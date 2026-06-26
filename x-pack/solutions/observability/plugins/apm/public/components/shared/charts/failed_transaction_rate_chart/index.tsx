@@ -7,6 +7,7 @@
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
@@ -27,6 +28,7 @@ import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
+import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
 
@@ -210,6 +212,9 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
                   transactionName,
                   transactionType,
                   sortDirection: 'DESC',
+                }}
+                ebt={{
+                  element: APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE,
                 }}
               />
             </EuiFlexItem>

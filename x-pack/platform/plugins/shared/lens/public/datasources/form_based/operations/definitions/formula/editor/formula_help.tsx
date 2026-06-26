@@ -12,6 +12,7 @@ import {
   documentationMap,
   tinymathFunctions,
   sections as formulasSections,
+  getTypeLabel,
 } from '@kbn/lens-formula-docs';
 import { groupBy } from 'lodash';
 import type {
@@ -165,7 +166,10 @@ export function getFunctionSignatureLabel(
 ): string {
   if (tinymathFunctions[name]) {
     return `${name}(${tinymathFunctions[name].positionalArguments
-      .map(({ name: argName, optional, type }) => `[${argName}]${optional ? '?' : ''}: ${type}`)
+      .map(
+        ({ name: argName, optional, type }) =>
+          `[${argName}]${optional ? '?' : ''}: ${type ? getTypeLabel(type) : ''}`
+      )
       .join(', ')})`;
   }
   if (operationDefinitionMap[name]) {

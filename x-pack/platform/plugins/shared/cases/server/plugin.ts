@@ -19,7 +19,7 @@ import {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
@@ -54,6 +54,7 @@ import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
+import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { CasesEventBus } from './events/event_bus';
@@ -82,6 +83,7 @@ export class CasePlugin
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private casesEventBus?: CasesEventBus;
@@ -111,11 +113,7 @@ export class CasePlugin
 
     initUiSettings(core.uiSettings);
 
-    registerInternalAttachments(
-      this.externalReferenceAttachmentTypeRegistry,
-      this.persistableStateAttachmentTypeRegistry,
-      this.unifiedAttachmentTypeRegistry
-    );
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry);
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
     registerCasesAnalyticsIndexesTasks({
@@ -170,6 +168,14 @@ export class CasePlugin
         this.incrementalIdTaskManager = new IncrementalIdTaskManager(
           plugins.taskManager,
           this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
+      }
+
+      if (this.caseConfig.templates.enabled) {
+        this.templatesMigrationTaskManager = new TemplatesMigrationTaskManager(
+          plugins.taskManager,
           this.logger,
           plugins.usageCollection
         );
@@ -251,6 +257,18 @@ export class CasePlugin
 
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      }
+
+      if (this.caseConfig.templates.enabled && this.templatesMigrationTaskManager) {
+        void this.templatesMigrationTaskManager
+          .scheduleMigrationTask(plugins.taskManager, core)
+          .catch((err) =>
+            this.logger.error(
+              `Failed to initialize templates migration task: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            )
+          );
       }
       if (this.caseConfig.analytics.index?.enabled) {
         const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([

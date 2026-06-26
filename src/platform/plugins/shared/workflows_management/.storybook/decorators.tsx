@@ -12,10 +12,10 @@ import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { CoreStart } from '@kbn/core/public';
-import { CommonGlobalAppStyles } from '@kbn/core-chrome-layout/layouts/common/global_app_styles';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { CommonGlobalAppStyles } from '@kbn/ui-chrome-layout';
 import { mockUiSettingsService } from '../public/shared/mocks/mock_ui_settings_service';
 
 const createMockWebStorage = () => ({

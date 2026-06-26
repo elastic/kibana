@@ -1582,3 +1582,172 @@ describe('getInputId', () => {
     expect(id1).not.toBe(id2);
   });
 });
+
+describe('storedPackagePolicyToAgentInputs - condition handling', () => {
+  const basePolicy: PackagePolicy = {
+    id: 'pkg-uuid',
+    name: 'pkg',
+    description: '',
+    created_at: '',
+    created_by: '',
+    updated_at: '',
+    updated_by: '',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    namespace: 'default',
+    inputs: [],
+    revision: 1,
+  };
+
+  const makeInput = (overrides: Partial<PackagePolicyInput> = {}): PackagePolicyInput => ({
+    type: 'logfile',
+    enabled: true,
+    streams: [
+      {
+        id: 'stream-1',
+        enabled: true,
+        data_stream: { dataset: 'foo', type: 'logs' },
+      },
+    ],
+    ...overrides,
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('integration-level condition fans out to inputs', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      condition: "${host.platform} == 'linux'",
+      inputs: [makeInput(), makeInput({ type: 'metrics' })],
+    });
+    expect(result).toHaveLength(2);
+    expect(result[0].condition).toBe("${host.platform} == 'linux'");
+    expect(result[1].condition).toBe("${host.platform} == 'linux'");
+  });
+
+  it('integration-level condition is omitted on otelcol-type inputs', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      condition: "${host.platform} == 'linux'",
+      inputs: [makeInput({ type: OTEL_COLLECTOR_INPUT_TYPE })],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].condition).toBeUndefined();
+  });
+
+  it('integration-level condition is omitted on agentless policies', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      supports_agentless: true,
+      condition: "${host.platform} == 'linux'",
+      inputs: [makeInput()],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].condition).toBeUndefined();
+  });
+
+  it('input-level user condition AND-combines with compiled_input.condition', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          condition: "${host.platform} != 'windows'",
+          compiled_input: { condition: "${host.platform} == 'linux'", some_key: 'value' },
+        }),
+      ],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].condition).toBe(
+      "(${host.platform} == 'linux') and (${host.platform} != 'windows')"
+    );
+    expect((result[0] as any).some_key).toBe('value');
+  });
+
+  it('stream-level user condition AND-combines with compiled_stream.condition', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: "${host.name} == 'mybox'",
+              compiled_stream: {
+                condition: "arrayContains(${docker.labels}, 'monitor')",
+                extra: 'v',
+              } as any,
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].streams?.[0].condition).toBe(
+      "(arrayContains(${docker.labels}, 'monitor')) and (${host.name} == 'mybox')"
+    );
+    expect((result[0].streams?.[0] as any).extra).toBe('v');
+  });
+
+  it('all three levels combine on the emitted input', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      condition: "${host.platform} == 'linux'",
+      inputs: [
+        makeInput({
+          condition: "${host.platform} != 'windows'",
+          compiled_input: { condition: "${host.name} == 'fleet-host'" },
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: "arrayContains(${host.tags}, 'production')",
+              compiled_stream: {
+                condition: "arrayContains(${docker.labels}, 'monitor')",
+              } as any,
+            },
+          ],
+        }),
+      ],
+    });
+    // Flat 3-part combine: integration / template / user.
+    expect(result[0].condition).toBe(
+      "(${host.platform} == 'linux') and (${host.name} == 'fleet-host') and (${host.platform} != 'windows')"
+    );
+    expect(result[0].streams?.[0].condition).toBe(
+      "(arrayContains(${docker.labels}, 'monitor')) and (arrayContains(${host.tags}, 'production'))"
+    );
+  });
+
+  it('no conditions set anywhere → no condition keys emitted', () => {
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [makeInput()],
+    });
+    expect('condition' in result[0]).toBe(false);
+    expect('condition' in (result[0].streams?.[0] ?? {})).toBe(false);
+  });
+
+  it('overrides.inputs[id].condition still wins (no regression)', () => {
+    const inputId = 'logfile-pkg-uuid';
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      condition: "${host.platform} == 'linux'",
+      overrides: {
+        inputs: {
+          [inputId]: { condition: "${host.platform} == 'darwin'" },
+        },
+      },
+      inputs: [
+        makeInput({
+          condition: "${host.platform} != 'windows'",
+        }),
+      ],
+    });
+    expect(result[0].condition).toBe("${host.platform} == 'darwin'");
+  });
+});

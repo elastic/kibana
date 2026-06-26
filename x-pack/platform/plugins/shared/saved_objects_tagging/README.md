@@ -2,6 +2,10 @@
 
 Add tagging capability to saved objects
 
+## API migration
+
+The legacy tag CRUD endpoints under `/api/saved_objects_tagging` are deprecated. See `api_migration.md` for the `/api/tags` migration mapping.
+
 ## Integrating tagging on a new object type
 
 In addition to use the UI api to plug the tagging feature in your application, there is a couple

@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -21,22 +21,27 @@ import {
   useEuiTheme,
   EuiBadge,
   EuiFlexGrid,
+  EuiSearchBar,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
 import type { Category } from './types';
-import { useCustomCards } from './use_custom_cards';
+import { useCustomCards, AWS_CLOUDWATCH_OTEL_CARD_ID } from './use_custom_cards';
 import type { SupportedLogo } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
+import { ApiEndpoints } from '../api_endpoints/api_endpoints';
+
+const CLOUD_PROVIDER_TILE_MIN_HEIGHT = 152;
 
 interface UseCaseOption {
   id: Category;
@@ -143,11 +148,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
   const searchResultsRef = useRef<HTMLDivElement | null>(null);
-  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+  const [integrationSearch, setIntegrationSearch] = useState(
+    parseSearchQuery(searchParams.get('search'))
+  );
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
-    const searchParam = searchParams.get('search') ?? '';
+    const searchParam = parseSearchQuery(searchParams.get('search'));
     if (integrationSearch === searchParam) return;
     const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
     if (integrationSearch) {
@@ -181,19 +188,22 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const featuredCardsForCategoryMap: Record<Category, string[]> = {
     host: ['auto-detect-logs', 'otel-logs'],
-    kubernetes: ['kubernetes-quick-start', 'otel-kubernetes'],
+    kubernetes: ['otel-kubernetes'],
     application: ['apm-virtual', 'otel-virtual', 'synthetics-virtual'],
-    cloud: ['azure-logs-virtual', 'aws-logs-virtual', 'gcp-logs-virtual'],
+    cloud: ['azure-logs-virtual', AWS_CLOUDWATCH_OTEL_CARD_ID, 'gcp-logs-virtual'],
   };
   const customCards = useCustomCards(createCollectionCardHandler);
+  const selectedCategory = searchParams.get('category') as Category;
+  const awsCollectionFallbackCard =
+    selectedCategory === 'cloud'
+      ? customCards.find((card) => card.id === 'aws-logs-virtual')
+      : undefined;
   const featuredCardsForCategory: IntegrationCardItem[] = customCards.filter((card) => {
-    const category = searchParams.get('category') as Category;
-
-    if (category === null) {
+    if (selectedCategory === null) {
       return false;
     }
 
-    const cardList = featuredCardsForCategoryMap[category] ?? [];
+    const cardList = featuredCardsForCategoryMap[selectedCategory] ?? [];
 
     return cardList.includes(card.id);
   });
@@ -280,7 +290,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   )}
                 </>
               }
-              checked={option.id === searchParams.get('category')}
+              checked={option.id === selectedCategory}
               /**
                * onKeyDown and onKeyUp handlers disable
                * scrolling to the category items when user
@@ -331,21 +341,21 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <div ref={suggestedPackagesRef}>
           <EuiTitle size="s" id={packageListTitleId}>
             <strong>
-              {searchParams.get('category') === 'kubernetes'
+              {selectedCategory === 'kubernetes'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Kubernetes cluster using:',
                     }
                   )
-                : searchParams.get('category') === 'application'
+                : selectedCategory === 'application'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Application using:',
                     }
                   )
-                : searchParams.get('category') === 'cloud'
+                : selectedCategory === 'cloud'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
                     {
@@ -361,7 +371,39 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             </strong>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <PackageList list={featuredCardsForCategory} showCardLabels={true} />
+          <div
+            css={css`
+              [data-test-subj='integration-card:${AWS_CLOUDWATCH_OTEL_CARD_ID}'] {
+                padding-block-start: ${euiTheme.size.base};
+              }
+            `}
+          >
+            <PackageList list={featuredCardsForCategory} showCardLabels={true} />
+          </div>
+          {awsCollectionFallbackCard && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup
+                justifyContent="center"
+                data-test-subj="observabilityOnboardingCloudExtraRow"
+              >
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    width: calc((100% - ${euiTheme.size.base} * 2) / 3);
+                  `}
+                >
+                  <Suspense fallback={null}>
+                    <LazyPackageCard
+                      {...awsCollectionFallbackCard}
+                      showLabels={true}
+                      minCardHeight={CLOUD_PROVIDER_TILE_MIN_HEIGHT}
+                    />
+                  </Suspense>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </div>
       </div>
 
@@ -379,11 +421,14 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <PackageListSearchForm
           searchQuery={integrationSearch}
           setSearchQuery={setIntegrationSearch}
-          flowCategory={searchParams.get('category')}
-          customCards={customCards.filter((card) => !card.isCollectionCard)}
+          flowCategory={selectedCategory}
+          customCards={customCards.filter(
+            (card) => !card.isCollectionCard && card.id !== AWS_CLOUDWATCH_OTEL_CARD_ID
+          )}
           excludePackageIdList={searchExcludePackageIdList}
         />
       </div>
+      <ApiEndpoints />
     </EuiPanel>
   );
 };
@@ -399,4 +444,17 @@ function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
     behavior: 'smooth',
     top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
   });
+}
+
+function parseSearchQuery(searchQuery: string | null) {
+  if (searchQuery === null) {
+    return '';
+  }
+
+  try {
+    EuiSearchBar.Query.parse(searchQuery ?? '');
+    return searchQuery;
+  } catch {
+    return '';
+  }
 }

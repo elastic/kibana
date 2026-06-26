@@ -23,11 +23,30 @@ const mockLoadRuleTypes = jest
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
 jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields: {}, fields: [] });
 
-jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
-  UrlSyncedAlertsSearchBar: () => (
-    <div data-test-subj="urlSyncedAlertsSearchBar">{'UrlSyncedAlertsSearchBar'}</div>
-  ),
-}));
+jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
+  const ReactLib = jest.requireActual('react');
+  return {
+    // Simulate the real search bar: invoke the readiness callbacks once mounted, so the
+    // page's `hasInitialControlLoadingFinished` gate flips to `true`.
+    UrlSyncedAlertsSearchBar: ({
+      onFilterControlsChange,
+      onControlApiAvailable,
+    }: {
+      onFilterControlsChange?: (filters: unknown[]) => void;
+      onControlApiAvailable?: (api: unknown) => void;
+    }) => {
+      ReactLib.useEffect(() => {
+        onControlApiAvailable?.({});
+        onFilterControlsChange?.([]);
+      }, [onControlApiAvailable, onFilterControlsChange]);
+      return ReactLib.createElement(
+        'div',
+        { 'data-test-subj': 'urlSyncedAlertsSearchBar' },
+        'UrlSyncedAlertsSearchBar'
+      );
+    },
+  };
+});
 
 // Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
 // correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock

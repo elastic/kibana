@@ -27,7 +27,7 @@ describe('action policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         groupingMode: 'per_episode',
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -51,13 +51,23 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('omits throttle interval for strategies that do not require it', () => {
+    it('emits interval: null for strategies that do not require it', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'every_time',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'every_time' });
+      expect(payload.throttle).toEqual({ strategy: 'every_time', interval: null });
+    });
+
+    it('emits interval: null when strategy does not need interval, even if state holds a stale value', () => {
+      const payload = toCreatePayload({
+        ...state,
+        throttleStrategy: 'on_status_change',
+        throttleInterval: '5m',
+      });
+
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
   });
 
@@ -71,7 +81,7 @@ describe('action policy form utils', () => {
         tags: null,
         matcher: null,
         groupBy: null,
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -119,10 +129,8 @@ describe('action policy form utils', () => {
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
-      createdByUsername: 'elastic',
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
-      updatedByUsername: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
       auth: { owner: 'elastic', createdByUser: true },
     };

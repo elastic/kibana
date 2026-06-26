@@ -24,6 +24,11 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/deeplinks-observability'
+  - '@kbn/scout'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/react-query'
+  - '@kbn/fleet-plugin'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod
@@ -34,6 +39,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

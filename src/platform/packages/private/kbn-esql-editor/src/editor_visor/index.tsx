@@ -13,8 +13,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  useEuiTheme,
+  EuiToolTip,
   type EuiComboBoxOptionOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -29,6 +30,8 @@ import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { reportEsqlError } from '../report_error';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export { VisorMode } from './mode_selector';
 
@@ -37,20 +40,31 @@ export interface QuickSearchVisorProps {
   query: string;
   // Handling smaller space for the visor
   isSpaceReduced?: boolean;
+  // Whether the editor is rendered inline (controls placeholder length)
+  isInline?: boolean;
   // Whether the visor is visible
   isVisible: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   // Callback to toggle the visor visibility
   onToggleVisor: () => void;
+  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
   defaultMessage: 'Filter your data using KQL',
 });
 
+const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
+  defaultMessage: 'Filter using KQL',
+});
+
 const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
   defaultMessage: 'Describe the query you want in plain language',
+});
+
+const nlPlaceholderShort = i18n.translate('esqlEditor.visor.nlPlaceholderShort', {
+  defaultMessage: 'Describe in plain language',
 });
 
 const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
@@ -64,14 +78,17 @@ const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip',
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
+  isInline,
   isVisible,
   onUpdateAndSubmitQuery,
   onToggleVisor,
+  telemetryService,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
+  const useShortPlaceholder = useMemo(() => isInline || isSpaceReduced, [isInline, isSpaceReduced]);
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
@@ -108,11 +125,32 @@ export function QuickSearchVisor({
     [selectedSources, query, onUpdateAndSubmitQuery]
   );
 
+  const trackNlResult = useCallback(
+    (
+      nlLength: number,
+      contextQueryLength: number,
+      startTime: number,
+      success: boolean,
+      errorCode?: string,
+      generatedQueryLength?: number
+    ) =>
+      telemetryService?.trackVisorNlSubmitted({
+        nlLength,
+        contextQueryLength,
+        success,
+        durationMs: Date.now() - startTime,
+        ...(errorCode ? { errorCode } : {}),
+        ...(generatedQueryLength !== undefined ? { generatedQueryLength } : {}),
+      }),
+    [telemetryService]
+  );
+
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
     if (!trimmed || isNlLoading) return;
 
     setIsNlLoading(true);
+    const startTime = Date.now();
     try {
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
@@ -121,10 +159,23 @@ export function QuickSearchVisor({
         }),
       });
       if (result.content) {
+        trackNlResult(
+          trimmed.length,
+          query.length,
+          startTime,
+          true,
+          undefined,
+          result.content.length
+        );
         onUpdateAndSubmitQuery(result.content);
         setNlValue('');
       }
     } catch (error) {
+      reportEsqlError(error, { errorType: 'NlToEsql' });
+      const errorCode = String(
+        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
+      );
+      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
       const message =
         (error as { body?: { message?: string } })?.body?.message ??
         i18n.translate('esqlEditor.visor.nlError', {
@@ -134,7 +185,15 @@ export function QuickSearchVisor({
     } finally {
       setIsNlLoading(false);
     }
-  }, [nlValue, isNlLoading, core.http, core.notifications.toasts, onUpdateAndSubmitQuery, query]);
+  }, [
+    nlValue,
+    isNlLoading,
+    core.http,
+    core.notifications.toasts,
+    onUpdateAndSubmitQuery,
+    query,
+    trackNlResult,
+  ]);
 
   const checkConnectorAvailability = useCallback(async () => {
     if (connectorCheckRef.current) return;
@@ -281,7 +340,7 @@ export function QuickSearchVisor({
                       language: 'kuery',
                     }}
                     disableAutoFocus={false}
-                    placeholder={searchPlaceholder}
+                    placeholder={useShortPlaceholder ? searchPlaceholderShort : searchPlaceholder}
                     onChange={(newQuery) => {
                       onKqlValueChange(newQuery.query as string);
                     }}
@@ -302,7 +361,7 @@ export function QuickSearchVisor({
               ) : (
                 <NLInput
                   value={nlValue}
-                  placeholder={nlPlaceholder}
+                  placeholder={useShortPlaceholder ? nlPlaceholderShort : nlPlaceholder}
                   disabled={!isVisible || isNlLoading}
                   onChange={setNlValue}
                   onSubmit={onNlSubmit}
@@ -314,16 +373,18 @@ export function QuickSearchVisor({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          size="s"
-          iconSize="m"
-          onClick={onToggleVisor}
-          iconType="cross"
-          aria-label={closeButtonAriaLabel}
-          css={styles.closeButton}
-        />
+        <EuiToolTip content={closeButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            display="base"
+            size="s"
+            iconSize="m"
+            onClick={onToggleVisor}
+            iconType="cross"
+            aria-label={closeButtonAriaLabel}
+            css={styles.closeButton}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

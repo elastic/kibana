@@ -8,6 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-schemas",
+    "@kbn/datemath",
     "@kbn/core",
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-mocks",
@@ -41,7 +42,14 @@
     "@kbn/es-types",
     "@kbn/kibana-react-plugin",
     "@kbn/search-types",
+    "@kbn/spaces-plugin",
     "@kbn/user-profile-components",
-    "@kbn/unified-data-table"
+    "@kbn/unified-data-table",
+    "@kbn/core-spaces-common",
+    "@kbn/coloring",
+    "@kbn/lens-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/unified-doc-viewer-plugin"
   ]
 }

@@ -180,4 +180,15 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     }),
     icon: 'usersRolesApp',
   },
+  [AppIds.APPLICATION_CONNECTIONS]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate(
+      'management.landing.withCardNavigation.applicationConnectionsDescription',
+      {
+        defaultMessage:
+          'Review and revoke third-party OAuth applications connected to your account.',
+      }
+    ),
+    icon: 'link',
+  },
 };

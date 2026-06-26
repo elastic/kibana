@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/rrule'
   - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/core-spaces-common'
   - '@kbn/response-ops-rule-params'
   - '@kbn/response-ops-rules-apis'
   - '@kbn/fields-metadata-plugin'
@@ -105,6 +106,8 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/std'
   - '@kbn/lens-common'
+  - '@kbn/inspector-plugin'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

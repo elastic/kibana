@@ -16,10 +16,8 @@ import {
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
-  persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
@@ -36,14 +34,12 @@ const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   let service: AttachmentService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new AttachmentService({
       log: mockLogger,
-      persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: createAttachmentServiceConfig(),
     });
@@ -235,7 +231,6 @@ describe('AttachmentService', () => {
     it('when enabled, create writes to CASE_ATTACHMENT_SAVED_OBJECT with unified attributes', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -270,6 +265,69 @@ describe('AttachmentService', () => {
       );
     });
 
+    it('when enabled, unified file create round-trips: extracts `attachmentId` to refs on write and re-injects it on the response', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      const fileMetadata = {
+        files: [
+          {
+            name: 'screenshot',
+            extension: 'png',
+            mimeType: 'image/png',
+            created: '2024-01-01T00:00:00.000Z',
+          },
+        ],
+        soType: 'file' as const,
+      };
+
+      const fileAttrs = {
+        type: 'file' as const,
+        attachmentId: 'file-id-1',
+        metadata: fileMetadata,
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+
+      // SO-client `create` is what the production extractor would have written:
+      // `attachmentId` left on attributes AND mirrored into references.
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: '1',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        attributes: fileAttrs,
+        references: [{ id: 'file-id-1', name: 'attachmentId', type: 'file' }],
+      });
+
+      const result = await serviceWithFlagOn.create({
+        attributes: fileAttrs,
+        references: [],
+        id: '1',
+      });
+
+      const writeCall = unsecuredSavedObjectsClient.create.mock.calls[0];
+      expect(writeCall[0]).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+      const writtenRefs =
+        (writeCall[2] as { references?: Array<{ name: string }> }).references ?? [];
+      expect(writtenRefs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'file-id-1', name: 'attachmentId', type: 'file' }),
+        ])
+      );
+
+      // Response shape preserves the unified `attachmentId` for downstream callers.
+      expect(result.attributes).toEqual(
+        expect.objectContaining({ type: 'file', attachmentId: 'file-id-1' })
+      );
+    });
+
     it('when disabled, create writes to CASE_COMMENT_SAVED_OBJECT with legacy attributes', async () => {
       unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment());
 
@@ -289,7 +347,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkCreate writes to CASE_ATTACHMENT_SAVED_OBJECT', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -329,7 +386,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -386,7 +442,6 @@ describe('AttachmentService', () => {
     it('when enabled, bulkUpdate throws for typed patches without owner when requestWithoutType is false', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -432,9 +487,12 @@ describe('AttachmentService', () => {
       const unifiedEndpointAttrs = {
         type: 'security.endpoint',
         attachmentId: 'sec-endpoint-1',
+        // Post-lift wire shape: analyst comment lives on `data.content`, metadata
+        // carries only the machine-derived facts (`command`, `targets`). The legacy
+        // round-trip lowers `data.content` back into `externalReferenceMetadata.comment`.
+        data: { content: 'isolated by op' },
         metadata: {
           command: 'isolate',
-          comment: 'isolated by op',
           targets: [
             {
               endpointId: 'endpoint-1',
@@ -572,7 +630,7 @@ describe('AttachmentService', () => {
   describe('update', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+      attributes: persistableStateAttachmentAttributes,
       references: [],
       version: 'test',
       type: 'cases-comments',
@@ -705,7 +763,7 @@ describe('AttachmentService', () => {
   describe('bulkUpdate', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
+      attributes: persistableStateAttachmentAttributes,
       references: [],
       version: 'test',
       type: 'cases-comments',
@@ -891,7 +949,6 @@ describe('AttachmentService', () => {
     it('uses a single paginated find call when feature flag is enabled', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -934,7 +991,6 @@ describe('AttachmentService', () => {
     it('queries both legacy and unified comment SO types when feature flag is enabled', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -954,7 +1010,6 @@ describe('AttachmentService', () => {
     it('transforms unified comment find results to legacy output', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -1128,6 +1183,35 @@ describe('AttachmentService', () => {
       });
 
       expect(res).toBe(total);
+    });
+
+    it('when enabled, sums legacy + unified counts and excludes `file` from the unified type filter', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce(
+          createSOFindResponse(Array(2).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
+        )
+        .mockResolvedValueOnce(
+          createSOFindResponse(Array(3).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
+        );
+
+      const res = await serviceWithFlagOn.countPersistableStateAndExternalReferenceAttachments({
+        caseId: 'test-id',
+      });
+
+      expect(res).toBe(5);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+
+      const unifiedCallArgs = unsecuredSavedObjectsClient.find.mock.calls[1][0];
+      expect(unifiedCallArgs.type).toBe('cases-attachments');
+
+      const filterAsString = JSON.stringify(unifiedCallArgs.filter);
+      expect(filterAsString).not.toMatch(/"value":\s*"file"/);
     });
   });
 });

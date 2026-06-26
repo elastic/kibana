@@ -44,6 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
@@ -51,6 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Full workflow with snapshot and restore', () => {
@@ -291,7 +293,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -301,12 +303,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Disable streams to delete everything
         await disableStreams(apiClient);
 
+        // disableStreams does not remove the global significant-events data stream; delete it so
+        // the restore below can recreate it without an "index already exists" conflict.
+        await esClient.indices.deleteDataStream(
+          { name: '.significant_events*' },
+          { ignore: [404] }
+        );
+
         // Step 8: Restore from snapshot
         const restoreResponse = await esClient.snapshot.restore({
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 

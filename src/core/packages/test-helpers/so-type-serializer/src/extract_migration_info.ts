@@ -21,6 +21,7 @@ import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-i
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 import { createHash } from 'crypto';
 import { type Type, isConfigSchema } from '@kbn/config-schema';
+import { flattenMappings } from './flatten_mappings';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -42,8 +43,8 @@ export interface ModelVersionSummary {
   hasTransformation: boolean;
   newMappings: string[];
   schemas: {
-    create: false | string;
-    forwardCompatibility: false | string;
+    create: false | string | Record<string, unknown>;
+    forwardCompatibility: false | string | Record<string, unknown>;
   };
 }
 
@@ -84,7 +85,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
         changeTypes: [...new Set(changes.map((change) => change.type))].sort(),
         hasTransformation: hasTransformation(changes),
         newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
-        schemas: { ...getSchemaPropertiesHashes(schemas) },
+        schemas: { ...getSerializedSchemas(schemas) },
       };
     }
   );
@@ -95,7 +96,10 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     convertToMultiNamespaceTypeVersion: soType.convertToMultiNamespaceTypeVersion,
     migrationVersions,
     schemaVersions,
-    mappings: getFlattenedObject(soType.mappings ?? {}),
+    // Preserve empty objects (e.g. `properties: {}`) so the flatten/unflatten
+    // round-trip used by the Saved Objects check is lossless. `getFlattenedObject`
+    // would drop them, producing invalid mappings that break the migrator.
+    mappings: flattenMappings(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
   };
@@ -106,7 +110,7 @@ const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
   return changes.some((change) => changesWithTransform.includes(change.type));
 };
 
-const getSchemaPropertiesHashes = (
+const getSerializedSchemas = (
   schemas?:
     | SavedObjectsModelVersionSchemaDefinitions
     | SavedObjectsFullModelVersionSchemaDefinitions
@@ -119,21 +123,45 @@ const getSchemaPropertiesHashes = (
   }
   const { forwardCompatibility, create } = schemas;
   return {
-    forwardCompatibility: forwardCompatibility ? getHash(forwardCompatibility) : (false as const),
-    create: create ? getHash(create) : (false as const),
+    forwardCompatibility: forwardCompatibility
+      ? serializeSchema(forwardCompatibility)
+      : (false as const),
+    create: create ? serializeSchema(create) : (false as const),
   };
 };
 
-const getHash = (schemaProp: unknown) => {
-  const hash = createHash('sha256');
-  if (typeof schemaProp === 'function') {
-    return hash.update(schemaProp.toString()).digest('hex');
-  } else if (isConfigSchema(schemaProp)) {
-    return hash.update(JSON.stringify(serializeConfigSchema(schemaProp))).digest('hex');
-  } else if (typeof schemaProp === 'object' && schemaProp !== null) {
-    return hash.update(JSON.stringify(schemaProp)).digest('hex');
+const serializeSchema = (schemaProp: unknown): Record<string, unknown> => {
+  if (isConfigSchema(schemaProp)) {
+    return serializeConfigSchema(schemaProp) as Record<string, unknown>;
   }
-  return false;
+  if (typeof schemaProp === 'function') {
+    return { __fn: schemaProp.toString() };
+  }
+  if (typeof schemaProp === 'object' && schemaProp !== null) {
+    return schemaProp as Record<string, unknown>;
+  }
+  return {};
+};
+
+/**
+ * Converts a stored schema value back to the stable hash string that the old
+ * `getSchemaPropertiesHashes` implementation would have produced.  This keeps
+ * `getMigrationHash` stable across the format change (hash strings → objects).
+ *
+ * Rules:
+ * - `false`                         → `'false'`   (no schema)
+ * - `string`                        → the string itself (already a legacy hash)
+ * - `{ __fn: string }`              → sha256(fn_source) — matches the old fn hash
+ * - `Record<string, unknown>` (Joi) → sha256(JSON.stringify(obj))
+ */
+export const hashStoredSchema = (schema: false | string | Record<string, unknown>): string => {
+  if (schema === false) return 'false';
+  if (typeof schema === 'string') return schema;
+  const hash = createHash('sha256');
+  if ('__fn' in schema && typeof (schema as { __fn: unknown }).__fn === 'string') {
+    return hash.update((schema as { __fn: string }).__fn).digest('hex');
+  }
+  return hash.update(JSON.stringify(schema)).digest('hex');
 };
 
 /**

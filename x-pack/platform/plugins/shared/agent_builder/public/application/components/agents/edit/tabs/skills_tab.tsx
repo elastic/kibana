@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -272,7 +274,7 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
@@ -294,7 +296,14 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
                   defaultMessage="{skillsLink} provide specialized knowledge and instructions that guide agents on specific tasks."
                   values={{
                     skillsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.skills.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.skills.list)}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.MANAGE_ALL,
+                          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                        })}
+                      >
                         {labels.skills.title}
                       </EuiLink>
                     ),

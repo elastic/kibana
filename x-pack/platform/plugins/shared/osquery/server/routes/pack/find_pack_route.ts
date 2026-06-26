@@ -21,6 +21,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildScheduleResponseSlice, stripPerQueryRruleFields } from './utils';
 import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -67,7 +68,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         if (request.query.createdBy) {
           const users = request.query.createdBy.split(',');
           const userFilters = users.map(
-            (u) => `${packSavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
+            (user) => `${packSavedObjectType}.attributes.created_by: "${escapeQuotes(user.trim())}"`
           );
           filters.push(`(${userFilters.join(' OR ')})`);
         }
@@ -85,6 +86,8 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           ...(filters.length && { filter: filters.join(' AND ') }),
         });
 
+        const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
+
         const packSavedObjects: PackResponseData[] = map(soClientResponse.saved_objects, (pack) => {
           const policyIds = map(
             filter(pack.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
@@ -100,7 +103,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           return {
             name: attributes.name,
             description: attributes.description,
-            queries: attributes.queries,
+            queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
             version: attributes.version,
             enabled: attributes.enabled,
             created_at: attributes.created_at,
@@ -112,6 +115,8 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             saved_object_id: pack.id,
             policy_ids: policyIds,
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
+            // Discriminated find response — see buildScheduleResponseSlice.
+            ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
           };
         });
 

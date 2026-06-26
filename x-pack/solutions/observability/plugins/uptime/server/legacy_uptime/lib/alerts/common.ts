@@ -15,7 +15,7 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { IBasePath } from '@kbn/core/server';
 import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';

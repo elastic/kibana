@@ -1358,6 +1358,23 @@ Object {
       ],
       "default": null,
     },
+    "secretQueryParams": Object {
+      "anyOf": Array [
+        Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
     "user": Object {
       "anyOf": Array [
         Object {
@@ -1414,6 +1431,36 @@ Object {
         "skip_ssl_verification": Object {
           "type": "boolean",
         },
+      },
+      "type": "object",
+    },
+    "form_data": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "content": Object {
+            "type": "string",
+          },
+          "content_type": Object {
+            "type": "string",
+          },
+          "encoding": Object {
+            "enum": Array [
+              "utf8",
+              "base64",
+            ],
+            "type": "string",
+          },
+          "filename": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "content",
+        ],
+        "type": "object",
+      },
+      "propertyNames": Object {
+        "type": "string",
       },
       "type": "object",
     },
@@ -1514,6 +1561,36 @@ Object {
         "skip_ssl_verification": Object {
           "type": "boolean",
         },
+      },
+      "type": "object",
+    },
+    "form_data": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "content": Object {
+            "type": "string",
+          },
+          "content_type": Object {
+            "type": "string",
+          },
+          "encoding": Object {
+            "enum": Array [
+              "utf8",
+              "base64",
+            ],
+            "type": "string",
+          },
+          "filename": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "content",
+        ],
+        "type": "object",
+      },
+      "propertyNames": Object {
+        "type": "string",
       },
       "type": "object",
     },
@@ -1949,7 +2026,6 @@ Object {
               },
               "required": Array [
                 "summary",
-                "otherFields",
               ],
               "type": "object",
             },
@@ -3061,7 +3137,6 @@ Object {
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },
@@ -3900,7 +3975,6 @@ Object {
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },

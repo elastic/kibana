@@ -8,11 +8,12 @@
 import React, { useCallback, useState } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiPopover,
   EuiButtonIcon,
-  EuiSwitch,
   EuiFormRow,
+  EuiPopover,
   EuiSpacer,
+  EuiSwitch,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -71,17 +72,20 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
   );
 
   const button = (
-    <EuiButtonIcon
-      iconType="controls"
-      aria-label={i18n.VIEW_OPTIONS_ARIA_LABEL}
-      onClick={onButtonClick}
-      data-test-subj={`${TABLE_SECTION_TEST_ID}-view-options-button`}
-    />
+    <EuiToolTip content={i18n.VIEW_OPTIONS_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="controls"
+        aria-label={i18n.VIEW_OPTIONS_ARIA_LABEL}
+        onClick={onButtonClick}
+        data-test-subj={`${TABLE_SECTION_TEST_ID}-view-options-button`}
+      />
+    </EuiToolTip>
   );
 
   return (
     <EuiPopover
       id="attacksViewOptionsPopover"
+      aria-label={i18n.VIEW_OPTIONS_ARIA_LABEL}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

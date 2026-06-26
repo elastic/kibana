@@ -9,6 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { workflowExecutionLoop } from './workflow_execution_loop';
+import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('elastic-apm-node', () => ({
   __esModule: true,
@@ -34,10 +35,15 @@ describe('workflowExecutionLoop', () => {
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+    },
+    stepIoService: {
       flush: jest.fn().mockResolvedValue(undefined),
+      // Workflow-end safety release added with the deferred-release pattern.
+      releaseTransientlyRehydratedOutputs: jest.fn(),
     },
     workflowLogger: {
       flushEvents: jest.fn().mockResolvedValue(undefined),
+      logWarn: jest.fn(),
     },
     taskAbortController: new AbortController(),
   });
@@ -59,7 +65,9 @@ describe('workflowExecutionLoop', () => {
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.workflowExecutionState.flush).toHaveBeenCalled();
+    expect(params.stepIoService.flush).toHaveBeenCalled();
+    // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
+    expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
   });
 
@@ -88,5 +96,31 @@ describe('workflowExecutionLoop', () => {
         status: ExecutionStatus.CANCELLED,
       })
     );
+  });
+
+  it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
+    const params = createParams();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { flushState } = require('./persistence_loop');
+    const loopPromise = workflowExecutionLoop(params as any);
+    params.taskAbortController.abort(new WorkflowTaskManagerAbortError());
+    await loopPromise;
+
+    expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cancelRequested: true,
+        status: ExecutionStatus.CANCELLED,
+        cancellationReason: 'Cancelled because Task Manager aborted the task',
+        cancelledBy: 'system',
+      })
+    );
+    expect(flushState).toHaveBeenCalledWith(params, {
+      workflowLogFlushSignal: params.taskAbortController.signal,
+    });
+    expect(params.workflowRuntime.saveState).toHaveBeenCalled();
+    expect(params.stepIoService.flush).toHaveBeenCalled();
+    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+      signal: params.taskAbortController.signal,
+    });
   });
 });

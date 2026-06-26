@@ -10,25 +10,18 @@
 import datemath from '@kbn/datemath';
 import type { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
-import { readdirSync } from 'fs';
-import path from 'path';
 import { intervalToMs } from './utils/interval_to_ms';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
 import { startLiveDataUpload } from './utils/start_live_data_upload';
 
-function getBuiltinScenarios() {
-  return readdirSync(path.resolve(__dirname, '../scenarios')).map((s) => s.replace(/\.ts$/, ''));
-}
-
 function options(y: Argv) {
   return y
     .usage('$0 <files ...>')
     .positional('files', {
-      describe: 'Name of scenario',
+      describe: 'Name of a built-in scenario or a path (absolute or relative) to a scenario file',
       demandOption: true,
       string: true,
-      choices: getBuiltinScenarios(),
     })
     .option('target', {
       describe: 'Elasticsearch target',
@@ -144,6 +137,10 @@ function options(y: Argv) {
     .example(
       '$0 simple_logs --target=https://elastic:changeme@localhost:9200 --insecure',
       'Connect to HTTPS Elasticsearch with self-signed certificates'
+    )
+    .example(
+      '$0 ./x-pack/solutions/observability/plugins/apm/test/scenarios/distributed_trace.ts',
+      'Run a colocated scenario by path'
     )
     .showHelpOnFail(false)
     .wrap(null);

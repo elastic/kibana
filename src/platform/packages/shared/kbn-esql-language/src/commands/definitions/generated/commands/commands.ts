@@ -16,6 +16,10 @@ export const commandsMetadata: Record<string, unknown> = {
     license: 'platinum',
     observability_tier: 'COMPLETE',
   },
+  dedup: {
+    type: 'command',
+    name: 'dedup',
+  },
   dissect: {
     type: 'command',
     name: 'dissect',
@@ -43,6 +47,10 @@ export const commandsMetadata: Record<string, unknown> = {
   grok: {
     type: 'command',
     name: 'grok',
+  },
+  highlight: {
+    type: 'command',
+    name: 'highlight',
   },
   inline_stats: {
     type: 'command',
@@ -124,6 +132,7 @@ export const commandsMetadata: Record<string, unknown> = {
 
 export enum EsqlCommandNames {
   CHANGE_POINT = 'change_point',
+  DEDUP = 'dedup',
   DISSECT = 'dissect',
   DROP = 'drop',
   ENRICH = 'enrich',
@@ -131,6 +140,7 @@ export enum EsqlCommandNames {
   EXPLAIN = 'explain',
   FORK = 'fork',
   GROK = 'grok',
+  HIGHLIGHT = 'highlight',
   INLINE_STATS = 'inline_stats',
   INSIST = 'insist',
   KEEP = 'keep',

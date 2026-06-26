@@ -13,7 +13,7 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
-import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
+import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
@@ -39,16 +39,13 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
+  const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
-  const { updatePersistedConversationId } = usePersistedConversationId({});
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const openSidebarConversation = useCallback(() => {
-    if (conversationId) {
-      updatePersistedConversationId(conversationId);
-    }
-    openSidebarConversationInternal();
-  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
+    openSidebarConversationInternal({ conversationId });
+  }, [conversationId, openSidebarConversationInternal]);
 
   // Track previous conversation ID to detect changes
   const prevConversationIdRef = useRef(conversationId);
@@ -93,7 +90,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.version]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -107,12 +104,13 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       uiDefinition?.getActionButtons?.({
         attachment: canvasState.attachment,
         isSidebar: canvasState.isSidebar,
+        agentId,
         updateOrigin,
         openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, updateOrigin, openSidebarConversation, dynamicButtons]);
+  }, [canvasState, uiDefinition, agentId, updateOrigin, openSidebarConversation, dynamicButtons]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
@@ -120,6 +118,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
@@ -152,13 +151,16 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       paddingSize="none"
     >
       <AttachmentHeader
+        icon={header?.icon}
         title={title}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+        <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
           {uiDefinition.renderCanvasContent(
             {
               attachment,

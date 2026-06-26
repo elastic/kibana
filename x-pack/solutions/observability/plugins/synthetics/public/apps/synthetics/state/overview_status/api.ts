@@ -24,6 +24,7 @@ export function toStatusOverviewQueryArgs(
     projects: pageState.projects,
     schedules: pageState.schedules,
     monitorTypes: pageState.monitorTypes,
+    remoteNames: pageState.remoteNames,
     monitorQueryIds: pageState.monitorQueryIds,
     showFromAllSpaces: pageState.showFromAllSpaces,
     searchFields: [],

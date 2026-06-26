@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kbnTestServer.serverArgs,
         '--xpack.reporting.csv.scroll.duration=10m',
+        '--xpack.reporting.csv.scroll.size=1000',
         '--xpack.reporting.queue.timeout=600000',
         '--elasticsearch.requestTimeout=600000',
       ],

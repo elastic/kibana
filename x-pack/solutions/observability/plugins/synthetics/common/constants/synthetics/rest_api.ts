@@ -56,6 +56,10 @@ export enum SYNTHETICS_API_URLS {
   TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
+  CERTS_FACETS = '/internal/synthetics/certs/facets',
+
+  ERROR_GROUPS = '/internal/synthetics/error_groups',
+  ERROR_STATS = '/internal/synthetics/error_stats',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
   MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
@@ -66,9 +70,13 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
+  MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
 
   INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',
 
   MONITOR_SUMMARY_STATS = '/internal/synthetics/monitor/summary_stats',
+
+  /** Internal support bundle: monitors (redacted), indices, Fleet policies, locations, param keys. */
+  SYNTHETICS_DIAGNOSTICS = '/internal/synthetics/diagnostics',
 }

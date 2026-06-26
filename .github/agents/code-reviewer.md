@@ -56,6 +56,7 @@ Use review mode when the importing workflow is triggered by a pull request event
 - When a finding has a small, directly applicable fix, include a GitHub suggested change in the inline comment using a `suggestion` code block.
 - Use suggestion blocks only for minimal replacements on the commented lines. Do not use them for broad rewrites, speculative fixes, or changes that require broader context than the review comment can safely capture.
 - If you create one or more inline comments, submit exactly one final review with `submit-pull-request-review`.
+- Keep the final review body concise. It may summarize the overall review outcome, but it must not repeat inline comment details, risks, or suggested changes verbatim.
 - Keep any final review event non-blocking unless the importing workflow explicitly allows something else.
 - If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
 - Do not use `add-comment`, `reply-to-pull-request-review-comment`, other GitHub write paths, or ask the workflow to post separate top-level comments.
@@ -64,16 +65,28 @@ Use review mode when the importing workflow is triggered by a pull request event
 
 On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines.
 
+## Resolving addressed AI feedback
+
+On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.json`, and the current diff to find this reviewer's own prior feedback, then resolve those threads once the concern is addressed.
+
+- A shared bot `user.login` cannot tell reviewers apart: a thread is this reviewer's own only when the `workflow_id` in its originating review's marker (`<!-- gh-aw-agentic-workflow: ..., workflow_id: ..., ... -->` in `pr-reviews.json`) equals the workflow id the importing workflow gives as this reviewer's own.
+- Resolve a matched, addressed thread with its `review_thread_id` via `resolve_pull_request_review_thread`.
+- Do not resolve unmatched threads, already-resolved threads, or ambiguous fixes.
+- If a follow-up asks this reviewer to re-check addressed feedback, verify the fix, optionally reply, and resolve when fixed.
+
 ## Follow-up response mode output
 
-Use follow-up response mode when the importing workflow is triggered by an issue comment or pull request review comment. Reply to the comments using `GH_AW_*` variables in the `<github-context>` block.
+Use follow-up response mode when the importing workflow is triggered by `workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission fork events only run the Reviewer Comment Router. The elevated permission Reviewer Comment Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches the selected reviewer workflow with `pr_number` and `comment_id`.
 
+For dispatched follow-up runs, the importing workflow exposes:
+- Pull request number: `PR_NUMBER`
+- Triggering comment id: `REVIEWER_COMMENT_ID`
+
+- Find the triggering comment in the prefetched PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-issue-comments.json` and `pr-review-comments.json`, by matching `REVIEWER_COMMENT_ID`.
 - Respond only to the triggering comment or review body.
-- Use the prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
-- Use `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` as the pull request number when it is present.
-- For pull request timeline comments, use `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` as the pull request number.
-- For pull request review comments, reply in the same review thread with `reply-to-pull-request-review-comment` using `GH_AW_GITHUB_EVENT_COMMENT_ID`.
-- For pull request timeline comments, respond with `add-comment`.
+- Use the other prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
+- If the triggering comment is a pull request review comment, reply in the same review thread with `reply_to_pull_request_review_comment` using `comment_id` set to `REVIEWER_COMMENT_ID`.
+- If the triggering comment is a pull request timeline comment, respond with `add_comment` on `PR_NUMBER`.
 - Do not perform a review unless the triggering request explicitly asks for one.
 - Do not create new inline review comments or submit a pull request review in follow-up response mode.
 - If the request is not actionable, call `noop` with a brief reason.

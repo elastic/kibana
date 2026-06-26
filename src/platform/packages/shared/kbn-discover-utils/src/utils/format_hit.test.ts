@@ -37,11 +37,11 @@ describe('formatHitReact', () => {
     };
     row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
-      reactConvert: (value: unknown) => `formatted:${value}`,
+      convertToReact: (value: unknown) => `formatted:${value}`,
     });
   });
 
-  it('formats a document as expected using reactConvert', () => {
+  it('formats a document as expected using convertToReact', () => {
     const formatted = formatHitReact(
       row,
       dataViewMock,
@@ -68,6 +68,31 @@ describe('formatHitReact', () => {
       dataViewMock
     );
 
+    const formatted = formatHitReact(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
+      220,
+      fieldFormatsMock,
+      undefined
+    );
+    expect(formatted.map(([fieldName]) => fieldName)).toEqual([
+      'message',
+      'extension',
+      'object.value',
+      '_index',
+      '_score',
+    ]);
+  });
+
+  it('orders inline highlights first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        inline_highlights: { message: { preTag: '<em>', postTag: '</em>' } },
+      },
+      dataViewMock
+    );
     const formatted = formatHitReact(
       highlightHit,
       dataViewMock,
@@ -162,6 +187,75 @@ describe('formatHitReact', () => {
       ['bytesDisplayName', 'formatted:123', 'bytes'],
       ['_index', 'formatted:logs', '_index'],
       ['_score', undefined, '_score'],
+    ]);
+  });
+
+  it('skips nullish values before limiting fields when configured', () => {
+    const rowWithNullishFields = buildDataTableRecord(
+      {
+        _id: 'doc-001',
+        _source: {
+          field_1: null,
+          field_2: undefined,
+          source: 'void_realm',
+          status: 'missing_in_action',
+        },
+      },
+      dataViewMock
+    );
+
+    formatHitReact(rowWithNullishFields, dataViewMock, () => true, 2, fieldFormatsMock, undefined);
+
+    const formatted = formatHitReact(
+      rowWithNullishFields,
+      dataViewMock,
+      () => true,
+      2,
+      fieldFormatsMock,
+      undefined,
+      { skipNullishValues: true }
+    );
+
+    expect(
+      formatted.map(([fieldDisplayName, , fieldName]) => [fieldDisplayName, fieldName])
+    ).toEqual([
+      ['source', 'source'],
+      ['status', 'status'],
+    ]);
+  });
+
+  it('keeps non-nullish falsy values when skipping nullish values', () => {
+    const rowWithFalsyFields = buildDataTableRecord(
+      {
+        _id: 'doc-002',
+        _source: {
+          field_1: null,
+          a_empty_string: '',
+          b_zero: 0,
+          c_false_value: false,
+          d_source: 'void_realm',
+        },
+      },
+      dataViewMock
+    );
+
+    const formatted = formatHitReact(
+      rowWithFalsyFields,
+      dataViewMock,
+      () => true,
+      3,
+      fieldFormatsMock,
+      undefined,
+      { skipNullishValues: true }
+    );
+
+    expect(
+      formatted.map(([fieldDisplayName, , fieldName]) => [fieldDisplayName, fieldName])
+    ).toEqual([
+      ['a_empty_string', 'a_empty_string'],
+      ['b_zero', 'b_zero'],
+      ['c_false_value', 'c_false_value'],
+      ['and 1 more field', null],
     ]);
   });
 

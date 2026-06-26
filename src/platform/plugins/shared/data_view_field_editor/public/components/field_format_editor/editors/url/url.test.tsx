@@ -20,7 +20,7 @@ import type { Serializable } from '@kbn/utility-types';
 
 const fieldType = 'string';
 const format = {
-  reactConvert: jest.fn().mockImplementation((input: string) => `converted url for ${input}`),
+  convertToReact: jest.fn().mockImplementation((input: string) => `converted url for ${input}`),
   type: {
     urlTypes: [
       { kind: 'a', text: 'Link' },

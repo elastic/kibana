@@ -35,8 +35,10 @@ import type {
   WorkflowsPublicPluginStartDependencies,
   WorkflowsServices,
 } from './types';
+import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+import type { WorkflowsManagementConfig } from '../server/config';
 
 export class WorkflowsPlugin
   implements
@@ -55,12 +57,14 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
+  private readonly pluginConfig: WorkflowsManagementConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
+    this.pluginConfig = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -90,6 +94,8 @@ export class WorkflowsPlugin
 
     this.setupAgentBuilderStart(core);
 
+    const initialExecutionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -99,6 +105,7 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
+      deepLinks: getWorkflowsAppDeepLinks(initialExecutionsViewEnabled),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -198,14 +205,14 @@ export class WorkflowsPlugin
   }): AppDeepLinkLocations[] {
     // Not available takes precedence over authorized.
     if (!params.isAvailable) {
-      // Remove generic locations, but keep in sideNav and globalSearch to make users aware of the feature.
-      return ['globalSearch', 'sideNav'];
+      // Remove generic locations, but keep in 'classicSideNav', 'projectSideNav' and globalSearch to make users aware of the feature.
+      return ['globalSearch', 'classicSideNav', 'projectSideNav'];
     }
     if (!params.isAuthorized) {
-      // Remove from sideNav so it does not use nav real estate, but keep in globalSearch to make it discoverable
+      // Remove from 'classicSideNav', 'projectSideNav' so it does not use nav real estate, but keep in globalSearch to make it discoverable
       return ['globalSearch'];
     }
-    return ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
+    return ['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'projectSideNav'];
   }
 
   /**
@@ -247,6 +254,7 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
+        globalExecutionsView: this.pluginConfig.globalExecutionsView,
       },
     };
 

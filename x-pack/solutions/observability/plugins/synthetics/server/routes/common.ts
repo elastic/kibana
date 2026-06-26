@@ -9,7 +9,7 @@ import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useLogicalAndFields } from '../../common/constants';
 import type { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
@@ -33,6 +33,11 @@ const CommonQuerySchema = {
   locations: StringOrArraySchema,
   projects: StringOrArraySchema,
   schedules: StringOrArraySchema,
+  // Remote cluster aliases. Only honoured by the overview status route, where
+  // it scopes pings to documents whose `_index` is prefixed by one of the
+  // selected aliases (CCS pattern `<alias>:<index>`). Saved-object-backed
+  // routes ignore it because remote monitors have no local saved object.
+  remoteNames: StringOrArraySchema,
   status: StringOrArraySchema,
   monitorQueryIds: StringOrArraySchema,
   configIds: StringOrArraySchema,
@@ -246,6 +251,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     filter,
     projects,
     schedules,
+    remoteNames,
     monitorQueryIds,
     configIds,
   } = monitorQuery;
@@ -259,6 +265,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length ||
     !!projects?.length ||
     !!schedules?.length ||
+    !!remoteNames?.length ||
     !!monitorQueryIds?.length ||
     !!configIds?.length
   );

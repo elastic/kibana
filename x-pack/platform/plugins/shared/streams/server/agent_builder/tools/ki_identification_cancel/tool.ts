@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
@@ -22,9 +22,9 @@ const cancelSchema = z.object({
 });
 
 export const createKiIdentificationCancelTool = ({
-  getScopedClients,
+  streamsKIsOnboardingClient,
 }: {
-  getScopedClients: GetScopedClients;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof cancelSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
   type: ToolType.builtin,
@@ -35,16 +35,16 @@ export const createKiIdentificationCancelTool = ({
     - Stop a running KI identification background task when the user requests cancellation
 
     Returns:
-    - On success: task cancel acknowledgement payload with stream, task id, and status
+    - On success: cancel acknowledgement payload with stream, execution_id, and status
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: cancelSchema,
   handler: async ({ stream_name: streamName }, { request }) => {
     try {
-      const { taskClient } = await getScopedClients({ request });
       const data = await cancelKiIdentificationToolHandler({
-        stream_name: streamName,
-        task_client: taskClient,
+        streamName,
+        streamsKIsOnboardingClient,
+        request,
       });
 
       return {

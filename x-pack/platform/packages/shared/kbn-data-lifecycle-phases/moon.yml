@@ -18,15 +18,23 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-data-lifecycle-phases
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/storybook'
+  - '@kbn/index-lifecycle-management-common-shared'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-common
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
+    - .storybook/**/*.ts
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

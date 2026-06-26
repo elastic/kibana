@@ -16,16 +16,21 @@ import type {
 
 export type RenderingServiceMock = jest.Mocked<PublicMethodsOf<RenderingService>>;
 
+const MOCK_RENDER_RESULT = {
+  body: '<body />',
+  headers: { 'set-cookie': 'KBN_LOCALE=en; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly' },
+};
+
 function createRenderingPreboot() {
   const mocked: jest.Mocked<InternalRenderingServicePreboot> = {
-    render: jest.fn().mockResolvedValue('<body />'),
+    render: jest.fn().mockResolvedValue(MOCK_RENDER_RESULT),
   };
   return mocked;
 }
 
 function createRenderingSetup() {
   const mocked: jest.Mocked<InternalRenderingServiceSetup> = {
-    render: jest.fn().mockResolvedValue('<body />'),
+    render: jest.fn().mockResolvedValue(MOCK_RENDER_RESULT),
   };
   return mocked;
 }

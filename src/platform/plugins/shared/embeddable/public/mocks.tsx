@@ -64,9 +64,11 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getAddFromLibraryComponent: jest.fn(),
     getAddFromLibraryContentComponent: jest.fn(),
+    getEmbeddableDefinition: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getLegacyURLTransform: jest.fn(),
     hasLegacyURLTransform: jest.fn(),
+    getSavedObjects: jest.fn(),
   };
   return startContract;
 };

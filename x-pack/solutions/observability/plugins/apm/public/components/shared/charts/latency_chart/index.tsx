@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -27,6 +28,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { getLatencyChartScreenContext } from './get_latency_chart_screen_context';
 import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
+import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 
 interface Props {
@@ -166,6 +168,9 @@ export function LatencyChart({ height, kuery }: Props) {
                     transactionName: transactionName ?? undefined,
                     transactionType,
                     sortDirection: 'DESC',
+                  }}
+                  ebt={{
+                    element: APM_CHART_EBT_ELEMENTS.LATENCY,
                   }}
                 />
               </EuiFlexItem>

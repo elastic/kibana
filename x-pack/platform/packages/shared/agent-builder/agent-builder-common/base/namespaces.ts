@@ -32,7 +32,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.attachments,
   internalNamespaces.filestore,
   internalNamespaces.observability,
-  internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
+  internalNamespaces.platformDashboard, // Owned by agent_builder_dashboards plugin
   internalNamespaces.platformStreams,
   internalNamespaces.search,
   internalNamespaces.security,

@@ -20,12 +20,32 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/serverless'
   - '@kbn/config-schema'
+  - '@kbn/core-security-server'
   - '@kbn/serverless-vectordb-settings'
+  - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/console-plugin'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/cloud-plugin'
+  - '@kbn/shared-components'
+  - '@kbn/shared-ux-router'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/vectordb-onboarding'
+  - '@kbn/react-query'
+  - '@kbn/i18n'
+  - '@kbn/core-application-browser'
+  - '@kbn/deeplinks-management'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/management-settings-ids'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod
   - group-vectordb
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -34,4 +54,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

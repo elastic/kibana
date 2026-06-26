@@ -18,6 +18,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldNameWithIcon } from '@kbn/react-field';
@@ -143,7 +144,7 @@ const FromBuilderItem = ({
                   defaultMessage: 'Drag Handle',
                 })}
               >
-                <EuiIcon type="dragVertical" />
+                <EuiIcon type="dragVertical" aria-hidden={true} />
               </EuiPanel>
             </EuiFlexItem>
           )}
@@ -155,15 +156,22 @@ const FromBuilderItem = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              size="m"
-              aria-label={i18n.translate('xpack.streams.fromBuilderItem.removeLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.streams.fromBuilderItem.removeLabel', {
                 defaultMessage: 'Remove',
               })}
-              onClick={() => onRemove(index)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                size="m"
+                aria-label={i18n.translate('xpack.streams.fromBuilderItem.removeLabel', {
+                  defaultMessage: 'Remove',
+                })}
+                onClick={() => onRemove(index)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

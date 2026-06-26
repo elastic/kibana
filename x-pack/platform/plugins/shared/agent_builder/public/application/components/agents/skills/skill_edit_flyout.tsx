@@ -25,6 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useEditSkill } from '../../../hooks/skills/use_edit_skill';
 import { useSkillForm } from '../../../hooks/skills/use_skill_form';
@@ -102,7 +104,15 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
           <h2 id="skillEditFlyoutTitle">{labels.agentSkills.editSkillFlyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiLink href={skillLibraryUrl} external>
+        <EuiLink
+          href={skillLibraryUrl}
+          external
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.flyout,
+            action: AGENT_BUILDER_UI_EBT.action.libraryPanel.VIEW_IN_LIBRARY,
+            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+          })}
+        >
           {labels.agentSkills.viewSkillLibraryLink}
         </EuiLink>
       </EuiFlyoutHeader>
@@ -131,7 +141,16 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>{labels.skills.cancelButtonLabel}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              onClick={onClose}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_CANCEL,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
+            >
+              {labels.skills.cancelButtonLabel}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -139,6 +158,11 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
               onClick={handleSubmit(onSubmit)}
               isLoading={isSubmitting}
               disabled={hasErrors || isSubmitting || !isDirty}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_SAVE,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
             >
               {labels.skills.saveButtonLabel}
             </EuiButton>

@@ -30,6 +30,7 @@ import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -40,6 +41,7 @@ export interface MetricsExperienceGridContentProps
   metricItems: ParsedMetricItem[];
   activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
+  isTabSelected: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
@@ -53,6 +55,7 @@ export const MetricsExperienceGridContent = ({
   actions,
   histogramCss,
   isDiscoverLoading = false,
+  isTabSelected,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
@@ -88,6 +91,20 @@ export const MetricsExperienceGridContent = ({
         ? LEGACY_HISTOGRAM_USER_MESSAGES
         : undefined,
     []
+  );
+
+  const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
+
+  const getDescription = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      duplicateMetricNames.has(metricItem.metricName)
+        ? i18n.translate('metricsExperience.grid.duplicateMetricIndexDescription', {
+            defaultMessage:
+              'This metric exists in multiple data streams. This chart shows data from {indexName} only.',
+            values: { indexName: metricItem.indexName },
+          })
+        : undefined,
+    [duplicateMetricNames]
   );
 
   return (
@@ -130,6 +147,8 @@ export const MetricsExperienceGridContent = ({
           searchTerm={searchTerm}
           whereStatements={whereStatements}
           getUserMessages={getUserMessages}
+          getDescription={getDescription}
+          isTabSelected={isTabSelected}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

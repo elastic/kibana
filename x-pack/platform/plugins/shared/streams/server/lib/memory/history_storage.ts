@@ -5,49 +5,56 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
-import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import { chatSystemIndex } from '@kbn/agent-builder-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { memoryHistoryDataStreamName } from './history_data_stream';
 import type { MemoryVersionRecord } from './types';
 
-export const memoryHistoryIndexName = chatSystemIndex('memhistory');
+interface HistoryClientDocument {
+  document: MemoryVersionRecord;
+}
 
-const storageSettings = {
-  name: memoryHistoryIndexName,
-  schema: {
-    properties: {
-      id: types.keyword({}),
-      entry_id: types.keyword({}),
-      version: types.long({}),
-      name: types.keyword({}),
-      title: types.text({}),
-      content: types.text({}),
-      change_type: types.keyword({}),
-      change_summary: types.text({}),
-      created_at: types.date({}),
-      created_by: types.keyword({}),
-    },
-  },
-} satisfies IndexStorageSettings;
+interface HistorySearchHit {
+  _source: MemoryVersionRecord;
+}
 
-export type MemoryHistoryStorageSettings = typeof storageSettings;
+interface HistorySearchResponse {
+  hits: { hits: HistorySearchHit[] };
+}
 
-export type MemoryHistoryStorage = StorageIndexAdapter<
-  MemoryHistoryStorageSettings,
-  MemoryVersionRecord
->;
+interface HistoryClient {
+  index(params: HistoryClientDocument): Promise<void>;
+  search(params: Omit<SearchRequest, 'index'>): Promise<HistorySearchResponse>;
+}
+
+export interface MemoryHistoryStorage {
+  getClient(): HistoryClient;
+}
 
 export const createMemoryHistoryStorage = ({
-  logger,
   esClient,
 }: {
-  logger: Logger;
   esClient: ElasticsearchClient;
 }): MemoryHistoryStorage => {
-  return new StorageIndexAdapter<MemoryHistoryStorageSettings, MemoryVersionRecord>(
-    esClient,
-    logger,
-    storageSettings
-  );
+  const client: HistoryClient = {
+    async index({ document }) {
+      await esClient.index({
+        index: memoryHistoryDataStreamName,
+        document: {
+          ...document,
+          '@timestamp': document.created_at,
+        },
+      });
+    },
+
+    async search(params) {
+      const response = await esClient.search({
+        ...params,
+        index: memoryHistoryDataStreamName,
+      });
+      return response as unknown as HistorySearchResponse;
+    },
+  };
+
+  return { getClient: () => client };
 };

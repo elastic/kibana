@@ -91,7 +91,7 @@ import {
 } from '@kbn/content-list-mock-data';
 
 // Use directly in tests or custom implementations
-console.log(MOCK_DASHBOARDS.length); // 8 dashboard items
+console.log(MOCK_DASHBOARDS.length); // 10 dashboard items
 console.log(MOCK_TAGS.length);       // 8 tag items
 ```
 
@@ -146,10 +146,10 @@ const profile = MOCK_USER_PROFILES_MAP['u_jane_doe'];
 
 | Export | Type | Description |
 |--------|------|-------------|
-| `MOCK_DASHBOARDS` | `DashboardMockItem[]` | 8 dashboard items with titles, descriptions, tags, and metadata. |
-| `MOCK_VISUALIZATIONS` | `VisualizationMockItem[]` | 8 visualization items spanning multiple viz types (Lens, Pie, Table, etc.). |
-| `MOCK_MAPS` | `MapMockItem[]` | 5 map items representing geographic visualizations. |
-| `MOCK_FILES` | `FileMockItem[]` | 6 file items demonstrating custom content type attributes. |
+| `MOCK_DASHBOARDS` | `DashboardMockItem[]` | 10 dashboard items, tuned to span the name-cell permutation matrix (short/long title × empty/short/long description × no/few/many tags) so stories exercise both narrow and wide-viewport layouts. |
+| `MOCK_VISUALIZATIONS` | `VisualizationMockItem[]` | 8 visualization items covering the name-cell permutation matrix (title × description × tag count) and a variety of `visType`s (Lens, Pie, Table, Area, Metric, Tag Cloud, Vega, Line+error). |
+| `MOCK_MAPS` | `MapMockItem[]` | 5 map items spanning the name-cell permutation matrix (title × description × tag count) within the smaller fixture size — covers sparse-favorited, rich, description-wrap, long-title-only, and most-sparse rows. |
+| `MOCK_FILES` | `FileMockItem[]` | 6 file items spanning the name-cell `title × description` matrix (the Files Management story does not render tags inline), with realistic short/long filenames and short/long/missing descriptions. |
 | `MOCK_TAGS` | `MockTag[]` | 8 tags including both user-created and managed (Fleet) tags. |
 | `MOCK_USERS` | `readonly string[]` | Array of mock user IDs used across content items. |
 | `MOCK_USER_PROFILES` | `UserProfile[]` | User profile objects corresponding to `MOCK_USERS`. |

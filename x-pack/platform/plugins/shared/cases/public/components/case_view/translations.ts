@@ -190,18 +190,6 @@ export const ATTACHMENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.attachm
   defaultMessage: 'Attachments',
 });
 
-export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-export const EVENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.events', {
-  defaultMessage: 'Events',
-});
-
-export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
-  defaultMessage: 'Files',
-});
-
 export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observables', {
   defaultMessage: 'Observables',
 });
@@ -209,13 +197,6 @@ export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observa
 export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.similar', {
   defaultMessage: 'Similar cases',
 });
-
-export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.cases.caseView.tabs.alerts.emptyDescription',
-  {
-    defaultMessage: 'No alerts have been added to this case.',
-  }
-);
 
 export const SEND_EMAIL_ARIA = (user: string) =>
   i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
@@ -300,3 +281,7 @@ export const ERROR_CHANGING_TEMPLATE = i18n.translate(
     defaultMessage: 'Error changing template',
   }
 );
+
+export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.caseView.extendedFieldsTitle', {
+  defaultMessage: 'Extended fields',
+});

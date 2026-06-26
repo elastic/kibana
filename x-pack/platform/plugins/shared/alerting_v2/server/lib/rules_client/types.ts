@@ -43,3 +43,9 @@ export interface FindRulesParams {
 export type BulkRulesParams =
   | { ids: string[]; filter?: undefined; search?: undefined; match_all?: undefined }
   | { filter?: string; search?: string; match_all?: true; ids?: undefined };
+
+export interface UpdateRuleParams {
+  id: string;
+  data: UpdateRuleData;
+  options?: { version?: string };
+}

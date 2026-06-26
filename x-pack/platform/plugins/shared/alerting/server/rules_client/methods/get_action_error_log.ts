@@ -41,7 +41,7 @@ export async function getActionErrorLog(
   { id, dateStart, dateEnd, filter, page, perPage, sort }: GetActionErrorLogByIdParams
 ): Promise<IExecutionErrorsResult> {
   context.logger.debug(`getActionErrorLog(): getting action error logs for rule ${id}`);
-  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id })) as SanitizedRuleWithLegacyId;
 
   try {
     await context.authorization.ensureAuthorized({

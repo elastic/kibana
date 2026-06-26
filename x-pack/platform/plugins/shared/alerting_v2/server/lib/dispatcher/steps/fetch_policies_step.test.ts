@@ -19,6 +19,8 @@ describe('FetchPoliciesStep', () => {
       createActionPolicySavedObjectService());
   });
 
+  const buildStep = () => new FetchPoliciesStep(npSoService);
+
   it('fetches all decrypted policies via findAllDecrypted', async () => {
     mockFindAllDecrypted.mockResolvedValue([
       {
@@ -39,10 +41,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -63,10 +62,7 @@ describe('FetchPoliciesStep', () => {
   it('returns empty map when no policies exist', async () => {
     mockFindAllDecrypted.mockResolvedValue([]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -78,14 +74,35 @@ describe('FetchPoliciesStep', () => {
       { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
+  });
+
+  it('surfaces the matcher used to scope a policy to a rule', async () => {
+    mockFindAllDecrypted.mockResolvedValue([
+      {
+        id: 'p-scoped',
+        attributes: {
+          name: 'Scoped',
+          matcher: 'rule.id: "rule-7"',
+          destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          auth: { apiKey: 'k', owner: 'elastic', createdByUser: false },
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      },
+    ]);
+
+    const result = await buildStep().execute(createDispatcherPipelineState());
+
+    if (result.type !== 'continue') throw new Error('expected continue');
+    const policy = result.data?.policies?.get('p-scoped');
+    expect(policy?.matcher).toBe('rule.id: "rule-7"');
   });
 
   it('fetches multiple policies', async () => {
@@ -116,10 +133,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;

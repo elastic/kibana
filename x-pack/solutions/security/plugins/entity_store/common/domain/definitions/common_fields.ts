@@ -23,7 +23,13 @@ export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
   'service.name',
 ] as const;
 
-const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+/**
+ * Closed enum of every relationship-type identifier the entity store stores under
+ * `entity.relationships.<key>`. Also consumed by maintainers (e.g. the relationship
+ * engine in security_solution) so they can declare which keys their pipeline writes
+ * to without re-stating the schema.
+ */
+export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'administers',
   'communicates_with',
   'depends_on',
@@ -33,6 +39,8 @@ const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'owns',
   'supervises',
 ] as const;
+
+export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];
 
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
@@ -76,8 +84,8 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   return [
     collectValues({ source: 'event.module' }),
     collectValues({ source: 'event.dataset' }),
-    collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
-    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
+    collectValues({ source: 'data_stream.dataset' }),
+    collectValues({ source: ENTITY_SOURCE_FIELD }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
@@ -158,14 +166,12 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
-      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
     collectValues({
       source: `${prefix}.behaviors.anomaly_job_ids`,
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
-      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
 

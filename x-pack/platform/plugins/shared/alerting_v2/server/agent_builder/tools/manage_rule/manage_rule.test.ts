@@ -47,7 +47,10 @@ describe('manageRuleTool', () => {
             { operation: 'set_kind', kind: 'alert' },
             {
               operation: 'set_query',
-              base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+              },
             },
           ],
         },
@@ -57,8 +60,19 @@ describe('manageRuleTool', () => {
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       expect(result).toHaveProperty('results');
-      const { results } = result as { results: Array<{ type: string; data?: unknown }> };
+      const { results } = result as {
+        results: Array<{ type: string; data?: { ruleAttachment?: { ruleId?: string } } }>;
+      };
       expect(results[0].type).toBe(ToolResultType.other);
+
+      // Pre-assigned rule ID is returned in the tool result
+      expect(results[0].data?.ruleAttachment?.ruleId).toBeDefined();
+      expect(typeof results[0].data?.ruleAttachment?.ruleId).toBe('string');
+
+      // The attachment data stored via add() includes the pre-assigned rule ID
+      const addCall = ctx.attachments.add.mock.calls[0][0] as { data: { id?: string } };
+      expect(addCall.data.id).toBeDefined();
+      expect(addCall.data.id).toBe(results[0].data?.ruleAttachment?.ruleId);
     });
 
     it('passes esClient to executeRuleOperations for query validation', async () => {
@@ -73,7 +87,10 @@ describe('manageRuleTool', () => {
         {
           operations: [
             { operation: 'set_metadata', name: 'Test' },
-            { operation: 'set_query', base: 'FROM logs-* | STATS COUNT(*)' },
+            {
+              operation: 'set_query',
+              query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
+            },
           ],
         },
         ctx
@@ -93,7 +110,13 @@ describe('manageRuleTool', () => {
         {
           operations: [
             { operation: 'set_metadata', name: 'Bad Query Rule' },
-            { operation: 'set_query', base: 'FROM bad-index-* | STATS COUNT(*)' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM bad-index-* | STATS COUNT(*)' },
+              },
+            },
           ],
         },
         ctx
@@ -121,6 +144,70 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('rule name is required');
     });
 
+    it('stores recovery_strategy and no_data_strategy from set_query', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Recovery Rule' },
+            { operation: 'set_kind', kind: 'alert' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+                recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+              },
+              recovery_strategy: 'query',
+            },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { recovery_strategy?: string };
+      };
+      expect(addCall.data.recovery_strategy).toBe('query');
+    });
+
+    it('stores no_data_strategy and no_data from set_query', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'No-Data Rule' },
+            { operation: 'set_kind', kind: 'alert' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+                no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
+              },
+              no_data_strategy: 'emit',
+            },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { no_data_strategy?: string };
+      };
+      expect(addCall.data.no_data_strategy).toBe('emit');
+    });
+
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
@@ -129,6 +216,7 @@ describe('manageRuleTool', () => {
             data: {
               metadata: { name: 'Persisted Rule' },
               kind: 'alert',
+              query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
             },
           },
         ],
@@ -166,18 +254,19 @@ describe('manageRuleTool', () => {
   });
 
   describe('logger severity', () => {
-    it('logs validation errors at warn level (not error)', async () => {
+    it('logs validation errors at debug level (not warn or error)', async () => {
       const ctx = createContext();
 
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
-      expect(ctx.logger.warn).toHaveBeenCalledWith(
+      expect(ctx.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('manage_rule tool: invalid input')
       );
+      expect(ctx.logger.warn).not.toHaveBeenCalled();
       expect(ctx.logger.error).not.toHaveBeenCalled();
     });
 
-    it('logs unexpected errors at error level (not warn)', async () => {
+    it('logs unexpected errors at warn level (not error)', async () => {
       const ctx = createContext();
       ctx.attachments.add.mockRejectedValueOnce(new Error('ES exploded'));
 
@@ -188,10 +277,10 @@ describe('manageRuleTool', () => {
         ctx
       );
 
-      expect(ctx.logger.error).toHaveBeenCalledWith(
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error in manage_rule tool')
       );
-      expect(ctx.logger.warn).not.toHaveBeenCalled();
+      expect(ctx.logger.error).not.toHaveBeenCalled();
     });
   });
 });

@@ -29,12 +29,6 @@ export const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   return registry;
 };
 
-export const indexTypesMapMock = {
-  '.my_index': ['testtype', 'testtype2'],
-  '.task_index': ['testtasktype'],
-  '.complementary_index': ['testtype3'],
-};
-
 export const hashToVersionMapMock = {
   'testtype|someHash': '10.1.0',
   'testtype2|anotherHash': '10.2.0',
@@ -43,17 +37,12 @@ export const hashToVersionMapMock = {
 };
 
 export const savedObjectTypeRegistryMock = createRegistry([
-  // typeRegistry depicts an updated index map:
-  //   .my_index: ['testtype', 'testtype3'],
-  //   .other_index: ['testtype2'],
-  //   .task_index': ['testtasktype'],
   {
     name: 'testtype',
     migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
   },
   {
     name: 'testtype2',
-    // We are moving 'testtype2' from '.my_index' to '.other_index'
     indexPattern: '.other_index',
   },
   {
@@ -61,7 +50,6 @@ export const savedObjectTypeRegistryMock = createRegistry([
     indexPattern: '.task_index',
   },
   {
-    // We are moving 'testtype3' from '.complementary_index' to '.my_index'
     name: 'testtype3',
   },
 ]);

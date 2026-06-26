@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/streams-schema';
@@ -44,7 +50,7 @@ export function KnowledgeIndicatorActionsCell({
     const computed = isComputedFeature(knowledgeIndicator.feature);
 
     if (!computed) {
-      if (knowledgeIndicator.feature.excluded_at) {
+      if (knowledgeIndicator.feature.excluded) {
         items.push(
           <EuiContextMenuItem
             key="feature-restore"
@@ -130,20 +136,22 @@ export function KnowledgeIndicatorActionsCell({
     <EuiPopover
       aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
       button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
-          isLoading={isMutating}
-          isDisabled={isMutating}
-          onClick={() => setIsActionsMenuOpen((current) => !current)}
-        />
+        <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
+            isLoading={isMutating}
+            isDisabled={isMutating}
+            onClick={() => setIsActionsMenuOpen((current) => !current)}
+          />
+        </EuiToolTip>
       }
       isOpen={isActionsMenuOpen}
       closePopover={() => setIsActionsMenuOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenuPanel size="s" items={[...featureActionItems, ...queryActionItems]} />
+      <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
     </EuiPopover>
   );
 }

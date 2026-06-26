@@ -35,6 +35,10 @@ export const openIndexPicker = () => {
   cy.get(getDataTestSubjectSelector('privilegedUserMonitoringAddIndexCard')).click();
 };
 
+export const closeIndexPicker = () => {
+  cy.get(getDataTestSubjectSelector('index-selector-modal')).find('.euiModalHeader').click();
+};
+
 export const openCreateIndexModal = () => {
   cy.get(`${getDataTestSubjectSelector('create-index-button')}`)
     .should('exist')
@@ -69,7 +73,7 @@ export const expandIndexPickerOptions = () => {
 };
 
 export const selectIndexPickerOption = (index: string) => {
-  cy.get(`button[title="${index}"]`).should('exist').click();
+  cy.get(`[data-test-subj="privMonIndexOption-${index}"]`).should('exist').click();
 };
 
 export const clickFileUploaderAssignButton = () => {

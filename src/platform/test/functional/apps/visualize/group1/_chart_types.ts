@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the expected visualizations types for both recommended and legacy tabs', async function () {
-      const expectedRecommendedChartTypes = ['Lens', 'Maps', 'Vega'];
+      const expectedRecommendedChartTypes = ['Maps', 'Vega', 'Visualization'];
       const expectedLegacyChartTypes = ['Aggregation-based', 'TSVB'];
 
       // find all the chart types and make sure there all there

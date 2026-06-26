@@ -26,6 +26,7 @@ import type {
   IngestFlow,
 } from './types';
 import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
+import { registerOnboardingApp } from './onboarding';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -82,7 +83,7 @@ export class IngestHubPlugin
           coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
             map((enabled): AppUpdater => {
               return () => ({
-                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
+                visibleIn: enabled ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
               });
             })
           )
@@ -107,6 +108,8 @@ export class IngestHubPlugin
         return () => root.unmount();
       },
     });
+
+    registerOnboardingApp(coreSetup, startServicesPromise);
 
     return {};
   }

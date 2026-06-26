@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // 2. Add custom_bytes as a separate column and verify the same value
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('custom_bytes');
         await PageObjects.discover.waitUntilTabIsLoaded();
-        const columnCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+        const columnCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         const columnValue = await columnCell.getVisibleText();
         expect(columnValue).to.match(/^\d{1,3},\d{3}$/);
 

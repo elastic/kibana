@@ -26,10 +26,12 @@ import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
-import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
+import { listWorkflowExecutionsTool } from './tools/list_workflow_executions';
 import { resumeWorkflowExecutionTool } from './tools/resume_workflow_execution';
+import { generateWorkflowTool } from './tools/generate_workflow';
+import { executeWorkflowTool } from './tools/execute_workflow';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -62,11 +64,10 @@ export class AgentBuilderWorkflowsPlugin
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
     registerGetStepDefinitionsTool(agentBuilder, api);
-    registerGetTriggerDefinitionsTool(agentBuilder);
+    registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
     registerWorkflowExecuteStepTool(agentBuilder, api);
-    registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
     // Workflow attachment types
     registerWorkflowYamlAttachment(agentBuilder, api);
@@ -82,6 +83,9 @@ export class AgentBuilderWorkflowsPlugin
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement }),
       resumeWorkflowExecutionTool({ workflowsManagement }),
+      listWorkflowExecutionsTool({ workflowsManagement }),
+      generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
+      executeWorkflowTool({ workflowsManagement }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 

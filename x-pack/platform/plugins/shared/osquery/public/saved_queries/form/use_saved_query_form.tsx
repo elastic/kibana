@@ -11,7 +11,7 @@ import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { QUERY_TIMEOUT } from '../../../common/constants';
+import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
@@ -52,7 +52,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   timeout: payload.timeout ?? QUERY_TIMEOUT.DEFAULT,
   snapshot: payload.snapshot ?? true,
   removed: payload.removed ?? false,
-  platform: payload.platform ?? '',
+  platform: payload.platform || DEFAULT_PLATFORM,
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
@@ -103,6 +103,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             timeout: QUERY_TIMEOUT.DEFAULT,
             ecs_mapping: {},
             snapshot: true,
+            platform: DEFAULT_PLATFORM,
           },
     }),
   };

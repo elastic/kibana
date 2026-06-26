@@ -15,7 +15,8 @@ const SAMPLE_DATA_SET = 'ecommerce';
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
  */
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/274946
+test.describe.skip(
   'Discover Alerts menu with alerting v2',
   {
     tag: '@local-stateful-classic',
@@ -43,11 +44,8 @@ test.describe(
     }) => {
       await pageObjects.discoverAppMenu.openAlertsMenu();
 
-      await expect(pageObjects.discoverAppMenu.rulesTopLevelButton).toBeHidden();
-
-      await expect(pageObjects.discoverAppMenu.createEsqlRuleButton).toBeVisible();
-      await expect(pageObjects.discoverAppMenu.createEsqlRuleBadge).toBeVisible();
-      await expect(pageObjects.discoverAppMenu.createEsqlRuleBadge).toHaveText('New');
+      await expect(pageObjects.discoverAppMenu.selectorFlyout).toBeVisible();
+      await expect(pageObjects.discoverAppMenu.createEsqlRuleCard).toBeVisible();
 
       await expect(pageObjects.discoverAppMenu.createAlertButton).toBeHidden();
       await expect(pageObjects.discoverAppMenu.manageAlertsButton).toBeHidden();

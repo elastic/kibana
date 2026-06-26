@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pMap from 'p-map';
 
 import { appContextService, licenseService, packagePolicyService } from '../../services';

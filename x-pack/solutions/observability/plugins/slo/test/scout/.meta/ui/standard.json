@@ -1,5 +1,5 @@
 {
-  "sha1": "141ee12ba7c6d8ac5dd2c654f776a257139dd4bc",
+  "sha1": "cb9a0e7ed184b9fb1b765deba9aa5a0f6dca3cce",
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
-        "line": 10,
+        "line": 59,
         "column": 16
       }
     },
@@ -74,6 +74,54 @@
       }
     },
     {
+      "id": "1b1baaef6ea75c6-d584ec1839b42bf",
+      "title": "Composite SLO UI renders SLOs and Composite SLOs tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "1b1baaef6ea75c6-3b88ce926900368",
+      "title": "Composite SLO UI shows Create composite SLO option in create dropdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "1b1baaef6ea75c6-aa9b5daab7a8160",
+      "title": "Composite SLO UI renders composite SLO table when Composite SLOs tab is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
+        "line": 43,
+        "column": 9
+      }
+    },
+    {
       "id": "d0c1f04cf9e25c8-8345f73a5865487",
       "title": "Explore from SLO Details - APM Navigation Source panel renders with APM links for APM-based SLO",
       "expectedStatus": "passed",
@@ -102,6 +150,38 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
         "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "19d28556f6339bb-853a135b3f756e3",
+      "title": "SLO Overview Embeddable configures a single SLO overview panel from the add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "19d28556f6339bb-336a9b37545e893",
+      "title": "SLO Overview Embeddable configures a group SLO overview panel from the add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 70,
         "column": 9
       }
     },

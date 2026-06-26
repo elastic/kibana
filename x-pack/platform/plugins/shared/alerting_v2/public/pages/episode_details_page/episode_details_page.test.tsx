@@ -8,11 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
-import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
-import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
+import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { TestProviders } from '../../test_utils/test_providers';
 import { EpisodeDetailsPage } from './episode_details_page';
 
@@ -22,84 +20,79 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query', () => ({
-  useFetchEpisodeEventsQuery: jest.fn(),
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query', () => ({
+  useFetchEpisodeQuery: jest.fn(),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => ({
-  useFetchEpisodeActions: jest.fn(),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
-  useFetchGroupActions: jest.fn(),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query', () => ({
-  useFetchEpisodeEventDataQuery: jest.fn(),
-}));
-
-jest.mock('../../hooks/use_fetch_rule', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
+}));
+
+// Sections that call useFetchEpisodeQuery independently are mocked to keep the
+// test focused on the page-level layout and sidebar.
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/overview_list_section', () => ({
+  AlertEpisodeOverviewListSection: () => <div data-test-subj="stubOverviewListSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () => ({
+  AlertEpisodesRelatedSection: () => null,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_header_section', () => ({
+  AlertEpisodeDetailsHeaderSection: () => <div data-test-subj="stubDetailsHeaderSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section', () => ({
+  AlertEpisodeRuleOverviewPanelSection: () => <div data-test-subj="stubRuleOverviewPanelSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => ({
+  AlertEpisodeRunbookSection: () => <div data-test-subj="stubRunbookSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
+  AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section', () => ({
+  AlertEpisodeSeverityHeatmapSection: () => <div data-test-subj="stubSeverityHeatmapSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
+  AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
 }));
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
-jest.mock('./components/episode_overview_tab', () => ({
-  // helps with the slow render
-  EpisodeOverviewTab: () => <div data-test-subj="mockEpisodeOverviewTab" />,
-}));
-
-jest.mock('./components/episode_metadata_tab', () => ({
-  // helps with the slow render
-  EpisodeMetadataTab: () => <div data-test-subj="mockEpisodeMetadataTab" />,
-}));
-
 const mockUseParams = jest.mocked(useParams);
-const mockUseFetchEpisodeEventsQuery = jest.mocked(useFetchEpisodeEventsQuery);
-const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
-const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
-const mockUseFetchEpisodeEventDataQuery = jest.mocked(useFetchEpisodeEventDataQuery);
+const mockUseFetchEpisodeQuery = jest.mocked(useFetchEpisodeQuery);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 
-type EpisodeEventsQueryResult = ReturnType<typeof useFetchEpisodeEventsQuery>;
-type EpisodeActionsQueryResult = ReturnType<typeof useFetchEpisodeActions>;
-type GroupActionsQueryResult = ReturnType<typeof useFetchGroupActions>;
-type EpisodeEventDataQueryResult = ReturnType<typeof useFetchEpisodeEventDataQuery>;
+type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
 
-const eventsQuery = {
-  data: [
-    {
-      '@timestamp': '2026-05-08T08:00:00.000Z',
-      'episode.id': 'ep-1',
-      'episode.status': 'active',
-      'rule.id': 'rule-1',
-      group_hash: 'group-1',
-      first_timestamp: '2026-05-08T08:00:00.000Z',
-      last_timestamp: '2026-05-08T08:05:00.000Z',
-    },
-  ],
+const mockEpisode = {
+  '@timestamp': '2026-05-08T08:00:00.000Z',
+  'episode.id': 'ep-1',
+  'episode.status': 'active' as const,
+  'rule.id': 'rule-1',
+  group_hash: 'group-1',
+  first_timestamp: '2026-05-08T08:00:00.000Z',
+  last_timestamp: '2026-05-08T08:05:00.000Z',
+  triggered_at: '2026-05-08T08:00:00.000Z',
+  duration: 300000,
+  last_tags: ['tag-a'],
+  last_assignee_uid: 'u-1',
+};
+
+const episodeQuery = {
+  data: mockEpisode,
   isLoading: false,
   isError: false,
-  refetch: jest.fn(),
-} as unknown as EpisodeEventsQueryResult;
-
-const episodeActionsQuery = {
-  data: new Map([['ep-1', { lastAssigneeUid: 'u-1' }]]),
-  refetch: jest.fn(),
-} as unknown as EpisodeActionsQueryResult;
-
-const groupActionsQuery = {
-  data: new Map([['group-1', { tags: ['tag-a'] }]]),
-  refetch: jest.fn(),
-} as unknown as GroupActionsQueryResult;
-
-const eventDataQuery = {
-  data: { data: { 'host.name': 'host-1' } },
-  refetch: jest.fn(),
-} as unknown as EpisodeEventDataQueryResult;
+  fetchStatus: 'idle',
+} as unknown as EpisodeQueryResult;
 
 const fetchRuleResult = {
   data: {
@@ -108,37 +101,82 @@ const fetchRuleResult = {
     enabled: true,
     metadata: { name: 'Rule A', description: 'Rule description' },
     grouping: { fields: ['host.name'] },
-    evaluation: { query: { base: 'from index-*' } },
+    query: { format: 'standalone', breach: 'from index-*' },
     artifacts: [],
   },
   isLoading: false,
+  ruleState: {
+    status: RuleStateStatus.loaded,
+    ruleId: 'rule-1',
+    rule: {
+      id: 'rule-1',
+      kind: 'alerting',
+      enabled: true,
+      metadata: { name: 'Rule A', description: 'Rule description' },
+      grouping: { fields: ['host.name'] },
+      evaluation: { query: { base: 'from index-*' } },
+      artifacts: [],
+    },
+  },
 } as unknown as FetchRuleResult;
 
 const episodeId = 'ep-1';
 mockUseParams.mockReturnValue({ episodeId });
-mockUseFetchEpisodeEventsQuery.mockReturnValue(eventsQuery);
-mockUseFetchEpisodeActions.mockReturnValue(episodeActionsQuery);
-mockUseFetchGroupActions.mockReturnValue(groupActionsQuery);
-mockUseFetchEpisodeEventDataQuery.mockReturnValue(eventDataQuery);
+mockUseFetchEpisodeQuery.mockReturnValue(episodeQuery);
 mockUseFetchRule.mockReturnValue(fetchRuleResult);
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseParams.mockReturnValue({ episodeId });
+  mockUseFetchEpisodeQuery.mockReturnValue(episodeQuery);
+  mockUseFetchRule.mockReturnValue(fetchRuleResult);
 });
 
 describe('EpisodeDetailsPage', () => {
-  it('renders sidebar content as expected', () => {
+  it('renders the page structure once the episode loads', () => {
     render(
       <TestProviders>
         <EpisodeDetailsPage />
       </TestProviders>
     );
 
+    expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
-    expect(screen.getByText('Grouping fields')).toBeInTheDocument();
-    expect(screen.getByText('Triggered')).toBeInTheDocument();
-    expect(screen.getByText('Duration')).toBeInTheDocument();
-    expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('Assignee')).toBeInTheDocument();
+    expect(screen.getByTestId('stubLifecycleHeatmapSection')).toBeInTheDocument();
+    expect(screen.getByTestId('stubSeverityHeatmapSection')).toBeInTheDocument();
+  });
+
+  it('renders the not-found prompt when there is no episode', () => {
+    mockUseFetchEpisodeQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      fetchStatus: 'idle',
+    } as unknown as EpisodeQueryResult);
+
+    render(
+      <TestProviders>
+        <EpisodeDetailsPage />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
+  });
+
+  it('renders the error prompt when the episode query errors', () => {
+    mockUseFetchEpisodeQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      fetchStatus: 'idle',
+    } as unknown as EpisodeQueryResult);
+
+    render(
+      <TestProviders>
+        <EpisodeDetailsPage />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
   });
 });

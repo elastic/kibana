@@ -47,6 +47,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.bigquery',
+    lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
@@ -177,11 +181,19 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.hubspot',
+    lazy(() => import(/* webpackChunkName: "connectorIconHubspot" */ './specs/hubspot/icon')),
+  ],
+  [
     '.microsoft-teams',
     lazy(
       () =>
         import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
     ),
+  ],
+  [
+    '.outlook',
+    lazy(() => import(/* webpackChunkName: "connectorIconOutlook" */ './specs/outlook/icon')),
   ],
   [
     '.google_cloud_storage',
@@ -197,4 +209,6 @@ export const ConnectorIconsMap: Map<
     '.snowflake',
     lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
   ],
+
+  ['.box', lazy(() => import(/* webpackChunkName: "connectorIconbox" */ './specs/box/icon'))],
 ]);

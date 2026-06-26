@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { escapeQuotes } from '@kbn/es-query';
 
 export const CLIENT_DEFAULTS = {
   ABSOLUTE_DATE_RANGE_START: 0,
@@ -115,7 +116,13 @@ export const getTimeSpanFilter = () => ({
 
 export const getQueryFilters = (query: string) => ({
   query_string: {
-    query: `${query}`,
+    query: `"${escapeQuotes(query)}"`,
+    // Free-text fields the search box should match against. Status codes
+    // are filtered precisely via a separate `terms` query on
+    // `http.response.status_code` (driven by the status-code chips in the
+    // Error Insights panel) so we deliberately do NOT include it here:
+    // searching for "200" in this multi-field query string would also
+    // match e.g. URL ports or substrings of other ids.
     fields: [
       'monitor.name.text',
       'tags',
@@ -124,6 +131,8 @@ export const getQueryFilters = (query: string) => ({
       'urls',
       'hosts',
       'monitor.project.id',
+      'error.message',
+      'url.domain',
     ],
   },
 });

@@ -143,7 +143,7 @@ The full route repository is assembled in `server/routes/index.ts` by spreading 
 | `GET /api/streams/{name}/_doc_counts` | Get document counts per stream |
 | `GET /api/streams/{name}/_query` | Get a query stream definition |
 | `PUT /api/streams/{name}/_query` | Create or update a query stream (creates `$.`-prefixed ES\|QL view) |
-| `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries |
+| `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries. Deprecated, pending removal (use the internal query endpoints). |
 | `GET/POST /api/queries/*` | Query management |
 | `GET/PUT /api/content/*` | Content pack import/export |
 | `GET/POST/DELETE /api/attachments/*` | Asset attachments (dashboards, rules) |
@@ -501,13 +501,13 @@ Scout tests for the streams_app use Playwright:
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run UI tests
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 For serverless:
 ```bash
 node scripts/scout.js start-server --arch serverless --domain observability_complete
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Streamlang integration tests:

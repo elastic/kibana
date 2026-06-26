@@ -78,6 +78,7 @@ export const MonacoEditor = ({
       application,
     },
     docLinkVersion,
+    config: { defaultEditorContent },
   } = context;
   const { toasts } = notifications;
   const {
@@ -200,7 +201,7 @@ export const MonacoEditor = ({
     [esqlCallbacks]
   );
 
-  useSetInitialValue({ localStorageValue, setValue, toasts });
+  useSetInitialValue({ localStorageValue, setValue, toasts, defaultEditorContent });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 

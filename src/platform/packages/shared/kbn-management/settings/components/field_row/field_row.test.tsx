@@ -365,6 +365,42 @@ describe('Field', () => {
         expect(queryByText('Technical preview')).not.toBeInTheDocument();
       });
 
+      it('should render experimental badge if it is experimental', () => {
+        const { getByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting: { ...setting, experimental: true },
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(getByText('Experimental')).toBeInTheDocument();
+      });
+
+      it('should NOT render experimental badge if experimental is false or unspecified', () => {
+        const { queryByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting,
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(queryByText('Experimental')).not.toBeInTheDocument();
+      });
+
       it('should render unsaved value if there are unsaved changes', () => {
         const { getByTestId, getByAltText } = render(
           wrap(

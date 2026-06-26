@@ -89,6 +89,46 @@ async function getActionGroups(
   };
 }
 
+export function getMenuItems(
+  actions: Action[],
+  dashboardApi: DashboardApi,
+  context: ActionExecutionContext
+) {
+  return actions
+    .map((action) => {
+      const actionName = action.getDisplayName(context);
+      return {
+        id: action.id,
+        name: actionName,
+        icon: action.getIconType?.(context) ?? 'empty',
+        onClick: (event: React.MouseEvent) => {
+          dashboardApi.clearOverlays();
+          if (event.currentTarget instanceof HTMLAnchorElement) {
+            if (
+              !event.defaultPrevented && // onClick prevented default
+              event.button === 0 &&
+              (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+              !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+            ) {
+              event.preventDefault();
+            }
+          }
+          action.execute(context);
+        },
+        'data-test-subj': `create-action-${actionName}`,
+        description: action?.getDisplayNameTooltip?.(context),
+        isDisabled: action?.isDisabled?.(context),
+        order: action.order ?? 0,
+        MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
+      };
+    })
+    .sort((itemA, itemB) => {
+      return itemA.order === itemB.order
+        ? itemA.name.localeCompare(itemB.name)
+        : itemB.order - itemA.order;
+    });
+}
+
 function generateMenuItemGroups(
   groups: Record<string, { group: PresentableGroup; actions: Action[] }>,
   dashboardApi: DashboardApi,
@@ -101,39 +141,7 @@ function generateMenuItemGroups(
         title: group.getDisplayName?.(context) ?? '',
         'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
         order: group.order ?? 0,
-        items: actions
-          .map((action) => {
-            const actionName = action.getDisplayName(context);
-            return {
-              id: action.id,
-              name: actionName,
-              icon: action.getIconType?.(context) ?? 'empty',
-              onClick: (event: React.MouseEvent) => {
-                dashboardApi.clearOverlays();
-                if (event.currentTarget instanceof HTMLAnchorElement) {
-                  if (
-                    !event.defaultPrevented && // onClick prevented default
-                    event.button === 0 &&
-                    (!event.currentTarget.target || event.currentTarget.target === '_self') &&
-                    !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-                  ) {
-                    event.preventDefault();
-                  }
-                }
-                action.execute(context);
-              },
-              'data-test-subj': `create-action-${actionName}`,
-              description: action?.getDisplayNameTooltip?.(context),
-              isDisabled: action?.isDisabled?.(context),
-              order: action.order ?? 0,
-              MenuItem: action.MenuItem ? action.MenuItem({ context }) : undefined,
-            };
-          })
-          .sort((itemA, itemB) => {
-            return itemA.order === itemB.order
-              ? itemA.name.localeCompare(itemB.name)
-              : itemB.order - itemA.order;
-          }),
+        items: getMenuItems(actions, dashboardApi, context),
       };
     })
     .sort((groupA, groupB) => groupB.order - groupA.order);

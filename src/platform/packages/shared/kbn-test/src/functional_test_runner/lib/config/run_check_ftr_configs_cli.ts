@@ -27,6 +27,7 @@ const IGNORED_PATHS = [
   'src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js',
   'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts',
   'x-pack/solutions/security/test/cloud_security_posture_functional/config.base.ts',
+  'x-pack/solutions/observability/plugins/apm/test/scenarios/agent_config.ts',
 ];
 
 export async function runCheckFtrConfigsCli() {

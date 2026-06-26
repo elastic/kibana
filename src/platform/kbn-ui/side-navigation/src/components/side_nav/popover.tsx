@@ -19,7 +19,7 @@ import type {
 } from 'react';
 import { EuiPopover, EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/ui-chrome-layout-constants';
 import { i18n } from '@kbn/i18n';
 
 import {

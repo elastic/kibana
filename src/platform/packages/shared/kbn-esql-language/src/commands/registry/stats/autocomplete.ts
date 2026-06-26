@@ -22,7 +22,7 @@ import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
-  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
   byCompleteItem,
   whereCompleteItem,
   commaCompleteItem,
@@ -197,7 +197,11 @@ export async function autocomplete(
       const { expressionType, isComplete } = computed;
 
       if (expressionType === 'boolean' && isComplete) {
-        suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
+        suggestions.push(
+          ...newLineAndPipeCompleteItems,
+          { ...commaCompleteItem, text: ', ' },
+          byCompleteItem
+        );
       }
 
       return suggestions;
@@ -415,12 +419,18 @@ function buildCustomFilteringContext(
   const isInBy = isNodeWithinByClause(foundFunction, command);
 
   if (!isInBy) {
+    // The "no nested aggregations" rule does not apply when the current parameter
+    // explicitly expects an aggregation function (hint.kind === 'aggregation').
+    const expectsAggregation = basicContext.paramDefinitions.some(
+      (p) => p.hint?.kind === 'aggregation'
+    );
+
     statsSpecificFunctionsToIgnore.push(
       ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
+      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex) && !expectsAggregation
         ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
         : []),
-      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex) && !expectsAggregation
         ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
         : [])
     );

@@ -52,7 +52,7 @@ export function formatSingleValue(
     return moment(utcMoment.valueOf()).format('HH:mm');
   } else {
     if (fieldFormat !== undefined) {
-      return fieldFormat.convert(value, 'text');
+      return fieldFormat.convertToText(value);
     } else {
       // If no Kibana FieldFormat object provided,
       // format the value depending on its magnitude.
@@ -60,7 +60,7 @@ export function formatSingleValue(
       if (absValue >= 10000 || absValue === Math.floor(absValue)) {
         // Output 0 decimal places if whole numbers or >= 10000
         if (fieldFormat !== undefined) {
-          return fieldFormat.convert(value, 'text');
+          return fieldFormat.convertToText(value);
         } else {
           return Number(value.toFixed(0));
         }

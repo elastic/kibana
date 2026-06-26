@@ -17,7 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
-  SearchRulesField,
+  GranularRulesFilter,
   SearchRulesAggregations,
   GranularRulesSearch,
   FacetCounts,
@@ -57,12 +57,11 @@ export const SearchRulesRequestBody = lazySchema(() =>
       /**
        * Restrict the response to only include the specified fields and necessary metadata.
        */
-      fields: z.array(SearchRulesField).optional(),
+      fields: z.array(z.string().max(256)).optional(),
       /**
-      * KQL filter string.
-
-      */
-      filter: z.string().optional(),
+       * Structured KQL filter applied to detection rules (alert saved objects).
+       */
+      filter: GranularRulesFilter.optional(),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),
@@ -74,7 +73,7 @@ export const SearchRulesRequestBody = lazySchema(() =>
       /**
        * Page size.
        */
-      per_page: z.number().int().min(0).max(10000).optional().default(20),
+      per_page: z.number().int().min(1).max(10000).optional().default(20),
       /**
       * For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
 

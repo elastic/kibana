@@ -18,7 +18,6 @@ export class ESQLService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly findService = this.ctx.getService('find');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
@@ -166,8 +165,6 @@ export class ESQLService extends FtrService {
   public async openEsqlControlFlyout(query: string) {
     await this.retry.waitFor('control flyout to open', async () => {
       await this.typeEsqlEditorQuery(query);
-      // Wait until suggestions are loaded
-      await this.common.sleep(1000);
       await this.selectEsqlSuggestionByLabel('Create control');
 
       return await this.testSubjects.exists('create_esql_control_flyout');
@@ -178,9 +175,15 @@ export class ESQLService extends FtrService {
     await this.waitESQLEditorLoaded();
     await this.openEsqlControlFlyout(query);
 
-    // create the control
-    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
-    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
+      await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+      await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout', {
+        timeout: 2000,
+      });
+      return !flyoutOpen;
+    });
+
     await this.waitESQLEditorLoaded();
   }
 
@@ -246,6 +249,19 @@ export class ESQLService extends FtrService {
         expect(await suggestionWidget.isDisplayed()).to.be(false);
       }
     );
+  }
+
+  public async getEsqlBadgeHoverText(badgeClassName: string): Promise<string> {
+    return this.retry.try(async () => {
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
+      const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
+      await badge.moveMouseTo();
+
+      await this.findService.byCssSelector(`.monaco-hover`);
+      const rows = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+      return texts.join(' ').trim();
+    });
   }
 
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {

@@ -87,6 +87,20 @@ export const resyncStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Streams were resynced successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {

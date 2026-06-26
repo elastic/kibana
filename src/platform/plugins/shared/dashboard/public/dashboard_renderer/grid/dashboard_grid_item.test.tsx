@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { buildMockDashboardApi } from '../../mocks';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { Item } from './dashboard_grid_item';
@@ -35,6 +37,13 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 // since test mocks ReactEmbeddableRenderer to render static content regardless of embeddable type
 const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
 
+const buildMockChildApi = (id: string): DefaultEmbeddableApi =>
+  ({
+    uuid: id,
+    type: TEST_EMBEDDABLE,
+    relatedPanels$: new BehaviorSubject<string[]>([]),
+  } as unknown as DefaultEmbeddableApi);
+
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const panels = [
     {
@@ -51,6 +60,10 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
     },
   ];
   const { api, internalApi } = buildMockDashboardApi({ overrides: { panels } });
+
+  panels.forEach((panel) => {
+    api.registerChildApi(buildMockChildApi(panel.id));
+  });
 
   const component = render(
     <DashboardContext.Provider value={api}>

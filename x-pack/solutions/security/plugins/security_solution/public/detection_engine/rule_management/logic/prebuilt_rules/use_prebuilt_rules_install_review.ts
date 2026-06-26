@@ -7,19 +7,31 @@
 
 import type { UseQueryOptions } from '@kbn/react-query';
 import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  PrebuiltRuleAssetsAggregations,
+  PrebuiltRuleAssetsSortItem,
+} from '../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
+  GranularRulesFilter,
+  GranularRulesSearch,
+} from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
+import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import type { AddPrebuiltRulesTableFilterOptions } from '../../../rule_management_ui/components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
-import type { PrebuiltRuleAssetsSortItem } from '../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 
 interface UsePrebuiltRulesInstallReviewParams {
   page: number;
   perPage: number;
   filterOptions?: AddPrebuiltRulesTableFilterOptions;
+
   sortingOptions?: PrebuiltRuleAssetsSortItem;
+  aggregations?: PrebuiltRuleAssetsAggregations;
+  fields?: string[];
 }
+
+const ASSET_TAGS_FIELD = 'security-rule.tags';
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
@@ -33,12 +45,20 @@ export const usePrebuiltRulesInstallReview = (
 ) => {
   const { addError } = useAppToasts();
 
+  const trimmedSearchTerm = requestParameters.filterOptions?.name?.trim();
+  const search: GranularRulesSearch | undefined = trimmedSearchTerm?.length
+    ? { term: trimmedSearchTerm, mode: 'legacy' }
+    : undefined;
+
   return useFetchPrebuiltRulesInstallReviewQuery(
     {
       page: requestParameters.page,
       per_page: requestParameters.perPage,
-      filter: prepareFilters(requestParameters.filterOptions),
+      filter: buildInstallReviewKqlFilter(requestParameters.filterOptions),
+      search,
       sort: requestParameters.sortingOptions ? [requestParameters.sortingOptions] : undefined,
+      aggregations: requestParameters.aggregations,
+      fields: requestParameters.fields,
     },
     {
       onError: (error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
@@ -47,33 +67,36 @@ export const usePrebuiltRulesInstallReview = (
   );
 };
 
+const buildTagsClause = (tags: string[]): string => {
+  const nonEmptyTags = tags.filter((tag) => tag.length > 0);
+  if (nonEmptyTags.length === 0) {
+    return '';
+  }
+  return `${ASSET_TAGS_FIELD}:(${nonEmptyTags.map(prepareKQLStringParam).join(' AND ')})`;
+};
+
 /**
  * Converts filter options from a simplified UI format to a format expected by the API.
  */
-function prepareFilters(
+export const buildInstallReviewKqlFilter = (
   filterOptions: AddPrebuiltRulesTableFilterOptions | undefined
-): PrebuiltRuleAssetsFilter | undefined {
+): GranularRulesFilter | undefined => {
   if (!filterOptions) {
     return undefined;
   }
 
-  const filter: PrebuiltRuleAssetsFilter = {
-    fields: {},
-  };
-
-  if (filterOptions.name) {
-    filter.fields.name = {
-      include: { values: [filterOptions.name] },
-    };
-  }
+  const parts: string[] = [];
 
   if (filterOptions.tags.length) {
-    filter.fields.tags = {
-      include: { values: filterOptions.tags },
-    };
+    const clause = buildTagsClause(filterOptions.tags);
+    if (clause) {
+      parts.push(clause);
+    }
   }
 
-  const isEmptyFilter = Object.keys(filter.fields).length === 0;
+  if (parts.length === 0) {
+    return undefined;
+  }
 
-  return isEmptyFilter ? undefined : filter;
-}
+  return { term: parts.map((part) => `(${part})`).join(' AND '), mode: 'KQL' };
+};

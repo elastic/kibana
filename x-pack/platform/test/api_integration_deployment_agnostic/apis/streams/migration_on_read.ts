@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -70,17 +69,6 @@ const migratedProcessing = {
 
 // Do not update these if tests are failing - this is testing whether they get migrated correctly - you should
 // always make sure that existing definitions and links keep working.
-
-const assetLinks = [
-  {
-    'asset.type': 'query',
-    'asset.id': '12345',
-    'asset.uuid': '761ea54139754abb6e486ec1e29ea5c7f4df1387',
-    'stream.name': TEST_STREAM_NAME,
-    'query.title': 'Test',
-    'query.kql.query': 'atest',
-  },
-];
 
 const attachmentLinks = [
   {
@@ -201,20 +189,6 @@ const expectedDashboard = {
   streamNames: [TEST_STREAM_NAME],
 };
 
-const expectedQueriesResponse = {
-  queries: [
-    {
-      id: '12345',
-      type: 'match',
-      title: 'Test',
-      description: '',
-      esql: {
-        query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("atest")`,
-      },
-    },
-  ],
-};
-
 function expectStreams(expectedStreams: string[], persistedStreams: Streams.all.Definition[]) {
   for (const name of expectedStreams) {
     expect(persistedStreams.some((stream) => stream.name === name)).to.eql(true);
@@ -241,9 +215,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
       // link and unlink dashboard to make sure attachments index is created
       await apiClient.fetch(
         'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
@@ -269,27 +240,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         }
       );
-      // link and unlink query asset to make sure assets index is created
-      await apiClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-        params: {
-          path: {
-            name: 'logs.otel',
-            queryId: 'test-query-init',
-          },
-          body: {
-            title: 'Init Query',
-            esql: { query: 'FROM logs.otel, logs.otel.* METADATA _id, _source | LIMIT 1' },
-          },
-        },
-      });
-      await apiClient.fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
-        params: {
-          path: {
-            name: 'logs.otel',
-            queryId: 'test-query-init',
-          },
-        },
-      });
 
       await esClient.index({
         index: '.kibana_streams-000001',
@@ -304,16 +254,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       await Promise.all(
-        assetLinks.map((link) =>
-          esClient.index({
-            index: '.kibana_streams_assets-000001',
-            id: link['asset.uuid'],
-            document: link,
-          })
-        )
-      );
-
-      await Promise.all(
         attachmentLinks.map((link) =>
           esClient.index({
             index: '.kibana_streams_attachments-000001',
@@ -325,16 +265,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Refresh the index to make the document searchable
       await esClient.indices.refresh({ index: '.kibana_streams-000001' });
-      await esClient.indices.refresh({ index: '.kibana_streams_assets-000001' });
       await esClient.indices.refresh({ index: '.kibana_streams_attachments-000001' });
     });
 
     after(async () => {
       await disableStreams(apiClient);
       await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
     });
 
     it('should read and return existing orphaned classic stream', async () => {
@@ -410,16 +346,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(rest).to.eql(expectedDashboard);
       expect(createdAt).to.be.a('string');
       expect(updatedAt).to.be.a('string');
-    });
-
-    it('should read expected queries for classic stream', async () => {
-      const response = await apiClient.fetch('GET /api/streams/{name}/queries 2023-10-31', {
-        params: {
-          path: { name: TEST_STREAM_NAME },
-        },
-      });
-      expect(response.status).to.eql(200);
-      expect(response.body.queries).to.eql(expectedQueriesResponse.queries);
     });
 
     it('should migrate routing "if" condition to Streamlang syntax in wired streams', async () => {

@@ -5,28 +5,90 @@
  * 2.0.
  */
 
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
+import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
-const DEFAULT_METADATA: CreateRuleData['metadata'] = { name: 'scout-rule' };
-
-const DEFAULT_EVALUATION: CreateRuleData['evaluation'] = {
-  query: { base: 'FROM logs-* | LIMIT 10' },
+/**
+ * Defaults used by `buildCreateRuleData` so the integration specs only have to
+ * spell out what makes each rule unique (typically `metadata.name`, the
+ * `query.breach`, and the `state_transition` policy under test).
+ *
+ * Notes:
+ * - `schedule` uses the fast test-harness interval (5s every / 1m lookback)
+ *   so the executor produces events quickly during integration runs.
+ * - `state_transition: { pending_count: 0, recovering_count: 0 }` drives the
+ *   lifecycle straight to active/inactive, which is what most executor tests
+ *   want. Tests that care about the lifecycle override it explicitly. Signal
+ *   rules must opt out via `state_transition: undefined` because the schema
+ *   forbids state_transition for `kind: 'signal'`.
+ * - `recovery_strategy: 'no_breach'` so that, by default, rules recover
+ *   whenever a previously-breaching group stops appearing in the breach query
+ *   results. Signal rules must opt out by passing
+ *   `recovery_strategy: undefined` (or `'none'`) because the schema forbids
+ *   recovery strategies on `kind: 'signal'`. Tests that override `query`
+ *   should include `recovery_strategy: 'no_breach'` (or another valid
+ *   strategy) if they want the executor to emit recovery events.
+ */
+const DEFAULTS: CreateRuleData = {
+  kind: 'alert',
+  metadata: { name: 'scout-rule' },
+  schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+  recovery_strategy: 'no_breach',
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | LIMIT 10' },
+  },
+  time_field: '@timestamp',
+  grouping: { fields: ['host.name'] },
+  state_transition: { pending_count: 0, recovering_count: 0 },
 };
 
-const DEFAULT_SCHEDULE: CreateRuleData['schedule'] = { every: '5m' };
-
-const DEFAULT_TIME_FIELD: CreateRuleData['time_field'] = '@timestamp';
+const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
+  name: 'scout-action-policy',
+  description: 'Scout action policy',
+  destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
+};
 
 export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 
-export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => {
-  const {
-    kind = 'alert',
-    metadata = DEFAULT_METADATA,
-    schedule = DEFAULT_SCHEDULE,
-    evaluation = DEFAULT_EVALUATION,
-    time_field = DEFAULT_TIME_FIELD,
-    ...rest
-  } = input;
-  return { kind, metadata, schedule, evaluation, time_field, ...rest };
+export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
+  ...DEFAULTS,
+  ...input,
+});
+
+export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;
+
+export const buildCreateActionPolicyData = (
+  input: BuildCreateActionPolicyDataInput = {}
+): CreateActionPolicyDataInput => ({
+  ...ACTION_POLICY_DEFAULTS,
+  ...input,
+});
+
+export const buildActionPolicyDestinations = (count: number) =>
+  Array.from({ length: count }, (_, i) => ({
+    type: 'workflow' as const,
+    id: `wf-${i}`,
+  }));
+/**
+ * Defaults used by `buildAlertEvent` so the integration specs only have to
+ * spell out what makes each alert event unique.
+ */
+export type BuildAlertEventInput = Partial<AlertEvent>;
+
+export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    scheduled_timestamp: now,
+    rule: { id: 'scout-rule-id', version: 1 },
+    group_hash: 'scout-group-hash',
+    data: {},
+    status: 'breached',
+    source: 'scout-test',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  };
 };

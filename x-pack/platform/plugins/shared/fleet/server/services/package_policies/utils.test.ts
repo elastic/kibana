@@ -13,8 +13,11 @@ import { appContextService } from '../app_context';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+
 import {
   canDeployCustomPackageAsAgentlessOrThrow,
+  canUseOutputForIntegration,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './utils';
@@ -327,6 +330,82 @@ describe('Package Policy Utils', () => {
         '[data_stream.type]: required for stream in package "composable-integration"'
       );
     });
+  });
+});
+
+describe('canUseOutputForIntegration', () => {
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should reject a Logstash output_id on a package policy with an OTel input', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'logstash-output',
+      package: { name: 'host_metrics_otel', version: '1.0.0', title: 'Host Metrics OTel' },
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(false);
+    expect(result.errorMessage).toMatch(/not usable with package/);
+  });
+
+  it('should reject a Kafka output_id on a package policy with an OTel input', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'kafka-output', type: 'kafka' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'kafka-output',
+      package: { name: 'host_metrics_otel', version: '1.0.0', title: 'Host Metrics OTel' },
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(false);
+    expect(result.errorMessage).toMatch(/not usable with package/);
+  });
+
+  it('should accept an Elasticsearch output_id on a package policy with an OTel input', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'es-output', type: 'elasticsearch' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'es-output',
+      package: { name: 'host_metrics_otel', version: '1.0.0', title: 'Host Metrics OTel' },
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(true);
+    expect(result.errorMessage).toBeNull();
+  });
+
+  it('should still permit Logstash output_id on a non-OTel package policy (regression guard)', async () => {
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest
+      .spyOn(outputService, 'get')
+      .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
+
+    const result = await canUseOutputForIntegration(soClient, {
+      output_id: 'logstash-output',
+      package: { name: 'nginx', version: '1.0.0', title: 'Nginx' },
+      supports_agentless: false,
+      inputs: [{ type: 'log', enabled: true, streams: [] }],
+    } as any);
+
+    expect(result.canUseOutputForIntegrationResult).toBe(true);
+    expect(result.errorMessage).toBeNull();
   });
 });
 

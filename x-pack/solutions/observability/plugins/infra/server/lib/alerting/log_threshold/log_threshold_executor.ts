@@ -27,7 +27,7 @@ import type {
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
 import type {
   PublicAlertsClient,

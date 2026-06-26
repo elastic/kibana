@@ -85,6 +85,101 @@ describe('MonitorConfigRepository', () => {
     });
   });
 
+  describe('getAcrossSpaces', () => {
+    it('issues a single multi-space lookup and one legacy lookup per namespace', async () => {
+      const id = 'test-id';
+      const namespaces = ['default', 'space-two'];
+      const mockMonitor = {
+        id,
+        attributes: { name: 'Test Monitor' },
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      };
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [mockMonitor] });
+
+      const result = await repository.getAcrossSpaces(id, namespaces);
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: syntheticsMonitorSavedObjectType, id, namespaces: ['default', 'space-two'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['default'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['space-two'] },
+      ]);
+      expect(result).toBe(mockMonitor);
+    });
+
+    it('returns the first saved object that has attributes and no error', async () => {
+      const id = 'test-id';
+      const errored = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        attributes: {},
+        references: [],
+        error: { statusCode: 404, error: 'Not Found', message: 'not found' },
+      };
+      const found = {
+        id,
+        type: legacySyntheticsMonitorTypeSingle,
+        attributes: { name: 'Legacy' },
+        references: [],
+      };
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [errored as any, found] });
+
+      const result = await repository.getAcrossSpaces(id, ['default']);
+
+      expect(result).toBe(found);
+    });
+
+    it('throws not-found when no namespace has the monitor', async () => {
+      const id = 'missing-id';
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id,
+            type: syntheticsMonitorSavedObjectType,
+            error: { statusCode: 404, error: 'Not Found', message: 'not found' },
+          },
+        ],
+      } as any);
+
+      await expect(repository.getAcrossSpaces(id, ['default'])).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('deduplicates the namespaces array', async () => {
+      const id = 'dup-id';
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { id, type: syntheticsMonitorSavedObjectType, attributes: {}, references: [] },
+        ],
+      } as any);
+
+      await repository.getAcrossSpaces(id, ['default', 'default', 'space-two']);
+
+      const calledWith = soClient.bulkGet.mock.calls[0][0];
+      expect(calledWith).toEqual([
+        { type: syntheticsMonitorSavedObjectType, id, namespaces: ['default', 'space-two'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['default'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['space-two'] },
+      ]);
+    });
+
+    it('uses the supplied saved objects client when provided', async () => {
+      const id = 'test-id';
+      const altClient = savedObjectsClientMock.create();
+      altClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { id, type: syntheticsMonitorSavedObjectType, attributes: {}, references: [] },
+        ],
+      } as any);
+
+      await repository.getAcrossSpaces(id, ['default'], altClient);
+
+      expect(altClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getDecrypted', () => {
     it('should get and decrypt a monitor by id and space', async () => {
       const id = 'test-id';
@@ -277,6 +372,74 @@ describe('MonitorConfigRepository', () => {
     });
   });
 
+  describe('update', () => {
+    it('fully replaces attributes (mergeAttributes: false) so removed map-field keys are deleted', async () => {
+      const id = 'test-id';
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: ['default'],
+        attributes: {
+          name: 'Test Monitor',
+          [ConfigKey.LABELS]: { a: '1', b: '2', team: 'obs' },
+        },
+        references: [],
+      } as any;
+
+      // New attributes drop the `a` and `b` labels, keeping only `team`. A deep-merge
+      // would silently restore the removed keys (see #274387).
+      const data = {
+        name: 'Test Monitor',
+        [ConfigKey.LABELS]: { team: 'obs' },
+        spaces: ['default'],
+      } as any;
+
+      const mockUpdatedMonitor = {
+        id,
+        attributes: data,
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      };
+      soClient.update.mockResolvedValue(mockUpdatedMonitor as any);
+
+      const result = await repository.update(id, data, decryptedPreviousMonitor);
+
+      expect(soClient.update).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id, data, {
+        references: undefined,
+        mergeAttributes: false,
+      });
+      expect(result).toBe(mockUpdatedMonitor);
+    });
+
+    it('recreates the saved object when spaces change instead of updating', async () => {
+      const id = 'test-id';
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: ['default'],
+        attributes: {},
+        references: [],
+      } as any;
+      const data = { name: 'Test Monitor', spaces: ['space-2'] } as any;
+
+      soClient.delete.mockResolvedValue({} as any);
+      const mockCreated = { id, attributes: data, type: syntheticsMonitorSavedObjectType };
+      soClient.create.mockResolvedValue(mockCreated as any);
+
+      const result = await repository.update(id, data, decryptedPreviousMonitor);
+
+      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id, {
+        force: true,
+      });
+      expect(soClient.create).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, data, {
+        id,
+        initialNamespaces: ['space-2'],
+        references: undefined,
+      });
+      expect(result).toBe(mockCreated);
+    });
+  });
+
   describe('bulkUpdate', () => {
     it('should update multiple monitors in bulk', async () => {
       const monitors = [
@@ -322,11 +485,13 @@ describe('MonitorConfigRepository', () => {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-1',
           attributes: { name: 'Updated Monitor 1' },
+          mergeAttributes: false,
         },
         {
           type: 'synthetics-monitor',
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2' },
+          mergeAttributes: false,
         },
       ]);
 
@@ -393,11 +558,13 @@ describe('MonitorConfigRepository', () => {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-1',
           attributes: { name: 'Updated Monitor 1', spaces: ['default'] },
+          mergeAttributes: false,
         },
         {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+          mergeAttributes: false,
         },
       ]);
 
@@ -534,6 +701,7 @@ describe('MonitorConfigRepository', () => {
           type: syntheticsMonitorSavedObjectType,
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+          mergeAttributes: false,
         },
       ]);
       expect(result).toEqual({

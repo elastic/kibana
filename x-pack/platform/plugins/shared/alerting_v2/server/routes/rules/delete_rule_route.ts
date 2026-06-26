@@ -8,8 +8,8 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -30,15 +30,16 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Delete a rule',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      params: ruleIdParamsSchema,
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'The rule was deleted successfully.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates a rule with the given ID does not exist.',
       },
     },

@@ -6,14 +6,16 @@
  */
 
 import { tags } from '@kbn/scout';
-import { evaluate } from '../../src/evaluate';
-import { loadAttackDiscoveryBundledAlertsJsonlDataset } from '../../src/dataset/load_attack_discovery_jsonl';
-import { runAttackDiscovery } from '../../src/task/run_attack_discovery';
 import {
   DEFAULT_ALERTS_SNAPSHOT_CONFIG,
   resolveAlertsSnapshotConfig,
   restoreAlertsSnapshot,
-} from '../../src/data_generators/restore_alerts_snapshot';
+} from '@kbn/security-evals-alerts-snapshot';
+import { evaluate } from '../../src/evaluate';
+import { loadAttackDiscoveryBundledAlertsJsonlDataset } from '../../src/dataset/load_attack_discovery_jsonl';
+import { runAttackDiscovery } from '../../src/task/run_attack_discovery';
+
+const ALERTS_SNAPSHOT_ENV_PREFIX = 'ATTACK_DISCOVERY_ALERTS_SNAPSHOT';
 
 const DEFAULT_DATASET_NAME = 'Attack Discovery All Scenarios';
 const DEFAULT_DATASET_DESCRIPTION =
@@ -66,7 +68,7 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
   });
 
   evaluate.describe('modes smoke', () => {
-    const snapshotConfig = resolveAlertsSnapshotConfig();
+    const snapshotConfig = resolveAlertsSnapshotConfig(ALERTS_SNAPSHOT_ENV_PREFIX);
 
     evaluate(
       'searchAlerts mode (defaults)',
@@ -88,16 +90,18 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
 
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'attack discovery: searchAlerts smoke',
-              description: 'Smoke test for the searchAlerts mode',
-              examples: [
-                {
-                  input: { mode: 'searchAlerts', size: 1 } as const,
-                  output: { attackDiscoveries: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'attack discovery: searchAlerts smoke',
+                description: 'Smoke test for the searchAlerts mode',
+                examples: [
+                  {
+                    input: { mode: 'searchAlerts', size: 1 } as const,
+                    output: { attackDiscoveries: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) =>
               runAttackDiscovery({
                 inferenceClient,
@@ -122,16 +126,18 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, inferenceClient, log, attackDiscoveryClient }) => {
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'attack discovery: graphState smoke',
-              description: 'Smoke test for the graphState mode',
-              examples: [
-                {
-                  input: { mode: 'graphState', anonymizedAlerts: [] } as const,
-                  output: { attackDiscoveries: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'attack discovery: graphState smoke',
+                description: 'Smoke test for the graphState mode',
+                examples: [
+                  {
+                    input: { mode: 'graphState', anonymizedAlerts: [] } as const,
+                    output: { attackDiscoveries: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) =>
               runAttackDiscovery({
                 inferenceClient,

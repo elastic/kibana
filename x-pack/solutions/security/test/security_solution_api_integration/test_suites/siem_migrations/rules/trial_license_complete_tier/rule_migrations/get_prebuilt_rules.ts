@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Get Prebuilt Rules API', () => {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Get Prebuilt Rules API', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);

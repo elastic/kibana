@@ -88,7 +88,7 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
                         data-test-subj="apmTraceWaterfallOpenInDiscover"
                         {...getEbtProps({
                           action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-                          element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_OPEN_IN_DISCOVER,
+                          element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_FOOTER,
                         })}
                         href={discoverHref}
                         onClick={() => setIsPopoverOpen(false)}
@@ -106,7 +106,7 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
                         data-test-subj="apmTraceWaterfallOpenInApm"
                         {...getEbtProps({
                           action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
-                          element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_OPEN_IN_APM,
+                          element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_FOOTER,
                         })}
                         href={apmHref}
                         onClick={() => setIsPopoverOpen(false)}

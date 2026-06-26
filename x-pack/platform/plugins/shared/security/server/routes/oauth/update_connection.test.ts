@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
@@ -20,13 +21,18 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Update OAuth Connection route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
+    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
   ) {
+    const coreContext = coreMock.createRequestHandlerContext();
+    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 
+  let routeConfig: RouteConfig<any, any, any, any>;
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
@@ -38,10 +44,11 @@ describe('Update OAuth Connection route', () => {
 
     defineUpdateOAuthConnectionRoute(mockRouteDefinitionParams);
 
-    const [, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
+    const [config, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
       ([{ path }]) =>
         path === '/internal/security/oauth/clients/{client_id}/connections/{connection_id}'
     )!;
+    routeConfig = config;
     routeHandler = handler;
   });
 
@@ -70,6 +77,18 @@ describe('Update OAuth Connection route', () => {
     });
   });
 
+  describe('name length validation aligned with UIAM (128)', () => {
+    const getBodySchema = () => (routeConfig.validate as any).body as ObjectType;
+
+    it('accepts a name at the 128-character limit', () => {
+      expect(() => getBodySchema().validate({ name: 'a'.repeat(128) })).not.toThrow();
+    });
+
+    it('rejects a name over the 128-character limit', () => {
+      expect(() => getBodySchema().validate({ name: 'a'.repeat(129) })).toThrow(/name/);
+    });
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 
@@ -83,6 +102,20 @@ describe('Update OAuth Connection route', () => {
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
+    const response = await routeHandler(
+      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
+      httpServerMock.createKibanaRequest({
+        params: { client_id: 'c1', connection_id: 'conn1' },
+        body: { name: 'Updated' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.updateConnection).not.toHaveBeenCalled();
   });
 
   it('returns 404 when license-disabled service returns null', async () => {

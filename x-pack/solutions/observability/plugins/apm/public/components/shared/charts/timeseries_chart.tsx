@@ -9,6 +9,7 @@ import type {
   LineAnnotation,
   RectAnnotationStyle,
   SeriesIdentifier,
+  TooltipInfo,
   XYBrushEvent,
   XYChartSeriesIdentifier,
   SettingsSpec,
@@ -39,12 +40,13 @@ import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_op
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
+import { AnomalyChartTooltip } from './helper/anomaly_chart_tooltip';
 import {
   expectedBoundsTitle,
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
-import { expandApmTimeseriesWithEdgeDottedLines } from './utils/split_line_series_for_edge_dots';
+import { expandTimeseriesWithDottedGapLines } from './utils/timeseries_gap_handling';
 import type { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
@@ -90,7 +92,7 @@ export function TimeseriesChart({
   const isEmpty = isTimeseriesEmpty(timeseries);
   const isComparingExpectedBounds = comparisonEnabled && isExpectedBoundsComparison(offset);
   const timeseriesWithEdgeDots = useMemo(
-    () => expandApmTimeseriesWithEdgeDottedLines(timeseries),
+    () => expandTimeseriesWithDottedGapLines(timeseries),
     [timeseries]
   );
   const allSeries = [
@@ -112,6 +114,42 @@ export function TimeseriesChart({
   const max = Math.max(...xValues, ...xValuesExpectedBounds);
   const xFormatter = niceTimeFormatter([min, max]);
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
+
+  const tooltipHeaderFormatter = (value: number): ReactElement | string => {
+    const formattedValue = xFormatter(value);
+    if (max === value) {
+      return (
+        <>
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            gutterSize="xs"
+            css={{ fontWeight: 'normal' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="info" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          {formattedValue}
+        </>
+      );
+    }
+    return formattedValue;
+  };
+
+  // When anomalies from multiple environments are combined into a single
+  // timeseries, use a custom tooltip so each anomaly can display the
+  // environment it belongs to.
+  const hasAnomalyEnvironments = anomalyTimeseries?.anomalies.some(
+    (anomaly) => anomaly.environment != null
+  );
+  const customTooltip = hasAnomalyEnvironments
+    ? (props: TooltipInfo) => (
+        <AnomalyChartTooltip {...props} headerFormatter={tooltipHeaderFormatter} />
+      )
+    : undefined;
   // Using custom legendSort here when comparing expected bounds
   // because by default elastic-charts will show legends for expected bounds first
   // but for consistency, we are making `Expected bounds` last
@@ -149,29 +187,8 @@ export function TimeseriesChart({
         <Tooltip
           stickTo="top"
           showNullValues={false}
-          headerFormatter={({ value }) => {
-            const formattedValue = xFormatter(value);
-            if (max === value) {
-              return (
-                <>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    responsive={false}
-                    gutterSize="xs"
-                    css={{ fontWeight: 'normal' }}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="info" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="xs" />
-                  {formattedValue}
-                </>
-              );
-            }
-            return formattedValue;
-          }}
+          headerFormatter={({ value }) => tooltipHeaderFormatter(value)}
+          customTooltip={customTooltip}
         />
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
@@ -236,6 +253,7 @@ export function TimeseriesChart({
               timeZone={timeZone}
               key={serie.id ?? `${serie.title}-${index}`}
               id={serie.id || serie.title}
+              name={serie.title}
               groupId={serie.groupId}
               // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}

@@ -32,7 +32,6 @@ spaceTest.describe(
   () => {
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
     });
 
     spaceTest(

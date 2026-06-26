@@ -7,7 +7,7 @@
 
 import { createContext, useContext } from 'react';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -19,8 +19,8 @@ interface ConversationContextValue {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
   resetInitialMessage?: () => void;
-  attachments?: AttachmentInput[];
-  upsertAttachments?: (attachments: AttachmentInput[]) => void;
+  attachments?: ConversationAttachment[];
+  upsertAttachments?: (attachments: ConversationAttachment[]) => void;
   resetAttachments?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;

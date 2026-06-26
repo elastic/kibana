@@ -16,6 +16,7 @@ import type { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } fro
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import type { NewsfeedApi } from './lib/api';
 import { getApi, NewsfeedApiEndpoint } from './lib/api';
+import { registerNewsfeedHandler } from './register_newsfeed_handler';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
@@ -48,6 +49,9 @@ export class NewsfeedPublicPlugin
     const isScreenshotMode = screenshotMode.isScreenshotMode();
 
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
+
+    registerNewsfeedHandler({ core, api, isServerless: this.isServerless });
+
     core.chrome.navControls.registerRight({
       order: 1000,
       content: (

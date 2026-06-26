@@ -12,7 +12,7 @@
 
 export function kibanaFieldFormat(value: any, fieldFormat: any) {
   if (fieldFormat !== undefined && fieldFormat !== null) {
-    return fieldFormat.convert(value, 'text');
+    return fieldFormat.convertToText(value);
   } else {
     return value;
   }

@@ -11,7 +11,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { UsageRecord, UsageReportingService } from '@kbn/usage-api-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, pickManagedWorkflowFields } from '@kbn/workflows';
 
 import { BUCKET_SIZE_MS, METERING_SOURCE_ID, WORKFLOWS_USAGE_TYPE } from './constants';
 
@@ -48,6 +48,7 @@ export class WorkflowsMeteringService {
     const projectId = cloudSetup?.serverless?.projectId;
     const deploymentId = cloudSetup?.deploymentId;
     const instanceGroupId = projectId || deploymentId;
+    const instanceGroupType = projectId ? 'serverless_project' : 'stateful_deployment';
 
     // Self-managed: no metering (no projectId or deploymentId available)
     if (!instanceGroupId) {
@@ -63,7 +64,12 @@ export class WorkflowsMeteringService {
       return;
     }
 
-    const usageRecord = this.buildUsageRecord(execution, instanceGroupId);
+    const usageRecord = this.buildUsageRecord(
+      execution,
+      instanceGroupId,
+      instanceGroupType,
+      cloudSetup
+    );
 
     try {
       await this.usageReportingService.reportUsage([usageRecord]);
@@ -84,12 +90,19 @@ export class WorkflowsMeteringService {
    * The record follows Usage Record Schema v2. Kibana (Stage 1) sends raw data;
    * the transform function (Stage 3) decides what's billable and how to price it.
    */
-  private buildUsageRecord(execution: EsWorkflowExecution, instanceGroupId: string): UsageRecord {
+  private buildUsageRecord(
+    execution: EsWorkflowExecution,
+    instanceGroupId: string,
+    instanceGroupType: NonNullable<UsageRecord['source']['instance_group_type']>,
+    cloudSetup?: CloudSetup
+  ): UsageRecord {
     const durationMs = execution.duration || 0;
     const durationMinutes = Math.ceil(durationMs / 60000);
     const normalizedQuantity = Math.max(1, Math.ceil(durationMs / BUCKET_SIZE_MS));
     const stepTypes = this.extractStepTypes(execution);
     const stepCount = Object.values(stepTypes).reduce((sum, count) => sum + count, 0);
+
+    const managedWorkflowFields = pickManagedWorkflowFields(execution);
 
     const metadata: Record<string, string> = {
       duration_ms: String(durationMs),
@@ -98,13 +111,33 @@ export class WorkflowsMeteringService {
       status: execution.status,
       triggered_by: execution.triggeredBy || 'unknown',
       is_test_run: String(execution.isTestRun),
+      is_managed: String(managedWorkflowFields.managed === true),
       workflow_id: execution.workflowId,
       space_id: execution.spaceId,
       step_count: String(stepCount),
     };
 
+    if (managedWorkflowFields.managedBy !== undefined) {
+      metadata.managed_by = managedWorkflowFields.managedBy;
+    }
+
+    if (managedWorkflowFields.originManagedWorkflowId !== undefined) {
+      metadata.origin_managed_workflow_id = managedWorkflowFields.originManagedWorkflowId;
+    }
+
     if (Object.keys(stepTypes).length > 0) {
       metadata.step_types = JSON.stringify(stepTypes);
+    }
+
+    const source: UsageRecord['source'] = {
+      id: METERING_SOURCE_ID,
+      instance_group_id: instanceGroupId,
+      instance_group_type: instanceGroupType,
+    };
+
+    if (instanceGroupType !== 'serverless_project') {
+      source.provider = cloudSetup?.csp;
+      source.region = cloudSetup?.region;
     }
 
     return {
@@ -117,10 +150,7 @@ export class WorkflowsMeteringService {
         period_seconds: Math.ceil(durationMs / 1000) || 1,
         metadata,
       },
-      source: {
-        id: METERING_SOURCE_ID,
-        instance_group_id: instanceGroupId,
-      },
+      source,
     };
   }
 

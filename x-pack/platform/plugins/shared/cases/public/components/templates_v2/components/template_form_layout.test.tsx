@@ -262,6 +262,26 @@ describe('TemplateFormLayout', () => {
     expect(screen.getByTestId('resetTemplateButton')).toBeDisabled();
   });
 
+  it('disables save button when template definition is invalid', () => {
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: `name: Test
+fields:
+  - name: effort
+    control: INPUT_NUMBER
+    label: Effort
+    type: keyword
+`,
+      onChange: jest.fn(),
+      handleReset: mockHandleReset,
+      isSaving: false,
+      isSaved: false,
+    });
+
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeDisabled();
+  });
+
   it('renders back to templates button', () => {
     render(<TestWrapper onCreate={mockOnCreate} />);
 
@@ -410,7 +430,7 @@ fields:
     expect(updatedYaml).toContain('default: 42');
   });
 
-  it('trims whitespace from INPUT_TEXT value', () => {
+  it('preserves whitespace in INPUT_TEXT value', () => {
     setupWithYaml(`name: Test
 fields:
   - name: summary
@@ -424,7 +444,7 @@ fields:
 
     expect(onYamlChange).toHaveBeenCalledTimes(1);
     const updatedYaml = onYamlChange.mock.calls[0][0] as string;
-    expect(updatedYaml).toContain('default: hello');
+    expect(updatedYaml).toContain('default: "  hello  "');
   });
 
   it('passes the string value unchanged for INPUT_TEXT control', () => {

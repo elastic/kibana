@@ -77,6 +77,9 @@ export const DatasetFilter: React.FunctionComponent<{
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.agentLogs.datasetFilterAriaLabel', {
+        defaultMessage: 'Dataset filter',
+      })}
       button={
         <EuiFilterButton
           data-test-subj="agentList.datasetFilterBtn"
@@ -95,7 +98,7 @@ export const DatasetFilter: React.FunctionComponent<{
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         options={options}
@@ -111,7 +114,6 @@ export const DatasetFilter: React.FunctionComponent<{
         data-test-subj="agentList.datasetFilterOptions"
         isLoading={isLoading}
         listProps={{
-          paddingSize: 's',
           style: {
             minWidth: 220,
           },

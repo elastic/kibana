@@ -28,6 +28,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -149,7 +150,7 @@ export function ImportContentPackFlyout({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="package" />
+                    <EuiIcon type="package" aria-hidden={true} />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>
@@ -158,19 +159,29 @@ export function ImportContentPackFlyout({
                 </EuiFlexGroup>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={i18n.translate('xpack.streams.importContentPackFlyout.closeIcon', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.streams.importContentPackFlyout.closeIcon', {
                       defaultMessage: 'Close',
                     })}
-                    iconType="cross"
-                    color="danger"
-                    onClick={() => {
-                      setFile(undefined);
-                      setManifest(undefined);
-                      setContentPackObjects(undefined);
-                      setIncludedObjects({ objects: { all: {} } });
-                    }}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.streams.importContentPackFlyout.closeIcon',
+                        {
+                          defaultMessage: 'Close',
+                        }
+                      )}
+                      iconType="cross"
+                      color="danger"
+                      onClick={() => {
+                        setFile(undefined);
+                        setManifest(undefined);
+                        setContentPackObjects(undefined);
+                        setIncludedObjects({ objects: { all: {} } });
+                      }}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -180,7 +191,9 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.enabled ?? false}
+              significantEventsAvailable={
+                (!!significantEvents?.enabled && !!significantEvents?.available) ?? false
+              }
             />
           </>
         ) : null}

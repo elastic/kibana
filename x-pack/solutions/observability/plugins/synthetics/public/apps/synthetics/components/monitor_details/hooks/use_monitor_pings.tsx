@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { useSelectedMonitor } from './use_selected_monitor';
 import { useSelectedLocation } from './use_selected_location';
+import { useGetUrlParams } from '../../../hooks';
 import {
   getMonitorRecentPingsAction,
   selectMonitorPingsMetadata,
@@ -29,6 +30,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
+  const { remoteName } = useGetUrlParams();
 
   const monitorId = monitor?.id;
   const locationLabel = location?.label;
@@ -46,6 +48,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
           from: props?.from,
           to: props?.to,
           statusFilter,
+          remoteName,
         })
       );
     }
@@ -59,6 +62,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
     props?.from,
     props?.to,
     statusFilter,
+    remoteName,
   ]);
 
   const { total, data: pings, loading } = useSelector(selectMonitorPingsMetadata);

@@ -35,6 +35,13 @@ export const readStreamRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Stream definition and associated metadata.',
@@ -64,15 +71,15 @@ export const readStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Streams.all.GetResponse> => {
-    const { getQueryClient, attachmentClient, streamsClient, scopedClusterClient } =
+    const { getKnowledgeIndicatorClient, attachmentClient, streamsClient, scopedClusterClient } =
       await getScopedClients({
         request,
       });
 
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     const body = await readStream({
       name: params.path.name,
-      queryClient,
+      queryClient: kiClient,
       attachmentClient,
       scopedClusterClient,
       streamsClient,
@@ -94,8 +101,16 @@ export const listStreamsRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
+          description: 'A list of all streams.',
           content: {
             'application/json': {
               examples: {
@@ -218,6 +233,13 @@ export const deleteStreamRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'The stream was deleted successfully.',

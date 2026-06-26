@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Experiment API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationExperiment
+      description: Get details and statistics for a single evaluation experiment
+      summary: Get evaluation experiment detail
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: suite_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Filter stats by suite ID
+        - name: model_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Filter stats by task model ID
+        - name: execution_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1024
+          description: When provided, fetches all experiments in this execution instead of the single experiment from the path param
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  experiment_id:
+                    type: string
+                    maxLength: 1024
+                  experiment_name:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                  timestamp:
+                    type: string
+                    maxLength: 64
+                  task_model:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  evaluator_model:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  execution_id:
+                    type: string
+                    maxLength: 1024
+                  suite_id:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                    description: The suite ID when this experiment belongs to a suite run
+                  total_repetitions:
+                    type: integer
+                  git_branch:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                  git_commit_sha:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                  ci:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
+                  stats:
+                    type: array
+                    items:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluatorStats'
+                required:
+                  - experiment_id
+                  - stats
+        '404':
+          description: Experiment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024

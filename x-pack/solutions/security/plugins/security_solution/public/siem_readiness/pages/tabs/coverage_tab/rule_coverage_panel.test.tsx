@@ -19,10 +19,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
 jest.mock('../../../hooks/use_siem_readiness_cases', () => ({
   useSiemReadinessCases: () => ({ openNewCaseFlyout: jest.fn() }),
 }));
-jest.mock('@kbn/siem-readiness', () => ({
+jest.mock('../../../hooks/use_siem_readiness_api', () => ({
   useSiemReadinessApi: () => ({
     getDetectionRules: { data: { data: [] }, isLoading: false },
   }),
+}));
+jest.mock('../../../hooks/use_get_detection_rules_by_integration', () => ({
   useDetectionRulesByIntegration: () => ({
     ruleIntegrationCoverage: { coveredRules: [], missingIntegrations: [] },
     enabledPackagesSet: new Set(),

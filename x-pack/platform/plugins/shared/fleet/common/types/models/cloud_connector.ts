@@ -27,6 +27,17 @@ export interface CloudConnectorSecretReference {
   id: string;
 }
 
+export function isCloudConnectorSecretReference(
+  value: string | CloudConnectorSecretReference | undefined
+): value is CloudConnectorSecretReference {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'isSecretRef' in value &&
+    typeof (value as CloudConnectorSecretReference).id === 'string'
+  );
+}
+
 export interface CloudConnectorVar {
   type?: 'text';
   value: string;
@@ -40,9 +51,15 @@ export interface CloudConnectorSecretVar {
   frozen?: boolean;
 }
 
+/** Used only in create/update requests: plaintext value the server will convert to a Fleet secret. */
+export interface CloudConnectorNewSecretVar {
+  type: 'password';
+  value: string;
+}
+
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
-  external_id: CloudConnectorSecretVar;
+  external_id: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
 }
 
 export interface AzureCloudConnectorVars {

@@ -10,11 +10,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsAppLocator } from '../../common/locators';
-
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
-  ContentFrameworkSection: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 import { DiscoverFlyoutStreamFieldByStreamName } from './discover_flyout_stream_field_by_stream_name';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -55,7 +50,7 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
         streamName="logs-foo-default"
         streamsRepositoryClient={streamsRepositoryClient}
         locator={locator}
-        renderCpsWarning
+        cpsHasLinkedProjects
       />
     );
 
@@ -79,7 +74,7 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
         streamName="logs-foo-remote"
         streamsRepositoryClient={streamsRepositoryClient}
         locator={locator}
-        renderCpsWarning
+        cpsHasLinkedProjects
       />
     );
 

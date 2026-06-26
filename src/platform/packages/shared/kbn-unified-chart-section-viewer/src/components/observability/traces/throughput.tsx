@@ -14,6 +14,7 @@ import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getThroughputChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 
 type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>>;
 
@@ -28,11 +29,11 @@ const ThroughputChartContent = ({
     services,
     fetchParams,
     discoverFetch$,
-    indexes,
     onBrushEnd,
     onFilter,
     actions,
     profileId,
+    breakdownField,
   } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
@@ -40,13 +41,12 @@ const ThroughputChartContent = ({
       metricName: 'id',
       metricTypes: ['counter'],
       units: ['count'],
-      dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [],
     },
     color,
     seriesType,
     customFunction: 'COUNT',
+    dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
   return (
@@ -62,7 +62,7 @@ const ThroughputChartContent = ({
       onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
-      syncTooltips
+      legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
@@ -71,11 +71,12 @@ const ThroughputChartContent = ({
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!throughputChart) {

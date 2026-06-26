@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExecutionStatus } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
-
-const REFETCH_INTERVAL_MS = 5000;
+import { STEP_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 
 /**
  * Fetches a single step execution with full data (input/output).
@@ -26,7 +27,7 @@ export function useStepExecution(
   const api = useWorkflowsApi();
   const isStepFinished = stepStatus ? isTerminalStatus(stepStatus) : false;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
       if (!workflowExecutionId || !stepExecutionId) {
@@ -35,16 +36,24 @@ export function useStepExecution(
       return api.getStepExecution(workflowExecutionId, stepExecutionId);
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
-    staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS, // will be cleared when switching to a different execution
-    // Use the fetched data's own status to decide when to stop polling, rather than
-    // relying solely on the lightweight polling status. This handles the case where
-    // the execution polling already reports the step as finished, but ES hasn't
-    // refreshed the full step document (with input/output) for the detailed fetch yet.
-    refetchInterval: (data) => {
-      if (data && isTerminalStatus(data.status)) {
-        return false;
-      }
-      return REFETCH_INTERVAL_MS;
-    },
+    staleTime: isStepFinished ? Infinity : STEP_EXECUTION_POLL_INTERVAL_MS,
+    refetchInterval: false,
   });
+
+  const dataRef = useRef(query.data);
+  dataRef.current = query.data;
+
+  useSerialPolling({
+    poll: () => query.refetch(),
+    enabled: !!workflowExecutionId && !!stepExecutionId,
+    immediate: false,
+    intervalMs: STEP_EXECUTION_POLL_INTERVAL_MS,
+    shouldStop: () => {
+      const data = dataRef.current;
+      return data !== undefined && isTerminalStatus(data.status);
+    },
+    pollKey: stepExecutionId,
+  });
+
+  return query;
 }

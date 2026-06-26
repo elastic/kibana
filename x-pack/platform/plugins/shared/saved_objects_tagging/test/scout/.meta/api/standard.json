@@ -1,0 +1,1089 @@
+{
+  "sha1": "ecf384d5082e850e40f90433d8127031549451a6",
+  "tests": [
+    {
+      "id": "ee269d746d5108c-1f60021f34227ea",
+      "title": "tags - create creates a tag (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee269d746d5108c-fc28c38e5223a4c",
+      "title": "tags - create creates a tag with a generated color when omitted (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee269d746d5108c-ed0cbd5c59b22a9",
+      "title": "tags - create returns details when validation fails (400)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 87,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee269d746d5108c-e38371aa702ac35",
+      "title": "tags - create returns 409 when name already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee269d746d5108c-20c73b48caf3b5a",
+      "title": "tags - create authorization - returns error if user does not have permission to create a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
+        "line": 130,
+        "column": 10
+      }
+    },
+    {
+      "id": "a5982555e38f691-68a09d47e2d93e8",
+      "title": "tags - delete returns 404 when deleting a missing tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "a5982555e38f691-6374e21a041af28",
+      "title": "tags - delete authorization - returns 403 when user is not authorized to delete the tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "a5982555e38f691-843f0d4cf27f2df",
+      "title": "tags - delete deletes an existing tag (204)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
+        "line": 60,
+        "column": 10
+      }
+    },
+    {
+      "id": "2fc2efa52ac48cf-0680ceec7a77529",
+      "title": "tags - get returns 200 when tag exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/get_tag.spec.ts",
+        "line": 26,
+        "column": 10
+      }
+    },
+    {
+      "id": "2fc2efa52ac48cf-4cdd67ba5c6e210",
+      "title": "tags - get returns 404 when tag does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/get_tag.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "139a2d13664ab43-16d5830ad99b48c",
+      "title": "tags - search searches tags (200)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/search_tags.spec.ts",
+        "line": 26,
+        "column": 10
+      }
+    },
+    {
+      "id": "f9d2b70425d8a75-d70fe63df1204d1",
+      "title": "POST /api/saved_objects_tagging/assignments/update_by_tags allows to update tag assignments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "f9d2b70425d8a75-47dbdfe3420978a",
+      "title": "POST /api/saved_objects_tagging/assignments/update_by_tags returns an error when assigning to non-taggable types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "f9d2b70425d8a75-7d2aad8050a4f30",
+      "title": "POST /api/saved_objects_tagging/assignments/update_by_tags returns an error when both `assign` and `unassign` are unspecified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "651dd7f2acc024a-012419f1c482ab8",
+      "title": "POST /api/saved_objects_tagging/tags/create creates a tag when validation succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "651dd7f2acc024a-032a9afee55aa1c",
+      "title": "POST /api/saved_objects_tagging/tags/create returns validation details when create payload is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "651dd7f2acc024a-1145c4f2d74bbaf",
+      "title": "POST /api/saved_objects_tagging/tags/create does not create a tag with an existing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "9093c5311aa47ce-f23bb1137180db1",
+      "title": "DELETE /api/saved_objects_tagging/tags/{id} deletes a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "9093c5311aa47ce-8f6940527d9e942",
+      "title": "DELETE /api/saved_objects_tagging/tags/{id} removes references to a deleted tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "0acfb01bcf7dd1c-f2581268588b839",
+      "title": "Saved Objects Tagging - get assignable types returns dashboard and visualization types for privileged user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    },
+    {
+      "id": "0acfb01bcf7dd1c-dd24f07a4c1e2bb",
+      "title": "Saved Objects Tagging - get assignable types returns only dashboard type for dashboard write user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "0acfb01bcf7dd1c-6096c4864d720be",
+      "title": "Saved Objects Tagging - get assignable types returns empty list for user with base read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "0acfb01bcf7dd1c-72d3fa39af80950",
+      "title": "Saved Objects Tagging - get assignable types returns empty list because SO tagging read access does not grant write access to any object type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "3aee710ec992419-1261a2b13bd57be",
+      "title": "Saved Objects Tagging - update tag assignments allows privileged user to assign to any object type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "3aee710ec992419-54dabeda9b526e3",
+      "title": "Saved Objects Tagging - update tag assignments allows SO management write user to assign to any object type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "3aee710ec992419-db6bfcfb984c060",
+      "title": "Saved Objects Tagging - update tag assignments allows dashboard write user to assign to dashboard but returns 403 for visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "3aee710ec992419-9b1d6707a62c9a2",
+      "title": "Saved Objects Tagging - update tag assignments allows visualize write user to assign to visualization but returns 403 for dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "3aee710ec992419-ab7d468a96a653a",
+      "title": "Saved Objects Tagging - update tag assignments returns 403 for user with SO tagging read-only access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
+        "line": 159,
+        "column": 12
+      }
+    },
+    {
+      "id": "022edfdd2fac6f2-51b100906c79f91",
+      "title": "Saved Objects Tagging - bulk delete tags bulk deletes tags for privileged user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "022edfdd2fac6f2-0c18e9316425517",
+      "title": "Saved Objects Tagging - bulk delete tags bulk deletes tags for user with only SO tagging write access (minimal privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
+        "line": 48,
+        "column": 10
+      }
+    },
+    {
+      "id": "022edfdd2fac6f2-a960ee98be16558",
+      "title": "Saved Objects Tagging - bulk delete tags bulk deletes tags for user with SO management write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
+        "line": 60,
+        "column": 10
+      }
+    },
+    {
+      "id": "022edfdd2fac6f2-b08d7d24d7b40d1",
+      "title": "Saved Objects Tagging - bulk delete tags returns 403 for viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "7dae52a22c2d012-7b36432486e5c94",
+      "title": "Saved Objects Tagging - create tag creates a tag for user with SO tagging write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
+        "line": 33,
+        "column": 10
+      }
+    },
+    {
+      "id": "7dae52a22c2d012-c5658141fb88144",
+      "title": "Saved Objects Tagging - create tag creates a tag for user with only SO tagging write access (minimal privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
+        "line": 51,
+        "column": 10
+      }
+    },
+    {
+      "id": "7dae52a22c2d012-5d6909e48d999ef",
+      "title": "Saved Objects Tagging - create tag creates a tag for user with SO management write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "7dae52a22c2d012-01ec4286ca147ea",
+      "title": "Saved Objects Tagging - create tag returns 403 for user with SO tagging read-only access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "d767e0d49310024-7b43a261558dd5c",
+      "title": "Saved Objects Tagging - delete tag deletes a tag for user with SO tagging write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "d767e0d49310024-4d2c49a4ca24ef1",
+      "title": "Saved Objects Tagging - delete tag deletes a tag for user with only SO tagging write access (minimal privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "d767e0d49310024-32190f4c7bb4b0a",
+      "title": "Saved Objects Tagging - delete tag deletes a tag for user with SO management write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "d767e0d49310024-c14140b6140ce00",
+      "title": "Saved Objects Tagging - delete tag returns 403 for user with SO tagging read-only access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "284d047cf0df7fd-37a22eb6f07e61d",
+      "title": "Saved Objects Tagging - find tags returns matching tags for privileged user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_find.spec.ts",
+        "line": 27,
+        "column": 10
+      }
+    },
+    {
+      "id": "284d047cf0df7fd-62ba30dfbad12e4",
+      "title": "Saved Objects Tagging - find tags returns empty results for user without Kibana access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_find.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "77a916249922cd5-00047973307e9d2",
+      "title": "Saved Objects Tagging - get all tags returns all default-space tags for user with SO tagging read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "77a916249922cd5-00f1da196e28dcc",
+      "title": "Saved Objects Tagging - get all tags does not return tags from other spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "77a916249922cd5-4d861b71314d24a",
+      "title": "Saved Objects Tagging - get all tags returns 403 for user without Kibana access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
+        "line": 96,
+        "column": 10
+      }
+    },
+    {
+      "id": "07d3a89fa3d5a64-9714d0cc2ca4d5e",
+      "title": "Saved Objects Tagging - get tag returns tag data for user with SO tagging read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "07d3a89fa3d5a64-5d036e9b4ee333a",
+      "title": "Saved Objects Tagging - get tag returns 403 for user without Kibana access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "422fa2df128ab41-3ca1b8335640a22",
+      "title": "Saved Objects Tagging - update tag updates a tag for user with SO tagging write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "422fa2df128ab41-af2e6f5761b8ef5",
+      "title": "Saved Objects Tagging - update tag updates a tag for user with only SO tagging write access (minimal privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
+        "line": 59,
+        "column": 10
+      }
+    },
+    {
+      "id": "422fa2df128ab41-d4bdc33632515c1",
+      "title": "Saved Objects Tagging - update tag updates a tag for user with SO management write access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "422fa2df128ab41-0b8cf03b0894cda",
+      "title": "Saved Objects Tagging - update tag returns 403 for user with SO tagging read-only access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-6b92bc812fdf0a0",
+      "title": "POST /api/saved_objects_tagging/tags/{id} updates the tag when validation succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-43ee43e44e92ef7",
+      "title": "POST /api/saved_objects_tagging/tags/{id} does not allow updating a tag name to an existing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-eeebd4c89a03370",
+      "title": "POST /api/saved_objects_tagging/tags/{id} returns 404 when trying to update a missing tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 114,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-41f1b7990a1875a",
+      "title": "POST /api/saved_objects_tagging/tags/{id} returns validation details when update payload is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 135,
+        "column": 12
+      }
+    },
+    {
+      "id": "f6bd1700d78a4f6-1a669068241ea26",
+      "title": "Saved Objects Tagging - usage collector reports correct tag usage counts via the telemetry endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_usage_collector.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "8974f71e87a518f-a05aa279010b40c",
+      "title": "tags - upsert updates an existing tag (200)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "8974f71e87a518f-073f68eba0bec92",
+      "title": "tags - upsert creates a tag at the provided id (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "8974f71e87a518f-bbd433f233a8a81",
+      "title": "tags - upsert creates a tag with a generated color when omitted (201)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "8974f71e87a518f-05c72396e7ffc70",
+      "title": "tags - upsert returns 409 when updating to an existing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 96,
+        "column": 10
+      }
+    },
+    {
+      "id": "8974f71e87a518f-028f2165baa27e3",
+      "title": "tags - upsert returns details when validation fails (400)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 113,
+        "column": 10
+      }
+    },
+    {
+      "id": "8974f71e87a518f-e7e9b0550c79977",
+      "title": "tags - upsert authorization - returns 403 when user does not have permission to update a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    }
+  ]
+}

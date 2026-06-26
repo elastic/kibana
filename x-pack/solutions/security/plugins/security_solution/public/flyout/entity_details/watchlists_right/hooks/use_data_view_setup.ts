@@ -6,10 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useKibana } from '../../../../common/lib/kibana';
 
 /**
@@ -20,9 +17,6 @@ export const useDataViewSetup = () => {
   const {
     services: { data },
   } = useKibana();
-  const { sourcererDataView } = useSourcererDataView(PageScope.default);
-
-  const [dataView, setDataView] = useState<DataView>();
   const [filters, setFilters] = useState<Filter[]>([]);
   const filterManager = data.query.filterManager;
 
@@ -35,30 +29,5 @@ export const useDataViewSetup = () => {
     return () => subscription.unsubscribe();
   }, [filterManager]);
 
-  useEffect(() => {
-    let cancelled = false;
-    let dvId: string | undefined;
-
-    const createDataView = async () => {
-      if (!sourcererDataView) return;
-
-      const dv = await data.dataViews.create(sourcererDataView);
-
-      if (cancelled) {
-        if (dv.id) data.dataViews.clearInstanceCache(dv.id);
-        return;
-      }
-
-      dvId = dv.id;
-      setDataView(dv);
-    };
-    createDataView();
-
-    return () => {
-      cancelled = true;
-      if (dvId) data.dataViews.clearInstanceCache(dvId);
-    };
-  }, [data.dataViews, sourcererDataView]);
-
-  return { dataView, filters, filterManager };
+  return { filters, filterManager };
 };

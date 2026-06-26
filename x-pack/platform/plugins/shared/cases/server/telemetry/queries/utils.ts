@@ -12,9 +12,13 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
   MAX_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
-import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
+import {
+  AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
+  OBSERVABLE_TYPES_BUILTIN_KEYS,
+} from '../../../common/constants/observables';
 import type {
   CaseAggregationResult,
   Buckets,
@@ -225,7 +229,7 @@ export const getObservablesTotalsByType = (
       const type = OBSERVABLE_TYPES_BUILTIN_KEYS.includes(typeBucket.key) ? 'default' : 'custom';
       const count = typeBucket.doc_count;
 
-      if (description === 'Auto extract observables') {
+      if (description === AUTO_EXTRACT_OBSERVABLE_DESCRIPTION) {
         result.auto[type] += count;
       } else {
         result.manual[type] += count;
@@ -573,7 +577,19 @@ const getFileAttachmentStats = ({
   totalCasesForOwner: number;
   topMimeTypes?: Buckets<string>;
 }): FileAttachmentStats => {
-  const fileBucket = registryResults.buckets.find((bucket) => bucket.key === FILE_ATTACHMENT_TYPE);
+  const fileBuckets = registryResults.buckets.filter(
+    (bucket) => bucket.key === FILE_ATTACHMENT_TYPE || bucket.key === LEGACY_FILE_ATTACHMENT_TYPE
+  );
+
+  const totalDocCount = fileBuckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
+  // TODO(post-migration): once `.files` rows are gone, drop the legacy bucket.
+  // While both keys coexist, `maxOnACase` reports `max(legacyMax, unifiedMax)`
+  // — a case with mixed legacy + unified files under-reports the true max-on-a-case;
+  // the underlying agg is per-bucket so cross-bucket max can't be reconstructed here.
+  const maxOnACase = fileBuckets.reduce(
+    (max, bucket) => Math.max(max, bucket.references.cases.max.value ?? 0),
+    0
+  );
 
   const mimeTypes =
     topMimeTypes?.buckets.map((mimeType) => ({
@@ -583,9 +599,9 @@ const getFileAttachmentStats = ({
 
   return {
     averageSize: averageFileSize ?? 0,
-    average: calculateTypePerCaseAverage(fileBucket?.doc_count, totalCasesForOwner),
-    maxOnACase: fileBucket?.references.cases.max.value ?? 0,
-    total: fileBucket?.doc_count ?? 0,
+    average: calculateTypePerCaseAverage(totalDocCount, totalCasesForOwner),
+    maxOnACase,
+    total: totalDocCount,
     topMimeTypes: mimeTypes,
   };
 };

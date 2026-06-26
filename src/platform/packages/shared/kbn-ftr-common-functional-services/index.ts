@@ -47,3 +47,5 @@ export { RandomnessService } from './services/randomness';
 export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
 export { retryForSuccess } from './services/retry/retry_for_success';
 export { SecurityService } from './services/security';
+export { fetchSessionCookie } from './services/cookie_auth';
+export type { SessionCookie, FetchSessionCookieParams } from './services/cookie_auth';

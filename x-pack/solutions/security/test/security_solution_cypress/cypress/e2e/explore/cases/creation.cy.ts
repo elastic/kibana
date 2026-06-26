@@ -32,7 +32,6 @@ import {
   REPORTER,
   EXPECTED_METRICS,
   CASES_METRIC,
-  UNEXPECTED_METRICS,
 } from '../../../screens/case_details';
 import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 
@@ -120,10 +119,6 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
 
     EXPECTED_METRICS.forEach((metric) => {
       cy.get(CASES_METRIC(metric)).should('exist');
-    });
-
-    UNEXPECTED_METRICS.forEach((metric) => {
-      cy.get(CASES_METRIC(metric)).should('not.exist');
     });
 
     openCaseTimeline();

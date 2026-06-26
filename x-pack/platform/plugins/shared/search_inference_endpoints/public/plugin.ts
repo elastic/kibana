@@ -52,12 +52,13 @@ export class SearchInferenceEndpointsPlugin
           defaultMessage: 'External Inference',
         }),
         order: 2,
-        async mount({ element, history }: ManagementAppMountParams) {
+        async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
+            setBreadcrumbs,
           };
 
           return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
@@ -70,12 +71,13 @@ export class SearchInferenceEndpointsPlugin
         defaultMessage: 'Feature Settings',
       }),
       order: 3,
-      async mount({ element, history }: ManagementAppMountParams) {
+      async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
         const { renderSettingsMgmtApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
           history,
+          setBreadcrumbs,
         };
 
         return renderSettingsMgmtApp(coreStart, startDeps, element);
@@ -89,7 +91,7 @@ export class SearchInferenceEndpointsPlugin
           defaultMessage: 'Elastic Inference',
         }),
         order: 1,
-        async mount({ element, history }: ManagementAppMountParams) {
+        async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
           const { renderElasticInferenceServiceApp } = await import(
             './elastic_inference_service_application'
           );
@@ -97,15 +99,12 @@ export class SearchInferenceEndpointsPlugin
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
+            setBreadcrumbs,
           };
 
           return renderElasticInferenceServiceApp(coreStart, startDeps, element);
         },
       });
-
-    this.registerInferenceEndpoints.disable();
-    this.registerModelSettings.disable();
-    this.registerElasticInferenceService.disable();
 
     return {};
   }

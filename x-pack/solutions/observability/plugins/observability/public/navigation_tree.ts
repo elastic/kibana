@@ -12,6 +12,7 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -42,16 +43,16 @@ function isEditingFromDashboard(
 }
 
 function createNavTree({
+  coreStart,
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
-  showAlertingV2,
   ingestHubAvailable,
 }: {
+  coreStart: CoreStart;
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
-  showAlertingV2?: boolean;
   ingestHubAvailable?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
@@ -310,10 +311,6 @@ function createNavTree({
                 link: 'ml:indexDataVisualizer',
                 sideNavStatus: 'hidden',
               },
-              {
-                link: 'ml:indexDataVisualizerPage',
-                sideNavStatus: 'hidden',
-              },
             ],
           },
           {
@@ -432,6 +429,10 @@ function createNavTree({
                   defaultMessage: 'Get started',
                 }),
               },
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
             ],
           }
         : {
@@ -440,6 +441,12 @@ function createNavTree({
             }),
             link: 'observabilityOnboarding' as const,
             icon: 'plusInCircle',
+            children: [
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
+            ],
           },
       {
         id: 'devTools',
@@ -551,22 +558,7 @@ function createNavTree({
                   ]),
             ],
           },
-          ...(showAlertingV2
-            ? [
-                {
-                  id: 'v2_alerting_preview',
-                  title: i18n.translate('xpack.observability.obltNav.v2AlertingPreview', {
-                    defaultMessage: 'V2 Alerting Preview',
-                  }),
-                  renderAs: 'panelOpener' as const,
-                  children: [
-                    { link: 'management:rules' as const },
-                    { link: 'management:episodes' as const },
-                    { link: 'management:action_policies' as const },
-                  ],
-                },
-              ]
-            : []),
+          ...getAlertingV2ManagementNavPanel(coreStart),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
@@ -575,7 +567,7 @@ function createNavTree({
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'rules',
+                link: 'management:triggersActions',
               },
               {
                 link: 'management:triggersActionsConnectors',
@@ -727,10 +719,10 @@ export const createDefinition = (
   ]).pipe(
     map(([{ status }, chatExperience, ingestHubAvailable]) =>
       createNavTree({
+        coreStart,
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
         ingestHubAvailable,
       })
     )

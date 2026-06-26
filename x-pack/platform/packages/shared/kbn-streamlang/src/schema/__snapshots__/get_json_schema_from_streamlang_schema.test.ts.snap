@@ -96,7 +96,6 @@ Object {
         },
       ],
       "description": "The root condition object. It can be a simple filter or a combination of other conditions.",
-      "id": "Condition",
     },
     "ConditionWithSteps": Object {
       "allOf": Array [
@@ -124,7 +123,6 @@ Object {
           "type": "object",
         },
       ],
-      "id": "ConditionWithSteps",
     },
     "FilterCondition": Object {
       "anyOf": Array [
@@ -283,7 +281,6 @@ Object {
         },
       ],
       "description": "A basic filter condition, either unary or binary.",
-      "id": "FilterCondition",
     },
     "StreamlangConditionBlock": Object {
       "additionalProperties": false,
@@ -360,7 +357,6 @@ Object {
           "label": "Condition block with else",
         },
       ],
-      "id": "StreamlangConditionBlock",
       "properties": Object {
         "condition": Object {
           "additionalProperties": false,
@@ -590,7 +586,6 @@ Object {
               "label": "NOT condition",
             },
           ],
-          "id": "ConditionWithSteps",
           "properties": Object {
             "always": Object {
               "additionalProperties": false,
@@ -907,6 +902,65 @@ Object {
                 "pattern",
               ],
               "title": "Dissect",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "description": "Parse a URI string into its components (scheme, domain, path, query, fragment, port, user info, and file extension).",
+              "properties": Object {
+                "action": Object {
+                  "const": "uri_parts",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "from": Object {
+                  "description": "Source field holding the URI string to parse",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when source field is missing",
+                  "type": "boolean",
+                },
+                "keep_original": Object {
+                  "description": "If true (default), preserve the original URI string alongside the extracted parts",
+                  "type": "boolean",
+                },
+                "remove_if_successful": Object {
+                  "description": "If true, remove the source field after a successful parse. Source field is kept on failure.",
+                  "type": "boolean",
+                },
+                "to": Object {
+                  "description": "Target field / column prefix for the extracted URI components (defaults to \\"url\\"). May equal \`from\` — the canonical ECS shape parses the \`url\` field in place. Note: combining \`to === from\` with \`remove_if_successful: true\` nulls the parsed object after writing it.",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "from",
+              ],
+              "title": "URI Parts",
               "type": "object",
             },
             Object {
@@ -2139,6 +2193,132 @@ Object {
             },
             Object {
               "additionalProperties": false,
+              "description": "Extract details from browser user agent strings",
+              "properties": Object {
+                "action": Object {
+                  "const": "user_agent",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "extract_device_type": Object {
+                  "description": "Extracts device type from the user agent string",
+                  "type": "boolean",
+                },
+                "from": Object {
+                  "description": "The field containing the user agent string",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when source field is missing",
+                  "type": "boolean",
+                },
+                "properties": Object {
+                  "description": "Specific properties to extract (defaults to all)",
+                  "items": Object {
+                    "enum": Array [
+                      "name",
+                      "os",
+                      "device",
+                      "original",
+                      "version",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "regex_file": Object {
+                  "description": "Custom regex file name containing the regular expressions for parsing the user agent string",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "to": Object {
+                  "description": "The field that will be filled with the user agent details",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "from",
+              ],
+              "title": "User Agent",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "description": "Extract the domain parts from an FQDN string",
+              "properties": Object {
+                "action": Object {
+                  "const": "registered_domain",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "expression": Object {
+                  "description": "The string expression containing the FQDN to parse",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when expression field is missing",
+                  "type": "boolean",
+                },
+                "prefix": Object {
+                  "description": "The prefix for the output columns. The extracted parts are available as prefix.part_name",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "expression",
+                "prefix",
+              ],
+              "title": "Registered Domain",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
               "description": "Execute raw Elasticsearch ingest processors directly",
               "properties": Object {
                 "action": Object {
@@ -2202,6 +2382,7 @@ Object {
               "enum": Array [
                 "grok",
                 "dissect",
+                "uri_parts",
                 "date",
                 "drop_document",
                 "math",
@@ -2223,6 +2404,8 @@ Object {
                 "network_direction",
                 "json_extract",
                 "enrich",
+                "user_agent",
+                "registered_domain",
                 "manual_ingest_pipeline",
               ],
               "type": "string",
@@ -2238,7 +2421,6 @@ Object {
           "$ref": "#/definitions/StreamlangConditionBlock",
         },
       ],
-      "id": "StreamlangStep",
     },
   },
   "properties": Object {
@@ -2368,6 +2550,65 @@ Object {
                   "pattern",
                 ],
                 "title": "Dissect",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Parse a URI string into its components (scheme, domain, path, query, fragment, port, user info, and file extension).",
+                "properties": Object {
+                  "action": Object {
+                    "const": "uri_parts",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "from": Object {
+                    "description": "Source field holding the URI string to parse",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "keep_original": Object {
+                    "description": "If true (default), preserve the original URI string alongside the extracted parts",
+                    "type": "boolean",
+                  },
+                  "remove_if_successful": Object {
+                    "description": "If true, remove the source field after a successful parse. Source field is kept on failure.",
+                    "type": "boolean",
+                  },
+                  "to": Object {
+                    "description": "Target field / column prefix for the extracted URI components (defaults to \\"url\\"). May equal \`from\` — the canonical ECS shape parses the \`url\` field in place. Note: combining \`to === from\` with \`remove_if_successful: true\` nulls the parsed object after writing it.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "URI Parts",
                 "type": "object",
               },
               Object {
@@ -3600,6 +3841,132 @@ Object {
               },
               Object {
                 "additionalProperties": false,
+                "description": "Extract details from browser user agent strings",
+                "properties": Object {
+                  "action": Object {
+                    "const": "user_agent",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "extract_device_type": Object {
+                    "description": "Extracts device type from the user agent string",
+                    "type": "boolean",
+                  },
+                  "from": Object {
+                    "description": "The field containing the user agent string",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "properties": Object {
+                    "description": "Specific properties to extract (defaults to all)",
+                    "items": Object {
+                      "enum": Array [
+                        "name",
+                        "os",
+                        "device",
+                        "original",
+                        "version",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "regex_file": Object {
+                    "description": "Custom regex file name containing the regular expressions for parsing the user agent string",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "description": "The field that will be filled with the user agent details",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "User Agent",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "description": "Extract the domain parts from an FQDN string",
+                "properties": Object {
+                  "action": Object {
+                    "const": "registered_domain",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "expression": Object {
+                    "description": "The string expression containing the FQDN to parse",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when expression field is missing",
+                    "type": "boolean",
+                  },
+                  "prefix": Object {
+                    "description": "The prefix for the output columns. The extracted parts are available as prefix.part_name",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "expression",
+                  "prefix",
+                ],
+                "title": "Registered Domain",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
                 "description": "Execute raw Elasticsearch ingest processors directly",
                 "properties": Object {
                   "action": Object {
@@ -3663,6 +4030,7 @@ Object {
                 "enum": Array [
                   "grok",
                   "dissect",
+                  "uri_parts",
                   "date",
                   "drop_document",
                   "math",
@@ -3684,6 +4052,8 @@ Object {
                   "network_direction",
                   "json_extract",
                   "enrich",
+                  "user_agent",
+                  "registered_domain",
                   "manual_ingest_pipeline",
                 ],
                 "type": "string",
@@ -3699,7 +4069,6 @@ Object {
             "$ref": "#/definitions/StreamlangConditionBlock",
           },
         ],
-        "id": "StreamlangStep",
       },
       "type": "array",
     },

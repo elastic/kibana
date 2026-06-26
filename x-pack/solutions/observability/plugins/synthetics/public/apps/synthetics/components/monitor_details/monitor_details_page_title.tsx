@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MonitorSelector } from './monitor_selector/monitor_selector';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
+import { isRemoteSyntheticsMonitor } from '../../../../../common/runtime_types';
+import { SyntheticsRemoteBadge } from '../common/components/synthetics_remote_badge';
 
 export const MonitorDetailsPageTitle = () => {
   const { monitor } = useSelectedMonitor();
@@ -18,6 +20,11 @@ export const MonitorDetailsPageTitle = () => {
       <EuiFlexItem grow={false} data-test-subj="monitorNameTitle">
         {monitor?.name}
       </EuiFlexItem>
+      {isRemoteSyntheticsMonitor(monitor) && (
+        <EuiFlexItem grow={false}>
+          <SyntheticsRemoteBadge remote={monitor.remote} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <MonitorSelector />
       </EuiFlexItem>

@@ -9,8 +9,13 @@
 
 import React, { useCallback } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { MSearchIn, MSearchResult } from '@kbn/content-management-plugin/common';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
+import { apiHasType } from '@kbn/presentation-publishing';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import {
@@ -18,16 +23,15 @@ import {
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { apiHasType } from '@kbn/presentation-publishing';
-import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import {
+  contentManagement,
   core,
   savedObjectsTaggingOss,
-  contentManagement,
   usageCollection,
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
+import { SEARCH_ROUTE_PATH } from '../../common/constants';
+import type { SearchLibraryResponseType } from '../../server/search_route/types';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -81,7 +85,24 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
     <SavedObjectFinder
       id="embeddableAddPanel"
       services={{
-        contentClient: contentManagement.client,
+        contentClient: {
+          ...contentManagement.client,
+          mSearch: async (input: MSearchIn): Promise<MSearchResult<any>> => {
+            try {
+              const result = (await core.http.post(SEARCH_ROUTE_PATH, {
+                body: JSON.stringify({
+                  type: input.contentTypes.map(({ contentTypeId }) => contentTypeId),
+                  ...(input.query.text && { search: `${input.query.text}*` }),
+                  limit: input.query.limit,
+                  tags: input.query.tags,
+                }),
+              })) as SearchLibraryResponseType;
+              return { hits: result.hits, pagination: { total: result.total } };
+            } catch (e) {
+              return { hits: [], pagination: { total: 0 } };
+            }
+          },
+        } as ContentClient,
         savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
         uiSettings: core.uiSettings,
       }}

@@ -17,6 +17,7 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -112,12 +113,14 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
       >
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={i18n.CLOSE_PREVIEW}
-              onClick={onClose}
-              data-test-subj="template-preview-close"
-            />
+            <EuiToolTip content={i18n.CLOSE_PREVIEW} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={i18n.CLOSE_PREVIEW}
+                onClick={onClose}
+                data-test-subj="template-preview-close"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiTitle size="s">
@@ -155,7 +158,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
               <h4>{i18n.COLUMN_FIELDS}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <TemplateFieldRenderer parsedTemplate={parsedDefinition} />
+            <TemplateFieldRenderer parsedTemplate={parsedDefinition} owner={template.owner} />
           </>
         )}
       </EuiPanel>

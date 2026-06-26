@@ -67,7 +67,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     };
 
     before(async () => {
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
     });
 

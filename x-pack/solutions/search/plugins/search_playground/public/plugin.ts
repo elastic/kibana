@@ -67,7 +67,7 @@ export class SearchPlaygroundPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      visibleIn: ['sideNav', 'globalSearch'],
+      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 3,
     });
 

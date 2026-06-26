@@ -10,8 +10,13 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
-export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
+export const registerGetViewsRoute = (
+  router: IRouter,
+  { logger }: PluginInitializerContext,
+  isServerless: boolean
+) => {
   router.get(
     {
       path: VIEWS_ROUTE,
@@ -24,16 +29,35 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
       },
     },
     async (requestHandlerContext, request, response) => {
+      // TODO: Remove this once views are available in serverless
+      if (isServerless) {
+        return response.ok({ body: { views: [] } });
+      }
+
       try {
         const core = await requestHandlerContext.core;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
         const result = await service.getViews();
 
+        esqlRouteRequestCounter.add(1, {
+          route: 'views',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return response.ok({
           body: result,
         });
       } catch (error) {
-        logger.get().debug(error);
+        esqlRouteRequestCounter.add(1, {
+          route: 'views',
+          outcome: 'failure',
+          'http.response.status_code': getErrorStatusCode(error),
+        });
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to fetch ES|QL views: ${message}`, {
+          tags: ['esql', 'views'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         return response.ok({
           body: { views: [] },
         });

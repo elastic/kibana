@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { borderRadiusXlStyles } from '../../../common.styles';
 import { AttachmentPillsRow } from './conversation_input/attachment_pills_row';
@@ -54,7 +56,16 @@ export const StaleAttachmentsPanel: React.FC<StaleAttachmentsPanelProps> = ({
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill onClick={onAddToInput}>
+            <EuiButton
+              size="s"
+              fill
+              onClick={onAddToInput}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.STALE_USE_UPDATED,
+                detail: 'conversation',
+              })}
+            >
               <FormattedMessage
                 id="xpack.agentBuilder.conversation.staleAttachments.stageButton"
                 defaultMessage="Use updated versions"
@@ -62,7 +73,15 @@ export const StaleAttachmentsPanel: React.FC<StaleAttachmentsPanelProps> = ({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={onDismiss}>
+            <EuiButtonEmpty
+              size="s"
+              onClick={onDismiss}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.STALE_DISMISS,
+                detail: 'conversation',
+              })}
+            >
               <FormattedMessage
                 id="xpack.agentBuilder.conversation.staleAttachments.dismissButton"
                 defaultMessage="Dismiss"

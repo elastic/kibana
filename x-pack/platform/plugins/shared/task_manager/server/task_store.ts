@@ -38,7 +38,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
+import type { ExecutionContextStart } from '@kbn/core/server';
 
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
@@ -86,7 +86,6 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
-  basePath: IBasePath;
   executionContext: ExecutionContextStart;
   apiKeyStrategy: ApiKeyStrategy;
 }
@@ -162,7 +161,6 @@ export class TaskStore {
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
-  private basePath: IBasePath;
   private executionContextRunner: ExecutionContextRunner;
   private apiKeyStrategy: ApiKeyStrategy;
 
@@ -204,7 +202,6 @@ export class TaskStore {
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
-    this.basePath = opts.basePath;
     this.apiKeyStrategy = opts.apiKeyStrategy;
     this.executionContextRunner = getExecutionContextRunner(opts.executionContext, {
       name: 'taskStore',
@@ -269,7 +266,7 @@ export class TaskStore {
 
       // and create new API keys using the new request
       if (docsWithApiKeys.length) {
-        apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options.request);
+        apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options);
       }
     }
 
@@ -305,8 +302,9 @@ export class TaskStore {
 
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
-    request?: KibanaRequest
+    options?: ApiKeyOptions
   ): Promise<Map<string, ApiKeySOFields> | null> {
+    const request = options?.request;
     if (!this.getIsSecurityEnabled() || !request) {
       return null;
     }
@@ -316,7 +314,7 @@ export class TaskStore {
         taskInstances,
         request,
         this.security,
-        this.basePath
+        options?.onEsKey === true ? { onEsKey: true } : undefined
       );
     } catch (e) {
       this.errors$.next(e);
@@ -460,7 +458,7 @@ export class TaskStore {
     this.definitions.ensureHas(taskInstance.taskType);
 
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest([taskInstance], options?.request)) || new Map();
+      (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
     const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
@@ -527,7 +525,7 @@ export class TaskStore {
       throw e;
     }
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstances, options?.request)) || new Map();
+      (await this.grantApiKeysFromRequest(taskInstances, options)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 

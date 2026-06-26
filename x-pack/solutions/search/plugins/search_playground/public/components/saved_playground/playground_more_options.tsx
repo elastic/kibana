@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,8 +57,7 @@ export const PlaygroundMoreOptionsMenu = ({
   const menuItems = [
     <EuiContextMenuItem
       key="savePlaygroundAs"
-      icon={<EuiIcon type="save" />}
-      size="s"
+      icon={<EuiIcon type="save" aria-hidden={true} />}
       onClick={onOpenSaveAs}
       data-test-subj="moreOptionsSavePlaygroundAs"
       disabled={hasFormErrors}
@@ -71,8 +71,7 @@ export const PlaygroundMoreOptionsMenu = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="deletePlayground"
-      icon={<EuiIcon color="danger" type="trash" />}
-      size="s"
+      icon={<EuiIcon color="danger" type="trash" aria-hidden={true} />}
       onClick={onOpenDeleteConfirm}
       data-test-subj="moreOptionsDeletePlayground"
     >
@@ -87,25 +86,36 @@ export const PlaygroundMoreOptionsMenu = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.searchPlayground.savedPlayground.moreOptions.popover.ariaLabel',
+        { defaultMessage: 'More options' }
+      )}
       isOpen={showMoreOptions}
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          onClick={togglePopover}
-          size="m"
-          data-test-subj="moreOptionsActionButton"
-          aria-label={i18n.translate(
-            'xpack.searchPlayground.savedPlayground.moreOptions.ariaLabel',
-            {
-              defaultMessage: 'More options',
-            }
-          )}
-          aria-expanded={showMoreOptions}
-          aria-haspopup="true"
-        />
+        <EuiToolTip
+          content={i18n.translate('xpack.searchPlayground.savedPlayground.moreOptions.ariaLabel', {
+            defaultMessage: 'More options',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            onClick={togglePopover}
+            size="m"
+            data-test-subj="moreOptionsActionButton"
+            aria-label={i18n.translate(
+              'xpack.searchPlayground.savedPlayground.moreOptions.ariaLabel',
+              {
+                defaultMessage: 'More options',
+              }
+            )}
+            aria-expanded={showMoreOptions}
+            aria-haspopup="true"
+          />
+        </EuiToolTip>
       }
     >
       <EuiContextMenuPanel data-test-subj="moreOptionsContextMenu" items={menuItems} />

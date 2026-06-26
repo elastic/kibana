@@ -1,0 +1,133 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postCloudOnboardingDeploymentRequestExample:
+          description: 'Create a new AWS cloud onboarding deployment using identity federation (agentless)'
+          value:
+            provider: 'aws'
+            connectorId: 'cloud-connector-id-1'
+            mechanisms:
+              - 'agentless'
+            services:
+              - 'cloudwatch_metrics'
+              - 'cloudtrail'
+            serviceVars:
+              cloudwatch_metrics:
+                - regions:
+                    - 'us-east-1'
+                    - 'eu-west-1'
+                  namespace: 'AWS/EC2'
+              cloudtrail:
+                - regions:
+                    - 'us-east-1'
+                  s3_bucket_arn: 'arn:aws:s3:::my-cloudtrail-bucket'
+        postCloudOnboardingDeploymentAgentBasedRequestExample:
+          description: 'Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)'
+          value:
+            provider: 'aws'
+            connectorId: 'cloud-connector-id-1'
+            mechanisms:
+              - 'agent_based'
+            services:
+              - 'cloudwatch_metrics'
+            serviceVars:
+              cloudwatch_metrics:
+                - regions:
+                    - 'us-east-1'
+                  namespace: 'AWS/EC2'
+        postCloudOnboardingDeploymentPushRequestExample:
+          description: 'Create a new AWS cloud onboarding deployment using a push mechanism (cloud forwarder)'
+          value:
+            provider: 'aws'
+            connectorId: 'cloud-connector-id-1'
+            mechanisms:
+              - 'cloud_forwarder'
+            services:
+              - 'cloudfront_logs'
+            serviceVars:
+              cloudfront_logs:
+                - regions:
+                    - 'us-east-1'
+                  s3_bucket_arn: 'arn:aws:s3:::my-cloudfront-bucket'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postCloudOnboardingDeploymentExample:
+            description: 'Identity federation (agentless) deployment — packagePolicyIds set after agentless deployment completes'
+            value:
+              item:
+                id: 'onboarding-deployment-id-1'
+                provider: 'aws'
+                connectorId: 'cloud-connector-id-1'
+                mechanisms:
+                  - 'agentless'
+                services:
+                  - 'cloudwatch_metrics'
+                  - 'cloudtrail'
+                status: 'pending'
+                attemptCount: 1
+                serviceVars:
+                  cloudwatch_metrics:
+                    - regions:
+                        - 'us-east-1'
+                        - 'eu-west-1'
+                      namespace: 'AWS/EC2'
+                  cloudtrail:
+                    - regions:
+                        - 'us-east-1'
+                      s3_bucket_arn: 'arn:aws:s3:::my-cloudtrail-bucket'
+                packagePolicyIds:
+                  - 'package-policy-id-1'
+          postCloudOnboardingDeploymentAgentBasedExample:
+            description: 'Agent-based deployment — agentPolicyId set after the agent policy is selected or created'
+            value:
+              item:
+                id: 'onboarding-deployment-id-2'
+                provider: 'aws'
+                connectorId: 'cloud-connector-id-1'
+                mechanisms:
+                  - 'agent_based'
+                services:
+                  - 'cloudwatch_metrics'
+                status: 'pending'
+                attemptCount: 1
+                serviceVars:
+                  cloudwatch_metrics:
+                    - regions:
+                        - 'us-east-1'
+                      namespace: 'AWS/EC2'
+                agentPolicyId: 'agent-policy-id-1'
+          postCloudOnboardingDeploymentPushExample:
+            description: 'Push-service deployment — apiKeyId set after the Elasticsearch API key is created for the push service'
+            value:
+              item:
+                id: 'onboarding-deployment-id-3'
+                provider: 'aws'
+                connectorId: 'cloud-connector-id-1'
+                mechanisms:
+                  - 'cloud_forwarder'
+                services:
+                  - 'cloudfront_logs'
+                status: 'pending'
+                attemptCount: 1
+                serviceVars:
+                  cloudfront_logs:
+                    - regions:
+                        - 'us-east-1'
+                      s3_bucket_arn: 'arn:aws:s3:::my-cloudfront-bucket'
+                apiKeyId: 'es-api-key-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

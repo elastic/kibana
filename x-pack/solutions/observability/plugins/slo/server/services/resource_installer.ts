@@ -54,6 +54,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
       await this.createIndex(COMPOSITE_SUMMARY_INDEX_NAME);
+      await this.updateCompositeSummaryMapping();
 
       await this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE);
       await this.createDataStream(HEALTH_DATA_STREAM_NAME);
@@ -91,6 +92,16 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         throw err;
       }
     }
+  }
+
+  private async updateCompositeSummaryMapping() {
+    const mappings = COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE.template?.mappings;
+    if (!mappings) {
+      return;
+    }
+    await this.execute(() =>
+      this.esClient.indices.putMapping({ index: COMPOSITE_SUMMARY_INDEX_NAME, ...mappings })
+    );
   }
 
   private async createDataStream(dataStreamName: string) {

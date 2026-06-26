@@ -67,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       await forkStream(apiClient, 'logs.otel', {
         stream: { name: PARENT_STREAM_NAME },
@@ -104,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Parent view reference validation', () => {
@@ -191,6 +193,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Clean up
         await deleteStream(apiClient, rootQueryStreamName);
+      });
+
+      it('should reject root-level query stream with legacy logs root name', async () => {
+        const response = (await putStream(
+          apiClient,
+          'logs',
+          createQueryStreamRequest('FROM logs.otel | LIMIT 10', getEsqlViewName('logs')),
+          400
+        )) as unknown as { message: string };
+
+        expect(response.message).to.contain(
+          'Cannot create query stream: a stream with name "logs" is reserved for the legacy root stream'
+        );
       });
 
       it('should reject child referencing grandparent instead of immediate parent', async () => {

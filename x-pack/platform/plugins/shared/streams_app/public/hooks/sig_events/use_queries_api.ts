@@ -54,35 +54,22 @@ export function useQueriesApi(): QueriesApi {
           signal: null,
         });
       },
-      removeQuery: async ({ queryId, streamName }: { queryId: string; streamName: string }) => {
-        await streamsRepositoryClient.fetch(
-          'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
-          {
-            signal,
-            params: {
-              path: {
-                name: streamName,
-                queryId,
-              },
+      removeQuery: async ({ queryId }: { queryId: string; streamName: string }) => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
+          signal,
+          params: {
+            body: {
+              queryIds: [queryId],
             },
-          }
-        );
+          },
+        });
       },
-      deleteQueriesInBulk: async ({
-        queryIds,
-        streamName,
-      }: {
-        queryIds: string[];
-        streamName: string;
-      }) => {
-        await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+      deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[]; streamName: string }) => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
           signal: null,
           params: {
-            path: {
-              name: streamName,
-            },
             body: {
-              operations: queryIds.map((id) => ({ delete: { id } })),
+              queryIds,
             },
           },
         });

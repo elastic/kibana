@@ -39,6 +39,7 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
     // needed to enable breadcrumbs truncation
     min-width: 0;
     flex-shrink: 1;
+    gap: ${size.xs};
   `,
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation
@@ -106,6 +107,13 @@ export const ProjectHeader = React.memo(() => {
     background-color: ${euiTheme.colors.backgroundTransparent};
     border-bottom-color: ${euiTheme.colors.backgroundTransparent};
     padding-inline: 4px 8px;
+
+    .euiHeaderSectionItemButton {
+      block-size: ${euiTheme.size.xl};
+      inline-size: ${euiTheme.size.xl};
+      min-inline-size: ${euiTheme.size.xl};
+      padding-inline: 0;
+    }
   `;
 
   return (
@@ -133,7 +141,12 @@ export const ProjectHeader = React.memo(() => {
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
-            <EuiHeaderSection side="right">
+            <EuiHeaderSection
+              side="right"
+              css={css`
+                gap: ${euiTheme.size.xs};
+              `}
+            >
               <EuiHeaderSectionItem>
                 <HeaderNavControls position="center" />
               </EuiHeaderSectionItem>
@@ -142,13 +155,7 @@ export const ProjectHeader = React.memo(() => {
                 <HeaderHelpMenu />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem
-                css={css`
-                  gap: ${euiTheme.size.s};
-                `}
-              >
-                <HeaderNavControls position="right" />
-              </EuiHeaderSectionItem>
+              <HeaderNavControls position="right" />
             </EuiHeaderSection>
           </EuiHeader>
         </div>

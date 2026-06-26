@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiSkeletonText,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
@@ -68,14 +69,17 @@ export const MetricItemIcon = ({
 
   const inProgress = isTestRunning(testNowRun);
 
+  const stateId = latestPing?.state?.id;
   const errorLink = useErrorDetailsLink({
     locationId,
     configId: monitor.configId,
-    stateId: latestPing?.state?.id!,
+    stateId: stateId ?? '',
+    remoteName: monitor.remote?.remoteName,
   });
 
   const formatter = useDateFormat();
   const testTime = formatter(timestamp);
+  const metricItemPopoverTitleId = useGeneratedHtmlId();
 
   if (inProgress) {
     return (
@@ -122,22 +126,33 @@ export const MetricItemIcon = ({
           panelStyle={{
             outline: 'none',
           }}
+          aria-labelledby={metricItemPopoverTitleId}
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={metricItemPopoverTitleId}>
             <EuiFlexGroup>
               <EuiFlexItem grow>{testTime}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="syntheticsMetricItemIconButton"
-                  iconType="cross"
-                  onClick={closePopover}
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover',
                     {
                       defaultMessage: 'Close popover',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="syntheticsMetricItemIconButton"
+                    iconType="cross"
+                    onClick={closePopover}
+                    aria-label={i18n.translate(
+                      'xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover',
+                      {
+                        defaultMessage: 'Close popover',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPopoverTitle>
@@ -176,6 +191,7 @@ export const MetricItemIcon = ({
               fullWidth
               size="s"
               href={errorLink}
+              isDisabled={!stateId}
             >
               {ERROR_DETAILS}
             </EuiButton>
@@ -187,17 +203,21 @@ export const MetricItemIcon = ({
     if (monitor.urls) {
       return (
         <Container>
-          <EuiButtonIcon
-            title={monitor.urls}
-            color="text"
-            data-test-subj="syntheticsMetricItemIconButton"
-            href={monitor.urls}
-            iconType="link"
-            target="_blank"
-            aria-label={i18n.translate('xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl', {
-              defaultMessage: 'Monitor url',
-            })}
-          />
+          <EuiToolTip content={monitor.urls} disableScreenReaderOutput>
+            <EuiButtonIcon
+              color="text"
+              data-test-subj="syntheticsMetricItemIconButton"
+              href={monitor.urls}
+              iconType="link"
+              target="_blank"
+              aria-label={i18n.translate(
+                'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl',
+                {
+                  defaultMessage: 'Monitor url',
+                }
+              )}
+            />
+          </EuiToolTip>
         </Container>
       );
     }

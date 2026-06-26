@@ -28,7 +28,9 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
     episodes.some(
       (ep) =>
         ep.last_deactivate_action !== 'activate' &&
-        ep['episode.status'] !== ALERT_EPISODE_STATUS.ACTIVE
+        // last_deactivate_action is authoritative; episode.status may be stale after a resolve
+        (ep.last_deactivate_action === 'deactivate' ||
+          ep['episode.status'] !== ALERT_EPISODE_STATUS.ACTIVE)
     ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const items = uniqueByGroup(episodes).map((ep) => ({

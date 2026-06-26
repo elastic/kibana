@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { useHistory } from 'react-router-dom';
 import { useRouteMatch } from 'react-router-dom';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 import { useSyntheticsSettingsContext } from '../../contexts';
+import { SyntheticsDiagnosticsFlyoutLauncher } from './synthetics_diagnostics_flyout';
 
 export type SettingsTabId =
   | 'data-retention'
@@ -43,7 +45,7 @@ export const getSettingsPageHeader = (
     pageTitle: i18n.translate('xpack.synthetics.settingsRoute.pageHeaderTitle', {
       defaultMessage: 'Settings',
     }),
-    rightSideItems: [],
+    rightSideItems: [<SyntheticsDiagnosticsFlyoutLauncher key="syntheticsDiagnostics" />],
     tabs: [
       {
         label: i18n.translate('xpack.synthetics.settingsTabs.alerting', {

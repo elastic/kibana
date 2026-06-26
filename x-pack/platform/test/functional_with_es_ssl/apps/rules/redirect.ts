@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe('Redirect from triggersActions to rules app', () => {
+  describe('Redirect from /app/rules to Stack Management rules page', () => {
     before(async () => {
       await security.testUser.setRoles(['alerts_and_actions_role']);
     });
@@ -28,18 +28,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    it('redirects to rules app home when navigating to triggersActions with path rules', async () => {
-      await pageObjects.common.navigateToApp('triggersActions', {
+    it('redirects /app/rules to the Stack Management rules page', async () => {
+      await pageObjects.common.navigateToApp('rules_redirect', {
         skipUrlValidation: true,
       });
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('app/rules');
+        expect(url).to.contain('app/management/insightsAndAlerting/triggersActions');
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('redirects to rule details page when navigating to triggersActions with path rule/:id', async () => {
+    it('preserves the sub-path when redirecting /app/rules/:path to Stack Management', async () => {
       const { body: createdRule } = await supertest
         .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -51,48 +51,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         .expect(200);
       objectRemover.add(createdRule.id, 'rule', 'alerting');
 
-      await pageObjects.common.navigateToApp('triggersActions', {
-        path: createdRule.id,
+      await pageObjects.common.navigateToApp('rules_redirect', {
+        path: `rule/${createdRule.id}`,
         skipUrlValidation: true,
       });
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`app/rules/${createdRule.id}`);
-      });
-      await pageObjects.header.waitUntilLoadingHasFinished();
-    });
-
-    it('redirects to edit rule page when navigating to triggersActions with path edit/:id', async () => {
-      const { body: createdRule } = await supertest
-        .post(`/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            rule_type_id: 'test.always-firing',
-          })
-        )
-        .expect(200);
-      objectRemover.add(createdRule.id, 'rule', 'alerting');
-
-      await pageObjects.common.navigateToApp('triggersActions', {
-        path: `edit/${createdRule.id}`,
-        skipUrlValidation: true,
-      });
-      await retry.try(async () => {
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`app/rules/edit/${createdRule.id}`);
-      });
-      await pageObjects.header.waitUntilLoadingHasFinished();
-    });
-
-    it('redirects to create rule page when navigating to triggersActions with path create/:ruleTypeId', async () => {
-      await pageObjects.common.navigateToApp('triggersActions', {
-        path: 'create/observability.rules.custom_threshold',
-        skipUrlValidation: true,
-      });
-      await retry.try(async () => {
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain('app/rules/create/observability.rules.custom_threshold');
+        expect(url).to.contain(
+          `app/management/insightsAndAlerting/triggersActions/rule/${createdRule.id}`
+        );
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
     });

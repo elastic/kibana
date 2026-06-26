@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-rendering-browser'
   - '@kbn/core-pricing-browser'
+  - '@kbn/core-user-storage-browser'
   - '@kbn/core-di'
 tags:
   - shared-browser

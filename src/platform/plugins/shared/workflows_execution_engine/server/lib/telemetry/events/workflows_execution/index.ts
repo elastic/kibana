@@ -18,6 +18,25 @@ import {
   WorkflowExecutionTelemetryEventTypes,
 } from './types';
 
+/** Shared schema fragment for output size telemetry fields. */
+const outputSizeTelemetrySchema = {
+  totalOutputSizeBytes: {
+    type: 'long' as const,
+    _meta: {
+      description:
+        'Total output size in bytes across all steps with recorded sizes (atomic steps measured by Layer 2 enforcement)',
+      optional: true as const,
+    },
+  },
+  averageOutputSizeBytes: {
+    type: 'long' as const,
+    _meta: {
+      description: 'Average output size per step in bytes (only steps with recorded sizes)',
+      optional: true as const,
+    },
+  },
+};
+
 export const workflowExecutionEventNames = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]: 'Workflow execution completed',
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: 'Workflow execution failed',
@@ -34,6 +53,10 @@ const baseWorkflowExecutionSchema: RootSchema<{
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
   isTestRun: boolean;
+  isManaged: boolean;
+  managedBy?: string;
+  originManagedWorkflowId?: string;
+  managedVersion?: number;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
@@ -82,6 +105,35 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description: 'Whether this is a test run',
       optional: false,
+    },
+  },
+  isManaged: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether this execution belongs to a managed workflow',
+      optional: false,
+    },
+  },
+  managedBy: {
+    type: 'keyword',
+    _meta: {
+      description: 'Owning plugin for managed workflow executions',
+      optional: true,
+    },
+  },
+  originManagedWorkflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Registered managed workflow definition ID, when this execution came from one',
+      optional: true,
+    },
+  },
+  managedVersion: {
+    type: 'long',
+    _meta: {
+      description:
+        'Registered managed workflow definition version, when this execution came from one',
+      optional: true,
     },
   },
   ruleId: {
@@ -372,6 +424,7 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> = {
@@ -624,6 +677,7 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledParams> = {
@@ -854,6 +908,7 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const eventDrivenExecutionSuppressedSchema: RootSchema<EventDrivenExecutionSuppressedParams> = {

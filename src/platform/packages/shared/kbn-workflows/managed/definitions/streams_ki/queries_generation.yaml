@@ -1,0 +1,87 @@
+# KI Queries Generation Workflow
+#
+# On-demand workflow that generates KI queries for a single
+# stream via LLM inference. Each run calls the _generate endpoint once and
+# returns the generated queries with token usage.
+#
+# Flow:
+#   generate_queries (retry ×3) → persist_queries (retry ×3) → output
+#
+# Concurrency is keyed per stream so only one generation run can be active
+# for a given stream at any time; overlapping triggers are dropped.
+
+version: "1"
+name: ".streams-ki-queries-generation"
+enabled: true
+description: "Generates KI queries for a stream using LLM inference."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - queries-generation
+settings:
+  timeout: "10m"
+  concurrency:
+    key: "streams-ki-queries-generation-{{ inputs.streamName }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      - name: streamName
+        type: string
+        required: true
+        description: "The name of the stream to generate queries for."
+      - name: connectorId
+        type: string
+        description: "Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry."
+      - name: maxExistingQueriesForContext
+        type: number
+        description: "Max number of existing queries to include as LLM context. When omitted the server-side default is used."
+steps:
+  # -----------------------------------------------------------------------
+  # Step 1: Call the LLM-backed generation endpoint (retries up to 3×).
+  # -----------------------------------------------------------------------
+  - name: generate_queries
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/queries/_generate"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        connectorId: "${{ inputs.connectorId }}"
+        maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+  # -----------------------------------------------------------------------
+  # Step 2: Persist the generated queries.
+  # -----------------------------------------------------------------------
+  - name: persist_queries
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/queries/_persist"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        queries: "${{ steps.generate_queries.output.queries }}"
+  # -----------------------------------------------------------------------
+  # Step 3: Output results.
+  # -----------------------------------------------------------------------
+  - name: output_result
+    type: workflow.output
+    with:
+      connectorId: "${{ steps.generate_queries.output.connectorId }}"
+      queries: "${{ steps.generate_queries.output.queries }}"
+      tokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+      persistedQueries: "${{ steps.persist_queries.output.persistedQueries }}"
+      skippedQueries: "${{ steps.persist_queries.output.skippedQueries }}"

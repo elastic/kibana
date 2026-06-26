@@ -11,6 +11,7 @@ import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_
 import type {
   EncryptedSyntheticsMonitor,
   OverviewStatusMetaData,
+  SelectedSyntheticsMonitor,
 } from '../../../../../../common/runtime_types';
 
 export const BadgeStatus = ({
@@ -50,7 +51,7 @@ export const MonitorStatus = ({
 }: {
   loading?: boolean;
   compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: EncryptedSyntheticsMonitor | SelectedSyntheticsMonitor;
   status?: string;
 }) => {
   const isBrowserType = monitor.type === 'browser';

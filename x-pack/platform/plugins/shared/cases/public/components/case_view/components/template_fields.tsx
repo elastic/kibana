@@ -7,101 +7,104 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
-import { FormProvider, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { CaseUI } from '../../../../common';
-import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
-import { FieldsRenderer } from '../../templates_v2/field_types/field_renderer';
-import { getFieldCamelKey, getFieldSnakeKey } from '../../../../common/utils';
+import { useResolvedFields } from '../../field_library/hooks/use_resolved_fields';
+import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
+import { parseFieldDefinitionsToInlineFields } from '../../../../common/utils';
+import { isInlineField } from '../../../../common/types/domain/template/fields';
+import * as i18n from '../translations';
 import type { OnUpdateFields } from '../types';
-import { SAVE } from '../../../common/translations';
+import { EMPTY_EXTENDED_FIELDS, TemplateFieldsFormReady } from './template_fields_form_ready';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 interface TemplateFieldsProps {
   caseData: CaseUI;
   onUpdateField: (args: OnUpdateFields) => void;
-  isLoading: boolean;
-  loadingKey: string | null;
 }
 
 const TemplateFieldsForm: FC<{
   parsedTemplate: ParsedTemplateDefinition;
+  owner: string;
   extendedFields: Record<string, unknown>;
   onUpdateField: (args: OnUpdateFields) => void;
-  isLoading: boolean;
-}> = ({ parsedTemplate, extendedFields, onUpdateField, isLoading }) => {
-  const templateKey = parsedTemplate.fields.map((f) => `${f.name}:${f.type}`).join('|');
+}> = ({ parsedTemplate, owner, extendedFields, onUpdateField }) => {
+  const { resolvedFields, isLoading: isResolvingFields } = useResolvedFields(
+    parsedTemplate.fields,
+    owner
+  );
 
-  const initialDefaultValues = useMemo(() => {
-    const defaults: Record<string, Record<string, unknown>> = { [CASE_EXTENDED_FIELDS]: {} };
-    for (const field of parsedTemplate.fields) {
-      const fieldKey = getFieldSnakeKey(field.name, field.type);
-      defaults[CASE_EXTENDED_FIELDS][fieldKey] =
-        extendedFields[getFieldCamelKey(field.name, field.type)] ?? '';
-    }
-    return defaults;
-  }, [parsedTemplate.fields, extendedFields]);
+  const templateKey = useMemo(
+    () => resolvedFields.map((f: InlineField) => `${f.name}:${f.type}`).join('|'),
+    [resolvedFields]
+  );
 
-  const { form } = useForm<{}>({
-    defaultValue: initialDefaultValues,
-    options: { stripEmptyFields: false },
-  });
-
-  const onSave = async () => {
-    const { isValid, data } = await form.submit();
-    if (!isValid) return;
-    const fields = (data as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS];
-    if (!fields) return;
-    onUpdateField({ key: CASE_EXTENDED_FIELDS, value: fields });
-  };
+  if (isResolvingFields) return null;
 
   return (
-    <FormProvider key={templateKey} form={form}>
-      <FieldsRenderer parsedTemplate={parsedTemplate} form={form} />
-      <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            data-test-subj="template-fields-save"
-            fill
-            iconType="save"
-            onClick={onSave}
-            size="s"
-            isLoading={isLoading}
-          >
-            {SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </FormProvider>
+    <TemplateFieldsFormReady
+      key={templateKey}
+      resolvedFields={resolvedFields}
+      extendedFields={extendedFields}
+      onUpdateField={onUpdateField}
+    />
   );
 };
 
 TemplateFieldsForm.displayName = 'TemplateFieldsForm';
 
-export const TemplateFields = React.memo<TemplateFieldsProps>(
-  ({ caseData, onUpdateField, isLoading }) => {
-    const { data: templateData } = useGetTemplate(
-      caseData.template?.id,
-      caseData.template?.version
-    );
+export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpdateField }) => {
+  const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version);
 
-    const parsedTemplate = templateData?.definition;
-    if (!parsedTemplate || parsedTemplate.fields.length === 0) return null;
+  const { data: globalFieldDefsData } = useGetFieldDefinitions({
+    owner: caseData.owner,
+    isGlobal: true,
+    // Prevent a background refetch from producing a new Set/array reference that would
+    // re-trigger memos and potentially reset an in-progress edit. Same rationale as the
+    // create form (create/template_fields.tsx).
+    staleTime: Infinity,
+  });
 
-    return (
+  const globalFieldNames = useMemo<ReadonlySet<string>>(
+    () =>
+      new Set(
+        parseFieldDefinitionsToInlineFields(globalFieldDefsData?.fieldDefinitions ?? []).map(
+          (f) => f.name
+        )
+      ),
+    [globalFieldDefsData]
+  );
+
+  const parsedTemplate = templateData?.definition;
+
+  const filteredTemplateFields = useMemo(
+    () =>
+      parsedTemplate?.fields.filter((f) => !isInlineField(f) || !globalFieldNames.has(f.name)) ??
+      [],
+    [parsedTemplate, globalFieldNames]
+  );
+
+  if (!templateData || !parsedTemplate || filteredTemplateFields.length === 0) return null;
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>{i18n.EXTENDED_FIELDS_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <TemplateFieldsForm
-        parsedTemplate={parsedTemplate}
-        extendedFields={caseData.extendedFields ?? {}}
+        parsedTemplate={{ ...parsedTemplate, fields: filteredTemplateFields }}
+        owner={templateData.owner}
+        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
         onUpdateField={onUpdateField}
-        isLoading={isLoading}
       />
-    );
-  }
-);
+    </>
+  );
+});
 
 TemplateFields.displayName = 'TemplateFields';

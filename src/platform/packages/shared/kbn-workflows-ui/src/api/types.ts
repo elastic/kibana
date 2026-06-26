@@ -12,6 +12,10 @@ import type {
   ExecutionStatus,
   ExecutionType,
   WorkflowDetailDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
+  WorkflowsEventsLogDocumentSource,
+  WorkflowsSearchParams,
 } from '@kbn/workflows';
 
 export interface BulkCreateWorkflowsParams {
@@ -51,6 +55,7 @@ export interface ExportWorkflowsResponse {
 
 export interface GetAggsParams {
   fields: string[];
+  managed?: WorkflowsSearchParams['managed'];
 }
 
 export interface GetSchemaParams {
@@ -73,8 +78,18 @@ export interface GetWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   omitStepRuns?: boolean;
+  /** Datemath lower bound for filtering executions by finishedAt (applied to finishedAt). */
+  finishedAfter?: string;
+  /** Datemath upper bound for filtering executions by finishedAt (applied to finishedAt). */
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering executions by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering executions by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetWorkflowStepExecutionsParams {
@@ -83,6 +98,10 @@ export interface GetWorkflowStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering step executions by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering step executions by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetExecutionParams {
@@ -123,4 +142,24 @@ export interface ResumeExecutionParams {
 
 export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
+}
+
+export interface SearchTriggerEventLogParams {
+  kql?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface SearchTriggerEventLogHit {
+  id: string;
+  source: WorkflowsEventsLogDocumentSource;
+}
+
+export interface SearchTriggerEventLogResult {
+  hits: SearchTriggerEventLogHit[];
+  total: number;
+  page: number;
+  size: number;
 }

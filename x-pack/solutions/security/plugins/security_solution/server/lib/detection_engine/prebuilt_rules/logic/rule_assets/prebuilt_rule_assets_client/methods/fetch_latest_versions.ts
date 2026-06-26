@@ -10,14 +10,14 @@ import type {
   SearchHitsMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { BasicRuleInfo } from '../../../basic_rule_info';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
-import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
 import {
+  PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
   prepareQueryDslFilter,
   prepareQueryDslSort,
   getPrebuiltRuleAssetSoId,
@@ -40,8 +40,8 @@ export async function fetchLatestVersions(
   savedObjectsClient: SavedObjectsClientContract,
   queryParameters?: {
     ruleIds?: string[];
-    filter?: PrebuiltRuleAssetsFilter;
     sort?: PrebuiltRuleAssetsSort;
+    filter?: string;
   }
 ): Promise<BasicRuleInfo[]> {
   const { ruleIds, sort, filter } = queryParameters || {};
@@ -69,7 +69,7 @@ export async function fetchLatestVersions(
 async function fetchLatestVersionSpecifiers(
   savedObjectsClient: SavedObjectsClientContract,
   ruleIds?: string[],
-  filter?: PrebuiltRuleAssetsFilter
+  filter?: string
 ) {
   const latestVersionSpecifiersResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
@@ -153,15 +153,7 @@ async function fetchVersionsBySoIds(
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: MAX_PREBUILT_RULES_COUNT,
-    runtime_mappings: {
-      [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
-        type: 'long',
-        script: {
-          source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
-          params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
-        },
-      },
-    },
+    runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
     query: {
       terms: {
         _id: soIds,

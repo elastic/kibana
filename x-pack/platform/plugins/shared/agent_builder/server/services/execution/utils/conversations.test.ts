@@ -111,6 +111,8 @@ describe('conversations utils', () => {
         expect(conversationClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
             rounds: [newRound],
+            read: false,
+            status: newRound.status,
           })
         );
       });
@@ -147,6 +149,8 @@ describe('conversations utils', () => {
         expect(conversationClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
             rounds: [existingRound, newRound],
+            read: false,
+            status: newRound.status,
           })
         );
       });
@@ -184,6 +188,8 @@ describe('conversations utils', () => {
         expect(conversationClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
             rounds: [newRound],
+            read: false,
+            status: newRound.status,
           })
         );
       });

@@ -180,7 +180,11 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       field: findRulesSortField,
       order: sortingOptions.order,
     },
-    filter: filterOptions,
+    filterOptions: {
+      tags: filterOptions.tags,
+      customizationStatus: filterOptions.customization_status,
+    },
+    searchTerm: filterOptions.name,
   });
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(

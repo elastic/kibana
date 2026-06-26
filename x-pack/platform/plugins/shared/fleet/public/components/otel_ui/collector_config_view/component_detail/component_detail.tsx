@@ -16,6 +16,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -150,17 +151,24 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {componentHealth && healhtLabel}
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label={i18n.translate(
-                  'xpack.fleet.otelUi.componentDetail.closeButtonAriaLabel',
-                  {
-                    defaultMessage: 'Close component detail',
-                  }
-                )}
-                onClick={onClose}
-                data-test-subj="otelComponentDetailCloseButton"
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.otelUi.componentDetail.closeButtonAriaLabel', {
+                  defaultMessage: 'Close component detail',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.otelUi.componentDetail.closeButtonAriaLabel',
+                    {
+                      defaultMessage: 'Close component detail',
+                    }
+                  )}
+                  onClick={onClose}
+                  data-test-subj="otelComponentDetailCloseButton"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -180,7 +188,11 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
       </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === 'config' && (
-        <ComponentConfigTab componentId={componentId} componentConfig={componentConfig} />
+        <ComponentConfigTab
+          componentId={componentId}
+          componentConfig={componentConfig}
+          componentType={componentType}
+        />
       )}
       {selectedTabId === 'health' && <ComponentHealthTab componentHealth={componentHealth} />}
 

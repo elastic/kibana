@@ -6,7 +6,7 @@
  */
 
 import { of, toArray, lastValueFrom } from 'rxjs';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import { convertGraphEvents } from './convert_graph_events';
 import { steps } from './constants';
 
@@ -28,6 +28,7 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       params: data.params,
       tool_call_group_id: data.toolCallGroupId,
       tool_origin: data.toolOrigin,
+      tool_type: data.toolType,
     },
   })),
   createToolResultEvent: jest.fn(),
@@ -42,11 +43,13 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
 }));
 
 jest.mock('./actions', () => ({
-  isAnswerAction: jest.fn(() => false),
+  isBackgroundExecutionCompleteAction: jest.fn(() => false),
   isExecuteToolAction: jest.fn(() => false),
-  isStructuredAnswerAction: jest.fn(() => false),
   isToolPromptAction: jest.fn(() => false),
-  isToolCallAction: jest.fn((action: any) => action.kind === 'tool_call_action'),
+  isToolCallAction: jest.fn(
+    (action: any) => action.kind === 'tool_call_action' || action.type === 'tool_call'
+  ),
+  isHandoverAction: jest.fn((action: any) => action?.type === 'hand_over'),
 }));
 
 describe('convertGraphEvents', () => {
@@ -80,11 +83,14 @@ describe('convertGraphEvents', () => {
         graphName: 'test-graph',
         toolManager: {
           getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-          getToolOrigin: jest.fn().mockReturnValue(ToolOrigin.inline),
+          getToolMeta: jest
+            .fn()
+            .mockReturnValue({ origin: ToolOrigin.inline, type: ToolType.builtin }),
         } as any,
         pendingRound: undefined,
         logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
         startTime: new Date(),
+        structuredOutput: false,
       }),
       toArray()
     );
@@ -103,8 +109,285 @@ describe('convertGraphEvents', () => {
           tool_call_id: 'call-1',
           tool_id: 'inline.dynamic',
           tool_origin: ToolOrigin.inline,
+          tool_type: ToolType.builtin,
         }),
       }),
     ]);
+  });
+
+  it('emits messageEvent at on_chain_end of finalize using state.finalAnswer (string)', async () => {
+    const { createMessageEvent } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain');
+    createMessageEvent.mockImplementation((content: string | object, opts: any) => ({
+      type: 'message_complete',
+      data: {
+        message_id: opts?.messageId ?? 'unknown',
+        message_content: typeof content === 'string' ? content : JSON.stringify(content),
+        ...(typeof content === 'object' ? { structured_output: content } : {}),
+      },
+    }));
+
+    const streamEvent = {
+      event: 'on_chain_end',
+      name: steps.finalize,
+      metadata: { graphName: 'test-graph' },
+      data: {
+        output: {
+          finalAnswer: 'final answer text',
+        },
+      },
+    } as any;
+
+    const events = await lastValueFrom(
+      of(streamEvent).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: false,
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        type: 'message_complete',
+        data: expect.objectContaining({
+          message_content: 'final answer text',
+        }),
+      })
+    );
+  });
+
+  it('emits messageEvent at on_chain_end of finalize using state.finalAnswer (object) for structured output', async () => {
+    const { createMessageEvent } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain');
+    createMessageEvent.mockImplementation((content: string | object, opts: any) => ({
+      type: 'message_complete',
+      data: {
+        message_id: opts?.messageId ?? 'unknown',
+        message_content: typeof content === 'string' ? content : JSON.stringify(content),
+        ...(typeof content === 'object' ? { structured_output: content } : {}),
+      },
+    }));
+
+    const structuredAnswer = { foo: 'bar' };
+    const streamEvent = {
+      event: 'on_chain_end',
+      name: steps.finalize,
+      metadata: { graphName: 'test-graph' },
+      data: {
+        output: {
+          finalAnswer: structuredAnswer,
+        },
+      },
+    } as any;
+
+    const events = await lastValueFrom(
+      of(streamEvent).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: true,
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        type: 'message_complete',
+        data: expect.objectContaining({
+          structured_output: structuredAnswer,
+        }),
+      })
+    );
+  });
+
+  it('emits thinkingCompleteEvent backdated to first chunk of terminal research turn', async () => {
+    const { createThinkingCompleteEvent, hasTag, extractTextContent } = jest.requireMock(
+      '@kbn/agent-builder-genai-utils/langchain'
+    );
+    hasTag.mockImplementation((event: any, tag: string) => event.tags?.includes(tag));
+    extractTextContent.mockImplementation((chunk: any) => chunk?.content ?? '');
+    createThinkingCompleteEvent.mockImplementation((time: number) => ({
+      type: 'thinking_complete',
+      data: { time_to_first_token: time },
+    }));
+
+    const startTime = new Date(1000);
+    const events: any[] = [
+      {
+        event: 'on_chain_start',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+      },
+      {
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        tags: ['agent', 'research-agent'],
+        metadata: { graphName: 'test-graph' },
+        data: { chunk: { content: 'hello' } },
+      },
+      {
+        event: 'on_chain_end',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+        data: {
+          output: {
+            mainActions: [{ type: 'hand_over', message: 'final answer' }],
+          },
+        },
+      },
+    ];
+
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(2500);
+
+    try {
+      const converted = await lastValueFrom(
+        of(...events).pipe(
+          convertGraphEvents({
+            graphName: 'test-graph',
+            toolManager: {
+              getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+              getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
+            } as any,
+            pendingRound: undefined,
+            logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+            startTime,
+            structuredOutput: false,
+          }),
+          toArray()
+        )
+      );
+
+      expect(converted).toContainEqual(
+        expect.objectContaining({
+          type: 'thinking_complete',
+          data: expect.objectContaining({ time_to_first_token: 1500 }),
+        })
+      );
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('does not emit thinkingCompleteEvent when research turn ends in tool calls', async () => {
+    const { hasTag, extractTextContent } = jest.requireMock(
+      '@kbn/agent-builder-genai-utils/langchain'
+    );
+    hasTag.mockImplementation((event: any, tag: string) => event.tags?.includes(tag));
+    extractTextContent.mockImplementation((chunk: any) => chunk?.content ?? '');
+
+    const events: any[] = [
+      {
+        event: 'on_chain_start',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+      },
+      {
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        tags: ['agent', 'research-agent'],
+        metadata: { graphName: 'test-graph' },
+        data: { chunk: { content: 'searching...' } },
+      },
+      {
+        event: 'on_chain_end',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+        data: {
+          output: {
+            mainActions: [
+              {
+                type: 'tool_call',
+                tool_calls: [{ toolCallId: 'c1', args: {} }],
+              },
+            ],
+          },
+        },
+      },
+    ];
+
+    const converted = await lastValueFrom(
+      of(...events).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: false,
+        }),
+        toArray()
+      )
+    );
+
+    expect(converted).not.toContainEqual(expect.objectContaining({ type: 'thinking_complete' }));
+  });
+
+  it('does not emit thinkingCompleteEvent in structured mode', async () => {
+    const { hasTag, extractTextContent } = jest.requireMock(
+      '@kbn/agent-builder-genai-utils/langchain'
+    );
+    hasTag.mockImplementation((event: any, tag: string) => event.tags?.includes(tag));
+    extractTextContent.mockImplementation((chunk: any) => chunk?.content ?? '');
+
+    const events: any[] = [
+      {
+        event: 'on_chain_start',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+      },
+      {
+        event: 'on_chat_model_stream',
+        name: 'unused',
+        tags: ['agent', 'research-agent'],
+        metadata: { graphName: 'test-graph' },
+        data: { chunk: { content: 'hello' } },
+      },
+      {
+        event: 'on_chain_end',
+        name: steps.researchAgent,
+        metadata: { graphName: 'test-graph' },
+        data: {
+          output: {
+            mainActions: [{ type: 'hand_over', message: 'draft' }],
+          },
+        },
+      },
+    ];
+
+    const converted = await lastValueFrom(
+      of(...events).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {
+            getToolIdMapping: jest.fn().mockReturnValue(new Map()),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
+          } as any,
+          pendingRound: undefined,
+          logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+          startTime: new Date(),
+          structuredOutput: true,
+        }),
+        toArray()
+      )
+    );
+
+    expect(converted).not.toContainEqual(expect.objectContaining({ type: 'thinking_complete' }));
   });
 });

@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { durationSchema, tagsSchema } from './common';
 import {
+  ACTION_POLICY_MAX_DESTINATIONS,
+  VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_BULK_ITEMS,
   MAX_DESCRIPTION_LENGTH,
@@ -16,9 +18,6 @@ import {
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
 } from './constants';
-
-/** Maximum number of destinations per action policy. */
-const MAX_DESTINATIONS = 10;
 
 /**
  * The set of supported action policy destination types. Single source of truth
@@ -57,21 +56,31 @@ export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
 
 const throttleSchema = z.object({
   strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-  interval: durationSchema.optional().describe('The throttle interval duration (e.g. 5m, 1h).'),
+  interval: durationSchema
+    .nullish()
+    .describe(
+      'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+    ),
 });
 
-const PER_EPISODE_STRATEGIES = new Set<string>([
+export const PER_EPISODE_STRATEGIES = new Set<string>([
   'on_status_change',
   'per_status_interval',
   'every_time',
 ]);
-const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
-const STRATEGIES_REQUIRING_INTERVAL = new Set<string>(['per_status_interval', 'time_interval']);
+export const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
+export const STRATEGIES_REQUIRING_INTERVAL = new Set<string>([
+  'per_status_interval',
+  'time_interval',
+]);
 
-interface ValidationPayload {
+export const needsInterval = (strategy: string | undefined): boolean =>
+  strategy != null && STRATEGIES_REQUIRING_INTERVAL.has(strategy);
+
+export interface ValidationPayload {
   value: {
     groupingMode?: string | null;
-    throttle?: { strategy?: string; interval?: string } | null;
+    throttle?: { strategy?: string; interval?: string | null } | null;
   };
   issues: z.core.$ZodRawIssue[];
 }
@@ -81,7 +90,7 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
   const strategy = data.throttle?.strategy;
   if (!strategy) return;
 
-  if (STRATEGIES_REQUIRING_INTERVAL.has(strategy) && !data.throttle?.interval) {
+  if (needsInterval(strategy) && !data.throttle?.interval) {
     issues.push({
       code: 'custom',
       message: `Strategy "${strategy}" requires an interval to be defined`,
@@ -176,37 +185,40 @@ export const bulkActionActionPoliciesBodySchema = z.object({
 
 export type BulkActionActionPoliciesBody = z.infer<typeof bulkActionActionPoliciesBodySchema>;
 
-export const createActionPolicyDataSchema = z
-  .object({
-    name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
-    description: z
-      .string()
-      .max(MAX_DESCRIPTION_LENGTH)
-      .describe('A description of the action policy.'),
-    destinations: z
-      .array(actionPolicyDestinationSchema)
-      .min(1, 'At least one destination must be provided')
-      .max(MAX_DESTINATIONS)
-      .describe('The list of destinations. At least one is required.'),
-    matcher: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .describe('A KQL query string to match alerts.'),
-    groupBy: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .max(MAX_GROUPING_FIELDS)
-      .optional()
-      .describe('The fields used to group alerts.'),
-    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-    groupingMode: groupingModeSchema
-      .optional()
-      .describe('The grouping mode for alert notifications.'),
-    throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
-  })
-  .check(validateGroupingModeAndStrategy);
+const createActionPolicyDataBaseSchema = z.object({
+  name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
+  description: z
+    .string()
+    .max(MAX_DESCRIPTION_LENGTH)
+    .describe('A description of the action policy.'),
+  destinations: z
+    .array(actionPolicyDestinationSchema)
+    .min(1, 'At least one destination must be provided')
+    .max(ACTION_POLICY_MAX_DESTINATIONS)
+    .describe('The list of destinations. At least one is required.'),
+  matcher: z
+    .string()
+    .max(MAX_KQL_LENGTH)
+    .optional()
+    .describe('A KQL query string to match alerts.'),
+  groupBy: z
+    .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+    .max(MAX_GROUPING_FIELDS)
+    .optional()
+    .describe('The fields used to group alerts.'),
+  tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
+  groupingMode: groupingModeSchema
+    .optional()
+    .describe('The grouping mode for alert notifications.'),
+  throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
+});
+
+export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema.check(
+  validateGroupingModeAndStrategy
+);
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
+export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
 
 export const updateActionPolicyDataSchema = z
   .object({
@@ -224,7 +236,7 @@ export const updateActionPolicyDataSchema = z
     destinations: z
       .array(actionPolicyDestinationSchema)
       .min(1, 'At least one destination must be provided')
-      .max(MAX_DESTINATIONS)
+      .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
     matcher: z
@@ -249,6 +261,7 @@ export const updateActionPolicyDataSchema = z
       .nullable()
       .describe('The throttle configuration for notifications.'),
   })
+  .strict()
   .check((payload) => {
     if (payload.value.throttle === null || payload.value.throttle === undefined) return;
     if (payload.value.groupingMode === undefined) {
@@ -264,7 +277,7 @@ export const updateActionPolicyBodySchema = updateActionPolicyDataSchema.extend(
   version: z
     .string()
     .min(1)
-    .max(256)
+    .max(VERSION_MAX_LENGTH)
     .describe('The current version of the action policy, used for optimistic concurrency control.'),
 });
 

@@ -7,17 +7,17 @@
 
 import * as Rx from 'rxjs';
 
-import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from '@kbn/core/server';
+import type { SavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 
 import { SpacesService } from './spaces_service';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesConfig } from '../lib/__fixtures__';
 import { SpacesClientService } from '../spaces_client';
-const createService = (serverBasePath: string = '') => {
+
+const createService = () => {
   const spacesService = new SpacesService();
 
   const coreStart = coreMock.createStart();
@@ -50,24 +50,7 @@ const createService = (serverBasePath: string = '') => {
   coreStart.savedObjects.createInternalRepository.mockReturnValue(respositoryMock);
   coreStart.savedObjects.createScopedRepository.mockReturnValue(respositoryMock);
 
-  const httpSetup = coreMock.createSetup().http;
-  httpSetup.basePath = {
-    serverBasePath,
-  } as HttpServiceSetup['basePath'];
-  httpSetup.basePath.get = jest.fn().mockImplementation((request: KibanaRequest) => {
-    const { spaceId } = getSpaceIdFromPath(request.url.pathname);
-
-    if (spaceId !== DEFAULT_SPACE_ID) {
-      return `/s/${spaceId}`;
-    }
-    return '/';
-  });
-
-  coreStart.http.basePath = httpSetup.basePath;
-
-  const spacesServiceSetup = spacesService.setup({
-    basePath: httpSetup.basePath,
-  });
+  const spacesServiceSetup = spacesService.setup();
 
   const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
   spacesClientService.setup({
@@ -81,7 +64,6 @@ const createService = (serverBasePath: string = '') => {
   );
 
   const spacesServiceStart = spacesService.start({
-    basePath: coreStart.http.basePath,
     spacesClientService: spacesClientServiceStart,
   });
 
@@ -93,22 +75,18 @@ const createService = (serverBasePath: string = '') => {
 
 describe('SpacesService', () => {
   describe('#getSpaceId', () => {
-    it('returns the default space id when no identifier is present', async () => {
+    it('returns the default space id when no spaceId is set on the request', async () => {
       const { spacesServiceStart } = createService();
 
-      const request: KibanaRequest = {
-        url: { pathname: '/app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest();
 
       expect(spacesServiceStart.getSpaceId(request)).toEqual(DEFAULT_SPACE_ID);
     });
 
-    it('returns the space id when identifier is present', async () => {
+    it('returns the space id from request.spaceId', async () => {
       const { spacesServiceStart } = createService();
 
-      const request: KibanaRequest = {
-        url: { pathname: '/s/foo/app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'foo' });
 
       expect(spacesServiceStart.getSpaceId(request)).toEqual('foo');
     });
@@ -118,9 +96,7 @@ describe('SpacesService', () => {
     it('returns true when in the default space', async () => {
       const { spacesServiceStart } = createService();
 
-      const request: KibanaRequest = {
-        url: { pathname: '/app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest();
 
       expect(spacesServiceStart.isInDefaultSpace(request)).toEqual(true);
     });
@@ -128,9 +104,7 @@ describe('SpacesService', () => {
     it('returns false when not in the default space', async () => {
       const { spacesServiceStart } = createService();
 
-      const request: KibanaRequest = {
-        url: { pathname: '/s/foo/app/kibana' },
-      } as KibanaRequest;
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'foo' });
 
       expect(spacesServiceStart.isInDefaultSpace(request)).toEqual(false);
     });
@@ -153,7 +127,7 @@ describe('SpacesService', () => {
   describe('#getActiveSpace', () => {
     it('returns the default space when in the default space', async () => {
       const { spacesServiceStart } = createService();
-      const request = httpServerMock.createKibanaRequest({ path: 'app/kibana' });
+      const request = httpServerMock.createKibanaRequest();
 
       const activeSpace = await spacesServiceStart.getActiveSpace(request);
       expect(activeSpace).toEqual({
@@ -166,7 +140,7 @@ describe('SpacesService', () => {
 
     it('returns the space for the current (non-default) space', async () => {
       const { spacesServiceStart } = createService();
-      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/app/kibana' });
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'foo' });
 
       const activeSpace = await spacesServiceStart.getActiveSpace(request);
       expect(activeSpace).toEqual({
@@ -178,7 +152,7 @@ describe('SpacesService', () => {
 
     it('propagates errors from the repository', async () => {
       const { spacesServiceStart } = createService();
-      const request = httpServerMock.createKibanaRequest({ path: '/s/unknown-space/app/kibana' });
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'unknown-space' });
 
       await expect(
         spacesServiceStart.getActiveSpace(request)

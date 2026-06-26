@@ -93,7 +93,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.duplicateActionLabel', {
         defaultMessage: 'Duplicate',
       }),
-      icon: <EuiIcon type="copy" />,
+      icon: <EuiIcon type="copy" aria-hidden={true} />,
       onClick: () => onCloneClick(pipeline.name),
     },
     /**
@@ -103,7 +103,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel', {
         defaultMessage: 'Delete',
       }),
-      icon: <EuiIcon type="trash" />,
+      icon: <EuiIcon type="trash" aria-hidden={true} />,
       'data-test-subj': 'deletePipelineButton',
       onClick: () => {
         setShowPopover(false);
@@ -114,19 +114,29 @@ export const DetailsPanel: FunctionComponent<Props> = ({
   ];
 
   const actionsPopoverButton = (
-    <EuiButtonIcon
-      display="base"
-      size="m"
-      data-test-subj="actionsPopoverButton"
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
         {
           defaultMessage: 'Other actions',
         }
       )}
-      onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="boxesVertical"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        display="base"
+        size="m"
+        data-test-subj="actionsPopoverButton"
+        aria-label={i18n.translate(
+          'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
+          {
+            defaultMessage: 'Other actions',
+          }
+        )}
+        onClick={() => setShowPopover((previousBool) => !previousBool)}
+        iconType="boxesVertical"
+      />
+    </EuiToolTip>
   );
   return (
     <EuiSplitPanel.Inner grow={true} paddingSize="none">
@@ -307,6 +317,10 @@ export const DetailsPanel: FunctionComponent<Props> = ({
                       button={actionsPopoverButton}
                       panelPaddingSize="none"
                       repositionOnScroll
+                      aria-label={i18n.translate(
+                        'xpack.ingestPipelines.list.pipelineDetails.actionsPopoverAriaLabel',
+                        { defaultMessage: 'Pipeline actions' }
+                      )}
                     >
                       <EuiContextMenu
                         initialPanelId={0}

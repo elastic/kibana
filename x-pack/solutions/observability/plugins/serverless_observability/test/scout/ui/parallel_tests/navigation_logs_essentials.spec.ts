@@ -50,6 +50,40 @@ test.describe(
       });
     });
 
+    test('does not show ML or AI related project settings', async ({ pageObjects }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await nav.navItemInFooterById('admin_and_settings').click();
+      const adminAndSettingsPanel = nav.sidePanel('admin_and_settings');
+      await expect(adminAndSettingsPanel).toBeVisible();
+
+      const disabledIds = ['machine_learning', 'model_management'];
+      for (const id of disabledIds) {
+        await expect(
+          adminAndSettingsPanel.locator(`[data-test-subj~="nav-item-id-${id}"]`)
+        ).toBeHidden();
+      }
+
+      const disabledDeepLinks = [
+        'management:overview',
+        'management:anomaly_detection',
+        'management:analytics',
+        'management:trained_models',
+        'management:supplied_configurations',
+        'management:elastic_inference_service',
+        'management:inference_endpoints',
+        'management:model_settings',
+        'management:genAiSettings',
+        'management:evals',
+        'management:observabilityAiAssistantManagement',
+      ];
+      for (const deepLinkId of disabledDeepLinks) {
+        await expect(
+          adminAndSettingsPanel.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`)
+        ).toBeHidden();
+      }
+    });
+
     test('clicking body nav items sets the active link and navigates', async ({
       pageObjects,
       page,

@@ -51,6 +51,21 @@ test.describe(
 
 This test will only run locally (stateful classic and serverless Security complete tier), and will be skipped by Elastic Cloud pipelines.
 
+## Pick the right tags [scout-deployment-tags-pick]
+
+Pick the narrowest scope that's still correct for the feature under test, as every extra deployment target spins up an additional run:
+
+| The test covers…                                 | Use                                                                                                                  |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| A platform feature that works everywhere         | [`tags.deploymentAgnostic`](#scout-deployment-tags-deployment-agnostic)                                              |
+| A solution feature                               | `tags.stateful.<solution>` + `tags.serverless.<solution>` (use `.complete` when the solution has tiers)              |
+| Behavior specific to one serverless project tier | The explicit tier tag, e.g. `tags.serverless.security.essentials` or `tags.serverless.observability.logs_essentials` |
+| Behavior that only exists on stateful            | `tags.stateful.<solution>` alone                                                                                     |
+
+::::::{warning}
+Don't reach for `tags.deploymentAgnostic` from a solution module. It runs your test across every solution and is expensive — use explicit per-deployment tags instead. See the [`tags.deploymentAgnostic` note](#scout-deployment-tags-deployment-agnostic).
+::::::
+
 ## Common shortcuts [scout-deployment-tags-shortcuts]
 
 ### `tags.deploymentAgnostic` [scout-deployment-tags-deployment-agnostic]

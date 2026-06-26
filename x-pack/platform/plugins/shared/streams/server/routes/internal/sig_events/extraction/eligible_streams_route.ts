@@ -19,11 +19,8 @@ import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
 } from '../../../../../common/constants';
-import {
-  type FeaturesIdentificationTaskParams,
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/features_identification';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import {
   classifyStreams,
   parseExcludePatterns,
@@ -53,13 +50,17 @@ export interface EligibleStreamsResponse {
   };
 }
 
-const NumberFromString = z.string().transform((value) => {
-  const trimmed = value.trim();
-  if (trimmed === '') {
-    return undefined;
-  }
-  return Number(trimmed);
-});
+const NumberFromString = z
+  .string()
+  .optional()
+  .transform((value) => {
+    if (value === undefined) return undefined;
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      return undefined;
+    }
+    return Number(trimmed);
+  });
 
 const eligibleStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_extraction/_eligible',
@@ -67,7 +68,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List streams eligible for KI extraction',
     description:
-      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and task state.',
+      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and workflow execution state.',
   },
   security: {
     authz: {
@@ -89,8 +90,14 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    workflowClients,
   }): Promise<EligibleStreamsResponse> => {
-    const { streamsClient, taskClient, globalUiSettingsClient, uiSettingsClient, licensing } =
+    const { streamsKIsOnboardingClient } = workflowClients;
+    if (!streamsKIsOnboardingClient) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
+
+    const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -117,24 +124,14 @@ const eligibleStreamsRoute = createServerRoute({
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [connectorId, sortedTasks, allStreams] = await Promise.all([
+    const [connectorId, executions, allStreams] = await Promise.all([
       resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         featureName: 'knowledge indicator extraction',
         request,
       }),
-      taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
-        sort: [
-          {
-            last_completed_at: {
-              order: 'asc',
-              missing: '_first',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      }),
+      streamsKIsOnboardingClient.getRecentExecutions(),
       streamsClient.listStreams(),
     ]);
 
@@ -145,7 +142,7 @@ const eligibleStreamsRoute = createServerRoute({
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
       allStreams,
-      sortedTasks,
+      executions,
       excludedStreamPatterns: resolvedExcludedPatterns,
       intervalHours,
     });

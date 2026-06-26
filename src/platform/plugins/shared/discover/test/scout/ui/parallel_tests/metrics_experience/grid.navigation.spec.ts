@@ -51,7 +51,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -66,34 +66,32 @@ spaceTest.describe(
       await spaceTest.step('pagination is visible', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.pagination.container).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
 
       await spaceTest.step('navigate to last page and grid updates', async () => {
         await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
         await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
-          'id',
-          FIRST_CARD_LAST_PAGE
-        );
       });
 
       await spaceTest.step('navigate using next and prev arrows', async () => {
         await metricsExperience.pagination.getPageButton(0).click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
 
         await metricsExperience.pagination.nextButton.click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_2);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_2);
 
         await metricsExperience.pagination.prevButton.click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
       });
     });
 
@@ -103,7 +101,7 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
 
       await spaceTest.step('search filters results across all pages', async () => {
-        await metricsExperience.searchMetric(SEARCH_METRIC_NAME);
+        await metricsExperience.searchMetric(`${SEARCH_METRIC_NAME}*`);
         await expect(metricsExperience.cards).toHaveCount(1);
       });
 
@@ -117,6 +115,25 @@ spaceTest.describe(
         await metricsExperience.clearSearch();
         await expect(metricsExperience.emptyState).toBeHidden();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
+      });
+
+      await spaceTest.step('space-separated search matches non-contiguous name', async () => {
+        await metricsExperience.searchMetric('gauge 22');
+        await expect(metricsExperience.cards).toHaveCount(1);
+        await metricsExperience.waitForFirstCard('gauge_22-0');
+      });
+
+      await spaceTest.step('wildcard search matches metric name pattern', async () => {
+        await metricsExperience.clearSearch();
+        await metricsExperience.searchMetric('*_0');
+        await expect(metricsExperience.cards).toHaveCount(2);
+      });
+
+      await spaceTest.step('typo-tolerant search finds metric', async () => {
+        await metricsExperience.clearSearch();
+        await metricsExperience.searchMetric('gauuge_0');
+        await expect(metricsExperience.cards).toHaveCount(1);
+        await metricsExperience.waitForFirstCard('gauge_0-0');
       });
     });
 

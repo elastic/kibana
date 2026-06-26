@@ -116,13 +116,15 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads" color="subdued">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleOpen}
-            aria-label={isOpen ? 'Collapse' : 'Expand'}
-            color="text"
-            size="xs"
-          />
+          <EuiToolTip content={isOpen ? i18n.COLLAPSE : i18n.EXPAND} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              onClick={toggleOpen}
+              aria-label={isOpen ? i18n.COLLAPSE : i18n.EXPAND}
+              color="text"
+              size="xs"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -240,12 +242,14 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   panelPaddingSize="m"
                   aria-label={i18n.OPTIONS}
                   button={
-                    <EuiButtonIcon
-                      iconType="boxesVertical"
-                      aria-label={i18n.OPTIONS}
-                      onClick={toggleOptions}
-                      data-test-subj="leadsOptionsButton"
-                    />
+                    <EuiToolTip content={i18n.OPTIONS} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="boxesVertical"
+                        aria-label={i18n.OPTIONS}
+                        onClick={toggleOptions}
+                        data-test-subj="leadsOptionsButton"
+                      />
+                    </EuiToolTip>
                   }
                 >
                   <div style={{ width: 320 }}>

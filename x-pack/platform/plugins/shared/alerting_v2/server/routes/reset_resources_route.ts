@@ -25,7 +25,7 @@ import {
 import { isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 
-import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/task_definition';
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DatastreamInitializer } from '../lib/services/resource_service/datastream_initializer';
@@ -65,7 +65,15 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
     access: 'internal',
     summary: 'Reset alerting v2 resources (temporary, pre-GA only)',
   } as const;
-  static validate = false as const;
+
+  static validate = {
+    request: {},
+    response: {
+      204: {
+        description: 'Resources were reset successfully.',
+      },
+    },
+  } as const;
 
   protected readonly routeName = 'reset alerting v2 resources';
 
@@ -167,8 +175,9 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
   }
 
   private async recreate(definition: ResourceDefinition): Promise<void> {
-    // Manual construction instead of DI: DatastreamInitializer is wired to
-    // the internal ES client via @inject, and we want the request-scoped one.
+    // DatastreamInitializer takes a per-resource definition plus an ES client;
+    // here we pass the request-scoped client (startup registration passes the
+    // internal one instead).
     const initializer = new DatastreamInitializer(this.ctx.logger, this.esClient, definition);
     await initializer.initialize();
   }

@@ -54,7 +54,7 @@ export const LocationsBadge = ({
         return {
           key: location.id,
           name: location.label,
-          icon: <EuiIcon type="dot" color={getColor(location.status)} />,
+          icon: <EuiIcon type="dot" color={getColor(location.status)} aria-hidden={true} />,
           onClick: () => {
             closePopover();
             onLocationClick?.(location.id, location.label);
@@ -111,6 +111,9 @@ export const LocationsBadge = ({
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.locationsBadge.popoverAriaLabel', {
+        defaultMessage: 'Locations menu',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

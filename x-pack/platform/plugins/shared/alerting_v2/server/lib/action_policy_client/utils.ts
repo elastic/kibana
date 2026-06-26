@@ -9,17 +9,23 @@ import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
   CreateActionPolicyData,
+  ThrottleStrategy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
+import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 const isoDateTimeString = z.string().datetime();
 
 export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);
   if (!result.success) {
-    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`);
+    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`, {
+      code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+      details: { value: dateString },
+    });
   }
 }
 
@@ -36,6 +42,18 @@ const resolveNextNullableField = <T>(
   return normalizeNullableField(existing);
 };
 
+const normalizeThrottle = (
+  throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
+): { strategy?: ThrottleStrategy; interval: string | null } | null => {
+  if (throttle == null) return null;
+  const { strategy, interval } = throttle;
+  const keepInterval = strategy == null || needsInterval(strategy);
+  return {
+    strategy,
+    interval: keepInterval ? interval ?? null : null,
+  };
+};
+
 const toAuthResponse = (
   auth: ActionPolicySavedObjectAttributes['auth']
 ): ActionPolicyResponse['auth'] => {
@@ -49,19 +67,15 @@ export const buildCreateActionPolicyAttributes = ({
   data,
   auth,
   createdBy,
-  createdByUsername,
   createdAt,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   data: CreateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   createdBy: string | null;
-  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -73,14 +87,12 @@ export const buildCreateActionPolicyAttributes = ({
     groupBy: data.groupBy ?? null,
     tags: data.tags ?? null,
     groupingMode: data.groupingMode ?? null,
-    throttle: data.throttle ?? null,
+    throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
     auth,
     createdBy,
-    createdByUsername,
     createdAt,
     updatedBy,
-    updatedByUsername,
     updatedAt,
   };
 };
@@ -90,14 +102,12 @@ export const buildUpdateActionPolicyAttributes = ({
   update,
   auth,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -109,13 +119,11 @@ export const buildUpdateActionPolicyAttributes = ({
     groupBy: resolveNextNullableField(update.groupBy, existing.groupBy),
     tags: resolveNextNullableField(update.tags, existing.tags),
     groupingMode: resolveNextNullableField(update.groupingMode, existing.groupingMode),
-    throttle: resolveNextNullableField(update.throttle, existing.throttle),
+    throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     auth,
     createdBy: existing.createdBy,
-    createdByUsername: existing.createdByUsername,
     updatedBy,
-    updatedByUsername,
     createdAt: existing.createdAt,
     updatedAt,
   };
@@ -141,14 +149,12 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     groupBy: normalizeNullableField(attributes.groupBy),
     tags: normalizeNullableField(attributes.tags),
     groupingMode: normalizeNullableField(attributes.groupingMode),
-    throttle: normalizeNullableField(attributes.throttle),
+    throttle: normalizeThrottle(attributes.throttle),
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
-    createdByUsername: attributes.createdByUsername,
     createdAt: attributes.createdAt,
     updatedBy: attributes.updatedBy,
-    updatedByUsername: attributes.updatedByUsername,
     updatedAt: attributes.updatedAt,
   };
 };

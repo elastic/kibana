@@ -29,13 +29,28 @@ interface AgentContextLayerPluginSetup {
 ```typescript
 interface AgentContextLayerPluginStart {
   search(params): Promise<{ results: SmlSearchResult[]; total: number }>;
-  checkItemsAccess(params): Promise<Map<string, boolean>>;
-  getDocuments(params): Promise<Map<string, SmlDocument>>;
+  /**
+   * Fetch SML documents by chunk IDs. Permission checks are performed internally
+   * — the returned map only contains documents the user (identified by `request`)
+   * is authorized to access. Unauthorized or missing IDs are absent from the
+   * result.
+   */
+  getDocuments(params: {
+    ids: string[];
+    request: KibanaRequest;
+    spaceId?: string; // resolved from request when omitted
+  }): Promise<Map<string, SmlDocument>>;
   getTypeDefinition(typeId: string): SmlTypeDefinition | undefined;
   resolveSmlAttachItems(params): Promise<SmlResolvedItemResult[]>;
   indexAttachment(params: SmlIndexAttachmentParams): Promise<void>;
 }
 ```
+
+> Note: an explicit `checkItemsAccess` primitive is intentionally **not** part of
+> the public contract. `getDocuments` is safe by default and `resolveSmlAttachItems`
+> covers the "convert chunks to attachments" workflow. If you find yourself wanting
+> a standalone access check, use `getDocuments` and look at which IDs are present
+> in the result.
 
 ## Registering an SML type
 
@@ -58,12 +73,12 @@ setup(core, { agentContextLayer }) {
 | Plugin | Types registered |
 |--------|-----------------|
 | `agentBuilderPlatform` | `visualization`, `connector` |
-| `dashboardAgent` | `dashboard` |
+| `agentBuilderDashboards` | `dashboard` |
 | `workflowsManagement` | `workflow` |
 
 ## Feature gating
 
-SML functionality is gated behind the `agentContextLayer:experimentalFeatures` UI setting. The search route, crawler tasks, and Agent Builder SML tools all check this flag.
+SML functionality is gated behind the `agentBuilder:experimentalFeatures` UI setting. The search route, crawler tasks, and Agent Builder SML tools all check this flag.
 
 ## Index naming
 

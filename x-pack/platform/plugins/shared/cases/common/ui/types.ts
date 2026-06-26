@@ -93,6 +93,11 @@ export interface CasesUiConfigType {
   templates: {
     enabled: boolean;
   };
+  casesRedesign: {
+    list: boolean;
+    details: boolean;
+    settings: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -347,8 +352,6 @@ export interface Ecs {
 }
 
 export type CaseActionConnector = ActionConnector;
-
-export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
 
 export interface CasesPermissions {
   all: boolean;

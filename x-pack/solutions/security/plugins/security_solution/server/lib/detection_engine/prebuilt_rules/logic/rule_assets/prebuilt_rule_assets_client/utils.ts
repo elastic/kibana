@@ -6,16 +6,28 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
-import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
-import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/types';
+import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
 
-export function prepareQueryDslFilter(
-  ruleIds?: string[],
-  filter?: PrebuiltRuleAssetsFilter
-): ESFilter[] {
+/**
+ * Runtime mapping that converts `severity` keyword values into a numeric rank,
+ * so Elasticsearch can sort by severity in a meaningful order rather than
+ * alphabetically. Must be included in any search that sorts on `severity_rank`.
+ */
+export const PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS: MappingRuntimeFields = {
+  [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
+    type: 'long',
+    script: {
+      source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
+      params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
+    },
+  },
+};
+
+export function prepareQueryDslFilter(ruleIds?: string[], filter?: string): ESFilter[] {
   const queryFilter: ESFilter[] = [];
 
   // Exclude deprecated rules by default from all queries that use this filter.
@@ -37,25 +49,16 @@ export function prepareQueryDslFilter(
     });
   }
 
-  if (filter?.fields?.name?.include?.values) {
-    filter.fields.name.include.values.forEach((name) => {
-      queryFilter.push({
-        wildcard: {
-          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`]: `*${name}*`,
-        },
-      });
-    });
+  if (filter) {
+    try {
+      const kqlDsl = toElasticsearchQuery(fromKueryExpression(filter));
+      queryFilter.push(kqlDsl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Invalid KQL filter: ${message}`);
+    }
   }
 
-  if (filter?.fields.tags?.include?.values) {
-    filter.fields.tags.include.values.forEach((tag) => {
-      queryFilter.push({
-        term: {
-          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`]: tag,
-        },
-      });
-    });
-  }
   return queryFilter;
 }
 
@@ -70,7 +73,6 @@ export function prepareQueryDslSort(sort?: PrebuiltRuleAssetsSort): Sort | undef
     return { [soSortFields[s.field]]: s.order };
   });
 }
-
 /**
  * `savedObjectsClient.search` method requires a non-empty "namespaces" parameter even if you want to search for space-agnostic SO types.
  * This function returns the current namespace to be passed as "namespaces" parameter.

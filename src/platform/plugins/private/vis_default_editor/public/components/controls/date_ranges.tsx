@@ -12,6 +12,7 @@ import {
   htmlIdGenerator,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiToolTip,
   EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
@@ -181,14 +182,15 @@ function DateRangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    title={deleteBtnTitle}
-                    aria-label={deleteBtnTitle}
-                    disabled={value.length === 1}
-                    color="danger"
-                    iconType="trash"
-                    onClick={() => onRemoveRange(id)}
-                  />
+                  <EuiToolTip content={deleteBtnTitle} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={deleteBtnTitle}
+                      disabled={value.length === 1}
+                      color="danger"
+                      iconType="trash"
+                      onClick={() => onRemoveRange(id)}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="xs" />

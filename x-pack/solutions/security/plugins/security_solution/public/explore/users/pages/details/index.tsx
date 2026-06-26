@@ -17,15 +17,13 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -63,14 +61,13 @@ import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { UsersType } from '../../store/model';
-import { getUsersDetailsPageFilters, euidDslFilterToPageFilters } from './helpers';
+import { getUsersDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
@@ -87,9 +84,9 @@ import { useObservedUser } from '../../../../flyout/entity_details/user_right/ho
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { euidDslFilterToPageFilters } from '../../../helpers';
 
 const USERS_DETAILS_OVERVIEW_QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -196,24 +193,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [dispatch]
   );
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
-
-  const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
-    : oldIndicesExist;
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const indicesExist = dataView.hasMatchedIndices();
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
@@ -257,12 +239,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     euidApi?.euid,
   ]);
 
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
 
   // observedUser.entityRecord returns entityStoreFromResult.entityRecord when entityStoreV2Enabled
   const observedUser = useObservedUser(
@@ -312,9 +289,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     try {
       return [
         buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
+          dataView,
           [query],
           [...usersDetailsEventsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -323,15 +298,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [
-    newDataViewPickerEnabled,
-    experimentalDataView,
-    oldSourcererDataViewSpec,
-    query,
-    usersDetailsEventsPageFilters,
-    globalFilters,
-    uiSettings,
-  ]);
+  }, [dataView, query, usersDetailsEventsPageFilters, globalFilters, uiSettings]);
 
   const stringifiedUserDetailsIdentityFilterQuery = useMemo(
     () =>
@@ -383,7 +350,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -393,11 +360,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar
-              dataView={experimentalDataView}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper

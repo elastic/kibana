@@ -13,7 +13,7 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -22,11 +22,11 @@ export function useFindMyKillerState() {
 
   const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index: getSyntheticsCcsIndex(remoteName),
 
       // TODO: remove this once we have a better way to handle this mapping
       runtime_mappings: {
@@ -55,7 +55,7 @@ export function useFindMyKillerState() {
       },
       sort: [{ '@timestamp': 'desc' }],
     },
-    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName],
     { name: 'getStateWhichEndTheState' }
   );
 

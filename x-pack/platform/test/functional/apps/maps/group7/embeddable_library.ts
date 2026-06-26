@@ -7,6 +7,11 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Verifies map embeddable can be linked and unlinked from library
+ *
+ * Migration: replace with unit test in x-pack/platform/plugins/shared/maps/public/react_embeddable/library_transforms.ts
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const { dashboard, header, maps } = getPageObjects(['dashboard', 'header', 'maps']);

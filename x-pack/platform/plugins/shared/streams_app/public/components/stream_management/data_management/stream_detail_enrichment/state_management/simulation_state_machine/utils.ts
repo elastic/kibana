@@ -31,29 +31,80 @@ import type {
   SimulationContext,
 } from './types';
 
-export function getSourceField(
+const trimFields = (fields: Array<string | undefined>): string[] =>
+  fields
+    .map((field) => field?.trim())
+    .filter((field): field is string => Boolean(field && field.length > 0));
+
+export function getSourceFields(
   processor: StreamlangProcessorDefinitionWithUIAttributes
-): string | undefined {
-  const processorSourceField = (() => {
+): string[] {
+  const sourceFields = ((): Array<string | undefined> => {
     switch (processor.action) {
-      case 'append':
-      case 'set':
-        return processor.to;
       case 'convert':
       case 'rename':
       case 'grok':
       case 'dissect':
       case 'date':
+      case 'uri_parts':
+      case 'replace':
+      case 'split':
+      case 'sort':
+      case 'redact':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
+        return [processor.from];
+      case 'network_direction':
+        return [processor.source_ip, processor.destination_ip];
+      case 'set':
+        // `set` reads from a field only when copying; literal values have no source.
+        return processor.copy_from ? [processor.copy_from] : [];
+      case 'concat':
+        // `from` mixes field and literal entries; only field entries are columns.
+        return processor.from.filter((entry) => entry.type === 'field').map((entry) => entry.value);
+      case 'join':
         return processor.from;
-      case 'manual_ingest_pipeline':
-        return undefined;
+      default:
+        // append, math, enrich, remove, remove_by_prefix, json_extract,
+        // drop_document, manual_ingest_pipeline: no individual source column.
+        return [];
+    }
+  })();
+
+  return trimFields(sourceFields);
+}
+
+export function getDestinationField(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string | undefined {
+  const destinationField = ((): string | undefined => {
+    switch (processor.action) {
+      case 'convert':
+      case 'rename':
+      case 'date':
+      case 'replace':
+      case 'split':
+      case 'sort':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
+      case 'set':
+      case 'append':
+      case 'concat':
+      case 'join':
+      case 'math':
+      case 'enrich':
+        return processor.to;
+      case 'network_direction':
+        return processor.target_field;
       default:
         return undefined;
     }
   })();
 
-  const trimmedSourceField = processorSourceField?.trim();
-  return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
+  const trimmed = destinationField?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
 }
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
@@ -121,15 +172,29 @@ export function collectDocumentsAffectedByProcessors(
   });
 }
 
+export const METADATA_FIELDS = new Set(['_id', '_source']);
+
+export function stripMetadataFields<T extends Record<string, unknown>>(docs: T[]): T[] {
+  return docs.map((doc) => {
+    const stripped = { ...doc };
+    for (const key of METADATA_FIELDS) {
+      delete stripped[key];
+    }
+    return stripped;
+  });
+}
+
 export function getAllFieldsInOrder(
   previewRecords: FlattenRecord[] = [],
   detectedFields: DetectedField[] = []
 ): string[] {
   const fields = new Set<string>();
   previewRecords.forEach((record) => {
-    Object.keys(record).forEach((key) => {
-      fields.add(key);
-    });
+    Object.keys(record)
+      .filter((key) => !METADATA_FIELDS.has(key))
+      .forEach((key) => {
+        fields.add(key);
+      });
   });
 
   const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
@@ -139,25 +204,33 @@ export function getAllFieldsInOrder(
 }
 
 export function getTableColumns({
-  currentProcessorSourceField,
+  currentProcessorSourceFields = [],
+  currentProcessorDestinationField,
   detectedFields = [],
   previewDocsFilter,
 }: {
-  currentProcessorSourceField?: string;
+  currentProcessorSourceFields?: string[];
+  currentProcessorDestinationField?: string;
   detectedFields?: DetectedField[];
   previewDocsFilter: PreviewDocsFilterOption;
 }) {
-  if (!currentProcessorSourceField) {
+  const baseFields = uniq(
+    [...currentProcessorSourceFields, currentProcessorDestinationField].filter(
+      (field): field is string => Boolean(field)
+    )
+  );
+
+  if (baseFields.length === 0) {
     return [];
   }
 
   if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
-    return [currentProcessorSourceField];
+    return baseFields;
   }
 
   const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
 
-  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
+  return uniq([...baseFields, ...uniqueDetectedFields]);
 }
 
 type SimulationDocReport = Simulation['documents'][number];

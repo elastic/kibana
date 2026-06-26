@@ -23,7 +23,9 @@ import {
 import type { EuiPopoverProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -87,6 +89,10 @@ const AgentListHeader: React.FC = () => {
           color="text"
           {...(manageAgents ? { href: createAgentHref } : { disabled: true })}
           data-test-subj="agentBuilderAgentSelectorNewAgentButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.sidebar,
+            action: AGENT_BUILDER_UI_EBT.action.navSidebar.NEW_AGENT,
+          })}
         >
           {labels.newAgent}
         </EuiButton>
@@ -112,6 +118,10 @@ const AgentListFooter: React.FC = () => {
         fullWidth
         size="s"
         data-test-subj="agentBuilderAgentSelectorManageAgentsButton"
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: AGENT_BUILDER_UI_EBT.action.navSidebar.MANAGE_ALL_AGENTS_CLICK,
+        })}
       >
         {labels.manageAgents}
       </EuiButton>
@@ -168,6 +178,10 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       color="text"
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.sidebar,
+        action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SELECTOR_OPEN,
+      })}
     >
       <EuiText size="m">
         <strong>
@@ -210,7 +224,13 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
 
         <EuiHorizontalRule margin="none" />
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.sidebar,
+            action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SWITCH,
+          })}
+        >
           <EuiSelectable
             id={agentSelectId}
             aria-label={labels.selectAgent}
@@ -231,6 +251,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
               rowHeight: AGENT_OPTION_ROW_HEIGHT,
               onFocusBadge: false,
               css: selectorListStyles,
+              paddingSize: 's',
             }}
           >
             {(list) => (

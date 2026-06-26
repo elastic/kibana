@@ -11,7 +11,7 @@ import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
 import { ApmServiceInventoryPage } from './pom/pages/apm_service_inventory.page';
-import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
+import { assertDiscoverHasData } from '../lib/validation_helpers';
 
 /**
  * In case you need to run this test locally, you can use https://github.com/elastic/oblt-reference-stack
@@ -31,44 +31,30 @@ test.beforeEach(async ({ page, onboardingHomePage }) => {
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
-/**
- * Kubernetes onboarding with OTel can be slow — increase test timeout to 10 minutes.
- */
-test('Otel Kubernetes', async ({
-  page,
-  onboardingHomePage,
-  otelKubernetesFlowPage,
-  wiredStreamsSelector,
-}) => {
-  test.setTimeout(10 * 60 * 1000);
+test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
-  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_otel_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
   await onboardingHomePage.selectKubernetesUseCase();
   await onboardingHomePage.selectOtelKubernetesQuickstart();
 
-  await otelKubernetesFlowPage.copyHelmRepositorySnippetToClipboard();
-  const helmRepoSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
-
-  if (useWiredStreams) {
-    await wiredStreamsSelector.selectWiredStreamsMode();
-  }
+  const helmRepoSnippet = (await otelKubernetesFlowPage.getHelmRepositorySnippet()) ?? '';
 
   await otelKubernetesFlowPage.copyInstallStackSnippetToClipboard();
   const installStackSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
   let codeSnippet: string;
 
-  if (!isLogsEssentialsMode && !useWiredStreams) {
+  if (!isLogsEssentialsMode) {
     /**
      * Getting the snippets and replacing placeholder
      * with the values used by Ensemble
      */
     await otelKubernetesFlowPage.switchInstrumentationInstructions('java');
+    await otelKubernetesFlowPage.selectNamespaceInstrumentationInstructions();
     const annotateAllResourceSnippet = (
       await otelKubernetesFlowPage.getAnnotateAllResourceSnippet()
     )?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
@@ -113,35 +99,104 @@ test('Otel Kubernetes', async ({
    */
   await page.waitForTimeout(2 * 60000);
 
-  /**
-   * Wired streams only reroutes logs (to logs.otel); metrics and traces are
-   * unaffected. So for wired streams we validate log delivery via Discover and
-   * the Streams page, and intentionally skip the Cluster Overview dashboard
-   * and APM Service Inventory checks. Dashboard/APM validation is already
-   * covered by the non-wired test variants.
-   *
-   * Both "wired streams" and "wired streams + logs essentials" fall into this
-   * single branch because the validation path is identical for both.
-   */
-  if (useWiredStreams) {
-    await otelKubernetesFlowPage.clickExploreLogsCTA();
-    await assertDiscoverHasData(page, { assertHitCount: true });
-    await assertStreamHasData(page, 'logs.otel');
-  } else if (!isLogsEssentialsMode) {
+  if (!isLogsEssentialsMode) {
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
     );
 
     await otelKubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
 
-    const apmServiceInventoryPage = new ApmServiceInventoryPage(
-      await otelKubernetesFlowPage.openServiceInventoryInNewTab()
+    const apmServiceName = 'opentelemetry/java/elastic';
+    const apmProbePath = path.join(
+      __dirname,
+      '..',
+      process.env.ARTIFACTS_FOLDER,
+      'apm_service_probes.json'
     );
+    const apmServiceCalls: Array<{
+      tMs: number;
+      status: number;
+      requestUrl: string;
+      services: Array<{ service: string; agent: string; transactionType: string }>;
+      errorBody?: string;
+    }> = [];
 
-    const serviceTestId = 'serviceLink_opentelemetry/java/elastic';
+    try {
+      // Open the inventory in a new tab manually so the response listener is
+      // attached before navigation. page.on('response') only catches future
+      // events, and the inventory's mount-fetch fires immediately on goto.
+      const serviceInventoryHref = await page
+        .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
+        .getAttribute('href');
+      if (!serviceInventoryHref) {
+        throw new Error('Service inventory URL not found');
+      }
 
-    await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
-    await apmServiceInventoryPage.assertTransactionExists();
+      const apmStartedAt = Date.now();
+      const apmPage = await page.context().newPage();
+      apmPage.on('response', async (response) => {
+        // Match only the top-level list endpoint, not /internal/apm/services/foo/...
+        const url = new URL(response.url());
+        if (url.pathname !== '/internal/apm/services') return;
+        const status = response.status();
+        let services: Array<{ service: string; agent: string; transactionType: string }> = [];
+        let errorBody: string | undefined;
+        if (status >= 400) {
+          try {
+            errorBody = (await response.text()).slice(0, 1000);
+          } catch {
+            errorBody = '<read-failed>';
+          }
+        } else {
+          try {
+            const json = (await response.json()) as {
+              items?: Array<{
+                serviceName?: string;
+                agentName?: string;
+                transactionType?: string;
+              }>;
+              services?: Array<{
+                serviceName?: string;
+                agentName?: string;
+                transactionType?: string;
+              }>;
+            };
+            const items = json.items ?? json.services ?? [];
+            services = items.map((item) => ({
+              service: item?.serviceName ?? '<missing>',
+              agent: item?.agentName ?? '<missing>',
+              transactionType: item?.transactionType ?? '<missing>',
+            }));
+          } catch {
+            // leave services empty
+          }
+        }
+        apmServiceCalls.push({
+          tMs: Date.now() - apmStartedAt,
+          status,
+          requestUrl: response.url(),
+          services,
+          ...(errorBody !== undefined ? { errorBody } : {}),
+        });
+      });
+      await apmPage.goto(serviceInventoryHref);
+      const apmServiceInventoryPage = new ApmServiceInventoryPage(apmPage);
+
+      const serviceTestId = `serviceLink_${apmServiceName}`;
+
+      await apmServiceInventoryPage.waitForServiceRow(serviceTestId);
+      await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
+      await apmServiceInventoryPage.assertTransactionExists();
+    } finally {
+      try {
+        fs.writeFileSync(
+          apmProbePath,
+          JSON.stringify({ serviceName: apmServiceName, calls: apmServiceCalls }, null, 2)
+        );
+      } catch {
+        // best-effort - don't mask the original test failure
+      }
+    }
   } else {
     await otelKubernetesFlowPage.clickExploreLogsCTA();
     await assertDiscoverHasData(page);
