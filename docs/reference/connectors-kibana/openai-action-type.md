@@ -153,4 +153,4 @@ Ensure your local LLM is running and accessible via an OpenAI-compatible API end
 
 ### Example
 
-For a concrete example, refer to [Connect to your own local LLM](docs-content://solutions/security/ai/connect-to-own-local-llm.md) in the Elastic Security solution documentation.
+For a concrete example, refer to [Connect to your own local LLM](docs-content://explore-analyze/ai-features/llm-guides/connect-to-lmstudio-security.md) in the Elastic Security solution documentation.
