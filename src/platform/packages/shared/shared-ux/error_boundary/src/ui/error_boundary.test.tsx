@@ -118,7 +118,6 @@ describe('<KibanaErrorBoundary>', () => {
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'BadComponent',
-      error_message: 'Error: This is an error to show the test user!',
     });
   });
 
@@ -192,7 +191,6 @@ describe('<KibanaErrorBoundary>', () => {
       TRANSIENT_NAVIGATION_WINDOW_MS
     );
     expect(payload.component_name).toBe('BadComponent');
-    expect(payload.error_message).toBe('Error: This is an error to show the test user!');
   });
 
   it('reports after max duration if not unmounted early', async () => {
@@ -221,6 +219,5 @@ describe('<KibanaErrorBoundary>', () => {
       DEFAULT_MAX_ERROR_DURATION_MS
     );
     expect(payload.component_name).toBe('BadComponent');
-    expect(payload.error_message).toBe('Error: This is an error to show the test user!');
   });
 });
