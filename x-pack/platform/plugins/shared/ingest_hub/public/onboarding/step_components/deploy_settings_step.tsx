@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -36,7 +36,7 @@ export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) 
   }, [selectedServiceIds]);
 
   // Fetch IAM permissions from the server endpoint.
-  const { data: iamPermissions } = useIamPermissions(selectedServiceIds);
+  const { data: iamPermissions, error: iamPermissionsError } = useIamPermissions(selectedServiceIds);
 
   // Display names for the per-service toggle in the permissions viewer dropdown.
   const viewerServices = useMemo(
@@ -50,8 +50,31 @@ export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) 
     [selectedServiceIds]
   );
 
-  // Render the viewer only once the endpoint has responded; until then show nothing.
+  // Render the viewer once the endpoint has responded, or a callout on failure.
   const staticKeysContent = useMemo(() => {
+    if (iamPermissionsError) {
+      return (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.deploySettingsStep.iamPermissionsError.title"
+                defaultMessage="Could not load required IAM permissions"
+              />
+            }
+            color="warning"
+            iconType="warning"
+            data-test-subj="iamPermissionsErrorCallout"
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.deploySettingsStep.iamPermissionsError.body"
+              defaultMessage="The required IAM permissions could not be retrieved. Refer to the integration documentation for the permissions needed before continuing."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      );
+    }
     if (!iamPermissions) return null;
     return (
       <AwsPermissionsViewer
@@ -61,7 +84,7 @@ export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) 
         services={viewerServices}
       />
     );
-  }, [iamPermissions, viewerServices]);
+  }, [iamPermissions, iamPermissionsError, viewerServices]);
 
   return (
     <div data-test-subj="onboardingStep-deploy-settings">

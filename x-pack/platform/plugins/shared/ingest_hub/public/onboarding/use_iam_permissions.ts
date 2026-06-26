@@ -46,6 +46,7 @@ export const useIamPermissions = (serviceIds: string[]): UseIamPermissionsResult
 
     setLoading(true);
     setError(null);
+    setData(null);
 
     services.http
       .get<GetIamPermissionsResponse>(IAM_PERMISSIONS_API_PATH, {
