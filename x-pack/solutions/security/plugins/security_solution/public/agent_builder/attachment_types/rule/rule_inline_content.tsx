@@ -24,9 +24,9 @@ import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { ThreatEuiFlexGroup } from '../../../detection_engine/rule_creation_ui/components/description_step/threat_description';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
-import { ScheduleDisplay } from './schedule_display';
 import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
 import type { RuleAttachment } from './helpers';
 import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
@@ -115,6 +115,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   }
 
   const { query, index, filters, interval, from } = getRuleDisplayFields(rule);
+  const schedule = interval
+    ? toSimpleRuleSchedule({ interval, from: from ?? `now-${interval}`, to: 'now' })
+    : undefined;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
@@ -242,7 +245,26 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {interval && (
         <>
           <EuiSpacer size="s" />
-          <ScheduleDisplay interval={interval} from={from} />
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.intervalLabel', {
+                defaultMessage: 'Interval:',
+              })}
+            </strong>{' '}
+            {schedule?.interval ?? interval}
+            {schedule?.lookback && (
+              <>
+                {' | '}
+                <strong>
+                  {i18n.translate(
+                    'xpack.securitySolution.agentBuilder.ruleAttachment.lookbackLabel',
+                    { defaultMessage: 'Lookback time:' }
+                  )}
+                </strong>{' '}
+                {schedule.lookback}
+              </>
+            )}
+          </EuiText>
         </>
       )}
 
