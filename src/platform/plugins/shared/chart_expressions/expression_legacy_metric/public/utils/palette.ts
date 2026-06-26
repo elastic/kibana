@@ -8,6 +8,30 @@
  */
 
 import { isColorDark } from '@elastic/eui';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+
+/**
+ * Coloring domain for the legacy metric. It only ever colors a bare metric value (no Maximum
+ * dimension and no per-tile breakdown wired into the palette), so the domain is anchored at 0:
+ *  - a single value is centered: `[0, 2 * value]` (or `[2 * value, 0]` for negatives), matching the
+ *    metric chart's single-value behavior
+ *
+ * Kept local to the legacy metric (rather than reusing the metric chart's `getDataBoundsForPalette`)
+ * so this deprecated chart's coloring stays decoupled from the metric chart's evolving logic.
+ */
+export const getLegacyMetricDataBounds = (
+  metricId?: string,
+  data?: Datatable
+): { min: number; max: number } => {
+  if (!data || !metricId || data.rows.length !== 1) {
+    return { min: -Infinity, max: Infinity };
+  }
+
+  const metricValues = data.rows.map((row) => row[metricId]);
+
+  const value = metricValues[0];
+  return value < 0 ? { min: value * 2, max: 0 } : { min: 0, max: value * 2 };
+};
 
 export const parseRgbString = (rgb: string) => {
   const groups = rgb.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*?(,\s*(\d+)\s*)?\)/) ?? [];
