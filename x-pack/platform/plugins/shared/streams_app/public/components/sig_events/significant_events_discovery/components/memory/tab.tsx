@@ -68,6 +68,7 @@ export function MemoryTab() {
     icon: string;
     label: string;
     testSubj: string;
+    requiresManage: boolean;
     mutation: { isLoading: boolean; mutate: () => void };
   }> = [
     {
@@ -77,6 +78,7 @@ export function MemoryTab() {
         defaultMessage: 'Scrape Conversations',
       }),
       testSubj: 'streamsMemoryScrapeButton',
+      requiresManage: true,
       mutation: scrapeConversations,
     },
     {
@@ -86,6 +88,7 @@ export function MemoryTab() {
         defaultMessage: 'Consolidate Memory',
       }),
       testSubj: 'streamsMemoryConsolidateButton',
+      requiresManage: true,
       mutation: consolidateMemory,
     },
     {
@@ -95,6 +98,7 @@ export function MemoryTab() {
         defaultMessage: 'Synthesize Memory',
       }),
       testSubj: 'streamsMemorySynthesizeButton',
+      requiresManage: true,
       mutation: synthesizeMemory,
     },
     {
@@ -104,6 +108,7 @@ export function MemoryTab() {
         defaultMessage: 'Detect Gaps',
       }),
       testSubj: 'streamsMemoryDetectGapsButton',
+      requiresManage: false,
       mutation: detectGaps,
     },
   ];
@@ -179,7 +184,6 @@ export function MemoryTab() {
                           defaultMessage: 'Workflow actions',
                         })}
                         onClick={() => setIsActionsPopoverOpen((v) => !v)}
-                        isDisabled={!canManage}
                         data-test-subj="streamsMemoryWorkflowActionsButton"
                       />
                     }
@@ -199,7 +203,9 @@ export function MemoryTab() {
                             action.mutation.mutate();
                             setIsActionsPopoverOpen(false);
                           }}
-                          disabled={action.mutation.isLoading}
+                          disabled={
+                            action.mutation.isLoading || (action.requiresManage && !canManage)
+                          }
                           data-test-subj={action.testSubj}
                         >
                           {action.label}

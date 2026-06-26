@@ -286,6 +286,7 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
                     fill
                     onClick={handleSave}
                     isLoading={updateEntry.isLoading}
+                    isDisabled={!editTitle.trim()}
                     data-test-subj="streamsMemorySaveButton"
                   >
                     {i18n.translate('xpack.streams.memory.saveButton', {
