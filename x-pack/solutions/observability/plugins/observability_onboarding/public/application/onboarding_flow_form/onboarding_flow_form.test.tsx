@@ -135,23 +135,41 @@ describe('OnboardingFlowForm', () => {
       expect(grid).toBeInTheDocument();
     });
 
-    it('should show only OpenTelemetry as the Kubernetes featured quickstart', () => {
-      mockUseCustomCards.mockReturnValue([
-        { id: 'otel-kubernetes', title: 'OpenTelemetry Kubernetes' } as IntegrationCardItem,
-      ]);
+    it('redirects ?category=kubernetes deep-links to the Kubernetes OTel flow', () => {
+      renderWithProviders(
+        <>
+          <OnboardingFlowForm />
+          <LocationDisplay />
+        </>,
+        ['/?category=kubernetes']
+      );
 
-      renderWithProviders(<OnboardingFlowForm />, ['/?category=kubernetes']);
-
-      expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
+      expect(screen.getByTestId('location-display')).toHaveTextContent('/kubernetes');
+      expect(screen.queryByTestId('package-item-otel-kubernetes')).not.toBeInTheDocument();
     });
 
-    it('navigates directly to the Kubernetes OTel flow when the Kubernetes tile is clicked, preserving query params', () => {
+    it('navigates directly to the Kubernetes OTel flow when the Kubernetes tile is selected, preserving non-landing query params', () => {
       renderWithProviders(
         <>
           <OnboardingFlowForm />
           <LocationDisplay />
         </>,
         ['/?foo=bar']
+      );
+
+      const kubernetesTile = screen.getByTestId('observabilityOnboardingUseCaseCard-kubernetes');
+      fireEvent.click(within(kubernetesTile).getByRole('radio'));
+
+      expect(screen.getByTestId('location-display')).toHaveTextContent('/kubernetes?foo=bar');
+    });
+
+    it('strips landing-only params (category, search) when routing to the Kubernetes OTel flow', () => {
+      renderWithProviders(
+        <>
+          <OnboardingFlowForm />
+          <LocationDisplay />
+        </>,
+        ['/?category=host&search=nginx&foo=bar']
       );
 
       const kubernetesTile = screen.getByTestId('observabilityOnboardingUseCaseCard-kubernetes');

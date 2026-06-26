@@ -40,10 +40,6 @@ export class OnboardingApp {
     return this.page.getByTestId('integration-card:otel-logs');
   }
 
-  public get otelKubernetesCard() {
-    return this.page.getByTestId('integration-card:otel-kubernetes');
-  }
-
   public get apmVirtualCard() {
     return this.page.getByTestId('integration-card:apm-virtual');
   }
@@ -92,14 +88,19 @@ export class OnboardingApp {
 
   async openWithCategory(category: 'host' | 'kubernetes' | 'cloud' | 'application') {
     await this.page.gotoApp('observabilityOnboarding', { params: { category } });
+
+    // ?category=kubernetes redirects straight to the OTel flow instead of
+    // rendering the (now removed) intermediate category page.
+    if (category === 'kubernetes') {
+      await this.page.waitForURL(/\/kubernetes(\?|$|#)/);
+      return;
+    }
+
     await this.waitForMainTilesToLoad();
 
     switch (category) {
       case 'host':
         await this.autoDetectLogsCard.waitFor({ state: 'visible' });
-        break;
-      case 'kubernetes':
-        await this.otelKubernetesCard.waitFor({ state: 'visible' });
         break;
       case 'cloud':
         await this.awsLogsVirtualCard.waitFor({ state: 'visible' });

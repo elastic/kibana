@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom-v5-compat';
+import { useSearchParams, useNavigate, useLocation, Navigate } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -34,6 +34,7 @@ import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_f
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
 import type { Category } from './types';
 import { useCustomCards, AWS_CLOUDWATCH_OTEL_CARD_ID } from './use_custom_cards';
+import { buildKubernetesRoutePath } from '../shared/build_kubernetes_route';
 import type { SupportedLogo } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import type { ObservabilityOnboardingAppServices } from '../..';
@@ -219,6 +220,14 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 
+  // The Kubernetes tile routes straight to the OTel flow, so the intermediate
+  // single-card category page is no longer a real destination. Redirect any
+  // deep-link / locator that still lands on ?category=kubernetes (the public
+  // onboarding locator can produce it) to keep one Kubernetes entry behavior.
+  if (selectedCategory === 'kubernetes') {
+    return <Navigate to={buildKubernetesRoutePath(location.search)} replace />;
+  }
+
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiTitle size="s" id={categorySelectorTitleId}>
@@ -307,10 +316,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               // selection in every browser (Chromium fires a spurious click on
               // arrow-select that an onClick handler would catch) and avoids the
               // label+radio bubble double-fire. Matches CollectionMethodSelector.
-              // Deep-links to ?category=kubernetes still render the category page.
+              // Trade-off: arrow-key selection routes away immediately rather than
+              // letting a keyboard user traverse the whole group, but the Kubernetes
+              // flow stays reachable by keyboard (selecting the tile lands on it).
+              // Landing-only params are stripped so the destination URL stays clean.
               onChange={() => {
                 if (option.id === 'kubernetes') {
-                  navigate(`/kubernetes${location.search}`);
+                  navigate(buildKubernetesRoutePath(location.search));
                   return;
                 }
                 setIntegrationSearch('');
@@ -352,14 +364,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <div ref={suggestedPackagesRef}>
           <EuiTitle size="s" id={packageListTitleId}>
             <strong>
-              {selectedCategory === 'kubernetes'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Kubernetes cluster using:',
-                    }
-                  )
-                : selectedCategory === 'application'
+              {selectedCategory === 'application'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
                     {
