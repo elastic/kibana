@@ -475,6 +475,18 @@ describe('listSearchSources', () => {
       expect(results.datasets.map((d) => d.name)).toEqual(['employees']);
     });
 
+    it('honors `-`-prefixed exclusion patterns for datasets', async () => {
+      esClient.transport.request.mockResolvedValue(datasetResponse);
+
+      const results = await listSearchSources({
+        pattern: '*,-employees',
+        includeDatasets: true,
+        esClient,
+      });
+
+      expect(results.datasets.map((d) => d.name)).toEqual(['customers']);
+    });
+
     it('degrades gracefully to no datasets when the `_query/dataset` API is unavailable', async () => {
       esClient.transport.request.mockRejectedValue(new Error('no handler found for uri'));
 

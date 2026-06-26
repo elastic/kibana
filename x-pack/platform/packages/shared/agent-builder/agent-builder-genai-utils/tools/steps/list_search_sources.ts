@@ -52,19 +52,25 @@ export interface ListSourcesResponse {
 
 /**
  * Matches an external dataset name against an Elasticsearch-style index pattern.
- * Supports comma-separated globs with `*` wildcards (e.g. `*`, `emp*`, `a,b-*`).
+ * Supports comma-separated globs with `*` wildcards and `-`-prefixed exclusions
+ * (e.g. `*`, `emp*`, `a,b-*`, `logs-*,-logs-old`), mirroring how `_resolve/index`
+ * honors exclusions for indices, aliases and data streams.
  */
 const matchesPattern = (name: string, pattern: string): boolean => {
-  return pattern.split(',').some((part) => {
-    const trimmed = part.trim();
-    if (!trimmed || trimmed === '*') {
-      return true;
-    }
-    const regex = new RegExp(
-      `^${trimmed.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`
-    );
-    return regex.test(name);
-  });
+  const toRegExp = (glob: string) =>
+    new RegExp(`^${glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
+
+  const parts = pattern
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const includes = parts.filter((part) => !part.startsWith('-'));
+  const excludes = parts.filter((part) => part.startsWith('-')).map((part) => part.slice(1));
+
+  const included =
+    includes.length === 0 || includes.some((part) => part === '*' || toRegExp(part).test(name));
+  const excluded = excludes.some((part) => part === '*' || toRegExp(part).test(name));
+  return included && !excluded;
 };
 
 /**
