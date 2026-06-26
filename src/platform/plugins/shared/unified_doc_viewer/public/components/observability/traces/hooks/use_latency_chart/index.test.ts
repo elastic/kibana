@@ -24,6 +24,7 @@ jest.mock('@elastic/apm-rum', () => ({
 }));
 
 const mockFetchSpanDistribution = jest.fn();
+const mockFetchTransactionDistribution = jest.fn();
 const mockAdd = jest.fn();
 const mockAddDanger = jest.fn();
 
@@ -38,6 +39,11 @@ const mockTheme: EuiThemeComputed = {
 const mockGetById = jest.fn((id: string) => {
   if (id === 'observability-traces-fetch-latency-overall-span-distribution') {
     return { fetchLatencyOverallSpanDistribution: mockFetchSpanDistribution };
+  }
+  if (id === 'observability-traces-fetch-latency-overall-transaction-distribution') {
+    return {
+      fetchLatencyOverallTransactionDistribution: mockFetchTransactionDistribution,
+    };
   }
   return undefined;
 });
@@ -81,8 +87,14 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('useLatencyChart', () => {
-  const params = {
+  const spanParams = {
     spanName: 'test-span',
+    serviceName: 'test-service',
+  };
+
+  const transactionParams = {
+    transactionName: 'test-transaction',
+    transactionType: 'request',
     serviceName: 'test-service',
   };
 
@@ -96,7 +108,7 @@ describe('useLatencyChart', () => {
       percentileThresholdValue: 456,
     });
 
-    const { result } = renderHook(() => useLatencyChart(params));
+    const { result } = renderHook(() => useLatencyChart(spanParams));
 
     await waitFor(() => !result.current.loading);
 
@@ -109,7 +121,7 @@ describe('useLatencyChart', () => {
     const error = new Error('Fetch error');
     mockFetchSpanDistribution.mockRejectedValue(error);
 
-    const { result } = renderHook(() => useLatencyChart(params));
+    const { result } = renderHook(() => useLatencyChart(spanParams));
 
     await waitFor(() => !result.current.loading);
 
@@ -130,5 +142,50 @@ describe('useLatencyChart', () => {
       })
     );
     expect(mockAddDanger).not.toHaveBeenCalled();
+  });
+
+  describe('transaction distribution', () => {
+    it('fetches and sets data successfully', async () => {
+      mockFetchTransactionDistribution.mockResolvedValue({
+        overallHistogram: [{ x: 1, y: 2 }],
+        percentileThresholdValue: 123,
+      });
+
+      const { result } = renderHook(() => useLatencyChart(transactionParams));
+
+      await waitFor(() => !result.current.loading);
+
+      expect(result.current.hasError).toBe(false);
+      expect(result.current.data?.distributionChartData).toHaveLength(1);
+      expect(result.current.data?.percentileThresholdValue).toBe(123);
+      expect(mockFetchSpanDistribution).not.toHaveBeenCalled();
+    });
+
+    it('captures a single APM event with the operation id label and shows a non-capturing danger toast on error', async () => {
+      const error = new Error('Fetch error');
+      mockFetchTransactionDistribution.mockRejectedValue(error);
+
+      const { result } = renderHook(() => useLatencyChart(transactionParams));
+
+      await waitFor(() => !result.current.loading);
+
+      expect(result.current.hasError).toBe(true);
+
+      await waitFor(() => {
+        expect(apm.captureError).toHaveBeenCalledWith(error, {
+          labels: { kibana_meta_operation_id: 'fetch-latency-overall-distribution' },
+        });
+      });
+
+      expect(mockAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          color: 'danger',
+          iconType: 'error',
+          title: 'An error occurred while fetching the latency histogram',
+          text: 'Fetch error',
+        })
+      );
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
   });
 });
