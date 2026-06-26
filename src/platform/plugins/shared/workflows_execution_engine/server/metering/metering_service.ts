@@ -50,17 +50,41 @@ export class WorkflowsMeteringService {
     const instanceGroupId = projectId || deploymentId;
     const instanceGroupType = projectId ? 'serverless_project' : 'stateful_deployment';
 
+    this.logger.debug(() => {
+      return `[reportWorkflowExecution] Preparing workflow usage report: ${JSON.stringify({
+        executionId: execution.id,
+        workflowId: execution.workflowId,
+        status: execution.status,
+        projectId,
+        deploymentId,
+        instanceGroupId,
+        instanceGroupType,
+        csp: cloudSetup?.csp,
+        region: cloudSetup?.region,
+        kibanaClusterId: cloudSetup?.kibanaClusterId,
+      })}`;
+    });
+
     // Self-managed: no metering (no projectId or deploymentId available)
     if (!instanceGroupId) {
+      this.logger.debug(
+        `[reportWorkflowExecution] Skipping workflow usage report for execution ${execution.id}: missing projectId/deploymentId`
+      );
       return;
     }
 
     // Only report for terminal states; skip SKIPPED executions since they
     // were dropped by concurrency limits and never actually ran.
     if (!isTerminalStatus(execution.status as ExecutionStatus)) {
+      this.logger.debug(
+        `[reportWorkflowExecution] Skipping workflow usage report for execution ${execution.id}: non-terminal status ${execution.status}`
+      );
       return;
     }
     if (execution.status === ExecutionStatus.SKIPPED) {
+      this.logger.debug(
+        `[reportWorkflowExecution] Skipping workflow usage report for execution ${execution.id}: skipped execution`
+      );
       return;
     }
 
@@ -72,7 +96,17 @@ export class WorkflowsMeteringService {
     );
 
     try {
+      this.logger.debug(() => {
+        return `[reportWorkflowExecution] Reporting workflow usage: ${JSON.stringify(
+          usageRecord,
+          undefined,
+          2
+        )}`;
+      });
       await this.usageReportingService.reportUsage([usageRecord]);
+      this.logger.debug(
+        `[reportWorkflowExecution] Reported workflow usage for execution ${execution.id}`
+      );
     } catch (err) {
       // Log with billing-relevant details per monitoring requirements:
       // project ID, type, and count for impact assessment

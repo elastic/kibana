@@ -59,6 +59,20 @@ class MeteringServiceImpl implements MeteringService {
     const projectOrDeploymentId = projectId ?? this.cloud.deploymentId;
     const instanceGroupType = projectId ? 'serverless_project' : 'stateful_deployment';
 
+    this.logger.debug(() => {
+      return `[reportExecution] Preparing agent builder usage report: ${JSON.stringify({
+        executionId: execution.executionId,
+        agentId: execution.agentId,
+        projectId,
+        deploymentId: this.cloud?.deploymentId,
+        instanceGroupId: projectOrDeploymentId,
+        instanceGroupType,
+        csp: this.cloud?.csp,
+        region: this.cloud?.region,
+        kibanaClusterId: this.cloud?.kibanaClusterId,
+      })}`;
+    });
+
     if (!projectOrDeploymentId) {
       this.logger.debug(`[reportExecution] Skipping reporting due to project or deployment ID.`);
       return;
@@ -130,5 +144,8 @@ class MeteringServiceImpl implements MeteringService {
     });
 
     await this.usageApi.usageReporting.reportUsage([record]);
+    this.logger.debug(
+      `[reportExecution] Reported agent builder usage for execution ${executionId}`
+    );
   }
 }
