@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -62,6 +63,8 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.host>;
   /** When using Entity Store v2: first seen from entity lifecycle. */
@@ -102,6 +105,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     hostName,
     jobNameById,
     isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
@@ -306,12 +310,18 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
-                    <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                    LinkRenderer ? (
+                      <LinkRenderer field="host.ip" value={ip}>
+                        {ip}
+                      </LinkRenderer>
+                    ) : (
+                      <FlyoutLink
+                        field={'host.ip'}
+                        value={ip}
+                        scopeId={scopeId}
+                        isFlyoutOpen={isFlyoutOpen}
+                      />
+                    )
                   ) : (
                     getEmptyTagValue()
                   )
@@ -350,7 +360,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
+      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen, LinkRenderer]
     );
     return (
       <>

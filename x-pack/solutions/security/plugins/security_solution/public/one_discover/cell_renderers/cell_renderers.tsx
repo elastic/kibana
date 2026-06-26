@@ -24,6 +24,7 @@ import type { SecurityAppStore } from '../../common/store/types';
 import { IpCellRenderer } from './ip_cell_renderer';
 import { RuleNameCellRenderer } from './rule_name_cell_renderer';
 import { HostCellRenderer, HOST_CELL_RENDERER_FIELDS } from './host_cell_renderer';
+import { UserCellRenderer, USER_CELL_RENDERER_FIELDS } from './user_cell_renderer';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export type SecuritySolutionRowCellRendererGetter = Awaited<
@@ -41,6 +42,7 @@ const ALLOWED_DISCOVER_RENDERED_FIELDS = new Set([
   SIGNAL_RULE_NAME_FIELD_NAME,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   ...HOST_CELL_RENDERER_FIELDS,
+  ...USER_CELL_RENDERER_FIELDS,
 ]);
 
 export const getCellRendererForGivenRecord = (
@@ -61,6 +63,12 @@ export const getCellRendererForGivenRecord = (
       if (HOST_CELL_RENDERER_FIELDS.has(fieldName)) {
         return function HostFieldRenderer(props: DataGridCellValueElementProps) {
           return <HostCellRenderer {...props} services={services} store={store} />;
+        };
+      }
+
+      if (USER_CELL_RENDERER_FIELDS.has(fieldName)) {
+        return function UserFieldRenderer(props: DataGridCellValueElementProps) {
+          return <UserCellRenderer {...props} services={services} store={store} />;
         };
       }
 

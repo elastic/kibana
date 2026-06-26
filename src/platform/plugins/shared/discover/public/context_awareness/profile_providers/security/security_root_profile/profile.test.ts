@@ -103,6 +103,20 @@ describe('createSecurityRootProfileProvider', () => {
       expect(result['kibana.alert.workflow_status']).toBeDefined();
     });
 
+    it('should add user.name cell renderer for alerts index', async () => {
+      const { provider, context } = await resolveSecurityContext((fieldName) =>
+        fieldName === 'user.name' ? MockComponent : undefined
+      );
+      const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), {
+        context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
+      const result = getCellRenderers({
+        dataView: createMockDataView(`${ALERTS_INDEX_PATTERN}default`),
+      } as Parameters<typeof getCellRenderers>[0]);
+      expect(result['user.name']).toBeDefined();
+    });
+
     it('should add cell renderers for IP fields without overriding existing ones', async () => {
       const ExistingRenderer: FunctionComponent<DataGridCellValueElementProps> = () => null;
       const { provider, context } = await resolveSecurityContext(() => MockComponent);

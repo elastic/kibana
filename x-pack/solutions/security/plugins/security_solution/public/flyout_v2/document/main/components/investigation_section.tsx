@@ -31,7 +31,10 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import {
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+} from '../../../../timelines/components/timeline/body/renderers/constants';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -118,7 +121,10 @@ export const InvestigationSection = memo(
 
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />
+        <OpenFlyoutLink
+          {...props}
+          asParent={props.field === HOST_NAME_FIELD_NAME || props.field === USER_NAME_FIELD_NAME}
+        />
       ),
       []
     );
