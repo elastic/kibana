@@ -8,10 +8,7 @@
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
-import {
-  bulkRuleSelectorSchema,
-  bulkRuleSummaryOutputSchema,
-} from '../common/bulk_action_schemas';
+import { bulkRuleSelectorSchema, bulkRuleSummaryOutputSchema } from '../common/bulk_action_schemas';
 
 export const DisableRuleStepId = 'security.disableRule' as const;
 
