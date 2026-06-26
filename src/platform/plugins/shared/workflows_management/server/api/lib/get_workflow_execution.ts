@@ -15,6 +15,7 @@ import type {
 } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import { mapWorkflowExecutionDocumentVersion } from './workflow_execution_dto_transform';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -112,5 +113,6 @@ function transformToWorkflowExecutionDetailDto(
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
     concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+    ...mapWorkflowExecutionDocumentVersion(workflowExecution),
   };
 }
