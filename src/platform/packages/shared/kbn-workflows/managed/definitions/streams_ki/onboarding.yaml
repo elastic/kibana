@@ -176,8 +176,9 @@ steps:
           queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 4: Keep-alive — re-stamp durable KIs not refreshed this cycle so
-  #         DSL retention does not physically delete them.
+  # Step 4: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
+  #         features whose exclusion must be remembered) not refreshed this
+  #         cycle so DSL retention does not physically delete them.
   # -----------------------------------------------------------------------
   - name: keep_alive_durable
     type: kibana.request

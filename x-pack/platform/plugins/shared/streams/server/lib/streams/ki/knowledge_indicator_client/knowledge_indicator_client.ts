@@ -76,11 +76,11 @@ export class KnowledgeIndicatorClient {
     return computeExpiresAt(new Date().toISOString(), this.ttlDays);
   }
 
-  keepAliveDurableIndicators(
+  keepAlivePersistentIndicators(
     stream: string,
     options: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    return this.writer.keepAliveDurable(stream, options);
+    return this.writer.keepAlivePersistent(stream, options);
   }
 
   deleteIndicators(stream: string) {

@@ -723,7 +723,7 @@ function createQueryDoc(
   };
 }
 
-describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
+describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
   const LAST_REFRESHED_BEFORE = '2026-06-01T00:00:00.000Z';
 
   it('re-emits durable features with a fresh @timestamp and no expires_at', async () => {
@@ -731,7 +731,7 @@ describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
     const durableFeature = createFeatureDoc();
     runEsql.mockResolvedValueOnce({ hits: [durableFeature] });
 
-    const result = await client.keepAliveDurableIndicators(STREAM, {
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
       lastRefreshedBefore: LAST_REFRESHED_BEFORE,
     });
 
@@ -752,12 +752,32 @@ describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
     const durableExcluded = createFeatureDoc({ excluded: true });
     runEsql.mockResolvedValueOnce({ hits: [durableExcluded] });
 
-    await client.keepAliveDurableIndicators(STREAM, { lastRefreshedBefore: LAST_REFRESHED_BEFORE });
+    await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
 
     const [{ documents }] = create.mock.calls[0];
     const written = documents[0] as StoredFeatureKnowledgeIndicator;
     expect(written.excluded).toBe(true);
     expect(written.expires_at).toBeUndefined();
+  });
+
+  it('keeps alive an excluded managed feature, preserving excluded and the original expires_at', async () => {
+    const { client, create, runEsql } = makeClient();
+    const managedExpiresAt = '2026-07-01T00:00:00.000Z';
+    const excludedManaged = createFeatureDoc({ excluded: true, expires_at: managedExpiresAt });
+    runEsql.mockResolvedValueOnce({ hits: [excludedManaged] });
+
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
+
+    expect(result).toEqual({ refreshed: 1 });
+    const [{ documents }] = create.mock.calls[0];
+    const written = documents[0] as StoredFeatureKnowledgeIndicator;
+    expect(written.excluded).toBe(true);
+    expect(written.expires_at).toBe(managedExpiresAt);
+    expect(written['@timestamp']).not.toBe(excludedManaged['@timestamp']);
   });
 
   it('re-emits durable queries with a fresh @timestamp, no expires_at, and preserves rule_backed/rule_id', async () => {
@@ -772,7 +792,7 @@ describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
     });
     runEsql.mockResolvedValueOnce({ hits: [durableQuery] });
 
-    const result = await client.keepAliveDurableIndicators(STREAM, {
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
       lastRefreshedBefore: LAST_REFRESHED_BEFORE,
     });
 
@@ -792,7 +812,7 @@ describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
     const { client, create, runEsql } = makeClient();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    const result = await client.keepAliveDurableIndicators(STREAM, {
+    const result = await client.keepAlivePersistentIndicators(STREAM, {
       lastRefreshedBefore: LAST_REFRESHED_BEFORE,
     });
 
@@ -800,16 +820,19 @@ describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('includes IS_DURABLE and olderThan in the postGrouping WHERE passed to ES|QL', async () => {
+  it('includes the durable-or-excluded predicate and olderThan in the postGrouping WHERE passed to ES|QL', async () => {
     const { client, runEsql } = makeClient();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await client.keepAliveDurableIndicators(STREAM, { lastRefreshedBefore: LAST_REFRESHED_BEFORE });
+    await client.keepAlivePersistentIndicators(STREAM, {
+      lastRefreshedBefore: LAST_REFRESHED_BEFORE,
+    });
 
     expect(runEsql).toHaveBeenCalledTimes(1);
     const query = runEsql.mock.calls[0][1] as { print: () => string };
     const printed = query.print();
     expect(printed).toContain('expires_at IS NULL');
+    expect(printed).toMatch(/excluded ==/i);
     expect(printed).toContain(LAST_REFRESHED_BEFORE);
   });
 });

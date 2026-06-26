@@ -14,7 +14,13 @@ import {
   type StoredFeatureKnowledgeIndicator,
   type StoredKnowledgeIndicator,
 } from '../data_stream';
-import { combineWhere, inPredicate, IS_DURABLE, IS_NOT_DELETED, olderThan } from '../esql_helpers';
+import {
+  combineWhere,
+  inPredicate,
+  IS_DURABLE_OR_EXCLUDED,
+  IS_NOT_DELETED,
+  olderThan,
+} from '../esql_helpers';
 import { ID, STREAM_NAME } from '../fields';
 import {
   computeExpiresAt,
@@ -281,14 +287,14 @@ export class IndicatorWriter {
     return docs;
   }
 
-  async keepAliveDurable(
+  async keepAlivePersistent(
     stream: string,
     { lastRefreshedBefore }: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
     const where = inPredicate(STREAM_NAME, [stream]);
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
-      IS_DURABLE,
+      IS_DURABLE_OR_EXCLUDED,
       olderThan(lastRefreshedBefore)
     );
     const latest = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
@@ -300,14 +306,15 @@ export class IndicatorWriter {
       const docs: StoredKnowledgeIndicator[] = [];
       for (const doc of latest) {
         if (isStoredFeatureKnowledgeIndicator(doc)) {
-          docs.push(toStoredFeature(stream, fromStoredFeature(doc), includeEmbedding));
+          docs.push(toStoredFeature(stream, fromStoredFeature(doc), includeEmbedding, doc.expires_at));
         } else if (isStoredQueryKnowledgeIndicator(doc)) {
           const link = fromStoredQuery(doc);
           docs.push(
             toStoredQuery(
               stream,
               { ...link.query, rule_backed: link.rule_backed, rule_id: link.rule_id },
-              includeEmbedding
+              includeEmbedding,
+              doc.expires_at
             )
           );
         }

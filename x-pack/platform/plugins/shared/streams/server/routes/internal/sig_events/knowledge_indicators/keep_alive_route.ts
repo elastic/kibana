@@ -10,11 +10,11 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 
-export const keepAliveDurableIndicatorsRoute = createServerRoute({
+export const keepAlivePersistentIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
   options: {
     access: 'internal',
-    summary: 'Keep alive durable knowledge indicators for a stream',
+    summary: 'Keep alive persistent (durable or excluded) knowledge indicators for a stream',
   },
   security: {
     authz: {
@@ -33,7 +33,7 @@ export const keepAliveDurableIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { refreshed } = await kiClient.keepAliveDurableIndicators(params.path.streamName, {
+    const { refreshed } = await kiClient.keepAlivePersistentIndicators(params.path.streamName, {
       lastRefreshedBefore: params.body.lastRefreshedBefore,
     });
     return { refreshed };
@@ -41,5 +41,5 @@ export const keepAliveDurableIndicatorsRoute = createServerRoute({
 });
 
 export const keepAliveRoutes = {
-  ...keepAliveDurableIndicatorsRoute,
+  ...keepAlivePersistentIndicatorsRoute,
 };
