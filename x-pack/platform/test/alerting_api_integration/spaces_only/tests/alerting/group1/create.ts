@@ -521,7 +521,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           type: 'phrases',
           key: 'host.name',
           params: ['a', 'b'],
-          value: ['a', 'b'],
           negate: false,
           disabled: false,
         },
