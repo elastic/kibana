@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  WorkflowLookup,
-  StepInfo,
-  StepPropInfo,
-} from './common/yaml/build_workflow_lookup';
+export type { WorkflowLookup, StepInfo, StepPropInfo } from './common/yaml/build_workflow_lookup';
