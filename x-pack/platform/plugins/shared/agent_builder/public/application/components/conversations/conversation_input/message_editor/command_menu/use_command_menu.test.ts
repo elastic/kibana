@@ -13,6 +13,10 @@ jest.mock('../../../../../hooks/use_context_engine_enabled', () => ({
   useContextEngineEnabled: () => true,
 }));
 
+jest.mock('../../../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: () => true,
+}));
+
 jest.mock('./utils/get_text_before_cursor');
 const mockGetTextBeforeCursor = jest.mocked(getTextBeforeCursor);
 

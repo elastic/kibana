@@ -35,12 +35,12 @@ import type { AgentContextLayerPluginStart } from '../types';
  *
  * Both branches are gated by two checks before the contract is invoked:
  *
- * 1. The `agentBuilder:enableExperimentalFeatures` UI setting (the same
- *    feature flag that gates every HTTP route via `withSmlFeatureFlag` and
- *    the SML crawler task). When disabled the step returns an error
- *    result without touching the indexer — keeping the workflow step in
- *    lockstep with the rest of the AGL surface so a deployment with the
- *    flag off cannot silently mutate the SML index via a workflow.
+ * 1. The `contextEngine:enabled` UI setting (the same feature flag that
+ *    gates every HTTP route via `withSmlFeatureFlag` and the SML crawler
+ *    task). When disabled the step returns an error result without
+ *    touching the indexer — keeping the workflow step in lockstep with the
+ *    rest of the AGL surface so a deployment with the flag off cannot
+ *    silently mutate the SML index via a workflow.
  * 2. The `agentContextLayer:write` Kibana privilege against the workflow's
  *    fake request. The HTTP upsert/delete routes already enforce the same
  *    privilege via route security; the workflow step is a second
@@ -90,7 +90,7 @@ export const createContextEngineAddEntryStepDefinition = ({
         if (!featureEnabled) {
           return {
             error: new Error(
-              `Context Engine is disabled — cannot ${action} Context Engine entry '${originId}'.`
+              `Context Engine (experimental feature) is disabled — cannot ${action} Context Engine entry '${originId}'.`
             ),
           };
         }

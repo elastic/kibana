@@ -9,5 +9,5 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const useContextEngineEnabled = (): boolean => {
-  return useUiSetting<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+  return useUiSetting<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
 };
