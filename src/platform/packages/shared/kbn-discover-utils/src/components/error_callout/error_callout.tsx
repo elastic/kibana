@@ -13,10 +13,12 @@ import {
   EuiCodeBlock,
   EuiEmptyPrompt,
   EuiIcon,
+  EuiText,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { renderSearchError } from '@kbn/search-errors';
+import { EsError, getParsedReasonFromShardFailure, renderSearchError } from '@kbn/search-errors';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -39,6 +41,10 @@ export const ErrorCallout = ({
 }: ErrorCalloutProps) => {
   const { euiTheme } = useEuiTheme();
   const searchErrorDisplay = renderSearchError(error);
+  const reason =
+    error instanceof EsError
+      ? getParsedReasonFromShardFailure(error.attributes?.error?.caused_by?.caused_by)
+      : null;
 
   return (
     <EuiEmptyPrompt
@@ -80,6 +86,12 @@ export const ErrorCallout = ({
                 </EuiButton>
               ) : null}
             </>
+          )}
+          {Boolean(reason) && (
+            <div>
+              <EuiSpacer size="s" />
+              <EuiText size="s">{reason}</EuiText>
+            </div>
           )}
         </>
       }
