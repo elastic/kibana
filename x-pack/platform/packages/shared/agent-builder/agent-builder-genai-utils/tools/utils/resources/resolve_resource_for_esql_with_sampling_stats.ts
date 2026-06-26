@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingFieldWithStats } from '../sampling';
 import { getSampleDocs, createStatsFromSamples, combineFieldsWithStats } from '../sampling';
 import type { ResolveResourceResponse } from './resolve_resource';
@@ -29,13 +30,14 @@ export const resolveResourceForEsqlWithSamplingStats = async ({
   samplingSize?: number;
   includeDatasets?: boolean;
 }) => {
-  const [resource, stats] = await Promise.all([
-    resolveResourceForEsql({ resourceName, esClient, includeDatasets }),
-    // best-effort: sampling uses `_search`, which some targets (e.g. datasets) don't support
-    getSampleDocs({ esClient, index: resourceName, size: samplingSize })
-      .then(({ samples }) => createStatsFromSamples({ samples }))
-      .catch(() => createStatsFromSamples({ samples: [] })),
-  ]);
+  const resource = await resolveResourceForEsql({ resourceName, esClient, includeDatasets });
+  // datasets are not searchable via `_search`, so skip sampling entirely for them
+  const stats =
+    resource.type === EsResourceType.dataset
+      ? createStatsFromSamples({ samples: [] })
+      : await getSampleDocs({ esClient, index: resourceName, size: samplingSize })
+          .then(({ samples }) => createStatsFromSamples({ samples }))
+          .catch(() => createStatsFromSamples({ samples: [] }));
 
   const combinedFields = combineFieldsWithStats({ fields: resource.fields, stats });
 
