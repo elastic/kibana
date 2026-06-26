@@ -176,11 +176,8 @@ export async function getServicesItems({
         items,
         maxCountExceeded,
         serviceOverflowCount,
-        serviceCount: serviceStats.length,
       };
     }
-
-    const result = await getItemsForRollupInterval(rollupInterval);
 
     // Only rolled-up service metrics have a finer tier to fall back to; raw transaction events do
     // not. When the requested (coarse) rollup exposes fewer services than the finest tier, some
@@ -193,9 +190,12 @@ export async function getServicesItems({
     const finestRollup = getFinestRollupFallback(rollupInterval);
 
     if (enableRollupFallback && isRolledUpMetric && finestRollup) {
-      const finestServiceCount = await countServices(finestRollup);
+      const [coarseServiceCount, finestServiceCount] = await Promise.all([
+        countServices(rollupInterval),
+        countServices(finestRollup),
+      ]);
 
-      if (finestServiceCount > result.serviceCount) {
+      if (finestServiceCount > coarseServiceCount) {
         const fallbackResult = await getItemsForRollupInterval(finestRollup);
 
         return {
@@ -206,6 +206,8 @@ export async function getServicesItems({
         };
       }
     }
+
+    const result = await getItemsForRollupInterval(rollupInterval);
 
     return {
       items: result.items,

@@ -233,8 +233,6 @@ export async function getServiceTransactionGroups({
     return response.aggregations?.transaction_group_count.value ?? 0;
   }
 
-  const result = await queryRollupInterval(rollupInterval);
-
   // Only metric document types are rolled up; raw transaction events have no finer tier to fall
   // back to.
   const isRolledUpMetric = documentType === ApmDocumentType.TransactionMetric;
@@ -247,9 +245,12 @@ export async function getServiceTransactionGroups({
     // group whose only coarse metric document fell outside the queried window). Re-query at the
     // finest tier so those groups reappear, and flag it so the UI can inform the user.
     const finestRollup = finerRollups[finerRollups.length - 1];
-    const finestGroupCount = await countTransactionGroups(finestRollup);
+    const [coarseGroupCount, finestGroupCount] = await Promise.all([
+      countTransactionGroups(rollupInterval),
+      countTransactionGroups(finestRollup),
+    ]);
 
-    if (finestGroupCount > result.transactionGroups.length) {
+    if (finestGroupCount > coarseGroupCount) {
       const fallbackResult = await queryRollupInterval(finestRollup);
 
       return {
@@ -259,6 +260,8 @@ export async function getServiceTransactionGroups({
       };
     }
   }
+
+  const result = await queryRollupInterval(rollupInterval);
 
   return {
     ...result,
