@@ -1806,6 +1806,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
+      const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      const breachedHash = breachedEvents[0].group_hash;
+
       await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': HOST } },
@@ -1818,6 +1823,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       });
 
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
+      expect(noDataEvents[0].group_hash).toBe(breachedHash);
     }
   );
 
