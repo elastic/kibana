@@ -17,6 +17,7 @@ import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInternalStateSelector } from '../../state_management/redux';
 import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_header';
+import { DiscoverApplicationAttachmentButton } from './discover_application_attachment_button';
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
@@ -77,6 +78,7 @@ export const ChromeAppHeader = ({
         menu={appMenu}
         sticky={false}
         padding="s"
+        titleActionAppend={<DiscoverApplicationAttachmentButton />}
         titleAppend={titleAppend}
         borderless={hasTabs}
       />

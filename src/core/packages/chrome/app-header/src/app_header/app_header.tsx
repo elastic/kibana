@@ -36,6 +36,10 @@ export interface AppHeaderViewProps {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig & { isCollapsed?: boolean };
   favorite?: ReactNode;
+  /**
+   * Optional quick action rendered beside the title on header hover (e.g. attach-to-agent).
+   */
+  titleActionAppend?: ReactNode;
   titleAppend?: ReactNode;
   metadata?: AppHeaderMetadataItems;
   sticky?: boolean;
@@ -57,6 +61,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     badges,
     menu,
     favorite,
+    titleActionAppend,
     titleAppend,
     metadata,
     sticky,
@@ -82,6 +87,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       !!menu?.items?.length ||
       !!titleAppend ||
       !!shareAction ||
+      !!titleActionAppend ||
       !!favorite ||
       !!metadata?.length ||
       !!docLink ||
@@ -96,7 +102,13 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       <AppHeaderShell
         title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
-        titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleActions={
+          <TitleActions
+            titleActionAppend={titleActionAppend}
+            shareAction={shareAction}
+            favorite={favorite}
+          />
+        }
         titleAppend={titleAppend}
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />

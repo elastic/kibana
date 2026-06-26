@@ -33,7 +33,7 @@ const useTitleActionsStyles = () => {
       color: ${euiTheme.colors.textSubdued};
     `;
 
-    const favoriteSlot = css`
+    const quickActionSlot = css`
       display: flex;
       flex-shrink: 0;
       align-items: center;
@@ -45,58 +45,66 @@ const useTitleActionsStyles = () => {
       }
     `;
 
-    return { root, iconButton, favoriteSlot };
+    return { root, iconButton, quickActionSlot };
   }, [euiTheme]);
 };
 
 export interface TitleActionsProps {
+  titleActionAppend?: ReactNode;
   shareAction?: ShareAction;
   favorite?: ReactNode;
 }
 
-export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favorite }) => {
-  const styles = useTitleActionsStyles();
+export const TitleActions = React.memo<TitleActionsProps>(
+  ({ titleActionAppend, shareAction, favorite }) => {
+    const styles = useTitleActionsStyles();
 
-  if (!shareAction && !favorite) {
-    return null;
+    if (!titleActionAppend && !shareAction && !favorite) {
+      return null;
+    }
+
+    const shareTooltipContent = shareAction?.tooltipContent ?? SHARE_ARIA_LABEL;
+    const hasCustomTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
+
+    return (
+      <div css={styles.root} data-test-subj="appHeaderTitleActions">
+        {titleActionAppend ? (
+          <div css={styles.quickActionSlot} data-test-subj="appHeaderTitleActionAppend">
+            {titleActionAppend}
+          </div>
+        ) : null}
+        {shareAction ? (
+          <EuiToolTip
+            content={shareTooltipContent}
+            title={shareAction.tooltipTitle}
+            {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+          >
+            <EuiButtonIcon
+              iconType="share"
+              color="text"
+              display="empty"
+              size="xs"
+              css={styles.iconButton}
+              aria-label={SHARE_ARIA_LABEL}
+              isDisabled={shareAction.isDisabled}
+              data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
+              onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
+                shareAction.onClick(event.currentTarget)
+              }
+            />
+          </EuiToolTip>
+        ) : null}
+        {favorite ? (
+          // Temporary slot: favorite is still a caller-owned React node.
+          // Replace with a typed app-header action before treating it as a stable API.
+          // https://github.com/elastic/kibana/issues/271402
+          <div css={styles.quickActionSlot} data-test-subj="appHeaderFavorite">
+            {favorite}
+          </div>
+        ) : null}
+      </div>
+    );
   }
-
-  const shareTooltipContent = shareAction?.tooltipContent ?? SHARE_ARIA_LABEL;
-  const hasCustomTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
-
-  return (
-    <div css={styles.root} data-test-subj="appHeaderTitleActions">
-      {shareAction ? (
-        <EuiToolTip
-          content={shareTooltipContent}
-          title={shareAction.tooltipTitle}
-          {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
-        >
-          <EuiButtonIcon
-            iconType="share"
-            color="text"
-            display="empty"
-            size="xs"
-            css={styles.iconButton}
-            aria-label={SHARE_ARIA_LABEL}
-            isDisabled={shareAction.isDisabled}
-            data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
-              shareAction.onClick(event.currentTarget)
-            }
-          />
-        </EuiToolTip>
-      ) : null}
-      {favorite ? (
-        // Temporary slot: favorite is still a caller-owned React node.
-        // Replace with a typed app-header action before treating it as a stable API.
-        // https://github.com/elastic/kibana/issues/271402
-        <div css={styles.favoriteSlot} data-test-subj="appHeaderFavorite">
-          {favorite}
-        </div>
-      ) : null}
-    </div>
-  );
-});
+);
 
 TitleActions.displayName = 'TitleActions';
