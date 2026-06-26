@@ -31,6 +31,7 @@ export interface UseAiPanelHtmlResult {
   html: string;
   isLoading: boolean;
   error: string | undefined;
+  isAiUnavailable: boolean;
 }
 
 export function useAiPanelHtml({
@@ -45,6 +46,7 @@ export function useAiPanelHtml({
   const [html, setHtml] = useState('');
   const [isLoading, setIsLoading] = useState(Boolean(prompt));
   const [error, setError] = useState<string | undefined>();
+  const [isAiUnavailable, setIsAiUnavailable] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
   const accRef = useRef('');
@@ -176,8 +178,13 @@ export function useAiPanelHtml({
         if (err.name !== 'AbortError') {
           hasFailed = true;
           stopInterval();
-          setError(err instanceof Error ? err.message : String(err));
-          setIsLoading(false);
+          if (err.message.toLowerCase().includes('no inference connector')) {
+            setIsAiUnavailable(true);
+            setIsLoading(false);
+          } else {
+            setError(err instanceof Error ? err.message : String(err));
+            setIsLoading(false);
+          }
         }
       })
       .finally(() => {
@@ -192,5 +199,5 @@ export function useAiPanelHtml({
     };
   }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate]);
 
-  return { html, isLoading, error };
+  return { html, isLoading, error, isAiUnavailable };
 }

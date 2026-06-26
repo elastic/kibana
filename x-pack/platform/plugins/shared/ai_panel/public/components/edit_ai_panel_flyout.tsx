@@ -79,6 +79,14 @@ export const EditAiPanelFlyout = ({
   const [draftEsqlQuery, setDraftEsqlQuery] = useState(esqlQuery ?? '');
   const [draftTemplate, setDraftTemplate] = useState(template ?? '');
   const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
+  const [isAiAvailable, setIsAiAvailable] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    getServices()
+      .core.http.get<{ connectors: unknown[] }>('/internal/inference/connectors')
+      .then((res) => setIsAiAvailable(res.connectors.length > 0))
+      .catch(() => setIsAiAvailable(false));
+  }, []);
 
   useEffect(() => {
     if (!draftEsqlQuery.trim()) {
@@ -164,12 +172,28 @@ export const EditAiPanelFlyout = ({
             onChange={(e) => setDraftPrompt(e.target.value)}
             rows={5}
             fullWidth
+            disabled={isAiAvailable === false}
             placeholder={i18n.translate('aiPanel.editFlyout.promptPlaceholder', {
               defaultMessage:
                 'e.g. Show a status board of top product categories by revenue with color-coded thresholds...',
             })}
           />
         </EuiFormRow>
+
+        {isAiAvailable === false && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              size="s"
+              color="warning"
+              iconType="warning"
+              title={i18n.translate('aiPanel.editFlyout.noAiConnector', {
+                defaultMessage:
+                  'AI features are not available. Configure an AI connector to enable prompt-based generation.',
+              })}
+            />
+          </>
+        )}
 
         <EuiSpacer size="s" />
 
@@ -384,7 +408,7 @@ export const EditAiPanelFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              disabled={!draftPrompt.trim()}
+              disabled={!draftPrompt.trim() || (isAiAvailable === false && draftPrompt !== prompt)}
               onClick={() => {
                 onSave(
                   draftPrompt,

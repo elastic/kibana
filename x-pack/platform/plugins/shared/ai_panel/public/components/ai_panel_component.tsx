@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -46,7 +46,7 @@ export const AiPanelComponent = ({
   onTemplateChange,
 }: AiPanelComponentProps) => {
   const { euiTheme } = useEuiTheme();
-  const { html, isLoading, error } = useAiPanelHtml({
+  const { html, isLoading, error, isAiUnavailable } = useAiPanelHtml({
     embeddableId,
     prompt,
     esqlQuery,
@@ -72,7 +72,29 @@ export const AiPanelComponent = ({
   return (
     <div css={wrapperCss}>
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {error && (
+      {isAiUnavailable && (
+        <EuiEmptyPrompt
+          iconType="sparkles"
+          iconColor="subdued"
+          title={
+            <h3>
+              {i18n.translate('aiPanel.aiUnavailable.title', {
+                defaultMessage: 'AI not available',
+              })}
+            </h3>
+          }
+          body={
+            <p>
+              {i18n.translate('aiPanel.aiUnavailable.body', {
+                defaultMessage:
+                  'This panel requires an AI connector to generate content. Contact your administrator to configure one.',
+              })}
+            </p>
+          }
+          color="subdued"
+        />
+      )}
+      {!isAiUnavailable && error && (
         <EuiCallOut
           color="danger"
           title={i18n.translate('aiPanel.error.title', {
@@ -84,7 +106,7 @@ export const AiPanelComponent = ({
           {error}
         </EuiCallOut>
       )}
-      {!error && html && (
+      {!isAiUnavailable && !error && html && (
         <div css={iframeContainerCss}>
           <iframe css={iframeCss} srcDoc={html} sandbox="" title="AI panel" />
         </div>
