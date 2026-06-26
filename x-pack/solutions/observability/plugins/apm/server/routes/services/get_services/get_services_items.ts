@@ -11,7 +11,7 @@ import {
   ApmDocumentType,
   type ApmServiceTransactionDocumentType,
 } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
+import type { RollupInterval } from '../../../../common/rollup';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -21,6 +21,7 @@ import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
+import { withRollupFallback } from '../../../lib/rollup_fallback';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getServiceAnomalyScores } from './get_service_anomaly_scores';
 import { getServicesAlerts } from './get_service_alerts';
@@ -30,22 +31,6 @@ import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
-
-// Finer rollup intervals to fall back to (in order) when the requested coarse rollup is missing
-// services that a finer tier can still see (e.g. a service whose 60m metrics were never written).
-const ROLLUP_FALLBACK_ORDER: RollupInterval[] = [
-  RollupInterval.SixtyMinutes,
-  RollupInterval.TenMinutes,
-  RollupInterval.OneMinute,
-];
-
-function getFinestRollupFallback(rollupInterval: RollupInterval): RollupInterval | undefined {
-  const currentIndex = ROLLUP_FALLBACK_ORDER.indexOf(rollupInterval);
-  if (currentIndex < 0 || currentIndex === ROLLUP_FALLBACK_ORDER.length - 1) {
-    return undefined;
-  }
-  return ROLLUP_FALLBACK_ORDER[ROLLUP_FALLBACK_ORDER.length - 1];
-}
 
 export interface ServicesItemsResponse {
   items: MergedServiceStat[];
@@ -180,39 +165,24 @@ export async function getServicesItems({
     }
 
     // Only rolled-up service metrics have a finer tier to fall back to; raw transaction events do
-    // not. When the requested (coarse) rollup exposes fewer services than the finest tier, some
-    // services are silently missing from the list. Re-query at the finest tier so they reappear and
-    // flag it so the UI can inform the user.
+    // not.
     const isRolledUpMetric =
       documentType === ApmDocumentType.ServiceTransactionMetric ||
       documentType === ApmDocumentType.TransactionMetric;
 
-    const finestRollup = getFinestRollupFallback(rollupInterval);
-
-    if (enableRollupFallback && isRolledUpMetric && finestRollup) {
-      const [coarseServiceCount, finestServiceCount] = await Promise.all([
-        countServices(rollupInterval),
-        countServices(finestRollup),
-      ]);
-
-      if (finestServiceCount > coarseServiceCount) {
-        const fallbackResult = await getItemsForRollupInterval(finestRollup);
-
-        return {
-          items: fallbackResult.items,
-          maxCountExceeded: fallbackResult.maxCountExceeded,
-          serviceOverflowCount: fallbackResult.serviceOverflowCount,
-          fellBackToRollupInterval: finestRollup,
-        };
-      }
-    }
-
-    const result = await getItemsForRollupInterval(rollupInterval);
+    const { result, fellBackToRollupInterval } = await withRollupFallback({
+      enableRollupFallback,
+      isRolledUpMetric,
+      rollupInterval,
+      countEntities: countServices,
+      queryRollupInterval: getItemsForRollupInterval,
+    });
 
     return {
       items: result.items,
       maxCountExceeded: result.maxCountExceeded,
       serviceOverflowCount: result.serviceOverflowCount,
+      fellBackToRollupInterval,
     };
   });
 }

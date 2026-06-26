@@ -20,32 +20,14 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { RollupInterval } from '../../../common/rollup';
+import type { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
+import { withRollupFallback } from '../../lib/rollup_fallback';
 
 const txGroupsDroppedBucketName = '_other';
 export const MAX_NUMBER_OF_TX_GROUPS = 1_000;
-
-// Finer rollup intervals to fall back to (in order) when the requested coarse rollup returns no
-// transaction groups for this service/type. Coarse rollups (e.g. 60m) can be globally present but
-// miss an individual transaction group whose only metric document fell outside the queried window
-// or was never written for that tier, so the row silently disappears. Falling back to a finer tier
-// recovers the data transparently.
-const ROLLUP_FALLBACK_ORDER: RollupInterval[] = [
-  RollupInterval.SixtyMinutes,
-  RollupInterval.TenMinutes,
-  RollupInterval.OneMinute,
-];
-
-function getFinerRollupFallbacks(rollupInterval: RollupInterval): RollupInterval[] {
-  const currentIndex = ROLLUP_FALLBACK_ORDER.indexOf(rollupInterval);
-  if (currentIndex < 0) {
-    return [];
-  }
-  return ROLLUP_FALLBACK_ORDER.slice(currentIndex + 1);
-}
 
 export interface TransactionGroups {
   alertsCount: number;
@@ -237,34 +219,17 @@ export async function getServiceTransactionGroups({
   // back to.
   const isRolledUpMetric = documentType === ApmDocumentType.TransactionMetric;
 
-  const finerRollups = getFinerRollupFallbacks(rollupInterval);
-
-  if (enableRollupFallback && isRolledUpMetric && finerRollups.length > 0) {
-    // The finest available tier is the most complete one. If it exposes more transaction groups than
-    // the requested (coarse) rollup, some groups are silently missing from the coarse view (e.g. a
-    // group whose only coarse metric document fell outside the queried window). Re-query at the
-    // finest tier so those groups reappear, and flag it so the UI can inform the user.
-    const finestRollup = finerRollups[finerRollups.length - 1];
-    const [coarseGroupCount, finestGroupCount] = await Promise.all([
-      countTransactionGroups(rollupInterval),
-      countTransactionGroups(finestRollup),
-    ]);
-
-    if (finestGroupCount > coarseGroupCount) {
-      const fallbackResult = await queryRollupInterval(finestRollup);
-
-      return {
-        ...fallbackResult,
-        hasActiveAlerts: false,
-        fellBackToRollupInterval: finestRollup,
-      };
-    }
-  }
-
-  const result = await queryRollupInterval(rollupInterval);
+  const { result, fellBackToRollupInterval } = await withRollupFallback({
+    enableRollupFallback,
+    isRolledUpMetric,
+    rollupInterval,
+    countEntities: countTransactionGroups,
+    queryRollupInterval,
+  });
 
   return {
     ...result,
     hasActiveAlerts: false,
+    fellBackToRollupInterval,
   };
 }
