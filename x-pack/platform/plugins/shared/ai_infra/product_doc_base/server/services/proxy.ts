@@ -19,22 +19,6 @@ interface RequestInitWithDispatcher extends RequestInit {
 
 type GetProxyDispatcherParams = ArtifactRepositoryProxySettings & { targetUrl: string };
 
-function getProxyHeaders(options: GetProxyDispatcherParams): Record<string, string> | undefined {
-  if (options.proxyHeaders) {
-    return options.proxyHeaders;
-  }
-
-  if (options.targetUrl.startsWith('https:')) {
-    const endpointParsed = new URL(options.targetUrl);
-    return {
-      // the proxied URL's host is put in the header instead of the server's actual host
-      Host: endpointParsed.host,
-    };
-  }
-
-  return undefined;
-}
-
 function getProxyDispatcher(options: GetProxyDispatcherParams): ProxyAgent {
   const proxyParsed = new URL(options.proxyUrl);
   const authValue = proxyParsed.username
@@ -46,12 +30,12 @@ function getProxyDispatcher(options: GetProxyDispatcherParams): ProxyAgent {
       ? { rejectUnauthorized: false as const }
       : undefined;
 
-  const headers = getProxyHeaders(options);
-
   return new ProxyAgent({
     uri: options.proxyUrl,
     ...(authValue ? { auth: authValue } : {}),
-    ...(headers ? { headers } : {}),
+    // Only pass explicit proxyHeaders. Do not set Host here: undici ProxyAgent already
+    // sets it for CONNECT requests, and adding Host causes UND_ERR_INVALID_ARG.
+    ...(options.proxyHeaders ? { headers: options.proxyHeaders } : {}),
     ...(tlsOptions ? { proxyTls: tlsOptions, requestTls: tlsOptions } : {}),
   });
 }
