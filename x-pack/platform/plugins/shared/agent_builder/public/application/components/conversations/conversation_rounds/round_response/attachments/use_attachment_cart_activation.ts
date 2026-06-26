@@ -16,6 +16,7 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
+import { useOptionalConversationSpineContext } from '../../../../../../agent_first/conversation_spine/conversation_spine_context';
 import { useCanvasContext } from './canvas_context';
 
 const GROUP_ATTACHMENT_TYPE = 'group';
@@ -35,6 +36,7 @@ export const pickCartActivationButton = (buttons: ActionButton[]): ActionButton 
 
 export const useAttachmentCartActivation = () => {
   const { openCanvas, closeCanvas } = useCanvasContext();
+  const spineContext = useOptionalConversationSpineContext();
   const { conversationActions, isEmbeddedContext } = useConversationContext();
   const conversationId = useConversationId();
   const agentId = useAgentId();
@@ -88,6 +90,10 @@ export const useAttachmentCartActivation = () => {
       };
 
       const openCanvasForAttachment = () => {
+        if (isAgentWorkspaceMount && !isSidebar && spineContext) {
+          spineContext.openAttachmentPreview(attachment);
+          return;
+        }
         openCanvas(attachment, isSidebar);
       };
 
@@ -127,6 +133,7 @@ export const useAttachmentCartActivation = () => {
       offerSidebarConversation,
       openCanvas,
       openSidebarConversation,
+      spineContext,
     ]
   );
 

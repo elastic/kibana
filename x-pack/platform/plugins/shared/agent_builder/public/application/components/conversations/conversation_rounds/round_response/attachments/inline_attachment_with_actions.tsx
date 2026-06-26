@@ -21,6 +21,7 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
+import { useOptionalConversationSpineContext } from '../../../../../../agent_first/conversation_spine/conversation_spine_context';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -79,10 +80,15 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   );
 
   const useOverlayPreview = isAgentWorkspaceMount && !isSidebar;
+  const spineContext = useOptionalConversationSpineContext();
 
   const openCanvas = useCallback(() => {
+    if (useOverlayPreview && spineContext) {
+      spineContext.openAttachmentPreview(attachment);
+      return;
+    }
     openCanvasContext(attachment, isSidebar);
-  }, [openCanvasContext, attachment, isSidebar]);
+  }, [useOverlayPreview, spineContext, openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {

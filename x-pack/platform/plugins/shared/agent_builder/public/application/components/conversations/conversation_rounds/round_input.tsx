@@ -56,6 +56,8 @@ export const RoundInput = ({
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
+    padding-block: ${euiTheme.size.s};
+    padding-inline: ${euiTheme.size.m};
   `;
 
   return (
@@ -68,7 +70,7 @@ export const RoundInput = ({
     >
       <EuiPanel
         css={inputContainerStyles}
-        paddingSize="m"
+        paddingSize="none"
         hasShadow={false}
         hasBorder={false}
         aria-label={labels.userMessage}

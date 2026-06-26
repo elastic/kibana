@@ -12,6 +12,8 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
+import { ConversationSpineProvider } from '../../../agent_first/conversation_spine/conversation_spine_context';
+import { ConversationSpineMount } from '../../../agent_first/conversation_spine/conversation_spine_mount';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import {
@@ -46,19 +48,22 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
 
   return (
     <RoutedConversationsProvider>
-      <CanvasProvider>
-        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-          <div css={headerShellStyles}>
-            <div css={headerRowStyles}>
-              <ConversationHeader />
+      <ConversationSpineProvider>
+        <CanvasProvider>
+          <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+            <div css={headerShellStyles}>
+              <div css={headerRowStyles}>
+                <ConversationHeader />
+              </div>
             </div>
+            <div css={contentStyles}>
+              <Conversation />
+            </div>
+            <ConversationSpineMount attachmentsService={attachmentsService} />
+            <CanvasFlyout attachmentsService={attachmentsService} />
           </div>
-          <div css={contentStyles}>
-            <Conversation />
-          </div>
-          <CanvasFlyout attachmentsService={attachmentsService} />
-        </div>
-      </CanvasProvider>
+        </CanvasProvider>
+      </ConversationSpineProvider>
     </RoutedConversationsProvider>
   );
 };
