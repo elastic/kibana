@@ -198,6 +198,30 @@ describe('buildSuperTimelineModel', () => {
       expect(model.dateRange.start).toBe('2020-01-01T00:00:00.000Z');
       expect(model.dateRange.end).toBe('now');
     });
+
+    it('handles legacy numeric epoch values in dateRange (stored before ISO migration)', () => {
+      // Legacy saved objects persisted dateRange.start/end as epoch ms numbers.
+      // See SavedDateRangePickerRuntimeType comment in common/types/timeline/saved_object.ts.
+      const EPOCH_JAN_2022 = new Date('2022-01-01T00:00:00.000Z').getTime(); // 1640995200000
+      const EPOCH_JAN_2024 = new Date('2024-01-01T00:00:00.000Z').getTime(); // 1704067200000
+      const t1 = makeTimeline({
+        // cast via unknown to simulate legacy numeric values reaching the model
+        dateRange: {
+          start: EPOCH_JAN_2022 as unknown as string,
+          end: EPOCH_JAN_2022 as unknown as string,
+        },
+      });
+      const t2 = makeTimeline({
+        dateRange: {
+          start: EPOCH_JAN_2024 as unknown as string,
+          end: EPOCH_JAN_2024 as unknown as string,
+        },
+      });
+      // t1 has the earlier start, t2 has the later end
+      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      expect(model.dateRange.start).toBe(EPOCH_JAN_2022 as unknown as string);
+      expect(model.dateRange.end).toBe(EPOCH_JAN_2024 as unknown as string);
+    });
   });
 
   describe('column union', () => {

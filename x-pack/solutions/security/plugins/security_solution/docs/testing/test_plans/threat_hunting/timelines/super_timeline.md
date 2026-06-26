@@ -44,7 +44,10 @@ The view is **transient** — never saved. Opened from two entry points (PR 4 ad
     objects.
   - **Date range**: earliest start → latest end across all source timelines.
   - **Columns**: union in first-seen order, falling back to `defaultColumns`.
-  - **Queries**: one OR `CombinedFilter` built from each timeline's `combineQueries` result.
+  - **Queries**: one OR `CombinedFilter` (one pill, labeled `SUPER_TIMELINE_QUERY_ALIAS` =
+    "Super Timeline Sources") built from each timeline's `combineQueries` result.
+    `buildCombinedFilter` strips sub-filter aliases via its internal `cleanUpFilter`, so only the
+    outer combined pill label is visible in the filter bar — not per-timeline labels.
     EQL/ESQL-only timelines contribute no sub-filter and are listed in `skippedQueryTimelines`.
 
 ### Why
@@ -164,7 +167,7 @@ and notes attached to events and to the timelines themselves.
 7. Verify the modal:
    - Header shows **"Super Timeline — read-only"** badge.
    - No **Save**, **Attach to Case**, or **Add to Favorites** buttons.
-   - **Query** tab shows the merged events from all selected timelines.
+   - **Query** tab shows the merged events from all selected timelines. A single "Super Timeline Sources" filter pill is visible in the filter bar (OR semantics, no per-timeline pills).
    - **Pinned Events** tab shows the union of pinned events across all selected timelines.
    - **Notes** tab shows notes from all selected timelines (no add-note input).
    - **ESQL** and **EQL** tabs are hidden.
