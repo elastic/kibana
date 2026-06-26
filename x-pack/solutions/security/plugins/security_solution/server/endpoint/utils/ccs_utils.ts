@@ -37,7 +37,14 @@ export const hasConnectedRemoteClusters = (
   const promise = esClient.cluster
     .remoteInfo()
     .then((response) => Object.values(response).some((r) => r.connected))
-    .catch(() => false);
+    .catch(() => {
+      // Don't pin a transient remoteInfo() failure for the whole TTL — drop this cache entry
+      // so the next call retries instead of serving a stale `false` that hides remote endpoints.
+      if (ccsCache?.timestamp === now) {
+        ccsCache = null;
+      }
+      return false;
+    });
 
   ccsCache = { promise, timestamp: now };
 

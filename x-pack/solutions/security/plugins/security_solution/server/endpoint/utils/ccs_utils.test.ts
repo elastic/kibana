@@ -54,13 +54,28 @@ describe('hasConnectedRemoteClusters', () => {
     expect(esClient.cluster.remoteInfo).not.toHaveBeenCalled();
   });
 
-  it('returns false and caches the result when remoteInfo throws', async () => {
+  it('returns false when remoteInfo throws', async () => {
     const esClient = {
       cluster: { remoteInfo: jest.fn().mockRejectedValue(new Error('permission denied')) },
     } as unknown as ElasticsearchClient;
     expect(await hasConnectedRemoteClusters(esClient, true)).toBe(false);
+  });
+
+  it('does not cache a transient remoteInfo failure and retries on the next call', async () => {
+    const esClient = {
+      cluster: {
+        remoteInfo: jest
+          .fn()
+          .mockRejectedValueOnce(new Error('transient'))
+          .mockResolvedValue({ cluster_a: { connected: true } }),
+      },
+    } as unknown as ElasticsearchClient;
+
+    // first call hits the transient failure -> false, and must NOT be cached
     expect(await hasConnectedRemoteClusters(esClient, true)).toBe(false);
-    expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(1);
+    // next call retries instead of serving the stale false, and sees the recovered remote
+    expect(await hasConnectedRemoteClusters(esClient, true)).toBe(true);
+    expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(2);
   });
 });
 
