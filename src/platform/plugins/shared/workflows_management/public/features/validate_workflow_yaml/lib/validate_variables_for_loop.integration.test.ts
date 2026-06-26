@@ -13,7 +13,6 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ConnectorStep } from '@kbn/workflows/spec/schema';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import {
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_VALIDATION_YAML,
@@ -22,6 +21,7 @@ import {
 } from './__fixtures__/for_loop_validation_workflow';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 import { extendContextWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
 
