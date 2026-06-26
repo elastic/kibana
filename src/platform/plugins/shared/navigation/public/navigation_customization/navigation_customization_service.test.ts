@@ -42,6 +42,7 @@ const makeDeps = (overrides?: {
 
   const core = {
     userStorage: {
+      peek: jest.fn().mockReturnValue(overrides?.userStorageValue),
       get$: jest.fn().mockReturnValue(userStorage$),
       get: jest.fn(),
       set: jest.fn().mockResolvedValue(undefined),
@@ -88,6 +89,18 @@ const makeDeps = (overrides?: {
 
 describe('NavigationCustomizationService', () => {
   describe('start()', () => {
+    it('seeds setNavigationCustomization synchronously from the cache via peek, before any get$ emission', () => {
+      const seeded: NavigationCustomization = { moves: [{ id: 'b', afterId: 'a' }], hidden: [] };
+      const { core, chrome, isUnauthenticated } = makeDeps({ userStorageValue: seeded });
+      const service = new NavigationCustomizationService();
+
+      service.start({ core, chrome, isUnauthenticated });
+
+      // Seed happened synchronously inside start(), without waiting on get$.
+      expect(core.userStorage.peek).toHaveBeenCalledWith(NAV_CUSTOMIZATION_STORAGE_KEY);
+      expect(chrome.project.setNavigationCustomization).toHaveBeenCalledWith(seeded);
+    });
+
     it('subscribes to stored customization and calls setNavigationCustomization', () => {
       const { core, chrome, userStorage$, isUnauthenticated } = makeDeps();
       const service = new NavigationCustomizationService();
@@ -128,6 +141,9 @@ describe('NavigationCustomizationService', () => {
       const service = new NavigationCustomizationService();
 
       service.start({ core, chrome, isUnauthenticated });
+      // Ignore the synchronous seed fired during start(); this test covers the
+      // get$ subscription specifically.
+      (chrome.project.setNavigationCustomization as jest.Mock).mockClear();
       service.stop();
 
       userStorage$.next({ moves: [], hidden: [] });

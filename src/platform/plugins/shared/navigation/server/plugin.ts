@@ -56,16 +56,9 @@ export class NavigationServerPlugin
   ) {
     core.uiSettings.register(getUiSettings(core, plugins, this.logger));
 
-    // preload: true is load-bearing for the customization key.
-    //
-    // The client subscribes to userStorage.get$(NAV_CUSTOMIZATION_STORAGE_KEY)
-    // and feeds it into chrome.project.setNavigationCustomization(). Preloading
-    // makes that first emission synchronous (the value is server-injected at
-    // page load), which lets the seed land before chrome.project.initNavigation()
-    // runs in solution plugins. Combined with the conditional write inside
-    // initNavigation, this prevents a startup race that would otherwise wipe
-    // the user's saved customization. Do not flip preload to false without
-    // auditing project_navigation_service.initNavigation.
+    // preload: true populates the client cache at page load so the navigation
+    // can read the stored customization synchronously on first paint. Without
+    // it, the customization applies a moment later, causing a brief flash.
     core.userStorage.register({
       [NAV_CUSTOMIZATION_STORAGE_KEY]: {
         schema: navCustomizationSchema,

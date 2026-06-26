@@ -56,23 +56,19 @@ export class NavigationCustomizationService {
   private menuLinkAdded = false;
 
   /**
-   * Subscribes to the stored customization key and reactively applies it to
-   * the project navigation. Must be called once per plugin lifecycle; skips
-   * the subscription if the user is unauthenticated.
+   * Applies the stored customization to the project navigation. Must be called
+   * once per plugin lifecycle; skips if the user is unauthenticated.
    *
-   * The initial emission is synchronous because NAV_CUSTOMIZATION_STORAGE_KEY
-   * is registered with `preload: true` on the server (see
-   * navigation/server/plugin.ts), so the value is server-injected at page
-   * load. This synchrony ensures the stored customization reaches
-   * setNavigationCustomization before any solution plugin calls
-   * chrome.project.initNavigation(), preventing a startup race that would
-   * silently discard the user's saved preferences. If this key ever loses
-   * preload: true the seed becomes async and the race returns.
-   *
-   * Subsequent emissions handle multi-tab sync.
+   * The stored value is seeded synchronously via `peek()` so the navigation has
+   * the customization applied on first paint. The `get$()` subscription then
+   * keeps it in sync with later updates (in-tab saves and multi-tab sync).
    */
   start({ core, chrome, isUnauthenticated }: NavigationCustomizationServiceStartDeps): void {
     if (isUnauthenticated) return;
+
+    chrome.project.setNavigationCustomization(
+      core.userStorage.peek<NavigationCustomization>(NAV_CUSTOMIZATION_STORAGE_KEY)
+    );
 
     core.userStorage
       .get$<NavigationCustomization>(NAV_CUSTOMIZATION_STORAGE_KEY)
