@@ -127,10 +127,10 @@ export const RESTORE_ACTIONS_LABEL = i18n.translate(
   }
 );
 
-export const RESTORE_VERSION_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreVersionLabel',
+export const RESTORE_REVISION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreRevisionLabel',
   {
-    defaultMessage: 'Restore this version',
+    defaultMessage: 'Restore this revision',
   }
 );
 

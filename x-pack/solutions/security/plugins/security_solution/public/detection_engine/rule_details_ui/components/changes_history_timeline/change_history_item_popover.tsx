@@ -73,7 +73,7 @@ export const ChangeHistoryItemPopover = memo(function ChangeHistoryItemPopover({
                 onRestore();
               }}
             >
-              {i18n.RESTORE_VERSION_LABEL}
+              {i18n.RESTORE_REVISION_LABEL}
             </EuiContextMenuItem>,
           ]}
         />
