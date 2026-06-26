@@ -38,7 +38,7 @@ export const parseFieldDefinitionsToInlineFields = (defs: FieldDefinition[]): In
 
 /**
  * Coerces a YAML-parsed default value to a string for use in `extended_fields`.
- * Mirrors the same logic in `public/components/templates_v2/utils/index.ts`.
+ * Single source of truth; re-exported from `public/components/templates_v2/utils`.
  */
 export const getYamlDefaultAsString = (rawDefault: unknown): string => {
   if (rawDefault === undefined || rawDefault === null) {
