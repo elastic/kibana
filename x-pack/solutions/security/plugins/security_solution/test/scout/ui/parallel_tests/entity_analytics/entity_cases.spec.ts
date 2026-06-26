@@ -41,7 +41,16 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
+import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { spaceTest, tags } from '../../fixtures';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const CASE_DEFAULTS = {
+  connector: { id: 'none', name: 'none', type: '.none', fields: null },
+  settings: { syncAlerts: false, extractObservables: false },
+  owner: 'securitySolution',
+} as const;
 
 // ── Test suite ────────────────────────────────────────────────────────────────
 
@@ -63,8 +72,8 @@ spaceTest.describe.skip(
   'Entity attachment cases – flyout add-to-case actions and Entities tab',
   { tag: [...tags.stateful.classic] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, casesApi }) => {
-      await casesApi.deleteAll();
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
       await apiServices.detectionRule.deleteAll();
 
       await apiServices.detectionRule.createCustomQueryRule({
@@ -75,8 +84,8 @@ spaceTest.describe.skip(
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices, casesApi }) => {
-      await casesApi.deleteAll();
+    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
+      await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
       await apiServices.detectionRule.deleteAll();
     });
 
@@ -111,14 +120,31 @@ spaceTest.describe.skip(
 
     spaceTest(
       'Entities tab renders the entity table when attachments were added via API',
-      async ({ pageObjects, scoutSpace, casesApi }) => {
+      async ({ pageObjects, scoutSpace, apiServices }) => {
         const { entityCases } = pageObjects;
-        const caseId = await casesApi.createWithEntityAttachment({
-          caseName: `Scout entity case – API – ${scoutSpace.id}`,
-          entityStoreId: 'test-entity-store-id',
-          entityName: 'scout-host',
-          entityType: 'host',
-        });
+        const { data: created } = await apiServices.cases.create(
+          {
+            title: `Scout entity case – API – ${scoutSpace.id}`,
+            description: 'Created by Scout entity attachment test',
+            tags: ['scout'],
+            ...CASE_DEFAULTS,
+          },
+          scoutSpace.id
+        );
+        // Entity attachment is a unified type not present in the shared AttachmentRequest
+        // union — double-assert to bridge the gap without widening to `any`.
+        type CasesCommentParam = Parameters<typeof apiServices.cases.comments.create>[1];
+        await apiServices.cases.comments.create(
+          created.id,
+          {
+            type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+            attachmentId: 'test-entity-store-id',
+            metadata: { entityName: 'scout-host', entityType: 'host' },
+            owner: 'securitySolution',
+          } as unknown as CasesCommentParam,
+          scoutSpace.id
+        );
+        const caseId = created.id;
 
         await entityCases.navigateToCase(caseId);
 
@@ -131,13 +157,18 @@ spaceTest.describe.skip(
 
     spaceTest(
       'Entities tab renders the empty state when a case has no entity attachments',
-      async ({ pageObjects, scoutSpace, casesApi }) => {
+      async ({ pageObjects, scoutSpace, apiServices }) => {
         const { entityCases } = pageObjects;
-        const caseId = await casesApi.createCase({
-          title: `Scout entity case – empty – ${scoutSpace.id}`,
-          description: 'No entity attachments',
-          tags: [],
-        });
+        const { data: created } = await apiServices.cases.create(
+          {
+            title: `Scout entity case – empty – ${scoutSpace.id}`,
+            description: 'No entity attachments',
+            tags: [],
+            ...CASE_DEFAULTS,
+          },
+          scoutSpace.id
+        );
+        const caseId = created.id;
 
         await entityCases.navigateToCase(caseId);
 
