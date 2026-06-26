@@ -44,7 +44,7 @@ import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
-import { ThroughputCell, ThroughputNotApplicable } from './throughput_cell';
+import { ThroughputCell } from './throughput_cell';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -98,6 +98,11 @@ export const AgentlessPackagePoliciesTable = ({
         {}
       ),
     [throughputData]
+  );
+
+  const hasNonConnectorPolicies = useMemo(
+    () => packagePolicies.some(({ packagePolicy }) => !isConnectorPolicy(packagePolicy)),
+    [packagePolicies]
   );
 
   const discoverLocator = useDiscoverLocator();
@@ -284,25 +289,27 @@ export const AgentlessPackagePoliciesTable = ({
               );
             },
           },
-          {
-            field: '',
-            name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.throughput24h', {
-              defaultMessage: 'Throughput last 24h',
-            }),
-            align: 'left' as HorizontalAlignment,
-            render({ packagePolicy }: { packagePolicy: InMemoryPackagePolicy }) {
-              if (isConnectorPolicy(packagePolicy)) {
-                return <ThroughputNotApplicable />;
-              }
-              return (
-                <ThroughputCell
-                  data={throughputByPolicyId[packagePolicy.id]}
-                  isLoading={isThroughputLoading}
-                  discover={getThroughputDiscoverParams(packagePolicy)}
-                />
-              );
-            },
-          },
+          ...(hasNonConnectorPolicies
+            ? [
+                {
+                  field: '',
+                  name: i18n.translate(
+                    'xpack.fleet.epm.packageDetails.integrationList.throughput24h',
+                    { defaultMessage: 'Throughput last 24h' }
+                  ),
+                  align: 'left' as HorizontalAlignment,
+                  render({ packagePolicy }: { packagePolicy: InMemoryPackagePolicy }) {
+                    return (
+                      <ThroughputCell
+                        data={throughputByPolicyId[packagePolicy.id]}
+                        isLoading={isThroughputLoading}
+                        discover={getThroughputDiscoverParams(packagePolicy)}
+                      />
+                    );
+                  },
+                },
+              ]
+            : []),
           ...(canReadAgents
             ? [
                 {

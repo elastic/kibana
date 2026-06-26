@@ -23,10 +23,6 @@ const ThroughputDash: React.FC<{ 'data-test-subj': string }> = ({ 'data-test-sub
   </EuiText>
 );
 
-export const ThroughputNotApplicable: React.FC = () => (
-  <ThroughputDash data-test-subj="agentlessThroughputNotApplicable" />
-);
-
 export const ThroughputCell: React.FC<{
   data?: AgentlessPolicyThroughput;
   isLoading: boolean;
