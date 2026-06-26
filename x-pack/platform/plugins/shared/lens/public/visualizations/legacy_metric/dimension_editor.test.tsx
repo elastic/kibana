@@ -199,10 +199,10 @@ describe('metric dimension editor', () => {
 
     expect(setState).toHaveBeenCalledWith(
       paletteParamsContaining({
-        // name: 'status',
-        // continuity: 'all',
-        // rangeMin: -Infinity,
-        // rangeMax: Infinity,
+        name: 'status',
+        continuity: 'all',
+        rangeMin: -Infinity,
+        rangeMax: Infinity,
         stops: expect.arrayContaining([]),
       })
     );
