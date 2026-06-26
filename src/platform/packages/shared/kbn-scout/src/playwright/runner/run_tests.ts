@@ -27,6 +27,22 @@ import type { ScoutPlaywrightProjects } from '../types';
 import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
+/**
+ * Scout always passes a single Playwright `--grep` to restrict a run to the deployment-tag of the
+ * current (arch, domain) mode (e.g. `@svlSearch`). Playwright honors only one `--grep` value, so a
+ * user-supplied pattern can't simply be appended — it has to be AND-combined with the tag into one
+ * regex. We do that with lookaheads so both the mode tag and the user pattern must match the test
+ * title: `(?=.*<tag>)(?=.*<userGrep>)`.
+ */
+export const buildPlaywrightGrepArg = (modeTag: string, userGrep?: string): string => {
+  const trimmedUserGrep = userGrep?.trim();
+  if (!trimmedUserGrep) {
+    return modeTag;
+  }
+
+  return `(?=.*${modeTag})(?=.*${trimmedUserGrep})`;
+};
+
 export const getPlaywrightProject = (
   testTarget: RunTestsOptions['testTarget']
 ): ScoutPlaywrightProjects => {
@@ -196,12 +212,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     );
   }
 
+  if (options.grep) {
+    log.info(`scout: Filtering tests by --grep pattern: ${options.grep}`);
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
     ...(pwTestFiles.length ? pwTestFiles : []),
     `--config=${pwConfigPath}`,
-    `--grep=${pwGrepTag}`,
+    `--grep=${buildPlaywrightGrepArg(pwGrepTag, options.grep)}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
     ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),

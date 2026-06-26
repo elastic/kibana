@@ -334,6 +334,70 @@ describe('parseTestFlags', () => {
     );
   });
 
+  it(`should parse with --grep flag`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      grep: 'my test',
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      repeatEach: undefined,
+      grep: 'my test',
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      serverConfigSet: 'default',
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should throw an error when '--grep' is an empty string`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      grep: '   ',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--grep' must be a non-empty string when provided`
+    );
+  });
+
+  it(`should not include grep in result when not provided`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).not.toHaveProperty('grep');
+  });
+
   describe('testFiles flag', () => {
     beforeEach(() => {
       jest.clearAllMocks();
