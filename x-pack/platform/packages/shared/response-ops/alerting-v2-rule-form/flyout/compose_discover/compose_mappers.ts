@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, UpdateRuleData, Query } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import {
   mapArtifacts,
   mergeArtifactsByType,
   splitArtifactsByType,
 } from '../../form/utils/artifact_mappers';
+import { ruleQueryToApiQuery, apiQueryToFormQuery } from '../../form/utils/query_mappers';
+import {
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
+} from '../../form/utils/state_transition_helpers';
 import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
 import type { ComposeFormValues } from './compose_form_types';
@@ -52,28 +57,6 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   return Object.keys(out).length ? out : undefined;
 };
 
-/**
- * Maps the compose form query to the API query shape. Recovery strategy is
- * inferred from presence of the recovery block and set as a top-level field
- * in `composeFormToCreateRequest`.
- */
-const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
-  if (q.format === 'composed') {
-    return {
-      format: 'composed',
-      base: q.base,
-      breach: { segment: q.breach.segment },
-      ...(q.recovery ? { recovery: { segment: q.recovery.segment } } : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: q.breach.query },
-    ...(q.recovery ? { recovery: { query: q.recovery.query } } : {}),
-    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
-  };
-};
-
 export const composeFormToCreateRequest = (
   formValues: ComposeFormValues,
   builderType?: string
@@ -92,7 +75,7 @@ export const composeFormToCreateRequest = (
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    query: composeQueryToApiQuery(formValues.query),
+    query: ruleQueryToApiQuery(formValues.query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
@@ -135,51 +118,6 @@ export const composeFormToUpdateRequest = (
 // API response → ComposeFormValues
 // ---------------------------------------------------------------------------
 
-/**
- * Maps the API query shape to the compose form's narrower shape. A
- * `recovery_strategy` of `'no_breach'` (or absent) is not surfaced by this
- * form — only `'query'` maps a recovery block onto the form.
- */
-const apiQueryToRuleQuery = (
-  q: RuleResponse['query'],
-  recoveryStrategy?: RuleResponse['recovery_strategy']
-): ComposeFormValues['query'] => {
-  if (q.format === 'composed') {
-    return {
-      format: 'composed',
-      base: q.base,
-      breach: { segment: q.breach.segment },
-      ...(recoveryStrategy === 'query' && q.recovery
-        ? { recovery: { segment: q.recovery.segment } }
-        : {}),
-    };
-  }
-  return {
-    format: 'standalone',
-    breach: { query: q.breach.query },
-    ...(recoveryStrategy === 'query' && q.recovery
-      ? { recovery: { query: q.recovery.query } }
-      : {}),
-    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
-  };
-};
-
-const deriveAlertDelayMode = (
-  st?: ComposeFormValues['stateTransition']
-): ComposeFormValues['stateTransitionAlertDelayMode'] => {
-  if (st?.pendingTimeframe != null) return DELAY_DURATION;
-  if (st?.pendingCount != null && st.pendingCount > 0) return DELAY_BREACHES;
-  return DELAY_IMMEDIATE;
-};
-
-const deriveRecoveryDelayMode = (
-  st?: ComposeFormValues['stateTransition']
-): ComposeFormValues['stateTransitionRecoveryDelayMode'] => {
-  if (st?.recoveringTimeframe != null) return DELAY_DURATION;
-  if (st?.recoveringCount != null && st.recoveringCount > 0) return 'recoveries';
-  return DELAY_IMMEDIATE;
-};
-
 /** Bridge YAML parse output into compose form values for the Discover flyout. */
 export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): ComposeFormValues => ({
   ...parsed,
@@ -210,13 +148,13 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
+    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
     noDataStrategy: rule.no_data_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
-    stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),
-    stateTransitionRecoveryDelayMode: deriveRecoveryDelayMode(stateTransition),
+    stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
+    stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
     ...splitArtifactsByType(rule.artifacts),
   };
 };

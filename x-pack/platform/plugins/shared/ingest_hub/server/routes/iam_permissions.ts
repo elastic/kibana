@@ -139,6 +139,9 @@ export const registerIamPermissionsRoute = (
           );
           const fallback = AWS_SERVICE_PROVIDER_PERMISSIONS[id];
           actions = fallback?.actions ?? [];
+          if (fallback?.managedPolicyArns?.length) {
+            managedPolicyArns = fallback.managedPolicyArns;
+          }
         }
 
         if (actions.length > 0 || managedPolicyArns.length > 0) {

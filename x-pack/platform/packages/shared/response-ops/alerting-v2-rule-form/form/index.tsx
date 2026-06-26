@@ -14,12 +14,11 @@ export type {
   StandaloneQuery,
   RuleKind,
 } from './types';
+export { getBreachQuery, getRecoverQuery } from './utils/query_helpers';
 export {
-  getBreachQuery,
-  getRecoverQuery,
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
-} from './types';
+} from './utils/state_transition_helpers';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
 export {
