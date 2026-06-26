@@ -24,7 +24,7 @@ import type {
   ChromeUserBanner,
   AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuStaticItem } from '@kbn/core-chrome-app-menu-components';
 
 import {
   createState,
@@ -69,6 +69,7 @@ export interface ChromeState {
   globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  appMenuStaticItems: ArrayState<AppMenuStaticItem>;
   contextSwitcher: State<ReactNode>;
   inlineAppHeader: State<boolean>;
   appHeader: State<AppHeaderConfig | undefined>;
@@ -119,6 +120,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (per-app reset handled in setupAppChangeHandler)
   const appMenu = createState<AppMenuConfig | undefined>(undefined);
+  const appMenuStaticItems = createArrayState<AppMenuStaticItem>();
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
@@ -163,6 +165,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     globalSearch,
     customNavLink,
     appMenu,
+    appMenuStaticItems,
     inlineAppHeader,
     appHeader,
     help: {

@@ -68,9 +68,10 @@ const useStaticItems = ({
   const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
+  const chromeStaticItems = useObservable(chrome.getAppMenuStaticItems$(), []);
 
   return useMemo(() => {
-    const staticItems: AppMenuStaticItem[] = [];
+    const staticItems: AppMenuStaticItem[] = [...chromeStaticItems];
 
     if (feedbackHandler) {
       staticItems.push(createFeedbackMenuItem(feedbackHandler));
@@ -93,7 +94,7 @@ const useStaticItems = ({
     }
 
     return staticItems;
-  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
+  }, [basePath, chromeStaticItems, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
 };
 
 const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu => {

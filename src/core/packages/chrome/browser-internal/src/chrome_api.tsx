@@ -139,6 +139,15 @@ export function createChromeApi({
     // App Menu
     getAppMenu$: () => state.appMenu.$,
     setAppMenu: state.appMenu.set,
+    getAppMenuStaticItems$: () => state.appMenuStaticItems.$,
+    registerAppMenuStaticItem: (item) => {
+      state.appMenuStaticItems.remove((existingItem) => existingItem.id === item.id);
+      state.appMenuStaticItems.add(item);
+
+      return () => {
+        state.appMenuStaticItems.remove((existingItem) => existingItem.id === item.id);
+      };
+    },
 
     // Help
     getHelpExtension$: () => state.help.extension.$,
