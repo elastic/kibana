@@ -76,14 +76,6 @@ const ConnectorSetupInline: React.FC<AttachmentRenderProps<ConnectorSetupAttachm
   );
 };
 
-/**
- * Canvas body: renders the embedded (non-flyout) connector form for the
- * proposed connector type. The canvas is `ownFocus={false}`, so the form is
- * fully interactive (unlike a nested flyout). Config + secrets are entered here
- * and submitted straight to the Actions API — they never pass through chat. On
- * success we link the attachment to the created connector (`updateOrigin`) and
- * close the canvas.
- */
 const ConnectorSetupCanvas: React.FC<
   AttachmentRenderProps<ConnectorSetupAttachment> & {
     deps: ConnectorSetupDeps;
@@ -186,8 +178,6 @@ export const createConnectorSetupAttachmentDefinition = (
     <ConnectorSetupCanvas {...props} deps={deps} callbacks={callbacks} />
   ),
   getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
-    // Save lives in the canvas (registered dynamically); the inline header only
-    // hosts the entry point / management link.
     if (isCanvas) {
       return [];
     }
