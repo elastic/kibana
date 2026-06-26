@@ -149,7 +149,7 @@ export const CustomizeNavigationModal = ({
           onChange={handleHidePrimaryLabelsChange}
         />
         <EuiSpacer size="l" />
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h4>
