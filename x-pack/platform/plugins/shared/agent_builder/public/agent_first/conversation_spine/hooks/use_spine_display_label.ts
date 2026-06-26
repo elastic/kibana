@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { getSpineTypeLabel } from '../spine_type_config';
 import type { SpineType } from '../types';
 
-const spineTypeLabels: Record<SpineType, string> = {
-  chat: i18n.translate('xpack.agentBuilder.conversationSpine.type.chat', {
-    defaultMessage: 'Chat',
-  }),
-  case: i18n.translate('xpack.agentBuilder.conversationSpine.type.case', {
-    defaultMessage: 'Case',
-  }),
-  incident: i18n.translate('xpack.agentBuilder.conversationSpine.type.incident', {
-    defaultMessage: 'Incident',
-  }),
-};
-
-export const getSpineTypeLabel = (type: SpineType): string => spineTypeLabels[type];
+export { getSpineTypeLabel };
 
 export const formatSpineDisplayLabel = (type: SpineType, identifier: string): string =>
   `${getSpineTypeLabel(type)} · ${identifier}`;

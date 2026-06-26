@@ -65,9 +65,11 @@ export const SpineHeader: React.FC<SpineHeaderProps> = ({
             ) : null}
             {spineState ? (
               <EuiFlexItem grow={false}>
+                {/* TODO: application panel badge may later navigate or show spine metadata */}
                 <SpineRelationshipBadge
                   type={spineState.record.type}
                   identifier={spineState.record.identifier}
+                  variant="ghost"
                 />
               </EuiFlexItem>
             ) : null}

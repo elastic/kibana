@@ -6,22 +6,14 @@
  */
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { AttachmentsService } from '../../../services/attachments/attachements_service';
 import { useConversationSpineContext } from '../conversation_spine_context';
+import { getAllTabsForSpineType } from '../spine_type_config';
 import type { SpineTabDefinition, SpineTabId } from '../types';
 import { AttachmentsTab } from './attachments_tab';
 import { PeopleTab } from './people_tab';
-
-const labels = {
-  attachments: i18n.translate('xpack.agentBuilder.conversationSpine.tabs.attachments', {
-    defaultMessage: 'Attachments',
-  }),
-  people: i18n.translate('xpack.agentBuilder.conversationSpine.tabs.people', {
-    defaultMessage: 'People',
-  }),
-};
+import { SpinePlaceholderTab } from './spine_placeholder_tab';
 
 interface SpineTabsProps {
   attachmentsService: AttachmentsService;
@@ -43,12 +35,39 @@ export const SpineTabs: React.FC<SpineTabsProps> = ({ attachmentsService, additi
     return null;
   }
 
-  const { activeTabId, attachmentsView } = spineState;
+  const { activeTabId, attachmentsView, record } = spineState;
+  const configuredTabs = getAllTabsForSpineType(record.type);
 
-  const baseTabs: Array<{ id: SpineTabId; name: string }> = [
-    { id: 'attachments', name: labels.attachments },
-    { id: 'people', name: labels.people },
-  ];
+  const renderTabContent = () => {
+    if (activeTabId === 'attachments') {
+      return (
+        <AttachmentsTab attachmentsService={attachmentsService} attachmentsView={attachmentsView} />
+      );
+    }
+
+    if (activeTabId === 'people') {
+      return <PeopleTab />;
+    }
+
+    const typeTab = configuredTabs.find((tab) => tab.id === activeTabId);
+    if (typeTab) {
+      return (
+        <SpinePlaceholderTab
+          title={typeTab.name}
+          testSubj={`agentBuilderConversationSpineTabContent-${activeTabId}`}
+        />
+      );
+    }
+
+    if (additionalTabs) {
+      const extensionTab = additionalTabs.find((tab) => tab.id === activeTabId);
+      if (extensionTab) {
+        return <React.Fragment key={extensionTab.id}>{extensionTab.content}</React.Fragment>;
+      }
+    }
+
+    return null;
+  };
 
   return (
     <div
@@ -62,7 +81,7 @@ export const SpineTabs: React.FC<SpineTabsProps> = ({ attachmentsService, additi
       data-test-subj="agentBuilderConversationSpineTabs"
     >
       <EuiTabs css={{ paddingInline: euiTheme.size.m }}>
-        {baseTabs.map((tab) => (
+        {configuredTabs.map((tab) => (
           <EuiTab
             key={tab.id}
             isSelected={activeTabId === tab.id}
@@ -76,7 +95,7 @@ export const SpineTabs: React.FC<SpineTabsProps> = ({ attachmentsService, additi
           <EuiTab
             key={tab.id}
             isSelected={activeTabId === tab.id}
-            onClick={() => setActiveTab(tab.id as SpineTabId)}
+            onClick={() => onTabClick(tab.id)}
           >
             {tab.name}
           </EuiTab>
@@ -90,18 +109,7 @@ export const SpineTabs: React.FC<SpineTabsProps> = ({ attachmentsService, additi
           minHeight: 0,
         }}
       >
-        {activeTabId === 'attachments' ? (
-          <AttachmentsTab
-            attachmentsService={attachmentsService}
-            attachmentsView={attachmentsView}
-          />
-        ) : null}
-        {activeTabId === 'people' ? <PeopleTab /> : null}
-        {additionalTabs?.map((tab) =>
-          activeTabId === tab.id ? (
-            <React.Fragment key={tab.id}>{tab.content}</React.Fragment>
-          ) : null
-        )}
+        {renderTabContent()}
       </div>
     </div>
   );

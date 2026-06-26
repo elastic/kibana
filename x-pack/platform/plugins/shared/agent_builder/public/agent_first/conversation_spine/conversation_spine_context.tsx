@@ -18,19 +18,26 @@ import React, {
 import { useConversationId } from '../../application/context/conversation/use_conversation_id';
 import { formatSpineDisplayLabel } from './hooks/use_spine_display_label';
 import { formatSpineIdentifier } from './hooks/use_spine_identifier';
+import {
+  getDefaultTabForSpineType,
+  isValidTabForSpineType,
+} from './spine_type_config';
 import type {
   ConversationSpineRecord,
   ConversationSpineState,
   OpenSpineOptions,
   SpineTabId,
+  SpineType,
 } from './types';
 
 interface ConversationSpineContextValue {
   spineState: ConversationSpineState | null;
   isSpineActive: boolean;
   spineDisplayLabel: string | null;
+  promotedSpineType: SpineType;
   openSpine: (options?: OpenSpineOptions) => void;
   closeSpine: () => void;
+  setSpineType: (type: SpineType) => void;
   setActiveTab: (tabId: SpineTabId) => void;
   openAttachmentPreview: (attachment: UnknownAttachment) => void;
   closeAttachmentPreview: () => void;
@@ -39,8 +46,8 @@ interface ConversationSpineContextValue {
 
 const ConversationSpineContext = createContext<ConversationSpineContextValue | null>(null);
 
-const buildSpineRecord = (conversationId: string): ConversationSpineRecord => ({
-  type: 'chat',
+const buildSpineRecord = (conversationId: string, type: SpineType): ConversationSpineRecord => ({
+  type,
   identifier: formatSpineIdentifier(conversationId),
   conversationId,
 });
@@ -52,6 +59,7 @@ interface ConversationSpineProviderProps {
 export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps> = ({ children }) => {
   const conversationId = useConversationId();
   const [spineState, setSpineState] = useState<ConversationSpineState | null>(null);
+  const [promotedSpineType, setPromotedSpineType] = useState<SpineType>('chat');
   const prevConversationIdRef = useRef(conversationId);
 
   const closeSpine = useCallback(() => {
@@ -61,6 +69,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
       closeSpine();
+      setPromotedSpineType('chat');
       prevConversationIdRef.current = conversationId;
     }
   }, [conversationId, closeSpine]);
@@ -72,16 +81,43 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
       }
 
       const isSidebar = options?.isSidebar ?? false;
-      const record = buildSpineRecord(conversationId);
+      const record = buildSpineRecord(conversationId, promotedSpineType);
+      const defaultTabId = options?.tabId ?? getDefaultTabForSpineType(promotedSpineType);
 
       setSpineState({
         record,
-        activeTabId: options?.tabId ?? 'attachments',
+        activeTabId: defaultTabId,
         attachmentsView: options?.attachmentsView ?? { mode: 'grid' },
         isSidebar,
       });
     },
-    [conversationId]
+    [conversationId, promotedSpineType]
+  );
+
+  const setSpineType = useCallback(
+    (type: SpineType) => {
+      if (type === promotedSpineType) {
+        return;
+      }
+
+      setPromotedSpineType(type);
+      setSpineState((prev) => {
+        if (!prev) {
+          return prev;
+        }
+
+        const activeTabId = isValidTabForSpineType(type, prev.activeTabId)
+          ? prev.activeTabId
+          : getDefaultTabForSpineType(type);
+
+        return {
+          ...prev,
+          record: { ...prev.record, type },
+          activeTabId,
+        };
+      });
+    },
+    [promotedSpineType]
   );
 
   const setActiveTab = useCallback((tabId: SpineTabId) => {
@@ -138,8 +174,10 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
       spineState,
       isSpineActive: spineState !== null,
       spineDisplayLabel,
+      promotedSpineType,
       openSpine,
       closeSpine,
+      setSpineType,
       setActiveTab,
       openAttachmentPreview,
       closeAttachmentPreview,
@@ -148,8 +186,10 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
     [
       spineState,
       spineDisplayLabel,
+      promotedSpineType,
       openSpine,
       closeSpine,
+      setSpineType,
       setActiveTab,
       openAttachmentPreview,
       closeAttachmentPreview,
