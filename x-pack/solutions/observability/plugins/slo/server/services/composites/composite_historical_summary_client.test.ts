@@ -292,9 +292,7 @@ describe('CompositeHistoricalSummaryClient', () => {
             budgetingMethod: 'timeslices',
           }),
         ],
-      },
-      { spaceId: 'default' }
-    );
+      });
   });
 
   it('handles multiple composites in a single fetch', async () => {
@@ -431,9 +429,7 @@ describe('CompositeHistoricalSummaryClient', () => {
             },
           }),
         ],
-      },
-      { spaceId: 'default' }
-    );
+      });
   });
 
   it('returns VIOLATED status when composite SLI drops below target', async () => {
