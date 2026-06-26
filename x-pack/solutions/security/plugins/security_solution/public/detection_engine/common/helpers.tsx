@@ -49,7 +49,6 @@ import type { RuleAction, RuleResponse } from '../../../common/api/detection_eng
 import { normalizeMachineLearningJobId } from '../../common/utils/normalize_machine_learning_job_id';
 import { convertDateMathToDuration } from '../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../common/constants';
-import { normalizeThreatsForForm } from './normalize_threats_for_form';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -260,7 +259,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     },
     falsePositives,
     investigationFields: investigationFields?.field_names ?? [],
-    threat: (normalizeThreatsForForm(threat as Threats) ?? threat) as Threats,
+    threat: threat as Threats,
     threatIndicatorPath,
     maxSignals,
     setup,
