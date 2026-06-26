@@ -29,6 +29,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../../../common';
+import { config as pluginConfig } from '../../../config';
 import type { WorkflowsRouter } from '../../../types';
 import { WorkflowsManagementApi } from '../../workflows_management_api';
 import { WorkflowsService } from '../../workflows_management_service';
@@ -37,7 +38,6 @@ import type { RouteDependencies } from '../types';
 import { createMockRequestHandlerContext } from '../utils/test_utils';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 import { registerWorkflowRoutes } from '../workflows';
-import { config as pluginConfig } from '../../../config';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
