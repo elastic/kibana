@@ -20,22 +20,23 @@ interface GetListItemOptions {
   id: Id;
   esClient: ElasticsearchClient;
   listItemIndex: string;
-  // Set to false when polling for segment-visible state (e.g. waitUntilDocumentIndexed
-  // callbacks). Defaults to true (translog realtime reads) for direct HTTP read paths.
-  realtime?: boolean;
+  // Maps to the ES Get API `realtime` parameter. Set to false in waitUntilDocumentIndexed
+  // poll callbacks so the read only resolves after a segment refresh (search-consistent).
+  // Defaults to true for direct HTTP read paths.
+  esRealtime?: boolean;
 }
 
 export const getListItem = async ({
   id,
   esClient,
   listItemIndex,
-  realtime = true,
+  esRealtime = true,
 }: GetListItemOptions): Promise<ListItemSchema | null> => {
   try {
     const response = await esClient.get<SearchEsListItemSchema>({
       id,
       index: listItemIndex,
-      realtime,
+      realtime: esRealtime,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
