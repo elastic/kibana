@@ -215,27 +215,12 @@ describe('CaseViewTimelines', () => {
       expect(timelineType).toBe('default');
     });
 
-    it('hides the batch actions button when nothing is selected', () => {
+    it('shows the batch actions button in the utility bar regardless of selection', () => {
       render(
         <TestProviders>
           <CaseViewTimelines caseData={caseDataWithTimelines} />
         </TestProviders>
       );
-
-      expect(
-        screen.queryByTestId('case-view-timelines-batch-actions-button')
-      ).not.toBeInTheDocument();
-    });
-
-    it('shows the batch actions button after onSelectionChange fires with items', () => {
-      render(
-        <TestProviders>
-          <CaseViewTimelines caseData={caseDataWithTimelines} />
-        </TestProviders>
-      );
-
-      const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
-      act(() => onSelectionChange([{ savedObjectId: 'tl-1' }]));
 
       expect(screen.getByTestId('case-view-timelines-batch-actions-button')).toBeInTheDocument();
     });
@@ -251,13 +236,15 @@ describe('CaseViewTimelines', () => {
       const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
       act(() => onSelectionChange([{ savedObjectId: 'tl-1' }, { savedObjectId: 'tl-2' }]));
 
-      await user.click(screen.getByTestId('case-view-timelines-batch-actions-button'));
+      // UtilityBarAction wraps the trigger in a LinkIcon; the clickable element carries
+      // the "-popover" suffix data-test-subj added by the Popover sub-component.
+      await user.click(screen.getByTestId('case-view-timelines-batch-actions-button-popover'));
 
       expect(mockGetBatchItemsPopoverContent).toHaveBeenCalled();
       expect(screen.getByTestId('batch-popover-content')).toBeInTheDocument();
     });
 
-    it('hides the batch actions button again when selection is cleared', () => {
+    it('keeps the batch actions button visible after selection is cleared', () => {
       render(
         <TestProviders>
           <CaseViewTimelines caseData={caseDataWithTimelines} />
@@ -266,12 +253,9 @@ describe('CaseViewTimelines', () => {
 
       const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
       act(() => onSelectionChange([{ savedObjectId: 'tl-1' }]));
-      expect(screen.getByTestId('case-view-timelines-batch-actions-button')).toBeInTheDocument();
-
       act(() => onSelectionChange([]));
-      expect(
-        screen.queryByTestId('case-view-timelines-batch-actions-button')
-      ).not.toBeInTheDocument();
+
+      expect(screen.getByTestId('case-view-timelines-batch-actions-button')).toBeInTheDocument();
     });
   });
 });
