@@ -8,6 +8,7 @@
  */
 
 import type { SpecDefinitionsService } from '../../../services';
+import { BOOLEAN } from './shared';
 
 const commonPipelineParams = {
   on_failure: [],
@@ -16,9 +17,10 @@ const commonPipelineParams = {
   },
   if: '',
   tag: '',
+  description: '',
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/append-processor
 const appendProcessorDefinition = {
   append: {
     __template: {
@@ -31,7 +33,29 @@ const appendProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/bytes-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/attachment
+const attachmentProcessorDefinition = {
+  attachment: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: 'attachment',
+    indexed_chars: 100000,
+    indexed_chars_field: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    remove_binary: {
+      __one_of: [false, true],
+    },
+    resource_name: '',
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/bytes-processor
 const bytesProcessorDefinition = {
   bytes: {
     __template: {
@@ -46,7 +70,24 @@ const bytesProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-circle-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/cef-processor
+const cefProcessorDefinition = {
+  cef: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ignore_empty_values: BOOLEAN,
+    timezone: 'UTC',
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/ingest-circle-processor
 const circleProcessorDefinition = {
   circle: {
     __template: {
@@ -67,7 +108,28 @@ const circleProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/csv-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/community-id-processor
+const communityIdProcessorDefinition = {
+  community_id: {
+    __template: {},
+    source_ip: 'source.ip',
+    source_port: 'source.port',
+    destination_ip: 'destination.ip',
+    destination_port: 'destination.port',
+    iana_number: 'network.iana_number',
+    icmp_type: 'icmp.type',
+    icmp_code: 'icmp.code',
+    transport: '',
+    target_field: 'network.community_id',
+    seed: 0,
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/csv-processor
 const csvProcessorDefinition = {
   csv: {
     __template: {
@@ -79,9 +141,7 @@ const csvProcessorDefinition = {
     separator: '',
     quote: '',
     empty_value: '',
-    trim: {
-      __one_of: [true, false],
-    },
+    trim: BOOLEAN,
     ignore_missing: {
       __one_of: [false, true],
     },
@@ -89,7 +149,7 @@ const csvProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/convert-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/convert-processor
 const convertProcessorDefinition = {
   convert: {
     __template: {
@@ -108,7 +168,7 @@ const convertProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/date-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/date-processor
 const dateProcessorDefinition = {
   date: {
     __template: {
@@ -124,7 +184,7 @@ const dateProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/date-index-name-processor
 const dateIndexNameProcessorDefinition = {
   date_index_name: {
     __template: {
@@ -143,7 +203,7 @@ const dateIndexNameProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dissect-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/dissect-processor
 const dissectProcessorDefinition = {
   dissect: {
     __template: {
@@ -160,7 +220,7 @@ const dissectProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dot-expand-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/dot-expand-processor
 const dotExpanderProcessorDefinition = {
   dot_expander: {
     __template: {
@@ -172,7 +232,7 @@ const dotExpanderProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/drop-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/drop-processor
 const dropProcessorDefinition = {
   drop: {
     __template: {},
@@ -180,7 +240,7 @@ const dropProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/enrich-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/enrich-processor
 const enrichProcessorDefinition = {
   enrich: {
     __template: {
@@ -194,16 +254,14 @@ const enrichProcessorDefinition = {
     ignore_missing: {
       __one_of: [false, true],
     },
-    override: {
-      __one_of: [true, false],
-    },
+    override: BOOLEAN,
     max_matches: 1,
     shape_relation: 'INTERSECTS',
     ...commonPipelineParams,
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/fail-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/fail-processor
 const failProcessorDefinition = {
   fail: {
     __template: {
@@ -214,7 +272,26 @@ const failProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/foreach-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/fingerprint-processor
+const fingerprintProcessorDefinition = {
+  fingerprint: {
+    __template: {
+      fields: [],
+    },
+    fields: [],
+    target_field: 'fingerprint',
+    salt: '',
+    method: {
+      __one_of: ['SHA-1', 'SHA-256', 'SHA-512', 'MD5', 'MurmurHash3'],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/foreach-processor
 const foreachProcessorDefinition = {
   foreach: {
     __template: {
@@ -229,7 +306,7 @@ const foreachProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/geoip-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/geoip-processor
 const geoipProcessorDefinition = {
   geoip: {
     __template: {
@@ -245,10 +322,37 @@ const geoipProcessorDefinition = {
     first_only: {
       __one_of: [false, true],
     },
+    ...commonPipelineParams,
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/ingest-geo-grid-processor
+const geoGridProcessorDefinition = {
+  geo_grid: {
+    __template: {
+      field: '',
+      tile_type: '',
+    },
+    field: '',
+    tile_type: {
+      __one_of: ['geotile', 'geohex', 'geohash'],
+    },
+    target_field: '',
+    target_format: {
+      __one_of: ['GeoJSON', 'WKT'],
+    },
+    parent_field: '',
+    children_field: '',
+    non_children_field: '',
+    precision_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/grok-processor
 const grokProcessorDefinition = {
   grok: {
     __template: {
@@ -268,7 +372,7 @@ const grokProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/gsub-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/gsub-processor
 const gsubProcessorDefinition = {
   gsub: {
     __template: {
@@ -283,7 +387,7 @@ const gsubProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/htmlstrip-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/htmlstrip-processor
 const htmlStripProcessorDefinition = {
   html_strip: {
     __template: {
@@ -298,7 +402,7 @@ const htmlStripProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/inference-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/inference-processor
 const inferenceProcessorDefinition = {
   inference: {
     __template: {
@@ -327,7 +431,25 @@ const inferenceProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/join-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/ip-location-processor
+const ipLocationProcessorDefinition = {
+  ip_location: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: 'ip_location',
+    database_file: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    first_only: BOOLEAN,
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/join-processor
 const joinProcessorDefinition = {
   join: {
     __template: {
@@ -340,7 +462,7 @@ const joinProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/json-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/json-processor
 const jsonProcessorDefinition = {
   json: {
     __template: {
@@ -355,7 +477,7 @@ const jsonProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/kv-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/kv-processor
 const kvProcessorDefinition = {
   kv: {
     __template: {
@@ -375,7 +497,7 @@ const kvProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/lowercase-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/lowercase-processor
 const lowercaseProcessorDefinition = {
   lowercase: {
     __template: {
@@ -389,7 +511,25 @@ const lowercaseProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/pipeline-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/network-direction-processor
+const networkDirectionProcessorDefinition = {
+  network_direction: {
+    __template: {
+      internal_networks: [],
+    },
+    source_ip: 'source.ip',
+    destination_ip: 'destination.ip',
+    target_field: 'network.direction',
+    internal_networks: [],
+    internal_networks_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor
 const pipelineProcessorDefinition = {
   pipeline: {
     __template: {
@@ -400,7 +540,7 @@ const pipelineProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/remove-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/remove-processor
 const removeProcessorDefinition = {
   remove: {
     __template: {
@@ -411,7 +551,47 @@ const removeProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/rename-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/redact-processor
+const redactProcessorDefinition = {
+  redact: {
+    __template: {
+      field: '',
+      patterns: [],
+    },
+    field: '',
+    patterns: [],
+    pattern_definitions: {},
+    prefix: '<',
+    suffix: '>',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    skip_if_unlicensed: {
+      __one_of: [false, true],
+    },
+    trace_redact: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/registered-domain-processor
+const registeredDomainProcessorDefinition = {
+  registered_domain: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/rename-processor
 const renameProcessorDefinition = {
   rename: {
     __template: {
@@ -427,7 +607,18 @@ const renameProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/script-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/reroute-processor
+const rerouteProcessorDefinition = {
+  reroute: {
+    __template: {},
+    destination: '',
+    dataset: '',
+    namespace: '',
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/script-processor
 const scriptProcessorDefinition = {
   script: {
     __template: {},
@@ -440,7 +631,7 @@ const scriptProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/set-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/set-processor
 const setProcessorDefinition = {
   set: {
     __template: {
@@ -449,14 +640,12 @@ const setProcessorDefinition = {
     },
     field: '',
     value: '',
-    override: {
-      __one_of: [true, false],
-    },
+    override: BOOLEAN,
     ...commonPipelineParams,
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-node-set-security-user-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/ingest-node-set-security-user-processor
 const setSecurityUserProcessorDefinition = {
   set_security_user: {
     __template: {
@@ -468,7 +657,7 @@ const setSecurityUserProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/split-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/split-processor
 const splitProcessorDefinition = {
   split: {
     __template: {
@@ -484,7 +673,7 @@ const splitProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/sort-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/sort-processor
 const sortProcessorDefinition = {
   sort: {
     __template: {
@@ -496,7 +685,7 @@ const sortProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/trim-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/trim-processor
 const trimProcessorDefinition = {
   trim: {
     __template: {
@@ -510,7 +699,15 @@ const trimProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/uppercase-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/terminate-processor
+const terminateProcessorDefinition = {
+  terminate: {
+    __template: {},
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/uppercase-processor
 const uppercaseProcessorDefinition = {
   uppercase: {
     __template: {
@@ -524,7 +721,7 @@ const uppercaseProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/urldecode-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/urldecode-processor
 const urlDecodeProcessorDefinition = {
   urldecode: {
     __template: {
@@ -539,7 +736,26 @@ const urlDecodeProcessorDefinition = {
   },
 };
 
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/user-agent-processor.html
+// Based on https://www.elastic.co/docs/reference/enrich-processor/uri-parts-processor
+const uriPartsProcessorDefinition = {
+  uri_parts: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: 'url',
+    keep_original: BOOLEAN,
+    remove_if_successful: {
+      __one_of: [false, true],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/docs/reference/enrich-processor/user-agent-processor
 const userAgentProcessorDefinition = {
   user_agent: {
     __template: {
@@ -552,16 +768,20 @@ const userAgentProcessorDefinition = {
     ignore_missing: {
       __one_of: [false, true],
     },
+    ...commonPipelineParams,
   },
 };
 
 const processorDefinition = {
   __one_of: [
     appendProcessorDefinition,
+    attachmentProcessorDefinition,
     bytesProcessorDefinition,
-    csvProcessorDefinition,
+    cefProcessorDefinition,
     circleProcessorDefinition,
+    communityIdProcessorDefinition,
     convertProcessorDefinition,
+    csvProcessorDefinition,
     dateProcessorDefinition,
     dateIndexNameProcessorDefinition,
     dissectProcessorDefinition,
@@ -569,26 +789,35 @@ const processorDefinition = {
     dropProcessorDefinition,
     enrichProcessorDefinition,
     failProcessorDefinition,
+    fingerprintProcessorDefinition,
     foreachProcessorDefinition,
+    geoGridProcessorDefinition,
     geoipProcessorDefinition,
     grokProcessorDefinition,
     gsubProcessorDefinition,
     htmlStripProcessorDefinition,
     inferenceProcessorDefinition,
+    ipLocationProcessorDefinition,
     joinProcessorDefinition,
     jsonProcessorDefinition,
     kvProcessorDefinition,
     lowercaseProcessorDefinition,
+    networkDirectionProcessorDefinition,
     pipelineProcessorDefinition,
+    redactProcessorDefinition,
+    registeredDomainProcessorDefinition,
     removeProcessorDefinition,
     renameProcessorDefinition,
+    rerouteProcessorDefinition,
     scriptProcessorDefinition,
     setProcessorDefinition,
     setSecurityUserProcessorDefinition,
-    splitProcessorDefinition,
     sortProcessorDefinition,
+    splitProcessorDefinition,
+    terminateProcessorDefinition,
     trimProcessorDefinition,
     uppercaseProcessorDefinition,
+    uriPartsProcessorDefinition,
     urlDecodeProcessorDefinition,
     userAgentProcessorDefinition,
   ],
