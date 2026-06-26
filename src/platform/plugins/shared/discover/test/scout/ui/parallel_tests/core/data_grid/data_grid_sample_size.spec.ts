@@ -27,13 +27,12 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.setQueryMode('classic');
     await scoutSpace.uiSettings.set({
       'discover:sampleSize': testData.DEFAULT_SAMPLE_SIZE,
       'discover:rowHeightOption': 0,
       'discover:sampleRowsPerPage': testData.DEFAULT_ROWS_PER_PAGE,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     await pageObjects.dataGrid.waitForDocTableRendered();
   });
