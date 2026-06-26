@@ -45,7 +45,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
           <EuiButtonIcon
             color="text"
             iconType="cross"
-            size="m"
+            size="xs"
             onClick={onClose}
             aria-label={labels.close}
             {...getEbtProps({

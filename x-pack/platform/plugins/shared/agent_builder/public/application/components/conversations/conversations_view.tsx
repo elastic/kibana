@@ -11,7 +11,11 @@ import React from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
+import {
+  conversationBackgroundStyles,
+  conversationHeaderRowStyles,
+  conversationHeaderShellStyles,
+} from './conversation.styles';
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -23,18 +27,13 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     ${conversationBackgroundStyles(euiTheme)}
   `;
 
-  const headerStyles = css`
-    flex-shrink: 0;
-    height: ${headerHeight}px;
-    display: flex;
-    align-items: center;
-    padding: ${euiTheme.size.m};
-  `;
+  const headerShellStyles = conversationHeaderShellStyles(euiTheme);
+  const headerRowStyles = conversationHeaderRowStyles(euiTheme);
 
   const contentStyles = css`
     width: 100%;
     flex: 1;
-    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
+    min-height: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -44,8 +43,10 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
       <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-        <div css={headerStyles}>
-          <ConversationHeader />
+        <div css={headerShellStyles}>
+          <div css={headerRowStyles}>
+            <ConversationHeader />
+          </div>
         </div>
         <div css={contentStyles}>
           <Conversation />

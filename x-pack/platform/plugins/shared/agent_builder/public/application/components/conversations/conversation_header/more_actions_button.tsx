@@ -291,7 +291,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const buttonProps = {
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
-    size: 'm' as const,
+    size: 'xs' as const,
     'aria-label': fullscreenLabels.actionsAriaLabel,
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',

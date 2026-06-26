@@ -35,7 +35,7 @@ export const EmbeddableMenuButton: React.FC = () => {
         iconType="menu"
         aria-label={openMenuLabel}
         color="text"
-        size="m"
+        size="xs"
         onClick={() => setIsPopoverOpen((v) => !v)}
         data-test-subj="agentBuilderEmbeddableMenuButton"
         {...getEbtProps({

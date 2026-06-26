@@ -29,7 +29,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
     display: flex;
     align-items: center;
     height: 100%;
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 
   const linkStyles = css`
