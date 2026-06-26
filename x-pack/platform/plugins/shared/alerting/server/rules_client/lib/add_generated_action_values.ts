@@ -9,7 +9,6 @@ import { v4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import Boom from '@hapi/boom';
-import { normalizePersistedFilterMeta, type AlertsFilter } from '@kbn/alerting-types';
 import type {
   NormalizedAlertAction,
   NormalizedAlertDefaultActionWithGeneratedValues,
@@ -19,28 +18,6 @@ import type {
 } from '..';
 import { getEsQueryConfig } from '../../lib/get_es_query_config';
 import type { RawRuleAlertsFilter } from '../../types';
-
-type RawRuleAlertsFilterQuery = NonNullable<RawRuleAlertsFilter['query']>;
-
-const normalizeGeneratedAlertsFilterQuery = (
-  query: AlertsFilter['query'],
-  generateDSL: (kql: string, filters: Filter[]) => string
-): RawRuleAlertsFilter['query'] | undefined => {
-  if (!query) {
-    return undefined;
-  }
-
-  const { kql, filters = [] } = query;
-
-  return {
-    kql,
-    filters: filters.map((filter) => ({
-      ...filter,
-      meta: normalizePersistedFilterMeta(filter.meta),
-    })) as RawRuleAlertsFilterQuery['filters'],
-    dsl: generateDSL(kql, filters),
-  };
-};
 
 export async function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = [],
@@ -73,7 +50,12 @@ export async function addGeneratedActionValues(
           ? {
               alertsFilter: {
                 ...alertsFilter,
-                query: normalizeGeneratedAlertsFilterQuery(alertsFilter.query, generateDSL),
+                query: alertsFilter.query
+                  ? {
+                      ...alertsFilter.query,
+                      dsl: generateDSL(alertsFilter.query.kql, alertsFilter.query.filters) ?? '',
+                    }
+                  : undefined,
               } as RawRuleAlertsFilter,
             }
           : {}),
