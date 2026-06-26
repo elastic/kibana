@@ -24,7 +24,8 @@ export const JourneyLastScreenshot = ({
     checkGroupId,
     undefined,
     undefined,
-    timestamp
+    timestamp,
+    true // stepsOnly: this component only renders a screenshot, never journey details
   );
 
   const lastSignificantStep = useMemo(() => {

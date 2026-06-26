@@ -67,4 +67,17 @@ describe('useJourneySteps', () => {
     const dispatched = mockDispatch.mock.calls[0][0];
     expect(dispatched.payload).toEqual({ checkGroup: 'cg-from-url', remoteName: undefined });
   });
+
+  it('forwards stepsOnly so the server can skip the journey-details lookup', () => {
+    renderHook(() => useJourneySteps('cg-explicit', undefined, undefined, undefined, true));
+
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    const dispatched = mockDispatch.mock.calls[0][0];
+    expect(dispatched.type).toBe(fetchJourneyAction.get.type);
+    expect(dispatched.payload).toEqual({
+      checkGroup: 'cg-explicit',
+      remoteName: undefined,
+      stepsOnly: true,
+    });
+  });
 });

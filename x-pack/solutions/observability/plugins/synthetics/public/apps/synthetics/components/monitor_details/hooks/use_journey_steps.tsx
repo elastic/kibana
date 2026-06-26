@@ -21,7 +21,8 @@ export const useJourneySteps = (
   checkGroup?: string,
   lastRefresh?: number,
   stepIndexArg?: number,
-  timestamp?: string
+  timestamp?: string,
+  stepsOnly?: boolean
 ) => {
   const { stepIndex: stepIndexUrl, checkGroupId: urlCheckGroup } = useParams<{
     stepIndex: string;
@@ -45,10 +46,13 @@ export const useJourneySteps = (
       // journey query targets `${remoteName}:synthetics-*` via CCS instead
       // of the local heartbeat indices. When the run `timestamp` is known we
       // forward it too so the steps query can be bounded to that run and prune
-      // frozen-tier shards.
-      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId, remoteName, timestamp }));
+      // frozen-tier shards. `stepsOnly` lets screenshot-only callers skip the
+      // journey-details lookup entirely.
+      dispatch(
+        fetchJourneyAction.get({ checkGroup: checkGroupId, remoteName, timestamp, stepsOnly })
+      );
     }
-  }, [checkGroupId, dispatch, lastRefresh, remoteName, timestamp]);
+  }, [checkGroupId, dispatch, lastRefresh, remoteName, timestamp, stepsOnly]);
 
   const stepEnds: JourneyStep[] = (journeyData?.steps ?? []).filter(isStepEnd);
   const failedStep = journeyData?.steps.find((step) => step.synthetics?.step?.status === 'failed');

@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeQuotes } from '@kbn/es-query';
 
 export const CLIENT_DEFAULTS = {
@@ -95,8 +96,14 @@ export const getTimespanFilter = ({ from, to }: { from: string; to: string }) =>
  */
 export const CHECK_GROUP_TIME_RANGE_BUFFER_MS = 60 * 60 * 1000; // 1 hour
 
-export const getCheckGroupTimeRangeFilter = (timestamp: string) => {
+export const getCheckGroupTimeRangeFilter = (timestamp: string): QueryDslQueryContainer => {
   const runTime = new Date(timestamp).getTime();
+  if (Number.isNaN(runTime)) {
+    // These routes are client-callable and validate `timestamp` only by length,
+    // so an unparseable value would make the `toISOString()` calls below throw a
+    // RangeError (HTTP 500). Fall back to no bound instead of crashing.
+    return { match_all: {} };
+  }
   return {
     range: {
       '@timestamp': {

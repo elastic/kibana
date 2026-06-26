@@ -20,6 +20,9 @@ export interface FetchJourneyStepsParams {
   checkGroup: string;
   remoteName?: string;
   timestamp?: string;
+  // When true, only `steps` are fetched and the server skips the journey
+  // details (prev/next sibling) lookup. Used by screenshot-only consumers.
+  stepsOnly?: boolean;
 }
 
 export async function fetchScreenshotBlockSet(
@@ -42,6 +45,7 @@ export async function fetchBrowserJourney(
   const query = {
     ...(params.remoteName ? { remoteName: params.remoteName } : {}),
     ...(params.timestamp ? { timestamp: params.timestamp } : {}),
+    ...(params.stepsOnly ? { stepsOnly: true } : {}),
   };
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),

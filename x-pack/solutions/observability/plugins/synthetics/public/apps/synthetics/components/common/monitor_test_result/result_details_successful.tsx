@@ -50,7 +50,8 @@ export const ResultDetailsSuccessful = ({
     data?.monitor.check_group,
     0,
     Number(step.synthetics.step?.index),
-    data?.['@timestamp']
+    data?.['@timestamp'],
+    true // stepsOnly: this row only needs step timing, never journey details
   );
 
   return (
