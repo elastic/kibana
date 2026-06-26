@@ -10,6 +10,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
 import { TestProvider } from '../../../shared/mocks/test_providers';
@@ -68,9 +69,10 @@ describe('WorkflowTriggersAndSteps', () => {
         history={[
           {
             id: 'run-1',
-            status: 'completed',
+            status: ExecutionStatus.COMPLETED,
             startedAt: '2025-01-15T10:00:00Z',
             finishedAt: '2025-01-15T10:05:00Z',
+            duration: 30000,
           },
         ]}
       />,
