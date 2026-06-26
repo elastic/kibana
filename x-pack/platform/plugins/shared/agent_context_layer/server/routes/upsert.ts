@@ -116,18 +116,13 @@ export const registerUpsertRoute = ({
         }),
         // Neither `type`, `permissions`, nor `origin_id` appear in
         // this body:
-        // - `type` is the URL path param; duplicating it invites
-        //   caller/path mismatch and a 400-vs-409 question with no
-        //   user value. (An older revision accepted `body.type` and
-        //   tolerated mismatches; this is the long-form contract we
-        //   moved to.)
+        // - `type` is the URL path param; duplicating it in the body
+        //   invites caller/path mismatch with no user value.
         // - `permissions` are derived by the indexer from the
         //   registered SML type's `getPermissions` hook (same source
         //   of truth as the crawler, the workflow step, and
-        //   event-driven writes); the old caller-supplied
-        //   `permissions` field was a spoofing surface that let an
-        //   HTTP client set the access-control gate independently of
-        //   the type it was stamping.
+        //   event-driven writes). Accepting caller-supplied permissions
+        //   would let an HTTP client override the access-control gate.
         // - `origin_id` is the URL path parameter; duplicating it in
         //   the body invites caller/path mismatch with no
         //   consistency check.

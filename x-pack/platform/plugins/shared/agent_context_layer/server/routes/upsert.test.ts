@@ -17,9 +17,6 @@ import {
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
 
-// The body no longer carries `type` — the URL does. See the route's
-// JSDoc and `common/constants.ts` for why the URL is compound on
-// `(type, originId)`.
 const validBody = {
   title: 'Test Viz',
   content: 'some content',
@@ -134,18 +131,10 @@ describe('registerUpsertRoute', () => {
   });
 
   it('clears existing tags when the PUT body omits tags (full-document replace semantic)', async () => {
-    // `PUT` is a full-document replace, not a patch — omitting `tags`
-    // in the body MUST clear any previously stored tags rather than
-    // preserving them. This is the documented REST `PUT` contract and
-    // also what the indexer's content-mode write does: it wipes every
-    // chunk for the origin and re-writes from the body. A previous
-    // refactor accidentally preserved tags via a merge, masking the
-    // intent; pin the behaviour here so any reintroduction of merge
-    // semantics fails loudly.
-    //
-    // The assertion looks at the `content` payload handed to the
-    // indexer rather than the post-write read because the indexer is
-    // the single source of truth for what lands on disk.
+    // PUT is a full-document replace — omitting `tags` must clear any
+    // existing tags. Pin this so merge-semantics regressions fail loudly.
+    // The assertion checks the payload handed to the indexer (the single
+    // source of truth for what lands on disk).
     const taggedDoc = { ...sampleDocument, tags: ['stale-tag-1', 'stale-tag-2'] };
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([taggedDoc]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
@@ -222,13 +211,9 @@ describe('registerUpsertRoute', () => {
   });
 
   it('accepts an unregistered type and writes it through the indexer (which stamps empty permissions)', async () => {
-    // Content-mode writes now accept any `type` — the indexer is the
-    // single point of decision on what permissions to stamp. The route
-    // no longer pre-checks the registry, so any value matching the
-    // identifier regex (`/^[a-z][a-z0-9_]*$/`) passes the params schema
-    // and the indexer handles permissioning. Verifying the call here
-    // is enough; the indexer's own tests cover the empty-permission
-    // stamping + warn-once behaviour.
+    // Any identifier regex-valid type passes schema validation; the
+    // indexer stamps empty permissions for unregistered types (covered
+    // by the indexer's own tests).
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
     mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);

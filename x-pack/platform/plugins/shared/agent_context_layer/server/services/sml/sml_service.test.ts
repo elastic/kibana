@@ -2429,12 +2429,11 @@ describe('SmlService', () => {
       expect(passed._source).toEqual(['id', 'type', 'spaces', 'origin']);
     });
 
-    it('logs a warning when total chunks exceed MAX_CHUNKS_PER_ORIGIN', async () => {
-      // Security-critical: if more than MAX_CHUNKS_PER_ORIGIN chunks
-      // exist across spaces, the cross-space guard might miss chunks
-      // in another space (they fall outside the returned window).
-      // We log explicitly so an operator can investigate the producer
-      // before the guard silently passes.
+    it('throws SmlCorpusTooLargeError (fail-closed) when total chunks exceed MAX_CHUNKS_PER_ORIGIN', async () => {
+      // Security-critical: if more than MAX_CHUNKS_PER_ORIGIN chunks exist
+      // across spaces, the cross-space guard would act on a partial view and
+      // could silently authorise a write that crosses a space boundary.
+      // We throw to prevent that — the write is rejected entirely.
       esClient.search.mockResolvedValue({
         hits: {
           total: { value: 2000, relation: 'eq' },
@@ -2446,17 +2445,17 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      await smlService.findByOriginAcrossSpaces({
-        type: 'visualization',
-        originId: 'overfull',
-        esClient: scopedClient,
-      });
+      await expect(
+        smlService.findByOriginAcrossSpaces({
+          type: 'visualization',
+          originId: 'overfull',
+          esClient: scopedClient,
+        })
+      ).rejects.toThrow(expect.objectContaining({ name: 'SmlCorpusTooLargeError' }));
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("origin 'visualization://overfull' has 2000 chunks")
-      );
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('cross-space overwrite guard may miss chunks')
+      // No spurious "failed" warn — the error is an intentional signal.
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('SML findByOriginAcrossSpaces failed')
       );
 
       const passed = esClient.search.mock.calls[0][0] as any;

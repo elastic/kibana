@@ -1506,14 +1506,15 @@ const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
  * Returns an empty array on `index_not_found` rather than throwing —
  * "no SML index yet" is a normal first-write state.
  *
- * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow has
- * a security implication: if more than the limit exists, chunks in
- * another space might fall outside the returned window and the
- * cross-space guard would silently pass. We log a warning when
- * overflow is detected so operators have an audit trail; the limit
- * itself is generous enough that producers should never legitimately
- * hit it (the workflow step caps batches at 100, and the crawler's
- * built-in types produce 1 chunk per origin).
+ * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. If more than
+ * the limit exists, chunks in another space might fall outside the
+ * returned window — the cross-space guard would then act on an
+ * incomplete view and could silently authorise a write that crosses
+ * a space boundary. To prevent that, overflow throws
+ * {@link SmlCorpusTooLargeError} (fail-closed). The limit is generous
+ * enough that legitimate producers should never hit it (the workflow
+ * step caps batches at 100, and the crawler's built-in types produce
+ * 1 chunk per origin).
  *
  * Returned `SmlDocument`s carry only the fields in
  * {@link FIND_ACROSS_SPACES_SOURCE_FIELDS}; everything else is
@@ -1549,8 +1550,8 @@ const findByOriginAcrossSpaces = async ({
 
     const total = extractTotalHits(response.hits.total);
     if (total > MAX_CHUNKS_PER_ORIGIN) {
-      logger.warn(
-        `SML findByOriginAcrossSpaces: origin '${originUri}' has ${total} chunks but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned — the cross-space overwrite guard may miss chunks beyond that limit. Investigate the producer immediately.`
+      throw new SmlCorpusTooLargeError(
+        `SML origin '${originUri}' has ${total} chunks, which exceeds the ${MAX_CHUNKS_PER_ORIGIN}-chunk cross-space guard limit. The write is rejected to avoid acting on a partial cross-space view. Reduce the chunk count for this origin before retrying.`
       );
     }
 
@@ -1561,7 +1562,11 @@ const findByOriginAcrossSpaces = async ({
     if (isNotFoundError(error)) {
       return [];
     }
-    logger.warn(`SML findByOriginAcrossSpaces failed: ${(error as Error).message}`);
+    // SmlCorpusTooLargeError is an intentional fail-closed signal — let it
+    // propagate without the generic "failed" warn, which would be redundant.
+    if (!(error instanceof SmlCorpusTooLargeError)) {
+      logger.warn(`SML findByOriginAcrossSpaces failed: ${(error as Error).message}`);
+    }
     throw error;
   }
 };

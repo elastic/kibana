@@ -93,10 +93,6 @@ describe('registerDeleteRoute', () => {
 
     const response = await callHandler(validParams);
 
-    // Single delete — `type` is pinned by the URL. No multi-type
-    // fan-out; the previous version of this route discovered `type`
-    // by enumerating chunks and looped, which was a side-effect of
-    // the (now removed) `/sml/{originId}` URL shape.
     expect(mockSmlService.deleteAttachment).toHaveBeenCalledTimes(1);
     expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({

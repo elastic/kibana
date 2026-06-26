@@ -1128,19 +1128,8 @@ describe('createSmlIndexer', () => {
       });
 
       it('getPermissions throw: propagates the throw and leaves existing chunks intact (fail-closed)', async () => {
-        // The previous implementation caught the throw, logged a warning,
-        // and stamped empty SmlPermissions on the chunk. That was actually
-        // FAIL-OPEN: the read-path filter treats `kbnPrivs.length === 0
-        // && esIdx.length === 0` as "no privileges required" and returns
-        // the chunk to any authenticated user in the space (see
-        // sml_service.ts `permsOk` computation). A transient blip during
-        // a crawl of sensitive resources would have silently de-gated
-        // those chunks until the next successful crawl overwrote them.
-        //
-        // The current behaviour propagates the throw BEFORE any ES
-        // mutation: the existing chunks for the origin remain intact,
-        // the task runner sees a typed error and reschedules, and no
-        // un-gated chunk is ever produced. We assert all three:
+        // The throw propagates before any ES mutation: existing chunks
+        // stay intact and no un-gated chunk is written. Assert all three:
         //  - the throw bubbles out
         //  - deleteByQuery is never called (origin not wiped)
         //  - bulk is never called (no new chunk written)

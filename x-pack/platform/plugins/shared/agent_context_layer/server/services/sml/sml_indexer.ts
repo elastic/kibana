@@ -177,11 +177,8 @@ class SmlIndexerImpl implements SmlIndexer {
 
     const definition = this.registry.get(attachmentType);
     if (!definition) {
-      // Single point of enforcement: origin-mode writes against unregistered
-      // types throw rather than silently no-op, mirroring content mode below.
-      // The old "log a warning and return" behaviour silently dropped the
-      // crawler's work when a type was disabled, which made the data plane
-      // and the registry drift without any signal. Delete still proceeds —
+      // Origin-mode writes against unregistered types throw (fail-closed),
+      // mirroring content mode below. Delete still proceeds —
       // see the early `action === 'delete'` branch above.
       throw new SmlUnregisteredTypeError(
         `SML indexer: type definition '${attachmentType}' is not registered — cannot index origin '${originId}'. Registered types: [${this.registry
@@ -401,12 +398,9 @@ class SmlIndexerImpl implements SmlIndexer {
     await this.deleteChunks({ originUri, esClient });
 
     const bulkOps = chunks.map((chunk) =>
-      // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
-      // scheme was unbounded (the inputs can be caller-controlled) and the
-      // determinism it advertised was redundant — `deleteChunks` above already
-      // wipes every chunk for the `origin_id`, so re-runs cannot accumulate
-      // stale rows. The `manual` literal was decoration; the document carries
-      // `ingestion_method: 'manual'` for that semantic.
+      // Use a bare UUID for `_id`: deterministic IDs are redundant because
+      // `deleteChunks` above wipes every chunk for the origin before writing,
+      // so re-runs cannot accumulate stale rows.
       this.buildIndexOp({
         chunkId: uuidv4(),
         chunk,
@@ -440,16 +434,8 @@ class SmlIndexerImpl implements SmlIndexer {
    *   namespace is emitted by `indexManualChunks` once per process per
    *   type so this helper can stay quiet on the hot path.
    *
-   * **Fail-closed on `getPermissions` throw.** The previous implementation
-   * caught the throw, logged a warning, and stamped empty permissions.
-   * That was actually fail-OPEN: the read-path filter treats
-   * `kbnPrivs.length === 0 && esIdx.length === 0` as "no privileges
-   * required" and returns the chunk to anyone in the space (see
-   * `sml_service.ts: permsOk = kbnPrivs.length === 0 || …`). A transient
-   * blip during a crawl of sensitive resources would have indexed those
-   * chunks with no gate until the next successful crawl overwrote them.
-   *
-   * We now propagate the throw instead. Callers see this:
+   * **Fail-closed on `getPermissions` throw.** When `getPermissions`
+   * throws, the error propagates before any ES mutation. Callers see this:
    *
    * - Origin-mode crawler: the task runner logs and reschedules on the
    *   next crawl tick. The origin keeps its previous chunks intact (the
@@ -624,14 +610,9 @@ class SmlIndexerImpl implements SmlIndexer {
         return false;
       }
       // On unexpected ES errors, fail-CLOSED (assume a manual entry
-      // exists, so the crawler does NOT overwrite). The previous
-      // fail-OPEN behaviour returned `false` here, which meant a
-      // transient blip during the manual-entry probe let the crawler
-      // proceed to `deleteChunks` + bulk write and silently destroy an
-      // admin-curated `'manual'` entry. Admins use manual entries to
-      // pin curated context (or to suppress a sensitive resource from
-      // surfacing into LLM context), so an invisible failure mode that
-      // destroys that intent is unacceptable.
+      // exists, so the crawler does NOT overwrite). Admins use manual
+      // entries to pin curated context or suppress sensitive resources
+      // from LLM context — silently destroying them is unacceptable.
       //
       // The trade-off: a transient ES error now causes the crawler to
       // *skip* this origin for one cycle. That's the correct default —
