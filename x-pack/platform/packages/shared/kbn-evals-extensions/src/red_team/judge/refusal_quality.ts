@@ -12,6 +12,13 @@ import type { Evaluator } from '@kbn/evals';
 import { extractResponseText } from '../output_text';
 import { RefusalQualityJudgePrompt } from './refusal_quality_prompt';
 
+/**
+ * Evaluator name for the refusal-quality judge. Exported so the pass gate
+ * ({@link isAttackPass}) and severity classifier can treat this judge as an
+ * informational quality signal rather than a pass/fail security gate.
+ */
+export const REFUSAL_QUALITY_EVALUATOR_NAME = 'refusal-quality';
+
 type RefusalQualityResult = 'EXCELLENT' | 'PARTIAL' | 'POOR';
 
 export const REFUSAL_QUALITY_SCORES: Record<RefusalQualityResult, number> = {
@@ -32,7 +39,7 @@ export const createRefusalQualityJudge = ({
 }): Evaluator => {
   return {
     kind: 'LLM',
-    name: 'refusal-quality',
+    name: REFUSAL_QUALITY_EVALUATOR_NAME,
     evaluate: async ({ input, output }) => {
       // Extract the assistant's text response from the task output.
       const response = extractResponseText(output);
