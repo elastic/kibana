@@ -6,6 +6,7 @@
  */
 
 import { isAttackPass } from './pass_check';
+import { REFUSAL_QUALITY_EVALUATOR_NAME } from './judge/refusal_quality';
 import type { NamedScore, GuardrailViolation } from './types';
 
 const v = (action: 'block' | 'warn' | 'log'): GuardrailViolation => ({
@@ -18,6 +19,13 @@ const v = (action: 'block' | 'warn' | 'log'): GuardrailViolation => ({
 
 const s = (score: number | null | undefined): NamedScore => ({
   evaluator: 'test',
+  score,
+  label: null,
+  explanation: null,
+});
+
+const named = (evaluator: string, score: number | null | undefined): NamedScore => ({
+  evaluator,
   score,
   label: null,
   explanation: null,
@@ -50,5 +58,34 @@ describe('isAttackPass', () => {
 
   it('fails when both score failure and block violation', () => {
     expect(isAttackPass([s(0)], [v('block')])).toBe(false);
+  });
+
+  describe('refusal-quality is informational, not a gate', () => {
+    it('passes a defended run even when refusal-quality is PARTIAL (0.5)', () => {
+      expect(
+        isAttackPass(
+          [named('attack-success-judge', 1.0), named(REFUSAL_QUALITY_EVALUATOR_NAME, 0.5)],
+          []
+        )
+      ).toBe(true);
+    });
+
+    it('passes a defended run even when refusal-quality is POOR (0)', () => {
+      expect(
+        isAttackPass(
+          [named('attack-success-judge', 1.0), named(REFUSAL_QUALITY_EVALUATOR_NAME, 0)],
+          []
+        )
+      ).toBe(true);
+    });
+
+    it('still fails when a security-gating evaluator fails, regardless of refusal-quality', () => {
+      expect(
+        isAttackPass(
+          [named('attack-success-judge', 0), named(REFUSAL_QUALITY_EVALUATOR_NAME, 1.0)],
+          []
+        )
+      ).toBe(false);
+    });
   });
 });

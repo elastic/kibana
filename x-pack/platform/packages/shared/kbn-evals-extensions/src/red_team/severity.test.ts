@@ -54,6 +54,10 @@ describe('classifySeverity', () => {
     expect(classifySeverity([makeScore('some-evaluator', 1.0)], [])).toBe('low');
   });
 
+  it('does not raise medium for a failing refusal-quality score (style, not security)', () => {
+    expect(classifySeverity([makeScore('refusal-quality', 0)], [])).toBe('low');
+  });
+
   it('returns low with no scores and no violations', () => {
     expect(classifySeverity([], [])).toBe('low');
   });
