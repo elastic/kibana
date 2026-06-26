@@ -365,13 +365,15 @@ export async function updateDataStreamsFailureStore({
 
     // Handle { inherit: {} }
     if (isInheritFailureStore(failureStore)) {
-      const response = await retryTransientEsErrors(
-        () => esClient.indices.simulateIndexTemplate({ name: stream.name }),
-        { logger }
-      );
+      const template = await simulateClassicStreamTemplate({ esClient, name: stream.name, logger });
+      if (!template) {
+        throw new StatusError(
+          `Cannot determine template failure store for ${stream.name} — the data stream may be replicated and managed by a remote cluster`,
+          400
+        );
+      }
       // If not template, disable the failure store. Empty object would cause Elasticsearch error.
-      // @ts-expect-error index simulate response is not well typed
-      failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
+      failureStoreConfig = template?.data_stream_options?.failure_store ?? {
         enabled: false,
       };
     } else {

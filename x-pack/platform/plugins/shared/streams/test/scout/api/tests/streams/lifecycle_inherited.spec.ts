@@ -11,7 +11,7 @@ import { streamsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
 apiTest.describe(
-  'Stream lifecycle - inherited config API',
+  'Stream lifecycle & failure store - inherited config API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const rootStream = 'logs.otel';
@@ -152,12 +152,210 @@ apiTest.describe(
     );
 
     apiTest(
+      'returns the failure store inherited from the parent wired stream',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const parentStream = `${streamNamePrefix}-fs-parent`;
+        const childStream = `${parentStream}.child`;
+
+        await forkStream(apiClient, cookieHeader, rootStream, parentStream, {
+          field: 'service.name',
+          eq: 'fs-parent',
+        });
+
+        // Enable failure store with a custom retention on the parent.
+        const parent = await getStream(apiClient, cookieHeader, parentStream);
+        const updateParentResponse = await apiClient.put(`api/streams/${parentStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...getWriteableIngest(parent),
+              failure_store: { lifecycle: { enabled: { data_retention: '20d' } } },
+            },
+          },
+          responseType: 'json',
+        });
+        expect(updateParentResponse).toHaveStatusCode(200);
+
+        await forkStream(apiClient, cookieHeader, parentStream, childStream, {
+          field: 'log.level',
+          eq: 'error',
+        });
+
+        const { statusCode, body } = await apiClient.get(
+          `internal/streams/${childStream}/failure_store/_inherited`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+        expect(body.failure_store).toBeDefined();
+        expect(body.failure_store.lifecycle).toBeDefined();
+        expect(body.failure_store.lifecycle.enabled).toBeDefined();
+        expect(body.failure_store.lifecycle.enabled.data_retention).toBe('20d');
+      }
+    );
+
+    apiTest(
+      'returns an inherited failure store result for a stream without explicit failure store config',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const parentStream = `${streamNamePrefix}-fs-default-parent`;
+        const childStream = `${parentStream}.child`;
+
+        await forkStream(apiClient, cookieHeader, rootStream, parentStream, {
+          field: 'service.name',
+          eq: 'fs-default-parent',
+        });
+        await forkStream(apiClient, cookieHeader, parentStream, childStream, {
+          field: 'log.level',
+          eq: 'info',
+        });
+
+        const { statusCode, body } = await apiClient.get(
+          `internal/streams/${childStream}/failure_store/_inherited`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+        // The shape is always an EffectiveFailureStore object: either disabled or a lifecycle config.
+        expect(body.failure_store).toBeDefined();
+        expect('disabled' in body.failure_store || 'lifecycle' in body.failure_store).toBe(true);
+      }
+    );
+
+    apiTest(
+      'returns the ILM policy a classic stream would inherit from its index template',
+      // ILM is a stateful-only concept, so this case does not apply to serverless.
+      { tag: tags.stateful.classic },
+      async ({ apiClient, samlAuth, esClient }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+        const dataStreamName = 'logs-lci-ilm-classic';
+        const templateName = 'lci-ilm-classic-template';
+        const policyName = 'lci-ilm-classic-policy';
+
+        try {
+          await esClient.ilm.putLifecycle({
+            name: policyName,
+            policy: {
+              phases: {
+                hot: { actions: { rollover: { max_age: '30d' } } },
+                delete: { min_age: '90d', actions: { delete: {} } },
+              },
+            },
+          });
+
+          await esClient.indices.putIndexTemplate({
+            name: templateName,
+            index_patterns: [`${dataStreamName}*`],
+            data_stream: {},
+            priority: 500,
+            template: {
+              settings: {
+                'index.lifecycle.name': policyName,
+                'index.lifecycle.prefer_ilm': true,
+              },
+            },
+          });
+
+          await esClient.indices.createDataStream({ name: dataStreamName });
+
+          const { statusCode, body } = await apiClient.get(
+            `internal/streams/${dataStreamName}/lifecycle/_inherited`,
+            {
+              headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+              responseType: 'json',
+            }
+          );
+
+          expect(statusCode).toBe(200);
+          expect(body.lifecycle.ilm).toBeDefined();
+          expect(body.lifecycle.ilm.policy).toBe(policyName);
+          expect(body.lifecycle.dsl).toBeUndefined();
+        } finally {
+          await esClient.indices.deleteDataStream({ name: dataStreamName }).catch(() => {});
+          await esClient.indices.deleteIndexTemplate({ name: templateName }).catch(() => {});
+          await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+        }
+      }
+    );
+
+    apiTest(
+      'returns the failure store a classic stream would inherit from an exact-pattern index template',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+        const dataStreamName = 'logs-lci-fs-exact';
+        const templateName = 'lci-fs-exact-template';
+
+        try {
+          await esClient.indices.putIndexTemplate({
+            name: templateName,
+            index_patterns: [dataStreamName],
+            data_stream: {},
+            priority: 500,
+            template: {
+              data_stream_options: {
+                failure_store: {
+                  enabled: true,
+                  lifecycle: { data_retention: '45d' },
+                },
+              },
+            },
+          });
+
+          await esClient.indices.createDataStream({ name: dataStreamName });
+
+          const { statusCode, body } = await apiClient.get(
+            `internal/streams/${dataStreamName}/failure_store/_inherited`,
+            {
+              headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+              responseType: 'json',
+            }
+          );
+
+          expect(statusCode).toBe(200);
+          expect(body.failure_store).toBeDefined();
+          expect(body.failure_store.lifecycle).toBeDefined();
+          expect(body.failure_store.lifecycle.enabled).toBeDefined();
+          expect(body.failure_store.lifecycle.enabled.data_retention).toBe('45d');
+        } finally {
+          await esClient.indices.deleteDataStream({ name: dataStreamName }).catch(() => {});
+          await esClient.indices.deleteIndexTemplate({ name: templateName }).catch(() => {});
+        }
+      }
+    );
+
+    apiTest(
       'returns 404 for a non-existent stream lifecycle inheritance',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
         const { statusCode } = await apiClient.get(
           'internal/streams/non-existent-inherited-stream/lifecycle/_inherited',
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          }
+        );
+
+        expect([403, 404]).toContain(statusCode);
+      }
+    );
+
+    apiTest(
+      'returns 404 for a non-existent stream failure store inheritance',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+        const { statusCode } = await apiClient.get(
+          'internal/streams/non-existent-inherited-stream/failure_store/_inherited',
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
             responseType: 'json',
