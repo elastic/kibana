@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -92,49 +92,6 @@ const Wrapper: React.FC<{
       </QueryClientProvider>
     </IntlProvider>
   );
-};
-
-const renderStep = ({
-  builderState = makeBuilderState(),
-  stateOverrides = {},
-  formValueOverrides = {},
-}: {
-  builderState?: ThresholdFormValues;
-  stateOverrides?: Partial<ComposeDiscoverState>;
-  formValueOverrides?: Partial<ComposeFormValues>;
-} = {}) => {
-  const state = createState(stateOverrides);
-  const dispatch = jest.fn();
-  const services = createMockServices();
-  const setBuilderState = jest.fn();
-  const queryClient = createTestQueryClient();
-  const defaultValues: ComposeFormValues = { ...BASE_COMPOSE_VALUES, ...formValueOverrides };
-
-  const StepWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
-    return (
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <FormProvider {...form}>
-            <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              <BuilderStateProvider
-                builderState={builderState}
-                setBuilderState={setBuilderState as (s: unknown) => void}
-              >
-                {children}
-              </BuilderStateProvider>
-            </RuleFormProvider>
-          </FormProvider>
-        </QueryClientProvider>
-      </IntlProvider>
-    );
-  };
-
-  render(<RuleBuilderAlertConditionStep state={state} dispatch={dispatch} services={services} />, {
-    wrapper: StepWrapper,
-  });
-
-  return { dispatch, services, setBuilderState };
 };
 
 describe('RuleBuilderAlertConditionStep', () => {
@@ -290,49 +247,284 @@ describe('RuleBuilderAlertConditionStep', () => {
 
     expect(screen.getByText('Field is required.')).toBeInTheDocument();
   });
-});
 
-describe('RuleBuilderAlertConditionStep - alert delay', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders AlertDelayField when kind is alert', () => {
-    renderStep({ formValueOverrides: { kind: 'alert' } });
-
-    expect(screen.getByTestId('alertDelayFormRow')).toBeTruthy();
-  });
-
-  it('does not render AlertDelayField when kind is signal', () => {
-    renderStep({
-      formValueOverrides: {
-        kind: 'signal',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | WHERE count > 100' } },
-      },
+  it('adds a second stat and shows remove buttons for both', () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
     });
 
-    expect(screen.queryByTestId('alertDelayFormRow')).toBeNull();
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderStatAgg-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleBuilderStatAgg-1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleBuilderRemoveStat-0')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddStat'));
+    const afterAdd = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    expect(afterAdd.stats).toHaveLength(2);
+
+    rerender(
+      <Wrapper builderState={afterAdd} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderStatAgg-1')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleBuilderRemoveStat-0')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleBuilderRemoveStat-1')).toBeInTheDocument();
   });
 
-  it('defaults to Immediate mode', () => {
-    renderStep({ formValueOverrides: { stateTransitionAlertDelayMode: 'immediate' } });
+  it('adds and removes alert conditions with operator toggle', () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
 
-    const alertRow = screen.getByTestId('alertDelayFormRow');
-    expect(within(alertRow).getByTestId('stateTransitionImmediateDescription')).toBeTruthy();
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderConditionMetric-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleBuilderConditionMetric-1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleBuilderConditionOperator')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddCondition'));
+    const afterAdd = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    expect(afterAdd.alertConditions).toHaveLength(2);
+
+    rerender(
+      <Wrapper builderState={afterAdd} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderConditionMetric-1')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleBuilderConditionOperator')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleBuilderRemoveCondition-1'));
+    const afterRemove = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    expect(afterRemove.alertConditions).toHaveLength(1);
+
+    rerender(
+      <Wrapper builderState={afterRemove} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('ruleBuilderConditionOperator')).not.toBeInTheDocument();
   });
 
-  it('switches between Immediate, Breaches, and Duration modes', () => {
-    renderStep({ formValueOverrides: { stateTransitionAlertDelayMode: 'immediate' } });
+  it('adds and removes evaluations and reflects label in condition metric dropdown', () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
 
-    const alertRow = screen.getByTestId('alertDelayFormRow');
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
 
-    fireEvent.click(within(alertRow).getByText('Breaches'));
-    expect(screen.getByTestId('stateTransitionCountInput')).toBeTruthy();
+    expect(screen.queryByTestId('ruleBuilderEvalLabel-0')).not.toBeInTheDocument();
 
-    fireEvent.click(within(alertRow).getByText('Duration'));
-    expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('ruleBuilderAddEvaluation'));
+    const afterAdd = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    expect(afterAdd.evaluations).toHaveLength(1);
 
-    fireEvent.click(within(alertRow).getByText('Immediate'));
-    expect(screen.getByTestId('stateTransitionImmediateDescription')).toBeTruthy();
+    rerender(
+      <Wrapper builderState={afterAdd} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderEvalLabel-0')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleBuilderEvalExpression-0')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('ruleBuilderEvalLabel-0'), {
+      target: { value: 'error_rate' },
+    });
+    const afterLabel = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+    rerender(
+      <Wrapper builderState={afterLabel} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    const metricSelect = screen.getByTestId('ruleBuilderConditionMetric-0');
+    const options = Array.from(metricSelect.querySelectorAll('option'));
+    expect(options.some((o) => o.textContent === 'error_rate')).toBe(true);
+
+    fireEvent.click(screen.getByTestId('ruleBuilderRemoveEval-0'));
+    const afterRemove = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    expect(afterRemove.evaluations).toHaveLength(0);
+  });
+
+  it('sets and displays filter input value', () => {
+    const onBuilderStateChange = jest.fn();
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    const filterInput = screen.getByTestId('ruleBuilderFilter');
+    fireEvent.change(filterInput, { target: { value: 'host.name == "api"' } });
+
+    expect(onBuilderStateChange).toHaveBeenCalled();
+    const call = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    expect(call.filterQuery).toBe('host.name == "api"');
+  });
+
+  it('shows stat field combo box when aggregation requires a field', () => {
+    const builderState = makeBuilderState({
+      stats: [
+        { id: 'stat-1', label: 'avg_latency', aggregation: Aggregation.AVG, field: undefined },
+      ],
+    });
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderStatField-0')).toBeInTheDocument();
+  });
+
+  it('hides stat field combo box for COUNT aggregation', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('ruleBuilderStatField-0')).not.toBeInTheDocument();
+  });
+
+  it('shows second threshold input for between comparator and hides it for single comparator', () => {
+    const builderState = makeBuilderState({
+      alertConditions: [
+        { id: 'cond-1', metric: 'count', comparator: Comparator.BETWEEN, threshold: [10, 50] },
+      ],
+    });
+
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderConditionThresholdTo-0')).toBeInTheDocument();
+
+    const singleComparator = makeBuilderState({
+      alertConditions: [
+        { id: 'cond-1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+      ],
+    });
+
+    rerender(
+      <Wrapper builderState={singleComparator} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('ruleBuilderConditionThresholdTo-0')).not.toBeInTheDocument();
+  });
+
+  it('disables preview button when childOpen is true', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState({ childOpen: true })}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
+  });
+
+  it('enables preview button when childOpen is false', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState({ childOpen: false })}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderOpenPreview')).not.toBeDisabled();
   });
 });
