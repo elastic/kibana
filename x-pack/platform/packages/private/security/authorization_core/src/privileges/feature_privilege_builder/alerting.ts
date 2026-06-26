@@ -26,6 +26,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getExecutionLog',
     'getActionErrorLog',
     'find',
+    'findMutedAlerts',
     'getRuleExecutionKPI',
     'getBackfill',
     'findBackfill',
@@ -64,7 +65,7 @@ const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
 
 // Covers both per-alert snooze/unsnooze and muteAlert/unmuteAlert
 const muteAlertsOperations: Record<AlertingEntity, string[]> = {
-  rule: ['muteAlert', 'unmuteAlert'],
+  rule: ['muteAlert', 'unmuteAlert', 'findMutedAlerts'],
   alert: [],
 };
 
