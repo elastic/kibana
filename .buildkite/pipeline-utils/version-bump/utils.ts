@@ -11,7 +11,7 @@ import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { getPrChangesCached } from '../github';
 
 const VERSION_BUMP_BRANCH_RE = /^bump-versions(-json)?-\d{4}-\d{2}-\d{2}/;
-const ELEASIC_LOGIN = 'elastic';
+const ELASTIC_LOGIN = 'elastic';
 const VERSION_BUMP_FILE_MATCHERS = [
   /^versions\.json$/,
   /^\.backportrc\.json$/,
@@ -29,7 +29,7 @@ export const isAutomatedVersionBumpPR = async (
   const branch = process.env.GITHUB_PR_BRANCH ?? '';
   const prHeadUser = process.env.GITHUB_PR_HEAD_USER ?? '';
 
-  if (!VERSION_BUMP_BRANCH_RE.test(branch) || prHeadUser !== ELEASIC_LOGIN) {
+  if (!VERSION_BUMP_BRANCH_RE.test(branch) || prHeadUser !== ELASTIC_LOGIN) {
     return false;
   }
 
