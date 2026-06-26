@@ -16,8 +16,6 @@ import {
 } from '../../../endpoint/types/workflow_insights';
 import type { WorkflowInsightType } from '../../../endpoint/types/workflow_insights';
 
-// `maxLength` caps for request strings, grouped by field category so the tiers stay
-// consistent and self-documenting (DoS hardening for unbounded schema strings).
 const MAX_DATE_LENGTH = 64; // ISO-8601 date/time strings
 const MAX_ID_LENGTH = 256; // IDs and other short identifier-like strings (incl. record keys, tags)
 const MAX_NAME_LENGTH = 256; // exception-list item name / description
