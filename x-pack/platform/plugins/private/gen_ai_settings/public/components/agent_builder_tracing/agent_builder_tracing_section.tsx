@@ -8,12 +8,13 @@
 import React from 'react';
 import {
   EuiAccordion,
-  EuiHorizontalRule,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
@@ -32,6 +33,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useTracingEnabledState } from './use_tracing_enabled_state';
 
 export const AgentBuilderTracingSection: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
     services: { settings, notifications, docLinks, application },
@@ -60,12 +62,12 @@ export const AgentBuilderTracingSection: React.FC = () => {
       <EuiSplitPanel.Outer hasBorder grow={false}>
         <EuiSplitPanel.Inner color="subdued">
           <EuiTitle size="s">
-            <h3 data-test-subj="agentBuilderTracingSectionTitle">
+            <h2 data-test-subj="agentBuilderTracingSectionTitle">
               <FormattedMessage
                 id="xpack.genAiSettings.agentBuilderTracing.sectionTitle"
                 defaultMessage="Agent Builder Traces"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
@@ -85,111 +87,146 @@ export const AgentBuilderTracingSection: React.FC = () => {
 
             {tracingEnabled && (
               <>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <FormattedMessage
-                    id="xpack.genAiSettings.agentBuilderTracing.accessControl"
-                    defaultMessage="Trace data is readable by anyone with index access. To restrict it, configure index-level permissions in {rolesLink}."
-                    values={{
-                      rolesLink: (
-                        <EuiLink href={rolesUrl}>
-                          <FormattedMessage
-                            id="xpack.genAiSettings.agentBuilderTracing.rolesLink"
-                            defaultMessage="Stack Management > Roles"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                  <br />
-                  <FormattedMessage
-                    id="xpack.genAiSettings.agentBuilderTracing.indices"
-                    defaultMessage="Traces are stored in {index1} and {index2}"
-                    values={{
-                      index1: <code>traces-agent_builder.otel-*</code>,
-                      index2: <code>logs-agent_builder.otel-*</code>,
-                    }}
-                  />
-                </EuiText>
-                <EuiSpacer size="m" />
-
-                <EuiAccordion
-                  id="agentBuilderTracingAdvanced"
-                  buttonContent={
-                    <FormattedMessage
-                      id="xpack.genAiSettings.agentBuilderTracing.advancedLabel"
-                      defaultMessage="Advanced privacy settings"
-                    />
-                  }
-                  paddingSize="s"
-                >
+                <EuiPanel color="primary" hasShadow={false} paddingSize="m">
+                  <EuiTitle size="xs" css={{ color: euiTheme.colors.primaryText }}>
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.genAiSettings.agentBuilderTracing.aboutTitle"
+                        defaultMessage="About trace access and storage"
+                      />
+                    </h4>
+                  </EuiTitle>
                   <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.genAiSettings.agentBuilderTracing.contentDescription"
-                        defaultMessage="Choose what sensitive content is included in Agent Builder traces."
+                        id="xpack.genAiSettings.agentBuilderTracing.accessControl"
+                        defaultMessage="Trace data is readable by anyone with index access. To restrict it, configure index-level permissions in {rolesLink}."
+                        values={{
+                          rolesLink: (
+                            <EuiLink href={rolesUrl}>
+                              <FormattedMessage
+                                id="xpack.genAiSettings.agentBuilderTracing.rolesLink"
+                                defaultMessage="Stack Management > Roles"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                      <br />
+                      <FormattedMessage
+                        id="xpack.genAiSettings.agentBuilderTracing.indices"
+                        defaultMessage="Traces are stored in {index1} and {index2}"
+                        values={{
+                          index1: (
+                            <code css={{ color: euiTheme.colors.subduedText }}>
+                              traces-agent_builder.otel-*
+                            </code>
+                          ),
+                          index2: (
+                            <code css={{ color: euiTheme.colors.subduedText }}>
+                              logs-agent_builder.otel-*
+                            </code>
+                          ),
+                        }}
                       />
                     </p>
                   </EuiText>
-                  <EuiSpacer size="m" />
+                </EuiPanel>
+                <EuiSpacer size="l" />
 
-                  {fields[AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID] && (
-                    <FieldRow
-                      field={fields[AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID]}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID]}
-                    />
-                  )}
+                <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+                  <EuiAccordion
+                    id="agentBuilderTracingAdvanced"
+                    arrowDisplay="right"
+                    buttonContent={
+                      <>
+                        <EuiTitle size="xs">
+                          <h4>
+                            <FormattedMessage
+                              id="xpack.genAiSettings.agentBuilderTracing.advancedLabel"
+                              defaultMessage="Advanced privacy settings"
+                            />
+                          </h4>
+                        </EuiTitle>
+                        <EuiSpacer size="xs" />
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="xpack.genAiSettings.agentBuilderTracing.contentDescription"
+                              defaultMessage="Choose what sensitive content is included in Agent Builder traces"
+                            />
+                          </p>
+                        </EuiText>
+                      </>
+                    }
+                    paddingSize="none"
+                  >
+                    <EuiSpacer size="m" />
 
-                  {fields[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID] && (
-                    <FieldRow
-                      field={fields[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]}
-                    />
-                  )}
+                    {fields[AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={
+                          unsavedChanges[AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID]
+                        }
+                      />
+                    )}
 
-                  {fields[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID] && (
-                    <FieldRow
-                      field={fields[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]}
-                    />
-                  )}
+                    {fields[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={
+                          unsavedChanges[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]
+                        }
+                      />
+                    )}
 
-                  {fields[AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID] && (
-                    <FieldRow
-                      field={fields[AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID]}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID]}
-                    />
-                  )}
+                    {fields[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={
+                          unsavedChanges[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]
+                        }
+                      />
+                    )}
 
-                  <EuiHorizontalRule margin="s" />
+                    {fields[AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={
+                          unsavedChanges[AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID]
+                        }
+                      />
+                    )}
 
-                  {fields[AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID] && (
-                    <FieldRow
-                      field={fields[AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]}
-                    />
-                  )}
+                    {fields[AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]}
+                      />
+                    )}
 
-                  {fields[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID] && (
-                    <FieldRow
-                      field={fields[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]}
-                    />
-                  )}
-                </EuiAccordion>
+                    {fields[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID] && (
+                      <FieldRow
+                        field={fields[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]}
+                        isSavingEnabled={!!canEditAdvancedSettings}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]}
+                      />
+                    )}
+                  </EuiAccordion>
+                </EuiPanel>
               </>
             )}
           </FieldRowProvider>
