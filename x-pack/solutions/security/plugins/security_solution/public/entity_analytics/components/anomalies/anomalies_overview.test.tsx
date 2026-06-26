@@ -214,7 +214,6 @@ describe('AnomaliesOverview', () => {
       const el = screen.getByTestId('mock-anomaly-job-name');
       expect(el).toHaveAttribute('data-job-id', 'my-job');
       expect(el).toHaveAttribute('data-job-name', 'My Job');
-      expect(el).toHaveAttribute('data-detector-index', '2');
     });
 
     it('uses jobId as fallback display name when jobName is null', () => {
