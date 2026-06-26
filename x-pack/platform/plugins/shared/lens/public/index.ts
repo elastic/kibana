@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LensPlugin } from './plugin';
+import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { declare } from '@kbn/plugin-di';
+import { LensPlugin, getLensEmbeddableServicesGetter } from './plugin';
+import { getLensFeatureFlags } from './get_feature_flags';
 
 // Embeddable types
 export { isLensApi } from './react_embeddable/type_guards';
@@ -132,3 +137,41 @@ export type { EditorFrameServiceProviderProps } from './editor_frame_service/edi
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
 export const plugin = () => new LensPlugin();
+
+/**
+ * Registers the Lens embeddable factory globally.
+ *
+ * The `getFactory` callback defers to `getStartServicesForEmbeddable`,
+ * which is set during `setup()` and resolves at render time when all
+ * start services are available.
+ */
+export const services = declare(({ contribute }) => {
+  contribute(EmbeddableFactoryRegistration, {
+    type: LENS_EMBEDDABLE_TYPE,
+    getFactory: async () => {
+      const getter = getLensEmbeddableServicesGetter();
+      if (!getter) {
+        throw new Error('Lens embeddable services getter not initialized');
+      }
+      const [deps, { createLensEmbeddableFactory }] = await Promise.all([
+        getter(),
+        import('./async_services'),
+      ]);
+      return createLensEmbeddableFactory(deps);
+    },
+    getLegacyURLTransform: async (transformDrilldownsOut) => {
+      const [{ getTransformOut }, { LensConfigBuilder }] = await Promise.all([
+        import('./async_services'),
+        import('@kbn/lens-embeddable-utils'),
+      ]);
+      const builder = new LensConfigBuilder(undefined, getLensFeatureFlags().apiFormat);
+      // Param is `unknown` on the decoupled contract; narrow to the embeddable transform type.
+      // Always invoked from the dashboard app, hence `true`.
+      return getTransformOut(
+        builder,
+        transformDrilldownsOut as DrilldownTransforms['transformOut'],
+        true
+      );
+    },
+  });
+});

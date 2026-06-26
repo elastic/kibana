@@ -358,10 +358,10 @@ contributions as an array:
 ```tsx
 import React from 'react';
 import { useExtensions } from '@kbn/core-di-browser';
-import { MyMenuItemsToken } from '@kbn/my-plugin-types';
+import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
 
-export function MenuItemList() {
-  const items = useExtensions(MyMenuItemsToken);
+export function FactoryList() {
+  const factories = useExtensions(EmbeddableFactoryRegistration);
 
   return (
     /* ... */
@@ -574,5 +574,9 @@ In production plugins, `slo` provides its flyout components as services
 (`slo.CreateSLOFormFlyout`, `slo.SLODetailsFlyout`) that `apm` consumes with no
 direct plugin dependency, projected from SLO's own `start()` contract.
 
-The same primitives support **extension points** (one-host, many-contributor
-contracts), which this effort exercises against real registry-style plugins.
+The embeddable factory example demonstrates an **extension point**: `embeddable`
+hosts `embeddable.FactoryRegistration` (in `@kbn/embeddable-factory-types`) and
+resolves it with `getExtensions(...)`, while `lens`, `dashboard_markdown`, and
+`image_embeddable` each `contribute(...)` a factory — replacing the imperative
+factory registry with `createTokenFactory(...).extensionPoint(...)`, `host(...)`,
+and `contribute(...)`.

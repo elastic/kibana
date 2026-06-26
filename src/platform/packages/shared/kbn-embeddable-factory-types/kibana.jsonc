@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/embeddable-factory-types",
+  "owner": ["@elastic/kibana-presentation"],
+  "description": "Cross-plugin extension point token for embeddable factory registration.",
+  "group": "platform",
+  "visibility": "shared"
+}

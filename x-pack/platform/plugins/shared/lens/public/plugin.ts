@@ -82,7 +82,6 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   FEATURED_ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -141,6 +140,14 @@ import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggest
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 import { setLensBuilder } from './lazy_builder';
+
+let lensEmbeddableServicesGetter: (() => Promise<LensEmbeddableStartServices>) | undefined;
+
+/**
+ * Returns the deferred getter for Lens embeddable start services.
+ * Set during `setup()`, consumed by the DI module's `getFactory` callback at render time.
+ */
+export const getLensEmbeddableServicesGetter = () => lensEmbeddableServicesGetter;
 
 export type { SaveProps } from './app_plugin';
 
@@ -383,16 +390,9 @@ export class LensPlugin {
       };
     };
 
-    if (embeddable) {
-      // Let Kibana know about the Lens embeddable
-      embeddable.registerEmbeddablePublicDefinition(LENS_EMBEDDABLE_TYPE, async () => {
-        const [deps, { createLensEmbeddableFactory }] = await Promise.all([
-          getStartServicesForEmbeddable(),
-          import('./async_services'),
-        ]);
-        return createLensEmbeddableFactory(deps);
-      });
+    lensEmbeddableServicesGetter = getStartServicesForEmbeddable;
 
+    if (embeddable) {
       this.setupPendingTasks.push(
         core.getStartServices().then(async ([{ featureFlags }]) => {
           // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
@@ -400,17 +400,6 @@ export class LensPlugin {
 
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
-
-          embeddable.registerLegacyURLTransform(
-            LENS_EMBEDDABLE_TYPE,
-            async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-              const { getTransformOut } = await import('./async_services');
-              const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
-              const builder = new LensConfigBuilder(undefined, flags.apiFormat);
-
-              return getTransformOut(builder, transformDrilldownsOut, true); // This will always be called from a dashboard app
-            }
-          );
         })
       );
 

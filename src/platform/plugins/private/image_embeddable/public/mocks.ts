@@ -8,14 +8,12 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { createMockFilesStart } from '@kbn/files-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { setKibanaServices } from './services/kibana_services';
 
 export const setStubKibanaServices = () => {
   setKibanaServices(coreMock.createStart(), {
-    embeddable: embeddablePluginMock.createStartContract(),
     files: createMockFilesStart(),
     uiActions: uiActionsPluginMock.createStartContract(),
   });
