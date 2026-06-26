@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useEffect, useState, useCallback } from 'react';
+import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { type Observable } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
@@ -67,8 +67,10 @@ const NavExtensionTemplateHost = ({
 
 export const useRenderNavExtensionPoint = () => {
   const chrome = useChromeService();
-  const extensionRegistry = useObservable(chrome.project.getExtensionRegistry$(), undefined);
-  const slotDataSources = useObservable(chrome.project.getActiveSlotDataSources$(), undefined);
+  const extensionRegistry$ = useMemo(() => chrome.project.getExtensionRegistry$(), [chrome]);
+  const slotDataSources$ = useMemo(() => chrome.project.getActiveSlotDataSources$(), [chrome]);
+  const extensionRegistry = useObservable(extensionRegistry$, undefined);
+  const slotDataSources = useObservable(slotDataSources$, undefined);
 
   const renderExtensionPoint = useCallback(
     (slotId: string, extensionId: string, context: NavExtensionRenderContext) => {
