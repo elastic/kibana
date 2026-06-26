@@ -3,7 +3,7 @@ navigation_title: "Workday"
 type: reference
 description: "Access Workday HR data across workers, recruiting, learning, expenses, projects, and procurement with the Workday connector. Reference for OAuth 2.0 setup, connector configuration, and available actions."
 applies_to:
-  stack: preview
+  stack: preview 9.5
   serverless: preview
 ---
 
@@ -13,7 +13,12 @@ The Workday connector connects directly to the Workday REST API. It enables AI a
 
 ## Overview
 
-The Workday connector uses Workday's REST API with OAuth 2.0 Authorization Code authentication (with non-expiring refresh tokens). To configure the connector, you provide your Workday tenant URL, tenant name, and OAuth credentials.
+The Workday connector uses Workday's REST API with OAuth 2.0 authentication. It supports two grant types:
+
+- **Authorization Code** — each user authenticates interactively; actions run as that user. Requires non-expiring refresh tokens.
+- **Client Credentials** — a single service account token; no user interaction required. Suitable for automated or machine-to-machine workflows.
+
+To configure the connector, provide your Workday tenant URL, tenant name, and OAuth credentials.
 
 All actions are read-only. Compensation, payroll, personal contact information, performance ratings, and medical data are not accessible.
 
@@ -30,7 +35,7 @@ You can create a Workday connector in **{{stack-manage-app}} > {{connectors-ui}}
 :   The tenant identifier used in API paths, for example `mycompany`. Typically, this matches the subdomain in your Workday URL.
 
 **Authentication**
-:   OAuth 2.0 Authorization Code with non-expiring refresh tokens. You need a **Client ID**, **Client Secret**, **Authorization URL**, and **Token URL** from a registered Workday API client scoped to an Integration System User (ISU).
+:   OAuth 2.0 — either Authorization Code (per-user) or Client Credentials (machine-to-machine). Both require a **Client ID**, **Client Secret**, and **Token URL** from a registered Workday API client. Authorization Code also requires an **Authorization URL**.
     The authorization and token URLs follow the pattern:
     - `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/authorize`
     - `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/token`
@@ -59,18 +64,36 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [workday-api-credentials]
 
-To use the Workday connector, you need to register an API client in Workday and create an Integration System User (ISU) with appropriate security permissions.
+To use the Workday connector, register an API client in Workday with the appropriate grant type.
+
+### Authorization Code (per-user) [workday-auth-code-setup]
 
 1. Log in to Workday as a system administrator.
 2. Search for and open **Register API Client for Integrations**.
 3. Enter a name for the client (for example, `Kibana Integration`).
 4. From the **Client Grant Type** menu, select **Authorization Code Grant**.
 5. Enable **PKCE**.
-6. Add the **Functional Areas** corresponding to the action groups you want to enable (see the Available actions table above).
-7. Click **OK** and copy the **Client ID** and **Client Secret** that are displayed. Store the secret securely — Workday displays it only once.
-8. Search for and open **View API Clients**. Find your client and copy the **Authorization Endpoint** and **Token Endpoint** URLs.
-9. To configure the Kibana connector, enter:
+6. Enable **Non-Expiring Refresh Tokens**.
+7. Add the **Functional Areas** corresponding to the action groups you want to enable (see the Available actions table above).
+8. Click **OK** and copy the **Client ID** and **Client Secret** that are displayed. Store the secret securely — Workday displays it only once.
+9. Search for and open **View API Clients**. Find your client and copy the **Authorization Endpoint** and **Token Endpoint** URLs.
+10. To configure the Kibana connector, enter:
+    - **Tenant URL**: your Workday base URL (for example, `https://mycompany.workday.com`)
+    - **Tenant Name**: your tenant identifier (for example, `mycompany`)
+    - **Client ID** and **Client Secret** from step 7
+    - **Authorization URL** and **Token URL** from step 8
+
+### Client Credentials (machine-to-machine) [workday-client-credentials-setup]
+
+1. Log in to Workday as a system administrator.
+2. Search for and open **Register API Client for Integrations**.
+3. Enter a name for the client (for example, `Kibana M2M Integration`).
+4. From the **Client Grant Type** menu, select **Client Credentials Grant**.
+5. Add the **Functional Areas** corresponding to the action groups you want to enable (see the Available actions table above).
+6. Click **OK** and copy the **Client ID** and **Client Secret**. Store the secret securely.
+7. Search for and open **View API Clients**. Find your client and copy the **Token Endpoint** URL.
+8. To configure the Kibana connector, enter:
    - **Tenant URL**: your Workday base URL (for example, `https://mycompany.workday.com`)
    - **Tenant Name**: your tenant identifier (for example, `mycompany`)
-   - **Client ID** and **Client Secret** from step 7
-   - **Authorization URL** and **Token URL** from step 8
+   - **Client ID** and **Client Secret** from step 6
+   - **Token URL** from step 7
