@@ -82,7 +82,7 @@ describe('applyCustomization', () => {
   });
 
   describe('defaultItemIds', () => {
-    it('excludes items with renderAs === "home"', () => {
+    it('includes items with renderAs === "home"', () => {
       const def = {
         id: SOLUTION_ID,
         body: [
@@ -100,7 +100,7 @@ describe('applyCustomization', () => {
         undefined
       );
 
-      expect(result.defaultItemIds).toEqual(['a', 'b']);
+      expect(result.defaultItemIds).toEqual(['home_node', 'a', 'b']);
     });
 
     it('captures ids from items that use the `link` field instead of `id`', () => {
@@ -225,11 +225,11 @@ describe('applyCustomization', () => {
   });
 
   describe('renderableNodes (pruning rules)', () => {
-    it('excludes the home node from renderableNodes', () => {
+    it('includes the home node in renderableNodes when it has a navigable href', () => {
       const def = {
         id: SOLUTION_ID,
         body: [
-          { id: 'home_node', title: 'HOME', renderAs: 'home' as const },
+          { id: 'home_node', title: 'HOME', renderAs: 'home' as const, href: 'https://localhost/app/home' },
           { id: 'a', title: 'A', href: 'https://localhost/app/a' },
           { id: 'b', title: 'B', href: 'https://localhost/app/b' },
         ],
@@ -243,7 +243,7 @@ describe('applyCustomization', () => {
         undefined
       );
 
-      expect(renderableIds(result)).toEqual(['a', 'b']);
+      expect(renderableIds(result)).toEqual(['home_node', 'a', 'b']);
     });
 
     it('excludes nodes flagged with sideNavStatus "hidden" in the definition', () => {

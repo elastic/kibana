@@ -17,10 +17,19 @@ import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 interface NavigationNode {
   id: string;
   icon?: unknown;
+  renderAs?: string;
   deepLink?: {
     euiIconType?: string;
     icon?: string;
   };
+}
+
+const isLogoIcon = (icon: string | undefined): boolean =>
+  icon !== undefined && icon.startsWith('logo');
+
+export interface GetNavigationNodeIconOptions {
+  /** When true, home nodes skip solution logo icons (used by the customization modal). */
+  forCustomizationModal?: boolean;
 }
 
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
@@ -59,7 +68,27 @@ const warnOnce = (message: string) => {
  * `@kbn/core-chrome-browser`) and the navigation customization modal
  * (via dynamic import).
  */
-export const getNavigationNodeIcon = (node: NavigationNode | null): string => {
+export const getNavigationNodeIcon = (
+  node: NavigationNode | null,
+  options?: GetNavigationNodeIconOptions
+): string => {
+  if (options?.forCustomizationModal && node?.renderAs === 'home') {
+    const candidates = [
+      typeof node.icon === 'string' ? node.icon : undefined,
+      AppDeepLinkIdToIcon[node.id],
+      node.deepLink?.euiIconType,
+      node.deepLink?.icon,
+    ];
+
+    for (const candidate of candidates) {
+      if (candidate && !isLogoIcon(candidate)) {
+        return candidate;
+      }
+    }
+
+    return 'home';
+  }
+
   if (node?.icon) {
     return node.icon as string;
   }

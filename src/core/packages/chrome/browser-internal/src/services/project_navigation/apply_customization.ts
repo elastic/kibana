@@ -59,10 +59,7 @@ export const applyCustomization = (
   const getId = (item: (typeof body)[number]): string | undefined => item.id ?? item.link;
 
   // Capture default item IDs from the raw body before any customization is applied.
-  const defaultItemIds = body
-    .filter((item) => item.renderAs !== 'home')
-    .map((item) => getId(item) as string)
-    .filter(Boolean);
+  const defaultItemIds = body.map((item) => getId(item) as string).filter(Boolean);
 
   if (customization) {
     overflowItemIds = customization.hidden;

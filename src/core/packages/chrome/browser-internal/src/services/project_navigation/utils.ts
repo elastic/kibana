@@ -294,10 +294,13 @@ const initNavNode = <
  * Returns the top-level body nodes that the sidebar will actually render, in
  * order. Specifically it prunes:
  *
- * - The home/logo node (`renderAs === 'home'`)
  * - Nodes explicitly hidden from the side nav (`sideNavStatus === 'hidden'`)
  * - Panel-opener nodes whose every descendant leaf has been removed or hidden
  *   (i.e. the user has no access to any item inside them)
+ *
+ * Home/logo nodes (`renderAs === 'home'`) are included when they represent a
+ * navigable landing page (e.g. Observability Overview) so the customization
+ * modal can surface them for reordering, hiding, and home-page selection.
  *
  * The result is the authoritative list for the customization modal so it shows
  * exactly the items the user can actually see and reorder.
@@ -318,7 +321,6 @@ export const getRenderableNodes = (
   };
 
   return nodes.filter((node) => {
-    if (node.renderAs === 'home') return false;
     if (node.sideNavStatus === 'hidden') return false;
     if (!hasVisibleLeaf(node)) return false;
     return true;

@@ -26,6 +26,14 @@ import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
  */
 const NAV_SNAPSHOT_TIMEOUT_MS = 5_000;
 
+const getCustomizationItemTitle = (node: ChromeProjectNavigationNode): string => {
+  if (node.renderAs === 'home' && node.deepLink?.title) {
+    return node.deepLink.title;
+  }
+
+  return (node.title ?? node.id) as string;
+};
+
 export interface NavigationCustomizationServiceStartDeps {
   core: CoreStart;
   chrome: InternalChromeStart;
@@ -205,9 +213,9 @@ export class NavigationCustomizationService {
     const overflowSet = new Set(nav.overflowItemIds);
     const items = nav.renderableNodes.map((node: ChromeProjectNavigationNode) => ({
       id: node.id,
-      title: (node.title ?? node.id) as string,
+      title: getCustomizationItemTitle(node),
       hidden: overflowSet.has(node.id),
-      icon: getNavigationNodeIcon(node),
+      icon: getNavigationNodeIcon(node, { forCustomizationModal: true }),
     }));
 
     return { items, defaultItemIds: nav.defaultItemIds };
