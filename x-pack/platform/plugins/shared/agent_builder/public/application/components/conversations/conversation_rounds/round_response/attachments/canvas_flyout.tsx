@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
@@ -20,7 +19,7 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
-import { getAgentWorkspaceMountElement } from '../../../../../../agent_workspace/agent_workspace_flyout_defaults';
+import { getApplicationWorkspaceMountElement } from '../../../../../../agent_workspace/agent_workspace_flyout_defaults';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentCartPanel } from './attachment_cart_panel';
 import { useCanvasContext } from './canvas_context';
@@ -43,7 +42,7 @@ interface CanvasFlyoutProps {
 
 /**
  * Flyout component for displaying attachments in canvas mode (expanded view).
- * In agent workspace chrome, renders a full-column overlay instead of a flyout.
+ * In agent-first chrome, renders a full-width overlay in the application workspace column.
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
@@ -140,61 +139,38 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     dynamicButtons,
   ]);
 
-  const useAgentWorkspacePanel =
+  const useApplicationWorkspaceOverlay =
     isAgentWorkspaceMount && canvasState && !canvasState.isSidebar;
 
-  const [, retryAgentWorkspaceMount] = useReducer((count) => count + 1, 0);
+  const [, retryApplicationWorkspaceMount] = useReducer((count) => count + 1, 0);
 
   useEffect(() => {
-    if (!useAgentWorkspacePanel || getAgentWorkspaceMountElement()) {
+    if (!useApplicationWorkspaceOverlay || getApplicationWorkspaceMountElement()) {
       return;
     }
 
     const rafId = requestAnimationFrame(() => {
-      retryAgentWorkspaceMount();
+      retryApplicationWorkspaceMount();
     });
 
     return () => window.cancelAnimationFrame(rafId);
-  }, [useAgentWorkspacePanel, canvasState]);
+  }, [useApplicationWorkspaceOverlay, canvasState]);
 
-  const agentWorkspaceMountElement = useAgentWorkspacePanel
-    ? getAgentWorkspaceMountElement()
+  const applicationWorkspaceMountElement = useApplicationWorkspaceOverlay
+    ? getApplicationWorkspaceMountElement()
     : null;
 
-  const inlineCartOverlayStyles = css`
-    position: absolute;
-    inset: 0;
-    z-index: ${layoutLevels.applicationTopBar + 1};
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    background: ${euiTheme.colors.backgroundBasePlain};
-  `;
-
-  // Agent workspace cart: inline overlay in the conversation column (no portal).
-  if (
-    isAgentWorkspaceMount &&
-    canvasState?.mode === 'cart' &&
-    !canvasState.isSidebar
-  ) {
-    return (
-      <div css={inlineCartOverlayStyles} data-test-subj="agentWorkspaceAttachmentCartOverlay">
-        <AttachmentCartPanel onClose={closeCanvas} />
-      </div>
-    );
-  }
-
-  // Agent workspace attachment preview uses a portaled overlay — never mount a flyout first or
+  // Agent-first attachment preview and cart use a portaled overlay — never mount a flyout first or
   // EuiFlyout will call onClose on unmount and clear canvas state before the overlay appears.
-  if (useAgentWorkspacePanel) {
-    if (!agentWorkspaceMountElement) {
+  if (useApplicationWorkspaceOverlay) {
+    if (!applicationWorkspaceMountElement) {
       return null;
     }
 
     return (
       <CanvasPanelOverlay
         attachmentsService={attachmentsService}
-        mountElement={agentWorkspaceMountElement}
+        mountElement={applicationWorkspaceMountElement}
       />
     );
   }

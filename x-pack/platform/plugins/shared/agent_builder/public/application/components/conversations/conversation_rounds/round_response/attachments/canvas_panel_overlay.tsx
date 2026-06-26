@@ -16,7 +16,10 @@ import { useConversationId } from '../../../../../context/conversation/use_conve
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
-import { shouldOfferSidebarConversation } from '../../../../../hooks/use_navigation';
+import {
+  shouldOfferSidebarConversation,
+  useIsAgentWorkspaceMount,
+} from '../../../../../hooks/use_navigation';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentCartPanel } from './attachment_cart_panel';
 import { useCanvasContext } from './canvas_context';
@@ -31,8 +34,8 @@ interface CanvasPanelOverlayProps {
 }
 
 /**
- * Full-column attachment preview for the agent workspace chrome column (POC).
- * Portals into agentWorkspaceMount — not a flyout, no scrim.
+ * Full-width attachment preview overlay for agent-first chrome (POC).
+ * Portals into the application workspace column — not a flyout, no scrim.
  */
 export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
   attachmentsService,
@@ -43,11 +46,12 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const offerSidebarConversation = shouldOfferSidebarConversation(
     canvasState?.isSidebar ?? false,
-    true
+    isAgentWorkspaceMount
   );
 
   const openSidebarConversation = useCallback(() => {

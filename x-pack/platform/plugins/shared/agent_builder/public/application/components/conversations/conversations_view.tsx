@@ -25,7 +25,6 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { attachmentsService } = useAgentBuilderServices();
 
   const containerStyles = css`
-    position: relative;
     display: flex;
     flex-direction: column;
     height: var(--kbn-application--content-height);
