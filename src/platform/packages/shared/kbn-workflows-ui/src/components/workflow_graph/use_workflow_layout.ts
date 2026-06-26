@@ -11,9 +11,9 @@ import type { Edge, Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { useMemo } from 'react';
 import {
+  computeTopologyFingerprint,
   ExecutionStatus,
   transformWorkflowToGraph,
-  computeTopologyFingerprint,
 } from '@kbn/workflows';
 import type {
   HandleSide,
@@ -162,8 +162,20 @@ export function useWorkflowLayout({
       }
     }
 
-    return { allBypassLaneIds, innerNodeToGroupId, allDomainNodes, nodeById, allEdges, mergeNodeIds };
-  }, [transformed.bypassLaneNodes, transformed.foreachGroups, transformed.nodes, transformed.edges]);
+    return {
+      allBypassLaneIds,
+      innerNodeToGroupId,
+      allDomainNodes,
+      nodeById,
+      allEdges,
+      mergeNodeIds,
+    };
+  }, [
+    transformed.bypassLaneNodes,
+    transformed.foreachGroups,
+    transformed.nodes,
+    transformed.edges,
+  ]);
 
   const derivedNodes = useMemo<Node[]>(() => {
     const { allBypassLaneIds, innerNodeToGroupId, allDomainNodes } = topologyMeta;

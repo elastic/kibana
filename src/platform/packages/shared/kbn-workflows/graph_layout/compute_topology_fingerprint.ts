@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '../spec/schema';
 import { isStep } from './types';
 import type { Step } from './types';
+import type { WorkflowYaml } from '../spec/schema';
 
 /**
  * Returns a stable string capturing the workflow's *structure* (trigger types
@@ -45,20 +45,10 @@ function walkStepsWithSlot(
     const record = step as Record<string, unknown>;
 
     if ('steps' in record && Array.isArray(record.steps)) {
-      walkStepsWithSlot(
-        (record.steps as unknown[]).filter(isStep),
-        parts,
-        'steps',
-        depth + 1
-      );
+      walkStepsWithSlot((record.steps as unknown[]).filter(isStep), parts, 'steps', depth + 1);
     }
     if ('else' in record && Array.isArray(record.else)) {
-      walkStepsWithSlot(
-        (record.else as unknown[]).filter(isStep),
-        parts,
-        'else',
-        depth + 1
-      );
+      walkStepsWithSlot((record.else as unknown[]).filter(isStep), parts, 'else', depth + 1);
     }
     if ('branches' in record && Array.isArray(record.branches)) {
       const branches = record.branches as Array<{ steps?: unknown[] }>;
@@ -79,12 +69,7 @@ function walkStepsWithSlot(
       }
     }
     if ('default' in record && Array.isArray(record.default)) {
-      walkStepsWithSlot(
-        (record.default as unknown[]).filter(isStep),
-        parts,
-        'default',
-        depth + 1
-      );
+      walkStepsWithSlot((record.default as unknown[]).filter(isStep), parts, 'default', depth + 1);
     }
   }
 }
