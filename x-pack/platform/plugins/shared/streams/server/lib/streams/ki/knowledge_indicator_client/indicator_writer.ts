@@ -306,7 +306,9 @@ export class IndicatorWriter {
       const docs: StoredKnowledgeIndicator[] = [];
       for (const doc of latest) {
         if (isStoredFeatureKnowledgeIndicator(doc)) {
-          docs.push(toStoredFeature(stream, fromStoredFeature(doc), includeEmbedding, doc.expires_at));
+          docs.push(
+            toStoredFeature(stream, fromStoredFeature(doc), includeEmbedding, doc.expires_at)
+          );
         } else if (isStoredQueryKnowledgeIndicator(doc)) {
           const link = fromStoredQuery(doc);
           docs.push(
