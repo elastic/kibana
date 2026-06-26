@@ -567,6 +567,15 @@ describe('Workflow Insights', () => {
         ).toThrow();
       });
 
+      it('should reject a remediation.link that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { remediation: { link: 'a'.repeat(2049) } },
+          })
+        ).toThrow();
+      });
+
       it('should accept values at the max length', () => {
         expect(() =>
           validateRequest({
@@ -574,6 +583,7 @@ describe('Workflow Insights', () => {
             body: {
               message: 'a'.repeat(10000),
               target: { ids: ['a'.repeat(256)] },
+              remediation: { link: 'a'.repeat(2048) },
               metadata: { notes: { ['a'.repeat(256)]: 'a'.repeat(1000) } },
             },
           })

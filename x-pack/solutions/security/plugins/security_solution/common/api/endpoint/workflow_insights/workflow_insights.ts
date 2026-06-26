@@ -16,11 +16,20 @@ import {
 } from '../../../endpoint/types/workflow_insights';
 import type { WorkflowInsightType } from '../../../endpoint/types/workflow_insights';
 
+// `maxLength` caps for request strings, grouped by field category so the tiers stay
+// consistent and self-documenting (DoS hardening for unbounded schema strings).
+const MAX_DATE_LENGTH = 64; // ISO-8601 date/time strings
+const MAX_ID_LENGTH = 256; // IDs and other short identifier-like strings (incl. record keys, tags)
+const MAX_NAME_LENGTH = 256; // exception-list item name / description
+const MAX_NOTE_VALUE_LENGTH = 1000; // short per-record annotation values
+const MAX_URL_LENGTH = 2048; // remediation link
+const MAX_FREE_TEXT_LENGTH = 10000; // general free-text (messages, descriptions)
+
 const arrayWithNonEmptyString = (field: string, options: { maxSize: number }) =>
   schema.arrayOf(
     schema.string({
       minLength: 1,
-      maxLength: 256,
+      maxLength: MAX_ID_LENGTH,
       validate: (id) => {
         if (id.trim() === '') {
           return `${field} cannot be an empty string`;
@@ -43,7 +52,7 @@ export const UpdateWorkflowInsightRequestSchema = {
   params: schema.object({
     insightId: schema.string({
       minLength: 1,
-      maxLength: 256,
+      maxLength: MAX_ID_LENGTH,
       validate: (id) => {
         if (id.trim() === '') {
           return 'insightId cannot be an empty string';
@@ -52,16 +61,16 @@ export const UpdateWorkflowInsightRequestSchema = {
     }),
   }),
   body: schema.object({
-    '@timestamp': schema.maybe(schema.string({ maxLength: 64 })),
-    message: schema.maybe(schema.string({ maxLength: 10000 })),
+    '@timestamp': schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
+    message: schema.maybe(schema.string({ maxLength: MAX_FREE_TEXT_LENGTH })),
     category: schema.maybe(categoryOneOf),
     type: schema.maybe(insightTypeOneOf),
     source: schema.maybe(
       schema.object({
         type: schema.maybe(sourceTypeOneOf),
-        id: schema.maybe(schema.string({ maxLength: 256 })),
-        data_range_start: schema.maybe(schema.string({ maxLength: 64 })),
-        data_range_end: schema.maybe(schema.string({ maxLength: 64 })),
+        id: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
+        data_range_start: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
+        data_range_end: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
       })
     ),
     target: schema.maybe(
@@ -73,18 +82,18 @@ export const UpdateWorkflowInsightRequestSchema = {
     action: schema.maybe(
       schema.object({
         type: schema.maybe(actionTypeOneOf),
-        timestamp: schema.maybe(schema.string({ maxLength: 64 })),
+        timestamp: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
       })
     ),
-    value: schema.maybe(schema.string({ maxLength: 10000 })),
+    value: schema.maybe(schema.string({ maxLength: MAX_FREE_TEXT_LENGTH })),
     remediation: schema.maybe(
       schema.object({
         exception_list_items: schema.maybe(
           schema.arrayOf(
             schema.object({
-              list_id: schema.maybe(schema.string({ maxLength: 256 })),
-              name: schema.maybe(schema.string({ maxLength: 256 })),
-              description: schema.maybe(schema.string({ maxLength: 256 })),
+              list_id: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
+              name: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
+              description: schema.maybe(schema.string({ maxLength: MAX_NAME_LENGTH })),
               entries: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 250 })),
               tags: schema.maybe(arrayWithNonEmptyString('tag', { maxSize: 50 })),
               os_types: schema.maybe(arrayWithNonEmptyString('os_type', { maxSize: 20 })),
@@ -92,14 +101,17 @@ export const UpdateWorkflowInsightRequestSchema = {
             { maxSize: 100 }
           )
         ),
-        descriptive: schema.maybe(schema.string({ maxLength: 10000 })),
-        link: schema.maybe(schema.string({ maxLength: 2048 })),
+        descriptive: schema.maybe(schema.string({ maxLength: MAX_FREE_TEXT_LENGTH })),
+        link: schema.maybe(schema.string({ maxLength: MAX_URL_LENGTH })),
       })
     ),
     metadata: schema.maybe(
       schema.object({
         notes: schema.maybe(
-          schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 1000 }))
+          schema.recordOf(
+            schema.string({ maxLength: MAX_ID_LENGTH }),
+            schema.string({ maxLength: MAX_NOTE_VALUE_LENGTH })
+          )
         ),
         message_variables: schema.maybe(
           arrayWithNonEmptyString('message_variable', { maxSize: 50 })
@@ -130,7 +142,7 @@ export const CreateWorkflowInsightRequestSchema = {
     endpointIds: schema.arrayOf(
       schema.string({
         minLength: 1,
-        maxLength: 256,
+        maxLength: MAX_ID_LENGTH,
         validate: (v) => {
           if (v.trim() === '') {
             return 'endpointId cannot be an empty string';
@@ -139,7 +151,7 @@ export const CreateWorkflowInsightRequestSchema = {
       }),
       { maxSize: 50 }
     ),
-    connectorId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+    connectorId: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_ID_LENGTH })),
   }),
 };
 
@@ -150,7 +162,7 @@ export const GetPendingInsightsRequestSchema = {
       schema.arrayOf(
         schema.string({
           minLength: 1,
-          maxLength: 256,
+          maxLength: MAX_ID_LENGTH,
           validate: (v) => {
             if (v.trim() === '') {
               return 'endpointId cannot be an empty string';
