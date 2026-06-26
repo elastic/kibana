@@ -41,7 +41,7 @@ export class DiscoverApp {
   }
 
   async goto(options: DiscoverGotoOptions) {
-    if (options.queryMode) await this.setQueryMode(options.queryMode);
+    await this.setQueryMode(options.queryMode);
 
     await this.page.gotoApp('discover');
     await this.waitForDiscoverPage();
