@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { registerAnomalySummaryRoutes } from './route';
-export { getEntityAnomalies } from './get_anomaly_details';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

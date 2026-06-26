@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { registerAnomalySummaryRoutes } from './route';
-export { getEntityAnomalies } from './get_anomaly_details';
+export { DashboardArtifactsSection } from './dashboard_artifacts_section';
