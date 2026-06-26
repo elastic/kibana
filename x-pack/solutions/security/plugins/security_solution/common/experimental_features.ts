@@ -245,10 +245,10 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillFindRules: false,
 
   /**
-   * Enables the onboard-prebuilt-rules Agent Builder skill.
+   * Enables the recommend-prebuilt-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillOnboardPrebuiltRules: false,
+  dexAiSkillRecommendPrebuiltRules: false,
 
   /**
    * Enables the new flyout using the EUI flyout system

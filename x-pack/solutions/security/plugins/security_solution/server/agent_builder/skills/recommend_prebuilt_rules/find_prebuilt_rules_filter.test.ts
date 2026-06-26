@@ -14,13 +14,19 @@ describe('buildPrebuiltRulesToolFilter', () => {
 
   it('builds a single-token keywords clause over name and description', () => {
     expect(buildPrebuiltRulesToolFilter({ keywords: 'mimikatz' })).toBe(
-      '(security-rule.name: mimikatz OR security-rule.description: mimikatz)'
+      '(security-rule.name: "mimikatz" OR security-rule.description: "mimikatz")'
     );
   });
 
   it('ANDs multi-token keywords within each field', () => {
     expect(buildPrebuiltRulesToolFilter({ keywords: 'lsass memory' })).toBe(
-      '(security-rule.name: (lsass AND memory) OR security-rule.description: (lsass AND memory))'
+      '(security-rule.name: ("lsass" AND "memory") OR security-rule.description: ("lsass" AND "memory"))'
+    );
+  });
+
+  it('quotes reserved KQL operator words in keywords so they are treated as literal terms', () => {
+    expect(buildPrebuiltRulesToolFilter({ keywords: 'ransomware or trojan' })).toBe(
+      '(security-rule.name: ("ransomware" AND "or" AND "trojan") OR security-rule.description: ("ransomware" AND "or" AND "trojan"))'
     );
   });
 
