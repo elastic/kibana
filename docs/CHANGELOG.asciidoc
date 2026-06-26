@@ -136,6 +136,7 @@ The 8.19.18 release includes the following fixes.
 Alerting and cases::
 * Fixes pushing a case to an external service so that all attachments are marked as pushed and the alert count comment is no longer duplicated on each push ({kibana-pull}274451[#274451]).
 Data ingestion and Fleet::
+* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
 * Fixes a crash in the **Integrations** UI when a package image is missing ({kibana-pull}273191[#273191]).
 Developer tools::
 * Fixes autocomplete in filter context to suggest the query DSL instead of the obsolete Elasticsearch 1.x filter DSL in **Console** ({kibana-pull}272907[#272907]).
@@ -179,7 +180,6 @@ Alerting::
 Dashboards and Visualizations::
 * Fixes the autoplay timer in **Canvas** jumping to the wrong page when pages are added or removed ({kibana-pull}268398[#268398]).
 Data ingestion and Fleet::
-* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
 * Fixes data stream selectors in input packages with multiple policy templates incorrectly sharing or duplicating variables between templates ({kibana-pull}273364[#273364]).
 * Improves response time of the agent policies list by computing counts in a single aggregation instead of multiple queries per policy ({kibana-pull}272429[#272429]).
 * Fixes missing security rule names in the **Integrations → Assets** tab ({kibana-pull}272089[#272089]).
