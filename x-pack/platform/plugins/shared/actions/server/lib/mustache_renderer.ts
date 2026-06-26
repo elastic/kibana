@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import { isString, isPlainObject, cloneDeepWith, cloneDeep } from 'lodash';
+import { isString, isPlainObject, cloneDeepWith } from 'lodash';
 import { setWith } from '@kbn/safer-lodash-set';
 import type { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
@@ -115,7 +115,7 @@ export function renderMustacheObject<Params>(
 // the dotted and nested representations at the same node, so rendered output is
 // unaffected.
 function augmentObjectVariables(variables: Variables): Variables {
-  const result = cloneDeep(variables);
+  const result = structuredClone(variables);
   expandDottedKeys(result);
   addToStringDeep(result);
   return result;
