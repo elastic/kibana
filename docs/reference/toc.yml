@@ -49,7 +49,6 @@ toc:
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
-          - file: connectors-kibana/workday-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
         children:
           - file: connectors-kibana/crowdstrike-action-type.md
@@ -111,6 +110,7 @@ toc:
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
+          - file: connectors-kibana/workday-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
