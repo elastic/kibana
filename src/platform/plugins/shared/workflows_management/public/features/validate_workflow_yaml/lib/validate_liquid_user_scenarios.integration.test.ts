@@ -10,7 +10,7 @@
 import { parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';

@@ -13,7 +13,7 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ConnectorStep } from '@kbn/workflows/spec/schema';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import {
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_VALIDATION_YAML,
