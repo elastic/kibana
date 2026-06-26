@@ -24,6 +24,7 @@ const PACKAGE_TYPES = /** @type {Array<import('./types').KibanaPackageType>} */ 
 );
 
 const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
+const GLOBAL_TOKEN_ID_PATTERN = /^[a-z][a-zA-Z0-9]*\.[A-Z][a-zA-Z0-9]*$/;
 
 /**
  * @param {unknown} v
@@ -67,10 +68,26 @@ function isArrOfStrings(v) {
 
 /**
  * @param {unknown} v
+ * @returns {v is string}
+ */
+function isValidGlobalTokenId(v) {
+  return typeof v === 'string' && GLOBAL_TOKEN_ID_PATTERN.test(v);
+}
+
+/**
+ * @param {unknown} v
  * @returns {v is string[]}
  */
 function isArrOfIds(v) {
   return Array.isArray(v) && v.every(isValidPluginId);
+}
+
+/**
+ * @param {unknown} v
+ * @returns {v is string[]}
+ */
+function isArrOfGlobalTokenIds(v) {
+  return Array.isArray(v) && v.every(isValidGlobalTokenId);
 }
 
 module.exports = {
@@ -78,7 +95,9 @@ module.exports = {
   isSomeString,
   isObj,
   isValidPluginId,
+  isValidGlobalTokenId,
   isValidPkgType,
   isArrOfIds,
+  isArrOfGlobalTokenIds,
   isArrOfStrings,
 };

@@ -47,6 +47,16 @@ describe('pluginManifestFromPluginPackage()', () => {
           "legacy",
         ],
         "enabledOnAnonymousPages": false,
+        "globals": Object {
+          "extensionPoints": Object {
+            "contributes": Array [],
+            "hosts": Array [],
+          },
+          "services": Object {
+            "consumes": Array [],
+            "provides": Array [],
+          },
+        },
         "id": "someLegacyPluginId",
         "kibanaVersion": "static",
         "optionalPlugins": Array [

@@ -45,6 +45,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     configPath: true,
     requiredPlugins: true,
     optionalPlugins: true,
+    globals: true,
     runtimePluginDependencies: true,
     ui: true,
     server: true,
@@ -209,6 +210,24 @@ export async function parseManifest(
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    globals: {
+      services: {
+        provides: Array.isArray(manifest.globals?.services?.provides)
+          ? [...manifest.globals.services.provides]
+          : [],
+        consumes: Array.isArray(manifest.globals?.services?.consumes)
+          ? [...manifest.globals.services.consumes]
+          : [],
+      },
+      extensionPoints: {
+        hosts: Array.isArray(manifest.globals?.extensionPoints?.hosts)
+          ? [...manifest.globals.extensionPoints.hosts]
+          : [],
+        contributes: Array.isArray(manifest.globals?.extensionPoints?.contributes)
+          ? [...manifest.globals.extensionPoints.contributes]
+          : [],
+      },
+    },
     requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     runtimePluginDependencies: Array.isArray(manifest.runtimePluginDependencies)
       ? manifest.runtimePluginDependencies

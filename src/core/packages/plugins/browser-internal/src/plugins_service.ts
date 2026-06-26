@@ -18,6 +18,7 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { validateGlobalTokens } from './validate_global_tokens';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -50,7 +51,11 @@ export class PluginsService
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    private readonly injectedPlugins: InjectedMetadataPlugin[]
+  ) {
+    const plugins = injectedPlugins;
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 
@@ -124,6 +129,10 @@ export class PluginsService
   }
 
   public async start(deps: PluginsServiceStartDeps): Promise<InternalPluginsServiceStart> {
+    // Validate cross-plugin DI contracts from the manifests before any plugin
+    // starts, mirroring the server ordering.
+    validateGlobalTokens(this.injectedPlugins);
+
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -154,7 +163,6 @@ export class PluginsService
 
     this.runtimeResolver.resolveStartRequests(contracts);
 
-    // Expose start contracts
     return { contracts };
   }
 
