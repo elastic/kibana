@@ -23,6 +23,10 @@ import {
   useConfig,
 } from '../../../../hooks';
 
+jest.mock('../../../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
+
 jest.mock('../components/steps/components/use_policies', () => {
   return {
     ...jest.requireActual('../components/steps/components/use_policies'),
@@ -643,8 +647,10 @@ describe('When on the package policy create page', () => {
         });
 
         test('should disable submit button on invalid form with empty package var', async () => {
-          await act(async () => {
-            fireEvent.click(renderResult.getByText('Change defaults'));
+          await waitFor(() => {
+            expect(
+              renderResult.getByDisplayValue('/var/log/nginx/access.log*')
+            ).toBeInTheDocument();
           });
 
           await act(async () => {
@@ -660,8 +666,10 @@ describe('When on the package policy create page', () => {
         });
 
         test('should submit form with changed package var', async () => {
-          await act(async () => {
-            fireEvent.click(renderResult.getByText('Change defaults'));
+          await waitFor(() => {
+            expect(
+              renderResult.getByDisplayValue('/var/log/nginx/access.log*')
+            ).toBeInTheDocument();
           });
 
           await act(async () => {

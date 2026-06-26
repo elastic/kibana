@@ -2512,9 +2512,11 @@ module.exports = {
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
       // security_solution and workflows_management blocks). The trade-off: the
-      // 35 allowlisted files that overlap with those blocks lose their
-      // `*legacy*` pattern check; verified that none of them currently import
-      // any path matching `*legacy*`.
+      // allowlisted files that overlap with those blocks lose their `*legacy*`
+      // pattern check; verified that none of them currently import any path
+      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
+      // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
         'no-restricted-imports': [
