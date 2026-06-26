@@ -188,9 +188,10 @@ describe('WorkflowsService (facade)', () => {
 
       const esClient = makeEsClient();
       const coreStart = makeCoreStart(esClient);
+      const logger = loggerMock.create();
       const service = await (async () => {
         const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+        const svc = new WorkflowsService(startServices as any, logger, '9.0.0');
         await Promise.resolve();
         await Promise.resolve();
         return svc;
@@ -198,7 +199,7 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflow('wf-1', 'default');
 
-      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart);
+      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart, logger);
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
@@ -218,9 +219,10 @@ describe('WorkflowsService (facade)', () => {
 
       const esClient = makeEsClient();
       const coreStart = makeCoreStart(esClient);
+      const logger = loggerMock.create();
       const service = await (async () => {
         const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+        const svc = new WorkflowsService(startServices as any, logger, '9.0.0');
         await Promise.resolve();
         await Promise.resolve();
         return svc;
@@ -228,7 +230,7 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflow('wf-1', 'default');
 
-      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart);
+      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart, logger);
       expect(changeHistoryInstance.initialize).not.toHaveBeenCalled();
     });
 
