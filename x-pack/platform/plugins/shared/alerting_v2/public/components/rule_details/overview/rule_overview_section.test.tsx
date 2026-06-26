@@ -17,7 +17,13 @@ jest.mock('./alert_timeline/alert_timeline_section', () => ({
 }));
 
 jest.mock('./signal_rule_overview', () => ({
-  SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
+  SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>
+}));
+
+jest.mock('./artifacts', () => ({
+  DashboardArtifactsSection: () => (
+    <div data-test-subj="dashboardArtifactsSectionMock">dashboards</div>
+  ),
 }));
 
 const baseRule: RuleApiResponse = {
@@ -44,15 +50,29 @@ const renderSection = (rule: RuleApiResponse) =>
   );
 
 describe('RuleOverviewSection', () => {
-  it('renders the alert activity timeline for alert rules', () => {
-    renderSection({ ...baseRule, kind: 'alert' });
-    expect(screen.getByTestId('alertTimelineSectionMock')).toBeInTheDocument();
-    expect(screen.queryByTestId('signalRuleOverviewMock')).not.toBeInTheDocument();
+  describe('activity section routing', () => {
+    it('renders the alert timeline for alert rules', () => {
+      renderSection({ ...baseRule, kind: 'alert' });
+      expect(screen.getByTestId('alertTimelineSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('signalRuleOverviewMock')).not.toBeInTheDocument();
+    });
+
+    it('renders the signal overview instead of the timeline for signal rules', () => {
+      renderSection({ ...baseRule, kind: 'signal' });
+      expect(screen.getByTestId('signalRuleOverviewMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders the signal overview instead of the timeline for signal rules', () => {
-    renderSection({ ...baseRule, kind: 'signal' });
-    expect(screen.getByTestId('signalRuleOverviewMock')).toBeInTheDocument();
-    expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+  describe('dashboard artifacts visibility', () => {
+    it('shows the dashboard artifacts section for alert rules', () => {
+      renderSection({ ...baseRule, kind: 'alert' });
+      expect(screen.getByTestId('dashboardArtifactsSectionMock')).toBeInTheDocument();
+    });
+
+    it('does not show dashboard artifacts for signal rules', () => {
+      renderSection({ ...baseRule, kind: 'signal' });
+      expect(screen.queryByTestId('dashboardArtifactsSectionMock')).not.toBeInTheDocument();
+    });
   });
 });

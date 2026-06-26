@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
 import { AlertTimelineSection } from './alert_timeline/alert_timeline_section';
+import { DashboardArtifactsSection } from './artifacts';
 import { SignalRuleOverview } from './signal_rule_overview';
 import { useRule } from '../rule_context';
 
@@ -25,6 +26,12 @@ export const RuleOverviewSection: React.FC = () => {
           <AlertTimelineSection />
         </EuiErrorBoundary>
       )}
+      {rule.kind === 'alert' ? (
+        <>
+          <EuiSpacer size="l" />
+          <DashboardArtifactsSection />
+        </>
+      ) : null}
     </div>
   );
 };
