@@ -175,6 +175,18 @@ export function MemoryTab() {
                     data-test-subj="streamsMemorySearch"
                   />
                 </EuiFlexItem>
+                {canManage && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="plusInCircle"
+                      aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
+                        defaultMessage: 'New memory entry',
+                      })}
+                      onClick={() => setShowCreateFlyout(true)}
+                      data-test-subj="streamsMemoryNewEntryButton"
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     button={
@@ -279,18 +291,6 @@ export function MemoryTab() {
                 </EuiText>
               )}
             </EuiFlexItem>
-            {canManage && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="plusInCircle"
-                  aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
-                    defaultMessage: 'New memory entry',
-                  })}
-                  onClick={() => setShowCreateFlyout(true)}
-                  data-test-subj="streamsMemoryNewEntryButton"
-                />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 
