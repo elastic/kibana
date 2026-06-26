@@ -121,20 +121,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService(this.options.spaceId)
       .getMetadataForEndpoints(uniqueIds, ccsEnabled);
-    let validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
-    let invalidIds = ids.filter((id) => !validIds.includes(id));
-
-    // TEMP — defendRemoteOutputCcs testing only (remove together with the feature flag):
-    // In the remote Elasticsearch output + CCS topology the Endpoint metadata transforms run on
-    // the *remote* cluster, so the managing cluster frequently cannot resolve host metadata and
-    // `getMetadataForEndpoints()` returns nothing. That makes every requested agent id look
-    // "invalid" and the response action is rejected with HOST_NOT_ENROLLED. Only while CCS is
-    // active (FF on AND a remote cluster connected — both already folded into `ccsEnabled`),
-    // trust the caller-supplied agent ids so the action can still be dispatched to the remote.
-    if (ccsEnabled && foundEndpointHosts.length === 0 && uniqueIds.length > 0) {
-      validIds = uniqueIds;
-      invalidIds = [];
-    }
+    const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+    const invalidIds = ids.filter((id) => !validIds.includes(id));
 
     if (invalidIds.length) {
       this.log.warn(getInvalidAgentsWarning(invalidIds));
