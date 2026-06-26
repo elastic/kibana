@@ -11,7 +11,13 @@ import { test } from '../fixtures';
 
 test.describe.serial(
   'Kubernetes Onboarding',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.observability.logs_essentials,
+    ],
+  },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();

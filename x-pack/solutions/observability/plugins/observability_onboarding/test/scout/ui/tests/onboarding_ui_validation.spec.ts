@@ -119,23 +119,6 @@ test.describe('Onboarding UI Validation', () => {
   );
 
   test(
-    'navigates correctly within Kubernetes OpenTelemetry flow',
-    {
-      tag: [
-        ...tags.stateful.classic,
-        ...tags.serverless.observability.complete,
-        ...tags.serverless.observability.logs_essentials,
-      ],
-    },
-    async ({ page, pageObjects }) => {
-      await test.step('navigates directly when Kubernetes use case is selected', async () => {
-        await pageObjects.onboarding.selectKubernetesUseCase();
-        expect(page.url()).toContain('/kubernetes');
-      });
-    }
-  );
-
-  test(
     'navigates correctly within Kubernetes OpenTelemetry flow using the keyboard only',
     {
       tag: [
