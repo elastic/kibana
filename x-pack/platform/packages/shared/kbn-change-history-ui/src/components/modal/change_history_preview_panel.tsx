@@ -16,10 +16,18 @@ import {
 import { css } from '@emotion/react';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
+import { useChangeHistoryPreviewCompare } from '../../hooks/use_change_history_preview_compare';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { getChangeHistoryErrorMessage } from '../../utils/get_change_history_error_message';
 import * as i18n from '../timeline/translations';
 
-export function ChangeHistoryPreviewPanel(): JSX.Element {
+export interface ChangeHistoryPreviewPanelProps {
+  listItems?: ChangeHistoryListItem[];
+}
+
+export function ChangeHistoryPreviewPanel({
+  listItems = [],
+}: ChangeHistoryPreviewPanelProps): JSX.Element {
   const { adapter, objectId, renderPreview, selectedChangeId } = useChangeHistoryConfig();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
@@ -27,6 +35,16 @@ export function ChangeHistoryPreviewPanel(): JSX.Element {
     changeId: selectedChangeId,
     enabled: Boolean(selectedChangeId),
   });
+
+  const { currentChange, previousChange, isLoadingCompareContext } = useChangeHistoryPreviewCompare(
+    {
+      adapter,
+      objectId,
+      listItems,
+      selectedChange: change,
+      selectedChangeId,
+    }
+  );
 
   if (!selectedChangeId) {
     return (
@@ -109,7 +127,13 @@ export function ChangeHistoryPreviewPanel(): JSX.Element {
       `}
       data-test-subj="changeHistoryPreview"
     >
-      {renderPreview({ change, objectId })}
+      {renderPreview({
+        change,
+        objectId,
+        currentChange,
+        previousChange,
+        isLoadingCompareContext,
+      })}
     </div>
   );
 }

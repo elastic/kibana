@@ -174,7 +174,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
             onBack={closeModal}
             footer={previewFooter}
           >
-            <ChangeHistoryPreviewPanel />
+            <ChangeHistoryPreviewPanel listItems={items} />
           </ChangeHistoryPreviewShell>
 
           <ChangeHistorySidebarPanel title={labels.timelinePanelTitle} onClose={closeModal}>

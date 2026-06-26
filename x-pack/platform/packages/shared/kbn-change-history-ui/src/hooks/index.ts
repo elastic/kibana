@@ -17,3 +17,8 @@ export type {
 } from './use_change_history_detail';
 export { useChangeHistoryRestore } from './use_change_history_restore';
 export type { UseChangeHistoryRestoreResult } from './use_change_history_restore';
+export { useChangeHistoryPreviewCompare } from './use_change_history_preview_compare';
+export type {
+  UseChangeHistoryPreviewCompareArgs,
+  UseChangeHistoryPreviewCompareResult,
+} from './use_change_history_preview_compare';
