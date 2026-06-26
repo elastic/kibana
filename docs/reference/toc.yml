@@ -83,6 +83,7 @@ toc:
           - file: connectors-kibana/bigquery-action-type.md
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
+          - file: connectors-kibana/censys-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
           - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
