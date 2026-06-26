@@ -323,7 +323,10 @@ function hasPathToTarget(
   const visited = new Set<string>();
 
   while (stack.length > 0) {
-    const currentId = stack.pop()!;
+    const currentId = stack.pop();
+    if (!currentId) {
+      continue;
+    }
 
     if (currentId === targetId) {
       return true;
