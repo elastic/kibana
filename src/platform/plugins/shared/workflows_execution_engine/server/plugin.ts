@@ -17,7 +17,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  pickManagedWorkflowFields,
+  toWorkflowExecutionEngineModel,
+  WorkflowRepository,
+} from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   EsWorkflowExecution,
@@ -37,7 +42,10 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
-import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
+import {
+  applyWorkflowVersion,
+  buildWorkflowExecutionDocument,
+} from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
@@ -564,6 +572,12 @@ export class WorkflowsExecutionEnginePlugin
                   : {}),
               };
 
+              applyWorkflowVersion(
+                workflowExecution as WorkflowExecutionForInputRendering,
+                toWorkflowExecutionEngineModel(workflow),
+                await readWorkflowVersioningEnabled(coreStart)
+              );
+
               const concurrencyGroupKey = this.getConcurrencyGroupKey(
                 workflowExecution,
                 workflow.definition?.settings,
@@ -1064,33 +1078,26 @@ export class WorkflowsExecutionEnginePlugin
       await this.initialize(coreStart);
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 
-      const workflowCreatedAt = new Date();
+      const spaceId = workflow.spaceId || 'default';
       const context: Record<string, unknown> = {
+        spaceId,
         ...(executionContext ?? {}),
         contextOverride,
       };
 
-      const triggeredBy = (context.triggeredBy as string | undefined) || 'manual'; // 'manual' or 'scheduled'
       const executedBy = await getAuthenticatedUser(
         request,
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const workflowExecution = {
-        id: generateUuid(),
-        spaceId: workflow.spaceId,
-        stepId,
-        workflowId: workflow.id,
-        ...pickManagedWorkflowFields(workflow),
-        isTestRun: workflow.isTestRun,
-        workflowDefinition: workflow.definition,
-        yaml: workflow.yaml,
+      const workflowExecution = await buildExecutionDocument({
+        workflow,
         context,
-        status: ExecutionStatus.PENDING,
-        createdAt: workflowCreatedAt.toISOString(),
-        executedBy,
-        triggeredBy,
-      };
+        defaultTriggeredBy: 'manual',
+        authenticatedUser: executedBy,
+        now: new Date(),
+      });
+      workflowExecution.stepId = stepId;
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 

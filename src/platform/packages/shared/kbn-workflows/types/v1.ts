@@ -448,6 +448,7 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  version?: number;
 }
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {

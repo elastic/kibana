@@ -104,6 +104,7 @@ export class WorkflowRepository {
         ...(managedBy !== undefined ? { managedBy } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
         ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...(typeof source.version === 'number' ? { version: source.version } : {}),
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -271,6 +272,7 @@ export class WorkflowRepository {
       'managedBy',
       'originManagedWorkflowId',
       'managedVersion',
+      'version',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -346,6 +348,7 @@ export class WorkflowRepository {
         ...(typeof source.managedVersion === 'number'
           ? { managedVersion: source.managedVersion }
           : {}),
+        ...(typeof source.version === 'number' ? { version: source.version } : {}),
       }));
     } finally {
       try {

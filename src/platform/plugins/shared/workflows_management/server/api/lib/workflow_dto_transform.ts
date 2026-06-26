@@ -41,6 +41,7 @@ export const transformStorageDocumentToWorkflowDto = (
     valid: source.valid,
     createdAt: source.created_at,
     lastUpdatedAt: source.updated_at,
+    ...(typeof source.version === 'number' ? { version: source.version } : {}),
   };
 };
 
@@ -82,5 +83,6 @@ export const transformStoragePartialToWorkflowDto = (
   if ('valid' in source) dto.valid = source.valid;
   if ('created_at' in source) dto.createdAt = source.created_at;
   if ('updated_at' in source) dto.lastUpdatedAt = source.updated_at;
+  if ('version' in source && typeof source.version === 'number') dto.version = source.version;
   return dto;
 };
