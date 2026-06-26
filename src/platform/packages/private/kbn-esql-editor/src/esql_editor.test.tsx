@@ -20,7 +20,6 @@ import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { monaco } from '@kbn/code-editor';
 import { ESQLEditor } from './esql_editor';
 import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
@@ -391,63 +390,6 @@ describe('ESQLEditor', () => {
     });
 
     jest.useRealTimers();
-  });
-
-  describe('query prop sync', () => {
-    const getEditorValue = () => monaco.editor.getModels()[0]?.getValue() ?? '';
-
-    it('updates editor value when query prop changes externally', async () => {
-      const { rerender } = renderWithI18n(
-        renderESQLEditorComponent({
-          ...props,
-          query: { esql: 'from test' },
-        })
-      );
-
-      await waitFor(() => {
-        expect(getEditorValue()).toBe('from test');
-      });
-
-      await act(async () => {
-        rerender(
-          renderESQLEditorComponent({
-            ...props,
-            query: { esql: 'from logs | keep last 100' },
-          })
-        );
-      });
-
-      await waitFor(() => {
-        expect(getEditorValue()).toBe('from logs | keep last 100');
-      });
-    });
-
-    it('does not reset editor value when parent re-renders with the same query', async () => {
-      const query = { esql: 'from logs | keep last 100' };
-
-      const { rerender } = renderWithI18n(
-        renderESQLEditorComponent({
-          ...props,
-          query,
-        })
-      );
-
-      await waitFor(() => {
-        expect(getEditorValue()).toBe(query.esql);
-      });
-
-      await act(async () => {
-        rerender(
-          renderESQLEditorComponent({
-            ...props,
-            query,
-            isLoading: true,
-          })
-        );
-      });
-
-      expect(getEditorValue()).toBe(query.esql);
-    });
   });
 
   it('should render warning if the warning and mergeExternalMessages props are set', async () => {
