@@ -5,7 +5,26 @@
  * 2.0.
  */
 
-import { substituteWorkflowConnectorIds, substituteFleetAgentIds } from './step_install_workflow_assets';
+import { isValidId } from '@kbn/human-readable-id';
+
+import {
+  getFleetPackageWorkflowId,
+  substituteWorkflowConnectorIds,
+  substituteFleetAgentIds,
+} from './step_install_workflow_assets';
+
+describe('getFleetPackageWorkflowId', () => {
+  it('normalizes package names with underscores for workflow id validation', () => {
+    const workflowId = getFleetPackageWorkflowId({
+      pkgName: 'sdlc_intel',
+      spaceId: 'default',
+      fileName: 'github-catalog-repos.yaml',
+    });
+
+    expect(workflowId).toBe('fleet-default-sdlc-intel-github-catalog-repos');
+    expect(isValidId(workflowId)).toBe(true);
+  });
+});
 
 describe('substituteWorkflowConnectorIds', () => {
   const sampleYaml = `

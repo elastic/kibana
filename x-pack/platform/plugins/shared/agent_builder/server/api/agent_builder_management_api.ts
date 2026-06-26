@@ -20,11 +20,11 @@ export class AgentBuilderManagementApi {
   ) {}
 
   private async getAgentsService() {
-    const [, startDeps] = await this.getStartServices();
-    if (!startDeps.agentBuilder) {
+    const [, , pluginStart] = await this.getStartServices();
+    if (!pluginStart?.agents) {
       throw new Error('agentBuilder plugin is not available');
     }
-    return startDeps.agentBuilder.agents;
+    return pluginStart.agents;
   }
 
   public async getAgent(agentId: string, request: KibanaRequest) {

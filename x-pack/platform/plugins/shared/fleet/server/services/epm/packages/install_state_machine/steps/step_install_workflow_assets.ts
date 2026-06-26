@@ -127,13 +127,20 @@ export const resolvePackagePolicyConnectorVars = async (
   }
 };
 
+/**
+ * Workflow IDs must match human-readable slug rules (lowercase alnum + hyphens only).
+ * Fleet package names often contain underscores (for example `sdlc_intel`).
+ */
+export const normalizeFleetPackageAssetIdSegment = (segment: string): string =>
+  segment.toLowerCase().replace(/_/g, '-');
+
 export const getFleetPackageWorkflowId = (params: {
   pkgName: string;
   spaceId: string;
   fileName: string;
 }): string => {
   const baseName = params.fileName.replace(/\.ya?ml$/i, '');
-  return `fleet-${params.spaceId}-${params.pkgName}-${baseName}`;
+  return `fleet-${normalizeFleetPackageAssetIdSegment(params.spaceId)}-${normalizeFleetPackageAssetIdSegment(params.pkgName)}-${baseName}`;
 };
 
 const FLEET_AGENT_PLACEHOLDER_PREFIX = 'REPLACE_WITH_FLEET_AGENT_';

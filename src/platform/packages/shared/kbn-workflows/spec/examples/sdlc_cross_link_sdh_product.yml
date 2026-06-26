@@ -46,6 +46,8 @@ steps:
     with:
       index: '{{ consts.syncStateIndex }}'
       size: 1
+      ignore_unavailable: true
+      allow_no_indices: true
       query:
         bool:
           must:

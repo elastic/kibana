@@ -24,9 +24,9 @@ configuration:
     - ai-conn-1
 `;
 
-    const result = parseFleetAgentYaml(yaml, 'fleet-default-sdlc_intel-sdlc-coverage-analysis');
+    const result = parseFleetAgentYaml(yaml, 'fleet-default-sdlc-intel-sdlc-coverage-analysis');
 
-    expect(result.id).toBe('fleet-default-sdlc_intel-sdlc-coverage-analysis');
+    expect(result.id).toBe('fleet-default-sdlc-intel-sdlc-coverage-analysis');
     expect(result.name).toBe('SDLC Coverage Analysis');
     expect(result.configuration.tools[0].tool_ids).toContain('platform.core.execute_esql');
   });
@@ -44,7 +44,7 @@ steps:
       spaceId: 'default',
     });
 
-    expect(result).toContain('agent-id: fleet-default-sdlc_intel-sdlc-coverage-analysis');
+    expect(result).toContain('agent-id: fleet-default-sdlc-intel-sdlc-coverage-analysis');
     expect(result).not.toContain('REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis');
   });
 });

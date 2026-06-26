@@ -11,8 +11,9 @@ import type {
   SavedObjectsType,
 } from '@kbn/core/server';
 
-import type { AssetSOObject, KibanaSavedObjectType, SimpleSOAssetType } from '../../../../common';
+import type { AssetSOObject, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
+import { KibanaSavedObjectType } from '../../../../common/types';
 
 import { displayedAssetTypesLookup } from '../../../../common/constants';
 
@@ -20,6 +21,33 @@ import type { SimpleSOAssetAttributes } from '../../../types';
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
+};
+
+export type ExternalAssetMetadata = {
+  title?: string;
+  description?: string;
+};
+
+export type GetBulkAssetsOptions = {
+  externalAssetEnricher?: (
+    assets: AssetSOObject[]
+  ) => Promise<Record<string, ExternalAssetMetadata>>;
+};
+
+const EXTERNAL_KIBANA_ASSET_TYPES = new Set<string>([
+  KibanaSavedObjectType.workflow,
+  KibanaSavedObjectType.agent,
+]);
+
+export const getKibanaLinkForExternalAsset = (type: KibanaSavedObjectType, id: string): string => {
+  switch (type) {
+    case KibanaSavedObjectType.workflow:
+      return `/app/workflows/${encodeURIComponent(id)}`;
+    case KibanaSavedObjectType.agent:
+      return `/app/agent_builder/agents/${encodeURIComponent(id)}/overview`;
+    default:
+      return '';
+  }
 };
 
 const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): string => {
@@ -50,10 +78,35 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   soTypeRegistry: ISavedObjectTypeRegistry,
-  assetIds: AssetSOObject[]
+  assetIds: AssetSOObject[],
+  options?: GetBulkAssetsOptions
 ) {
+  const externalAssetIds = assetIds.filter(({ type }) => EXTERNAL_KIBANA_ASSET_TYPES.has(type));
+  const savedObjectAssetIds = assetIds.filter(({ type }) => !EXTERNAL_KIBANA_ASSET_TYPES.has(type));
+
+  const externalMetadata = options?.externalAssetEnricher
+    ? await options.externalAssetEnricher(externalAssetIds)
+    : {};
+
+  const externalAssets: SimpleSOAssetType[] = externalAssetIds.map(({ id, type }) => {
+    const metadata = externalMetadata[id];
+    return {
+      id,
+      type: type as KibanaSavedObjectType,
+      attributes: {
+        title: metadata?.title ?? id,
+        description: metadata?.description,
+      },
+      appLink: getKibanaLinkForExternalAsset(type as KibanaSavedObjectType, id),
+    };
+  });
+
+  if (savedObjectAssetIds.length === 0) {
+    return externalAssets;
+  }
+
   const { resolved_objects: resolvedObjects } =
-    await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
+    await soClient.bulkResolve<DisplayableSOAssetAttributes>(savedObjectAssetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
 
   const res: SimpleSOAssetType[] = resolvedObjects
@@ -107,5 +160,6 @@ export async function getBulkAssets(
         appLink,
       };
     });
-  return res;
+
+  return [...res, ...externalAssets];
 }

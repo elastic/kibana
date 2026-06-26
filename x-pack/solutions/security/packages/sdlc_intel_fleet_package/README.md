@@ -26,9 +26,12 @@ sdlc_intel-0.1.0/
 From this directory:
 
 ```bash
-cd sdlc_intel-0.1.0
-zip -r ../.target/sdlc_intel-0.1.0.zip .
+mkdir -p .target
+rm -f .target/sdlc_intel-0.1.0.zip
+zip -r .target/sdlc_intel-0.1.0.zip sdlc_intel-0.1.0
 ```
+
+The zip must contain a single top-level folder named `sdlc_intel-0.1.0/` (matching `name-version` in `manifest.yml`). Do not zip from inside that folder — incremental updates leave duplicate root paths and Fleet returns **400 Bad Request**.
 
 Install via **Fleet → Integrations → Upload integration** (or your local package registry workflow).
 

@@ -127,7 +127,7 @@ Fleet optional dependency: add `agentBuilder?: AgentBuilderPluginSetup` to Fleet
 Update SDLC agentic workflows to reference fleet-installed agent IDs:
 
 ```yaml
-agent-id: fleet-default-sdlc_intel-sdlc-coverage-analysis
+agent-id: fleet-default-sdlc-intel-sdlc-coverage-analysis
 ```
 
 Or introduce `REPLACE_WITH_AGENT_ID` placeholders per agent file (parallel to connector substitution).
