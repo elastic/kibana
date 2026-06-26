@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ClearStaleUiamApiKeysTask } from './clear_stale_uiam_api_keys_task';
+export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';

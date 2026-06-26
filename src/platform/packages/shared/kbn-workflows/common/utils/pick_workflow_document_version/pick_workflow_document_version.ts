@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+export const isValidWorkflowDocumentVersion = (version: unknown): version is number =>
+  typeof version === 'number' && !Number.isNaN(version);
 
-export function toExecutionModel(
-  workflow: EsWorkflow,
-  isTestRun: boolean
-): WorkflowExecutionEngineModel {
-  return {
-    id: workflow.id,
-    name: workflow.name,
-    enabled: workflow.enabled,
-    definition: workflow.definition,
-    yaml: workflow.yaml,
-    ...pickManagedWorkflowFields(workflow),
-    isTestRun,
-  };
-}
+export const pickWorkflowDocumentVersion = (source: {
+  version?: unknown;
+}): { version?: number } => {
+  const { version } = source;
+  return isValidWorkflowDocumentVersion(version) ? { version } : {};
+};
