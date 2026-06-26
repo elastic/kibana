@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../common/utils/kql';
+import { prepareKQLStringParam } from '../../../../common/utils/kql';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_type';
 interface PrebuiltRulesFilter {
   keywords?: string;
@@ -32,6 +32,7 @@ const RULE_ID_FIELD = field('rule_id');
 
 /**
  * Searches if keywords appear in either name or description. Order does not matter.
+ *
  * @example
  * buildKeywordsClause('mimikatz')         // (name: "mimikatz" OR description: "mimikatz")
  * buildKeywordsClause('lateral movement') // (name: ("lateral" AND "movement") OR description: ("lateral" AND "movement"))
@@ -41,7 +42,7 @@ const buildKeywordsClause = (keywords: string): string | undefined => {
     .trim()
     .split(/\s+/)
     .filter(Boolean)
-    .map((token) => fullyEscapeKQLStringParam(token));
+    .map((token) => prepareKQLStringParam(token));
 
   if (tokens.length === 0) {
     return undefined;

@@ -19,7 +19,7 @@ import { evaluate } from '../../src/evaluate';
  * `security.find_prebuilt_rules` tool call (its `params` and `results`).
  *
  * Requirements for the eval target Kibana:
- * - Start with the `dexAiSkillOnboardPrebuiltRules` experimental flag enabled
+ * - Start with the `dexAiSkillRecommendPrebuiltRules` experimental flag enabled
  *   (`xpack.securitySolution.enableExperimental`), otherwise the skill is never
  *   registered and the agent cannot route to it.
  * - The bundled `security_detection_engine` package is installed in `beforeAll`

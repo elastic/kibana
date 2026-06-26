@@ -83,8 +83,7 @@ describe('buildMitreCoverageFromRules', () => {
             tech('T1565', 'Data Manipulation', [sub('T1565.001', 'Stored Data Manipulation')]),
           ]),
         ])
-      ),
-      1
+      )
     );
 
     expect(result).toEqual({
@@ -114,8 +113,7 @@ describe('buildMitreCoverageFromRules', () => {
           ]),
         ]),
         rule([mitre('TA0002', 'Execution', [tech('T1059', 'Command and Scripting Interpreter')])])
-      ),
-      3
+      )
     );
 
     expect(result.total_with_mitre_mapping).toBe(3);
@@ -135,8 +133,7 @@ describe('buildMitreCoverageFromRules', () => {
           mitre('TA0001', 'Initial Access', [tech('T1059', 'Command and Scripting Interpreter')]),
           mitre('TA0002', 'Execution', [tech('T1059', 'Command and Scripting Interpreter')]),
         ])
-      ),
-      1
+      )
     );
 
     expect(result.total_with_mitre_mapping).toBe(1);
@@ -160,8 +157,7 @@ describe('buildMitreCoverageFromRules', () => {
             ]),
           ]),
         ])
-      ),
-      1
+      )
     );
 
     // The technique is counted once; its subtechniques are not surfaced as a field.
@@ -179,8 +175,7 @@ describe('buildMitreCoverageFromRules', () => {
             technique: [],
           },
         ])
-      ),
-      1
+      )
     );
 
     expect(result).toEqual({
@@ -201,15 +196,14 @@ describe('buildMitreCoverageFromRules', () => {
             technique: [],
           },
         ])
-      ),
-      1
+      )
     );
 
     expect(result.tactics).toEqual([{ id: 'TA0001', name: 'TA0001', count: 1 }]);
   });
 
   it('treats rules without threat as having no MITRE mapping', () => {
-    const result = buildMitreCoverageFromRules(rules(rule(undefined)), 1);
+    const result = buildMitreCoverageFromRules(rules(rule(undefined)));
     expect(result).toEqual({
       total_installed_rules: 1,
       total_with_mitre_mapping: 0,

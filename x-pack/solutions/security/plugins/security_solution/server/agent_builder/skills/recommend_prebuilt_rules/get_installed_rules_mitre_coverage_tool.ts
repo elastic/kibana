@@ -41,11 +41,12 @@ const byCountDescThenId = (a: MitreCoverageEntry, b: MitreCoverageEntry): number
   b.count - a.count || a.id.localeCompare(b.id);
 
 /**
- * Tallies MITRE ATT&CK coverage from installed rules.
+ * Tallies MITRE ATT&CK coverage from installed rules. All counts — including
+ * `total_installed_rules` — are derived from the rules actually passed in, so the mapping
+ * total and the rule total always share the same base.
  */
 export const buildMitreCoverageFromRules = (
-  rules: Array<{ params: RuleWithThreat }>,
-  totalInstalledRules: number
+  rules: Array<{ params: RuleWithThreat }>
 ): MitreCoverageData => {
   const tacticCounts = new Map<string, number>();
   const tacticNames = new Map<string, string>();
@@ -99,7 +100,7 @@ export const buildMitreCoverageFromRules = (
     .sort(byCountDescThenId);
 
   return {
-    total_installed_rules: totalInstalledRules,
+    total_installed_rules: rules.length,
     total_with_mitre_mapping: totalWithMitreMapping,
     tactics,
     techniques,
@@ -132,7 +133,7 @@ export const createGetInstalledRulesMitreCoverageTool = ({
       const [, startPlugins] = await getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
-      const { data, total } = await findRules({
+      const { data } = await findRules({
         rulesClient,
         filter: undefined,
         fields: ['params.threat'],
@@ -146,7 +147,7 @@ export const createGetInstalledRulesMitreCoverageTool = ({
         results: [
           {
             type: ToolResultType.other,
-            data: buildMitreCoverageFromRules(data, total),
+            data: buildMitreCoverageFromRules(data),
           },
         ],
       };
