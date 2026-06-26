@@ -127,7 +127,26 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.19.17]]
 == {kib} 8.19.17
 
-The 8.19.17 release includes the following fixes.
+The 8.19.17 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.17]]
+=== Known issues
+
+// tag::known-issue-268398[]
+.Canvas Autoplay stops advancing after one page.
+[%collapsible]
+====
+*Details* +
+Multipage Canvas visualizations stop advancing after one page when in autoplay mode
+
+*Workaround* +
+Manually advance to the next page or upgrade to 8.19.18 or 9.3.7.
+
+*Resolved* + 
+This issue is resolved in 8.19.18 and 9.3.7.
+====
+// end::known-issue-268398[]
 
 [float]
 [[fixes-v8.19.17]]
