@@ -97,7 +97,7 @@ export const EditAiPanelFlyout = ({
         timeRange,
         controller.signal
       );
-      setPreviewData({ columns: result.columns, rows: result.rows.slice(0, 10) });
+      setPreviewData({ columns: result.columns, rows: (result.values ?? []).slice(0, 10) });
     } catch (err) {
       setPreviewError(err instanceof Error ? err.message : String(err));
     } finally {

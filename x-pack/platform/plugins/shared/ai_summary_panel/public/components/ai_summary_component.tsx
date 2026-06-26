@@ -116,9 +116,9 @@ export const AiSummaryComponent = ({
     // Fast path — esqlQuery panel with stored template: run query only, no LLM.
     if (template && esqlQuery) {
       fetchEsqlData(search, esqlQuery, timeRange, controller.signal)
-        .then(({ columns, rows }) => {
+        .then(({ columns, values }) => {
           if (controller.signal.aborted) return;
-          setHtml(fillTemplate(template, columns, rows));
+          setHtml(fillTemplate(template, columns, values ?? []));
           setIsLoading(false);
         })
         .catch((err: Error) => {
@@ -165,7 +165,7 @@ export const AiSummaryComponent = ({
           setIsLoading(false);
           return;
         }
-        rendered = fillTemplate(cleaned, esqlData.columns, esqlData.rows);
+        rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
         onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
         // Static panel: sanitize then store. CSP is already in the accumulator

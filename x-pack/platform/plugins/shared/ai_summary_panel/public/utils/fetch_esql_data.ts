@@ -8,12 +8,8 @@
 import { getESQLResults, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import dateMath from '@kbn/datemath';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { TemplateColumn } from './template_fill';
 
-export interface EsqlDataResult {
-  columns: TemplateColumn[];
-  rows: unknown[][];
-}
+export type EsqlDataResult = Awaited<ReturnType<typeof getESQLResults>>['response'];
 
 /**
  * Fetches ES|QL query results client-side via the data plugin's search service.
@@ -54,8 +50,5 @@ export async function fetchEsqlData(
     timeRange,
   });
 
-  return {
-    columns: response.columns as TemplateColumn[],
-    rows: (response.values ?? []) as unknown[][],
-  };
+  return response;
 }
