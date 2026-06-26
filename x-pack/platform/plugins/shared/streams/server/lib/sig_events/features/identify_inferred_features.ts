@@ -17,6 +17,7 @@ import {
   type IterationResult,
   isComputedFeature,
   isFeatureWithFilter,
+  normalizeFeatureSlug,
 } from '@kbn/streams-schema';
 import {
   EMPTY_TOKENS,
@@ -60,6 +61,7 @@ type IterationTuningParams = Partial<
 
 export interface FeaturesIdentifiedTelemetry {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -82,6 +84,7 @@ export interface FeaturesIdentifiedTelemetry {
 
 export interface TelemetryContext {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -343,6 +346,7 @@ export interface IdentifyInferredFeaturesOptions {
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
+  connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
@@ -370,6 +374,7 @@ export async function identifyInferredFeatures({
   kiClient,
   soClient,
   inferenceClient,
+  connectorId,
   logger,
   signal,
   streamName,
@@ -439,6 +444,7 @@ export async function identifyInferredFeatures({
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,
+    connector_id: connectorId,
     iteration,
     stream_name: streamName,
     stream_type: streamType,
@@ -476,9 +482,14 @@ export async function identifyInferredFeatures({
 
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
+    const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
     await kiClient.bulk(
       streamName,
-      allChanged.map((feature) => ({ index: { feature } }))
+      allChanged.map((feature) => {
+        const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
+        const expiresAt = !prior || prior.expires_at ? kiClient.getDefaultExpiresAt() : undefined;
+        return { index: { feature: { ...feature, expires_at: expiresAt } } };
+      })
     );
   }
 
