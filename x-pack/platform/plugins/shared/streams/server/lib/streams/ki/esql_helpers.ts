@@ -42,8 +42,6 @@ export const IS_NOT_EXCLUDED: LatestSourceWhereCondition = esql.exp`excluded IS 
 
 export const IS_NOT_EXPIRED: LatestSourceWhereCondition = esql.exp`expires_at IS NULL OR expires_at >= NOW()`;
 
-export const IS_DURABLE: LatestSourceWhereCondition = esql.exp`expires_at IS NULL`;
-
 export const IS_DURABLE_OR_EXCLUDED: LatestSourceWhereCondition = esql.exp`(expires_at IS NULL) OR (excluded == true)`;
 
 export const olderThan = (ts: string): LatestSourceWhereCondition =>
