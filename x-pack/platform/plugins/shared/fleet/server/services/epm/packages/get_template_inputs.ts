@@ -213,7 +213,7 @@ export async function getTemplateInputs(
   if (format === 'json') {
     return { inputs };
   } else if (format === 'yml') {
-    const doc = new yaml.Document(inputs, {
+    const doc = new yaml.Document({ inputs }, {
       sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
       strict: false,
     });
