@@ -63,7 +63,7 @@ The Dropbox connector exposes the following actions:
 :   List all tools available on the Dropbox MCP server. Use this to discover capabilities not exposed as named actions, such as write operations (upload, move, copy, delete) and file versioning tools.
 
 `callTool`
-:   Call any tool on the Dropbox MCP server directly by name. Use this as a fallback for tools not yet exposed as named actions (such as `CreateFile`, `CreateFolder`, `Copy`, `Move`, `Delete`, or `RestoreFileRevision`). Use `listTools` first to discover available tool names and their arguments.
+:   Call any tool on the Dropbox MCP server directly by name. Use this as a fallback for tools not yet exposed as named actions (such as `create_file`, `create_folder`, `copy`, `move`, `delete`, or `restore_file_revision`). Use `listTools` first to discover available tool names and their arguments.
 
 ## Connector networking configuration [dropbox-connector-networking-configuration]
 

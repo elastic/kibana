@@ -215,7 +215,7 @@ export const Dropbox: ConnectorSpec = {
       isTool: true,
       description:
         'Call any tool on the Dropbox MCP server directly by name. Use this as an escape hatch for tools not yet ' +
-        'exposed as named actions (such as CreateFile, CreateFolder, Copy, Move, Delete, or RestoreFileRevision). Use ' +
+        'exposed as named actions (such as create_file, create_folder, copy, move, delete, or restore_file_revision). Use ' +
         'listTools first to discover available tool names and their arguments.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
