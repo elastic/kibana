@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useFetchProjects } from '@kbn/cps-utils';
-import { MlProjectPickerPanel, showUpdateConfirmationModal } from '@kbn/ml-cps';
+import { MlProjectPickerPanel, showProjectRoutingChangeConfirmModal } from '@kbn/ml-cps';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
@@ -129,7 +129,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
       return;
     }
     try {
-      await showUpdateConfirmationModal({
+      await showProjectRoutingChangeConfirmModal({
         overlays,
         startServices,
         jobCount: jobIds.length,
