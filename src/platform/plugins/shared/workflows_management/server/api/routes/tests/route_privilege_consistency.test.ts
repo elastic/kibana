@@ -37,7 +37,7 @@ import type { RouteDependencies } from '../types';
 import { createMockRequestHandlerContext } from '../utils/test_utils';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 import { registerWorkflowRoutes } from '../workflows';
-import { config } from '../../../config';
+import { config as pluginConfig } from '../../../config';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -587,7 +587,7 @@ describe('Route privilege/ES-operation consistency', () => {
       },
     } as unknown as jest.Mocked<WorkflowsRouter>;
 
-    const defaultConfig = config.schema.validate({});
+    const defaultConfig = pluginConfig.schema.validate({});
     const mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') } as any;
     const mockAudit = createWorkflowManagementAuditLogMock();
 
