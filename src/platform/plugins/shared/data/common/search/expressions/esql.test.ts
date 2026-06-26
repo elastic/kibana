@@ -17,7 +17,7 @@ import type {
   IEsqlSearchResult,
 } from '@kbn/search-types';
 import type { KibanaContext } from '..';
-import { ESQLColumn } from '@kbn/es-types';
+import type { ESQLColumn } from '@kbn/es-types';
 
 interface MockTypedSearchService {
   esql: jest.Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
