@@ -339,6 +339,7 @@ function setupMocks({
       ...deployAndDetectStep,
     },
     updateDeployAndDetectStep: jest.fn(),
+    getLatestFailedPackages: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),
     retryDeploy: jest.fn(),
   });
