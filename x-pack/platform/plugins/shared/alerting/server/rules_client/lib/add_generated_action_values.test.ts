@@ -170,6 +170,58 @@ describe('addGeneratedActionValues()', () => {
     `);
   });
 
+  test('normalizes non-string meta.value from phrases filters', async () => {
+    const phrasesFilter = {
+      meta: {
+        type: 'phrases',
+        key: 'host.name',
+        params: ['a', 'b'],
+        value: ['a', 'b'],
+      },
+      query: {
+        bool: {
+          should: [{ match_phrase: { 'host.name': 'a' } }, { match_phrase: { 'host.name': 'b' } }],
+          minimum_should_match: 1,
+        },
+      },
+    };
+
+    const actionWithGeneratedValues = await addGeneratedActionValues(
+      [
+        {
+          ...mockAction,
+          alertsFilter: {
+            query: {
+              kql: '',
+              filters: [phrasesFilter],
+            },
+          },
+        },
+      ],
+      [mockSystemAction],
+      {
+        ...rulesClientParams,
+        minimumScheduleIntervalInMs: 0,
+      }
+    );
+
+    const returnedFilter = actionWithGeneratedValues.actions[0].alertsFilter?.query?.filters?.[0];
+
+    expect(returnedFilter?.meta).toEqual({
+      type: 'phrases',
+      key: 'host.name',
+      params: ['a', 'b'],
+    });
+    expect(returnedFilter?.meta).not.toHaveProperty('value');
+    expect(returnedFilter?.query).toEqual(phrasesFilter.query);
+    expect(actionWithGeneratedValues.actions[0].alertsFilter?.query?.dsl).toContain(
+      '"minimum_should_match":1'
+    );
+    expect(actionWithGeneratedValues.actions[0].alertsFilter?.query?.dsl).toContain(
+      '"match_phrase":{"host.name":"a"}'
+    );
+  });
+
   test('throws error if KQL is not valid', async () => {
     await expect(async () =>
       addGeneratedActionValues(
