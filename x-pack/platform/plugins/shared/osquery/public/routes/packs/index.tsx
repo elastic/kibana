@@ -15,14 +15,15 @@ import { EditPackPage } from './edit';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useKibana } from '../../common/lib/kibana';
 import { MissingPrivileges } from '../components';
+import { pagePathGetters } from '../../common/page_paths';
 
 // The read-only Pack details page was removed. Redirect the legacy
 // `/packs/:packId` route to the pack's Edit page so existing bookmarks and
 // deep links still resolve to that pack.
-const PackDetailsRedirect = ({ basePath }: { basePath: string }) => {
+const PackDetailsRedirect = () => {
   const { packId } = useParams<{ packId: string }>();
 
-  return <Redirect to={`${basePath}/${packId}/edit`} />;
+  return <Redirect to={pagePathGetters.pack_edit({ packId })} />;
 };
 
 const PacksComponent = () => {
@@ -43,7 +44,7 @@ const PacksComponent = () => {
         {permissions.writePacks ? <EditPackPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:packId`}>
-        <PackDetailsRedirect basePath={match.url} />
+        <PackDetailsRedirect />
       </Route>
       <Route path={`${match.url}`}>
         <PacksPage />
