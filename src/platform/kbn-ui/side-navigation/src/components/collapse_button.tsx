@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
@@ -20,7 +20,7 @@ interface Props {
   toggle: (isCollapsed: boolean) => void;
 }
 
-const sideNavCollapseButtonStyles = () => {
+const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
   return {
     sideNavCollapseButtonWrapper: css`
       display: flex;
@@ -28,6 +28,13 @@ const sideNavCollapseButtonStyles = () => {
       flex-shrink: 0;
     `,
     sideNavCollapseButton: css`
+      color: ${euiTheme.colors.textSubdued};
+
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled) {
+        color: ${euiTheme.colors.textParagraph};
+      }
+
       &.euiButtonIcon:hover {
         transform: none;
       }
@@ -43,8 +50,9 @@ export const SideNavCollapseButton: FC<Props> = ({
   isCollapsed,
   toggle,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
-  const styles = useMemo(() => sideNavCollapseButtonStyles(), []);
+  const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
 
   const expandLabel = i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
     defaultMessage: 'Expand navigation menu',
