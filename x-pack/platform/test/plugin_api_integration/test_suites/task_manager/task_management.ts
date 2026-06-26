@@ -1899,7 +1899,10 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(scheduled.userScope?.userProfileId).to.eql(testProfileUid);
-        expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(true);
+        // Scheduling via a fake request clones the caller's key into a Task-Manager-owned key, so
+        // it is not flagged as user-created (it is invalidated on task removal). Profile resolution
+        // is unaffected since the clone runs with the same identity.
+        expect(scheduled.userScope?.apiKeyCreatedByUser).to.be(false);
 
         // The task is one-shot, so it's removed from saved objects after it
         // runs. The task indexes its captured state into the test history
