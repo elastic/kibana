@@ -71,6 +71,10 @@ test.describe(
         await expect(pageObjects.thresholdBuilder.statAggSelect(0)).toBeVisible();
       });
 
+      await test.step('Next is disabled before index is selected', async () => {
+        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      });
+
       await test.step('select index pattern', async () => {
         await pageObjects.thresholdBuilder.setIndex(TEST_INDEX);
       });
@@ -78,10 +82,6 @@ test.describe(
       await test.step('time field is auto-populated', async () => {
         await expect(pageObjects.thresholdBuilder.timeFieldSelect).toBeVisible();
         await expect(pageObjects.thresholdBuilder.timeFieldSelect).toHaveValue('@timestamp');
-      });
-
-      await test.step('Next is disabled before builder form is valid', async () => {
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
       });
 
       await test.step('set threshold condition value', async () => {
