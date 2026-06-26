@@ -46,6 +46,7 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   idBasedRiskScoringEnabled: boolean;
   lookupIndex: string;
   abortSignal?: AbortSignal;
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
@@ -135,6 +136,7 @@ export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
   lookupIndex,
+  refresh,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   // Persist using categorized write groups to keep routing explicit.
@@ -185,6 +187,7 @@ export const scoreBaseEntities = async ({
       entityType: params.entityType,
       scores: riskIndexWrites,
       logger: params.logger,
+      refresh,
     });
     await persistScoresToEntityStore({
       crudClient: params.crudClient,

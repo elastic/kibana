@@ -30,6 +30,8 @@ interface RunResolutionScoringParams {
   watchlistConfigs: Map<string, WatchlistObject>;
   idBasedRiskScoringEnabled: boolean;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
+  targetEntityIds?: string[];
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
 }
 
 export const runResolutionScoringStep = async ({
@@ -47,6 +49,8 @@ export const runResolutionScoringStep = async ({
   watchlistConfigs,
   idBasedRiskScoringEnabled,
   writer,
+  targetEntityIds,
+  refresh,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
@@ -67,6 +71,7 @@ export const runResolutionScoringStep = async ({
     now,
     calculationRunId,
     watchlistConfigs,
+    targetEntityIds,
   })) {
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');
@@ -80,6 +85,7 @@ export const runResolutionScoringStep = async ({
         entityType,
         scores: pageScores,
         logger: runLogger,
+        refresh,
       });
       await persistScoresToEntityStore({
         crudClient,
