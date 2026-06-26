@@ -324,7 +324,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   }, [selectedStepId, onStepSelect]);
 
   const handleMoveEnd = useCallback(
-    (_event: MouseEvent | TouchEvent, viewport: Viewport) => onViewportChange?.(viewport),
+    (_event: MouseEvent | TouchEvent | null, viewport: Viewport) => onViewportChange?.(viewport),
     [onViewportChange]
   );
 

@@ -504,8 +504,8 @@ function nodePropsAreEqual(
     prev.selected === next.selected &&
     prev.targetPosition === next.targetPosition &&
     prev.sourcePosition === next.sourcePosition &&
-    prev.xPos === next.xPos &&
-    prev.yPos === next.yPos
+    prev.positionAbsoluteX === next.positionAbsoluteX &&
+    prev.positionAbsoluteY === next.positionAbsoluteY
   );
 }
 

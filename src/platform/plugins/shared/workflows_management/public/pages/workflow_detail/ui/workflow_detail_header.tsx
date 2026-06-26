@@ -479,4 +479,10 @@ const componentStyles = {
     minWidth: 0,
     overflow: 'hidden',
   }),
+  separator: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '1px',
+      alignSelf: 'stretch',
+      backgroundColor: euiTheme.colors.borderBasePlain,
+    }),
 };
