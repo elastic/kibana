@@ -9,24 +9,24 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
   logicalCSS,
   useEuiTheme,
-  EuiButtonEmpty,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
+  getRenderCustomToolbarWithElements,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
@@ -50,8 +50,10 @@ import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -74,6 +76,7 @@ const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
     duration: { width: 110 },
     assignees: { width: 120 },
     'episode.status': { width: 110 },
+    severity: { width: 100 },
   },
 };
 
@@ -86,10 +89,6 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
   }),
-  duration: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
-    ...column,
-    displayHeaderCellProps: { style: { textAlign: 'left' } },
-  }),
 };
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
@@ -98,12 +97,12 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   border: ${euiTheme.border.thin};
   overflow: hidden;
 
-  & .unifiedDataTable__cellValue {
-    font-family: unset;
+  & .unifiedDataTableToolbar {
+    padding-bottom: ${euiTheme.size.s};
   }
 
-  & .euiDataGridRowCell__content {
-    display: flex;
+  & .unifiedDataTable__cellValue {
+    font-family: unset;
   }
 
   & .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--autoHeight) {
@@ -152,6 +151,7 @@ export const AlertEpisodesListPage = () => {
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
+    'severity',
     '@timestamp',
     'rule.id',
     'duration',
@@ -225,6 +225,59 @@ export const AlertEpisodesListPage = () => {
   );
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
+
+  const renderCustomToolbar = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: (
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            gutterSize="xs"
+            css={css`
+              ${logicalCSS('padding-horizontal', euiTheme.size.s)}
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                <FormattedMessage
+                  id="xpack.alertingV2.episodes.itemCount"
+                  defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
+                  values={{
+                    filtered: <strong>{filteredAlertEpisodesCount}</strong>,
+                    total: <strong>{totalAlertEpisodesCount}</strong>,
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                |
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="eraser"
+                color="text"
+                disabled={!hasActiveFilters}
+                onClick={handleClearFilters}
+                data-test-subj="episodesFilterBar-resetFilters"
+              >
+                {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      }),
+    [
+      euiTheme.size.s,
+      filteredAlertEpisodesCount,
+      handleClearFilters,
+      hasActiveFilters,
+      totalAlertEpisodesCount,
+    ]
+  );
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
@@ -320,6 +373,7 @@ export const AlertEpisodesListPage = () => {
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       'rule.id': (props) => (
         <EpisodeRuleCell
@@ -419,44 +473,6 @@ export const AlertEpisodesListPage = () => {
         >
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem
-              grow={false}
-              css={css`
-                margin-top: ${euiTheme.size.m};
-              `}
-            >
-              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                    <FormattedMessage
-                      id="xpack.alertingV2.episodes.itemCount"
-                      defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
-                      values={{
-                        filtered: <strong>{filteredAlertEpisodesCount}</strong>,
-                        total: <strong>{totalAlertEpisodesCount}</strong>,
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    |
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="eraser"
-                    disabled={!hasActiveFilters}
-                    onClick={handleClearFilters}
-                    data-test-subj="episodesFilterBar-resetFilters"
-                  >
-                    {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            <EuiFlexItem
               grow
               css={css`
                 min-width: 0;
@@ -480,6 +496,7 @@ export const AlertEpisodesListPage = () => {
                     gridStyleOverride={{
                       stripes: false,
                       cellPadding: 'l',
+                      header: 'shade',
                     }}
                     dataView={dataView}
                     columns={columns}
@@ -508,6 +525,7 @@ export const AlertEpisodesListPage = () => {
                     expandedDoc={expandedDoc}
                     setExpandedDoc={setExpandedDoc}
                     renderDocumentView={renderDocumentView}
+                    renderCustomToolbar={renderCustomToolbar}
                   />
                 )}
               </CellActionsProvider>
