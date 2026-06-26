@@ -17,37 +17,37 @@ import { TemplateMetadataSchema } from './template';
  */
 export const TemplateSchema = TemplateMetadataSchema.omit({ install: true })
   .extend({
-    definitionUrl: z.string().min(1),
+    definitionUrl: z.string().min(1).max(2048),
     contentHash: z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.'),
     // Full `type` strings for every step (recursively, including nested steps)
     // and every trigger in the template, derived by the catalog generator. The
     // Library UI maps these to icons. Either array may be empty.
-    stepTypes: z.array(z.string().min(1)),
-    triggerTypes: z.array(z.string().min(1)),
+    stepTypes: z.array(z.string().min(1).max(256)).max(1000),
+    triggerTypes: z.array(z.string().min(1).max(256)).max(1000),
   })
   .strict();
 
 export const TemplatesCatalogSchema = z
   .object({
-    version: z.string().min(1),
-    kibanaVersion: z.string().min(1),
-    generatedAt: z.string().min(1),
-    templates: z.array(TemplateSchema),
+    version: z.string().min(1).max(256),
+    kibanaVersion: z.string().min(1).max(256),
+    generatedAt: z.string().min(1).max(256),
+    templates: z.array(TemplateSchema).max(1000),
   })
   .strict();
 
 export const KibanaVersionEntrySchema = z
   .object({
-    id: z.string().min(1),
-    kibana: z.string().min(1),
+    id: z.string().min(1).max(256),
+    kibana: z.string().min(1).max(256),
     active: z.boolean(),
   })
   .strict();
 
 export const KibanaVersionsManifestSchema = z
   .object({
-    versions: z.array(KibanaVersionEntrySchema),
-    latest: z.string().min(1),
+    versions: z.array(KibanaVersionEntrySchema).max(100),
+    latest: z.string().min(1).max(256),
   })
   .strict();
 
@@ -59,9 +59,9 @@ export const KibanaVersionsManifestSchema = z
  * Template Authoring / CI validation uses the strict base schemas.
  */
 export const TemplatesCatalogConsumptionSchema = TemplatesCatalogSchema.extend({
-  templates: z.array(TemplateSchema.strip()),
+  templates: z.array(TemplateSchema.strip()).max(1000),
 }).strip();
 
 export const KibanaVersionsManifestConsumptionSchema = KibanaVersionsManifestSchema.extend({
-  versions: z.array(KibanaVersionEntrySchema.strip()),
+  versions: z.array(KibanaVersionEntrySchema.strip()).max(100),
 }).strip();

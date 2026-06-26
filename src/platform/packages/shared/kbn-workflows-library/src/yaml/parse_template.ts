@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import yaml from 'yaml';
 import { ZodError } from '@kbn/zod/v4';
 import { TemplateMetadataSchema } from '../schemas/template';
 import type { TemplateMetadata } from '../types/catalog';
@@ -56,7 +56,7 @@ export interface ParsedTemplate {
 export function parseTemplateYaml(raw: string): ParsedTemplate {
   let doc: unknown;
   try {
-    doc = yaml.load(raw);
+    doc = yaml.parse(raw);
   } catch (err) {
     throw new TemplateParseError('Template YAML is not valid YAML.', 'invalid-yaml', err);
   }

@@ -20,26 +20,26 @@ export const InstallFormFieldTypeSchema = z.union([
 
 export const InstallFormFieldOptionSchema = z
   .object({
-    value: z.string().min(1),
-    label: z.string().min(1).max(120),
+    value: z.string().min(1).max(1024),
+    label: z.string().min(1).max(1024),
   })
   .strict();
 
 export const InstallFormFieldSchema = z
   .object({
-    name: z.string().min(1),
-    label: z.string().min(1).max(120).optional(),
-    description: z.string().min(1).max(500).optional(),
+    name: z.string().min(1).max(1024),
+    label: z.string().min(1).max(1024).optional(),
+    description: z.string().min(1).max(4096).optional(),
     inputType: InstallFormFieldTypeSchema,
     required: z.boolean().optional(),
-    connectorType: z.string().min(1).optional(),
-    options: z.array(InstallFormFieldOptionSchema).optional(),
-    default: z.unknown().optional(),
+    connectorType: z.string().min(1).max(256).optional(),
+    options: z.array(InstallFormFieldOptionSchema).max(100).optional(),
+    default: z.union([z.string().max(1024), z.number(), z.boolean()]).optional(),
   })
   .strict();
 
 export const InstallFormSchema = z
   .object({
-    form: z.array(InstallFormFieldSchema),
+    form: z.array(InstallFormFieldSchema).max(100),
   })
   .strict();

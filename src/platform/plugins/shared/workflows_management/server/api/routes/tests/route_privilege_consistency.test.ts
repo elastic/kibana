@@ -37,6 +37,7 @@ import type { RouteDependencies } from '../types';
 import { createMockRequestHandlerContext } from '../utils/test_utils';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 import { registerWorkflowRoutes } from '../workflows';
+import { config } from '../../../config';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -543,12 +544,17 @@ describe('Route privilege/ES-operation consistency', () => {
     const startServices = jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]) as any;
     const mockCoreSetup = { getStartServices: startServices } as any;
     const mockPluginsSetup = {} as any;
-    const service = new WorkflowsService(mockCoreSetup, mockPluginsSetup, mockLogger, '9.0.0');
-    await service.getCoreStart();
+    const workflowsService = new WorkflowsService(
+      mockCoreSetup,
+      mockPluginsSetup,
+      mockLogger,
+      '9.0.0'
+    );
+    await workflowsService.getCoreStart();
 
     // ── WorkflowsManagementApi ──
 
-    const api = new WorkflowsManagementApi(service, true);
+    const api = new WorkflowsManagementApi(workflowsService, true);
 
     // ── Capturing mock router ──
 
@@ -581,14 +587,16 @@ describe('Route privilege/ES-operation consistency', () => {
       },
     } as unknown as jest.Mocked<WorkflowsRouter>;
 
+    const defaultConfig = config.schema.validate({});
     const mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') } as any;
     const mockAudit = createWorkflowManagementAuditLogMock();
 
     const deps: RouteDependencies = {
       router: mockRouter,
       api,
-      service,
+      workflowsService,
       logger: mockLogger,
+      config: defaultConfig,
       spaces: mockSpaces,
       audit: mockAudit,
     };

@@ -15,7 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { LibraryFetcher, LibraryFetchError } from '..';
 
-const FIXTURE_ROOT = path.join(__dirname, 'fixtures', 'dist');
+const FIXTURE_ROOT = path.join(__dirname, '__fixtures__', 'dist');
 const TTL_MS = 60_000;
 
 interface FixtureServer {
