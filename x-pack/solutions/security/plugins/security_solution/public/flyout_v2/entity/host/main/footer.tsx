@@ -45,7 +45,6 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
         <AiAssistantButton
           entityType={EntityType.host}
           entityName={hostName}
-          xw
           telemetryPathway="entity_flyout"
         />
       </EuiFlexItem>
