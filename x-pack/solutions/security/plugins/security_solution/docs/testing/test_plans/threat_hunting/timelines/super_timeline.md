@@ -6,9 +6,9 @@
 
 Super Timeline lets an incident lead aggregate multiple Timeline investigations into a single
 transient, read-only view. Pinned events from all selected timelines are merged; notes are shown
-read-only (never duplicated); KQL/filter queries are OR'd into one combined filter pill with
-per-timeline labels. ESQL and EQL timelines still contribute their pins and notes — only their
-query is skipped.
+read-only (never duplicated); KQL/filter queries are OR'd into one combined filter pill labeled
+"Super Timeline Sources". ESQL and EQL timelines still contribute their pins and notes — only
+their query is skipped.
 
 The view is **transient** — never saved. Opened from two entry points (PR 4 adds the first):
 1. Timelines list page → bulk-select timelines → "View Super Timeline"
@@ -232,8 +232,12 @@ Then, in the Kibana UI:
    - **Pinned Events** tab shows the union of pinned events across all selected timelines.
    - **Notes** tab shows notes from all selected timelines read-only (no add-note input).
    - **ESQL** and **EQL** tabs are hidden.
-7. **URL persistence**: copy the browser URL. Open it in a new tab — the Super Timeline modal
-   should reopen automatically with the same source timelines loaded.
-8. Close the modal, then press the **browser back** button — the Super Timeline should reopen.
+7. **URL persistence (page reload)**: copy the browser URL. Open it in a new tab — the Super
+   Timeline modal should reopen automatically with the same source timelines loaded.
+8. **Browser back/forward caveat**: the `popstate` guard in `use_init_timeline_url_param.ts`
+   compares the active `savedObjectId` (`null` for Super Timeline) against the URL-restored `id`
+   (`undefined` when omitted), so the back/forward path does **not** trigger a reopen. Only a
+   full page load from the URL restores the Super Timeline. This is a known limitation and does
+   not affect the contractual requirement (URL copy + reload works).
 9. Close the modal and navigate away from the Case — the Super Timeline should **not**
    reappear on a fresh page load (transient once the URL param is gone).
