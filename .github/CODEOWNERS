@@ -143,6 +143,7 @@ src/core/packages/chrome/app-menu/core-chrome-app-menu-components @elastic/appex
 src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-components @elastic/appex-sharedux
 src/core/packages/chrome/browser-context @elastic/appex-sharedux
+src/core/packages/chrome/browser-context-mocks @elastic/appex-sharedux
 src/core/packages/chrome/browser-hooks @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal-types @elastic/appex-sharedux
