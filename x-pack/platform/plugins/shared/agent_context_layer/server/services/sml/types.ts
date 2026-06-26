@@ -477,10 +477,10 @@ export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
   /**
-   * Log-only. See type-level `@remarks` — the indexer does NOT use this
-   * to filter the underlying `deleteByQuery`; selection is global by
-   * `(origin_id, attachmentType[, ingestion_method])`. Space-scope
-   * enforcement is a route-layer concern.
+   * Space-isolation guard. `deleteChunks` filters by
+   * `{ terms: { spaces: [...spaces, '*'] } }` so only chunks whose stored
+   * `spaces` array contains one of the provided IDs (or the global wildcard
+   * `'*'`) are removed. See type-level `@remarks` for the full contract.
    */
   spaces: string[];
   esClient: ElasticsearchClient;

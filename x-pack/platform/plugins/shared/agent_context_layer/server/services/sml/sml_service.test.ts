@@ -2426,7 +2426,7 @@ describe('SmlService', () => {
       });
 
       const passed = esClient.search.mock.calls[0][0] as any;
-      expect(passed._source).toEqual(['id', 'type', 'spaces', 'origin']);
+      expect(passed._source).toEqual(['id', 'type', 'spaces', 'origin', 'created_at']);
     });
 
     it('throws SmlCorpusTooLargeError (fail-closed) when total chunks exceed MAX_CHUNKS_PER_ORIGIN', async () => {
