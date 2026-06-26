@@ -3596,6 +3596,9 @@ oas_docs/scripts                              @elastic/kibana-core
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
+docs/release-notes                            @elastic/experience-docs
+docs/docset.yml                               @elastic/experience-docs
+docs/redirects.yml                            @elastic/experience-docs
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
