@@ -694,6 +694,25 @@ describe('toNewAgentlessPolicy', () => {
     expect(result).not.toHaveProperty('cloud_connector');
   });
 
+  it('drops unknown/new fields not in the allowlist (leak-proof contract)', () => {
+    // These fields exist on NewPackagePolicy (or could be added in the future) and
+    // are NOT part of the agentless contract. A blocklist would silently forward
+    // them; the pick allowlist must drop them.
+    const result = toNewAgentlessPolicy(
+      createPackagePolicy({
+        is_managed: true,
+        overrides: { inputs: { 'some-input': { enabled: false } } },
+        elasticsearch: { privileges: { cluster: ['monitor'] } },
+        var_group_selections: { group: 'selection' },
+      })
+    );
+
+    expect(result).not.toHaveProperty('is_managed');
+    expect(result).not.toHaveProperty('overrides');
+    expect(result).not.toHaveProperty('elasticsearch');
+    expect(result).not.toHaveProperty('var_group_selections');
+  });
+
   describe('cloud_connector', () => {
     it('reuses an existing connector when cloud_connector_id is set', () => {
       const result = toNewAgentlessPolicy(

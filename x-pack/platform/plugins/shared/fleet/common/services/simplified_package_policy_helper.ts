@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty, omit } from 'lodash';
+import { isEmpty, omit, pick } from 'lodash';
 
 import type {
   AgentConditionExpression,
@@ -338,6 +338,18 @@ type AgentlessPolicyInput = NewPackagePolicy & {
   create_dataset_templates?: boolean;
 };
 
+/**
+ * Build the agentless create request body ({@link NewAgentlessPolicy}) from a
+ * package policy. Single source of truth shared by the UI create submit
+ * (`form.tsx`) and the Dev Tools request preview (`devtools_request.tsx`) so the
+ * two can never drift.
+ *
+ * Uses an explicit `pick` allowlist (not an `omit` blocklist): only fields that
+ * are part of the agentless contract are ever forwarded. This keeps the UI→API
+ * payload leak-proof as `NewPackagePolicy` evolves — any new/unknown property
+ * (e.g. `overrides`, `elasticsearch`, `is_managed`) is dropped instead of being
+ * silently sent and potentially rejected by the server.
+ */
 export const toNewAgentlessPolicy = (
   packagePolicy: AgentlessPolicyInput,
   varGroups?: RegistryVarGroup[]
@@ -345,22 +357,15 @@ export const toNewAgentlessPolicy = (
   const targetCsp = detectTargetCsp(packagePolicy, varGroups);
 
   return {
-    ...omit(
-      packagePolicy,
-      'policy_ids',
-      'policy_id',
-      'output_id',
-      'package',
-      'enabled',
-      'inputs',
-      'vars',
-      'id',
-      'condition',
-      'supports_agentless',
-      'supports_cloud_connector',
-      'cloud_connector_id',
-      'cloud_connector_name'
-    ),
+    ...pick(packagePolicy, [
+      'name',
+      'description',
+      'namespace',
+      'additional_datastreams_permissions',
+      'force',
+      'create_dataset_templates',
+      'global_data_tags',
+    ]),
     package: omit(packagePolicy.package, 'title'),
     id: packagePolicy.id ? String(packagePolicy.id) : undefined,
     inputs: formatInputs(packagePolicy.inputs, true),
