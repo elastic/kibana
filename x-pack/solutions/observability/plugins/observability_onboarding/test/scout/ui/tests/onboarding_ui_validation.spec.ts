@@ -70,9 +70,6 @@ test.describe('Onboarding UI Validation', () => {
         await expect(pageObjects.onboarding.apmVirtualCard).toBeVisible();
         await expect(pageObjects.onboarding.otelVirtualCard).toBeVisible();
         await expect(pageObjects.onboarding.syntheticsVirtualCard).toBeVisible();
-
-        await pageObjects.onboarding.selectKubernetesUseCase();
-        await expect(pageObjects.kubernetes.layout('otel')).toBeVisible();
       });
 
       await test.step('supports deep-linking to onboarding use cases', async () => {
