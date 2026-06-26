@@ -86,9 +86,6 @@ enabled:
   - src/platform/test/functional/apps/discover/esql_3/config.ts
   - src/platform/test/functional/apps/discover/esql_4/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
-  - src/platform/test/functional/apps/discover/group2_data_grid1/config.ts
-  - src/platform/test/functional/apps/discover/group2_data_grid2/config.ts
-  - src/platform/test/functional/apps/discover/group2_data_grid3/config.ts
   - src/platform/test/functional/apps/discover/group3/config.ts
   - src/platform/test/functional/apps/discover/group4/config.ts
   - src/platform/test/functional/apps/discover/group5/config.ts
@@ -180,11 +177,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group16/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group11/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group12/config_non_dedicated_task_runner.ts
-  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group13/config_non_dedicated_task_runner.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/non_dedicated_task_runner_smoke/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group1/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group2/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group3/config.ts
@@ -323,7 +316,6 @@ enabled:
   - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/platform/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
-  - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
@@ -411,7 +403,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
   - x-pack/platform/test/api_integration/apis/console/config.ts
   - x-pack/platform/test/api_integration/apis/anonymization/config.ts
-  - x-pack/platform/test/api_integration/apis/content_management/config.ts
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/entity_manager/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts
@@ -445,5 +436,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.alerting_v2.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts

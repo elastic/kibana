@@ -104,7 +104,8 @@ const isESQLUnit = (s: string): s is ESQLUnit => s in ESQL_UNIT_TO_DATEMATH;
 function mapResponseToDatatable(
   body: ESQLSearchResponse,
   input: Input,
-  request: ESQLSearchParams
+  request: ESQLSearchParams,
+  warning?: string
 ): Datatable {
   const { query, time_zone } = request;
   // all_columns in the response means that there is a separation between
@@ -207,7 +208,7 @@ function mapResponseToDatatable(
     },
     columns: updatedWithVariablesColumns,
     rows,
-    warning: undefined,
+    warning,
   } as Datatable;
 }
 
@@ -367,7 +368,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, requestParams } = await searchService.esql(
+        const { rawResponse, requestParams, warning } = await searchService.esql(
           {
             query: fixedQuery,
             params: params.params,
@@ -433,7 +434,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
-        return mapResponseToDatatable(rawResponse as any, input, params);
+        return mapResponseToDatatable(rawResponse as any, input, params, warning);
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()

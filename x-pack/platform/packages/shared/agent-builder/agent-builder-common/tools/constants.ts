@@ -73,6 +73,7 @@ export const internalTools = {
   loadSkill: 'load_skill',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
+  listFiles: 'list_files',
   bash: 'bash',
 };
 
@@ -111,6 +112,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
+  platformCoreTools.generateEsql,
+  platformCoreTools.executeEsql,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
