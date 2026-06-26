@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
@@ -130,8 +131,14 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
-      <EuiFlexItem grow={false}>
-        <UtilityBar border>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          padding-top: 16px;
+          padding-bottom: 8px;
+        `}
+      >
+        <UtilityBar>
           <UtilityBarSection>
             <UtilityBarGroup>
               <UtilityBarText data-test-subj="case-view-timelines-showing-count">
