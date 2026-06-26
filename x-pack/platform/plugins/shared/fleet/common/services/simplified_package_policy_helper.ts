@@ -22,7 +22,7 @@ import type { NewAgentlessPolicy } from '../types/rest_spec/agentless_policy';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy, getInputEffectiveName } from '.';
+import { packageToPackagePolicy, getInputEffectiveName } from './package_to_package_policy';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 import { detectTargetCsp } from './cloud_connectors';
 
