@@ -427,9 +427,7 @@ describe('executeRuleOperations', () => {
 
     it('skips stamping when the 20-tag cap is already reached', async () => {
       const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
-      const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'My Rule', tags: maxTags },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
 
       const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
 
