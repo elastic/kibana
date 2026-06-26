@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/error-sentry-plugin",
+  "owner": ["@elastic/obs-ai-team"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "errorSentry",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "errorSentry"],
+    "requiredPlugins": [
+      "workflowsExtensions",
+      "workflowsManagement",
+      "cases"
+    ],
+    "optionalPlugins": [
+      "agentBuilder",
+      "actions",
+      "discover"
+    ],
+    "requiredBundles": []
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/actions-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query",
+    "@kbn/utility-types",
+    "@kbn/discover-plugin"
+  ]
+}

@@ -1156,6 +1156,8 @@
       "@kbn/entityManager-plugin/*": ["x-pack/platform/plugins/shared/entity_manager/*"],
       "@kbn/error-boundary-example-plugin": ["examples/error_boundary"],
       "@kbn/error-boundary-example-plugin/*": ["examples/error_boundary/*"],
+      "@kbn/error-sentry-plugin": ["x-pack/solutions/observability/plugins/error_sentry"],
+      "@kbn/error-sentry-plugin/*": ["x-pack/solutions/observability/plugins/error_sentry/*"],
       "@kbn/es": ["src/platform/packages/shared/kbn-es"],
       "@kbn/es/*": ["src/platform/packages/shared/kbn-es/*"],
       "@kbn/es-archiver": ["src/platform/packages/shared/kbn-es-archiver"],
