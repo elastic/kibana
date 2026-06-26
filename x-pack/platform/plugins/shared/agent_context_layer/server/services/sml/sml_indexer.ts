@@ -101,6 +101,10 @@ export interface SmlIndexer {
    * When `ingestionMethod` is set, only chunks with that method are removed; otherwise
    * all chunks for the origin are removed regardless of method.
    *
+   * When `spaces` is set, only chunks whose `spaces` array contains at least
+   * one of the listed space IDs are removed. Omit for global deletes (e.g.
+   * crawler origin-mode rewrites where the caller controls all spaces).
+   *
    * Exposed on the indexer so internal callers can run a "delete crawled
    * chunks, keep manual" cleanup after writing a manual entry without
    * duplicating the index/error-handling boilerplate. The public write
@@ -111,6 +115,7 @@ export interface SmlIndexer {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
+    spaces?: string[];
   }) => Promise<void>;
 }
 
@@ -290,6 +295,7 @@ class SmlIndexerImpl implements SmlIndexer {
     await this.deleteChunks({
       originUri: `${attachmentType}://${originId}`,
       esClient,
+      spaces,
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
   }
@@ -343,7 +349,7 @@ class SmlIndexerImpl implements SmlIndexer {
       this.logger.debug(
         `SML indexer: content mode for origin '${originId}' supplied no chunks — deleting existing chunks`
       );
-      await this.deleteChunks({ originUri, esClient });
+      await this.deleteChunks({ originUri, esClient, spaces });
       return;
     }
 
@@ -395,7 +401,7 @@ class SmlIndexerImpl implements SmlIndexer {
       throw error;
     }
 
-    await this.deleteChunks({ originUri, esClient });
+    await this.deleteChunks({ originUri, esClient, spaces });
 
     const bulkOps = chunks.map((chunk) =>
       // Use a bare UUID for `_id`: deterministic IDs are redundant because
@@ -643,14 +649,23 @@ class SmlIndexerImpl implements SmlIndexer {
     originUri,
     esClient,
     ingestionMethod,
+    spaces,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
+    spaces?: string[];
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
     if (ingestionMethod) {
       filter.push({ term: { ingestion_method: ingestionMethod } });
+    }
+    if (spaces && spaces.length > 0) {
+      // Scope the delete to chunks that are visible in at least one of the
+      // provided spaces. A chunk is visible in a space when the space id
+      // appears in its `spaces` array, so a single `terms` query is correct
+      // (ES applies a "contains any" match against array fields).
+      filter.push({ terms: { spaces } });
     }
     const label = ingestionMethod ? `${ingestionMethod} chunks` : 'chunks';
 

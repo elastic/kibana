@@ -977,6 +977,32 @@ describe('createSmlIndexer', () => {
         expect(bulkMock).not.toHaveBeenCalled();
       });
 
+      it('content mode scopes deleteByQuery to the caller space (chunks in other spaces preserved)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-space-scoped',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['my-space'],
+            esClient,
+            content: [{ type: 'lens', title: 'T', content: 'c' }],
+          })
+        );
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+        expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['my-space'] } });
+      });
+
       it('delete action removes only crawled chunks (manual entries preserved)', async () => {
         // `indexAttachment({ action: 'delete' })` is a back-compat shape used
         // by the crawler and event-driven CRUD callers; it always defaults to
@@ -1260,10 +1286,11 @@ describe('createSmlIndexer', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      // Filter must contain ONLY the origin_id term — no ingestion_method
-      // term means deleteByQuery removes manual + crawled.
+      // Space-scoped: only chunks visible in 'default' are deleted.
+      // No ingestion_method term means both manual + crawled are removed.
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
+        { terms: { spaces: ['default'] } },
       ]);
     });
 
@@ -1282,6 +1309,7 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
+        { terms: { spaces: ['default'] } },
       ]);
     });
 
@@ -1291,9 +1319,6 @@ describe('createSmlIndexer', () => {
       const esClient = createMockEsClient();
       const indexer = createSmlIndexer({ registry, logger });
 
-      // No `ingestionMethod` passed — should behave exactly like the historical
-      // `action: 'delete'` call on `indexAttachment` (preserve manual entries,
-      // wipe crawled).
       await indexer.deleteAttachment(
         createDeleteParams({ originId: 'att-default-scope', esClient })
       );
@@ -1303,7 +1328,28 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
+        { terms: { spaces: ['default'] } },
       ]);
+    });
+
+    it('scopes delete to caller space — chunks in other spaces are preserved', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.deleteAttachment(
+        createDeleteParams({
+          originId: 'att-space-a',
+          ingestionMethod: 'all',
+          spaces: ['space-a'],
+          esClient,
+        })
+      );
+
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['space-a'] } });
+      expect(callArgs.query.bool.filter).not.toContainEqual({ terms: { spaces: ['space-b'] } });
     });
   });
 });
