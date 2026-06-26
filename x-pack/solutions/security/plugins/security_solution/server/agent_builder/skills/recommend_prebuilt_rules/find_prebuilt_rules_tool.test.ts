@@ -176,6 +176,11 @@ describe('findPrebuiltRulesSchema', () => {
     expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: 'T1059' } }).success).toBe(
       false
     );
+    // Lowercase IDs are rejected — the keyword field is case-sensitive, so a lowercased value
+    // would silently match zero rules. Reject it up front so the agent can correct the case.
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['t1059'] } }).success
+    ).toBe(false);
   });
 
   it('rejects MITRE tactic values that are not TA-prefixed IDs', () => {
@@ -184,6 +189,10 @@ describe('findPrebuiltRulesSchema', () => {
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['Initial Access'] } }).success
     ).toBe(false);
     expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['T1059'] } }).success).toBe(
+      false
+    );
+    // Lowercase IDs are rejected for the same case-sensitivity reason as techniques.
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['ta0005'] } }).success).toBe(
       false
     );
   });
