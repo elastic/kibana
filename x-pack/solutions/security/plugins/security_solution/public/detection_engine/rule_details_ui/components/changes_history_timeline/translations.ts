@@ -80,10 +80,16 @@ export const ACTION_LABEL_REVERTED = i18n.translate(
   { defaultMessage: 'Reverted the rule' }
 );
 
-export const ACTION_LABEL_RESTORED_FROM_HISTORY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelRestoredFromHistory',
-  { defaultMessage: 'Restored' }
-);
+export const ACTION_LABEL_RESTORED_FROM_HISTORY = (revision?: number): string =>
+  revision != null
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelRestoredFromHistory',
+        { defaultMessage: 'Restored R{revision}', values: { revision } }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelRestoredFromHistoryUnknown',
+        { defaultMessage: 'Restored' }
+      );
 
 export const SYSTEM_USER_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.systemUserLabel',
@@ -125,6 +131,13 @@ export const RESTORE_VERSION_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreVersionLabel',
   {
     defaultMessage: 'Restore this version',
+  }
+);
+
+export const RESTORING_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoringLabel',
+  {
+    defaultMessage: 'Restoring...',
   }
 );
 

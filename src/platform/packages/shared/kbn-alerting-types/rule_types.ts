@@ -45,6 +45,13 @@ export interface RuleChangeTrackingMetadata {
    * Rule restore action — the change-history event id of the snapshot being restored from.
    */
   restoredFromChangeId?: string;
+  /**
+   * Rule restore action — the rule's revision from the snapshot the rule being restored to.
+   * This is a de-normalized from as the rule's revision could be fetched from the changes
+   * history by restoredFromChangeId. However it requires an extra request to ES and besides
+   * that the desired change history item could be removed by the ILM policy.
+   */
+  restoredToRevision?: number;
 }
 
 /**

@@ -29,6 +29,7 @@ interface ChangeHistoryTimelineProps {
   selectedItem?: RuleHistoryItem;
   startedAt?: Date;
   isLoading?: boolean;
+  restoringItemId?: string;
   onSelectItem?: (item: RuleHistoryItem) => void;
   onRestore: (item: RuleHistoryItem) => void;
   /**
@@ -42,6 +43,7 @@ export function RuleChangesHistoryTimeline({
   selectedItem,
   startedAt,
   isLoading,
+  restoringItemId,
   onSelectItem,
   onRestore,
   onLoadMore,
@@ -113,10 +115,13 @@ export function RuleChangesHistoryTimeline({
             key={item.id}
             item={item}
             selected={selectedItem?.id === item.id}
+            restoringItemId={restoringItemId}
             onRestore={
-              isRestorableItem(item) && index !== 0 && canEditRules ? onRestore : undefined
+              !restoringItemId && isRestorableItem(item) && index !== 0 && canEditRules
+                ? onRestore
+                : undefined
             }
-            onClick={onSelectItem}
+            onClick={restoringItemId ? undefined : onSelectItem}
           />
         ))}
         <div ref={sentinelRef} />

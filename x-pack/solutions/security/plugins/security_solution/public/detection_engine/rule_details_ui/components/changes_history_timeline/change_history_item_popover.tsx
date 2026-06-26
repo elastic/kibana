@@ -19,10 +19,14 @@ import * as i18n from './translations';
 
 interface ChangeHistoryItemPopoverProps {
   onRestore?: () => void;
+  onClick?: () => void;
+  isRestoring?: boolean;
 }
 
 export const ChangeHistoryItemPopover = memo(function ChangeHistoryItemPopover({
   onRestore,
+  onClick,
+  isRestoring,
 }: ChangeHistoryItemPopoverProps): JSX.Element | null {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const popoverButton = useMemo(
@@ -33,12 +37,13 @@ export const ChangeHistoryItemPopover = memo(function ChangeHistoryItemPopover({
           aria-label={i18n.RESTORE_ACTIONS_LABEL}
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
+            onClick?.();
             togglePopover();
           }}
         />
       </EuiToolTip>
     ),
-    [togglePopover]
+    [onClick, togglePopover]
   );
 
   if (!onRestore) {
@@ -62,6 +67,7 @@ export const ChangeHistoryItemPopover = memo(function ChangeHistoryItemPopover({
             <EuiContextMenuItem
               key="restore"
               icon="refresh"
+              disabled={isRestoring}
               onClick={() => {
                 closePopover();
                 onRestore();

@@ -89,7 +89,7 @@ export const restoreRuleFromHistory = async ({
       options: { id: ruleId },
       changeTracking: {
         action: SecurityRuleChangeTrackingAction.ruleRestore,
-        metadata: { restoredFromChangeId: changeId },
+        metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
         refresh: 'wait_for',
       },
     });
@@ -129,7 +129,7 @@ export const restoreRuleFromHistory = async ({
     data: newAlertingRule,
     changeTracking: {
       action: SecurityRuleChangeTrackingAction.ruleRestore,
-      metadata: { restoredFromChangeId: changeId },
+      metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
       refresh: 'wait_for',
     },
   });

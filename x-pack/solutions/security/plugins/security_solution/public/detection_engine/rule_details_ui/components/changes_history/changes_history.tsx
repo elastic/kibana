@@ -68,8 +68,6 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const { restoreFromHistory } = useRuleRestoreFromHistory({ ruleId });
-
   const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
   const hasNoHistory = !isLoading && items.length === 0;
   const trackingStartedAt = data?.pages[0]?.tracking_started_at;
@@ -78,11 +76,16 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     [trackingStartedAt]
   );
 
-  const { lockSelectionDecision } = useChangeHistoryAutoSelection({
+  const { lockSelectionDecision, unlockSelectionDecision } = useChangeHistoryAutoSelection({
     ruleId,
     items,
     isFetchingFirstPage: isFetching && !isFetchingNextPage,
     setSelectedItem,
+  });
+
+  const { restoreFromHistory, restoringItemId } = useRuleRestoreFromHistory({
+    ruleId,
+    onRestoreSuccess: unlockSelectionDecision,
   });
 
   const handleSelectItem = useCallback(
@@ -196,6 +199,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
             onLoadMore={handleNextPageLoading}
             onSelectItem={handleSelectItem}
             onRestore={restoreFromHistory}
+            restoringItemId={restoringItemId}
           />
         </EuiFlyoutBody>
       </EuiFlyout>

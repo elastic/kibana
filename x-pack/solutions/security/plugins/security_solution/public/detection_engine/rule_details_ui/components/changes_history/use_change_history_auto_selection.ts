@@ -18,6 +18,7 @@ interface UseChangeHistoryAutoSelectionParams {
 
 interface UseChangeHistoryAutoSelectionResult {
   lockSelectionDecision: () => void;
+  unlockSelectionDecision: () => void;
 }
 
 export function useChangeHistoryAutoSelection({
@@ -30,6 +31,10 @@ export function useChangeHistoryAutoSelection({
 
   const lockSelectionDecision = useCallback(() => {
     decidedRef.current = true;
+  }, []);
+
+  const unlockSelectionDecision = useCallback(() => {
+    decidedRef.current = false;
   }, []);
 
   // Reset when ruleId changes.
@@ -63,5 +68,5 @@ export function useChangeHistoryAutoSelection({
     }
   }, [items, isFetchingFirstPage, setSelectedItem]);
 
-  return { lockSelectionDecision };
+  return { lockSelectionDecision, unlockSelectionDecision };
 }
