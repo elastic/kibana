@@ -41,6 +41,7 @@ import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
   selectEditorWorkflowLookup,
+  selectFocusedStepId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,
@@ -176,6 +177,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const showGraph = isVisualEditorEnabled && editorView === 'graph';
 
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const focusedStepId = useSelector(selectFocusedStepId);
 
   const handleEditorViewChange = useCallback(
     (next: 'yaml' | 'graph') => {
@@ -203,19 +205,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           const tEnd = firstStepLine != null ? firstStepLine - 1 : undefined;
           if (tStart != null && tEnd != null && line >= tStart && line <= tEnd) {
             dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
-          } else {
-            const found = Object.entries(workflowLookup.steps).find(
-              ([, info]) => info.lineStart <= line && line <= info.lineEnd
-            );
-            if (found) {
-              dispatch(setHighlightedStepId({ stepId: found[0] }));
-            }
+          } else if (focusedStepId) {
+            // `focusedStepId` is already the canonical cursor→step derived by the
+            // setCursorPosition reducer (via findStepByLine, which also handles
+            // blank/continuation lines). No need to re-scan workflowLookup here.
+            dispatch(setHighlightedStepId({ stepId: focusedStepId }));
           }
         }
       }
       setEditorView(next);
     },
-    [dispatch, isVisualEditorEnabled, setEditorView, workflowLookup]
+    [dispatch, focusedStepId, isVisualEditorEnabled, setEditorView, workflowLookup]
   );
 
   const openTestModal = useCallback(() => {
