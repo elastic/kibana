@@ -74,6 +74,7 @@ xpack.serverless.search.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
+
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
