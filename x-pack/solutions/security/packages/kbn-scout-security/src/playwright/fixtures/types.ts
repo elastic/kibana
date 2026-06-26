@@ -25,6 +25,7 @@ import type {
   PrevalenceApiService,
   AnalyzerApiService,
   NetworkApiService,
+  HostApiService,
   ResponseActionsApiService,
 } from './worker';
 
@@ -40,6 +41,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   prevalence: PrevalenceApiService;
   analyzer: AnalyzerApiService;
   network: NetworkApiService;
+  host: HostApiService;
   responseActions: ResponseActionsApiService;
 }
 

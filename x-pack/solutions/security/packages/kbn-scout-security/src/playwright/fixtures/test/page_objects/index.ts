@@ -24,6 +24,7 @@ import { ThreatIntelligenceIndicatorsPage } from './threat_intelligence_indicato
 import { DocumentFlyout } from './flyout_v2/document/main/document_flyout';
 import { RuleFlyout } from './flyout_v2/rule/rule_flyout';
 import { NetworkFlyout } from './flyout_v2/network/network_flyout';
+import { HostFlyout } from './flyout_v2/entity/host_flyout';
 import { IOCFlyout } from './flyout_v2/ioc/ioc_flyout';
 import { ThreatIntelligenceTool } from './flyout_v2/document/tools/threat_intelligence_tool';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
@@ -58,6 +59,8 @@ export interface SecurityPageObjects extends PageObjects {
   ruleFlyout: RuleFlyout;
   /** v2 network flyout — opened from an IP value (alerts table source.ip cell / document flyout IP field). */
   networkFlyout: NetworkFlyout;
+  /** v2 host entity flyout — opened from a host.name value (alerts table host cell / document flyout entities section). */
+  hostFlyout: HostFlyout;
   /** v2 IOC (indicator) flyout — opened from the Threat Intelligence indicators table. */
   iocFlyout: IOCFlyout;
   /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
@@ -102,6 +105,7 @@ export function extendPageObjects(
     documentFlyout: createLazyPageObject(DocumentFlyout, page),
     ruleFlyout: createLazyPageObject(RuleFlyout, page),
     networkFlyout: createLazyPageObject(NetworkFlyout, page),
+    hostFlyout: createLazyPageObject(HostFlyout, page),
     iocFlyout: createLazyPageObject(IOCFlyout, page),
     threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceTool, page),
     correlationsTool: createLazyPageObject(CorrelationsTool, page),

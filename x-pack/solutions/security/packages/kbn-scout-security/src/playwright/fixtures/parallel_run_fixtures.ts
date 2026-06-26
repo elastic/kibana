@@ -24,6 +24,7 @@ import {
   getPrevalenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
+  getHostApiService,
   getResponseActionsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
@@ -117,6 +118,10 @@ export const spaceTest = securityParallelFixtures.extend<
         log,
       });
       extendedApiServices.network = getNetworkApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.host = getHostApiService({
         esClient,
         log,
       });

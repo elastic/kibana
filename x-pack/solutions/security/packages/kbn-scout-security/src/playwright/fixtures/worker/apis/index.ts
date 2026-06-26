@@ -37,5 +37,8 @@ export type { AnalyzerApiService } from './analyzer';
 export { getNetworkApiService } from './network';
 export type { NetworkApiService } from './network';
 
+export { getHostApiService } from './host';
+export type { HostApiService } from './host';
+
 export { getResponseActionsApiService } from './response_actions';
 export type { ResponseActionsApiService } from './response_actions';

@@ -104,6 +104,33 @@ export class AlertsTablePage {
     await ipCell.click();
   }
 
+  async clickHostNameCell(hostName: string) {
+    await this.alertsTable.waitFor({ state: 'visible' });
+    // `host.name` renders one clickable cell per alert row, so scope to the first data row to stay
+    // unambiguous when several alerts share the same host (clicking any of them opens the same host
+    // flyout). EUI tags each cell with `data-gridcell-row-index` (data rows start at 0).
+    const hostCell = this.alertsTable
+      .locator('[data-gridcell-row-index="0"]')
+      .getByTestId('host-details-button')
+      .filter({ hasText: hostName });
+    // `host.name` sits mid-grid and EUI horizontally virtualizes columns, so the cell isn't mounted
+    // until scrolled into view. Scroll the virtualized body right in steps until it mounts. EUI's
+    // react-window scroll container exposes no stable data-test-subj, so the `.euiDataGrid__virtualized`
+    // class is a deliberate, documented exception (same approach as `clickNetworkIpCell`).
+    const virtualized = this.alertsTable.locator('.euiDataGrid__virtualized');
+    await expect
+      .poll(
+        async () => {
+          if ((await hostCell.count()) > 0) return true;
+          await virtualized.evaluate((el) => el.scrollBy({ left: 500 }));
+          return false;
+        },
+        { timeout: 20_000, intervals: [250] }
+      )
+      .toBe(true);
+    await hostCell.click();
+  }
+
   async waitForDetectionsAlertsWrapper() {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });

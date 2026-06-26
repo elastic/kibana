@@ -23,6 +23,7 @@ import {
   getPrevalenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
+  getHostApiService,
   getResponseActionsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
@@ -99,6 +100,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.network = getNetworkApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.host = getHostApiService({
         esClient,
         log,
       });
