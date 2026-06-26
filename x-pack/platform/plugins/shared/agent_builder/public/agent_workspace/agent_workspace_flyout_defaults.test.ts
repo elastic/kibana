@@ -5,13 +5,31 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 import {
   AGENT_WORKSPACE_MOUNT_TEST_SUBJ,
   createAgentWorkspaceFlyoutDefaults,
+  getApplicationWorkspaceMountElement,
   resolveAgentWorkspaceFlyoutContainer,
 } from './agent_workspace_flyout_defaults';
 
 describe('agent_workspace_flyout_defaults', () => {
+  describe('getApplicationWorkspaceMountElement', () => {
+    it('returns the application workspace scroll container when present', () => {
+      const mountRoot = document.createElement('div');
+      mountRoot.id = APP_MAIN_SCROLL_CONTAINER_ID;
+      document.body.appendChild(mountRoot);
+
+      expect(getApplicationWorkspaceMountElement()).toBe(mountRoot);
+
+      document.body.removeChild(mountRoot);
+    });
+
+    it('returns null when the application workspace scroll container is absent', () => {
+      expect(getApplicationWorkspaceMountElement()).toBeNull();
+    });
+  });
+
   describe('resolveAgentWorkspaceFlyoutContainer', () => {
     it('returns the agent workspace mount root when present', () => {
       const mountRoot = document.createElement('div');

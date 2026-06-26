@@ -8,8 +8,14 @@
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import type { RefObject } from 'react';
 import { EuiComponentDefaultsProvider } from '@elastic/eui';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
 export const AGENT_WORKSPACE_MOUNT_TEST_SUBJ = 'agentWorkspaceMount';
+
+export const getApplicationWorkspaceMountElement = (): HTMLElement | null => {
+  const mountRoot = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+  return mountRoot instanceof HTMLElement ? mountRoot : null;
+};
 
 export const getAgentWorkspaceMountElement = (): HTMLElement | null => {
   const mountRoot = document.querySelector(`[data-test-subj="${AGENT_WORKSPACE_MOUNT_TEST_SUBJ}"]`);
