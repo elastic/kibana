@@ -85,7 +85,7 @@ export const Dropbox: ConnectorSpec = {
           widget: 'text',
           placeholder: DROPBOX_MCP_SERVER_URL,
           label: i18n.translate('connectorSpecs.dropbox.config.serverUrl.label', {
-            defaultMessage: 'MCP Server URL',
+            defaultMessage: 'MCP server URL',
           }),
           helpText: i18n.translate('connectorSpecs.dropbox.config.serverUrl.helpText', {
             defaultMessage: 'The URL of the official Dropbox remote MCP server.',
