@@ -76,8 +76,9 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
 - **Snippets file**: Third-party data connectors (cloud storage, SaaS search, etc.) belong in
   `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`, **not**
   `elastic-connectors-list.md` (which is reserved for Kibana-native connectors like Cases, Index,
-  ServerLog, and Obs AI Assistant). Flag any third-party connector entry added to the wrong file.
-- `docs/reference/toc.yml` entry exists in the correct section
+  ServerLog, and Obs AI Assistant). Order them alphabetically. Flag any third-party connector 
+  entry added to the wrong file.
+- `docs/reference/toc.yml` entry exists in the correct section and matches alphabetical order in that section.
 - **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
 
