@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
+import { getIsAnomalyDetectionConfiguredForEnvironment } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import type { Environment } from '../../../../common/environment_rt';
 import { ENVIRONMENT_ALL, getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import type { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
@@ -130,13 +130,11 @@ function getExpectedBoundsText({
   isAllEnvironments,
   hasJobForEnvironment,
   kuery,
-  status,
   environment,
 }: {
   isAllEnvironments: boolean;
   hasJobForEnvironment: boolean;
   kuery?: string;
-  status?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
   environment: string;
 }) {
   if (isAllEnvironments) {
@@ -145,7 +143,7 @@ function getExpectedBoundsText({
     });
   }
 
-  if (!hasJobForEnvironment && status === FETCH_STATUS.SUCCESS) {
+  if (!hasJobForEnvironment) {
     return i18n.translate('xpack.apm.comparison.mlExpectedBoundsEnvironmentDisabledText', {
       defaultMessage:
         'Expected bounds (Anomaly detection must be enabled for environment "{environment}")',
@@ -169,18 +167,16 @@ function getExpectedBoundsTestSubj({
   isAllEnvironments,
   hasJobForEnvironment,
   kuery,
-  status,
 }: {
   isAllEnvironments: boolean;
   hasJobForEnvironment: boolean;
   kuery?: string;
-  status?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
 }) {
   if (isAllEnvironments) {
     return EXPECTED_BOUNDS_TEST_SUBJ.allEnvironmentsDisabled;
   }
 
-  if (!hasJobForEnvironment && status === FETCH_STATUS.SUCCESS) {
+  if (!hasJobForEnvironment) {
     return EXPECTED_BOUNDS_TEST_SUBJ.environmentDisabled;
   }
 
@@ -195,16 +191,14 @@ export function getComparisonOptions({
   start,
   end,
   showSelectedBoundsOption,
-  anomalyDetectionJobsStatus,
-  anomalyDetectionJobsData,
+  anomalyDetectionSetupState,
   preferredEnvironment,
   kuery,
 }: {
   start?: string;
   end?: string;
-  showSelectedBoundsOption?: boolean;
-  anomalyDetectionJobsStatus?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
-  anomalyDetectionJobsData?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'];
+  showSelectedBoundsOption: boolean;
+  anomalyDetectionSetupState: AnomalyDetectionJobsContextValue['anomalyDetectionSetupState'];
   preferredEnvironment: Environment;
   kuery?: string;
 }) {
@@ -226,8 +220,6 @@ export function getComparisonOptions({
     comparisonTypes = [TimeRangeComparisonEnum.PeriodBefore];
   }
 
-  const hasMLJob = isDefined(anomalyDetectionJobsData) && anomalyDetectionJobsData.jobs.length > 0;
-
   const comparisonOptions = getSelectOptions({
     comparisonTypes,
     start: momentStart,
@@ -235,16 +227,13 @@ export function getComparisonOptions({
     msDiff,
   });
 
-  if (showSelectedBoundsOption && hasMLJob) {
+  if (showSelectedBoundsOption) {
     const isAllEnvironments = preferredEnvironment === ENVIRONMENT_ALL.value;
-    const hasJobForEnvironment =
-      anomalyDetectionJobsStatus === 'success' &&
-      anomalyDetectionJobsData.jobs.some((j) => j.environment === preferredEnvironment);
+    const hasJobForEnvironment = getIsAnomalyDetectionConfiguredForEnvironment(
+      anomalyDetectionSetupState
+    );
 
-    const disabled =
-      isAllEnvironments ||
-      (anomalyDetectionJobsStatus === 'success' && !hasJobForEnvironment) ||
-      !isEmpty(kuery);
+    const disabled = isAllEnvironments || !hasJobForEnvironment || !isEmpty(kuery);
 
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,
@@ -252,7 +241,6 @@ export function getComparisonOptions({
         isAllEnvironments,
         hasJobForEnvironment,
         kuery,
-        status: anomalyDetectionJobsStatus,
         environment: preferredEnvironment,
       }),
       disabled,
@@ -260,7 +248,6 @@ export function getComparisonOptions({
         isAllEnvironments,
         hasJobForEnvironment,
         kuery,
-        status: anomalyDetectionJobsStatus,
       }),
     });
   }

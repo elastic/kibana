@@ -10,6 +10,7 @@ import { getEnvironmentLabel, type AnomalyThreshold } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import React from 'react';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import type { AnomalyThresholdDisabledReason } from '../../../../hooks/use_anomaly_threshold';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
@@ -80,6 +81,12 @@ export function AnomalyThresholdSelect({
 }) {
   const { preferredEnvironment } = useEnvironmentsContext();
   const { anomalyThreshold, isDisabled, disabledReason } = useAnomalyThreshold();
+
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
+
+  if (!shouldShowAnomalyUi) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">

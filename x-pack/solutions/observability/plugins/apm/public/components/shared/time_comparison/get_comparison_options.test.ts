@@ -7,13 +7,12 @@
 
 import type { Environment } from '../../../../common/environment_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import type { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   EXPECTED_BOUNDS_TEST_SUBJ,
   getComparisonOptions,
   TimeRangeComparisonEnum,
 } from './get_comparison_options';
+import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 
 const PROD = 'production' as Environment;
 
@@ -21,23 +20,13 @@ const PROD = 'production' as Environment;
 const start = '2021-01-28T14:00:00.000Z';
 const end = '2021-01-28T15:00:00.000Z';
 
-function getJobsData(
-  environments: string[]
-): AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'] {
-  return {
-    jobs: environments.map((environment) => ({ jobId: 'job', environment })),
-    hasLegacyJobs: false,
-  } as AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'];
-}
-
 describe('getComparisonOptions - expected bounds', () => {
   it('does not offer the expected bounds option when no ML jobs exist', () => {
     const options = getComparisonOptions({
       start,
       end,
-      showSelectedBoundsOption: true,
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-      anomalyDetectionJobsData: getJobsData([]),
+      showSelectedBoundsOption: false,
+      anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobs,
       preferredEnvironment: PROD,
     });
 
@@ -51,8 +40,7 @@ describe('getComparisonOptions - expected bounds', () => {
       start,
       end,
       showSelectedBoundsOption: true,
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-      anomalyDetectionJobsData: getJobsData([PROD]),
+      anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobsForEnvironment,
       preferredEnvironment: ENVIRONMENT_ALL.value,
     });
 
@@ -71,8 +59,7 @@ describe('getComparisonOptions - expected bounds', () => {
       start,
       end,
       showSelectedBoundsOption: true,
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-      anomalyDetectionJobsData: getJobsData([PROD]),
+      anomalyDetectionSetupState: AnomalyDetectionSetupState.UpToDate,
       preferredEnvironment: PROD,
     });
 
@@ -89,8 +76,7 @@ describe('getComparisonOptions - expected bounds', () => {
       start,
       end,
       showSelectedBoundsOption: true,
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-      anomalyDetectionJobsData: getJobsData(['staging']),
+      anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobsForEnvironment,
       preferredEnvironment: PROD,
     });
 

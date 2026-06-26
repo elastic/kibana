@@ -10,9 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } f
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isEmpty } from 'lodash';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { getIsAnomalyDetectionConfiguredForEnvironment } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { getAnomalyDetectorIndex } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -31,15 +30,14 @@ const mlIconLinkCss = css`
 
 export function OpenAnomalies({ mlJobId, detectorType, dataTestSubj }: OpenAnomaliesProps) {
   const { transactionType, serviceName } = useApmServiceContext();
-  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
   const {
     query: { kuery },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
-  const isConfigured = getIsAnomalyDetectionConfiguredForEnvironment(anomalyDetectionSetupState);
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
   const hasKuery = !isEmpty(kuery);
 
-  if (!isConfigured || !mlJobId || hasKuery) {
+  if (!shouldShowAnomalyUi || hasKuery || !mlJobId) {
     return null;
   }
 
