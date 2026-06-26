@@ -245,15 +245,6 @@ export async function persistSigEventsFeaturesForSnapshot(
   );
 }
 
-/**
- * Captures all detections from the raw `.significant_events-detections` data stream.
- *
- * Raw (not the read API) so *every* revision is kept: the investigator needs the active
- * (`detection`/`quiet`) doc, the judge the post-triage (`handled`) one. Consumers filter by `kind`.
- *
- * Not scoped by `stream_name`: detections write it to `_source` but the data stream maps
- * `dynamic: false` without it, so it isn't queryable — a `match_all` read is the reliable option.
- */
 export async function persistSigEventsDetectionsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
@@ -279,14 +270,6 @@ export async function persistSigEventsDetectionsForSnapshot(
   );
 }
 
-/**
- * Captures the knowledge-indicators set for one stream by reading the raw
- * `.significant_events-knowledge_indicators` data stream (superuser), scoped by `stream.name` —
- * features and queries together, in KI data-stream doc shape. Replaces the queries-only capture:
- * replaying this index into the live data stream gives the agents' real `search_knowledge_indicators`
- * both feature and query KIs. `search_embedding` is carried in `_source` but stripped when the
- * captured index is replayed into the live data stream.
- */
 export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
@@ -294,8 +277,6 @@ export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
   snapshotName: string,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
-  // Scoped to the scenario's stream (KI docs carry `stream.name`), mirroring the per-stream
-  // feature capture — avoids pulling KIs from unrelated streams.
   const kiDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
     readRawDataStreamDocs(
       sysClient,
@@ -415,12 +396,6 @@ export async function resetQueriesPromotion({ esClient }: { esClient: Client }):
   });
 }
 
-/**
- * Triggers the server-side significant events discovery workflow. It runs the full
- * detection → investigator pipeline space-wide using the connector configured via
- * {@link configureModelSelectionSettings}, persisting results to the plugin's
- * `.significant_events-discoveries` / `.significant_events-detections` data streams.
- */
 export async function triggerSigEventsDiscovery(
   config: ConnectionConfig,
   log: ToolingLog
@@ -522,11 +497,6 @@ async function fetchAllPaginated<T>(
   return all;
 }
 
-/**
- * Reads a raw data-stream (using the superuser `sysClient`) and returns every matching `_source`.
- * Fails loudly when the match exceeds {@link RAW_DATA_STREAM_SEARCH_LIMIT} rather than silently
- * truncating — a partial snapshot would otherwise only surface as an under-counting eval later.
- */
 async function readRawDataStreamDocs(
   sysClient: Client,
   index: string,
