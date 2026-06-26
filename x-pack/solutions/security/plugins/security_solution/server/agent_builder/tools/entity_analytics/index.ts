@@ -9,3 +9,5 @@ export { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entit
 export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 export { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './leads/list_leads_tool';
+export { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './leads/generate_leads_tool';
+export { dismissLeadTool, SECURITY_DISMISS_LEAD_TOOL_ID } from './leads/dismiss_lead_tool';

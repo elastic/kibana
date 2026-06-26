@@ -6,7 +6,11 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { SECURITY_LIST_LEADS_TOOL_ID } from '../../tools/entity_analytics';
+import {
+  SECURITY_LIST_LEADS_TOOL_ID,
+  SECURITY_GENERATE_LEADS_TOOL_ID,
+  SECURITY_DISMISS_LEAD_TOOL_ID,
+} from '../../tools/entity_analytics';
 
 export const ENTITY_ANALYTICS_LEADS_SKILL_ID = 'entity-analytics-leads';
 
@@ -15,8 +19,8 @@ export const entityAnalyticsLeadsSkill = defineSkillType({
   name: ENTITY_ANALYTICS_LEADS_SKILL_ID,
   basePath: 'skills/security/entity_analytics_leads',
   description:
-    'AI-generated investigation leads for security entities: list and triage open leads with priority, status, and staleness. ' +
-    'Use when the user asks to review, list, show, or triage AI-generated investigation leads.',
+    'AI-generated investigation leads for security entities: list, triage, dismiss, and generate leads. ' +
+    'Use when the user asks to review, list, show, triage, dismiss, or generate AI-generated investigation leads.',
   content: `
 # Investigation Leads Guide
 
@@ -32,11 +36,12 @@ Do **not** use this skill when:
 - The user wants to find leads about a specific entity — \`list_leads\` has no entity filter; it returns all leads across the space. Retrieve leads, surface any that mention the entity, and follow up with the \`entity-analytics\` skill for a full profile.
 - The user wants to investigate a specific entity by ID — use the \`entity-analytics\` skill instead.
 - The user wants to search for risky entities — use \`security.search_entities\`.
-- The user asks to generate new leads or dismiss a lead — those actions are not yet available in chat.
 
 ## Available Tools
 
 - **\`${SECURITY_LIST_LEADS_TOOL_ID}\`**: List AI-generated investigation leads.
+- **\`${SECURITY_GENERATE_LEADS_TOOL_ID}\`**: Trigger a new AI lead generation run (asynchronous — returns immediately; check back with \`list_leads\`).
+- **\`${SECURITY_DISMISS_LEAD_TOOL_ID}\`**: Dismiss a lead by ID, marking it as triaged.
 
 ## What Is a Lead?
 
@@ -67,12 +72,40 @@ The result also includes **\`lastGeneratedAt\`**: ISO timestamp of the most rece
 4. **When \`lastGeneratedAt\` is null** — no generation run has completed yet; leads list will be empty.
 5. **When the result is empty** — report that no leads match the filter, not that there are no leads at all (a different status filter may return results).
 
+## Using generate_leads
+
+Call \`${SECURITY_GENERATE_LEADS_TOOL_ID}\` when the user wants to kick off a new generation run.
+
+- The tool will prompt the user for confirmation before starting.
+- The tool returns immediately with \`{ status: 'running', executionUuid }\` — generation continues in the background.
+- After the run completes, new leads appear in \`list_leads\`. Tell the user to re-list leads to see the new results.
+- \`connectorName\` is optional — provide a name or partial name (e.g. "OpenAI") and the tool resolves it to the correct connector. If omitted, the previously configured connector is used. If no connector has been configured, the tool will ask for one.
+
+## Using dismiss_lead
+
+Call \`${SECURITY_DISMISS_LEAD_TOOL_ID}\` when the user decides a lead is not worth investigating.
+
+- Requires the lead **\`id\`** (present in every \`list_leads\` result).
+- Pass **\`title\`** as well (also from \`list_leads\`) so the confirmation prompt shows the lead name instead of a raw ID.
+- The tool will prompt the user for confirmation before making the change; wait for their response.
+- After dismissal, the lead's status becomes \`dismissed\` and it no longer appears in the default active view.
+
 ## Example Flows
 
 ### "Show me the open investigation leads"
 1. Call \`${SECURITY_LIST_LEADS_TOOL_ID}\` with \`status: 'active'\`
 2. Present the leads sorted by priority (highest first), with title, byline, entities, and staleness
 3. Note any stale leads and the last generation run time
+
+### "Generate new investigation leads"
+1. Call \`${SECURITY_GENERATE_LEADS_TOOL_ID}\` (with \`connectorName\` if not previously configured, e.g. \`connectorName: "OpenAI"\`)
+2. The tool will ask the user to confirm before starting
+3. On confirmation, report that generation has started and suggest calling \`list_leads\` once it completes
+
+### "Dismiss this lead"
+1. Call \`${SECURITY_LIST_LEADS_TOOL_ID}\` if you don't already have the lead details
+2. Call \`${SECURITY_DISMISS_LEAD_TOOL_ID}\` with the lead \`id\` and \`title\` (so the user sees a friendly name in the confirmation)
+3. On confirmation, report that the lead has been dismissed
 
 ### "Any new leads from the last run?"
 1. Call \`${SECURITY_LIST_LEADS_TOOL_ID}\` with \`sortField: 'timestamp', status: 'active'\`
@@ -89,5 +122,9 @@ The result also includes **\`lastGeneratedAt\`**: ISO timestamp of the most rece
 - Never invent lead content — only present what the tool returns
 - Always show the \`staleness\` field alongside the lead so the analyst can judge relevance
 `,
-  getRegistryTools: () => [SECURITY_LIST_LEADS_TOOL_ID],
+  getRegistryTools: () => [
+    SECURITY_LIST_LEADS_TOOL_ID,
+    SECURITY_GENERATE_LEADS_TOOL_ID,
+    SECURITY_DISMISS_LEAD_TOOL_ID,
+  ],
 });

@@ -12,9 +12,11 @@ import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import {
   entityRiskScoreTool,
+  generateLeadsTool,
   getEntityTool,
   listLeadsTool,
   searchEntitiesTool,
+  dismissLeadTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -55,6 +57,10 @@ export const registerTools = async (
 
   if (experimentalFeatures.leadGenerationEnabled) {
     agentBuilder.tools.register(listLeadsTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(
+      generateLeadsTool(core, logger, experimentalFeatures, rulePreviewDeps.getStartServices)
+    );
+    agentBuilder.tools.register(dismissLeadTool(core, logger, experimentalFeatures));
   }
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
