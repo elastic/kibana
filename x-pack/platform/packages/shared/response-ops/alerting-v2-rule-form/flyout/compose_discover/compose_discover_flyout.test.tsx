@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -19,10 +19,12 @@ import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import type { FormValues } from '../../form/types';
 import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
+import type { RuleQuery } from './compose_form_types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -39,7 +41,9 @@ const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
 ));
 
 jest.mock('./compose_discover_form', () => {
-  const { useFormContext } = jest.requireActual('react-hook-form');
+  const { useFormContext } = jest.requireActual(
+    'react-hook-form'
+  ) as typeof import('react-hook-form');
   const actual = jest.requireActual('./use_compose_discover_state');
   return {
     getSteps: (isAlert: boolean) => ({
@@ -54,7 +58,8 @@ jest.mock('./compose_discover_form', () => {
     }),
     ComposeDiscoverForm: (props: FormProps) => {
       mockComposeDiscoverForm(props);
-      const { setValue } = useFormContext();
+      const { setValue, getValues } = useFormContext<FormValues>();
+      readCommittedQuery = () => getValues('query');
       return (
         <div data-test-subj="composeDiscoverFormMock">
           <button
@@ -70,8 +75,36 @@ jest.mock('./compose_discover_form', () => {
   };
 });
 
+interface SandboxFlyoutMockProps {
+  query: RuleQuery;
+  onQueryChange?: (query: RuleQuery) => void;
+  onApply?: () => void;
+  onClose: () => void;
+}
+
+let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
+let readCommittedQuery: (() => RuleQuery) | undefined;
+
 jest.mock('./query_sandbox_flyout', () => ({
-  QuerySandboxFlyout: () => <div data-test-subj="composeDiscoverChildMock" />,
+  QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
+    sandboxFlyoutProps = props;
+    return (
+      <div data-test-subj="composeDiscoverChildMock">
+        {props.onApply ? (
+          <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
+            Apply
+          </button>
+        ) : null}
+        <button
+          type="button"
+          data-test-subj="composeDiscoverChildMockClose"
+          onClick={props.onClose}
+        >
+          Close sandbox
+        </button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('./use_esql_providers', () => ({
@@ -99,22 +132,28 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 
 jest.mock('../../form/utils/yaml_form_utils', () => ({
-  serializeFormToYaml: () => '',
-  parseYamlToFormValues: (yaml: string) => ({
-    values: yaml
-      ? {
-          kind: 'signal',
-          metadata: { name: 'changed', enabled: true, description: '', tags: [] },
-          timeField: '@timestamp',
-          schedule: { every: '1m', lookback: '5m' },
-          query: { format: 'standalone', breach: { query: '' } },
-          stateTransitionAlertDelayMode: 'immediate',
-          stateTransitionRecoveryDelayMode: 'immediate',
-          artifacts: [],
-        }
-      : null,
-  }),
+  serializeFormToYaml: () => 'mock-yaml',
+  parseYamlToFormValues: jest.fn((yaml: string) => mockParseYamlToFormValues(yaml)),
 }));
+
+const defaultYamlFormValues: FormValues = {
+  kind: 'signal',
+  metadata: { name: 'changed', enabled: true, description: '', tags: [] },
+  timeField: '@timestamp',
+  schedule: { every: '1m', lookback: '5m' },
+  query: { format: 'standalone', breach: { query: '' } },
+  stateTransitionAlertDelayMode: 'immediate',
+  stateTransitionRecoveryDelayMode: 'immediate',
+  artifacts: [],
+};
+
+let mockParseYamlToFormValues: (yaml: string) => {
+  values: FormValues | null;
+  error: string | null;
+} = (yaml) => ({
+  values: yaml ? defaultYamlFormValues : null,
+  error: null,
+});
 
 jest.mock('../../form/yaml_rule_form', () => ({
   YamlRuleForm: ({ setYamlText }: { setYamlText: (yaml: string) => void }) => (
@@ -173,6 +212,14 @@ const clickEditMode = (mode: 'form' | 'yaml') => {
 };
 
 describe('ComposeDiscoverFlyout', () => {
+  beforeEach(() => {
+    sandboxFlyoutProps = undefined;
+    readCommittedQuery = undefined;
+    mockParseYamlToFormValues = (yaml) => ({
+      values: yaml ? defaultYamlFormValues : null,
+      error: null,
+    });
+  });
   describe('HorizontalMinimalStepper', () => {
     it('renders the stepper with the correct aria-label for step 1 of 4', () => {
       renderFlyout();
@@ -195,6 +242,39 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
       expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+    });
+
+    it('renders Query sandbox button in YAML mode only', () => {
+      renderFlyout();
+
+      expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
+
+      clickEditMode('yaml');
+
+      expect(screen.getByTestId('composeDiscoverYamlQuerySandbox')).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverYamlQuerySandbox')).toHaveTextContent(
+        'Query sandbox'
+      );
+
+      clickEditMode('form');
+
+      expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
+    });
+
+    it('reopens Query sandbox after manual close in YAML mode', () => {
+      renderFlyout();
+
+      clickEditMode('yaml');
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverYamlQuerySandbox'));
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
     });
   });
 
@@ -469,6 +549,285 @@ describe('ComposeDiscoverFlyout', () => {
       );
 
       expect(screen.queryByTestId('ruleV2FlyoutValidationErrors')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('YAML save submission', () => {
+    const validComposedYamlValues: FormValues = {
+      kind: 'alert',
+      metadata: { name: 'Test rule', enabled: true, description: '', tags: [] },
+      timeField: '@timestamp',
+      schedule: { every: '1m', lookback: '5m' },
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
+      artifacts: [],
+    };
+
+    const standaloneAlertYamlValues: FormValues = {
+      ...validComposedYamlValues,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-*' },
+      },
+    };
+
+    it('allows YAML save for alert + standalone', async () => {
+      const onCreateRule = jest.fn();
+      mockParseYamlToFormValues = () => ({
+        values: validComposedYamlValues,
+        error: null,
+      });
+      renderFlyout({
+        onCreateRule,
+        initialQuery: 'FROM logs-* | WHERE count > 100',
+      });
+
+      clickEditMode('yaml');
+      mockParseYamlToFormValues = () => ({
+        values: standaloneAlertYamlValues,
+        error: null,
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
+      });
+
+      await waitFor(() => {
+        expect(onCreateRule).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('allows YAML save for a valid composed alert', async () => {
+      const onCreateRule = jest.fn();
+      mockParseYamlToFormValues = () => ({
+        values: validComposedYamlValues,
+        error: null,
+      });
+      renderFlyout({
+        onCreateRule,
+        initialQuery: 'FROM logs-* | WHERE count > 100',
+      });
+
+      clickEditMode('yaml');
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
+      });
+
+      await waitFor(() => {
+        expect(onCreateRule).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('handleSandboxApply', () => {
+    it('runs heuristic split and commits the result in create + alert unified editor', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query after Apply');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE count > 100');
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not re-split in edit mode and commits the sandbox structure as-is', () => {
+      const editFormValues: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'Edit rule', enabled: true, description: '', tags: [] },
+        timeField: '@timestamp',
+        schedule: { every: '1m', lookback: '5m' },
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 100' },
+        },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+        artifacts: [],
+      };
+
+      mockParseYamlToFormValues = () => ({
+        values: editFormValues,
+        error: null,
+      });
+
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      clickEditMode('yaml');
+      expect(sandboxFlyoutProps).toBeDefined();
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: '| WHERE count > 50' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: '| WHERE count > 50' },
+      });
+    });
+  });
+
+  describe('forced YAML mode for non-representable rules', () => {
+    const nonRepresentableRule = {
+      id: 'test-rule-id',
+      kind: 'alert' as const,
+      enabled: true,
+      metadata: { name: 'Standalone alert', tags: [] },
+      time_field: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      query: {
+        format: 'standalone' as const,
+        breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h | WHERE c > 100' },
+      },
+      recovery_strategy: 'query' as const,
+    };
+
+    const representableRule = {
+      id: 'test-rule-id',
+      kind: 'alert' as const,
+      enabled: true,
+      metadata: { name: 'Composed alert', tags: [] },
+      time_field: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      query: {
+        format: 'composed' as const,
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      },
+      recovery_strategy: 'query' as const,
+    };
+
+    it('opens in YAML mode with sandbox when rule is non-representable', () => {
+      renderFlyout({ mode: 'edit', rule: nonRepresentableRule as any });
+
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverFormMock')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+    });
+
+    it('disables the edit mode toggle for non-representable rules', () => {
+      renderFlyout({ mode: 'edit', rule: nonRepresentableRule as any });
+
+      const toggle = screen.getByTestId('composeDiscoverEditModeToggle');
+      const buttons = toggle.querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+    });
+
+    it('opens in form mode for representable rules', () => {
+      renderFlyout({ mode: 'edit', rule: representableRule as any });
+
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
+    });
+
+    it('does not disable the toggle for representable rules', () => {
+      renderFlyout({ mode: 'edit', rule: representableRule as any });
+
+      const toggle = screen.getByTestId('composeDiscoverEditModeToggle');
+      const buttons = toggle.querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).not.toBeDisabled());
+    });
+
+    it('shows YAML badge instead of stepper for non-representable rules', () => {
+      renderFlyout({ mode: 'edit', rule: nonRepresentableRule as any });
+
+      expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+    });
+  });
+
+  describe('recovery_strategy removal on update', () => {
+    const ruleWithRecoveryStrategy = {
+      id: 'test-rule-id',
+      kind: 'alert' as const,
+      enabled: true,
+      metadata: { name: 'No breach recovery', tags: [] },
+      time_field: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      query: {
+        format: 'composed' as const,
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      },
+      recovery_strategy: 'no_breach' as const,
+    };
+
+    it('opens in YAML mode for recovery_strategy: no_breach', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverFormMock')).not.toBeInTheDocument();
+    });
+
+    it('opens in YAML mode for recovery_strategy: none', () => {
+      const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+    });
+
+    it('opens in YAML mode for no_data_strategy: emit', () => {
+      const rule = {
+        ...ruleWithRecoveryStrategy,
+        recovery_strategy: 'query' as const,
+        query: {
+          format: 'composed' as const,
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE count > 100' },
+        },
+        no_data_strategy: 'emit' as const,
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
     });
   });
 });

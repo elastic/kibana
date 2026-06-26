@@ -38,6 +38,10 @@ For an existing dashboard:
 
 ${dashboardDesignGuidancePrompt}
 
+## ES|QL
+
+Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
+
 ## Generation Edge Cases
 
 - Never invent a \`source: "config"\` payload for content you have not actually resolved. If you cannot obtain a panel's configuration, report it clearly instead of fabricating one.
