@@ -10,7 +10,11 @@ import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
-export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }): void => {
+export const registerUISettings = ({
+  uiSettings,
+}: {
+  uiSettings: UiSettingsServiceSetup;
+}): void => {
   uiSettings.register({
     [CONTEXT_ENGINE_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentContextLayer.uiSettings.contextEngine.name', {
