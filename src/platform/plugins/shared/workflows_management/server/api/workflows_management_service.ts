@@ -130,7 +130,6 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
-  private workflowVersioningEnabled!: boolean;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
@@ -201,9 +200,9 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+    const workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart, this.logger);
 
-    if (this.workflowVersioningEnabled) {
+    if (workflowVersioningEnabled) {
       await this.initializeChangeHistoryService(coreStart);
     } else {
       this.logger.debug(
@@ -222,7 +221,7 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowVersioningEnabled: this.workflowVersioningEnabled,
+      workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -271,7 +270,7 @@ export class WorkflowsService {
       {
         changeHistoryService: this.changeHistoryService,
         getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
-        workflowVersioningEnabled: this.workflowVersioningEnabled,
+        workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
       },
       { workflowId: id, spaceId, ...options }
     );

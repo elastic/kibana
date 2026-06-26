@@ -15,7 +15,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
-import { mapWorkflowExecutionDocumentVersion } from './workflow_execution_dto_transform';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 
 interface SearchWorkflowExecutionsParams {
   esClient: ElasticsearchClient;
@@ -119,7 +119,7 @@ function transformToWorkflowExecutionListModel(
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
           concurrencyGroupKey: source.concurrencyGroupKey,
-          ...mapWorkflowExecutionDocumentVersion(source),
+          ...pickWorkflowDocumentVersion(source),
         });
       }
       return acc;

@@ -9,11 +9,7 @@
 
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  applyWorkflowVersion,
-  buildWorkflowExecutionDocument,
-} from './build_workflow_execution_document';
-import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
+import { buildWorkflowExecutionDocument } from './build_workflow_execution_document';
 
 const baseWorkflow: WorkflowExecutionEngineModel = {
   id: 'workflow-1',
@@ -70,6 +66,16 @@ describe('buildWorkflowExecutionDocument', () => {
     expect(workflowExecution.version).toBeUndefined();
   });
 
+  it('omits version when workflow has an invalid numeric version', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: { ...baseWorkflow, version: Number.NaN },
+      workflowVersioningEnabled: true,
+    });
+
+    expect(workflowExecution.version).toBeUndefined();
+  });
+
   it('builds core execution fields', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
@@ -85,20 +91,5 @@ describe('buildWorkflowExecutionDocument', () => {
       createdAt: '2024-06-01T12:00:00.000Z',
     });
     expect(workflowExecution.id).toBeDefined();
-  });
-});
-
-describe('applyWorkflowVersion', () => {
-  it('ignores non-numeric version values', () => {
-    const workflowExecution: WorkflowExecutionForInputRendering = {
-      id: 'exec-1',
-      workflowId: 'workflow-1',
-      spaceId: 'default',
-      createdAt: '2024-06-01T12:00:00.000Z',
-    };
-
-    applyWorkflowVersion(workflowExecution, { ...baseWorkflow, version: Number.NaN }, true);
-
-    expect(workflowExecution.version).toBeUndefined();
   });
 });

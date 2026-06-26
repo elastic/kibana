@@ -9,7 +9,11 @@
 
 import { v4 as generateUuid } from 'uuid';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus, pickManagedWorkflowFields } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  pickManagedWorkflowFields,
+  pickWorkflowDocumentVersion,
+} from '@kbn/workflows';
 import { normalizeEventChainVisitedWorkflowIds } from './telemetry/utils/extract_execution_metadata';
 import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
@@ -24,7 +28,7 @@ export interface BuildWorkflowExecutionDocumentParams {
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
 }
 
-export const applyWorkflowVersion = (
+const stampExecutionWorkflowVersion = (
   workflowExecution: WorkflowExecutionForInputRendering,
   workflow: WorkflowExecutionEngineModel,
   workflowVersioningEnabled: boolean
@@ -33,8 +37,8 @@ export const applyWorkflowVersion = (
     return;
   }
 
-  const version = workflow.version;
-  if (typeof version === 'number' && !Number.isNaN(version)) {
+  const { version } = pickWorkflowDocumentVersion(workflow);
+  if (version !== undefined) {
     workflowExecution.version = version;
   }
 };
@@ -93,7 +97,7 @@ export const buildWorkflowExecutionDocument = (
     ...(dispatchEventId ? { dispatchEventId } : {}),
   };
 
-  applyWorkflowVersion(workflowExecution, workflow, workflowVersioningEnabled);
+  stampExecutionWorkflowVersion(workflowExecution, workflow, workflowVersioningEnabled);
 
   const concurrencyGroupKey = getConcurrencyGroupKey(workflowExecution);
   if (concurrencyGroupKey) {

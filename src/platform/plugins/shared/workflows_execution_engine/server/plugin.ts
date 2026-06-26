@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
   CoreStart,
@@ -19,7 +18,6 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
-  pickManagedWorkflowFields,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -43,7 +41,6 @@ import {
   runWorkflow,
 } from './execution_functions';
 import {
-  applyWorkflowVersion,
   buildWorkflowExecutionDocument,
 } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
@@ -541,51 +538,32 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
-              const workflowExecution: Partial<EsWorkflowExecution> = {
-                id: generateUuid(),
-                spaceId,
-                workflowId: workflow.id,
-                ...pickManagedWorkflowFields(workflow),
-                isTestRun: false,
-                workflowDefinition: workflow.definition,
-                yaml: workflow.yaml,
+              const workflowExecution = buildWorkflowExecutionDocument({
+                workflow: toWorkflowExecutionEngineModel(workflow),
                 context: executionContext,
-                status: ExecutionStatus.PENDING,
-                // Store task's runAt to link execution to specific scheduled run
-                // runAt is stable across retries (retries use the same runAt but get a new startedAt)
-                // This allows us to detect stale executions from previous scheduled runs
-                taskRunAt: taskInstance.runAt?.toISOString() || null,
-                createdAt: workflowCreatedAt.toISOString(),
-                executedBy,
-                triggeredBy: 'scheduled',
-                // Store queue delay metrics for observability (only if enabled in config)
-                ...(this.config.collectQueueMetrics
-                  ? {
-                      queueMetrics: {
-                        scheduledAt: taskInstance.scheduledAt?.toString(),
-                        runAt: taskInstance.runAt?.toString(),
-                        startedAt: new Date(now).toISOString(),
-                        queueDelayMs,
-                        scheduleDelayMs,
-                      },
-                    }
-                  : {}),
-              };
+                defaultTriggeredBy: 'scheduled',
+                authenticatedUser: executedBy,
+                now: workflowCreatedAt,
+                workflowVersioningEnabled: await readWorkflowVersioningEnabled(coreStart, logger),
+                maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+                getConcurrencyGroupKey: (execution) =>
+                  this.getConcurrencyGroupKey(
+                    execution,
+                    workflow.definition?.settings,
+                    coreStart,
+                    dependencies
+                  ),
+              });
 
-              applyWorkflowVersion(
-                workflowExecution as WorkflowExecutionForInputRendering,
-                toWorkflowExecutionEngineModel(workflow),
-                await readWorkflowVersioningEnabled(coreStart)
-              );
-
-              const concurrencyGroupKey = this.getConcurrencyGroupKey(
-                workflowExecution,
-                workflow.definition?.settings,
-                coreStart,
-                dependencies
-              );
-              if (concurrencyGroupKey) {
-                workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
+              workflowExecution.taskRunAt = taskInstance.runAt?.toISOString() ?? null;
+              if (this.config.collectQueueMetrics) {
+                workflowExecution.queueMetrics = {
+                  scheduledAt: taskInstance.scheduledAt?.toString(),
+                  runAt: taskInstance.runAt?.toString(),
+                  startedAt: new Date(now).toISOString(),
+                  queueDelayMs,
+                  scheduleDelayMs,
+                };
               }
 
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
@@ -684,7 +662,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const isWorkflowVersioningEnabled = async (): Promise<boolean> => {
-      return readWorkflowVersioningEnabled(coreStart);
+      return readWorkflowVersioningEnabled(coreStart, this.logger);
     };
 
     const buildExecutionDocument = async (args: {

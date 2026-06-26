@@ -12,6 +12,7 @@ import {
   type ManagedWorkflowFieldsSource,
   pickManagedWorkflowFields,
 } from '../pick_managed_workflow_fields/pick_managed_workflow_fields';
+import { pickWorkflowDocumentVersion } from '../pick_workflow_document_version/pick_workflow_document_version';
 
 export type WorkflowExecutionEngineModelSource = {
   id: string;
@@ -40,9 +41,7 @@ export const toWorkflowExecutionEngineModel = (
     ...(definition !== undefined ? { definition } : {}),
     yaml: workflow.yaml,
     ...pickManagedWorkflowFields(workflow),
-    ...(typeof workflow.version === 'number' && !Number.isNaN(workflow.version)
-      ? { version: workflow.version }
-      : {}),
+    ...pickWorkflowDocumentVersion(workflow),
     ...options,
   };
 };

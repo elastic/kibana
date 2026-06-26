@@ -334,6 +334,8 @@ export const EsWorkflowSchema = z.object({
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
+  /** Monotonic workflow document version counter (`_source.version`). */
+  version: z.number().optional(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
@@ -488,12 +490,11 @@ export interface WorkflowExecutionEngineModel
     | 'managedBy'
     | 'originManagedWorkflowId'
     | 'managedVersion'
+    | 'version'
   > {
   isTestRun?: boolean;
   isEphemeral?: boolean;
   spaceId?: string;
-  /** Domain monotonic version counter from the workflow document (`_source.version`). */
-  version?: number;
 }
 
 export interface WorkflowListItemAction {
