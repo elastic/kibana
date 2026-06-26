@@ -247,95 +247,109 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
 
-  const testWorkflowButton = (
-    <EuiToolTip content={runWorkflowTooltipContent}>
-      <EuiButton
-        color="success"
-        iconType="play"
-        size="m"
-        onClick={handleRunClickWithUnsavedCheck}
-        isDisabled={runDisabled}
-        data-test-subj="workflowBottomBarRunButton"
-      >
-        {i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
-          defaultMessage: 'Run workflow',
-        })}
-      </EuiButton>
-    </EuiToolTip>
+  const testWorkflowButton = useMemo(
+    () => (
+      <EuiToolTip content={runWorkflowTooltipContent}>
+        <EuiButton
+          color="success"
+          iconType="play"
+          size="m"
+          onClick={handleRunClickWithUnsavedCheck}
+          isDisabled={runDisabled}
+          data-test-subj="workflowBottomBarRunButton"
+        >
+          {i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
+            defaultMessage: 'Run workflow',
+          })}
+        </EuiButton>
+      </EuiToolTip>
+    ),
+    [runWorkflowTooltipContent, handleRunClickWithUnsavedCheck, runDisabled]
   );
 
-  const testWorkflowButtonCompact = (
-    <EuiToolTip content={runWorkflowTooltipContent} disableScreenReaderOutput>
-      <EuiButtonIcon
-        color="success"
-        display="base"
-        iconType="play"
-        size="s"
-        onClick={handleRunClickWithUnsavedCheck}
-        disabled={runDisabled}
-        aria-label={i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
-          defaultMessage: 'Run workflow',
-        })}
-        data-test-subj="workflowBottomBarRunButtonCompact"
-      />
-    </EuiToolTip>
+  const testWorkflowButtonCompact = useMemo(
+    () => (
+      <EuiToolTip content={runWorkflowTooltipContent} disableScreenReaderOutput>
+        <EuiButtonIcon
+          color="success"
+          display="base"
+          iconType="play"
+          size="s"
+          onClick={handleRunClickWithUnsavedCheck}
+          disabled={runDisabled}
+          aria-label={i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
+            defaultMessage: 'Run workflow',
+          })}
+          data-test-subj="workflowBottomBarRunButtonCompact"
+        />
+      </EuiToolTip>
+    ),
+    [runWorkflowTooltipContent, handleRunClickWithUnsavedCheck, runDisabled]
   );
-
-  const commandKey = isMac ? '⌘' : 'Ctrl';
-  const documentationLabel = i18n.translate('workflows.workflowDetailEditor.tools.documentation', {
-    defaultMessage: 'Documentation',
-  });
-  const actionsMenuLabel = i18n.translate('workflows.workflowDetailEditor.tools.actionsMenu', {
-    defaultMessage: 'Actions menu',
-  });
 
   // Always built; the bar cross-fades visibility based on editorView so the
   // mount/unmount jump doesn't interrupt the opacity transition.
-  const yamlActionsSlot = (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
-          <EuiButtonIcon
-            iconType="plus"
-            color="text"
-            size="s"
-            onClick={() => openActionsRef.current?.()}
-            aria-label={actionsMenuLabel}
-            data-test-subj="workflowBottomBarActionsMenu"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="documentation"
-            href={WORKFLOWS_DOCUMENTATION_URL}
-            target="_blank"
-            color="text"
-            size="s"
-            aria-label={documentationLabel}
-            data-test-subj="workflowBottomBarDocumentation"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const yamlActionsSlot = useMemo(() => {
+    const documentationLabel = i18n.translate(
+      'workflows.workflowDetailEditor.tools.documentation',
+      {
+        defaultMessage: 'Documentation',
+      }
+    );
 
-  const toolsSlot = (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
-      <EuiFlexItem grow={false}>
-        <KeyboardShortcutsPopover />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EditorSettingsPopover
-          editorRef={editorRef}
-          graphDirection={graphDirection}
-          onGraphDirectionChange={setGraphDirection}
-          hideControlsMenu={hideControlsMenu}
-          onHideControlsMenuChange={handleHideControlsMenuChange}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    const commandKey = isMac ? '⌘' : 'Ctrl';
+    const actionsMenuLabel = i18n.translate('workflows.workflowDetailEditor.tools.actionsMenu', {
+      defaultMessage: 'Actions menu',
+    });
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
+            <EuiButtonIcon
+              iconType="plus"
+              color="text"
+              size="s"
+              onClick={() => openActionsRef.current?.()}
+              aria-label={actionsMenuLabel}
+              data-test-subj="workflowBottomBarActionsMenu"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="documentation"
+              href={WORKFLOWS_DOCUMENTATION_URL}
+              target="_blank"
+              color="text"
+              size="s"
+              aria-label={documentationLabel}
+              data-test-subj="workflowBottomBarDocumentation"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
+
+  const toolsSlot = useMemo(
+    () => (
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false}>
+          <KeyboardShortcutsPopover />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EditorSettingsPopover
+            editorRef={editorRef}
+            graphDirection={graphDirection}
+            onGraphDirectionChange={setGraphDirection}
+            hideControlsMenu={hideControlsMenu}
+            onHideControlsMenuChange={handleHideControlsMenuChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [graphDirection, handleHideControlsMenuChange, hideControlsMenu, setGraphDirection]
   );
 
   // Keep the graph mounted for a moment after switching to YAML so the
