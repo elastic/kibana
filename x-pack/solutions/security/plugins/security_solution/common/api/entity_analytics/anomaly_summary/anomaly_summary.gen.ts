@@ -189,10 +189,6 @@ export const AnomalyOverviewHit = lazySchema(() =>
      * The anomalous value observed by the detector
      */
     anomalousValue: z.string().max(200).nullable(),
-    /**
-     * Index of the detector within the ML job that produced the anomaly
-     */
-    detectorIndex: z.number().int(),
   })
 );
 export type AnomalyOverviewHit = z.infer<typeof AnomalyOverviewHit>;

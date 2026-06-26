@@ -219,7 +219,6 @@ export const getEntityAnomalyOverview = async ({
       jobName: jobConfig?.jobName ?? anomaly.job_id,
       timestamp: new Date(anomaly.timestamp).toISOString(),
       anomalousValue,
-      detectorIndex: anomaly.detector_index,
     };
   });
 
