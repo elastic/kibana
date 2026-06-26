@@ -16,6 +16,7 @@ import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
+  AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
@@ -135,9 +136,22 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       description: i18n.translate(
         'xpack.agentBuilder.uiSettings.tracing.llmResponses.description',
         {
-          defaultMessage: 'Record assistant responses and tool results.',
+          defaultMessage: 'Record assistant responses.',
         }
       ),
+      schema: schema.boolean(),
+      value: false,
+      requiresPageReload: false,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]: {
+      name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.toolDetails.name', {
+        defaultMessage: 'Include tool call details in traces',
+      }),
+      description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.toolDetails.description', {
+        defaultMessage: 'Record tool call arguments and tool call results.',
+      }),
       schema: schema.boolean(),
       value: false,
       requiresPageReload: false,

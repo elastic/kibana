@@ -21,6 +21,7 @@ import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
+  AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
@@ -148,6 +149,15 @@ export const AgentBuilderTracingSection: React.FC = () => {
                       isSavingEnabled={!!canEditAdvancedSettings}
                       onFieldChange={handleFieldChange}
                       unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID]}
+                    />
+                  )}
+
+                  {fields[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID] && (
+                    <FieldRow
+                      field={fields[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]}
+                      isSavingEnabled={!!canEditAdvancedSettings}
+                      onFieldChange={handleFieldChange}
+                      unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID]}
                     />
                   )}
 

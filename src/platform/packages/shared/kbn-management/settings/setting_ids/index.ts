@@ -72,6 +72,8 @@ export const AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID =
   'agentBuilder:tracing:includeUserPrompts';
 export const AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID =
   'agentBuilder:tracing:includeLlmResponses';
+export const AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID =
+  'agentBuilder:tracing:includeToolDetails';
 export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
   'agentBuilder:tracing:includeSystemPrompt';
 export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';

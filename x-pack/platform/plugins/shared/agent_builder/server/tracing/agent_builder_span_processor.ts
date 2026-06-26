@@ -29,6 +29,7 @@ export interface TracingPrivacySettings {
   enabled: boolean;
   includeUserPrompts: boolean;
   includeLlmResponses: boolean;
+  includeToolDetails: boolean;
   includeSystemPrompt: boolean;
   includeRealNames: boolean;
   includeRealIds: boolean;
@@ -177,12 +178,11 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       if (!settings.includeUserPrompts && event.name === 'gen_ai.user.message') return false;
       if (
         !settings.includeLlmResponses &&
-        (event.name === 'gen_ai.assistant.message' ||
-          event.name === 'gen_ai.tool.message' ||
-          event.name === 'gen_ai.choice')
+        (event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice')
       ) {
         return false;
       }
+      if (!settings.includeToolDetails && event.name === 'gen_ai.tool.message') return false;
       return true;
     });
 
@@ -197,7 +197,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
 
-    const attributesAfterToolIO = settings.includeLlmResponses
+    const attributesAfterToolIO = settings.includeToolDetails
       ? processedAttributes
       : stripToolCallIO(processedAttributes);
 

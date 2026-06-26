@@ -155,6 +155,7 @@ describe('AgentBuilderSpanProcessor', () => {
       enabled: true,
       includeUserPrompts: true,
       includeLlmResponses: true,
+      includeToolDetails: true,
       includeSystemPrompt: true,
       includeRealNames: true,
       includeRealIds: true,
@@ -404,7 +405,7 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.events[0].name).toBe('gen_ai.system.message');
     });
 
-    it('drops gen_ai.assistant.message, gen_ai.tool.message, and gen_ai.choice when includeLlmResponses is false', () => {
+    it('drops gen_ai.assistant.message and gen_ai.choice when includeLlmResponses is false', () => {
       const processor = new AgentBuilderSpanProcessor({
         exporter: createExporter(),
         scheduledDelayMillis: 1,
@@ -421,8 +422,30 @@ describe('AgentBuilderSpanProcessor', () => {
       );
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-      expect(exported.events).toHaveLength(1);
-      expect(exported.events[0].name).toBe('gen_ai.user.message');
+      expect(exported.events).toHaveLength(2);
+      expect(exported.events[0].name).toBe('gen_ai.tool.message');
+      expect(exported.events[1].name).toBe('gen_ai.user.message');
+    });
+
+    it('drops gen_ai.tool.message when includeToolDetails is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeToolDetails: false }),
+      });
+
+      processor.onEnd(
+        makeReadableWithEvents([
+          { name: 'gen_ai.assistant.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.tool.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.user.message', time: [0, 0], attributes: {} },
+        ])
+      );
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.events).toHaveLength(2);
+      expect(exported.events[0].name).toBe('gen_ai.assistant.message');
+      expect(exported.events[1].name).toBe('gen_ai.user.message');
     });
 
     it('preserves all events when all include flags are true', () => {
@@ -448,11 +471,11 @@ describe('AgentBuilderSpanProcessor', () => {
   });
 
   describe('tool call I/O stripping', () => {
-    it('strips tool call arguments and result when includeLlmResponses is false', () => {
+    it('strips tool call arguments and result when includeToolDetails is false', () => {
       const processor = new AgentBuilderSpanProcessor({
         exporter: createExporter(),
         scheduledDelayMillis: 1,
-        getSettings: () => createSettings({ includeLlmResponses: false }),
+        getSettings: () => createSettings({ includeToolDetails: false }),
       });
 
       const readable = createMockReadableSpan({
@@ -470,11 +493,35 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.attributes['other.attr']).toBe('keep-me');
     });
 
-    it('preserves tool call arguments and result when includeLlmResponses is true', () => {
+    it('preserves tool call arguments and result when includeToolDetails is true', () => {
       const processor = new AgentBuilderSpanProcessor({
         exporter: createExporter(),
         scheduledDelayMillis: 1,
-        getSettings: () => createSettings({ includeLlmResponses: true }),
+        getSettings: () => createSettings({ includeToolDetails: true }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [GenAISemanticConventions.GenAIToolCallArguments]: '{"query":"value"}',
+        [GenAISemanticConventions.GenAIToolCallResult]: '{"data":"result"}',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolCallArguments]).toBe(
+        '{"query":"value"}'
+      );
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolCallResult]).toBe(
+        '{"data":"result"}'
+      );
+    });
+
+    it('does not strip tool call I/O when only includeLlmResponses is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeLlmResponses: false, includeToolDetails: true }),
       });
 
       const readable = createMockReadableSpan({
