@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { setAttachWithFlightHandler, triggerCartPulse, getAgentCartButtonElement, registerAgentCartButtonElement } from './coordinator_bridge';
+import {
+  setAttachWithFlightHandler,
+  triggerCartPulse,
+  getAgentCartButtonElement,
+  getApplicationAttachButtonElement,
+  registerAgentCartButtonElement,
+  registerApplicationAttachButtonElement,
+} from './coordinator_bridge';
 import { playFlightAnimation } from './play_flight_animation';
 import type { AttachWithFlightOptions } from './types';
 import { AgentFirstAttachmentCoordinatorContextProvider } from './use_agent_first_attachment_coordinator';
@@ -21,10 +28,8 @@ interface AgentFirstAttachmentCoordinatorProviderProps {
 export const AgentFirstAttachmentCoordinatorProvider: React.FC<
   AgentFirstAttachmentCoordinatorProviderProps
 > = ({ agentBuilder, children }) => {
-  const applicationAttachButtonRef = useRef<HTMLElement | null>(null);
-
   const registerApplicationAttachButton = useCallback((element: HTMLElement | null) => {
-    applicationAttachButtonRef.current = element;
+    registerApplicationAttachButtonElement(element);
   }, []);
 
   const registerAgentCartButton = useCallback((element: HTMLElement | null) => {
@@ -37,7 +42,7 @@ export const AgentFirstAttachmentCoordinatorProvider: React.FC<
 
   const attachWithFlight = useCallback(
     async (attachment: AttachmentInput, options?: AttachWithFlightOptions) => {
-      const sourceElement = options?.sourceElement ?? applicationAttachButtonRef.current;
+      const sourceElement = options?.sourceElement ?? getApplicationAttachButtonElement();
       const targetElement = getAgentCartButtonElement();
       const iconType = options?.iconType ?? 'paperClip';
 

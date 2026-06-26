@@ -18,6 +18,7 @@ type CartPulseListener = () => void;
 
 let attachWithFlightHandler: AttachWithFlightHandler | null = null;
 let agentCartButtonElement: HTMLElement | null = null;
+let applicationAttachButtonElement: HTMLElement | null = null;
 const cartPulseListeners = new Set<CartPulseListener>();
 
 export const setAttachWithFlightHandler = (handler: AttachWithFlightHandler | null): void => {
@@ -27,6 +28,13 @@ export const setAttachWithFlightHandler = (handler: AttachWithFlightHandler | nu
 export const registerAgentCartButtonElement = (element: HTMLElement | null): void => {
   agentCartButtonElement = element;
 };
+
+export const registerApplicationAttachButtonElement = (element: HTMLElement | null): void => {
+  applicationAttachButtonElement = element;
+};
+
+export const getApplicationAttachButtonElement = (): HTMLElement | null =>
+  applicationAttachButtonElement;
 
 export const getAgentCartButtonElement = (): HTMLElement | null =>
   agentCartButtonElement ??
@@ -61,6 +69,13 @@ export const POC_ATTACH_ATTACHMENT: AttachmentInput = {
   type: 'group',
   id: 'agent-first-poc-attachment',
   label: 'POC attachment',
+  items: [],
+};
+
+export const POC_APPLICATION_ATTACH_ATTACHMENT: AttachmentInput = {
+  type: 'group',
+  id: 'agent-first-poc-application-attachment',
+  label: 'POC application attachment',
   items: [],
 };
 

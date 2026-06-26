@@ -24,7 +24,12 @@ export type {
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
+  ApplicationAttachmentButtonProps,
+  ApplicationAttachmentLinkDescriptor,
+  UseApplicationAttachmentStateOptions,
+  UseApplicationAttachmentStateResult,
 } from './types';
+export { useApplicationAttachmentState } from './agent_first/use_application_attachment_state';
 export type { EmbeddableConversationProps } from './embeddable/types';
 export { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges, MCP_SERVER_PATH };
 export { type CreateSkillResponse, SKILLS_API_PATH };

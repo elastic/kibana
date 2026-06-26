@@ -35,6 +35,12 @@ export {
   getAgentFirstAttachmentCoordinator,
 } from './src/agent_first/agent_first_coordinator_registry';
 export { AgentFirstAttachmentCoordinatorShell } from './src/agent_first/agent_first_attachment_coordinator_shell';
+export {
+  registerApplicationAttachmentHarness,
+  subscribeApplicationAttachmentHarness,
+  getApplicationAttachmentHarness,
+} from './src/agent_first/application_attachment_harness_registry';
+export { ApplicationAttachmentHarnessShell } from './src/agent_first/application_attachment_harness_shell';
 export { ApplicationWorkspaceBootstrap } from './src/application/application_workspace_bootstrap';
 export { AgentWorkspacePanel } from './src/agent/agent_workspace_panel';
 export { Sidebar } from './src/sidebar';

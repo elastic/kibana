@@ -36,6 +36,10 @@ export type {
   OpenConversationSidebarOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
+  ApplicationAttachmentButtonProps,
+  ApplicationAttachmentLinkDescriptor,
+  UseApplicationAttachmentStateOptions,
+  UseApplicationAttachmentStateResult,
 } from './plugin_contract';
 export { AgentBuilderAnnouncementModal } from './announcement_modal/agent_builder_announcement_modal';
 export type {

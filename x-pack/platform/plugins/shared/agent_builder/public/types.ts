@@ -37,6 +37,10 @@ export type {
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
+  ApplicationAttachmentButtonProps,
+  ApplicationAttachmentLinkDescriptor,
+  UseApplicationAttachmentStateOptions,
+  UseApplicationAttachmentStateResult,
 } from '@kbn/agent-builder-browser';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/

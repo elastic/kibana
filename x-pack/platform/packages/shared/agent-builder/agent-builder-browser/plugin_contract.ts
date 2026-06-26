@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType, RefAttributes } from 'react';
+import type { IconType } from '@elastic/eui';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -124,6 +125,30 @@ export interface PublicEmbeddableConversationInputProps {
    * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
    */
   agentId?: string;
+}
+
+export interface ApplicationAttachmentLinkDescriptor {
+  attachmentId?: string;
+  origin?: string;
+}
+
+export interface ApplicationAttachmentButtonProps {
+  getAttachment: () => AttachmentInput | null;
+  linkDescriptor?: ApplicationAttachmentLinkDescriptor;
+  iconType?: IconType;
+  disabled?: boolean;
+}
+
+export interface UseApplicationAttachmentStateOptions {
+  getAttachment: () => AttachmentInput | null;
+  linkDescriptor?: ApplicationAttachmentLinkDescriptor;
+  iconType?: IconType;
+}
+
+export interface UseApplicationAttachmentStateResult {
+  canAttach: boolean;
+  isLinked: boolean;
+  attach: (sourceElement: HTMLElement | null) => Promise<void>;
 }
 
 /**
@@ -254,4 +279,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Paperclip button for attaching application context to the active agent conversation.
+   * In agent-first chrome, triggers a cross-panel flight animation to the cart button.
+   */
+  ApplicationAttachmentButton: ComponentType<ApplicationAttachmentButtonProps>;
 }
