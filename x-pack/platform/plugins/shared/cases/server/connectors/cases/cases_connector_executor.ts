@@ -812,10 +812,13 @@ export class CasesConnectorExecutor {
   private getCreateCaseRequestFromV2Template(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId,
-    v2Template: ParsedTemplateDefinition
+    v2Template: ParsedTemplateDefinition,
+    customFieldsConfigurations?: CustomFieldsConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
+
+    const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations);
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -836,6 +839,7 @@ export class CasesConnectorExecutor {
         extractObservables: false,
       },
       owner: params.owner,
+      customFields: builtCustomFields,
     };
 
     if (v2Template.severity) {
@@ -860,7 +864,12 @@ export class CasesConnectorExecutor {
     const flattenGrouping = getFlattenedObject(grouping);
 
     if (v2Template) {
-      return this.getCreateCaseRequestFromV2Template(params, groupingData, v2Template);
+      return this.getCreateCaseRequestFromV2Template(
+        params,
+        groupingData,
+        v2Template,
+        customFieldsConfigurations
+      );
     }
 
     const selectedTemplate = templatesConfigurations?.find(

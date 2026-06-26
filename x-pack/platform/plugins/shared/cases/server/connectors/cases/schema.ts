@@ -15,6 +15,7 @@ import {
   MAX_TITLE_LENGTH,
   DEFAULT_MAX_OPEN_CASES,
   ABSOLUTE_MAX_CASES_PER_RUN,
+  MAX_TEMPLATE_KEY_LENGTH,
 } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -105,8 +106,8 @@ export const CasesConnectorRunParamsSchema = schema.object({
     min: 1,
     max: ABSOLUTE_MAX_CASES_PER_RUN,
   }),
-  templateId: schema.nullable(schema.string()),
-  templateVersion: schema.nullable(schema.string()),
+  templateId: schema.nullable(schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH })),
+  templateVersion: schema.nullable(schema.string({ maxLength: 10 })),
   internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
 });
 
@@ -200,8 +201,8 @@ export const ZCasesConnectorRunParamsSchema = z
       .min(1)
       .max(ABSOLUTE_MAX_CASES_PER_RUN)
       .default(DEFAULT_MAX_OPEN_CASES),
-    templateId: z.string().nullable().default(null),
-    templateVersion: z.string().nullable().default(null),
+    templateId: z.string().max(MAX_TEMPLATE_KEY_LENGTH).nullable().default(null),
+    templateVersion: z.string().max(10).nullable().default(null),
     internallyManagedAlerts: z.boolean().default(false).nullable(),
   })
   .strict();
@@ -213,8 +214,8 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
-    templateId: schema.nullable(schema.string()),
-    templateVersion: schema.nullable(schema.string()),
+    templateId: schema.nullable(schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH })),
+    templateVersion: schema.nullable(schema.string({ maxLength: 10 })),
     maximumCasesToOpen: schema.nullable(
       schema.number({
         min: 1,

@@ -1274,7 +1274,7 @@ fields: []
             expect(createdCase.severity).toBe('medium');
             expect(createdCase.category).toBe('Phishing');
             expect(createdCase.connector.type).toBe('.none');
-            expect(createdCase.customFields).toBeUndefined();
+            expect(createdCase.customFields).toEqual([]);
           });
 
           it('v2 template title wins only when groupedAlerts has no explicit title', async () => {
