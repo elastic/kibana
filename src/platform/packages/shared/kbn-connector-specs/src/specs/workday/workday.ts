@@ -122,14 +122,14 @@ export const Workday: ConnectorSpec = {
         overrides: {
           meta: {
             authorizationUrl: {
-              placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/authorize',
+              placeholder: 'https://<tenant>.workday.com/ccx/oauth2/<tenant>/authorize',
               helpText:
-                "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/authorize ",
+                "Replace '<tenant>' with your Workday tenant name, for example https://mycompany.workday.com/ccx/oauth2/mycompany/authorize",
             },
             tokenUrl: {
-              placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/token',
+              placeholder: 'https://<tenant>.workday.com/ccx/oauth2/<tenant>/token',
               helpText:
-                "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/token",
+                "Replace '<tenant>' with your Workday tenant name, for example https://mycompany.workday.com/ccx/oauth2/mycompany/token",
             },
             scope: {
               hidden: true,
@@ -147,9 +147,9 @@ export const Workday: ConnectorSpec = {
         overrides: {
           meta: {
             tokenUrl: {
-              placeholder: 'https://wd2-impl-services1.workday.com/ccx/oauth2/<tenant>/token',
+              placeholder: 'https://<tenant>.workday.com/ccx/oauth2/<tenant>/token',
               helpText:
-                "Replace '<tenant>' with your Workday tenant name, for example https://wd2-impl-services1.workday.com/ccx/oauth2/mycompany/token",
+                "Replace '<tenant>' with your Workday tenant name, for example https://mycompany.workday.com/ccx/oauth2/mycompany/token",
             },
             scope: {
               hidden: true,
