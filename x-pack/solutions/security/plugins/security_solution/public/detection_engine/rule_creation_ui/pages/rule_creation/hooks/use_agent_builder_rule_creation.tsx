@@ -289,7 +289,6 @@ export const useAgentBuilderRuleCreation = ({
 
       const steps = event.data.round?.steps ?? [];
       let touchedAttachmentId: string | undefined;
-      let touchedIsNewCard = false;
 
       for (const step of steps) {
         if (isToolCallStep(step)) {
@@ -304,8 +303,6 @@ export const useAgentBuilderRuleCreation = ({
                   (resultData.attachment_id as string | undefined);
                 if (candidateId) {
                   touchedAttachmentId = candidateId;
-                  touchedIsNewCard =
-                    toolId === RULE_CREATE_TOOL_ID ? Boolean(resultData.isNewCard) : false;
                 }
               }
             }
@@ -313,10 +310,8 @@ export const useAgentBuilderRuleCreation = ({
         }
       }
 
-      if (touchedIsNewCard) {
-        aiRuleCreation.releaseBind();
-        return;
-      }
+      // Whether the AI updated an existing card or minted a new one, always fall through so the
+      // attachment lookup below can bind to it and push the AI's output into the form.
 
       // Priority: touched attachment this round → bound attachment → first-of-type in event.
       const attachments = event.data.attachments ?? [];

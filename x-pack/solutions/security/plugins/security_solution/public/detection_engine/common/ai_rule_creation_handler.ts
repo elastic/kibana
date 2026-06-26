@@ -142,8 +142,11 @@ export const createAiRuleCreationHandler = ({
             ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
             transformInput(saved)
           );
+          // refetchType: 'none' prevents a background refetch that would race with the
+          // setQueryData above; the cache already has the authoritative saved data.
           securitySolutionQueryClient.invalidateQueries(['GET', DETECTION_ENGINE_RULES_URL], {
             exact: false,
+            refetchType: 'none',
           });
         }
 
