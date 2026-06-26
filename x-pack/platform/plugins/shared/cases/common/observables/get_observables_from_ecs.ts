@@ -6,8 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import { castArray } from 'lodash';
-import type { ObservablePost } from '../../../common/types/api';
+import type { ObservablePost } from '../types/api';
 import {
+  AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   OBSERVABLE_TYPE_DOMAIN,
   OBSERVABLE_TYPE_FILE_HASH,
   OBSERVABLE_TYPE_FILE_PATH,
@@ -15,7 +16,7 @@ import {
   OBSERVABLE_TYPE_IPV6,
   OBSERVABLE_TYPE_HOSTNAME,
   OBSERVABLE_TYPE_AGENT_ID,
-} from '../../../common/constants/observables';
+} from '../constants/observables';
 
 export const getIPType = (ip: string): 'IPV4' | 'IPV6' => {
   if (ip.includes(':')) {
@@ -46,6 +47,7 @@ export interface FlattedEcsData {
 }
 export const getHashFields = (): string[] =>
   HASH_PARENTS.map((parent) => HASH_FIELDS.map((field) => `${parent}.hash.${field}`)).flat();
+
 export const processObservable = (
   observablesMap: Map<string, ObservablePost>,
   value: string,
@@ -68,7 +70,7 @@ export const getObservablesFromEcs = (ecsDataArray: FlattedEcsData[][]): Observa
   const observablesMap = new Map<string, ObservablePost>();
 
   const description = i18n.translate('xpack.cases.caseView.observables.autoExtract.description', {
-    defaultMessage: 'Auto extracted observable',
+    defaultMessage: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   });
   const hashFields = getHashFields();
   for (const ecsData of ecsDataArray) {
