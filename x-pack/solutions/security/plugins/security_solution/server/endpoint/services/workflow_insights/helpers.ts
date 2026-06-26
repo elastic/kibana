@@ -237,7 +237,10 @@ export const checkIfRemediationExists = async ({
   }
 
   // One endpoint only for incompatible antivirus insights
-  const hostMetadata = await endpointMetadataClient.getHostMetadata(insight.target.ids[0], ccsEnabled);
+  const hostMetadata = await endpointMetadataClient.getHostMetadata(
+    insight.target.ids[0],
+    ccsEnabled
+  );
 
   const filter = generateTrustedAppsFilter(insight, hostMetadata.Endpoint.policy.applied.id);
 
