@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
@@ -24,6 +25,7 @@ export interface OverviewTabProps {
 export const OverviewTab = memo(({ hit }: OverviewTabProps) => (
   <div data-test-subj="attack-flyout-overview-tab">
     <AISummarySection hit={hit} />
+    <EuiHorizontalRule margin="m" />
     <VisualizationsSection hit={hit} />
   </div>
 ));
