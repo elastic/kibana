@@ -801,14 +801,17 @@ describe('When on the package policy create page', () => {
           item: {
             name: 'Nginx',
             id: 'policy-1',
-            inputs: [],
-            policy_ids: ['agent-policy-1'],
-            supports_agentless: true,
+            namespace: 'default',
+            inputs: {},
             package: {
               name: 'nginx',
               title: 'Nginx',
               version: '1.3.0',
             },
+            created_at: '2025-11-06T18:27:43.541Z',
+            created_by: 'test_user',
+            updated_at: '2025-11-06T18:27:43.541Z',
+            updated_by: 'test_user',
           },
         });
 
@@ -832,15 +835,14 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          }),
-          { format: 'legacy' }
+          })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         await waitFor(() => {
           expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
             INTEGRATIONS_PLUGIN_ID,
-            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
           );
         });
       });
@@ -859,14 +861,13 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          }),
-          { format: 'legacy' }
+          })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
           INTEGRATIONS_PLUGIN_ID,
-          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
         );
       });
     });
