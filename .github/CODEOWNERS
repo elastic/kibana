@@ -1434,6 +1434,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_pending_invalidation @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_to_invalidate @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/cases @elastic/kibana-cases
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/config @elastic/appex-sharedux
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/connector_token @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_connector @elastic/kibana-core
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_stream-config @elastic/integration-experience
