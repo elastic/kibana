@@ -11,7 +11,10 @@ import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
+import { CanvasProvider } from '../application/components/conversations/conversation_rounds/round_response/attachments/canvas_context';
+import { CanvasFlyout } from '../application/components/conversations/conversation_rounds/round_response/attachments/canvas_flyout';
 import { EmbeddableConversationHeader } from '../application/components/conversations/embeddable_conversation_header/embeddable_conversation_header';
+import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import {
   conversationBackgroundStyles,
   conversationHeaderRowStyles,
@@ -24,6 +27,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   props
 ) => {
   const { euiTheme } = useEuiTheme();
+  const { attachmentsService } = useAgentBuilderServices();
   const { onClose, ariaLabelledBy } = props;
 
   const wrapperStyles = css`
@@ -65,15 +69,18 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     <div css={wrapperStyles} data-test-subj="agentBuilderConversation">
       <EmbeddableConversationsProvider {...props}>
         <EmbeddableAccessBoundary onClose={onClose}>
-          <EuiFlyoutHeader css={[headerShellStyles, flyoutHeaderOverrideStyles]}>
-            <div css={headerRowStyles}>
-              <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
-            </div>
-          </EuiFlyoutHeader>
-          <EmbeddableWelcomeMessage />
-          <EuiFlyoutBody css={bodyStyles}>
-            <Conversation />
-          </EuiFlyoutBody>
+          <CanvasProvider>
+            <EuiFlyoutHeader css={[headerShellStyles, flyoutHeaderOverrideStyles]}>
+              <div css={headerRowStyles}>
+                <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+              </div>
+            </EuiFlyoutHeader>
+            <EmbeddableWelcomeMessage />
+            <EuiFlyoutBody css={bodyStyles}>
+              <Conversation />
+            </EuiFlyoutBody>
+            <CanvasFlyout attachmentsService={attachmentsService} />
+          </CanvasProvider>
         </EmbeddableAccessBoundary>
       </EmbeddableConversationsProvider>
     </div>

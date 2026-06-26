@@ -11,6 +11,11 @@ import { EuiComponentDefaultsProvider } from '@elastic/eui';
 
 export const AGENT_WORKSPACE_MOUNT_TEST_SUBJ = 'agentWorkspaceMount';
 
+export const getAgentWorkspaceMountElement = (): HTMLElement | null => {
+  const mountRoot = document.querySelector(`[data-test-subj="${AGENT_WORKSPACE_MOUNT_TEST_SUBJ}"]`);
+  return mountRoot instanceof HTMLElement ? mountRoot : null;
+};
+
 /**
  * Agent Builder mounts into the chrome agent column via a separate React root.
  * Flyout defaults must be provided in that app tree — not only in the chrome tree.

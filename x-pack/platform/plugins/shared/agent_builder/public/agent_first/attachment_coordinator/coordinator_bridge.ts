@@ -9,6 +9,17 @@ import type { IconType } from '@elastic/eui';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachWithFlightOptions } from './types';
 
+declare global {
+  interface Window {
+    __agentBuilderCartBridgeVersion?: string;
+    __agentBuilderCartButtonMounted?: boolean;
+    __agentBuilderCartButtonElement?: HTMLElement | null;
+  }
+}
+
+// POC debug — remove before merge. Set on module load to verify bundle includes latest cart code.
+window.__agentBuilderCartBridgeVersion = 'cart-debug-v2';
+
 type AttachWithFlightHandler = (
   attachment: AttachmentInput,
   options?: AttachWithFlightOptions
@@ -16,8 +27,10 @@ type AttachWithFlightHandler = (
 
 type CartPulseListener = () => void;
 type CartReceivingListener = (isReceiving: boolean) => void;
+type OpenAttachmentCartHandler = (isSidebar: boolean) => void;
 
 let attachWithFlightHandler: AttachWithFlightHandler | null = null;
+let openAttachmentCartHandler: OpenAttachmentCartHandler | null = null;
 let agentCartButtonElement: HTMLElement | null = null;
 let applicationAttachButtonElement: HTMLElement | null = null;
 const cartPulseListeners = new Set<CartPulseListener>();
@@ -27,8 +40,40 @@ export const setAttachWithFlightHandler = (handler: AttachWithFlightHandler | nu
   attachWithFlightHandler = handler;
 };
 
+export const registerOpenAttachmentCartHandler = (
+  handler: OpenAttachmentCartHandler | null
+): void => {
+  openAttachmentCartHandler = handler;
+
+  if (handler) {
+    // POC debug — remove before merge
+    // eslint-disable-next-line no-console
+    console.warn('[agentBuilderAttachmentCart] openAttachmentCart handler registered');
+  }
+};
+
+export const openAttachmentCartFromBridge = (isSidebar: boolean): boolean => {
+  if (!openAttachmentCartHandler) {
+    // POC debug — remove before merge
+    // eslint-disable-next-line no-console
+    console.warn('[agentBuilderAttachmentCart] openAttachmentCartFromBridge: no handler registered');
+    return false;
+  }
+
+  openAttachmentCartHandler(isSidebar);
+  return true;
+};
+
 export const registerAgentCartButtonElement = (element: HTMLElement | null): void => {
   agentCartButtonElement = element;
+  window.__agentBuilderCartButtonMounted = element !== null;
+  window.__agentBuilderCartButtonElement = element;
+
+  if (element) {
+    // POC debug — remove before merge
+    // eslint-disable-next-line no-console
+    console.warn('[agentBuilderAttachmentCart] cart button element registered');
+  }
 };
 
 export const registerApplicationAttachButtonElement = (element: HTMLElement | null): void => {

@@ -42,10 +42,7 @@ import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
-import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
-import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
 import { RoundsScreenReaderStatus } from './conversation_rounds/rounds_screen_reader_status';
-import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
@@ -68,7 +65,6 @@ export const Conversation: React.FC<{}> = () => {
   const { errorType } = useConversationError();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
-  const { attachmentsService } = useAgentBuilderServices();
   const {
     attachments: stagedAttachments = [],
     upsertAttachments,
@@ -191,7 +187,7 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   return (
-    <CanvasProvider>
+    <>
       <RoundsScreenReaderStatus lastRound={lastRound} />
       <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
         <EuiFlexItem grow={true} css={scrollWrapperStyles}>
@@ -228,7 +224,6 @@ export const Conversation: React.FC<{}> = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <CanvasFlyout attachmentsService={attachmentsService} />
-    </CanvasProvider>
+    </>
   );
 };

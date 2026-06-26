@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import { registerOpenAttachmentCartHandler } from '../../../../../../agent_first/attachment_coordinator/coordinator_bridge';
 
-interface CanvasState {
-  attachment: UnknownAttachment;
-  isSidebar: boolean;
-}
+export type CanvasState =
+  | { mode: 'attachment'; attachment: UnknownAttachment; isSidebar: boolean }
+  | { mode: 'cart'; isSidebar: boolean };
 
 export const getAttachmentPreviewKey = (attachmentId: string, version?: number) =>
   `${attachmentId}:${version ?? 'latest'}`;
@@ -20,6 +20,7 @@ interface CanvasContextValue {
   canvasState: CanvasState | null;
   previewedAttachmentKey: string | null;
   openCanvas: (attachment: UnknownAttachment, isSidebar: boolean) => void;
+  openAttachmentCart: (isSidebar: boolean) => void;
   closeCanvas: () => void;
   setCanvasAttachmentOrigin: (origin: string) => void;
   setPreviewedAttachmentKey: (attachmentKey: string | null) => void;
@@ -36,26 +37,42 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   const [previewedAttachmentKey, setPreviewedAttachmentKey] = useState<string | null>(null);
 
   const openCanvas = useCallback((attachment: UnknownAttachment, isSidebar: boolean) => {
-    setCanvasState({ attachment, isSidebar });
+    setCanvasState({ mode: 'attachment', attachment, isSidebar });
     setPreviewedAttachmentKey(getAttachmentPreviewKey(attachment.id, attachment.version));
   }, []);
 
+  const openAttachmentCart = useCallback((isSidebar: boolean) => {
+    setCanvasState({ mode: 'cart', isSidebar });
+  }, []);
+
+  useEffect(() => {
+    registerOpenAttachmentCartHandler(openAttachmentCart);
+
+    return () => {
+      registerOpenAttachmentCartHandler(null);
+    };
+  }, [openAttachmentCart]);
+
   const closeCanvas = useCallback(() => {
-    if (canvasState) {
-      const canvasPreviewKey = getAttachmentPreviewKey(
-        canvasState.attachment.id,
-        canvasState.attachment.version
-      );
-      if (previewedAttachmentKey === canvasPreviewKey) {
-        setPreviewedAttachmentKey(null);
+    setCanvasState((prev) => {
+      if (prev?.mode === 'attachment') {
+        const canvasPreviewKey = getAttachmentPreviewKey(
+          prev.attachment.id,
+          prev.attachment.version
+        );
+        setPreviewedAttachmentKey((currentKey) =>
+          currentKey === canvasPreviewKey ? null : currentKey
+        );
       }
-    }
-    setCanvasState(null);
-  }, [canvasState, previewedAttachmentKey]);
+      return null;
+    });
+  }, []);
 
   const setCanvasAttachmentOrigin = useCallback((origin: string) => {
     setCanvasState((prev) => {
-      if (!prev) return null;
+      if (!prev || prev.mode !== 'attachment') {
+        return prev;
+      }
       return {
         ...prev,
         attachment: { ...prev.attachment, origin },
@@ -67,12 +84,20 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
     () => ({
       canvasState,
       openCanvas,
+      openAttachmentCart,
       closeCanvas,
       setCanvasAttachmentOrigin,
       previewedAttachmentKey,
       setPreviewedAttachmentKey,
     }),
-    [canvasState, previewedAttachmentKey, openCanvas, closeCanvas, setCanvasAttachmentOrigin]
+    [
+      canvasState,
+      previewedAttachmentKey,
+      openCanvas,
+      openAttachmentCart,
+      closeCanvas,
+      setCanvasAttachmentOrigin,
+    ]
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
