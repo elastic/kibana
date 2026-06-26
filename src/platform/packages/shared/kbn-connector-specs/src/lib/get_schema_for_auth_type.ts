@@ -41,7 +41,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     authTypeId = def.type;
     defaults = def.defaults;
     meta = def?.overrides?.meta;
-    labelOverride = def.label;
+    labelOverride = def.overrides?.label;
     isRecommendedOverride = def.isRecommended;
     isLegacyOverride = def.isLegacy;
   }

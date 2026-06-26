@@ -96,10 +96,12 @@ export const GithubConnector: ConnectorSpec = {
       },
       {
         type: 'bearer',
-        label: i18n.translate('core.kibanaConnectorSpecs.github.auth.bearer.label', {
-          defaultMessage: 'Personal Access Token (PAT)',
-        }),
         defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.github.auth.bearer.label', {
+            defaultMessage: 'Personal Access Token (PAT)',
+          }),
+        },
       },
     ],
     headers: {

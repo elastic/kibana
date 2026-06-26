@@ -267,8 +267,6 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
-  /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
-  label?: string;
   /** When true, renders a "Recommended" badge in the picker to highlight the preferred auth option. */
   isRecommended?: boolean;
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
@@ -276,6 +274,8 @@ export interface AuthTypeDef {
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
+    /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
+    label?: string;
     meta?: Record<string, Record<string, unknown>>;
     // can override other Zod fields here in the future if needed
   };
