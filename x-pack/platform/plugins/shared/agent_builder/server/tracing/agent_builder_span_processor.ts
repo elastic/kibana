@@ -8,6 +8,7 @@
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { GenAISemanticConventions } from '@kbn/inference-tracing';
+import { omitBy } from 'lodash';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
@@ -138,6 +139,49 @@ function stripToolCallIO(attributes: Record<string, unknown>): Record<string, un
   return rest;
 }
 
+function stripToolCallsFromEventAttributes(eventAttributes: api.Attributes): api.Attributes {
+  return omitBy(
+    eventAttributes,
+    (_value, key) => key.startsWith('tool_calls.') || key.startsWith('message.tool_calls.')
+  );
+}
+
+/**
+ * Filters and sanitizes span events based on privacy settings.
+ * Drops entire events whose content category is disabled, and strips
+ * `message.tool_calls.*` from assistant/choice events when tool details are off.
+ */
+function applyEventPrivacyFilters(
+  events: tracing.TimedEvent[],
+  settings: TracingPrivacySettings
+): tracing.TimedEvent[] {
+  return events.reduce<tracing.TimedEvent[]>((acc, event) => {
+    if (!settings.includeSystemPrompt && event.name === 'gen_ai.system.message') return acc;
+    if (!settings.includeUserPrompts && event.name === 'gen_ai.user.message') return acc;
+    if (
+      !settings.includeLlmResponses &&
+      (event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice')
+    ) {
+      return acc;
+    }
+    if (!settings.includeToolDetails && event.name === 'gen_ai.tool.message') return acc;
+
+    if (
+      !settings.includeToolDetails &&
+      (event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice')
+    ) {
+      acc.push({
+        ...event,
+        attributes: stripToolCallsFromEventAttributes(event.attributes ?? {}),
+      });
+      return acc;
+    }
+
+    acc.push(event);
+    return acc;
+  }, []);
+}
+
 /**
  * Span processor that exports Agent Builder inference spans.
  */
@@ -173,18 +217,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
-    const filteredEvents = span.events.filter((event) => {
-      if (!settings.includeSystemPrompt && event.name === 'gen_ai.system.message') return false;
-      if (!settings.includeUserPrompts && event.name === 'gen_ai.user.message') return false;
-      if (
-        !settings.includeLlmResponses &&
-        (event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice')
-      ) {
-        return false;
-      }
-      if (!settings.includeToolDetails && event.name === 'gen_ai.tool.message') return false;
-      return true;
-    });
+    const filteredEvents = applyEventPrivacyFilters(span.events, settings);
 
     const {
       [SHOULD_TRACK_ATTR]: _,
