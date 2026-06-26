@@ -219,7 +219,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
         css={overlayStyles}
         data-test-subj="agentWorkspaceAttachmentCartOverlay"
       >
-        <AttachmentCartPanel onClose={handleClose} />
+        <AttachmentCartPanel onClose={handleClose} squareBottomCorners={true} />
       </div>,
       mountElement
     );

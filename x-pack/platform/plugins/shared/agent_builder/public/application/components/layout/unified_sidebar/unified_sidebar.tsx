@@ -65,6 +65,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
     border-radius: 0;
     display: flex;
     flex-direction: column;
+    padding-top: ${isCondensed ? euiTheme.size.s : 0};
   `;
 
   const sidebarContentStyles = css`
