@@ -69,6 +69,12 @@ const muteAlertsOperations: Record<AlertingEntity, string[]> = {
   alert: [],
 };
 
+// Read-only access to per-alert mute/snooze state, without the ability to mute/unmute.
+const findMutedAlertsOperations: Record<AlertingEntity, string[]> = {
+  rule: ['findMutedAlerts'],
+  alert: [],
+};
+
 const writeOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'create',
@@ -117,6 +123,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       const manageRuleSettings =
         get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
       const muteAlerts = get(privilegeDefinition.alerting, `${entity}.mute_alerts`) ?? [];
+      const findMutedAlerts = get(privilegeDefinition.alerting, `${entity}.find_muted_alerts`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
@@ -126,6 +133,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
         ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
         ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),
         ...getAlertingPrivilege(muteAlertsOperations[entity], muteAlerts, entity),
+        ...getAlertingPrivilege(findMutedAlertsOperations[entity], findMutedAlerts, entity),
       ]);
     };
 
