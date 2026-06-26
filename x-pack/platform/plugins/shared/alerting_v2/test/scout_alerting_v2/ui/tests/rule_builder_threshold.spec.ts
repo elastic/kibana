@@ -78,6 +78,11 @@ test.describe(
 
       await test.step('time field is auto-populated', async () => {
         await expect(pageObjects.thresholdBuilder.timeFieldSelect).toBeVisible();
+        await expect(pageObjects.thresholdBuilder.timeFieldSelect).toHaveValue('@timestamp');
+      });
+
+      await test.step('Next is disabled before builder form is valid', async () => {
+        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
       });
 
       await test.step('set threshold condition value', async () => {
