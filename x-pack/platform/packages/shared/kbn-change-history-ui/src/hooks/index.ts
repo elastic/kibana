@@ -15,3 +15,5 @@ export type {
   UseChangeHistoryDetailArgs,
   UseChangeHistoryDetailResult,
 } from './use_change_history_detail';
+export { useChangeHistoryRestore } from './use_change_history_restore';
+export type { UseChangeHistoryRestoreResult } from './use_change_history_restore';

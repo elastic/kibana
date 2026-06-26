@@ -9,4 +9,8 @@ export { ChangeHistoryProvider } from './change_history_provider';
 export type { ChangeHistoryProviderProps } from './change_history_provider';
 export { useChangeHistoryConfig } from './use_change_history_config';
 export { ChangeHistoryContext } from './change_history_context';
-export type { ChangeHistoryContextValue } from './change_history_context';
+export type {
+  ChangeHistoryContextValue,
+  ChangeHistoryOnRestoreSuccessArgs,
+} from './change_history_context';
+export { resolveChangeHistorySupports } from './resolve_change_history_supports';

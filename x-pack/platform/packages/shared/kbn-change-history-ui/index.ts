@@ -26,17 +26,21 @@ export {
   ChangeHistoryTrigger,
   ChangeHistoryListGroupItem,
   ChangeHistoryPreviewPanel,
+  ChangeHistoryRestoreButton,
+  ChangeHistoryDefaultPreviewFooter,
 } from './src/components/modal';
 export type {
   ChangeHistoryTriggerProps,
   ChangeHistoryListGroupItemProps,
+  ChangeHistoryRestoreButtonProps,
 } from './src/components/modal';
 export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
-export type { ChangeHistoryProviderProps } from './src/provider';
-export { useChangeHistoryList, useChangeHistoryDetail } from './src/hooks';
+export type { ChangeHistoryProviderProps, ChangeHistoryOnRestoreSuccessArgs } from './src/provider';
+export { useChangeHistoryList, useChangeHistoryDetail, useChangeHistoryRestore } from './src/hooks';
 export type {
   UseChangeHistoryListArgs,
   UseChangeHistoryListResult,
   UseChangeHistoryDetailArgs,
   UseChangeHistoryDetailResult,
+  UseChangeHistoryRestoreResult,
 } from './src/hooks';

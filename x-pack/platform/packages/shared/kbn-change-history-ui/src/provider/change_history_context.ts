@@ -8,14 +8,19 @@
 import { createContext } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
+import type { ChangeHistorySupports } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewFooterRenderFn } from '../types/change_history_preview_footer';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
-
 export interface ChangeHistoryResolvedLabels {
   previewBackLabel: string;
   previewTitle: string;
   timelinePanelTitle: string;
+}
+
+export interface ChangeHistoryOnRestoreSuccessArgs {
+  objectId: string;
+  changeId: string;
 }
 
 export interface ChangeHistoryContextValue {
@@ -25,6 +30,8 @@ export interface ChangeHistoryContextValue {
   renderPreviewFooter?: ChangeHistoryPreviewFooterRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryResolvedLabels;
+  supports: ChangeHistorySupports;
+  onRestoreSuccess?: (args: ChangeHistoryOnRestoreSuccessArgs) => void;
   isModalOpen: boolean;
   openModal: () => void;
   closeModal: () => void;

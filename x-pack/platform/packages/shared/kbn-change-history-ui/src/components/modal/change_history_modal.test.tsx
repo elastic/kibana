@@ -158,4 +158,90 @@ describe('ChangeHistoryModal', () => {
 
     expect(screen.queryByTestId('changeHistoryFooter')).not.toBeInTheDocument();
   });
+
+  it('shows restore button for a non-current version when restore is enabled', async () => {
+    const historicalItem = {
+      id: 'evt-2',
+      timestamp: '2026-06-15T12:00:00.000Z',
+      actor: { name: 'Bob' },
+      action: 'Updated',
+      metadata: { version: 3 },
+    };
+    const historicalDetail: ChangeHistoryDetail = {
+      ...historicalItem,
+      snapshot: { workflow: { yaml: 'name: older\n' } },
+    };
+
+    const adapter = createAdapter({
+      listChanges: jest.fn().mockResolvedValue({
+        items: [listItem, historicalItem],
+        total: 2,
+      }),
+      getChange: jest.fn().mockImplementation(({ changeId }) => {
+        if (changeId === 'evt-2') {
+          return Promise.resolve(historicalDetail);
+        }
+        return Promise.resolve(detail);
+      }),
+      restoreChange: jest.fn().mockResolvedValue(undefined),
+    });
+
+    render(
+      <I18nProvider>
+        <ChangeHistoryProvider
+          objectId="workflow-1"
+          adapter={adapter}
+          features={{ restore: true }}
+          renderPreview={({ change }) => (
+            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
+          )}
+        >
+          <ChangeHistoryTrigger />
+          <ChangeHistoryModal />
+        </ChangeHistoryProvider>
+      </I18nProvider>
+    );
+
+    openModal();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryItem-evt-2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-2'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
+    });
+  });
+
+  it('hides restore button for the current version', async () => {
+    const adapter = createAdapter({
+      restoreChange: jest.fn().mockResolvedValue(undefined),
+    });
+
+    render(
+      <I18nProvider>
+        <ChangeHistoryProvider
+          objectId="workflow-1"
+          adapter={adapter}
+          features={{ restore: true }}
+          renderPreview={({ change }) => (
+            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
+          )}
+        >
+          <ChangeHistoryTrigger />
+          <ChangeHistoryModal />
+        </ChangeHistoryProvider>
+      </I18nProvider>
+    );
+
+    openModal();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryItem-evt-1')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
+  });
 });

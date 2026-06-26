@@ -16,6 +16,7 @@ import { useChangeHistoryConfig } from '../../provider/use_change_history_config
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
 import { ChangeHistorySidebarPanel } from './change_history_sidebar_panel';
+import { ChangeHistoryDefaultPreviewFooter } from './change_history_default_preview_footer';
 
 const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
   if (timestamps.length === 0) {
@@ -34,6 +35,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     renderBadge,
     renderPreviewFooter,
     labels,
+    supports,
     isModalOpen,
     closeModal,
     selectedChangeId,
@@ -117,10 +119,11 @@ export function ChangeHistoryModal(): JSX.Element | null {
     ? getHistoryStartedAt(items.map((item) => item.timestamp))
     : undefined;
 
-  const previewFooter = renderPreviewFooter?.({
-    objectId,
-    selectedChangeId,
-  });
+  const previewFooter =
+    renderPreviewFooter?.({
+      objectId,
+      selectedChangeId,
+    }) ?? (supports.restore ? <ChangeHistoryDefaultPreviewFooter /> : undefined);
 
   const renderSidebarContent = () => {
     if (showLoadingSidebar) {

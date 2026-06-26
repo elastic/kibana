@@ -8,10 +8,16 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
+import type {
+  ChangeHistoryFeatures,
+  ChangeHistoryPermissions,
+} from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewFooterRenderFn } from '../types/change_history_preview_footer';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
+import type { ChangeHistoryOnRestoreSuccessArgs } from './change_history_context';
 import { ChangeHistoryContext } from './change_history_context';
+import { resolveChangeHistorySupports } from './resolve_change_history_supports';
 import * as i18n from '../components/timeline/translations';
 
 export interface ChangeHistoryProviderProps {
@@ -21,6 +27,10 @@ export interface ChangeHistoryProviderProps {
   renderPreviewFooter?: ChangeHistoryPreviewFooterRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels?: ChangeHistoryLabels;
+  features?: ChangeHistoryFeatures;
+  permissions?: ChangeHistoryPermissions;
+  isReadOnly?: boolean;
+  onRestoreSuccess?: (args: ChangeHistoryOnRestoreSuccessArgs) => void;
   children: React.ReactNode;
 }
 
@@ -31,6 +41,10 @@ export const ChangeHistoryProvider = ({
   renderPreviewFooter,
   renderBadge,
   labels,
+  features,
+  permissions,
+  isReadOnly,
+  onRestoreSuccess,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,6 +70,11 @@ export const ChangeHistoryProvider = ({
     setSelectedChangeId(changeId);
   }, []);
 
+  const supports = useMemo(
+    () => resolveChangeHistorySupports(adapter, { features, permissions, isReadOnly }),
+    [adapter, features, isReadOnly, permissions]
+  );
+
   const value = useMemo(
     () => ({
       objectId,
@@ -68,6 +87,8 @@ export const ChangeHistoryProvider = ({
         previewTitle: labels?.previewTitle ?? labels?.modalTitle ?? '',
         timelinePanelTitle: labels?.timelinePanelTitle ?? i18n.TIMELINE_PANEL_TITLE,
       },
+      supports,
+      onRestoreSuccess,
       isModalOpen,
       openModal,
       closeModal,
@@ -84,11 +105,13 @@ export const ChangeHistoryProvider = ({
       labels?.previewTitle,
       labels?.timelinePanelTitle,
       objectId,
+      onRestoreSuccess,
       openModal,
       renderBadge,
       renderPreview,
       renderPreviewFooter,
       selectedChangeId,
+      supports,
     ]
   );
 
