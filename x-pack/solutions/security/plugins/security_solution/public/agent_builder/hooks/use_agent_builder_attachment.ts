@@ -21,19 +21,32 @@ export interface UseAgentBuilderAttachmentParams {
    */
   attachmentType: string;
   /**
-   * Data for the attachment
+   * Data for the attachment (by-value). Optional when `origin` is provided and the server should
+   * resolve the content by reference instead.
    */
-  attachmentData: Record<string, unknown>;
+  attachmentData?: Record<string, unknown>;
   /**
-   * Prompt/input text for the agent builder conversation
+   * Saved-object id for a by-reference attachment. When provided without `attachmentData`, the
+   * server resolves the content from this origin. May be combined with `attachmentData` to attach
+   * a by-value snapshot that is still linked to its saved object (e.g. an edited form bound to an
+   * existing rule).
    */
-  attachmentPrompt: string;
+  origin?: string;
+  /**
+   * Human-readable description of the attachment. Used by the chat UI to display
+   * "Attachment added: {description}" on the user's input round — without this the
+   * label line renders blank.
+   */
+  attachmentDescription?: string;
+  /**
+   * Prompt/input text for the agent builder conversation. When omitted the chat
+   * opens with the attachment loaded and no pre-filled message.
+   */
+  attachmentPrompt?: string;
 }
 
 export interface UseAgentBuilderAttachmentResult {
-  /**
-   * Function to open the agent builder flyout with attachments and prefilled conversation
-   */
+  /** Opens the agent builder flyout with the attachment loaded and an optional pre-filled message. */
   openAgentBuilderFlyout: () => void;
 }
 
@@ -45,6 +58,8 @@ export const useAgentBuilderAttachment = ({
   attachmentId,
   attachmentType,
   attachmentData,
+  origin,
+  attachmentDescription,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
@@ -65,17 +80,29 @@ export const useAgentBuilderAttachment = ({
     const attachment: AttachmentInput = {
       id: attachmentId ?? `${attachmentType}-${Date.now()}`,
       type: attachmentType,
-      data: attachmentData,
+      // `origin` without `data` triggers server-side resolve (by-reference). When both are present
+      // the snapshot is stored by value and linked to its origin. Callers always provide at least one.
+      ...(attachmentData ? { data: attachmentData } : {}),
+      ...(origin ? { origin } : {}),
+      ...(attachmentDescription ? { description: attachmentDescription } : {}),
     };
 
     agentBuilder.openChat({
       autoSendInitialMessage: false,
       newConversation: true,
-      initialMessage: attachmentPrompt,
+      ...(attachmentPrompt && { initialMessage: attachmentPrompt }),
       attachments: [attachment],
       sessionTag: 'security',
     });
-  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [
+    attachmentId,
+    attachmentType,
+    attachmentData,
+    origin,
+    attachmentDescription,
+    attachmentPrompt,
+    agentBuilder,
+  ]);
 
   return {
     openAgentBuilderFlyout,

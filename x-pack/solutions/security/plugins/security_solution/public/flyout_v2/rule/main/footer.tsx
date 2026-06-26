@@ -8,8 +8,10 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { isEsqlRule } from '../../../../common/detection_engine/utils';
 import { AddRuleAttachmentToChatButton } from '../../../detection_engine/rule_creation_ui/components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
+import { NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP } from '../../../agent_builder/components/translations';
 import { RULE_DETAILS_FOOTER_TEST_ID } from './test_ids';
 
 export interface FooterProps {
@@ -33,7 +35,12 @@ export const Footer = memo(({ rule }: FooterProps) => {
       data-test-subj={RULE_DETAILS_FOOTER_TEST_ID}
     >
       <EuiFlexItem grow={false}>
-        <AddRuleAttachmentToChatButton rule={rule} pathway="alerts_table_rule_flyout" />
+        <AddRuleAttachmentToChatButton
+          rule={rule}
+          pathway="alerts_table_rule_flyout"
+          disabled={!isEsqlRule(rule.type)}
+          disabledTooltip={NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -54,6 +54,7 @@ import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
@@ -148,6 +149,7 @@ import { RuleScheduleSection } from '../../../rule_management/components/rule_de
 import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
+import { NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP } from '../../../../agent_builder/components/translations';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
@@ -241,7 +243,12 @@ export const RuleDetailsPage = connector(
       'ruleChangesHistoryEnabled'
     );
 
-    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -364,6 +371,21 @@ export const RuleDetailsPage = connector(
         setRule(maybeRule);
       }
     }, [maybeRule]);
+
+    useEffect(() => {
+      let wasSaving = false;
+
+      const savingSub = aiRuleCreation.saving$.subscribe((isSaving: boolean) => {
+        if (wasSaving && !isSaving) {
+          refreshRule();
+        }
+        wasSaving = isSaving;
+      });
+
+      return () => {
+        savingSub.unsubscribe();
+      };
+    }, [aiRuleCreation, refreshRule]);
 
     useLegacyUrlRedirect({ rule, spacesApi });
 
@@ -741,7 +763,12 @@ export const RuleDetailsPage = connector(
                       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                         {isAgentChatExperienceEnabled && rule != null ? (
                           <EuiFlexItem grow={false}>
-                            <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
+                            <AddRuleAttachmentToChatButton
+                              rule={rule}
+                              pathway="rule_details"
+                              disabled={!isEsqlRule(rule.type)}
+                              disabledTooltip={NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP}
+                            />
                           </EuiFlexItem>
                         ) : null}
                         <EuiFlexItem grow={false}>

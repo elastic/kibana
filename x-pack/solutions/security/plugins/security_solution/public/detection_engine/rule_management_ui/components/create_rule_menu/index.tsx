@@ -34,18 +34,6 @@ interface CreateRuleContextMenuProps {
   isDisabled?: boolean;
 }
 
-/**
- * Alternative implementation using SecuritySolutionLinkButton components
- * for better integration with existing routing
- */
-const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
-
-You can review and edit everything before enabling the rule. 
-Desired behavior or activity to detect:
-
-==== YOUR DESCRIPTION HERE====
-`;
-
 const AI_RULE_CREATION_MENU_TOUR_SUBTITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.subtitle',
   {
@@ -73,6 +61,11 @@ const RULE_CREATION_POPOVER_ARIA_LABEL = i18n.translate(
     defaultMessage:
       'Create a rule either using the agent or manually using the rule creation form ',
   }
+);
+
+const AI_RULE_CREATION_ATTACHMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+  { defaultMessage: 'New Rule' }
 );
 
 const AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE = {
@@ -137,17 +130,17 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     const emptyRuleAttachment: AttachmentInput = {
       id: SECURITY_RULE_ATTACHMENT_ID,
       type: SecurityAgentBuilderAttachments.rule,
+      description: AI_RULE_CREATION_ATTACHMENT_LABEL,
       data: {
         text: JSON.stringify({}),
-        attachmentLabel: 'New Rule',
+        attachmentLabel: AI_RULE_CREATION_ATTACHMENT_LABEL,
       },
     };
 
     if (agentBuilder?.openChat) {
+      aiRuleCreation.releaseBind();
       agentBuilder.openChat({
         newConversation: true,
-        initialMessage: AI_RULE_CREATION_INITIAL_MESSAGE,
-        autoSendInitialMessage: false,
         sessionTag: 'security',
         attachments: [emptyRuleAttachment],
       });
