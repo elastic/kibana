@@ -67,8 +67,6 @@ export interface ServiceMapEmbeddableProps {
   parentQuery?: Query | AggregateQuery;
   viewFilters?: ServiceMapViewFilters;
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
-  /** Optional overrides for the service flyout opened from this map. */
-  flyoutOptions?: ServiceMapFlyoutOptions;
   /**
    * When true, shows the quick-filters toggle/menu and minimap even though this is an embed.
    * Set by the dashboard embeddable factory when the panel is maximized in view mode.
@@ -111,7 +109,6 @@ export function ServiceMapEmbeddable({
   parentQuery,
   viewFilters,
   onViewFiltersChange,
-  flyoutOptions,
   showEmbeddedControls,
   flyoutOptions,
 }: ServiceMapEmbeddableProps) {
