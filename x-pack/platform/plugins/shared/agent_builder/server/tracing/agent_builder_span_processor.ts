@@ -96,9 +96,8 @@ function anonymizeNames(
     const isBuiltin = agentId != null && BUILTIN_AGENT_IDS.has(String(agentId));
     result[GenAISemanticConventions.GenAIAgentName] = isBuiltin ? agentName : 'custom';
     if (!isBuiltin) {
-      const prefix = 'invoke_agent ';
-      if (finalSpanName.startsWith(prefix)) {
-        finalSpanName = `${prefix}custom`;
+      if (finalSpanName.startsWith('invoke_agent')) {
+        finalSpanName = `invoke_agent custom`;
       }
     }
   }
@@ -108,16 +107,18 @@ function anonymizeNames(
     const isBuiltin = BUILTIN_TOOL_IDS.has(String(toolName)) || isInternalTool(String(toolName));
     result[GenAISemanticConventions.GenAIToolName] = isBuiltin ? toolName : 'custom';
     if (!isBuiltin) {
-      const prefix = 'execute_tool ';
-      if (finalSpanName.startsWith(prefix)) {
-        finalSpanName = `${prefix}custom`;
+      if (finalSpanName.startsWith('execute_tool')) {
+        finalSpanName = `execute_tool custom`;
       }
     }
   }
-
   const workflowName = result[GenAISemanticConventions.GenAIWorkflowName];
   if (workflowName != null) {
     result[GenAISemanticConventions.GenAIWorkflowName] = 'custom';
+
+    if (finalSpanName.startsWith('invoke_workflow')) {
+      finalSpanName = `invoke_workflow custom`;
+    }
   }
 
   return { attributes: result, spanName: finalSpanName };
