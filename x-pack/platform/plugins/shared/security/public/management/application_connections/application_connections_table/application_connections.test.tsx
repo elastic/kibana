@@ -95,7 +95,7 @@ describe('ApplicationConnections', () => {
     expect(getByTestId('applicationConnectionsTable')).toBeInTheDocument();
   }, 15_000);
 
-  it('hides clients that have zero connections (falls back to the empty prompt when all clients are empty)', async () => {
+  it('shows clients that have zero connections in the grouped view', async () => {
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
@@ -109,13 +109,40 @@ describe('ApplicationConnections', () => {
       connections: { connections: [] },
     });
 
-    const { findByText, queryByText, queryByTestId } = renderPage(coreStart);
+    const { findByText, findByTestId, queryByText, queryByTestId } = renderPage(coreStart);
 
-    expect(await findByText(/No application connections/)).toBeInTheDocument();
-    expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
+    expect(await findByText('Unused MCP app')).toBeInTheDocument();
     expect(
-      queryByTestId('applicationConnectionsListRow-client-without-conn')
-    ).not.toBeInTheDocument();
+      await findByTestId('applicationConnectionsListRow-client-without-conn')
+    ).toBeInTheDocument();
+    expect(await findByTestId('applicationConnectionsCount-client-without-conn')).toHaveTextContent(
+      '0'
+    );
+    expect(queryByTestId('expandRow-client-without-conn')).not.toBeInTheDocument();
+    expect(queryByText(/No application connections/)).not.toBeInTheDocument();
+  });
+
+  it('excludes clients with zero connections from the flat list view', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [
+          { id: 'client-with-conn', client_name: 'Connected app', resource: 'cluster:elastic' },
+          { id: 'client-without-conn', client_name: 'Unused MCP app', resource: 'cluster:elastic' },
+        ],
+      },
+      connections: {
+        connections: [{ id: 'conn-1', client_id: 'client-with-conn', resource: 'cluster:elastic' }],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId, queryByText } = renderPage(coreStart);
+
+    expect(await findByText('Unused MCP app')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    expect(await findByTestId('applicationConnectionsListViewRow-conn-1')).toBeInTheDocument();
+    expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
   });
 
   it('renders clients grouped with their connections', async () => {

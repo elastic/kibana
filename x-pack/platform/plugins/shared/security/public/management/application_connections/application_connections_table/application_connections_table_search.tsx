@@ -136,6 +136,9 @@ export const useApplicationConnectionsTableSearch = ({
           applicationConnectionsMatchesFreeText(applicationConnection, searchQuery)
         )
         .flatMap((applicationConnection) => {
+          if (applicationConnection.connections.length === 0) {
+            return statusFilter.length === 0 ? [applicationConnection] : [];
+          }
           const matchingConnections = applicationConnection.connections.filter((connection) =>
             applicationConnectionMatchesStatus(
               { client: applicationConnection.client, connection },
