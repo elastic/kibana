@@ -46,9 +46,6 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       telemetryCollector: collector,
     });
 
-    logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
-    );
     telemetry.report({
       iterations: result.totalIterations,
       truncated: result.truncated,
