@@ -12,6 +12,7 @@ export { RED_TEAM_MODULE_IDS } from './types';
 export type { RedTeamModuleId } from './types';
 
 export { createAttackSuccessJudge } from './judge/attack_success';
+export { createRefusalQualityJudge } from './judge/refusal_quality';
 
 export type {
   AttackModule,

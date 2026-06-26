@@ -40,6 +40,7 @@ import { scanWithGuardrails, mergeGuardrailRules, DEFAULT_GUARDRAIL_RULES } from
 import { classifySeverity, type NamedEvaluationResult } from './severity';
 import { isAttackPass } from './pass_check';
 import { createAttackSuccessJudge } from './judge/attack_success';
+import { createRefusalQualityJudge } from './judge/refusal_quality';
 
 export interface RedTeamOrchestratorOptions {
   config: RedTeamConfig;
@@ -63,6 +64,7 @@ const buildDefaultEvaluators = (
 
   if (inferenceClient && log) {
     evaluators.push(createAttackSuccessJudge({ inferenceClient, log }));
+    evaluators.push(createRefusalQualityJudge({ inferenceClient, log }));
   }
 
   const { targetContext } = config;
