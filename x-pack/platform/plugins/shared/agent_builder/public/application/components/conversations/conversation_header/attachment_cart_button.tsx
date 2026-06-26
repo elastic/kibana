@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { EuiButtonIcon, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActiveConversationAttachmentCount } from '../../../hooks/use_active_conversation_attachment_count';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import {
   registerAgentCartButtonElement,
   subscribeCartPulse,
   subscribeCartReceiving,
 } from '../../../../agent_first/attachment_coordinator/coordinator_bridge';
+import { useCanvasContext } from '../conversation_rounds/round_response/attachments/canvas_context';
 
 const labels = {
   attachments: (count: number) =>
@@ -41,10 +43,11 @@ const PULSE_DURATION_MS = 400;
 export const AttachmentCartButton: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const attachmentCount = useActiveConversationAttachmentCount();
-  const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
+  const { isEmbeddedContext } = useConversationContext();
+  const { openAttachmentCart } = useCanvasContext();
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
-  const [isPulsing, setIsPulsing] = React.useState(false);
-  const [isReceiving, setIsReceiving] = React.useState(false);
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [isReceiving, setIsReceiving] = useState(false);
 
   const triggerPulse = useCallback(() => {
     window.clearTimeout(pulseTimeoutRef.current);
@@ -58,8 +61,7 @@ export const AttachmentCartButton: React.FC = () => {
     });
   }, []);
 
-  const setButtonWrapperRef = useCallback((node: HTMLDivElement | null) => {
-    buttonWrapperRef.current = node;
+  const setButtonWrapperRef = useCallback((node: HTMLSpanElement | null) => {
     registerAgentCartButtonElement(node);
   }, []);
 
@@ -78,7 +80,12 @@ export const AttachmentCartButton: React.FC = () => {
     return subscribeCartReceiving(setIsReceiving);
   }, []);
 
+  const handleOpenCart = useCallback(() => {
+    openAttachmentCart(isEmbeddedContext);
+  }, [openAttachmentCart, isEmbeddedContext]);
+
   const cartIconType = isReceiving ? 'folderOpen' : 'folder';
+  const ariaLabel = labels.attachments(attachmentCount);
 
   const badgeStyles = css`
     position: absolute;
@@ -93,33 +100,33 @@ export const AttachmentCartButton: React.FC = () => {
   `;
 
   return (
-    <EuiToolTip content={labels.attachments(attachmentCount)} position="bottom">
-      <div
-        ref={setButtonWrapperRef}
-        tabIndex={0}
-        css={css`
-          position: relative;
-          display: inline-flex;
-          ${isPulsing ? pulseStyles : undefined}
-        `}
-      >
+    <span
+      ref={setButtonWrapperRef}
+      css={css`
+        position: relative;
+        display: inline-flex;
+      `}
+    >
+      <EuiToolTip content={ariaLabel} position="bottom" disableScreenReaderOutput>
         <EuiButtonIcon
           color="text"
           iconType={cartIconType}
           size="xs"
-          aria-label={labels.attachments(attachmentCount)}
+          aria-label={ariaLabel}
           data-test-subj="agentBuilderAttachmentCartButton"
+          onClick={handleOpenCart}
+          css={isPulsing ? pulseStyles : undefined}
         />
-        {attachmentCount > 0 ? (
-          <EuiNotificationBadge
-            css={badgeStyles}
-            color="accent"
-            data-test-subj="agentBuilderAttachmentCartBadge"
-          >
-            {attachmentCount}
-          </EuiNotificationBadge>
-        ) : null}
-      </div>
-    </EuiToolTip>
+      </EuiToolTip>
+      {attachmentCount > 0 ? (
+        <EuiNotificationBadge
+          css={badgeStyles}
+          color="accent"
+          data-test-subj="agentBuilderAttachmentCartBadge"
+        >
+          {attachmentCount}
+        </EuiNotificationBadge>
+      ) : null}
+    </span>
   );
 };

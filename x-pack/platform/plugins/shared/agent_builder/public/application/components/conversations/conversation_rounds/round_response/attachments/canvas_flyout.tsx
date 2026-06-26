@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
@@ -19,7 +20,9 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
+import { getAgentWorkspaceMountElement } from '../../../../../../agent_workspace/agent_workspace_flyout_defaults';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentCartPanel } from './attachment_cart_panel';
 import { useCanvasContext } from './canvas_context';
 import { CanvasPanelOverlay } from './canvas_panel_overlay';
 
@@ -28,6 +31,10 @@ const CANVAS_MIN_WIDTH = 300;
 
 const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
   defaultMessage: 'Attachment preview',
+});
+
+const CART_FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.cartAriaLabel', {
+  defaultMessage: 'Attachment cart',
 });
 
 interface CanvasFlyoutProps {
@@ -68,7 +75,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const updateOrigin = useCallback(
     async (origin: string) => {
-      if (!conversationId || !canvasState) {
+      if (!conversationId || !canvasState || canvasState.mode !== 'attachment') {
         return;
       }
       const result = await attachmentsService.updateOrigin(
@@ -89,15 +96,19 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     ]
   );
 
-  const uiDefinition = canvasState
-    ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
-    : null;
+  const uiDefinition =
+    canvasState?.mode === 'attachment'
+      ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
+      : null;
 
   const [dynamicButtons, setDynamicButtons] = useState<ActionButton[]>([]);
 
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
+  }, [
+    canvasState?.mode === 'attachment' ? canvasState.attachment.id : undefined,
+    canvasState?.mode === 'attachment' ? canvasState.attachment.version : undefined,
+  ]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -108,14 +119,16 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       return dynamicButtons;
     }
     const staticButtons =
-      uiDefinition?.getActionButtons?.({
-        attachment: canvasState.attachment,
-        isSidebar: canvasState.isSidebar,
-        agentId,
-        updateOrigin,
-        openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
-        isCanvas: true,
-      }) ?? [];
+      canvasState.mode === 'attachment'
+        ? uiDefinition?.getActionButtons?.({
+            attachment: canvasState.attachment,
+            isSidebar: canvasState.isSidebar,
+            agentId,
+            updateOrigin,
+            openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
+            isCanvas: true,
+          }) ?? []
+        : [];
     return [...staticButtons, ...dynamicButtons];
   }, [
     canvasState,
@@ -130,21 +143,61 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const useAgentWorkspacePanel =
     isAgentWorkspaceMount && canvasState && !canvasState.isSidebar;
 
+  const [, retryAgentWorkspaceMount] = useReducer((count) => count + 1, 0);
+
+  useEffect(() => {
+    if (!useAgentWorkspacePanel || getAgentWorkspaceMountElement()) {
+      return;
+    }
+
+    const rafId = requestAnimationFrame(() => {
+      retryAgentWorkspaceMount();
+    });
+
+    return () => window.cancelAnimationFrame(rafId);
+  }, [useAgentWorkspacePanel, canvasState]);
+
+  const agentWorkspaceMountElement = useAgentWorkspacePanel
+    ? getAgentWorkspaceMountElement()
+    : null;
+
+  const inlineCartOverlayStyles = css`
+    position: absolute;
+    inset: 0;
+    z-index: ${layoutLevels.applicationTopBar + 1};
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: ${euiTheme.colors.backgroundBasePlain};
+  `;
+
+  // Agent workspace cart: inline overlay in the conversation column (no portal).
+  if (
+    isAgentWorkspaceMount &&
+    canvasState?.mode === 'cart' &&
+    !canvasState.isSidebar
+  ) {
+    return (
+      <div css={inlineCartOverlayStyles} data-test-subj="agentWorkspaceAttachmentCartOverlay">
+        <AttachmentCartPanel onClose={closeCanvas} />
+      </div>
+    );
+  }
+
+  // Agent workspace attachment preview uses a portaled overlay — never mount a flyout first or
+  // EuiFlyout will call onClose on unmount and clear canvas state before the overlay appears.
   if (useAgentWorkspacePanel) {
-    return <CanvasPanelOverlay attachmentsService={attachmentsService} />;
+    if (!agentWorkspaceMountElement) {
+      return null;
+    }
+
+    return (
+      <CanvasPanelOverlay
+        attachmentsService={attachmentsService}
+        mountElement={agentWorkspaceMountElement}
+      />
+    );
   }
-
-  if (!canvasState || !uiDefinition?.renderCanvasContent) {
-    return null;
-  }
-
-  const { attachment, isSidebar } = canvasState;
-  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-  const header = uiDefinition?.getHeader?.({ attachment });
-
-  const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
-  const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
-  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
 
   const flyoutBodyStyles = css`
     padding-top: ${euiTheme.size.m};
@@ -157,6 +210,43 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       height: 100%;
     }
   `;
+
+  if (canvasState?.mode === 'cart') {
+    const { isSidebar } = canvasState;
+    const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
+    const flyoutSize = isSidebar || isNarrowViewport ? 'full' : DEFAULT_CANVAS_WIDTH;
+
+    return (
+      <EuiFlyout
+        onClose={closeCanvas}
+        aria-label={CART_FLYOUT_ARIA_LABEL}
+        ownFocus={false}
+        outsideClickCloses={true}
+        minWidth={CANVAS_MIN_WIDTH}
+        maxWidth={DEFAULT_CANVAS_WIDTH}
+        resizable={!isSidebar && !isNarrowViewport}
+        size={flyoutSize}
+        type={flyoutType}
+        hideCloseButton
+        paddingSize="none"
+        data-test-subj="agentBuilderAttachmentCartFlyout"
+      >
+        <AttachmentCartPanel onClose={closeCanvas} />
+      </EuiFlyout>
+    );
+  }
+
+  if (!canvasState || canvasState.mode !== 'attachment' || !uiDefinition?.renderCanvasContent) {
+    return null;
+  }
+
+  const { attachment, isSidebar } = canvasState;
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
+
+  const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
+  const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
+  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
 
   return (
     <EuiFlyout

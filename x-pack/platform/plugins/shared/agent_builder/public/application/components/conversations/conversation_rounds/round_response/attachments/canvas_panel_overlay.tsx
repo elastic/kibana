@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
-import { AGENT_WORKSPACE_MOUNT_TEST_SUBJ } from '../../../../../../agent_workspace/agent_workspace_flyout_defaults';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { shouldOfferSidebarConversation } from '../../../../../hooks/use_navigation';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentCartPanel } from './attachment_cart_panel';
 import { useCanvasContext } from './canvas_context';
 
 const ENTRY_DURATION_MS = 250;
@@ -26,13 +27,17 @@ const ENTRY_TRANSLATE_Y_PX = 14;
 
 interface CanvasPanelOverlayProps {
   attachmentsService: AttachmentsService;
+  mountElement: HTMLElement;
 }
 
 /**
  * Full-column attachment preview for the agent workspace chrome column (POC).
  * Portals into agentWorkspaceMount — not a flyout, no scrim.
  */
-export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachmentsService }) => {
+export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
+  attachmentsService,
+  mountElement,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
@@ -59,7 +64,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
 
   const updateOrigin = useCallback(
     async (origin: string) => {
-      if (!conversationId || !canvasState) {
+      if (!conversationId || !canvasState || canvasState.mode !== 'attachment') {
         return;
       }
       const result = await attachmentsService.updateOrigin(
@@ -80,20 +85,15 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
     ]
   );
 
-  const uiDefinition = canvasState
-    ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
-    : null;
+  const uiDefinition =
+    canvasState?.mode === 'attachment'
+      ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
+      : null;
 
   const [dynamicButtons, setDynamicButtons] = useState<ActionButton[]>([]);
-  const [mountElement, setMountElement] = useState<HTMLElement | null>(null);
-  const [isEntering, setIsEntering] = useState(true);
+  const [isEntering, setIsEntering] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const overlayRef = useRef<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    const mountRoot = document.querySelector(`[data-test-subj="${AGENT_WORKSPACE_MOUNT_TEST_SUBJ}"]`);
-    setMountElement(mountRoot instanceof HTMLElement ? mountRoot : null);
-  }, []);
 
   useEffect(() => {
     setDynamicButtons([]);
@@ -102,7 +102,11 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
     requestAnimationFrame(() => {
       setIsEntering(false);
     });
-  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
+  }, [
+    canvasState?.mode,
+    canvasState?.mode === 'attachment' ? canvasState.attachment.id : undefined,
+    canvasState?.mode === 'attachment' ? canvasState.attachment.version : undefined,
+  ]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -113,14 +117,16 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
       return dynamicButtons;
     }
     const staticButtons =
-      uiDefinition?.getActionButtons?.({
-        attachment: canvasState.attachment,
-        isSidebar: canvasState.isSidebar,
-        agentId,
-        updateOrigin,
-        openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
-        isCanvas: true,
-      }) ?? [];
+      canvasState.mode === 'attachment'
+        ? uiDefinition?.getActionButtons?.({
+            attachment: canvasState.attachment,
+            isSidebar: canvasState.isSidebar,
+            agentId,
+            updateOrigin,
+            openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
+            isCanvas: true,
+          }) ?? []
+        : [];
     return [...staticButtons, ...dynamicButtons];
   }, [
     canvasState,
@@ -170,13 +176,9 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
     };
   }, [isClosing, finishClose]);
 
-  if (!canvasState || !uiDefinition?.renderCanvasContent || !mountElement) {
+  if (!canvasState) {
     return null;
   }
-
-  const { attachment, isSidebar } = canvasState;
-  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-  const header = uiDefinition?.getHeader?.({ attachment });
 
   const isVisible = !isEntering && !isClosing;
 
@@ -189,7 +191,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
   const overlayStyles = css`
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: ${layoutLevels.applicationTopBar + 1};
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -205,6 +207,27 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
     overflow: auto;
     padding-top: ${euiTheme.size.m};
   `;
+
+  if (canvasState.mode === 'cart') {
+    return createPortal(
+      <div
+        ref={overlayRef}
+        css={overlayStyles}
+        data-test-subj="agentWorkspaceAttachmentCartOverlay"
+      >
+        <AttachmentCartPanel onClose={handleClose} />
+      </div>,
+      mountElement
+    );
+  }
+
+  if (canvasState.mode !== 'attachment' || !uiDefinition?.renderCanvasContent) {
+    return null;
+  }
+
+  const { attachment, isSidebar } = canvasState;
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   return createPortal(
     <div
