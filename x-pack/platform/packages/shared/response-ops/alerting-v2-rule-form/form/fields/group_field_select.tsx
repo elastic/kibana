@@ -10,6 +10,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
+import { getBreachQuery } from '../utils/query_helpers';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
 import { getGroupByColumnsFromQuery } from '../hooks/use_default_group_by';
 import { useRuleFormServices, useRuleFormMeta } from '../contexts';
@@ -23,7 +24,8 @@ export const GroupFieldSelect = ({ label: labelOverride }: GroupFieldSelectProps
   const { data } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'evaluation.query.base', control });
+  const ruleQuery = useWatch({ name: 'query', control });
+  const query = getBreachQuery(ruleQuery);
   const groupByRowId = 'ruleV2FormGroupByField';
 
   // Auto-populate group fields from the STATS ... BY clause whenever the
@@ -79,9 +81,12 @@ export const GroupFieldSelect = ({ label: labelOverride }: GroupFieldSelectProps
         return (
           <EuiFormRow
             id={groupByRowId}
-            label={labelOverride ?? i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
-              defaultMessage: 'Group Fields',
-            })}
+            label={
+              labelOverride ??
+              i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
+                defaultMessage: 'Group Fields',
+              })
+            }
             labelAppend={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyOptional', {
               defaultMessage: 'optional',
             })}

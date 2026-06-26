@@ -219,19 +219,14 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
     <EuiPopover
       id="alertsV2TakeActionPanel"
       aria-label={i18n.TAKE_ACTION}
-      button={button}
+      button={button ?? defaultButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="upRight"
       repositionOnScroll
     >
-      <EuiContextMenu
-        size="s"
-        initialPanelId={0}
-        panels={panels}
-        data-test-subj="alertsV2TakeActionMenu"
-      />
+      <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="alertsV2TakeActionMenu" />
     </EuiPopover>
   );
 };

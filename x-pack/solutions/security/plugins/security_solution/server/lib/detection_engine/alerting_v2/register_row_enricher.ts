@@ -5,9 +5,31 @@
  * 2.0.
  */
 
-import { registerRuleExecutionRowEnricher } from '@kbn/alerting-v2-plugin/server';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger } from '@kbn/logging';
+import type { IScopedClusterClient } from '@kbn/core/server';
+
+/**
+ * TODO(alerting-v2 migration): main's redesigned alerting_v2 plugin removed the
+ * row-enricher extension point (`registerRuleExecutionRowEnricher`). The
+ * enrichment logic below is preserved so it can be re-wired once the platform
+ * plugin exposes an equivalent extension API. Until then registration is a
+ * local no-op and enrichment does not run during v2 rule execution.
+ */
+interface RowEnricherContext {
+  rows: Array<Record<string, unknown>>;
+  rule: { id: string };
+  scopedClusterClient: IScopedClusterClient;
+  spaceId: string;
+}
+
+type RuleExecutionRowEnricher = (
+  ctx: RowEnricherContext
+) => Promise<Array<Record<string, unknown>>>;
+
+const registerRuleExecutionRowEnricher = (_enricher: RuleExecutionRowEnricher): void => {
+  // no-op: deferred until the alerting_v2 plugin re-exposes the extension point.
+};
 
 import type { DetectionAlertLatest } from '../../../../common/api/detection_engine/model/alerts';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';

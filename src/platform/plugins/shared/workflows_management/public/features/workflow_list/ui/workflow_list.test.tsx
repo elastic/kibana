@@ -101,6 +101,10 @@ jest.mock('../../../components', () => ({
   ),
 }));
 
+jest.mock('../../../components/workflows_empty_state/workflows_empty_state', () => ({
+  WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
+}));
+
 jest.mock('../../run_workflow/ui/workflow_execute_modal', () => ({
   WorkflowExecuteModal: () => <div data-test-subj="workflow-execute-modal" />,
 }));
@@ -227,7 +231,7 @@ describe('WorkflowList', () => {
   });
 
   describe('empty state', () => {
-    it('shows empty state when there are no workflows and no filters', () => {
+    it('shows the create empty state when there are no workflows and the user can create', () => {
       mockUseWorkflows.mockReturnValue({
         data: { results: [], total: 0, ...defaultSearch },
         isLoading: false,
@@ -236,6 +240,26 @@ describe('WorkflowList', () => {
       });
       renderComponent({ search: { ...defaultSearch } });
       expect(screen.getByTestId('workflows-empty-state')).toBeInTheDocument();
+    });
+
+    it('shows the read-only empty state when there are no workflows and the user cannot create', () => {
+      const { useWorkflowsCapabilities } = jest.requireMock('@kbn/workflows-ui') as {
+        useWorkflowsCapabilities: jest.Mock;
+      };
+      useWorkflowsCapabilities.mockReturnValue({
+        ...mockCreateMockWorkflowsCapabilities(),
+        canCreateWorkflow: false,
+      });
+
+      mockUseWorkflows.mockReturnValue({
+        data: { results: [], total: 0, ...defaultSearch },
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+      renderComponent({ search: { ...defaultSearch } });
+
+      expect(screen.getByTestId('workflows-empty-state-readonly')).toBeInTheDocument();
     });
 
     it('does not show empty state when filters are applied even with no results', () => {

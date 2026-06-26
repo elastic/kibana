@@ -92,7 +92,15 @@ export interface SmlHttpItem {
   created_at: string;
   updated_at: string;
   spaces: string[];
-  permissions: string[];
+  tags: string[];
+  /**
+   * Permissions required to access the underlying element. Always
+   * present; inner arrays may be empty.
+   */
+  permissions: {
+    kibana: { privileges: Array<{ name: string }> };
+    elasticsearch: { indices: Array<{ name: string }> };
+  };
   /** How this chunk was produced. */
   ingestion_method: 'manual' | 'crawled';
 }

@@ -1,0 +1,311 @@
+{
+  "sha1": "2fd013cb86d878dfb51ef7931ea6a4b1672ccd01",
+  "tests": [
+    {
+      "id": "d5de350ea79b8d1-e52296bed230db3",
+      "title": "ML Calendar - create should successfully create calendar by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "d5de350ea79b8d1-ac56d4376e2fe36",
+      "title": "ML Calendar - create should not create calendar for user without required permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "d5de350ea79b8d1-e950f84f52d69cf",
+      "title": "ML Calendar - create should not create calendar for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/create_calendars.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "2bb12074edb2cb7-2d7672d6d371ab3",
+      "title": "ML Calendar - delete should delete calendar by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "2bb12074edb2cb7-4838033dc8377ef",
+      "title": "ML Calendar - delete should not delete calendar for user without required permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "2bb12074edb2cb7-a4ac3e8bf253b09",
+      "title": "ML Calendar - delete should not delete calendar for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "2bb12074edb2cb7-973915877750205",
+      "title": "ML Calendar - delete should return 404 for a non-existent calendar id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/delete_calendars.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "c1db5f4fe4ee590-a56108825d94a67",
+      "title": "ML Calendar - get all should fetch all calendars as poweruser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "c1db5f4fe4ee590-36be80e896417f9",
+      "title": "ML Calendar - get all should fetch all calendars as viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "c1db5f4fe4ee590-89bec333aa03c1c",
+      "title": "ML Calendar - get all should not fetch calendars for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_all_calendars.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "c469190c27100f4-471ed63c24a2bc7",
+      "title": "ML Calendar - get by id should fetch calendar and associated events by id as poweruser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "c469190c27100f4-8e714eeb450a57a",
+      "title": "ML Calendar - get by id should fetch calendar and associated events by id as viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "c469190c27100f4-0f55604276fa551",
+      "title": "ML Calendar - get by id should not fetch calendar for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "c469190c27100f4-0a1f1145fb0e364",
+      "title": "ML Calendar - get by id should return 404 for a non-existent calendar id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/get_calendar_by_id.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "7bdec8f03b8b0ab-ff838630760f13e",
+      "title": "ML Calendar - update should update calendar by id with new settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "7bdec8f03b8b0ab-93baed67fc73cd4",
+      "title": "ML Calendar - update should not allow updating a calendar for user without required permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "7bdec8f03b8b0ab-55940ace7e4ff4a",
+      "title": "ML Calendar - update should not allow updating a calendar for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "7bdec8f03b8b0ab-b2b267c5c7a37f1",
+      "title": "ML Calendar - update should return 404 for a non-existent calendar id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/calendars/update_calendars.spec.ts",
+        "line": 122,
+        "column": 12
+      }
+    }
+  ]
+}

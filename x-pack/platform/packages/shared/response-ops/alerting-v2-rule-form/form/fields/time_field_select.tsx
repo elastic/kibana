@@ -12,6 +12,7 @@ import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
 import { getTimeFieldOptions } from '../utils';
+import { getBreachQuery } from '../utils/query_helpers';
 import { useDataFields } from '../hooks/use_data_fields';
 import { useRuleFormServices, useRuleFormMeta } from '../contexts';
 
@@ -32,7 +33,8 @@ export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'evaluation.query.base', control });
+  const ruleQuery = useWatch({ name: 'query', control });
+  const query = getBreachQuery(ruleQuery);
 
   const handleAutoSelect = useCallback(
     (fields: DataViewFieldMap) => {

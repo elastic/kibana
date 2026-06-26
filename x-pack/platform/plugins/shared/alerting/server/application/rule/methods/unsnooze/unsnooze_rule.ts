@@ -57,10 +57,6 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
       operation: WriteOperations.Unsnooze,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

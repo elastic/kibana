@@ -56,6 +56,17 @@ export const useRulesTableActions = ({
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
 
+  const convertToV2Action: DefaultItemAction<Rule> = {
+    type: 'icon',
+    'data-test-subj': 'convertToV2Action',
+    description: i18n.CONVERT_TO_V2,
+    icon: 'push',
+    name: i18n.CONVERT_TO_V2,
+    available: (rule: Rule) => rule.type === 'esql' || rule.type === 'threshold',
+    enabled: () => canEditRules,
+    onClick: (rule: Rule) => onConvertToV2?.(rule),
+  };
+
   return [
     {
       type: 'icon',
@@ -153,20 +164,7 @@ export const useRulesTableActions = ({
       },
       enabled: (rule: Rule) => canManualRunRules && rule.enabled,
     },
-    ...(onConvertToV2
-      ? [
-          {
-            type: 'icon' as const,
-            'data-test-subj': 'convertToV2Action',
-            description: i18n.CONVERT_TO_V2,
-            icon: 'push',
-            name: i18n.CONVERT_TO_V2,
-            available: (rule: Rule) => rule.type === 'esql' || rule.type === 'threshold',
-            enabled: () => canEditRules,
-            onClick: (rule: Rule) => onConvertToV2(rule),
-          },
-        ]
-      : []),
+    ...(onConvertToV2 ? [convertToV2Action] : []),
     {
       type: 'icon',
       'data-test-subj': 'deleteRuleAction',

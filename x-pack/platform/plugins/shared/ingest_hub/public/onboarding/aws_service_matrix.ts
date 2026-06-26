@@ -9,6 +9,11 @@
 // Source of truth for delivery mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
+import {
+  AWS_SERVICE_PROVIDER_PERMISSIONS,
+  type ProviderPermissions,
+} from './aws_provider_permissions';
+
 export type SignalType = 'logs' | 'metrics';
 
 export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
@@ -52,6 +57,8 @@ export interface AwsServiceMatrixEntry {
   inputs?: string[];
   /** Manifest var names the user must configure to activate this data stream */
   requiredConfig?: string[];
+  /** Boolean manifest vars that are required: true in the package but have default values */
+  mandatoryFields?: string[];
   packageName: string;
   /** Fleet policy template name (policy_templates[].name in the package manifest) */
   policyTemplate?: string;
@@ -60,9 +67,27 @@ export interface AwsServiceMatrixEntry {
   /** Whether this service should be shown in the AWS onboarding UI */
   showInUI: boolean;
   badge?: Badge;
+  /** Hardcoded AWS IAM permissions required to ingest this data stream.
+   *  Temporary until packages expose provider_permissions in the manifest. */
+  providerPermissions?: ProviderPermissions;
 }
 
-export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
+function hasAgentlessDelivery(entry: AwsServiceMatrixEntry): boolean {
+  return entry.deliveryMethods.some(({ method }) => method === 'agentless');
+}
+
+function enrichWithProviderPermissions(
+  entry: Omit<AwsServiceMatrixEntry, 'providerPermissions'>
+): AwsServiceMatrixEntry {
+  if (!hasAgentlessDelivery(entry)) {
+    return entry;
+  }
+
+  const providerPermissions = AWS_SERVICE_PROVIDER_PERMISSIONS[entry.id];
+  return providerPermissions ? { ...entry, providerPermissions } : entry;
+}
+
+const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'>[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
@@ -72,6 +97,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'apigateway',
     defaultEnabled: true,
@@ -98,6 +124,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     requiredConfig: ['regions'],
+    mandatoryFields: ['collect_esm_metrics'],
     packageName: 'aws',
     policyTemplate: 'lambda',
     defaultEnabled: true,
@@ -111,6 +138,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
+    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'lambda',
     defaultEnabled: true,
@@ -126,6 +154,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'ec2',
     defaultEnabled: true,
@@ -165,6 +194,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }, { method: 'cloud_forwarder' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'emr',
     defaultEnabled: true,
@@ -206,6 +236,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
+    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'cloudwatch',
     defaultEnabled: false,
@@ -234,6 +265,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     requiredConfig: [],
+    mandatoryFields: ['leaderelection'],
     packageName: 'aws',
     policyTemplate: 'billing',
     defaultEnabled: true,
@@ -266,6 +298,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     ],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'cloudtrail',
     defaultEnabled: true,
@@ -279,6 +312,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['cel'],
     requiredConfig: ['aws_region'],
+    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'config',
     defaultEnabled: true,
@@ -292,6 +326,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-s3', 'httpjson'],
     requiredConfig: ['aws_region', 'detector_id', 'bucket_arn', 'region'],
+    mandatoryFields: [
+      'collect_s3_logs',
+      'preserve_duplicate_custom_fields',
+      'preserve_original_event',
+    ],
     packageName: 'aws',
     policyTemplate: 'guardduty',
     defaultEnabled: true,
@@ -306,6 +345,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
+    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'inspector',
     defaultEnabled: true,
@@ -319,6 +359,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'firewall',
     defaultEnabled: true,
@@ -345,6 +386,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
+    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'securityhub',
     defaultEnabled: true,
@@ -358,6 +400,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
+    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'securityhub',
     defaultEnabled: true,
@@ -371,6 +414,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
+    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'securityhub',
     defaultEnabled: true,
@@ -384,6 +428,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'waf',
     defaultEnabled: true,
@@ -399,6 +444,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn', 'region'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'cloudfront',
     defaultEnabled: true,
@@ -412,6 +458,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'elb',
     defaultEnabled: true,
@@ -451,6 +498,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
+    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'route53',
     defaultEnabled: true,
@@ -464,6 +512,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'agentless', preferred: true }, { method: 'cloud_forwarder' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'route53',
     defaultEnabled: true,
@@ -494,6 +543,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     ],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'vpcflow',
     defaultEnabled: true,
@@ -561,6 +611,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn', 'region'],
+    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 's3',
     defaultEnabled: true,
@@ -831,5 +882,9 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 ];
+
+export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = AWS_SERVICES_MATRIX_RAW.map(
+  enrichWithProviderPermissions
+);
 
 export const AWS_SERVICES_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));

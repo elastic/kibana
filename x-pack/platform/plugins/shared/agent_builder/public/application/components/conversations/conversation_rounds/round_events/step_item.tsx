@@ -13,6 +13,10 @@ import {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { ReasoningStep } from './steps/reasoning_step';
 import { ToolCallStep } from './steps/tool_call_step';
 import { CompactionStep } from './steps/compaction_step';
@@ -20,12 +24,30 @@ import { BackgroundAgentStep } from './steps/background_agent_step';
 
 interface StepItemProps {
   step: ConversationRoundStep;
+  steps: ConversationRoundStep[];
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationId?: string;
 }
 
-export const StepItem: React.FC<StepItemProps> = ({ step }) => {
+export const StepItem: React.FC<StepItemProps> = ({
+  step,
+  steps,
+  conversationAttachments,
+  attachmentRefs,
+  conversationId,
+}) => {
   if (isReasoningStep(step)) {
     if (step.transient) return null;
-    return <ReasoningStep step={step} />;
+    return (
+      <ReasoningStep
+        step={step}
+        steps={steps}
+        conversationAttachments={conversationAttachments}
+        attachmentRefs={attachmentRefs}
+        conversationId={conversationId}
+      />
+    );
   }
   if (isToolCallStep(step)) {
     return <ToolCallStep step={step} />;

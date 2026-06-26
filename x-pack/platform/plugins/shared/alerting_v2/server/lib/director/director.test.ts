@@ -31,7 +31,6 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
       { name: 'last_episode_timestamp', type: 'date' },
-      { name: 'last_episode_started_at', type: 'date' },
       { name: 'group_hash', type: 'keyword' },
     ],
     records.map((r) => [
@@ -40,7 +39,6 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       r.last_episode_status,
       r.last_episode_status_count,
       r.last_episode_timestamp ?? null,
-      r.last_episode_started_at ?? null,
       r.group_hash,
     ])
   );
@@ -97,7 +95,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
-        started_at: '2025-01-01T00:00:00.000Z',
       });
     });
 
@@ -112,7 +109,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: null,
@@ -133,7 +129,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
-        started_at: '2025-01-01T00:00:00.000Z',
       });
     });
 
@@ -148,7 +143,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode-1',
             last_episode_status: 'inactive',
@@ -167,7 +161,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
-        started_at: '2025-01-01T00:00:00.000Z',
       });
     });
 
@@ -182,7 +175,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode',
             last_episode_status: 'pending',
@@ -201,7 +193,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
-        started_at: '2026-01-01T00:00:00.000Z',
       });
     });
 
@@ -216,7 +207,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode',
             last_episode_status: 'active',
@@ -235,7 +225,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
-        started_at: '2026-01-01T00:00:00.000Z',
       });
     });
 
@@ -250,7 +239,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'recovered',
             last_episode_id: 'existing-episode',
             last_episode_status: 'recovering',
@@ -269,7 +257,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
-        started_at: '2026-01-01T00:00:00.000Z',
       });
     });
 
@@ -283,7 +270,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'active',
@@ -292,7 +278,6 @@ describe('DirectorService', () => {
           },
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-2',
             last_episode_status: 'active',
@@ -313,13 +298,11 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
-        started_at: '2026-01-01T00:00:00.000Z',
       });
 
       expect(result[1].episode).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
-        started_at: '2026-01-01T00:00:00.000Z',
       });
     });
 
@@ -334,7 +317,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'recovered',
             last_episode_id: 'old-episode',
             last_episode_status: 'inactive',
@@ -365,7 +347,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'existing-episode',
             last_episode_status: alertEpisodeStatus.active,
@@ -430,7 +411,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'pending',
@@ -450,7 +430,6 @@ describe('DirectorService', () => {
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
         status_count: 2,
-        started_at: '2026-01-01T00:00:00.000Z',
       });
     });
 
@@ -469,7 +448,6 @@ describe('DirectorService', () => {
         createLatestAlertEventStateResponse([
           {
             last_episode_timestamp: '2026-01-01T00:00:00.000Z',
-            last_episode_started_at: '2026-01-01T00:00:00.000Z',
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'pending',
@@ -488,244 +466,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
-        started_at: '2026-01-01T00:00:00.000Z',
-      });
-    });
-  });
-
-  describe('grouping duration (episode expiry)', () => {
-    const EPISODE_STARTED = '2026-01-01T00:00:00.000Z';
-    const EPISODE_STARTED_MS = new Date(EPISODE_STARTED).getTime();
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('keeps the same episode when duration has not expired', async () => {
-      const ruleWithDuration = createRuleResponse({
-        grouping: { fields: ['host.name'], duration: '1h' },
-      });
-
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        episode: undefined,
-      });
-
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          {
-            last_episode_timestamp: EPISODE_STARTED,
-            last_episode_started_at: EPISODE_STARTED,
-            last_status: 'breached',
-            last_episode_id: 'existing-episode',
-            last_episode_status: 'active',
-            last_episode_status_count: null,
-            group_hash: 'hash-1',
-          },
-        ])
-      );
-
-      jest.useFakeTimers();
-      jest.setSystemTime(EPISODE_STARTED_MS + 30 * 60_000);
-
-      const result = await directorService.run({
-        rule: ruleWithDuration,
-        executionContext: testExecutionContext,
-        alertEvents: [alertEvent],
-      });
-
-      expect(result[0].episode?.id).toBe('existing-episode');
-      expect(result[0].episode?.started_at).toBe(EPISODE_STARTED);
-    });
-
-    it('creates a new episode when duration has expired', async () => {
-      const ruleWithDuration = createRuleResponse({
-        grouping: { fields: ['host.name'], duration: '1h' },
-      });
-
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        episode: undefined,
-      });
-
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          {
-            last_episode_timestamp: EPISODE_STARTED,
-            last_episode_started_at: EPISODE_STARTED,
-            last_status: 'breached',
-            last_episode_id: 'old-episode',
-            last_episode_status: 'active',
-            last_episode_status_count: null,
-            group_hash: 'hash-1',
-          },
-        ])
-      );
-
-      jest.useFakeTimers();
-      jest.setSystemTime(EPISODE_STARTED_MS + 61 * 60_000);
-
-      const result = await directorService.run({
-        rule: ruleWithDuration,
-        executionContext: testExecutionContext,
-        alertEvents: [alertEvent],
-      });
-
-      expect(result[0].episode?.id).toBe('mocked-uuid');
-      expect(result[0].episode?.started_at).toBe('2025-01-01T00:00:00.000Z');
-    });
-
-    it('creates a new episode at the exact expiry boundary', async () => {
-      const ruleWithDuration = createRuleResponse({
-        grouping: { fields: ['host.name'], duration: '30m' },
-      });
-
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        episode: undefined,
-      });
-
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          {
-            last_episode_timestamp: EPISODE_STARTED,
-            last_episode_started_at: EPISODE_STARTED,
-            last_status: 'breached',
-            last_episode_id: 'old-episode',
-            last_episode_status: 'active',
-            last_episode_status_count: null,
-            group_hash: 'hash-1',
-          },
-        ])
-      );
-
-      jest.useFakeTimers();
-      jest.setSystemTime(EPISODE_STARTED_MS + 30 * 60_000 + 1);
-
-      const result = await directorService.run({
-        rule: ruleWithDuration,
-        executionContext: testExecutionContext,
-        alertEvents: [alertEvent],
-      });
-
-      expect(result[0].episode?.id).toBe('mocked-uuid');
-    });
-
-    it('does not expire episodes when no duration is configured', async () => {
-      const ruleNoDuration = createRuleResponse({
-        grouping: { fields: ['host.name'] },
-      });
-
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        episode: undefined,
-      });
-
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          {
-            last_episode_timestamp: EPISODE_STARTED,
-            last_episode_started_at: EPISODE_STARTED,
-            last_status: 'breached',
-            last_episode_id: 'existing-episode',
-            last_episode_status: 'active',
-            last_episode_status_count: null,
-            group_hash: 'hash-1',
-          },
-        ])
-      );
-
-      jest.useFakeTimers();
-      jest.setSystemTime(EPISODE_STARTED_MS + 365 * 24 * 60 * 60_000);
-
-      const result = await directorService.run({
-        rule: ruleNoDuration,
-        executionContext: testExecutionContext,
-        alertEvents: [alertEvent],
-      });
-
-      expect(result[0].episode?.id).toBe('existing-episode');
-    });
-
-    it('does not expire episodes when started_at is missing (backwards compat)', async () => {
-      const ruleWithDuration = createRuleResponse({
-        grouping: { fields: ['host.name'], duration: '1h' },
-      });
-
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        episode: undefined,
-      });
-
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          {
-            last_episode_timestamp: EPISODE_STARTED,
-            last_episode_started_at: null,
-            last_status: 'breached',
-            last_episode_id: 'existing-episode',
-            last_episode_status: 'active',
-            last_episode_status_count: null,
-            group_hash: 'hash-1',
-          },
-        ])
-      );
-
-      jest.useFakeTimers();
-      jest.setSystemTime(EPISODE_STARTED_MS + 2 * 60 * 60_000);
-
-      const result = await directorService.run({
-        rule: ruleWithDuration,
-        executionContext: testExecutionContext,
-        alertEvents: [alertEvent],
-      });
-
-      expect(result[0].episode?.id).toBe('existing-episode');
-    });
-
-    it('expired episode starts fresh with pending status', async () => {
-      const ruleWithDuration = createRuleResponse({
-        grouping: { fields: ['host.name'], duration: '1h' },
-      });
-
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        episode: undefined,
-      });
-
-      mockEsClient.esql.query.mockResolvedValue(
-        createLatestAlertEventStateResponse([
-          {
-            last_episode_timestamp: EPISODE_STARTED,
-            last_episode_started_at: EPISODE_STARTED,
-            last_status: 'breached',
-            last_episode_id: 'old-episode',
-            last_episode_status: 'active',
-            last_episode_status_count: null,
-            group_hash: 'hash-1',
-          },
-        ])
-      );
-
-      jest.useFakeTimers();
-      jest.setSystemTime(EPISODE_STARTED_MS + 2 * 60 * 60_000);
-
-      const result = await directorService.run({
-        rule: ruleWithDuration,
-        executionContext: testExecutionContext,
-        alertEvents: [alertEvent],
-      });
-
-      expect(result[0].episode).toEqual({
-        id: 'mocked-uuid',
-        status: alertEpisodeStatus.pending,
-        started_at: '2025-01-01T00:00:00.000Z',
       });
     });
   });

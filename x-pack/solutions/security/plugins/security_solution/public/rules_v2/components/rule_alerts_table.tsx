@@ -34,6 +34,13 @@ import type { RowControlColumn, DataTableRecord } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
+import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { EpisodeRuleCell } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
+import { WorkflowStatusFilter } from '../../alerts_v2/components/workflow_status_filter';
 import {
   useFetchSecurityEpisodes,
   type SecurityAlertEpisode,
@@ -41,13 +48,6 @@ import {
   type SecurityEpisodesSortState,
   type WorkflowStatus,
 } from '../../alerts_v2/hooks/use_fetch_security_episodes';
-import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
-import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
-import { WorkflowStatusFilter } from '../../alerts_v2/components/workflow_status_filter';
-import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
-import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { EpisodeRuleCell } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
-import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { EpisodeAssigneeCell } from '../../alerts_v2/components/episode_assignee_cell';
@@ -122,9 +122,7 @@ const dataTableRecordToEpisode = (record: DataTableRecord): SecurityAlertEpisode
 
 const normalizeEpisodeTags = (ep: SecurityAlertEpisode): SecurityAlertEpisode => {
   const raw = ep.last_tags;
-  return Array.isArray(raw)
-    ? ep
-    : { ...ep, last_tags: typeof raw === 'string' ? [raw] : [] };
+  return Array.isArray(raw) ? ep : { ...ep, last_tags: typeof raw === 'string' ? [raw] : [] };
 };
 
 const getEpisodesFromDocIds = (
@@ -149,7 +147,9 @@ export const RuleAlertsTable: React.FC<RuleAlertsTableProps> = ({ ruleId }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-6h', to: 'now' });
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedWorkflowStatus, setSelectedWorkflowStatus] = useState<WorkflowStatus | undefined>();
+  const [selectedWorkflowStatus, setSelectedWorkflowStatus] = useState<
+    WorkflowStatus | undefined
+  >();
   const [selectedTags, setSelectedTags] = useState<string[] | undefined>();
   const [selectedAssigneeUid, setSelectedAssigneeUid] = useState<string | undefined>();
 
@@ -271,7 +271,6 @@ export const RuleAlertsTable: React.FC<RuleAlertsTableProps> = ({ ruleId }) => {
         expressions: services.expressions,
         spaces: services.spaces,
         queryClient,
-        getEpisodeDetailsHref: () => '',
         getDiscoverHref: () => undefined,
       }).filter(
         (a) =>

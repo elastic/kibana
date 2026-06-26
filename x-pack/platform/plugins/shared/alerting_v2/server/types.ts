@@ -30,25 +30,13 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { RulesClient } from './lib/rules_client';
-import type { PreQueryFilterProvider } from './lib/rule_executor/pre_query_filter_registry';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
-export interface AlertingServerSetup {
-  /**
-   * Register a callback that returns a DSL filter to compose into the ES|QL
-   * query's `filter` parameter before execution. Useful for solution plugins
-   * that need to inject pre-query filtering (e.g. exception lists) without
-   * introducing a dependency from alerting_v2 → the solution plugin.
-   *
-   * Must be called during plugin setup, before start.
-   */
-  registerPreQueryFilterProvider(name: string, provider: PreQueryFilterProvider): void;
-}
-
+export type AlertingServerSetup = void;
 
 export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;

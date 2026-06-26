@@ -72,9 +72,7 @@ const columns: Array<EuiBasicTableColumn<UnifiedExecutionResult>> = [
     name: 'Timestamp',
     sortable: true,
     width: '220px',
-    render: (value: string) => (
-      <EuiText size="s">{new Date(value).toLocaleString()}</EuiText>
-    ),
+    render: (value: string) => <EuiText size="s">{new Date(value).toLocaleString()}</EuiText>,
   },
   {
     field: 'execution_duration_ms',
@@ -95,9 +93,7 @@ const columns: Array<EuiBasicTableColumn<UnifiedExecutionResult>> = [
     field: 'outcome.message',
     name: 'Message',
     render: (_: unknown, record: UnifiedExecutionResult) => (
-      <EuiTextBlockTruncate lines={2}>
-        {record.outcome.message ?? '—'}
-      </EuiTextBlockTruncate>
+      <EuiTextBlockTruncate lines={2}>{record.outcome.message ?? '—'}</EuiTextBlockTruncate>
     ),
   },
 ];
@@ -141,13 +137,10 @@ export const ExecutionLogTable: React.FC<ExecutionLogTableProps> = ({ ruleId }) 
     []
   );
 
-  const onTimeChange = useCallback(
-    ({ start, end }: { start: string; end: string }) => {
-      setDateRange({ start, end });
-      setPageIndex(0);
-    },
-    []
-  );
+  const onTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
+    setDateRange({ start, end });
+    setPageIndex(0);
+  }, []);
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -197,10 +190,7 @@ export const ExecutionLogTable: React.FC<ExecutionLogTableProps> = ({ ruleId }) 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <StatusFilter
-                selectedItems={statusFilters}
-                onChange={setStatusFilters}
-              />
+              <StatusFilter selectedItems={statusFilters} onChange={setStatusFilters} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiSuperDatePicker
@@ -278,9 +268,7 @@ const StatusFilter: React.FC<{
             onClick={() => handleItemClick(status)}
             data-test-subj={`v2ExecutionStatusFilter-item-${status}`}
           >
-            <EuiHealth color={STATUS_COLOR[status]}>
-              {STATUS_LABEL[status]}
-            </EuiHealth>
+            <EuiHealth color={STATUS_COLOR[status]}>{STATUS_LABEL[status]}</EuiHealth>
           </EuiFilterSelectItem>
         ))}
       </EuiPopover>

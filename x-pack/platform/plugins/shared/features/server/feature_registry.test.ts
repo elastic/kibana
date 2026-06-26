@@ -64,7 +64,7 @@ describe('FeatureRegistry', () => {
           },
           read: {
             savedObject: {
-              all: [],
+              all: ['user-storage', 'user-storage-global'],
               read: [
                 'config',
                 'config-global',
@@ -349,6 +349,7 @@ describe('FeatureRegistry', () => {
         'tag',
         'cloud',
       ]);
+      expect(readPrivilege?.savedObject.all).toEqual(['user-storage', 'user-storage-global']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -356,8 +357,6 @@ describe('FeatureRegistry', () => {
         'url',
         'tag',
         'cloud',
-        'user-storage',
-        'user-storage-global',
       ]);
     });
 
@@ -451,6 +450,7 @@ describe('FeatureRegistry', () => {
         'tag',
         'cloud',
       ]);
+      expect(readPrivilege?.savedObject.all).toEqual(['user-storage', 'user-storage-global']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -458,8 +458,6 @@ describe('FeatureRegistry', () => {
         'tag',
         'cloud',
         'telemetry',
-        'user-storage',
-        'user-storage-global',
       ]);
     });
 
@@ -2715,17 +2713,8 @@ describe('FeatureRegistry', () => {
           read: {
             ui: [],
             savedObject: {
-              all: [],
-              read: [
-                'config',
-                'config-global',
-                'telemetry',
-                'url',
-                'tag',
-                'cloud',
-                'user-storage',
-                'user-storage-global',
-              ],
+              all: ['user-storage', 'user-storage-global'],
+              read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
             },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
           },
@@ -2755,17 +2744,8 @@ describe('FeatureRegistry', () => {
           read: {
             ui: [],
             savedObject: {
-              all: [],
-              read: [
-                'config',
-                'config-global',
-                'telemetry',
-                'url',
-                'tag',
-                'cloud',
-                'user-storage',
-                'user-storage-global',
-              ],
+              all: ['user-storage', 'user-storage-global'],
+              read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
             },
           },
         });

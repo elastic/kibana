@@ -264,6 +264,14 @@ export interface EvaluationSpecificWorkerFixtures {
   workerExecutionId: WorkerExecutionIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
+  /**
+   * User-selected connector descriptors set per-project in the Playwright config.
+   * These are Playwright options (`{ option: true }`) consumed by the `connector` /
+   * `evaluationConnector` fixtures, which create/resolve the actual connectors.
+   * They default to `undefined` and must be set per-project (see createPlaywrightEvalsConfig).
+   */
+  connectorParam: AvailableConnectorWithId | undefined;
+  evaluationConnectorParam: AvailableConnectorWithId | undefined;
   repetitions: number;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;

@@ -25,8 +25,8 @@ import { RecoveryResultsPreview } from './recovery_results_preview';
 export const RulePreviewPanel = () => {
   const { layout } = useRuleFormMeta();
   const { control } = useFormContext<FormValues>();
-  const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
-  const showRecoveryPreview = recoveryType === 'query';
+  const recoveryStrategy = useWatch({ control, name: 'recoveryStrategy' });
+  const showRecoveryPreview = recoveryStrategy === 'query';
 
   if (layout === 'page') {
     return (

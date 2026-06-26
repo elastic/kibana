@@ -15,16 +15,18 @@ import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_wor
 import { MemoryServiceImpl } from '../lib/memory';
 import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+import { registerInvestigationAgents } from './agents/investigation';
 
 export const createMemoryToolsOptions = ({
+  getScopedClients,
   server,
   logger,
 }: {
+  getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
 }): MemoryToolsOptions => {
@@ -37,6 +39,9 @@ export const createMemoryToolsOptions = ({
   return {
     getMemoryService,
     getSecurity: () => server.core.security,
+    getScopedClients,
+    server,
+    logger,
   };
 };
 
@@ -47,8 +52,8 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
-  isMemoryEnabled,
   streamsKIsOnboardingClient,
+  investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   agentContextLayer?: AgentContextLayerPluginSetup;
@@ -56,37 +61,22 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-}) => {
+  investigationEnabled?: boolean;
+}): Promise<void> => {
+  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
+
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
-  registerSignificantEventsDiscoveryAgents(agentBuilder);
-
-  const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
-
-  // The memory skill is registered lazily — only once the significant events memory feature flag is on.
-  // This avoids exposing the skill to the agent when memory is not configured.
-  let memorySkillRegistered = false;
-
-  const ensureMemorySkillRegistered = () => {
-    if (memorySkillRegistered) {
-      return;
-    }
-    memorySkillRegistered = true;
-    agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
-    logger.info(
-      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
-    );
-  };
-
-  if (await isMemoryEnabled()) {
-    ensureMemorySkillRegistered();
+  registerAgentBuilderSkills({
+    agentBuilder,
+    telemetry,
+    streamsKIsOnboardingClient,
+    memoryToolsOptions,
+  });
+  registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
+  if (investigationEnabled) {
+    registerInvestigationAgents(agentBuilder);
   }
-
-  return {
-    ensureMemorySkillRegistered,
-  };
 };

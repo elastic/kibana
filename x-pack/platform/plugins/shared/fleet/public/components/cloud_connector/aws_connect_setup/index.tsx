@@ -31,6 +31,7 @@ export interface AwsConnectSetupProps {
   initialStaticKeys?: Partial<AwsStaticKeyCredentials>;
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
   showIdentityFederation?: boolean;
+  staticKeysContent?: React.ReactNode;
   onNext?: () => void;
   onConnectorIdChange?: (connectorId: string | undefined) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
@@ -46,6 +47,7 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialStaticKeys,
   initialTemporaryKeys,
   showIdentityFederation = true,
+  staticKeysContent,
   onNext,
   onConnectorIdChange,
   onStaticKeysChange,
@@ -92,7 +94,6 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         onChange={handleAuthTypeChange}
       />
       <EuiSpacer size="l" />
-      {/* TODO: for IDF and static keys, generate a CFN template to download and show instructions to run it (AWS CLI) */}
       {authType === 'identity_federation' && (
         <AwsIdentityFederationSetup
           cloud={cloud}
@@ -105,12 +106,15 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         />
       )}
       {authType === 'static_keys' && (
-        <AwsStaticKeysForm
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          initialValues={initialStaticKeys}
-          onReadyChange={setIsFormReady}
-          onFieldsChange={onStaticKeysChange}
-        />
+        <>
+          {staticKeysContent}
+          <AwsStaticKeysForm
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            initialValues={initialStaticKeys}
+            onReadyChange={setIsFormReady}
+            onFieldsChange={onStaticKeysChange}
+          />
+        </>
       )}
       {authType === 'temporary_keys' && (
         <AwsTemporaryKeysForm

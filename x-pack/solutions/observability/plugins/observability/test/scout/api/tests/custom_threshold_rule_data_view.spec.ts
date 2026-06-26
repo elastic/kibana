@@ -36,6 +36,38 @@ const buildCriteria = () => [
   },
 ];
 
+/**
+ * The exact criteria the full custom-threshold creation wizard persists, ported
+ * from the FTR `pages/alerts/custom_threshold.ts` "saved the rule correctly"
+ * payload assertion (a two-metric custom equation with a `notBetween` threshold).
+ * The UI spec (`custom_threshold_full_form.spec.ts`) now drives the form; this
+ * API test owns the persisted-payload verification.
+ */
+const buildFullFormCriteria = () => [
+  {
+    comparator: COMPARATORS.NOT_BETWEEN,
+    label: 'test equation',
+    equation: 'A - B',
+    metrics: [
+      { name: 'A', aggType: Aggregators.AVERAGE, field: 'metricset.rtt' },
+      { name: 'B', aggType: Aggregators.COUNT, filter: 'service.name : "opbeans-node"' },
+    ],
+    threshold: [200, 250],
+    timeSize: 2,
+    timeUnit: 'd',
+  },
+];
+
+/** Richer view of the create/get response used by the full-form persistence test. */
+interface FullFormRuleResponse extends RuleResponse {
+  params: {
+    noDataBehavior?: string;
+    criteria?: unknown;
+    groupBy?: unknown;
+    searchConfiguration?: unknown;
+  };
+}
+
 const createCustomThresholdRule = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
@@ -159,6 +191,38 @@ apiTest.describe('Custom Threshold rule data view', { tag: [...tags.stateful.cla
     });
     expect(res).toHaveStatusCode(200);
     expect((res.body as RuleResponse).id).toBe(ruleId);
+  });
+
+  apiTest('should persist the full custom-threshold form payload', async ({ apiClient }) => {
+    // Mirrors the FTR "saved the rule correctly" assertion: a custom equation
+    // with two metrics, a `notBetween` threshold, a 2-day window and a group-by.
+    const rule = await createCustomThresholdRule(apiClient, headers, {
+      name: 'Custom threshold rule - full form',
+      params: {
+        criteria: buildFullFormCriteria(),
+        groupBy: ['docker.container.name'],
+        alertOnNoData: false,
+        noDataBehavior: 'recover',
+        searchConfiguration: { query: { query: '', language: 'kuery' }, index: DATA_VIEW_ID },
+      },
+    });
+    transientRuleIds.push(rule.id);
+
+    const res = await apiClient.get(`api/alerting/rule/${rule.id}`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(res).toHaveStatusCode(200);
+    const { params } = res.body as FullFormRuleResponse;
+    // The custom-threshold params schema persists `criteria` verbatim (the FTR
+    // asserted the same exact shape via `_find`), so a strict deep match is safe.
+    expect(params.criteria).toStrictEqual(buildFullFormCriteria());
+    expect(params.groupBy).toStrictEqual(['docker.container.name']);
+    expect(params.searchConfiguration).toStrictEqual({
+      query: { query: '', language: 'kuery' },
+      index: DATA_VIEW_ID,
+    });
+    expect(params.noDataBehavior).toBe('recover');
   });
 
   apiTest(

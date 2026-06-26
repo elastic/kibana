@@ -7,6 +7,7 @@
 
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { getBreachQuery } from '../utils/query_helpers';
 import { usePreview } from './use_preview';
 import { useRuleFormMeta } from '../contexts';
 
@@ -23,7 +24,8 @@ export const useRulePreview = () => {
   const { control } = useFormContext<FormValues>();
   const { additionalPreviewFilter } = useRuleFormMeta();
 
-  const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
+  const query = useWatch({ control, name: 'query' });
+  const baseQuery = getBreachQuery(query);
   const timeField = useWatch({ control, name: 'timeField' });
   const interval = useWatch({ control, name: 'schedule.every' });
   const lookback = useWatch({ control, name: 'schedule.lookback' });

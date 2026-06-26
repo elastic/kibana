@@ -190,7 +190,9 @@ const createSecuritySolutionRequestContextMock = (
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getRuleExecutionLogV2: jest.fn(() => ({
-      getV2ExecutionResults: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, per_page: 10 }),
+      getV2ExecutionResults: jest
+        .fn()
+        .mockResolvedValue({ data: [], total: 0, page: 1, per_page: 10 }),
     })),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
     getInternalFleetServices: jest.fn(

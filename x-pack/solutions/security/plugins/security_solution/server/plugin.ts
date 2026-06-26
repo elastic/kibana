@@ -103,6 +103,7 @@ import {
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 import { registerSecuritySolutionAlertingV2RowEnricher } from './lib/detection_engine/alerting_v2/register_row_enricher';
+import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -170,10 +171,8 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
-import { registerMlAnomalyDetectionBehaviorMaintainer } from './lib/entity_analytics/maintainers/behaviors/ml_anomaly_detection';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
-import { createExceptionFilterProvider } from './lib/detection_engine/rule_types/utils/exception_filter_provider';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -261,7 +260,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private registerAgentBuilderAttachmentsAndTools(
     plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    previewRuleDataClient: IRuleDataClient,
+    securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps
   ): void {
     if (!plugins.agentBuilder) {
       return;
@@ -272,13 +273,26 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures, this.isServerless).catch(
-      (error) => {
-        this.logger.error(`Error registering security tools: ${error}`);
-      }
-    );
-
-    registerAttachments(agentBuilder, core, logger).catch((error) => {
+    registerTools(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      {
+        config: this.config,
+        ml: plugins.ml,
+        security: plugins.security,
+        securityRuleTypeOptions,
+        previewRuleDataClient,
+        getStartServices: core.getStartServices,
+        logger,
+        isServerless: this.isServerless,
+      },
+      this.isServerless
+    ).catch((error) => {
+      this.logger.error(`Error registering security tools: ${error}`);
+    });
+    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
 
@@ -323,20 +337,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
-    if (plugins.alertingVTwo && plugins.lists) {
-      plugins.alertingVTwo.registerPreQueryFilterProvider(
-        'securitySolution.exceptionLists',
-        createExceptionFilterProvider({
-          lists: plugins.lists,
-          core,
-          getSpaces: async () => {
-            const [, startPlugins] = await core.getStartServices();
-            return startPlugins.spaces;
-          },
-          logger: this.logger,
-        })
-      );
-    }
+    // TODO(alerting-v2 migration): the redesigned alerting_v2 plugin removed the
+    // `registerPreQueryFilterProvider` extension point. Re-wire the exception
+    // pre-query filter (`createExceptionFilterProvider`) once the platform plugin
+    // exposes an equivalent extension API. Deferred for now.
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
@@ -351,19 +355,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityAnalyticsConfig: config.entityAnalytics,
         telemetry: core.analytics,
       });
-      if (experimentalFeatures.entityAnalyticsMlJobBehaviorMaintainer) {
-        registerMlAnomalyDetectionBehaviorMaintainer({
-          entityStore: plugins.entityStore,
-          getStartServices: core.getStartServices,
-          ml: plugins.ml,
-          logger: this.logger,
-        });
-      }
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({
           entityStore: plugins.entityStore,
           getStartServices: core.getStartServices,
           logger: this.logger,
+          hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
         });
       }
     } else {
@@ -386,6 +383,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
@@ -852,7 +850,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(
+      plugins,
+      core,
+      this.logger,
+      previewRuleDataClient,
+      securityRuleTypeOptions
+    );
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions, core);

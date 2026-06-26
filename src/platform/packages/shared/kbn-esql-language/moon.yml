@@ -9,8 +9,6 @@ owners:
   defaultOwner: '@elastic/kibana-esql'
 toolchains:
   default: node
-  javascript:
-    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/esql-language'
@@ -26,7 +24,6 @@ dependsOn:
   - '@kbn/field-types'
   - '@kbn/test-es-server'
   - '@kbn/tooling-log'
-  - '@kbn/esql-scripts'
 tags:
   - shared-common
   - package

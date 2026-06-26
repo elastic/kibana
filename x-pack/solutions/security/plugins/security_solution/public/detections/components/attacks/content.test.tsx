@@ -31,6 +31,10 @@ jest.mock('./search_bar/search_bar_section', () => ({
   SearchBarSection: () => <div data-test-subj="search-bar-section" />,
 }));
 
+jest.mock('./filters/type_filter', () => ({
+  TypeFilter: () => <div data-test-subj="mock-type-filter" />,
+}));
+
 jest.mock(
   '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover',
   () => ({
@@ -70,6 +74,11 @@ describe('AttacksPageContent', () => {
         },
         telemetry: {
           reportEvent,
+        },
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
+          remove: jest.fn(),
         },
       },
     });
@@ -170,6 +179,18 @@ describe('AttacksPageContent', () => {
     expect(onGenerateMock).toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.GenerateClicked, {
       source: 'attacks_page_header',
+    });
+  });
+
+  it('should render `Type` filter', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-type-filter')).toBeInTheDocument();
     });
   });
 

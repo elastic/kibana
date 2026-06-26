@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import type { RuleResponse as V2RuleResponse, ExceptionListReference } from '@kbn/alerting-v2-schemas';
+import type {
+  RuleResponse as V2RuleResponse,
+  ExceptionListReference,
+} from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { Rule } from '../../detection_engine/rule_management/logic/types';
 
 export const V2_RULE_MARKER = '__isV2Rule__' as const;
 
-export interface V2AdaptedRule extends Rule {
+export type V2AdaptedRule = Rule & {
   [V2_RULE_MARKER]: true;
   _v2Exceptions: ExceptionListReference[];
-}
+};
 
 /**
  * Adapts a v2 RuleResponse to the shape expected by ExceptionsViewer and
@@ -42,7 +46,7 @@ export const toV1ExceptionRuleShape = (v2Rule: V2RuleResponse): V2AdaptedRule =>
     enabled: v2Rule.enabled,
     type: 'esql',
     language: 'esql',
-    query: v2Rule.evaluation.query.base,
+    query: getBreachEsqlQuery(v2Rule.query),
     severity: 'low',
     severity_mapping: [],
     risk_score: 0,

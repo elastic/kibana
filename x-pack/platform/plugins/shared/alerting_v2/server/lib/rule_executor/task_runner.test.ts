@@ -12,12 +12,10 @@ import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
 import { createRulePipelineState } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
-  let eventLogService: jest.Mocked<EventLogServiceContract>;
   let abortController: AbortController;
 
   // @ts-expect-error: not all fields are required
@@ -31,13 +29,8 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
-    eventLogService = { logEvent: jest.fn() };
     const mockLoggerService = createLoggerService();
-    runner = new RuleExecutorTaskRunner(
-      pipeline,
-      mockLoggerService.loggerService,
-      eventLogService
-    );
+    runner = new RuleExecutorTaskRunner(pipeline, mockLoggerService.loggerService);
     abortController = new AbortController();
   });
 
@@ -109,6 +102,18 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_disabled',
+        finalState: createRulePipelineState(),
+      });
+
+      const result = await runner.run({ taskInstance, abortController });
+
+      expect(result).toEqual({ state: { foo: 'bar' } });
+    });
+
+    it('preserves previous state when pipeline halts with engine_disabled', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: false,
+        haltReason: 'engine_disabled',
         finalState: createRulePipelineState(),
       });
 

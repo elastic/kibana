@@ -12,14 +12,12 @@ import {
   RuleExecutionMiddlewaresToken,
 } from '../lib/rule_executor/tokens';
 import {
+  CheckEngineEnabledStep,
   WaitForResourcesStep,
   FetchRuleStep,
   ValidateRuleStep,
-  ApplyPreQueryFiltersStep,
   ExecuteRuleQueryStep,
-  EnrichEsqlRowsStep,
   CreateAlertEventsStep,
-  ApplyDetectionEngineFeaturesStep,
   CreateRecoveryEventsStep,
 } from '../lib/rule_executor/steps';
 import {
@@ -50,14 +48,12 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
    * Rule execution steps via multi-injection.
    * Binding order defines execution order.
    */
+  bind(RuleExecutionStepsToken).to(CheckEngineEnabledStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(ApplyPreQueryFiltersStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(EnrichEsqlRowsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(ApplyDetectionEngineFeaturesStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();

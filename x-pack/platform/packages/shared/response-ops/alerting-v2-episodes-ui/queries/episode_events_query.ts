@@ -14,12 +14,9 @@ export interface EpisodeEventRow {
   'episode.id': string;
   'episode.status': AlertEpisodeStatus;
   'rule.id': string;
-  'rule.version'?: number;
   group_hash: string;
-  status: string;
-  source?: string;
-  scheduled_timestamp?: string;
-  event_data?: string;
+  severity?: string | null;
+  data?: string | Record<string, unknown> | null;
 }
 
 const ALERT_EPISODE_EVENT_FIELDS = [
@@ -27,18 +24,13 @@ const ALERT_EPISODE_EVENT_FIELDS = [
   'episode.id',
   'episode.status',
   'rule.id',
-  'rule.version',
   'group_hash',
-  'status',
-  'source',
-  'scheduled_timestamp',
-  'event_data',
+  'severity',
+  'data',
 ] as const;
 
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
- * Uses `_source` metadata + JSON_EXTRACT to include the flattened `data` field
- * as a JSON string named `event_data` (ES|QL cannot KEEP flattened fields directly).
  */
 export const buildEpisodeEventsEsqlQuery = (spaceId: string, episodeId: string) => {
   // prettier-ignore
@@ -46,7 +38,7 @@ export const buildEpisodeEventsEsqlQuery = (spaceId: string, episodeId: string) 
     .where`space_id == ${spaceId}`
     .where`type == "alert"`
     .where`episode.id == ${episodeId}`
-    .pipe`EVAL event_data = JSON_EXTRACT(_source, "data")`
+    .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
     .sort([TIME_FIELD, 'ASC'])
     .keep(...ALERT_EPISODE_EVENT_FIELDS);
 };

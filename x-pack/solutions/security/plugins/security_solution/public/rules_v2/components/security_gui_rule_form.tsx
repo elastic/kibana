@@ -160,11 +160,7 @@ export const SecurityGuiRuleForm = ({
           onReferencesChange={onReferencesChange}
         />
       </EuiForm>
-      <SubmissionButtons
-        isSubmitting={isSubmitting}
-        onCancel={onCancel}
-        ruleId={ruleId}
-      />
+      <SubmissionButtons isSubmitting={isSubmitting} onCancel={onCancel} ruleId={ruleId} />
     </>
   );
 };

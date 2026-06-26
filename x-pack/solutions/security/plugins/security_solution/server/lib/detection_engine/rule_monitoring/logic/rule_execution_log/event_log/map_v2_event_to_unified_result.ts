@@ -58,8 +58,7 @@ const extractExecutionStart = (event: IValidatedEvent): string => {
   return executionStart;
 };
 
-const extractDurationMs = (event: IValidatedEvent): number | null =>
-  nsToMs(event?.event?.duration);
+const extractDurationMs = (event: IValidatedEvent): number | null => nsToMs(event?.event?.duration);
 
 const extractScheduleDelayMs = (event: IValidatedEvent): number | null =>
   nsToMs(event?.kibana?.task?.schedule_delay);
@@ -99,7 +98,9 @@ const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome
       break;
     case 'timeout':
       status = 'failure';
-      message = `Rule execution timed out${event?.error?.message ? `: ${event.error.message}` : ''}`;
+      message = `Rule execution timed out${
+        event?.error?.message ? `: ${event.error.message}` : ''
+      }`;
       break;
     case 'skipped':
       status = 'warning';
@@ -123,9 +124,7 @@ const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics
     total_indexing_duration_ms: null, // Not available in v2 schema
     execution_gap_duration_s: null, // Gap detection not in v2 (parity item #5)
     alerts_candidate_count: toOptionalInt(query?.number_of_rows_returned),
-    alert_counts: eventsWritten
-      ? { new: toOptionalInt(eventsWritten.breached) }
-      : null,
+    alert_counts: eventsWritten ? { new: toOptionalInt(eventsWritten.breached) } : null,
     matched_indices_count: null, // DE-specific, not in v2
     frozen_indices_queried_count: null, // DE-specific, not in v2
   };

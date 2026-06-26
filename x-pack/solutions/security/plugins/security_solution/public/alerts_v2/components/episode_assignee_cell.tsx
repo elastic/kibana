@@ -76,7 +76,7 @@ export const EpisodeAssigneeCell: React.FC<EpisodeAssigneeCellProps> = ({
   const avatar = profile.data?.avatar;
 
   return (
-    <UserToolTip user={user} avatar={avatar} position="top" delay="regular">
+    <UserToolTip user={user} avatar={avatar} position="top">
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ minWidth: 0 }}>
         <EuiFlexItem grow={false}>
           <UserAvatar user={user} avatar={avatar} size="s" />

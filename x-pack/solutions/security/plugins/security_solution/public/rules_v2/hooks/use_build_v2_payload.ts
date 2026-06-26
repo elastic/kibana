@@ -15,12 +15,12 @@ const resolveIndexPatterns = async (
   rule: Rule,
   dataViewsService: { get: (id: string) => Promise<{ getIndexPattern: () => string }> }
 ): Promise<string[] | undefined> => {
-  if (rule.index && rule.index.length > 0) {
+  const index = 'index' in rule ? rule.index : undefined;
+  if (index && index.length > 0) {
     return undefined;
   }
 
-  const dataViewId =
-    'data_view_id' in rule ? (rule.data_view_id as string | undefined) : undefined;
+  const dataViewId = 'data_view_id' in rule ? (rule.data_view_id as string | undefined) : undefined;
 
   if (!dataViewId) {
     return undefined;

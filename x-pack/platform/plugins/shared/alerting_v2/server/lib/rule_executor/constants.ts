@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-export const RULE_EXECUTOR_EVENT_PROVIDER = 'alerting_v2' as const;
-
-export const RULE_EXECUTOR_EVENT_ACTIONS = {
-  EXECUTE_START: 'execute-start',
-  EXECUTE: 'execute',
-} as const;
-
-export type RuleExecutorEventAction =
-  (typeof RULE_EXECUTOR_EVENT_ACTIONS)[keyof typeof RULE_EXECUTOR_EVENT_ACTIONS];
 /**
  * Task manager task type used to schedule rule executor ticks.
  *

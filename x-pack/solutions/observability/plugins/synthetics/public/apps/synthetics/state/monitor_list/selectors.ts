@@ -29,11 +29,21 @@ export const selectMonitorFiltersAndQueryState = createSelector(selectMonitorLis
     locations,
     projects,
     schedules,
+    remoteNames,
     useLogicalAndFor,
   }: MonitorFilterState = state.pageState;
   const { query } = state.pageState;
 
-  return { monitorTypes, tags, locations, projects, schedules, query, useLogicalAndFor };
+  return {
+    monitorTypes,
+    tags,
+    locations,
+    projects,
+    schedules,
+    remoteNames,
+    query,
+    useLogicalAndFor,
+  };
 });
 
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>

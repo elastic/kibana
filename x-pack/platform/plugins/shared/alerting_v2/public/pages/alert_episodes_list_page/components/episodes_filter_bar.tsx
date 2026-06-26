@@ -8,19 +8,16 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useState,
   type ChangeEvent,
   type SetStateAction,
 } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFilterGroup,
   EuiFieldSearch,
   EuiSuperDatePicker,
-  EuiSwitch,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
@@ -33,10 +30,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import deepEqual from 'fast-deep-equal';
 import { css } from '@emotion/react';
-import { INCLUDE_BUILDING_BLOCKS_LABEL } from '../translations';
-import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -49,8 +43,6 @@ export interface EpisodesFilterBarProps {
   onRefresh?: () => void;
   isLoading?: boolean;
   services: { http: HttpStart; expressions: ExpressionsStart; spaces: SpacesPluginStart };
-  includeBuildingBlocks?: boolean;
-  onIncludeBuildingBlocksChange?: (value: boolean) => void;
 }
 
 export const EpisodesFilterBar = ({
@@ -63,8 +55,6 @@ export const EpisodesFilterBar = ({
   onRefresh,
   isLoading = false,
   services,
-  includeBuildingBlocks = false,
-  onIncludeBuildingBlocksChange,
 }: EpisodesFilterBarProps) => {
   const { euiTheme } = useEuiTheme();
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
@@ -115,16 +105,6 @@ export const EpisodesFilterBar = ({
   const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setQueryStringInput(e.target.value);
   }, []);
-
-  const hasActiveFilters = useMemo(
-    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
-    [filterState, queryStringInput]
-  );
-
-  const onClearFilters = useCallback(() => {
-    setQueryStringInput('');
-    onFilterChange({ ...DEFAULT_EPISODES_LIST_FILTER });
-  }, [onFilterChange]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
@@ -180,30 +160,6 @@ export const EpisodesFilterBar = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          disabled={!hasActiveFilters}
-          onClick={onClearFilters}
-          data-test-subj="episodesFilterBar-resetFilters"
-        >
-          {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-
-      {onIncludeBuildingBlocksChange && (
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            label={INCLUDE_BUILDING_BLOCKS_LABEL}
-            checked={includeBuildingBlocks}
-            onChange={(e) => onIncludeBuildingBlocksChange(e.target.checked)}
-            data-test-subj="episodesFilterBar-includeBuildingBlocks"
-          />
-        </EuiFlexItem>
-      )}
-
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
           compressed

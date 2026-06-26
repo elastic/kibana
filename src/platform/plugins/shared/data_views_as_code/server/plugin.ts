@@ -24,7 +24,7 @@ export class DataViewsAsCodeServerPlugin
     >
 {
   public setup(core: CoreSetup<DataViewsAsCodeServerPluginStartDependencies, void>) {
-    registerRoutes({ http: core.http });
+    registerRoutes(core);
   }
 
   public start() {}

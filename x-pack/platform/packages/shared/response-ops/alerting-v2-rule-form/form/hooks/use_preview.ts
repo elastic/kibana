@@ -186,9 +186,6 @@ export const usePreview = ({
           }
         : timeFilter;
 
-    // eslint-disable-next-line no-console
-    console.log('[usePreview] executing with filter:', JSON.stringify(composedFilter, null, 2));
-
     const result = await getESQLResults({
       esqlQuery: debouncedQuery,
       search: data.search.search,
@@ -198,7 +195,15 @@ export const usePreview = ({
     });
 
     return result.response;
-  }, [canExecute, debouncedQuery, timeField, interval, lookback, data.search.search, stableAdditionalFilter]);
+  }, [
+    canExecute,
+    debouncedQuery,
+    timeField,
+    interval,
+    lookback,
+    data.search.search,
+    stableAdditionalFilter,
+  ]);
 
   const {
     data: response,
@@ -207,7 +212,11 @@ export const usePreview = ({
     error,
     refetch,
   } = useQuery({
-    queryKey: [...ruleFormKeys.preview(debouncedQuery, timeField, interval, lookback), stableAdditionalFilter],
+    queryKey: [
+      ...ruleFormKeys.preview(debouncedQuery, timeField, lookback),
+      interval,
+      stableAdditionalFilter,
+    ],
     queryFn: fetchPreview,
     enabled: canExecute,
     keepPreviousData: true,

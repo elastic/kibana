@@ -75,21 +75,16 @@ export const useConvertToV2 = () => {
         await executeBulkAction({
           type: BulkActionTypeEnum.edit,
           ids: [rule.id],
-          editPayload: [
-            { type: BulkActionEditTypeEnum.add_tags, value: ['migrated_to_v2'] },
-          ],
+          editPayload: [{ type: BulkActionEditTypeEnum.add_tags, value: ['migrated_to_v2'] }],
         });
 
         queryClient.invalidateQueries({ queryKey: ['v2RulesSectionList'] });
 
         notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.securitySolution.ruleManagement.convertToV2.successTitle',
-            {
-              defaultMessage: 'Rule "{name}" converted to v2',
-              values: { name: rule.name },
-            }
-          ),
+          title: i18n.translate('xpack.securitySolution.ruleManagement.convertToV2.successTitle', {
+            defaultMessage: 'Rule "{name}" converted to v2',
+            values: { name: rule.name },
+          }),
           text: disableOriginal
             ? i18n.translate(
                 'xpack.securitySolution.ruleManagement.convertToV2.successTextWithDisable',
@@ -98,28 +93,22 @@ export const useConvertToV2 = () => {
                     'A new v2 rule was created (disabled), the original rule was disabled and tagged.',
                 }
               )
-            : i18n.translate(
-                'xpack.securitySolution.ruleManagement.convertToV2.successText',
-                {
-                  defaultMessage:
-                    'A new v2 rule was created (disabled) and the original rule was tagged.',
-                }
-              ),
+            : i18n.translate('xpack.securitySolution.ruleManagement.convertToV2.successText', {
+                defaultMessage:
+                  'A new v2 rule was created (disabled) and the original rule was tagged.',
+              }),
         });
 
         return { v2RuleId: v2Rule.id };
       } catch (error) {
         notifications.toasts.addDanger(
-          i18n.translate(
-            'xpack.securitySolution.ruleManagement.convertToV2.errorMessage',
-            {
-              defaultMessage: 'Failed to convert rule "{name}" to v2: {error}',
-              values: {
-                name: rule.name,
-                error: error instanceof Error ? error.message : String(error),
-              },
-            }
-          )
+          i18n.translate('xpack.securitySolution.ruleManagement.convertToV2.errorMessage', {
+            defaultMessage: 'Failed to convert rule "{name}" to v2: {error}',
+            values: {
+              name: rule.name,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          })
         );
         return null;
       } finally {

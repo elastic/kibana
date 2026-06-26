@@ -121,10 +121,7 @@ export const SecurityDetectionFields: React.FC<SecurityDetectionFieldsProps> = (
       const updated = [...threat];
       updated[threatIdx] = {
         ...updated[threatIdx],
-        technique: [
-          ...(updated[threatIdx].technique ?? []),
-          { ...NONE_ENTRY, subtechnique: [] },
-        ],
+        technique: [...(updated[threatIdx].technique ?? []), { ...NONE_ENTRY, subtechnique: [] }],
       };
       onThreatChange(updated);
     },
@@ -421,12 +418,7 @@ interface ThreatEntryRowProps {
   onUpdateTechnique: (threatIdx: number, techIdx: number, value: string) => void;
   onAddSubtechnique: (threatIdx: number, techIdx: number) => void;
   onRemoveSubtechnique: (threatIdx: number, techIdx: number, subIdx: number) => void;
-  onUpdateSubtechnique: (
-    threatIdx: number,
-    techIdx: number,
-    subIdx: number,
-    value: string
-  ) => void;
+  onUpdateSubtechnique: (threatIdx: number, techIdx: number, subIdx: number, value: string) => void;
 }
 
 const ThreatEntryRow: React.FC<ThreatEntryRowProps> = ({
@@ -460,10 +452,7 @@ const ThreatEntryRow: React.FC<ThreatEntryRowProps> = ({
   );
 
   const filteredTechniques = useMemo(
-    () =>
-      techniquesOptions.filter((t) =>
-        t.tactics.includes(kebabCase(entry.tactic.name))
-      ),
+    () => techniquesOptions.filter((t) => t.tactics.includes(kebabCase(entry.tactic.name))),
     [techniquesOptions, entry.tactic.name]
   );
 
@@ -533,12 +522,7 @@ interface TechniqueRowProps {
   onRemoveTechnique: (threatIdx: number, techIdx: number) => void;
   onAddSubtechnique: (threatIdx: number, techIdx: number) => void;
   onRemoveSubtechnique: (threatIdx: number, techIdx: number, subIdx: number) => void;
-  onUpdateSubtechnique: (
-    threatIdx: number,
-    techIdx: number,
-    subIdx: number,
-    value: string
-  ) => void;
+  onUpdateSubtechnique: (threatIdx: number, techIdx: number, subIdx: number, value: string) => void;
 }
 
 const TechniqueRow: React.FC<TechniqueRowProps> = ({
@@ -627,12 +611,7 @@ interface SubtechniqueRowProps {
   techIdx: number;
   subIdx: number;
   filteredSubs: MitreSubTechnique[];
-  onUpdateSubtechnique: (
-    threatIdx: number,
-    techIdx: number,
-    subIdx: number,
-    value: string
-  ) => void;
+  onUpdateSubtechnique: (threatIdx: number, techIdx: number, subIdx: number, value: string) => void;
   onRemoveSubtechnique: (threatIdx: number, techIdx: number, subIdx: number) => void;
 }
 

@@ -90,9 +90,7 @@ export interface UnsupportedV1Fields {
  * Fields that make conversion impossible (would produce an invalid v2 rule).
  * When any of these are `true`, the Convert button should be disabled.
  */
-export const BLOCKING_FIELDS: ReadonlySet<keyof UnsupportedV1Fields> = new Set([
-  'luceneQuery',
-]);
+export const BLOCKING_FIELDS: ReadonlySet<keyof UnsupportedV1Fields> = new Set(['luceneQuery']);
 
 export const getUnsupportedFields = (rule: Rule): UnsupportedV1Fields => ({
   severity: rule.severity !== 'low',
@@ -103,11 +101,12 @@ export const getUnsupportedFields = (rule: Rule): UnsupportedV1Fields => ({
   responseActions: 'response_actions' in rule && (rule.response_actions?.length ?? 0) > 0,
   timelineTemplate: 'timeline_id' in rule && rule.timeline_id != null,
   maxSignals: (rule.max_signals ?? 100) !== 100,
-  ruleNameOverride:
-    'rule_name_override' in rule && rule.rule_name_override != null,
+  ruleNameOverride: 'rule_name_override' in rule && rule.rule_name_override != null,
   missingFieldsStrategy:
     'alert_suppression' in rule &&
-    rule.alert_suppression?.missing_fields_strategy != null &&
+    rule.alert_suppression != null &&
+    'missing_fields_strategy' in rule.alert_suppression &&
+    rule.alert_suppression.missing_fields_strategy != null &&
     rule.alert_suppression.missing_fields_strategy !== 'doNotSuppress',
   dataViewId: false,
   luceneQuery:
@@ -143,10 +142,13 @@ interface ConvertOptions {
  */
 export const toV2CreatePayload = (rule: Rule, options: ConvertOptions = {}): CreateRuleData => {
   if (rule.type !== 'esql' && rule.type !== 'threshold') {
-    throw new Error(`Cannot convert rule type "${rule.type}" to v2. Only esql and threshold are supported.`);
+    throw new Error(
+      `Cannot convert rule type "${rule.type}" to v2. Only esql and threshold are supported.`
+    );
   }
 
-  const indexPatterns = options.resolvedIndexPatterns ?? rule.index ?? [];
+  const indexPatterns =
+    options.resolvedIndexPatterns ?? ('index' in rule ? rule.index : undefined) ?? [];
   const evaluationQuery = buildEvaluationQuery(rule, indexPatterns);
 
   if (!evaluationQuery) {
@@ -182,13 +184,8 @@ export const toV2CreatePayload = (rule: Rule, options: ConvertOptions = {}): Cre
     }
   }
 
-  const kind: CreateRuleData['kind'] =
-    'building_block_type' in rule && rule.building_block_type
-      ? 'building_block'
-      : 'alert';
-
   const payload: CreateRuleData = {
-    kind,
+    kind: 'alert',
     metadata: {
       name: rule.name,
       description: rule.description,
@@ -197,10 +194,11 @@ export const toV2CreatePayload = (rule: Rule, options: ConvertOptions = {}): Cre
     },
     time_field: ('timestamp_override' in rule && rule.timestamp_override) || '@timestamp',
     schedule,
-    evaluation: {
-      query: { base: evaluationQuery },
+    query: {
+      format: 'standalone',
+      breach: { query: evaluationQuery },
     },
-    recovery_policy: { type: 'no_breach' },
+    recovery_strategy: 'no_breach',
     state_transition: {
       pending_count: 0,
       recovering_count: 0,
@@ -219,8 +217,7 @@ const buildEvaluationQuery = (rule: Rule, indexPatterns: string[]): string => {
   }
 
   if (rule.type === 'threshold' && rule.threshold) {
-    const filterKql =
-      'filters' in rule ? filtersToKqlString((rule.filters as Filter[]) ?? []) : '';
+    const filterKql = 'filters' in rule ? filtersToKqlString((rule.filters as Filter[]) ?? []) : '';
     const queryKql = rule.query?.trim() ?? '';
     const language = 'language' in rule ? (rule.language as string) : 'kuery';
     const isLucene = language === 'lucene';
@@ -231,7 +228,9 @@ const buildEvaluationQuery = (rule: Rule, indexPatterns: string[]): string => {
 
     return buildThresholdEsqlQuery({
       indexPatterns,
-      thresholdFields: rule.threshold.field,
+      thresholdFields: Array.isArray(rule.threshold.field)
+        ? rule.threshold.field
+        : [rule.threshold.field],
       thresholdValue: rule.threshold.value,
       cardinalityField: rule.threshold.cardinality?.[0]?.field,
       cardinalityValue: rule.threshold.cardinality?.[0]?.value,
@@ -250,9 +249,7 @@ const buildTags = (rule: Rule): string[] => {
   } else {
     baseTags.push('esql');
   }
-  const userTags = (rule.tags ?? []).filter(
-    (t) => !baseTags.includes(t.toLowerCase())
-  );
+  const userTags = (rule.tags ?? []).filter((t) => !baseTags.includes(t.toLowerCase()));
   return [...baseTags, ...userTags];
 };
 
@@ -305,10 +302,13 @@ const buildParams = (rule: Rule): RuleParams => {
   return params;
 };
 
-const buildGrouping = (
-  rule: Rule
-): { fields: string[]; duration?: string } | undefined => {
-  if ('alert_suppression' in rule && rule.alert_suppression?.group_by?.length) {
+const buildGrouping = (rule: Rule): { fields: string[]; duration?: string } | undefined => {
+  if (
+    'alert_suppression' in rule &&
+    rule.alert_suppression != null &&
+    'group_by' in rule.alert_suppression &&
+    rule.alert_suppression.group_by?.length
+  ) {
     const result: { fields: string[]; duration?: string } = {
       fields: rule.alert_suppression.group_by,
     };

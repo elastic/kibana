@@ -45,9 +45,7 @@ export const useIndexFields = ({ indexPatterns, search }: UseIndexFieldsProps) =
     refetchOnWindowFocus: false,
     retry: false,
     select: (cols) =>
-      cols
-        .map(({ name }) => ({ label: name }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
+      cols.map(({ name }) => ({ label: name })).sort((a, b) => a.label.localeCompare(b.label)),
   });
 
   return { fieldOptions: data ?? [], isLoading };

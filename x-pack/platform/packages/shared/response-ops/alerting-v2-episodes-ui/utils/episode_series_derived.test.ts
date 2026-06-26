@@ -21,7 +21,6 @@ const makeEventRow = (overrides: Partial<EpisodeEventRow> = {}): EpisodeEventRow
   'episode.status': ALERT_EPISODE_STATUS.PENDING,
   'rule.id': 'rule-1',
   group_hash: 'hash-1',
-  status: 'breached',
   ...overrides,
 });
 

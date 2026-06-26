@@ -29,6 +29,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useHistory, useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../common/lib/kibana';
@@ -70,7 +71,9 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
     },
     {
       title: i18n.VIEW_SCHEDULE_LABEL,
-      description: `Every ${rule.schedule.every}${rule.schedule.lookback ? `, lookback ${rule.schedule.lookback}` : ''}`,
+      description: `Every ${rule.schedule.every}${
+        rule.schedule.lookback ? `, lookback ${rule.schedule.lookback}` : ''
+      }`,
     },
     ...(rule.grouping?.fields?.length
       ? [
@@ -115,9 +118,10 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   ];
 
   const isThreshold = rule.metadata.tags?.includes('threshold') ?? false;
+  const breachQuery = getBreachEsqlQuery(rule.query);
   const parsedThreshold = useMemo(
-    () => (isThreshold ? parseThresholdEsqlQuery(rule.evaluation.query.base) : null),
-    [isThreshold, rule.evaluation.query.base]
+    () => (isThreshold ? parseThresholdEsqlQuery(breachQuery) : null),
+    [isThreshold, breachQuery]
   );
 
   const thresholdItems = parsedThreshold
@@ -172,72 +176,102 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { params } = rule;
   const paramsItems = [
     ...(params?.note
-      ? [{ title: i18n.NOTE_LABEL, description: <EuiText size="s"><p>{params.note}</p></EuiText> }]
+      ? [
+          {
+            title: i18n.NOTE_LABEL,
+            description: (
+              <EuiText size="s">
+                <p>{params.note}</p>
+              </EuiText>
+            ),
+          },
+        ]
       : []),
     ...(params?.setup
-      ? [{ title: i18n.SETUP_LABEL, description: <EuiText size="s"><p>{params.setup}</p></EuiText> }]
+      ? [
+          {
+            title: i18n.SETUP_LABEL,
+            description: (
+              <EuiText size="s">
+                <p>{params.setup}</p>
+              </EuiText>
+            ),
+          },
+        ]
       : []),
     ...(params?.references?.length
-      ? [{
-          title: i18n.REFERENCES_LABEL,
-          description: (
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {params.references.map((ref, idx) => (
-                <EuiFlexItem key={idx} grow={false}>
-                  <EuiLink href={ref} target="_blank" external>{ref}</EuiLink>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ),
-        }]
+      ? [
+          {
+            title: i18n.REFERENCES_LABEL,
+            description: (
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                {params.references.map((ref, idx) => (
+                  <EuiFlexItem key={idx} grow={false}>
+                    <EuiLink href={ref} target="_blank" external>
+                      {ref}
+                    </EuiLink>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
       : []),
     ...(params?.investigation_fields?.field_names?.length
-      ? [{
-          title: i18n.INVESTIGATION_FIELDS_LABEL,
-          description: (
-            <EuiFlexGroup gutterSize="xs" wrap>
-              {params.investigation_fields.field_names.map((f) => (
-                <EuiFlexItem grow={false} key={f}>
-                  <EuiBadge color="hollow">{f}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ),
-        }]
+      ? [
+          {
+            title: i18n.INVESTIGATION_FIELDS_LABEL,
+            description: (
+              <EuiFlexGroup gutterSize="xs" wrap>
+                {params.investigation_fields.field_names.map((f) => (
+                  <EuiFlexItem grow={false} key={f}>
+                    <EuiBadge color="hollow">{f}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
       : []),
     ...(params?.related_integrations?.length
-      ? [{
-          title: i18n.RELATED_INTEGRATIONS_LABEL,
-          description: (
-            <EuiFlexGroup gutterSize="xs" wrap>
-              {params.related_integrations.map((ri, idx) => (
-                <EuiFlexItem grow={false} key={idx}>
-                  <EuiBadge color="hollow">
-                    {ri.package}:{ri.version}
-                    {ri.integration ? ` (${ri.integration})` : ''}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ),
-        }]
+      ? [
+          {
+            title: i18n.RELATED_INTEGRATIONS_LABEL,
+            description: (
+              <EuiFlexGroup gutterSize="xs" wrap>
+                {params.related_integrations.map((ri, idx) => (
+                  <EuiFlexItem grow={false} key={idx}>
+                    <EuiBadge color="hollow">
+                      {ri.package}:{ri.version}
+                      {ri.integration ? ` (${ri.integration})` : ''}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
       : []),
     ...(params?.threat?.length
-      ? [{
-          title: i18n.THREAT_LABEL,
-          description: (
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {params.threat.map((t, idx) => (
-                <EuiFlexItem key={idx} grow={false}>
-                  <EuiBadge color="warning">
-                    {t.tactic.name}
-                    {t.technique?.length ? ` > ${t.technique.map((tech) => tech.name).join(', ')}` : ''}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ),
-        }]
+      ? [
+          {
+            title: i18n.THREAT_LABEL,
+            description: (
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                {params.threat.map((t, idx) => (
+                  <EuiFlexItem key={idx} grow={false}>
+                    <EuiBadge color="warning">
+                      {t.tactic.name}
+                      {t.technique?.length
+                        ? ` > ${t.technique.map((tech) => tech.name).join(', ')}`
+                        : ''}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
       : []),
   ];
 
@@ -262,7 +296,7 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiCodeBlock language="esql" fontSize="m" paddingSize="m" isCopyable>
-              {rule.evaluation.query.base}
+              {breachQuery}
             </EuiCodeBlock>
           </EuiPanel>
         </EuiFlexItem>
@@ -422,4 +456,3 @@ export const RulesV2ViewPage = () => {
     </SecuritySolutionPageWrapper>
   );
 };
-

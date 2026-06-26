@@ -161,10 +161,9 @@ const buildSecurityEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  return query
-    .sort([sortField, sortDir])
-    .pipe`LIMIT ${pageSizeParam}`
-    .keep(...SECURITY_EPISODE_FIELDS);
+  return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
+    ...SECURITY_EPISODE_FIELDS
+  );
 };
 
 export interface UseFetchSecurityEpisodesOptions {

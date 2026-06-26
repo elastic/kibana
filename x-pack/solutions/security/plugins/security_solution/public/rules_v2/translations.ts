@@ -81,22 +81,18 @@ export const FILTER_QUERY_LABEL = i18n.translate(
   { defaultMessage: 'Filter query' }
 );
 
-export const FILTER_QUERY_HELP = i18n.translate(
-  'xpack.securitySolution.rulesV2.filterQueryHelp',
-  {
-    defaultMessage:
-      'Optional ES|QL WHERE clause to filter data before aggregation (e.g. status >= 400 AND service.name == "api").',
-  }
-);
+export const FILTER_QUERY_HELP = i18n.translate('xpack.securitySolution.rulesV2.filterQueryHelp', {
+  defaultMessage:
+    'Optional ES|QL WHERE clause to filter data before aggregation (e.g. status >= 400 AND service.name == "api").',
+});
 
 export const THRESHOLD_LABEL = i18n.translate('xpack.securitySolution.rulesV2.thresholdLabel', {
   defaultMessage: 'Threshold',
 });
 
-export const SUPPRESSION_LABEL = i18n.translate(
-  'xpack.securitySolution.rulesV2.suppressionLabel',
-  { defaultMessage: 'Suppression' }
-);
+export const SUPPRESSION_LABEL = i18n.translate('xpack.securitySolution.rulesV2.suppressionLabel', {
+  defaultMessage: 'Suppression',
+});
 
 export const SUPPRESSION_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.rulesV2.suppressionFieldsLabel',
@@ -211,8 +207,7 @@ export const THREAT_LABEL = i18n.translate('xpack.securitySolution.rulesV2.threa
 });
 
 export const THREAT_HELP = i18n.translate('xpack.securitySolution.rulesV2.threatHelp', {
-  defaultMessage:
-    'Map this rule to MITRE ATT&CK tactics, techniques, and subtechniques.',
+  defaultMessage: 'Map this rule to MITRE ATT&CK tactics, techniques, and subtechniques.',
 });
 
 export const NOTE_LABEL = i18n.translate('xpack.securitySolution.rulesV2.noteLabel', {

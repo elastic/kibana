@@ -35,6 +35,7 @@ import {
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
 import { useAlertingEpisodeSourceDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episode_source_data_view';
@@ -140,7 +141,6 @@ const getEventColumns = (
   },
 ];
 
-
 const monoWrapCss = css`
   font-family: 'Roboto Mono', 'Courier New', monospace;
   font-size: 0.8125rem;
@@ -214,14 +214,21 @@ const getEventsLogDescription = (
     const isCloseAction = entry.action_type === 'deactivate' || entry.action_type === 'activate';
     if (isCloseAction) {
       const label = getDefaultClosingReasonLabel(entry.reason);
-      parts.push(<>Reason: <strong>{label}</strong></>);
+      parts.push(
+        <>
+          Reason: <strong>{label}</strong>
+        </>
+      );
     } else {
       parts.push(entry.reason);
     }
   }
   if (entry.action_type === 'snooze' && entry.expiry) {
     parts.push(
-      `Until ${new Date(entry.expiry).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}`
+      `Until ${new Date(entry.expiry).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })}`
     );
   }
   if (entry.action_type === 'tag' && entry.tags) {
@@ -232,7 +239,9 @@ const getEventsLogDescription = (
     const assigneeName = resolveUsername(entry.assignee_uid, profilesMap);
     parts.push(
       entry.assignee_uid ? (
-        <>Assigned to <strong>{assigneeName}</strong></>
+        <>
+          Assigned to <strong>{assigneeName}</strong>
+        </>
       ) : (
         'Assignee removed'
       )
@@ -308,7 +317,10 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     data: eventRows = [],
     isLoading: isLoadingEvents,
     refetch: refetchEvents,
-  } = useFetchEpisodeEventsQuery({ episodeId, services: { data: services.data, spaces: services.spaces } });
+  } = useFetchEpisodeEventsQuery({
+    episodeId,
+    services: { data: services.data, spaces: services.spaces },
+  });
 
   const {
     data: episodeEventData,
@@ -335,12 +347,11 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     services: { expressions: services.expressions, spaces: services.spaces },
   });
 
-  const { data: eventsLogEntries = [], isLoading: isLoadingEventsLog } =
-    useFetchEpisodeChangelog({
-      episodeId,
-      groupHash,
-      data: services.data,
-    });
+  const { data: eventsLogEntries = [], isLoading: isLoadingEventsLog } = useFetchEpisodeChangelog({
+    episodeId,
+    groupHash,
+    data: services.data,
+  });
 
   const eventsLogUids = useMemo(() => {
     const uids = new Set<string>();
@@ -373,7 +384,6 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const rawTags = groupAction?.tags;
   const tags = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
 
-
   const episodeActions = useMemo(
     () =>
       createEpisodeActions({
@@ -387,7 +397,6 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         expressions: services.expressions,
         spaces: services.spaces,
         queryClient,
-        getEpisodeDetailsHref: () => '',
         getDiscoverHref: () => undefined,
       }),
     [services, queryClient]
@@ -433,7 +442,17 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         (groupAction?.lastDeactivateAction as 'activate' | 'deactivate' | undefined) ?? undefined,
       last_tags: groupAction?.tags,
     };
-  }, [episodeId, lastStatus, ruleId, groupHash, eventRows, durationMs, derivedWorkflowStatus, episodeAction, groupAction]);
+  }, [
+    episodeId,
+    lastStatus,
+    ruleId,
+    groupHash,
+    eventRows,
+    durationMs,
+    derivedWorkflowStatus,
+    episodeAction,
+    groupAction,
+  ]);
 
   const latestEventRow = eventRows.length > 0 ? eventRows[eventRows.length - 1] : null;
 
@@ -472,9 +491,10 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
 
   const ruleIds = useMemo(() => (ruleId ? [ruleId] : []), [ruleId]);
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services });
-  const ruleName = ruleId ? rulesCache[ruleId]?.metadata?.name : undefined;
-  const ruleQuery = ruleId ? rulesCache[ruleId]?.evaluation?.query?.base : undefined;
-  const ruleGroupingFields = ruleId ? rulesCache[ruleId]?.grouping?.fields : undefined;
+  const cachedRule = ruleId ? rulesCache[ruleId] : undefined;
+  const ruleName = cachedRule?.metadata?.name;
+  const ruleQuery = cachedRule ? getBreachEsqlQuery(cachedRule.query) : undefined;
+  const ruleGroupingFields = cachedRule?.grouping?.fields;
 
   const groupingFieldItems = useMemo(() => {
     if (!ruleGroupingFields?.length || !episodeEventData?.data) return [];
@@ -494,11 +514,21 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const { value: metadataDataView, loading: isMetadataDataViewLoading } =
     useAlertingEpisodeSourceDataView({
       query: ruleQuery,
-      services: metadataServices,
+      dataViews: metadataServices.dataViews,
+      http: metadataServices.http,
     });
 
   const docViewerRegistry = (
-    services as unknown as { unifiedDocViewer?: { registry: { getAll: () => Array<{ id: string; render?: (props: Record<string, unknown>) => React.ReactNode }> } } }
+    services as unknown as {
+      unifiedDocViewer?: {
+        registry: {
+          getAll: () => Array<{
+            id: string;
+            render?: (props: Record<string, unknown>) => React.ReactNode;
+          }>;
+        };
+      };
+    }
   ).unifiedDocViewer?.registry;
 
   const tableDocView = useMemo(
@@ -522,10 +552,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       {
         title: i18n.FLYOUT_ASSIGNEE_LABEL,
         description: (
-          <EpisodeAssigneeCell
-            assigneeUid={assigneeUid}
-            userProfile={services.userProfile}
-          />
+          <EpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={services.userProfile} />
         ),
       },
       ...(tags.length > 0
@@ -572,9 +599,19 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
           ]
         : []),
     ],
-    [episodeId, ruleId, ruleName, triggeredAt, groupHash, workflowStatusBadge, tags, assigneeUid, services.userProfile, groupingFieldItems]
+    [
+      episodeId,
+      ruleId,
+      ruleName,
+      triggeredAt,
+      groupHash,
+      workflowStatusBadge,
+      tags,
+      assigneeUid,
+      services.userProfile,
+      groupingFieldItems,
+    ]
   );
-
 
   if (isLoadingEvents) {
     return (
@@ -619,20 +656,17 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
           columns={getEventColumns(toggleEventExpand, expandedEventIds)}
           itemIdToExpandedRowMap={Object.fromEntries(
             eventRows
-              .filter((row) =>
-                expandedEventIds.has(`${row['@timestamp']}-${row['episode.id']}`)
-              )
+              .filter((row) => expandedEventIds.has(`${row['@timestamp']}-${row['episode.id']}`))
               .map((row) => {
-                const { event_data: rawData, ...rest } = row;
+                const { data: rawData, ...rest } = row;
                 let parsedData: unknown;
                 try {
-                  parsedData = rawData ? JSON.parse(rawData) : undefined;
+                  parsedData =
+                    typeof rawData === 'string' ? JSON.parse(rawData) : rawData ?? undefined;
                 } catch {
                   parsedData = rawData;
                 }
-                const displayRow = parsedData !== undefined
-                  ? { ...rest, data: parsedData }
-                  : rest;
+                const displayRow = parsedData !== undefined ? { ...rest, data: parsedData } : rest;
                 return [
                   `${row['@timestamp']}-${row['episode.id']}`,
                   <EuiCodeBlock
@@ -742,16 +776,10 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     return (
       <EuiCommentList aria-label={i18n.FLYOUT_TAB_EVENTS_LOG}>
         {eventsLogEntries.map((entry, idx) => {
-          const actorProfile = entry.actor
-            ? eventsLogProfilesMap.get(entry.actor)
-            : undefined;
+          const actorProfile = entry.actor ? eventsLogProfilesMap.get(entry.actor) : undefined;
           const username = resolveUsername(entry.actor, eventsLogProfilesMap);
           const avatar = actorProfile ? (
-            <UserAvatar
-              user={actorProfile.user}
-              avatar={actorProfile.data?.avatar}
-              size="s"
-            />
+            <UserAvatar user={actorProfile.user} avatar={actorProfile.data?.avatar} size="s" />
           ) : undefined;
 
           const rawEventJson = JSON.stringify(entry, null, 2);
@@ -828,19 +856,13 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiTabs size="s" bottomBorder={false}>
-          <EuiTab
-            isSelected={selectedTab === 'overview'}
-            onClick={() => onTabClick('overview')}
-          >
+          <EuiTab isSelected={selectedTab === 'overview'} onClick={() => onTabClick('overview')}>
             {i18n.FLYOUT_TAB_OVERVIEW}
           </EuiTab>
           <EuiTab isSelected={selectedTab === 'json'} onClick={() => onTabClick('json')}>
             {i18n.FLYOUT_TAB_JSON}
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'metadata'}
-            onClick={() => onTabClick('metadata')}
-          >
+          <EuiTab isSelected={selectedTab === 'metadata'} onClick={() => onTabClick('metadata')}>
             {i18n.FLYOUT_TAB_METADATA}
           </EuiTab>
           <EuiTab
@@ -855,10 +877,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
               </>
             )}
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'notes'}
-            onClick={() => onTabClick('notes')}
-          >
+          <EuiTab isSelected={selectedTab === 'notes'} onClick={() => onTabClick('notes')}>
             {i18n.FLYOUT_TAB_NOTES}
             {notes.length > 0 && (
               <>

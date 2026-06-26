@@ -29,13 +29,10 @@ export const SuppressionDurationField = () => {
           if (!value) return true;
           const error = validateMaxDuration(value, MAX_DURATION);
           if (error) {
-            return i18n.translate(
-              'xpack.securitySolution.rulesV2.suppressionDuration.maxError',
-              {
-                defaultMessage: 'Suppression window cannot exceed {max}.',
-                values: { max: MAX_DURATION },
-              }
-            );
+            return i18n.translate('xpack.securitySolution.rulesV2.suppressionDuration.maxError', {
+              defaultMessage: 'Suppression window cannot exceed {max}.',
+              values: { max: MAX_DURATION },
+            });
           }
           return true;
         },

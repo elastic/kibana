@@ -45,6 +45,12 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   }
 );
 
+export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCount', {
+    defaultMessage: 'Showing {count, plural, one {# episode} other {# episodes}}',
+    values: { count },
+  });
+
 export const EPISODES_ASSIGNEE_EMPTY = i18n.translate('xpack.alertingV2.episodes.assignees.empty', {
   defaultMessage: '—',
 });
@@ -102,11 +108,6 @@ export const BULK_RESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkAction
 export const BULK_UNRESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkActions.activate', {
   defaultMessage: 'Unresolve',
 });
-
-export const INCLUDE_BUILDING_BLOCKS_LABEL = i18n.translate(
-  'xpack.alertingV2.episodes.filterBar.includeBuildingBlocks',
-  { defaultMessage: 'Include building block alerts' }
-);
 
 export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActions.editTags', {
   defaultMessage: 'Edit tags',

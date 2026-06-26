@@ -20,6 +20,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useQuery } from '@kbn/react-query';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices, FormValues } from '@kbn/alerting-v2-rule-form';
 import { useKibana } from '../../common/lib/kibana';
@@ -120,7 +121,12 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
   const history = useHistory();
   const services = useRuleFormServices();
 
-  const { data: rule, isLoading, isError, error } = useQuery(
+  const {
+    data: rule,
+    isLoading,
+    isError,
+    error,
+  } = useQuery(
     ['rulesV2Edit', ruleId],
     () => services.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${ruleId}`),
     { staleTime: 0, cacheTime: 0 }
@@ -160,7 +166,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
   }
 
   const initialValues: Partial<FormValues> = mapRuleResponseToFormValues(rule);
-  const initialQuery = rule.evaluation?.query?.base ?? 'FROM logs-*';
+  const initialQuery = getBreachEsqlQuery(rule.query) || 'FROM logs-*';
   const initialParams = rule.params;
   const initialExceptions = rule.exceptions ?? [];
 
@@ -197,14 +203,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
 };
 
 const useRuleFormServices = (): RuleFormServices => {
-  const {
-    http,
-    data,
-    dataViews,
-    notifications,
-    application,
-    lens,
-  } = useKibana().services;
+  const { http, data, dataViews, notifications, application, lens } = useKibana().services;
 
   return useMemo(
     () => ({ http, data, dataViews, notifications, application, lens }),

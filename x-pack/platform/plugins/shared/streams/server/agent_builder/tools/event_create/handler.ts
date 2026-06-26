@@ -36,7 +36,7 @@ export async function createEventToolHandler({
     created_at: now,
     event_id: eventId,
     discovery_slug: `agent-event-${eventId.slice(0, 8)}`,
-    verdict: eventInput.status ?? 'promoted',
+    status: eventInput.status ?? 'promoted',
     stream_names: eventInput.stream_names,
     title: eventInput.title,
     summary: eventInput.summary,

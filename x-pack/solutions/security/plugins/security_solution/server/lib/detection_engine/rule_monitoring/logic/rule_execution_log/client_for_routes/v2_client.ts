@@ -37,9 +37,7 @@ interface GetV2ExecutionResultsArgs {
 }
 
 export interface IRuleExecutionLogV2ForRoutes {
-  getV2ExecutionResults(
-    args: GetV2ExecutionResultsArgs
-  ): Promise<ReadRuleExecutionResultsResponse>;
+  getV2ExecutionResults(args: GetV2ExecutionResultsArgs): Promise<ReadRuleExecutionResultsResponse>;
 }
 
 export const createRuleExecutionLogV2ClientForRoutes = (
@@ -50,46 +48,43 @@ export const createRuleExecutionLogV2ClientForRoutes = (
     getV2ExecutionResults: (
       args: GetV2ExecutionResultsArgs
     ): Promise<ReadRuleExecutionResultsResponse> => {
-      return withSecuritySpan(
-        'IRuleExecutionLogV2ForRoutes.getV2ExecutionResults',
-        async () => {
-          const { ruleId } = args;
-          try {
-            const { filter: filterParams, sort, page, perPage } = args;
-            const { from, to, outcome } = filterParams ?? {};
-            const sortField = sort?.field ?? 'execution_start';
-            const sortOrder = sort?.order ?? 'desc';
+      return withSecuritySpan('IRuleExecutionLogV2ForRoutes.getV2ExecutionResults', async () => {
+        const { ruleId } = args;
+        try {
+          const { filter: filterParams, sort, page, perPage } = args;
+          const { from, to, outcome } = filterParams ?? {};
+          const sortField = sort?.field ?? 'execution_start';
+          const sortOrder = sort?.order ?? 'desc';
 
-            const findResult = await eventLog.findEventsBySavedObjectIds(
-              ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
-              [ruleId],
-              {
-                filter: constructV2ExecutionEventKqlFilter({ outcome }),
-                sort: [{ sort_field: mapSortField(sortField), sort_order: sortOrder }],
-                page,
-                per_page: perPage,
-                start: from,
-                end: to,
-              }
-            );
+          const findResult = await eventLog.findEventsBySavedObjectIds(
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            [ruleId],
+            {
+              filter: constructV2ExecutionEventKqlFilter({ outcome }),
+              sort: [{ sort_field: mapSortField(sortField), sort_order: sortOrder }],
+              page,
+              per_page: perPage,
+              start: from,
+              end: to,
+            }
+          );
 
-            return {
-              data: findResult.data.map(mapV2EventToUnifiedResult),
-              total: findResult.total,
-              page: findResult.page,
-              per_page: findResult.per_page,
-            };
-          } catch (e) {
-            const logMessage = 'Error getting v2 execution results from event log';
-            const logReason = e instanceof Error ? e.message : String(e);
-            const logSuffix = `[rule id ${ruleId}]`;
-            const logMeta: ExtMeta = { rule: { id: ruleId } };
+          return {
+            data: findResult.data.map(mapV2EventToUnifiedResult),
+            total: findResult.total,
+            page: findResult.page,
+            per_page: findResult.per_page,
+          };
+        } catch (e) {
+          const logMessage = 'Error getting v2 execution results from event log';
+          const logReason = e instanceof Error ? e.message : String(e);
+          const logSuffix = `[rule id ${ruleId}]`;
+          const logMeta: ExtMeta = { rule: { id: ruleId } };
 
-            logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
-            throw e;
-          }
+          logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
+          throw e;
         }
-      );
+      });
     },
   };
 };

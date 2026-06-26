@@ -25,6 +25,7 @@ export enum AttacksEventTypes {
   GenerateClicked = 'Attacks Generate Clicked',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
   WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
+  TypeFilterChanged = 'Attacks Type Filter Changed',
 }
 
 interface AttacksTableSortChangedParams {
@@ -99,6 +100,10 @@ interface AttacksFeaturePromotionCalloutActionParams {
   action: 'view_attacks' | 'hide';
 }
 
+interface AttacksTypeFilterChangedParams {
+  types: string[];
+}
+
 export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.TableSortChanged]: AttacksTableSortChangedParams;
   [AttacksEventTypes.ViewOptionChanged]: AttacksViewOptionChangedParams;
@@ -117,6 +122,7 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.ScheduleDetailsFlyoutOpened]: AttacksScheduleDetailsFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;
   [AttacksEventTypes.WorkflowRunTriggered]: AttacksActionBaseParams;
+  [AttacksEventTypes.TypeFilterChanged]: AttacksTypeFilterChangedParams;
 }
 
 export interface AttacksTelemetryEvent {

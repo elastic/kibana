@@ -145,7 +145,7 @@ const useMemoryTaskAction = (
       queryClient.invalidateQueries({ queryKey: memoryKeys.all });
       core.notifications.toasts.addSuccess(
         i18n.translate('xpack.streams.memory.taskSuccess', {
-          defaultMessage: '{actionName} started successfully.',
+          defaultMessage: '{actionName} queued. Results will appear once the workflow completes.',
           values: { actionName },
         })
       );
@@ -178,6 +178,24 @@ export const useConsolidateMemory = () => {
     `${MEMORY_BASE}/_consolidate`,
     i18n.translate('xpack.streams.memory.consolidateActionName', {
       defaultMessage: 'Consolidate memory',
+    })
+  );
+};
+
+export const useSynthesizeMemory = () => {
+  return useMemoryTaskAction(
+    `${MEMORY_BASE}/_synthesize`,
+    i18n.translate('xpack.streams.memory.synthesizeActionName', {
+      defaultMessage: 'Synthesize memory',
+    })
+  );
+};
+
+export const useDetectGaps = () => {
+  return useMemoryTaskAction(
+    `${MEMORY_BASE}/_detect_gaps`,
+    i18n.translate('xpack.streams.memory.detectGapsActionName', {
+      defaultMessage: 'Detect gaps',
     })
   );
 };

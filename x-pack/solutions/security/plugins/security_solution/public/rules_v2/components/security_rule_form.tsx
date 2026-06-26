@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { RuleResponse, RuleParams } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, RuleParams, ExceptionListReference } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 
 type ThreatEntry = NonNullable<RuleParams['threat']>[number];
@@ -19,10 +19,10 @@ import {
   RuleFormProvider,
   RulePreviewPanel,
   useFormDefaults,
+  getBreachQuery,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
 } from '@kbn/alerting-v2-rule-form';
-import type { ExceptionListReference } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import type { SecurityRuleType } from '../constants';
 import { buildThresholdEsqlQuery, parseThresholdEsqlQuery } from '../utils/threshold_to_esql';
@@ -33,10 +33,14 @@ const DEFAULT_THRESHOLD_VALUE = 200;
 
 const SECURITY_OVERRIDES: Pick<
   FormValues,
-  'kind' | 'recoveryPolicy' | 'stateTransition' | 'stateTransitionAlertDelayMode' | 'stateTransitionRecoveryDelayMode'
+  | 'kind'
+  | 'recoveryStrategy'
+  | 'stateTransition'
+  | 'stateTransitionAlertDelayMode'
+  | 'stateTransitionRecoveryDelayMode'
 > = {
   kind: 'alert',
-  recoveryPolicy: { type: 'no_breach' },
+  recoveryStrategy: 'no_breach',
   stateTransition: { pendingCount: 0, recoveringCount: 0 },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -70,8 +74,9 @@ export const SecurityRuleForm = ({
   onSuccess,
   onCancel,
 }: SecurityRuleFormProps) => {
-  const inferredType: SecurityRuleType =
-    initialValues?.metadata?.tags?.includes('threshold') ? 'threshold' : 'esql';
+  const inferredType: SecurityRuleType = initialValues?.metadata?.tags?.includes('threshold')
+    ? 'threshold'
+    : 'esql';
   const [ruleType, setRuleType] = useState<SecurityRuleType>(
     initialRuleType ?? (ruleId ? inferredType : 'esql')
   );
@@ -80,9 +85,10 @@ export const SecurityRuleForm = ({
   onSuccessRef.current = onSuccess;
 
   const parsedThreshold = useMemo(
-    () => (ruleId && inferredType === 'threshold' && initialQuery
-      ? parseThresholdEsqlQuery(initialQuery)
-      : null),
+    () =>
+      ruleId && inferredType === 'threshold' && initialQuery
+        ? parseThresholdEsqlQuery(initialQuery)
+        : null,
     [ruleId, inferredType, initialQuery]
   );
 
@@ -95,15 +101,9 @@ export const SecurityRuleForm = ({
   const [thresholdValue, setThresholdValue] = useState(
     parsedThreshold?.thresholdValue ?? DEFAULT_THRESHOLD_VALUE
   );
-  const [cardinalityField, setCardinalityField] = useState(
-    parsedThreshold?.cardinalityField ?? ''
-  );
-  const [cardinalityValue, setCardinalityValue] = useState(
-    parsedThreshold?.cardinalityValue ?? 0
-  );
-  const [filterQuery, setFilterQuery] = useState(
-    parsedThreshold?.filterQuery ?? ''
-  );
+  const [cardinalityField, setCardinalityField] = useState(parsedThreshold?.cardinalityField ?? '');
+  const [cardinalityValue, setCardinalityValue] = useState(parsedThreshold?.cardinalityValue ?? 0);
+  const [filterQuery, setFilterQuery] = useState(parsedThreshold?.filterQuery ?? '');
 
   const [threat, setThreat] = useState<ThreatEntry[]>(initialParams?.threat ?? []);
   const [note, setNote] = useState(initialParams?.note ?? '');
@@ -128,7 +128,15 @@ export const SecurityRuleForm = ({
       cardinalityValue: cardinalityField ? cardinalityValue : undefined,
       filterQuery: filterQuery || undefined,
     });
-  }, [ruleType, indexPatterns, groupByFields, thresholdValue, cardinalityField, cardinalityValue, filterQuery]);
+  }, [
+    ruleType,
+    indexPatterns,
+    groupByFields,
+    thresholdValue,
+    cardinalityField,
+    cardinalityValue,
+    filterQuery,
+  ]);
 
   const defaultFromClause = `FROM ${DEFAULT_INDEX_PATTERN.join(', ')}`;
 
@@ -136,7 +144,8 @@ export const SecurityRuleForm = ({
     if (ruleType === 'threshold') {
       return generatedQuery || defaultFromClause;
     }
-    return initialQuery ?? initialValues?.evaluation?.query?.base ?? defaultFromClause;
+    const initialBreach = getBreachQuery(initialValues?.query);
+    return initialQuery ?? (initialBreach !== '' ? initialBreach : defaultFromClause);
   }, [ruleType, generatedQuery, initialQuery, initialValues, defaultFromClause]);
 
   const queryDefaults = useFormDefaults({ query: effectiveQuery });
@@ -148,7 +157,7 @@ export const SecurityRuleForm = ({
     };
 
     if (ruleType === 'threshold' && generatedQuery) {
-      securityDefaults.evaluation = { query: { base: generatedQuery } };
+      securityDefaults.query = { format: 'standalone', breach: { query: generatedQuery } };
     }
 
     return {
@@ -162,24 +171,20 @@ export const SecurityRuleForm = ({
         ...queryDefaults.schedule,
         ...securityDefaults.schedule,
       },
-      evaluation: {
-        ...queryDefaults.evaluation,
-        query: {
-          ...queryDefaults.evaluation.query,
-          ...securityDefaults.evaluation?.query,
-        },
-      },
+      query: securityDefaults.query ?? queryDefaults.query,
       ...(securityDefaults.grouping !== undefined ? { grouping: securityDefaults.grouping } : {}),
-      ...(securityDefaults.recoveryPolicy !== undefined
-        ? { recoveryPolicy: securityDefaults.recoveryPolicy }
+      ...(securityDefaults.recoveryStrategy !== undefined
+        ? { recoveryStrategy: securityDefaults.recoveryStrategy }
         : {}),
       ...(securityDefaults.stateTransition !== undefined
         ? { stateTransition: securityDefaults.stateTransition }
         : {}),
       stateTransitionAlertDelayMode:
-        securityDefaults.stateTransitionAlertDelayMode ?? queryDefaults.stateTransitionAlertDelayMode,
+        securityDefaults.stateTransitionAlertDelayMode ??
+        queryDefaults.stateTransitionAlertDelayMode,
       stateTransitionRecoveryDelayMode:
-        securityDefaults.stateTransitionRecoveryDelayMode ?? queryDefaults.stateTransitionRecoveryDelayMode,
+        securityDefaults.stateTransitionRecoveryDelayMode ??
+        queryDefaults.stateTransitionRecoveryDelayMode,
     };
   }, [queryDefaults, initialValues, ruleType, generatedQuery]);
 
@@ -203,14 +208,16 @@ export const SecurityRuleForm = ({
   const meta = useMemo(
     () => ({
       layout: 'page' as const,
-      ...(exceptionPreviewFilter != null ? { additionalPreviewFilter: exceptionPreviewFilter } : {}),
+      ...(exceptionPreviewFilter != null
+        ? { additionalPreviewFilter: exceptionPreviewFilter }
+        : {}),
     }),
     [exceptionPreviewFilter]
   );
 
   useEffect(() => {
     if (ruleType === 'threshold' && generatedQuery) {
-      methods.setValue('evaluation.query.base', generatedQuery);
+      methods.setValue('query', { format: 'standalone', breach: { query: generatedQuery } });
     }
   }, [ruleType, generatedQuery, methods]);
 
@@ -234,7 +241,7 @@ export const SecurityRuleForm = ({
       };
 
       if (ruleType === 'threshold' && generatedQuery) {
-        enriched.evaluation = { query: { base: generatedQuery } };
+        enriched.query = { format: 'standalone', breach: { query: generatedQuery } };
       }
 
       const filteredRefs = references.filter((r) => r.trim().length > 0);
@@ -244,9 +251,7 @@ export const SecurityRuleForm = ({
         ...(threat.length > 0 ? { threat } : {}),
         ...(note.trim() ? { note: note.trim() } : {}),
         ...(setup.trim() ? { setup: setup.trim() } : {}),
-        ...(filteredIntegrations.length > 0
-          ? { related_integrations: filteredIntegrations }
-          : {}),
+        ...(filteredIntegrations.length > 0 ? { related_integrations: filteredIntegrations } : {}),
         ...(investigationFieldNames.length > 0
           ? { investigation_fields: { field_names: investigationFieldNames } }
           : {}),
@@ -274,13 +279,26 @@ export const SecurityRuleForm = ({
         onSuccessRef.current?.(savedRuleId);
       } catch (error) {
         services.notifications.toasts.addDanger(
-          `Error ${ruleId ? 'updating' : 'creating'} rule: ${error instanceof Error ? error.message : String(error)}`
+          `Error ${ruleId ? 'updating' : 'creating'} rule: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
       } finally {
         setIsSubmitting(false);
       }
     },
-    [ruleType, generatedQuery, ruleId, services, threat, note, setup, relatedIntegrations, investigationFieldNames, references]
+    [
+      ruleType,
+      generatedQuery,
+      ruleId,
+      services,
+      threat,
+      note,
+      setup,
+      relatedIntegrations,
+      investigationFieldNames,
+      references,
+    ]
   );
 
   return (

@@ -90,9 +90,19 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click('.slack-card');
 
-    await page.testSubj.locator('nameInput').fill(connectorName);
+    // The connector form renders only after the action-type model resolves and
+    // ConnectorForm lazy-loads its field chunk via Suspense. On a cold CI cache
+    // that can exceed the default 10s fill timeout, so wait for nameInput first.
+    const nameInput = page.testSubj.locator('nameInput');
+    await nameInput.waitFor({ state: 'visible' });
+    await nameInput.fill(connectorName);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
     const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');

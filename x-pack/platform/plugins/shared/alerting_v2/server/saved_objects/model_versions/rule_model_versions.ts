@@ -16,36 +16,4 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV1,
     },
   },
-  '2': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          params: { type: 'flattened', ignore_above: 4096 },
-        },
-      },
-    ],
-    schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV1,
-    },
-  },
-  '3': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          grouping: {
-            properties: {
-              duration: { type: 'keyword' },
-            },
-          },
-        },
-      },
-    ],
-    schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV1,
-    },
-  },
 };

@@ -5,71 +5,47 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import type { DynamicRuleFormProps } from './dynamic_rule_form';
-
-// Lazy load form components
-const LazyDynamicRuleForm = React.lazy(() =>
-  import('./dynamic_rule_form').then((module) => ({
-    default: module.DynamicRuleForm,
-  }))
-);
-
-export const DynamicRuleForm = (props: DynamicRuleFormProps) => (
-  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-    <LazyDynamicRuleForm {...props} />
-  </Suspense>
-);
-
-// Lazy load preview component
-const LazyRuleResultsPreview = React.lazy(() =>
-  import('./fields/rule_results_preview').then((module) => ({
-    default: module.RuleResultsPreview,
-  }))
-);
-
-export const RuleResultsPreview = () => (
-  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-    <LazyRuleResultsPreview />
-  </Suspense>
-);
-
 export type {
   FormValues,
   StateTransitionDelayMode,
-  WorkflowFormComponentProps,
   RuleNotificationsValue,
+  RuleQuery,
+  ComposedQuery,
+  StandaloneQuery,
+  RuleKind,
 } from './types';
-export type { DynamicRuleFormProps } from './dynamic_rule_form';
-export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
-export {
-  RuleFormProvider,
-  useRuleFormServices,
-  useRuleFormMeta,
-  NOOP_WORKFLOW_FORM,
-} from './contexts';
+export { getBreachQuery, getRecoverQuery } from './utils/query_helpers';
 export {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
+} from './utils/state_transition_helpers';
+export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
+export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+export {
   mapFormValuesToRuleRequest,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
   mapRuleResponseToFormValues,
 } from './utils/rule_request_mappers';
 export type { RuleRequestCommon } from './utils/rule_request_mappers';
+export { isNonRepresentableRule } from './utils/is_non_representable';
 
 // Field groups — for composing custom form layouts
 export { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
 export { ConditionFieldGroup } from './field_groups/condition_field_group';
 export { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
-export { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
+
+// Fields & components — for composing custom form layouts
 export { KindField } from './fields/kind_field';
 export { RulePreviewPanel } from './fields/rule_preview_panel';
-export { GroupFieldSelect } from './fields/group_field_select';
 export { DurationInput } from './fields/duration_input';
 export type { DurationInputProps } from './fields/duration_input';
 export { SubmissionButtons } from './components/submission_buttons';
 export type { SubmissionButtonsProps } from './components/submission_buttons';
 export { ErrorCallOut } from './error_callout';
+
+// Hooks
 export { useFormDefaults } from './hooks/use_form_defaults';
+
+// Constants
+export { RULE_FORM_ID, DEFAULT_RULE_NAME } from './constants';

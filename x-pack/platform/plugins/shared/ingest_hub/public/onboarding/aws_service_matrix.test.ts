@@ -91,4 +91,16 @@ describe('AWS_SERVICES_MATRIX', () => {
       expect(typeof entry.showInUI).toBe('boolean');
     });
   });
+
+  const agentlessEntries = AWS_SERVICES_MATRIX.filter((entry) =>
+    entry.deliveryMethods.some(({ method }) => method === 'agentless')
+  );
+
+  describe.each(
+    agentlessEntries.map((entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry])
+  )('agentless service "%s"', (_id, entry) => {
+    it('has non-empty providerPermissions.actions', () => {
+      expect(entry.providerPermissions?.actions?.length).toBeGreaterThan(0);
+    });
+  });
 });

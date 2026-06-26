@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { AppHeaderEditableTitle, AppHeaderTitle } from '../../types';
+import type { AppHeaderEditableTitle } from '../../types';
 
 // The bundled lib.dom `FocusOptions` does not yet include `focusVisible`, which lets us
 // force the focus ring on/off when restoring focus programmatically.
@@ -48,8 +48,9 @@ const invalidTitleErrorMessage = i18n.translate(
   }
 );
 
-export const isEditableTitle = (title: AppHeaderTitle): title is AppHeaderEditableTitle =>
-  typeof title !== 'string';
+export const isEditableTitle = (
+  title: string | AppHeaderEditableTitle
+): title is AppHeaderEditableTitle => typeof title !== 'string';
 
 // All of the title's layout/visual contract lives here, isolated from the behavior in
 // `Title`. The comments record the hard-won invariants behind read/edit pixel parity --
@@ -258,246 +259,250 @@ const useTitleStyles = () => {
   }, [euiTheme]);
 };
 
-export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }>(
-  ({ title, titleOffset }) => {
-    const editable = isEditableTitle(title);
-    const text = editable ? title.text : title;
-    const placeholder = editable ? title.placeholder : undefined;
-    const ariaLabel = editable ? title.ariaLabel : undefined;
-    const onSave = editable ? title.onSave : undefined;
+interface TitleProps {
+  title: string | AppHeaderEditableTitle;
+  titleOffset?: boolean;
+  size?: 'xs' | 's';
+}
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [draft, setDraft] = useState(text);
-    const [error, setError] = useState<string | undefined>();
-    const [isSaving, setIsSaving] = useState(false);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const titleRef = useRef<HTMLButtonElement>(null);
-    // Whether the current edit was opened via keyboard, so the focus ring only returns for
-    // keyboard users when focus is restored to the title.
-    const enteredViaKeyboardRef = useRef(false);
-    // Marks that an edit was resolved by an explicit action (Enter/Escape) so the trailing
-    // blur from unmounting the focused input does not re-enter save().
-    const resolvingRef = useRef(false);
-    const errorId = useGeneratedHtmlId({ prefix: 'appHeaderEditableTitleError' });
-    const instructionsId = useGeneratedHtmlId({ prefix: 'appHeaderEditableTitleInstructions' });
+export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' }) => {
+  const editable = isEditableTitle(title);
+  const text = editable ? title.text : title;
+  const placeholder = editable ? title.placeholder : undefined;
+  const ariaLabel = editable ? title.ariaLabel : undefined;
+  const onSave = editable ? title.onSave : undefined;
 
-    const styles = useTitleStyles();
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(text);
+  const [error, setError] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLButtonElement>(null);
+  // Whether the current edit was opened via keyboard, so the focus ring only returns for
+  // keyboard users when focus is restored to the title.
+  const enteredViaKeyboardRef = useRef(false);
+  // Marks that an edit was resolved by an explicit action (Enter/Escape) so the trailing
+  // blur from unmounting the focused input does not re-enter save().
+  const resolvingRef = useRef(false);
+  const errorId = useGeneratedHtmlId({ prefix: 'appHeaderEditableTitleError' });
+  const instructionsId = useGeneratedHtmlId({ prefix: 'appHeaderEditableTitleInstructions' });
 
-    useEffect(() => {
-      if (!isEditing) {
+  const styles = useTitleStyles();
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (!input) {
         return;
       }
+      input.focus();
+      // Select the whole title on entry so the I-beam never lands the caret in a surprising
+      // spot; the user can click again within the now-real input to position it.
+      input.select();
+    });
+  }, [isEditing]);
 
-      requestAnimationFrame(() => {
-        const input = inputRef.current;
-        if (!input) {
-          return;
-        }
-        input.focus();
-        // Select the whole title on entry so the I-beam never lands the caret in a surprising
-        // spot; the user can click again within the now-real input to position it.
-        input.select();
-      });
-    }, [isEditing]);
+  const returnFocusToTitle = () => {
+    const options: FocusOptionsWithVisible = { focusVisible: enteredViaKeyboardRef.current };
+    requestAnimationFrame(() => {
+      titleRef.current?.focus(options);
+    });
+  };
 
-    const returnFocusToTitle = () => {
-      const options: FocusOptionsWithVisible = { focusVisible: enteredViaKeyboardRef.current };
-      requestAnimationFrame(() => {
-        titleRef.current?.focus(options);
-      });
-    };
+  const startEditing = (viaKeyboard = false) => {
+    if (!editable) {
+      return;
+    }
 
-    const startEditing = (viaKeyboard = false) => {
-      if (!editable) {
-        return;
-      }
+    enteredViaKeyboardRef.current = viaKeyboard;
+    resolvingRef.current = false;
+    setDraft(text);
+    setError(undefined);
+    setIsEditing(true);
+  };
 
-      enteredViaKeyboardRef.current = viaKeyboard;
-      resolvingRef.current = false;
-      setDraft(text);
-      setError(undefined);
-      setIsEditing(true);
-    };
+  const save = async (restoreFocus = true) => {
+    if (!onSave || isSaving) {
+      return;
+    }
 
-    const save = async (restoreFocus = true) => {
-      if (!onSave || isSaving) {
-        return;
-      }
+    const nextTitle = draft.trim();
 
-      const nextTitle = draft.trim();
-
-      // No change -> exit without calling onSave (also covers leaving an empty title empty).
-      if (nextTitle === text.trim()) {
-        resolvingRef.current = true;
-        setError(undefined);
-        setIsEditing(false);
-        if (restoreFocus) {
-          returnFocusToTitle();
-        }
-        return;
-      }
-
-      if (!nextTitle) {
-        setError(emptyTitleErrorMessage);
-        return;
-      }
-
-      setIsSaving(true);
-      let result: string | void;
-      try {
-        result = await onSave(nextTitle);
-      } catch {
-        setIsSaving(false);
-        setError(invalidTitleErrorMessage);
-        return;
-      }
-
-      const saveError = typeof result === 'string' ? result : undefined;
-      setIsSaving(false);
-
-      if (saveError) {
-        setError(saveError);
-        return;
-      }
-
+    // No change -> exit without calling onSave (also covers leaving an empty title empty).
+    if (nextTitle === text.trim()) {
       resolvingRef.current = true;
       setError(undefined);
       setIsEditing(false);
       if (restoreFocus) {
         returnFocusToTitle();
       }
-    };
+      return;
+    }
 
-    const cancel = () => {
-      resolvingRef.current = true;
-      setDraft(text);
-      setError(undefined);
-      setIsEditing(false);
+    if (!nextTitle) {
+      setError(emptyTitleErrorMessage);
+      return;
+    }
+
+    setIsSaving(true);
+    let result: string | void;
+    try {
+      result = await onSave(nextTitle);
+    } catch {
+      setIsSaving(false);
+      setError(invalidTitleErrorMessage);
+      return;
+    }
+
+    const saveError = typeof result === 'string' ? result : undefined;
+    setIsSaving(false);
+
+    if (saveError) {
+      setError(saveError);
+      return;
+    }
+
+    resolvingRef.current = true;
+    setError(undefined);
+    setIsEditing(false);
+    if (restoreFocus) {
       returnFocusToTitle();
-    };
+    }
+  };
 
-    const displayText = text || placeholder || '';
-    const isPlaceholder = !text && !!placeholder;
+  const cancel = () => {
+    resolvingRef.current = true;
+    setDraft(text);
+    setError(undefined);
+    setIsEditing(false);
+    returnFocusToTitle();
+  };
 
-    // The hidden sizer is the single source of the frame width in both modes: its intrinsic
-    // width sets the grid track while the visible text/input truncates or scrolls within it,
-    // so read and edit share identical geometry. Read mode sizes to the shown text (or the
-    // placeholder when empty); edit mode sizes to the draft (or placeholder while empty) so
-    // the input grows in lockstep as you type and the placeholder shows in full.
-    const renderSizer = (sizerText: string) => (
-      <span aria-hidden="true" css={styles.titleSizer}>
-        {sizerText}
+  const displayText = text || placeholder || '';
+  const isPlaceholder = !text && !!placeholder;
+
+  // The hidden sizer is the single source of the frame width in both modes: its intrinsic
+  // width sets the grid track while the visible text/input truncates or scrolls within it,
+  // so read and edit share identical geometry. Read mode sizes to the shown text (or the
+  // placeholder when empty); edit mode sizes to the draft (or placeholder while empty) so
+  // the input grows in lockstep as you type and the placeholder shows in full.
+  const renderSizer = (sizerText: string) => (
+    <span aria-hidden="true" css={styles.titleSizer}>
+      {sizerText}
+    </span>
+  );
+
+  // Shared read view: the sizer drives the frame width while the visible span truncates
+  // within it, so editable and non-editable titles have identical geometry.
+  const readContent = (
+    <>
+      {renderSizer(displayText)}
+      <span css={[styles.titleText, isPlaceholder ? styles.placeholderText : undefined]}>
+        {displayText}
       </span>
-    );
+    </>
+  );
 
-    // Shared read view: the sizer drives the frame width while the visible span truncates
-    // within it, so editable and non-editable titles have identical geometry.
-    const readContent = (
-      <>
-        {renderSizer(displayText)}
-        <span css={[styles.titleText, isPlaceholder ? styles.placeholderText : undefined]}>
-          {displayText}
-        </span>
-      </>
-    );
+  return (
+    <div
+      css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}
+      data-test-subj="appHeaderTitle"
+    >
+      <EuiTitle size={size}>
+        <h1>
+          {isEditing ? (
+            <div css={[styles.editingTitleFrame, error ? styles.invalidTitleFrame : undefined]}>
+              {renderSizer(draft || placeholder || '')}
+              <input
+                ref={inputRef}
+                // `size={1}` keeps the input's intrinsic width from inflating the grid track,
+                // so the sizer span alone determines the frame width.
+                size={1}
+                data-test-subj="appHeaderTitleInput"
+                css={styles.input}
+                value={draft}
+                placeholder={placeholder}
+                disabled={isSaving}
+                aria-busy={isSaving}
+                aria-invalid={!!error}
+                aria-label={ariaLabel ?? defaultAriaLabel}
+                aria-describedby={error ? errorId : undefined}
+                onChange={(event) => {
+                  setDraft(event.target.value);
+                  setError(undefined);
+                }}
+                onBlur={() => {
+                  // Ignore the trailing blur from an Enter/Escape that already closed the
+                  // field; a genuine click-away still commits.
+                  if (resolvingRef.current) {
+                    return;
+                  }
+                  void save(false);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void save();
+                  }
 
-    return (
-      <div
-        css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}
-        data-test-subj="appHeaderTitle"
-      >
-        <EuiTitle size="s">
-          <h1>
-            {isEditing ? (
-              <div css={[styles.editingTitleFrame, error ? styles.invalidTitleFrame : undefined]}>
-                {renderSizer(draft || placeholder || '')}
-                <input
-                  ref={inputRef}
-                  // `size={1}` keeps the input's intrinsic width from inflating the grid track,
-                  // so the sizer span alone determines the frame width.
-                  size={1}
-                  data-test-subj="appHeaderTitleInput"
-                  css={styles.input}
-                  value={draft}
-                  placeholder={placeholder}
-                  disabled={isSaving}
-                  aria-busy={isSaving}
-                  aria-invalid={!!error}
-                  aria-label={ariaLabel ?? defaultAriaLabel}
-                  aria-describedby={error ? errorId : undefined}
-                  onChange={(event) => {
-                    setDraft(event.target.value);
-                    setError(undefined);
-                  }}
-                  onBlur={() => {
-                    // Ignore the trailing blur from an Enter/Escape that already closed the
-                    // field; a genuine click-away still commits.
-                    if (resolvingRef.current) {
-                      return;
-                    }
-                    void save(false);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      void save();
-                    }
-
-                    if (event.key === 'Escape') {
-                      event.preventDefault();
-                      cancel();
-                    }
-                  }}
-                />
-                {error && (
-                  <EuiScreenReaderOnly>
-                    <span id={errorId} role="alert" data-test-subj="appHeaderTitleError">
-                      {error}
-                    </span>
-                  </EuiScreenReaderOnly>
-                )}
-                {(isSaving || error) && (
-                  <span css={[styles.statusIcon]}>
-                    {isSaving ? (
-                      <EuiLoadingSpinner size="m" />
-                    ) : (
-                      <EuiIconTip type="warning" color="danger" content={error} position="top" />
-                    )}
+                  if (event.key === 'Escape') {
+                    event.preventDefault();
+                    cancel();
+                  }
+                }}
+              />
+              {error && (
+                <EuiScreenReaderOnly>
+                  <span id={errorId} role="alert" data-test-subj="appHeaderTitleError">
+                    {error}
                   </span>
-                )}
-              </div>
-            ) : editable ? (
-              // Accessible name comes from the visible title text (the sizer span is
-              // aria-hidden), so the heading reads as the title itself; editability is
-              // conveyed via the screen-reader instructions referenced below.
-              <button
-                ref={titleRef}
-                type="button"
-                data-test-subj="appHeaderTitleButton"
-                css={styles.readModeTrigger}
-                aria-describedby={instructionsId}
-                // `event.detail === 0` marks a keyboard activation (Enter/Space) vs a mouse
-                // click, so the ring only returns to keyboard users after editing.
-                onClick={(event) => startEditing(event.detail === 0)}
-              >
-                {readContent}
-              </button>
-            ) : (
-              // Non-editable title: shares the same frame as the editable read view (its
-              // transparent overlay simply never activates) so geometry/alignment is identical.
-              <span css={styles.titleFrame}>{readContent}</span>
-            )}
-          </h1>
-        </EuiTitle>
-        {/* Kept outside the h1 so it never feeds the heading's name-from-content. */}
-        {editable && !isEditing && (
-          <EuiScreenReaderOnly>
-            <span id={instructionsId}>{editInstructions}</span>
-          </EuiScreenReaderOnly>
-        )}
-      </div>
-    );
-  }
-);
+                </EuiScreenReaderOnly>
+              )}
+              {(isSaving || error) && (
+                <span css={[styles.statusIcon]}>
+                  {isSaving ? (
+                    <EuiLoadingSpinner size="m" />
+                  ) : (
+                    <EuiIconTip type="warning" color="danger" content={error} position="top" />
+                  )}
+                </span>
+              )}
+            </div>
+          ) : editable ? (
+            // Accessible name comes from the visible title text (the sizer span is
+            // aria-hidden), so the heading reads as the title itself; editability is
+            // conveyed via the screen-reader instructions referenced below.
+            <button
+              ref={titleRef}
+              type="button"
+              data-test-subj="appHeaderTitleButton"
+              css={styles.readModeTrigger}
+              aria-describedby={instructionsId}
+              // `event.detail === 0` marks a keyboard activation (Enter/Space) vs a mouse
+              // click, so the ring only returns to keyboard users after editing.
+              onClick={(event) => startEditing(event.detail === 0)}
+            >
+              {readContent}
+            </button>
+          ) : (
+            // Non-editable title: shares the same frame as the editable read view (its
+            // transparent overlay simply never activates) so geometry/alignment is identical.
+            <span css={styles.titleFrame}>{readContent}</span>
+          )}
+        </h1>
+      </EuiTitle>
+      {/* Kept outside the h1 so it never feeds the heading's name-from-content. */}
+      {editable && !isEditing && (
+        <EuiScreenReaderOnly>
+          <span id={instructionsId}>{editInstructions}</span>
+        </EuiScreenReaderOnly>
+      )}
+    </div>
+  );
+});
 
 Title.displayName = 'Title';

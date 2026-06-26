@@ -30,13 +30,6 @@ const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.
   defaultMessage: 'Signal',
 });
 
-const BUILDING_BLOCK_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleForm.modeField.buildingBlock.title',
-  {
-    defaultMessage: 'Building block',
-  }
-);
-
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
     'Tracks a problem across state changes and can notify your team or trigger automated actions when the state changes. Choose this to monitor ongoing issues.',
@@ -47,14 +40,6 @@ const SIGNAL_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Records each match as a data point without lifecycle tracking or notifications. Choose this to capture activity for querying and investigation.',
-  }
-);
-
-const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleForm.modeField.buildingBlock.description',
-  {
-    defaultMessage:
-      'Runs silently and produces signals hidden from the default SIEM alerts view. Choose this to use as inputs for other detection rules.',
   }
 );
 
@@ -87,24 +72,12 @@ const MODE_OPTIONS: Array<{
       </>
     ),
   },
-  {
-    value: 'building_block',
-    inputDisplay: BUILDING_BLOCK_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{BUILDING_BLOCK_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{BUILDING_BLOCK_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
-  },
 ];
 
 /**
- * Presentational Mode select. Switches a rule between `alert` (stateful lifecycle),
- * `signal` (stateless detection), and `building_block` (hidden inputs for other
- * rules) modes. Each option renders its title and a description in the dropdown.
+ * Presentational Mode select. Switches a rule between `alert` (stateful lifecycle)
+ * and `signal` (stateless detection) modes. Each option renders its title and a
+ * description in the dropdown.
  */
 export const ModeSelect = ({
   value,

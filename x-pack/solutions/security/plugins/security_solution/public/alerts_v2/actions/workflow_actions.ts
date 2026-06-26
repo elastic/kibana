@@ -9,8 +9,8 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import type { SecurityAlertEpisode } from '../hooks/use_fetch_security_episodes';
 import { bulkCreateAlertActions } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { SecurityAlertEpisode } from '../hooks/use_fetch_security_episodes';
 
 export interface SecurityEpisodeAction {
   id: string;

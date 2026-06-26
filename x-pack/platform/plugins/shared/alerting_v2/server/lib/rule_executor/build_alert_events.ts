@@ -72,7 +72,7 @@ export interface BuildAlertEventsBaseOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
-  ruleAttributes: Pick<RuleResponse, 'grouping' | 'kind'>;
+  ruleAttributes: Pick<RuleResponse, 'grouping'>;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
@@ -80,10 +80,6 @@ export interface BuildAlertEventsBaseOpts {
 }
 
 export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
-
-function resolveEventType(kind: RuleResponse['kind']): 'signal' | 'alert' {
-  return kind === 'signal' ? 'signal' : 'alert';
-}
 
 export function createAlertEventsBatchBuilder({
   ruleId,
@@ -99,6 +95,7 @@ export function createAlertEventsBatchBuilder({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
   return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
@@ -107,13 +104,11 @@ export function createAlertEventsBatchBuilder({
     for (const rowDoc of batch) {
       const groupHash = buildGroupHash({
         rowDoc,
-        groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+        groupKeyFields: groupingFields,
         get fallbackSeed(): string {
           return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
         },
       });
-
-      const isBuildingBlock = ruleAttributes.kind === 'building_block';
 
       const doc: AlertEvent = {
         '@timestamp': wroteAt,
@@ -126,9 +121,8 @@ export function createAlertEventsBatchBuilder({
         data: rowDoc,
         status: 'breached',
         source,
-        type: resolveEventType(ruleAttributes.kind),
+        type: 'signal',
         space_id: spaceId,
-        ...(isBuildingBlock && { building_block: true }),
       };
 
       const severity = extractSeverity(rowDoc);
@@ -151,14 +145,13 @@ export interface BuildRecoveryAlertEventsOpts {
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: Set<string>;
   scheduledTimestamp: string;
-  kind: RuleResponse['kind'];
 }
 
 /**
  * Creates `recovered` alert events for groups that were previously in a non-inactive
  * episode state but are no longer present in the current breached set.
  *
- * Used when `recovery_policy.type` is `no_breach` or unset.
+ * Used when no recover query is configured on the rule.
  */
 export function buildRecoveryAlertEvents({
   ruleId,
@@ -167,11 +160,8 @@ export function buildRecoveryAlertEvents({
   activeGroupHashes,
   breachedGroupHashes,
   scheduledTimestamp,
-  kind,
 }: BuildRecoveryAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
-
-  const isBuildingBlock = kind === 'building_block';
 
   return activeGroupHashes
     .filter(({ group_hash }) => !breachedGroupHashes.has(group_hash))
@@ -183,9 +173,8 @@ export function buildRecoveryAlertEvents({
       data: {},
       status: 'recovered' as const,
       source: 'internal',
-      type: resolveEventType(kind),
+      type: 'signal' as const,
       space_id: spaceId,
-      ...(isBuildingBlock && { building_block: true }),
     }));
 }
 
@@ -204,17 +193,16 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
-  ruleAttributes: Pick<RuleResponse, 'grouping' | 'kind'>;
+  ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
-
 /**
  * Creates `recovered` alert events by running a custom recovery query.
  *
  * Active groups whose group hash matches a row in the recovery query results
- * are considered recovered. Used when `recovery_policy.type` is `query`.
+ * are considered recovered. Used when the rule has a recover query configured.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,
@@ -225,8 +213,6 @@ export function buildQueryRecoveryAlertEvents({
   esqlResponse,
   scheduledTimestamp,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
-  const { kind } = ruleAttributes;
-  const isBuildingBlock = kind === 'building_block';
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
@@ -235,6 +221,7 @@ export function buildQueryRecoveryAlertEvents({
   }
 
   const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}|recovery`);
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 
   // Keep the first matching row's data per group hash.
@@ -244,7 +231,7 @@ export function buildQueryRecoveryAlertEvents({
     const rowDoc = rowToDocument(columns, values[i]);
     const groupHash = buildGroupHash({
       rowDoc,
-      groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+      groupKeyFields: groupingFields,
       get fallbackSeed(): string {
         return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
       },
@@ -269,8 +256,7 @@ export function buildQueryRecoveryAlertEvents({
     data,
     status: 'recovered' as const,
     source: 'internal',
-    type: resolveEventType(kind),
+    type: 'signal' as const,
     space_id: spaceId,
-    ...(isBuildingBlock && { building_block: true }),
   }));
 }

@@ -37,11 +37,9 @@ const mappings: MappingsDefinition = {
         id: { type: 'keyword' },
         status: { type: 'keyword' }, // inactive | pending | active | recovering
         status_count: { type: 'long' }, // only set for pending and recovering
-        started_at: { type: 'date' },
       },
     },
     space_id: { type: 'keyword' },
-    building_block: { type: 'boolean' },
     severity: { type: 'keyword' }, // info | low | medium | high | critical
   },
 };
@@ -74,11 +72,9 @@ export const alertEventSchema = z.object({
       id: z.string(),
       status: alertEpisodeStatusSchema,
       status_count: alertEpisodeStatusCountSchema,
-      started_at: z.string().optional(),
     })
     .optional(),
   space_id: z.string(),
-  building_block: z.literal(true).optional(),
   severity: alertEventSeveritySchema.optional(),
 });
 

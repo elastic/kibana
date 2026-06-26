@@ -19,9 +19,7 @@ import { kqlAnd, kqlOr } from '../../utils/kql';
  * Unlike v1, there is no "execute-backfill" action in v2 — backfill is not yet supported.
  * The execute-start beacon is excluded because it has no metrics (it's a pre-pipeline marker).
  */
-export const constructV2ExecutionEventKqlFilter = (filter: {
-  outcome?: string[];
-}): string => {
+export const constructV2ExecutionEventKqlFilter = (filter: { outcome?: string[] }): string => {
   const filters: string[] = [
     `${f.EVENT_PROVIDER}:${ALERTING_V2_PROVIDER}`,
     `${f.EVENT_ACTION}:execute`,
@@ -29,9 +27,7 @@ export const constructV2ExecutionEventKqlFilter = (filter: {
 
   if (filter.outcome && filter.outcome.length > 0) {
     const v2Statuses = mapOutcomesToV2Statuses(filter.outcome);
-    filters.push(
-      `kibana.alerting_v2.rule_executor.execution.status:(${kqlOr(v2Statuses)})`
-    );
+    filters.push(`kibana.alerting_v2.rule_executor.execution.status:(${kqlOr(v2Statuses)})`);
   }
 
   return kqlAnd(filters);

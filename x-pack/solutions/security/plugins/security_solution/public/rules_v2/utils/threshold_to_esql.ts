@@ -57,10 +57,7 @@ const parseFragment = (src: string): ESQLSingleAstItem | null => {
   return null;
 };
 
-const parseStatsCommand = (
-  statsFields: string[],
-  groupByFields: string[]
-): ESQLSingleAstItem[] => {
+const parseStatsCommand = (statsFields: string[], groupByFields: string[]): ESQLSingleAstItem[] => {
   const groupBy =
     groupByFields.length > 0 ? ` BY ${groupByFields.map(escapeField).join(', ')}` : '';
   const src = `ROW x = 1 | STATS ${statsFields.join(', ')}${groupBy}`;
@@ -174,10 +171,7 @@ const isThresholdConditionWhere = (cmd: ESQLCommand): boolean => {
   return printed.includes('threshold.count') || printed.includes('threshold.cardinality');
 };
 
-const extractComparison = (
-  fn: ESQLFunction,
-  metricPrefix: string
-): number | null => {
+const extractComparison = (fn: ESQLFunction, metricPrefix: string): number | null => {
   if (!['>=', '>', '<=', '<'].includes(fn.name)) return null;
   const left = getColumnName(fn.args[0] as ESQLAstItem);
   if (!left?.startsWith(metricPrefix)) return null;

@@ -64,15 +64,12 @@ export const RulesV2ListPage = () => {
     { keepPreviousData: true }
   );
 
-  const onTableChange = useCallback(
-    ({ page: tablePage }: CriteriaWithPagination<RuleResponse>) => {
-      if (tablePage) {
-        setPage(tablePage.index);
-        setPerPage(tablePage.size);
-      }
-    },
-    []
-  );
+  const onTableChange = useCallback(({ page: tablePage }: CriteriaWithPagination<RuleResponse>) => {
+    if (tablePage) {
+      setPage(tablePage.index);
+      setPerPage(tablePage.size);
+    }
+  }, []);
 
   const columns = useMemo<Array<EuiBasicTableColumn<RuleResponse>>>(
     () => [
@@ -98,9 +95,7 @@ export const RulesV2ListPage = () => {
             label={enabled ? i18n.DISABLE_RULE : i18n.ENABLE_RULE}
             showLabel={false}
             checked={enabled}
-            onChange={() =>
-              toggleEnabledMutation.mutate({ id: rule.id, enabled: !enabled })
-            }
+            onChange={() => toggleEnabledMutation.mutate({ id: rule.id, enabled: !enabled })}
             compressed
             data-test-subj={`ruleSwitch-${rule.id}`}
           />
@@ -154,11 +149,7 @@ export const RulesV2ListPage = () => {
 
       {isError && (
         <>
-          <EuiCallOut
-            title={i18n.LOAD_ERROR}
-            color="danger"
-            iconType="error"
-          >
+          <EuiCallOut title={i18n.LOAD_ERROR} color="danger" iconType="error">
             {error instanceof Error ? error.message : String(error)}
           </EuiCallOut>
           <EuiSpacer />

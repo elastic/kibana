@@ -26,23 +26,21 @@ export interface EpisodeChangelogEntry {
 }
 
 const buildEpisodeChangelogQuery = (episodeId: string, groupHash: string) => {
-  return esql
-    .from(ALERT_ACTIONS_DATA_STREAM)
+  return esql.from(ALERT_ACTIONS_DATA_STREAM)
     .where`episode_id == ${episodeId} OR (group_hash == ${groupHash} AND episode_id IS NULL)`
-    .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign", "closed", "open")`
-    .sort(['@timestamp', 'DESC'])
-    .pipe`LIMIT 200`
-    .keep(
-      '@timestamp',
-      'action_type',
-      'actor',
-      'reason',
-      'episode_id',
-      'group_hash',
-      'tags',
-      'assignee_uid',
-      'expiry'
-    );
+    .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign", "closed", "open")`.sort(
+    ['@timestamp', 'DESC']
+  ).pipe`LIMIT 200`.keep(
+    '@timestamp',
+    'action_type',
+    'actor',
+    'reason',
+    'episode_id',
+    'group_hash',
+    'tags',
+    'assignee_uid',
+    'expiry'
+  );
 };
 
 export interface UseFetchEpisodeChangelogOptions {

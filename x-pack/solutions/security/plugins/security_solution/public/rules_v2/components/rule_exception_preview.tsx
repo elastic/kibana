@@ -186,8 +186,7 @@ export const RuleExceptionPreview: React.FC<RuleExceptionPreviewProps> = ({
   const itemCardCss = (isActive: boolean) => css`
     transition: opacity 150ms ease-in-out, border-color 150ms ease-in-out;
     opacity: ${isActive ? 1 : 0.45};
-    border-left: 3px solid
-      ${isActive ? euiTheme.colors.danger : euiTheme.colors.lightShade};
+    border-left: 3px solid ${isActive ? euiTheme.colors.danger : euiTheme.colors.lightShade};
   `;
 
   const conditionRowCss = css`
@@ -243,11 +242,7 @@ export const RuleExceptionPreview: React.FC<RuleExceptionPreviewProps> = ({
             return (
               <React.Fragment key={item.id}>
                 <EuiSpacer size="xs" />
-                <EuiPanel
-                  paddingSize="s"
-                  hasShadow={false}
-                  css={itemCardCss(isActive)}
-                >
+                <EuiPanel paddingSize="s" hasShadow={false} css={itemCardCss(isActive)}>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiSwitch

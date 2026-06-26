@@ -8,9 +8,15 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { RuleQuery } from './compose_form_types';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+}));
 
 let mockFieldMap: DataViewFieldMap = {};
 jest.mock('../../form/hooks/use_data_fields', () => ({
@@ -25,15 +31,18 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
   }),
 }));
 
+const mockColumns: never[] = [];
+const mockRows: never[] = [];
+const mockRun = jest.fn();
 jest.mock('./use_query_execution', () => ({
   useQueryExecution: () => ({
-    columns: [],
-    rows: [],
+    columns: mockColumns,
+    rows: mockRows,
     totalRowCount: 0,
     isLoading: false,
     isError: false,
     error: null,
-    run: jest.fn(),
+    run: mockRun,
     hasRun: false,
     lastExecutedQuery: null,
   }),
@@ -59,7 +68,7 @@ const mockField = (name: string, type: string) =>
 
 const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
   format: 'standalone',
-  breach,
+  breach: { query: breach },
 });
 
 const defaultProps: QuerySandboxFlyoutProps = {
@@ -72,11 +81,17 @@ const defaultProps: QuerySandboxFlyoutProps = {
   onClose: jest.fn(),
 };
 
+const testQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
 const renderSandbox = (overrides: Partial<QuerySandboxFlyoutProps> = {}) =>
   render(
-    <IntlProvider locale="en">
-      <QuerySandboxFlyout {...defaultProps} {...overrides} />
-    </IntlProvider>
+    <QueryClientProvider client={testQueryClient}>
+      <IntlProvider locale="en">
+        <QuerySandboxFlyout {...defaultProps} {...overrides} />
+      </IntlProvider>
+    </QueryClientProvider>
   );
 
 describe('QuerySandboxFlyout — timefield auto-select', () => {
@@ -95,7 +110,8 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith('event.start');
+    // sorted: event.end < event.start
+    expect(onTimeFieldChange).toHaveBeenCalledWith('event.end');
   });
 
   it('resets to @timestamp when fieldMap is empty and current timeField differs', () => {
@@ -144,13 +160,15 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
 
     act(() => {
       rerender(
-        <IntlProvider locale="en">
-          <QuerySandboxFlyout
-            {...defaultProps}
-            timeField="event.start"
-            onTimeFieldChange={onTimeFieldChange}
-          />
-        </IntlProvider>
+        <QueryClientProvider client={testQueryClient}>
+          <IntlProvider locale="en">
+            <QuerySandboxFlyout
+              {...defaultProps}
+              timeField="event.start"
+              onTimeFieldChange={onTimeFieldChange}
+            />
+          </IntlProvider>
+        </QueryClientProvider>
       );
     });
 

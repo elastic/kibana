@@ -7,6 +7,7 @@
 
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { getRecoverQuery } from '../utils/query_helpers';
 import { usePreview } from './use_preview';
 import type { PreviewResult } from './use_preview';
 
@@ -24,8 +25,9 @@ export type { PreviewResult as RecoveryPreviewResult } from './use_preview';
 export const useRecoveryPreview = (): PreviewResult => {
   const { control } = useFormContext<FormValues>();
 
-  const recoveryBase = useWatch({ control, name: 'recoveryPolicy.query.base' });
-  const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
+  const query = useWatch({ control, name: 'query' });
+  const recoveryStrategy = useWatch({ control, name: 'recoveryStrategy' });
+  const recoveryBase = getRecoverQuery(query);
   const timeField = useWatch({ control, name: 'timeField' });
   const interval = useWatch({ control, name: 'schedule.every' });
   const lookback = useWatch({ control, name: 'schedule.lookback' });
@@ -37,6 +39,6 @@ export const useRecoveryPreview = (): PreviewResult => {
     interval,
     lookback,
     groupingFields,
-    enabled: recoveryType === 'query',
+    enabled: recoveryStrategy === 'query',
   });
 };

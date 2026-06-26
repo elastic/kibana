@@ -43,7 +43,14 @@ export interface PreviewChartProps {
  * This component renders only the chart content (no panel wrapper) and is
  * intended to be placed inside a parent panel such as `QueryResultsGrid`.
  */
-export const PreviewChart = ({ query, timeField, interval, lookback, esqlColumns, additionalFilter }: PreviewChartProps) => {
+export const PreviewChart = ({
+  query,
+  timeField,
+  interval,
+  lookback,
+  esqlColumns,
+  additionalFilter,
+}: PreviewChartProps) => {
   const { lensAttributes, timeRange, isLoading, hasError, lensFilters } = usePreviewChart({
     query,
     timeField,
@@ -80,7 +87,14 @@ export const PreviewChart = ({ query, timeField, interval, lookback, esqlColumns
     return null;
   }
 
-  return <LensChart lensAttributes={lensAttributes} timeRange={timeRange} height={CHART_HEIGHT} filters={lensFilters} />;
+  return (
+    <LensChart
+      lensAttributes={lensAttributes}
+      timeRange={timeRange}
+      height={CHART_HEIGHT}
+      filters={lensFilters}
+    />
+  );
 };
 
 /**

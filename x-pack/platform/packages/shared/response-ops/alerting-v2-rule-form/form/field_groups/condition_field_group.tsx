@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { getBreachQuery } from '../utils/query_helpers';
 import { FieldGroup } from './field_group';
 import { EvaluationQueryField } from '../fields/evaluation_query_field';
 import { GroupFieldSelect } from '../fields/group_field_select';
@@ -35,11 +36,15 @@ interface ConditionFieldGroupProps {
  * The full ES|QL query defines what data is being evaluated, including any
  * trigger condition (e.g. a trailing WHERE clause).
  */
-export const ConditionFieldGroup = ({ includeBase = false, groupFieldLabel }: ConditionFieldGroupProps) => {
+export const ConditionFieldGroup = ({
+  includeBase = false,
+  groupFieldLabel,
+}: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();
 
-  // Read the base query from form state (initialized via useFormDefaults)
-  const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
+  // Read the breach query from form state (initialized via useFormDefaults)
+  const query = useWatch({ control, name: 'query' });
+  const baseQuery = getBreachQuery(query);
 
   return (
     <FieldGroup

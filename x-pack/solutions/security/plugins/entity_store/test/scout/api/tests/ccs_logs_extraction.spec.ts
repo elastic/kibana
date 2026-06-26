@@ -137,11 +137,7 @@ apiTest.describe(
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
-        body: {
-          logExtraction: {
-            docsLimit: DOCS_LIMIT,
-          },
-        },
+        body: {},
       });
       await clearEntityStoreIndices(esClient);
     });
@@ -177,7 +173,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES('host'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -317,7 +313,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('user'),
+          ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES('user'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -431,7 +427,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('service'),
+          ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES('service'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -507,7 +503,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('generic'),
+          ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES('generic'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -605,7 +601,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES('host'),
           {
             headers: internalHeaders,
             responseType: 'json',

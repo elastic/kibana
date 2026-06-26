@@ -201,7 +201,7 @@ export const AgentlessPackagePoliciesTable = ({
             }),
             truncateText: true,
             render(updatedBy: PackagePolicy['updated_by']) {
-              return <Persona size="s" name={updatedBy} title={updatedBy} />;
+              return <Persona size="s" name={updatedBy} />;
             },
           },
           {

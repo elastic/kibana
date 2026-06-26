@@ -149,7 +149,7 @@ describe('AgentPolicySummaryLine', () => {
 
     test('it should render a tooltip with the policy ID when showPolicyId is true', () => {
       const results = renderWithPolicyId(true);
-      expect(results.getByTitle('My Policy').closest('[data-popover-open]')).toBeDefined();
+      expect(results.getByText('My Policy').closest('[data-popover-open]')).toBeDefined();
       const tooltipAnchor = results.container.querySelector(
         '[data-test-subj="agentPolicyNameLink"]'
       );

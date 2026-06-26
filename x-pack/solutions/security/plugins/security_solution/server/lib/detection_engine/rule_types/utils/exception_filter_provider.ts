@@ -8,6 +8,7 @@
 import type {
   CoreSetup,
   ElasticsearchClient,
+  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -15,7 +16,18 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists/build_exception_filter';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { PreQueryFilterProvider } from '@kbn/alerting-v2-plugin/server';
+import type { ExceptionListReference } from '@kbn/alerting-v2-schemas';
+
+/**
+ * TODO(alerting-v2 migration): main's redesigned alerting_v2 plugin removed the
+ * `PreQueryFilterProvider` extension point. This local type mirrors the previous
+ * provider contract so the implementation is preserved and ready to be re-wired
+ * once the platform plugin exposes an equivalent extension API.
+ */
+type PreQueryFilterProvider = (args: {
+  rule: { id: string; exceptions?: ExceptionListReference[] };
+  request: KibanaRequest;
+}) => Promise<unknown | null>;
 
 interface CreateExceptionFilterProviderDeps {
   lists: ListPluginSetup;
@@ -55,10 +67,7 @@ export const createExceptionFilterProvider = ({
     const spaces = await getSpaces();
     const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
 
-    const exceptionListClient = lists.getExceptionListClient(
-      savedObjectsClient,
-      'alerting_v2'
-    );
+    const exceptionListClient = lists.getExceptionListClient(savedObjectsClient, 'alerting_v2');
     const listClient = lists.getListClient(esClient, spaceId, 'alerting_v2');
 
     const listIds = exceptionRefs.map((ref) => ref.list_id);

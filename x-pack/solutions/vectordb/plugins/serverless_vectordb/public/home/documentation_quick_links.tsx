@@ -31,30 +31,28 @@ export const DocumentationQuickLinks = () => {
     services: { docLinks },
   } = useKibana();
 
-  // Placeholder titles and links are being used here until we have final content
-  // TODO: Replace these with the final docs links once vector content is merged
   const DOC_LINKS: DocLink[] = [
     {
       title: i18n.translate('xpack.serverlessVectordb.home.docs.slices.title', {
-        defaultMessage: 'Partitioning your vector database with slices',
+        defaultMessage: 'Vector Search in Elasticsearch',
       }),
-      href: docLinks.links.enterpriseSearch.knnSearch,
+      href: docLinks.links.enterpriseSearch.vectorSearch,
       telemetryId: 'serverlessVectordb-home-docLink-slices',
       testSubj: 'quickLinkPanel-slices',
     },
     {
       title: i18n.translate('xpack.serverlessVectordb.home.docs.vectorSearch.title', {
-        defaultMessage: 'Vector search in Elasticsearch for AI-driven experiences.',
+        defaultMessage: 'Get Started with Semantic Search',
       }),
-      href: docLinks.links.enterpriseSearch.knnSearch,
+      href: docLinks.links.enterpriseSearch.semanticSearchGetStarted,
       telemetryId: 'serverlessVectordb-home-docLink-vectorSearch',
       testSubj: 'quickLinkPanel-vectorSearch',
     },
     {
       title: i18n.translate('xpack.serverlessVectordb.home.docs.semanticSearch.title', {
-        defaultMessage: 'Semantic search and the semantic_text field type',
+        defaultMessage: 'Elasticsearch as a Vector Database',
       }),
-      href: docLinks.links.enterpriseSearch.semanticSearch,
+      href: docLinks.links.enterpriseSearch.esAsVectorDatabase,
       telemetryId: 'serverlessVectordb-home-docLink-semanticSearch',
       testSubj: 'quickLinkPanel-semanticSearch',
     },

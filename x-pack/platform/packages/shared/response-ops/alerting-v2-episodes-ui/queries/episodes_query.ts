@@ -33,6 +33,17 @@ export interface AlertEpisode {
   snooze_expiry?: string;
   last_deactivate_action?: 'activate' | 'deactivate';
   last_tags?: string[];
+  /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
+  episode_data?: string | null;
+  /** Latest top-level `severity` from a breached rule event, when present. */
+  severity?: string | null;
+}
+
+/**
+ * Raw ES|QL response shape before client-side normalization.
+ */
+export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags'> {
+  last_tags?: string | string[] | null;
 }
 
 export const ALERT_EPISODE_FIELDS = [
@@ -51,6 +62,8 @@ export const ALERT_EPISODE_FIELDS = [
   'snooze_expiry',
   'last_deactivate_action',
   'last_tags',
+  'episode_data',
+  'severity',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -58,14 +71,21 @@ export interface EpisodesFilterState {
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;
+  /** Group hash — narrows to a single per-rule series (used for deep-links from rule details). */
+  groupHash?: string | null;
+  /**
+   * Display-only companion to `groupHash`. When a deep-link carries the
+   * resolved grouping field values (e.g. `{ "host.name": "web-01" }`), the
+   * destination chip can render `host=web-01` without re-running the DSL
+   * lookup. Does NOT affect the query — `buildEpisodesQuery` ignores it.
+   */
+  groupingValues?: Record<string, string | null> | null;
   /** Query string for full-text search */
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
-  /** When true, include building block alert episodes (hidden by default). */
-  includeBuildingBlocks?: boolean;
 }
 
 export interface EpisodesSortState {
@@ -86,11 +106,14 @@ const sanitizeSortField = (field: string) => {
 };
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
-  // This will be simplified when the `$.alerting-episodes` ES|QL view works.
+  /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
+   * Matches `buildEpisodeEventDataQuery` and `buildRelatedEpisodesQuery`.
+   */
+
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -137,6 +160,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   if (filterState.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;
   }
+  if (filterState.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
+  }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
   }
@@ -150,11 +176,7 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
  * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
  * then narrows to episode rows and derives `effective_status`.
  */
-export const buildEpisodesBaseQuery = (
-  spaceId: string,
-  search?: string,
-  includeBuildingBlocks = false
-): ComposerQuery => {
+export const buildEpisodesBaseQuery = (spaceId: string, search?: string): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`;
 
@@ -172,9 +194,6 @@ export const buildEpisodesBaseQuery = (
   addGroupHashActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
-  if (!includeBuildingBlocks) {
-    query.where`building_block IS NULL`;
-  }
   addEpisodeAggregation(query);
   // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
   query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", \`episode.status\`)`;
@@ -198,11 +217,7 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(
-    spaceId,
-    filterState?.queryString?.trim(),
-    filterState?.includeBuildingBlocks ?? false
-  );
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
   if (filterState) {
     applyFilterState(query, filterState);

@@ -17,7 +17,7 @@ import { schema } from '@kbn/config-schema';
  * denormalization) without breaking the public API.
  */
 export const ruleSavedObjectAttributesSchema = schema.object({
-  kind: schema.oneOf([schema.literal('alert'), schema.literal('signal'), schema.literal('building_block')]),
+  kind: schema.oneOf([schema.literal('alert'), schema.literal('signal')]),
 
   metadata: schema.object({
     name: schema.string(),
@@ -31,21 +31,31 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     every: schema.string(),
     lookback: schema.maybe(schema.string()),
   }),
-  evaluation: schema.object({
-    query: schema.object({
-      base: schema.string(),
-    }),
-  }),
-  recovery_policy: schema.maybe(
-    schema.object({
-      type: schema.oneOf([schema.literal('query'), schema.literal('no_breach')]),
-      query: schema.maybe(
-        schema.object({
-          base: schema.maybe(schema.string()),
-        })
-      ),
-    })
+  recovery_strategy: schema.maybe(
+    schema.oneOf([schema.literal('no_breach'), schema.literal('query'), schema.literal('none')])
   ),
+  no_data_strategy: schema.maybe(
+    schema.oneOf([
+      schema.literal('last_known_status'),
+      schema.literal('emit'),
+      schema.literal('recover'),
+      schema.literal('none'),
+    ])
+  ),
+  query: schema.oneOf([
+    schema.object({
+      format: schema.literal('composed'),
+      base: schema.string(),
+      breach: schema.object({ segment: schema.string() }),
+      recovery: schema.maybe(schema.object({ segment: schema.string() })),
+    }),
+    schema.object({
+      format: schema.literal('standalone'),
+      breach: schema.object({ query: schema.string() }),
+      recovery: schema.maybe(schema.object({ query: schema.string() })),
+      no_data: schema.maybe(schema.object({ query: schema.string() })),
+    }),
+  ]),
   state_transition: schema.maybe(
     schema.nullable(
       schema.object({
@@ -63,36 +73,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   grouping: schema.maybe(
     schema.object({
       fields: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
-      duration: schema.maybe(schema.string()),
     })
-  ),
-  no_data: schema.maybe(
-    schema.object({
-      behavior: schema.maybe(
-        schema.oneOf([
-          schema.literal('no_data'),
-          schema.literal('last_status'),
-          schema.literal('recover'),
-        ])
-      ),
-      timeframe: schema.maybe(schema.string()),
-    })
-  ),
-
-  exceptions: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        id: schema.string(),
-        list_id: schema.string(),
-        type: schema.oneOf([
-          schema.literal('detection'),
-          schema.literal('rule_default'),
-          schema.literal('endpoint'),
-        ]),
-        namespace_type: schema.oneOf([schema.literal('agnostic'), schema.literal('single')]),
-      }),
-      { maxSize: 100 }
-    )
   ),
 
   artifacts: schema.maybe(
@@ -104,58 +85,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       }),
       { maxSize: 100 }
     )
-  ),
-
-  params: schema.maybe(
-    schema.object({
-      threat: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            framework: schema.string(),
-            tactic: schema.object({
-              id: schema.string(),
-              name: schema.string(),
-              reference: schema.string(),
-            }),
-            technique: schema.maybe(
-              schema.arrayOf(
-                schema.object({
-                  id: schema.string(),
-                  name: schema.string(),
-                  reference: schema.string(),
-                  subtechnique: schema.maybe(
-                    schema.arrayOf(
-                      schema.object({
-                        id: schema.string(),
-                        name: schema.string(),
-                        reference: schema.string(),
-                      })
-                    )
-                  ),
-                })
-              )
-            ),
-          })
-        )
-      ),
-      note: schema.maybe(schema.string()),
-      setup: schema.maybe(schema.string()),
-      related_integrations: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            package: schema.string(),
-            version: schema.string(),
-            integration: schema.maybe(schema.string()),
-          })
-        )
-      ),
-      investigation_fields: schema.maybe(
-        schema.object({
-          field_names: schema.arrayOf(schema.string()),
-        })
-      ),
-      references: schema.maybe(schema.arrayOf(schema.string())),
-    })
   ),
 
   // Server-managed fields
