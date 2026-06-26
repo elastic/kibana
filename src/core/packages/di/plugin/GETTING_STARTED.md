@@ -254,3 +254,9 @@ rest are conventions to keep in mind.
 - Do not redefine a token in a plugin entrypoint after exporting it from a shared types package.
 - Do not use `requiredPlugins` just to model an optional service lookup.
 - Do not collapse services and extension points into one generic abstraction. Their ownership and resolution semantics are different on purpose.
+
+## Examples
+
+These plugins use this authoring pattern directly:
+
+- `examples/di_global_alpha` and `examples/di_global_beta` for bidirectional service resolution, including the hybrid classic-plus-module pattern
