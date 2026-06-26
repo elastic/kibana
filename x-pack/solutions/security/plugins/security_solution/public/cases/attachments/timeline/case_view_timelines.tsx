@@ -153,9 +153,11 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
               </UtilityBarText>
             </UtilityBarGroup>
             <UtilityBarGroup>
-              <UtilityBarText data-test-subj="case-view-timelines-selected-count">
-                {SELECTED_TIMELINES(selectedItems.length)}
-              </UtilityBarText>
+              {isSuperTimelineEnabled && (
+                <UtilityBarText data-test-subj="case-view-timelines-selected-count">
+                  {SELECTED_TIMELINES(selectedItems.length)}
+                </UtilityBarText>
+              )}
               {isSuperTimelineEnabled && (
                 <UtilityBarAction
                   dataTestSubj="case-view-timelines-batch-actions-button"
