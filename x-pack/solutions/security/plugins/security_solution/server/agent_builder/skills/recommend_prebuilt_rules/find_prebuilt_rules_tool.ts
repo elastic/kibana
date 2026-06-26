@@ -69,7 +69,7 @@ const findPrebuiltRulesFilterSchema = z
       .array(
         z
           .string()
-          .regex(/^T\d{4}$/i)
+          .regex(/^T\d{4}$/)
           .max(MAX_STRING_LENGTH)
       )
       .optional()
@@ -78,7 +78,7 @@ const findPrebuiltRulesFilterSchema = z
       .array(
         z
           .string()
-          .regex(/^TA\d{4}$/i)
+          .regex(/^TA\d{4}$/)
           .max(MAX_STRING_LENGTH)
       )
       .optional()
