@@ -9,7 +9,7 @@ import { v4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import Boom from '@hapi/boom';
-import type { AlertsFilter } from '@kbn/alerting-types';
+import { normalizePersistedFilterMeta, type AlertsFilter } from '@kbn/alerting-types';
 import type {
   NormalizedAlertAction,
   NormalizedAlertDefaultActionWithGeneratedValues,
@@ -21,15 +21,6 @@ import { getEsQueryConfig } from '../../lib/get_es_query_config';
 import type { RawRuleAlertsFilter } from '../../types';
 
 type RawRuleAlertsFilterQuery = NonNullable<RawRuleAlertsFilter['query']>;
-type PersistedAlertsFilterQueryMeta = RawRuleAlertsFilterQuery['filters'][number]['meta'];
-
-const normalizePersistedFilterMeta = (meta: Filter['meta']): PersistedAlertsFilterQueryMeta => {
-  if (meta.value === undefined || typeof meta.value === 'string') {
-    return meta as PersistedAlertsFilterQueryMeta;
-  }
-  const { value, ...rest } = meta;
-  return rest as PersistedAlertsFilterQueryMeta;
-};
 
 const normalizeGeneratedAlertsFilterQuery = (
   query: AlertsFilter['query'],
