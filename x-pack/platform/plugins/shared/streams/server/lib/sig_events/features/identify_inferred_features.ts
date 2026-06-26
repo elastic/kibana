@@ -17,6 +17,7 @@ import {
   type IterationResult,
   isComputedFeature,
   isFeatureWithFilter,
+  normalizeFeatureSlug,
 } from '@kbn/streams-schema';
 import {
   EMPTY_TOKENS,
@@ -481,9 +482,14 @@ export async function identifyInferredFeatures({
 
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
+    const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
     await kiClient.bulk(
       streamName,
-      allChanged.map((feature) => ({ index: { feature } }))
+      allChanged.map((feature) => {
+        const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
+        const expiresAt = !prior || prior.expires_at ? kiClient.getDefaultExpiresAt() : undefined;
+        return { index: { feature: { ...feature, expires_at: expiresAt } } };
+      })
     );
   }
 

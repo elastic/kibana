@@ -39,6 +39,7 @@ import { LogoIcon } from '../shared/logo_icon';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
+import { ApiEndpoints } from '../api_endpoints/api_endpoints';
 
 const CLOUD_PROVIDER_TILE_MIN_HEIGHT = 152;
 
@@ -427,6 +428,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           excludePackageIdList={searchExcludePackageIdList}
         />
       </div>
+      <ApiEndpoints />
     </EuiPanel>
   );
 };

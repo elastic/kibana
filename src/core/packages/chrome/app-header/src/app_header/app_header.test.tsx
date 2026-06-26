@@ -9,6 +9,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
+import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -16,8 +17,10 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 import type { AppHeaderMetadataItems } from '../types';
 import { AppHeaderView } from './app_header';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const renderAppHeader = (
   ui: React.ReactElement,
@@ -47,7 +50,7 @@ describe('AppHeaderView', () => {
       />
     );
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Share' }));
 
     expect(runShare).toHaveBeenCalledTimes(1);
@@ -64,7 +67,7 @@ describe('AppHeaderView', () => {
       />
     );
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Favorite' })).toBeInTheDocument();
   });
 
@@ -81,7 +84,7 @@ describe('AppHeaderView', () => {
       />
     );
 
-    expect(screen.getByTestId('appHeaderMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
     expect(screen.getByText('Warning at llm 24')).toBeInTheDocument();
     expect(screen.getByTestId('createdByMetadata')).toHaveTextContent('Created by: analyst');
 
@@ -109,8 +112,8 @@ describe('AppHeaderView', () => {
   it('renders when the only content is a static app menu item', async () => {
     renderAppHeader(<AppHeaderView showAddIntegrations />);
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
-    expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+    expect(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.root)).toBeInTheDocument();
   });
 
   it('renders when the only content is a title appendix', () => {
@@ -129,7 +132,7 @@ describe('AppHeaderView', () => {
 
     renderAppHeader(<AppHeaderView />, chrome);
 
-    expect(screen.getByTestId('appHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });
 
@@ -178,7 +181,10 @@ describe('AppHeaderView', () => {
 
     renderAppHeader(<AppHeaderView back="/base-other/app" />, chrome);
 
-    expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('href', '/base/base-other/app');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/base/base-other/app'
+    );
   });
 
   it('renders multiple back targets as a menu and closes it after selection', async () => {
@@ -198,5 +204,25 @@ describe('AppHeaderView', () => {
 
     expect(backClick).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
+  });
+
+  describe('borderless flag', () => {
+    it('renders a bottom border by default', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" />);
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toHaveStyleRule(
+        'border-bottom',
+        expect.stringMatching(/solid/)
+      );
+    });
+
+    it('omits the bottom border when borderless is set', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" borderless />);
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toHaveStyleRule(
+        'border-bottom',
+        expect.stringMatching(/solid/)
+      );
+    });
   });
 });
