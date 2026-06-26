@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
@@ -33,7 +34,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
-import { BadgeList } from '../../components/action_policy/badge_list';
+import { PopoverItems } from '../../components/popover_items';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../components/action_policy/delete_confirmation_modal';
@@ -281,6 +282,7 @@ export const ListActionPoliciesPage = () => {
     },
     {
       field: 'tags',
+      width: '180px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.actionPoliciesList.column.tags"
@@ -289,7 +291,34 @@ export const ListActionPoliciesPage = () => {
       ),
       render: (tags: string[] | null) => {
         if (!tags || tags.length === 0) return null;
-        return <BadgeList items={tags} />;
+        const visibleCount = 1;
+        const overflowCount = tags.length - visibleCount;
+        return (
+          <PopoverItems
+            items={tags}
+            numberOfItemsToDisplay={visibleCount}
+            popoverTitle={i18n.translate(
+              'xpack.alertingV2.actionPoliciesList.column.tags.popoverTitle',
+              { defaultMessage: 'Tags' }
+            )}
+            popoverButtonTitle={`+${overflowCount}`}
+            dataTestPrefix="actionPolicyTags"
+            renderItem={(tag) => (
+              <EuiBadge
+                key={tag}
+                color="hollow"
+                title={tag}
+                css={{
+                  maxWidth: 150,
+                  minWidth: 0,
+                  '.euiBadge__text': { minWidth: 0 },
+                }}
+              >
+                {tag}
+              </EuiBadge>
+            )}
+          />
+        );
       },
     },
     {
