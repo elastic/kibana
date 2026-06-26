@@ -326,6 +326,81 @@ describe('RedTeamOrchestrator', () => {
     expect(blockViolation?.action).toBe('block');
   });
 
+  it('flags unauthorized tool calls extracted from steps as critical (tool-poisoning)', async () => {
+    // Regression: the orchestrator read a non-existent `output.toolCalls` key, so
+    // tool-poisoning always scored "safe". Tool invocations live under `steps`.
+    const log = createMockLog();
+    const runExperiment = jest.fn().mockImplementation(async (options, evaluators) => {
+      const { datasets, task } = options;
+      const [dataset] = datasets;
+      const runs: Record<string, any> = {};
+      const evaluationRuns: any[] = [];
+
+      for (let i = 0; i < dataset.examples.length; i++) {
+        const example = dataset.examples[i];
+        const runKey = `${i}-0-mock`;
+        const output = await task(example);
+        runs[runKey] = {
+          exampleIndex: i,
+          repetition: 0,
+          input: example.input,
+          expected: example.output,
+          metadata: example.metadata,
+          output,
+        };
+        for (const ev of evaluators) {
+          const result = await ev.evaluate({
+            input: example.input,
+            output,
+            expected: example.output,
+            metadata: example.metadata ?? null,
+          });
+          evaluationRuns.push({ name: ev.name, experimentRunId: runKey, result });
+        }
+      }
+
+      return [
+        {
+          id: 'mock',
+          experimentName: dataset.name,
+          datasetId: 'mock-dataset',
+          datasetName: dataset.name,
+          runs,
+          evaluationRuns,
+          experimentMetadata: options.metadata,
+        },
+      ];
+    });
+    const executorClient = {
+      runExperiment,
+      getDatasetRunResults: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<EvalsExecutorClient>;
+
+    const orchestrator = createRedTeamOrchestrator({
+      config: {
+        count: 1,
+        difficulty: 'basic',
+        templateOnly: true,
+        modules: ['prompt_injection'],
+        targetContext: { availableTools: ['allowed_tool'] },
+      },
+      executorClient,
+      log: log as any,
+    });
+
+    const task = jest.fn().mockResolvedValue({
+      messages: [{ message: 'done' }],
+      steps: [{ type: 'tool_call', tool_id: 'exec_shell' }],
+    });
+
+    const report = await orchestrator.run(task);
+
+    const result = report.modules[0].results[0];
+    const toolScore = result.namedScores.find((s) => s.evaluator === 'tool-poisoning');
+    expect(toolScore?.score).toBe(0);
+    expect(result.severity).toBe('critical');
+  });
+
   describe('AttackResult shape', () => {
     it('does not include evaluatorScores in AttackResult', () => {
       // AttackResult should only have namedScores, not evaluatorScores
@@ -466,6 +541,35 @@ describe('RedTeamOrchestrator', () => {
       expect(report.modules[0].failed).toBe(0);
       expect(report.modules[0].results).toHaveLength(1);
       expect(report.modules[0].results[0].strategy).toBe('crescendo');
+    });
+
+    it('threads conversationId across turns so the target builds context', async () => {
+      // Regression: each turn was sent as a cold single-message conversation, so
+      // multi-turn escalation never accumulated context. The orchestrator now
+      // forwards the server-side conversationId returned by the previous turn.
+      const executorClient = createMockExecutorClient();
+      const log = createMockLog();
+
+      const orchestrator = createRedTeamOrchestrator({
+        config: multiTurnConfig,
+        executorClient,
+        log: log as any,
+      });
+
+      const receivedIds: Array<string | undefined> = [];
+      let turn = 0;
+      const task = jest.fn().mockImplementation(async (example: any) => {
+        receivedIds.push(example.input?.conversationId);
+        turn += 1;
+        return { messages: [{ message: 'Clean response' }], conversationId: `conv-${turn}` };
+      });
+
+      await orchestrator.run(task);
+
+      // First live turn starts cold; the next turn must receive the id from the first.
+      expect(receivedIds.length).toBeGreaterThan(1);
+      expect(receivedIds[0]).toBeUndefined();
+      expect(receivedIds[1]).toBe('conv-1');
     });
   });
 });

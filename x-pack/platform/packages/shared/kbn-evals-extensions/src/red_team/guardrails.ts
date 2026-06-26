@@ -53,9 +53,12 @@ export const scanWithGuardrails = (
 ): GuardrailViolation[] => {
   let text = typeof output === 'string' ? output : JSON.stringify(output) ?? '';
 
-  // Strip the original input prompt to avoid false positives from echo
+  // Strip the original input prompt to avoid false positives from echo. Use
+  // split/join to remove EVERY occurrence — a model that quotes the adversarial
+  // prompt more than once (e.g. echoes it, then refuses) would otherwise leave a
+  // surviving copy that trips injection-echo / system-prompt-leak rules.
   if (inputPrompt) {
-    text = text.replace(inputPrompt, '');
+    text = text.split(inputPrompt).join('');
   }
 
   const violations: GuardrailViolation[] = [];

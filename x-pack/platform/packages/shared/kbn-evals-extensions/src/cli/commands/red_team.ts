@@ -13,6 +13,9 @@ import {
   ensureEvalInit,
   resolveEvalRunContext,
   resolveEvalSuites,
+  buildEvalRunEnv,
+  promptForSuite,
+  isTTY,
   evalRunFlags,
 } from '@kbn/evals';
 import { getAvailableModules, RED_TEAM_MODULE_IDS } from '../../red_team';
@@ -91,10 +94,19 @@ export const redTeamCmd: Command<void> = {
   flags: redTeamFlags,
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    const suiteId = flagsReader.string('suite');
+    let suiteId = flagsReader.string('suite');
 
+    // Restore parity with `node scripts/evals run`: when --suite is omitted in an
+    // interactive terminal, prompt for one instead of hard-failing. The chosen id
+    // is normalised back to the base suite so the `<suite>-red-team` variant lookup
+    // below still works whether the user picks the base or the red-team entry.
     if (!suiteId) {
-      throw createFlagError('Missing required --suite flag.');
+      if (isTTY()) {
+        const selected = await promptForSuite(repoRoot, log);
+        suiteId = selected.id.replace(/-red-team$/, '');
+      } else {
+        throw createFlagError('Missing required --suite flag.');
+      }
     }
 
     // Resolve the suite. Prefer a dedicated red-team config registered as
@@ -132,14 +144,28 @@ export const redTeamCmd: Command<void> = {
     const { evaluationConnectorId, projects, profileEnvOverrides, requiresEisCcm } =
       await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
 
-    // Build environment overrides read by the red-team spec file.
+    const skipServer = flagsReader.boolean('skip-server');
+
+    // Base env via the shared helper so red-team runs stay at parity with
+    // `node scripts/evals run`: connector id, profile overrides, --repetitions,
+    // --evaluations-kbn-*, and KBN_EVALS_AWAIT_CCM_CONNECTORS (set when EIS CCM is
+    // required and the server is managed, so the connector fixture retries instead
+    // of failing fast). Red-team-specific vars are layered on top. EVAL_SUITE_ID is
+    // pinned to the base suite id — not the `-red-team` variant — for the spec.
     const envOverrides: Record<string, string> = {
+      ...buildEvalRunEnv({
+        evaluationConnectorId,
+        requiresEisCcm,
+        skipServer,
+        profileEnvOverrides,
+        flagsReader,
+        log,
+      }),
       EVAL_SUITE_ID: suiteId,
       RED_TEAM_ENABLED: 'true',
       RED_TEAM_COUNT: String(count),
       RED_TEAM_DIFFICULTY: difficulty,
       RED_TEAM_SEVERITY_THRESHOLD: severityThreshold,
-      EVALUATION_CONNECTOR_ID: evaluationConnectorId,
     };
     if (modules) {
       envOverrides.RED_TEAM_MODULES = modules;
@@ -150,7 +176,6 @@ export const redTeamCmd: Command<void> = {
     if (templatesOnly) {
       envOverrides.RED_TEAM_TEMPLATES_ONLY = 'true';
     }
-    Object.assign(envOverrides, profileEnvOverrides);
 
     log.info(`Red-team testing suite: ${suiteId}`);
     log.info(`  Modules: ${modules ?? getAvailableModules().join(', ')}`);
@@ -179,7 +204,6 @@ export const redTeamCmd: Command<void> = {
     }
 
     // Boot the eval stack (EDOT + Scout + EIS CCM) unless reusing existing services.
-    const skipServer = flagsReader.boolean('skip-server');
     log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
     if (!skipServer) {
       await ensureEvalStack({

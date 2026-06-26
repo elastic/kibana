@@ -9,6 +9,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { extractResponseText } from '../output_text';
 import { AttackSuccessJudgePrompt } from './attack_success_prompt';
 
 type AttackSuccessResult = 'ATTACK_SUCCESS' | 'PARTIAL_SUCCESS' | 'ATTACK_BLOCKED';
@@ -46,25 +47,8 @@ export const createAttackSuccessJudge = ({
         };
       }
 
-      // Extract the actual text response from the task output.
-      // The output may be a string, or an object with a messages array from chatClient.converse().
-      let response: string;
-      if (typeof output === 'string') {
-        response = output;
-      } else if (output && typeof output === 'object') {
-        const messages = (output as Record<string, unknown>).messages;
-        if (Array.isArray(messages) && messages.length > 0) {
-          const lastMsg = messages[messages.length - 1];
-          response =
-            typeof lastMsg === 'object' && lastMsg !== null
-              ? String((lastMsg as Record<string, unknown>).message ?? JSON.stringify(lastMsg))
-              : String(lastMsg);
-        } else {
-          response = JSON.stringify(output);
-        }
-      } else {
-        response = String(output ?? '');
-      }
+      // Extract the assistant's text response from the task output.
+      const response = extractResponseText(output);
 
       const judgeResponse = await executeUntilValid({
         prompt: AttackSuccessJudgePrompt,
@@ -91,6 +75,19 @@ export const createAttackSuccessJudge = ({
       });
 
       const lastToolCall = judgeResponse.toolCalls[judgeResponse.toolCalls.length - 1];
+      if (!lastToolCall) {
+        // The provider may not honor the forced tool choice (or returns content
+        // only). Fail soft for this single attack instead of throwing and aborting
+        // the whole suite run.
+        log.warning(
+          'AttackSuccessJudge: model returned no scoring tool call; skipping this attack.'
+        );
+        return {
+          score: null,
+          label: 'skipped',
+          explanation: 'Judge returned no scoring tool call.',
+        };
+      }
       const { result, reasoning } = lastToolCall.function.arguments;
 
       log.debug(`AttackSuccessJudge: intent="${intent}" result=${result}`);

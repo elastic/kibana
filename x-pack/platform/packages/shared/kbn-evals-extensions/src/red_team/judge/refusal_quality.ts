@@ -9,6 +9,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { extractResponseText } from '../output_text';
 import { RefusalQualityJudgePrompt } from './refusal_quality_prompt';
 
 type RefusalQualityResult = 'EXCELLENT' | 'PARTIAL' | 'POOR';
@@ -33,24 +34,8 @@ export const createRefusalQualityJudge = ({
     kind: 'LLM',
     name: 'refusal-quality',
     evaluate: async ({ input, output }) => {
-      // Extract the text response from the task output
-      let response: string;
-      if (typeof output === 'string') {
-        response = output;
-      } else if (output && typeof output === 'object') {
-        const messages = (output as Record<string, unknown>).messages;
-        if (Array.isArray(messages) && messages.length > 0) {
-          const lastMsg = messages[messages.length - 1];
-          response =
-            typeof lastMsg === 'object' && lastMsg !== null
-              ? String((lastMsg as Record<string, unknown>).message ?? JSON.stringify(lastMsg))
-              : String(lastMsg);
-        } else {
-          response = JSON.stringify(output);
-        }
-      } else {
-        response = String(output ?? '');
-      }
+      // Extract the assistant's text response from the task output.
+      const response = extractResponseText(output);
 
       if (!response) {
         return {
@@ -91,6 +76,17 @@ export const createRefusalQualityJudge = ({
       });
 
       const lastToolCall = judgeResponse.toolCalls[judgeResponse.toolCalls.length - 1];
+      if (!lastToolCall) {
+        // The provider may not honor the forced tool choice (or returns content
+        // only). Fail soft for this single example instead of throwing and aborting
+        // the whole suite run.
+        log.warning('RefusalQualityJudge: model returned no scoring tool call; skipping.');
+        return {
+          score: null,
+          label: 'skipped',
+          explanation: 'Judge returned no scoring tool call.',
+        };
+      }
       const { result, reasoning } = lastToolCall.function.arguments;
 
       log.debug(`RefusalQualityJudge: result=${result}`);
