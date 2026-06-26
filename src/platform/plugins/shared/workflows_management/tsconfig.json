@@ -111,7 +111,10 @@
     "@kbn/esql-utils",
     "@kbn/inbox-plugin",
     "@kbn/inbox-common",
-    "@kbn/datemath"
+    "@kbn/presentation-publishing",
+    "@kbn/datemath",
+    "@kbn/controls-plugin",
+    "@kbn/controls-schemas"
   ],
   "exclude": ["target/**/*"]
 }
