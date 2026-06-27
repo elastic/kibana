@@ -125,9 +125,6 @@ describe('setAlertTagsStepDefinition', () => {
       });
     });
 
-    // Workflows render the `with` block at runtime — they do NOT run `inputSchema.parse()` — so
-    // zod `.default([])` never materializes for omitted fields. These cases mirror the runtime
-    // shape produced by the documentation examples (one array omitted).
     it('defaults tags_to_remove to [] when the workflow omits it', async () => {
       const mockContext = createMockContext({
         alert_ids: 'alert-1',
