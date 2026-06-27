@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type APMIndices, validateApmIndices } from '@kbn/apm-sources-access-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -98,7 +98,7 @@ export function ApmIndices() {
     );
   }, [data]);
 
-  const validationErrors = validateApmIndices(apmIndices);
+  const validationErrors = useMemo(() => validateApmIndices(apmIndices), [apmIndices]);
   const hasInvalidChanges = Object.keys(validationErrors).length > 0;
 
   const handleApplyChangesEvent = async (
