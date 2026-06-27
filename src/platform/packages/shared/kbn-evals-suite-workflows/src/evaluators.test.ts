@@ -767,8 +767,11 @@ describe('Rejection evaluator', () => {
     expectedRefusalReason: 'out-of-scope' as const,
   };
 
+  const negativeInput = { instruction: 'do impossible thing' };
+
   it('returns N/A when the example is not a negative case', async () => {
     const result = await evaluator.evaluate({
+      input: negativeInput,
       output: { messages: [], errors: [] },
       expected: negativeExpected,
       metadata: undefined,
@@ -779,6 +782,7 @@ describe('Rejection evaluator', () => {
 
   it('passes when the agent refuses and surfaces the expected reason', async () => {
     const result = await evaluator.evaluate({
+      input: negativeInput,
       output: { messages: [], errors: [] },
       expected: negativeExpected,
       metadata: { category: 'negative' },
@@ -791,6 +795,7 @@ describe('Rejection evaluator', () => {
 
   it('fails when the agent produced YAML despite the negative case', async () => {
     const result = await evaluator.evaluate({
+      input: negativeInput,
       output: { messages: [], errors: [], resultYaml: 'name: nope' },
       expected: negativeExpected,
       metadata: { category: 'negative' },
@@ -798,6 +803,33 @@ describe('Rejection evaluator', () => {
     expect(result.score).toBe(0);
     expect(result.label).toBe('FAIL');
     expect(result.metadata?.expectedRefusalReason).toBe('out-of-scope');
+  });
+
+  it('passes when the agent returns the seeded edit YAML unchanged', async () => {
+    const initialYaml = 'name: seed\nsteps:\n  - name: a\n    type: console';
+    const result = await evaluator.evaluate({
+      input: { instruction: 'add error handling to nothing', initialYaml },
+      output: { messages: [], errors: [], resultYaml: `${initialYaml}\n` },
+      expected: negativeExpected,
+      metadata: { category: 'negative' },
+    });
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('PASS');
+    expect(result.metadata?.echoedSeed).toBe(true);
+    expect(result.explanation).toContain('seeded YAML unchanged');
+  });
+
+  it('fails when the agent edited the seeded YAML despite the negative case', async () => {
+    const initialYaml = 'name: seed';
+    const result = await evaluator.evaluate({
+      input: { instruction: 'edit it anyway', initialYaml },
+      output: { messages: [], errors: [], resultYaml: 'name: seed\nsteps: []' },
+      expected: negativeExpected,
+      metadata: { category: 'negative' },
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('FAIL');
+    expect(result.metadata?.echoedSeed).toBe(false);
   });
 });
 

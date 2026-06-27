@@ -327,10 +327,12 @@ export function createRejectionEvaluator() {
     name: 'Rejection',
     kind: 'CODE' as const,
     evaluate: async ({
+      input,
       output,
       expected,
       metadata,
     }: {
+      input: WorkflowExample['input'];
       output: WorkflowTaskOutput;
       expected: WorkflowExample['output'];
       metadata: WorkflowExample['metadata'];
@@ -340,17 +342,28 @@ export function createRejectionEvaluator() {
       }
       const expectedRefusalReason =
         (expected as NegativeWorkflowExample['output']).expectedRefusalReason ?? null;
-      const refused = !output.resultYaml;
+
+      // For edit-context negatives the seeded `initialYaml` echoes back through
+      // the conversation attachment store unchanged when the agent refuses, so
+      // `output.resultYaml` would otherwise look like the agent produced a
+      // workflow. Treat a byte-identical (up to surrounding whitespace) echo as
+      // "no new content".
+      const initialYaml = (input as NegativeWorkflowExample['input']).initialYaml;
+      const echoedSeed =
+        !!initialYaml && !!output.resultYaml && output.resultYaml.trim() === initialYaml.trim();
+      const refused = !output.resultYaml || echoedSeed;
+
       const reasonSuffix = expectedRefusalReason
         ? ` (expected reason: ${expectedRefusalReason})`
         : '';
+      const echoSuffix = echoedSeed ? ' — agent returned the seeded YAML unchanged' : '';
       return {
         score: refused ? 1 : 0,
         label: refused ? ('PASS' as const) : ('FAIL' as const),
         explanation: refused
-          ? `Model correctly refused to generate a workflow${reasonSuffix}`
+          ? `Model correctly refused to generate a workflow${reasonSuffix}${echoSuffix}`
           : `Model incorrectly generated a workflow for a request it should have rejected${reasonSuffix}`,
-        metadata: { expectedRefusalReason },
+        metadata: { expectedRefusalReason, echoedSeed },
       };
     },
   };
