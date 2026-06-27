@@ -101,6 +101,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
       return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
     });
+    setTablePageIndex(0);
   }, []);
 
   const timeRangeMs = useMemo(
@@ -118,6 +119,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const [selectedSeverities, setSelectedSeverities] = useState<SeverityOption[]>(severityOptions);
   const handleSeverityChange = useCallback((next: SeverityOption[]) => {
     setSelectedSeverities(next);
+    setTablePageIndex(0);
   }, []);
 
   const scoreFilter = useMemo<{ min_score?: number; max_score?: number }>(() => {
@@ -143,15 +145,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const handleSelectTactic = useCallback(
     (tactic: string) => {
       setSelectedTactic((current) => (current === tactic ? null : tactic));
+      setTablePageIndex(0);
     },
     [setSelectedTactic]
   );
-
-  // Reset to page 1 whenever filters that affect the result set change, so the
-  // table doesn't request an out-of-range page after the result set shrinks.
-  useEffect(() => {
-    setTablePageIndex(0);
-  }, [timeRangeMs, scoreFilter, selectedTactic]);
 
   const handleTableChange = useCallback(({ page, sort }: TableChangeEvent) => {
     if (page) {
@@ -201,16 +198,23 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     }
   }, [anomalyOverview.isFetching, selectedTactic, uniqueTactics]);
 
-  const isDateRangeTooOld = useMemo(() => {
+  const [isDateRangeTooOld, setIsDateRangeTooOld] = useState(false);
+  useEffect(() => {
+    if (anomalyOverview.isFetching || anomalySummary.isFetching) return;
     const err = (anomalyOverview.error ?? anomalySummary.error) as
       | { response?: { status?: number }; body?: { message?: string } }
       | null
       | undefined;
-    return (
+    setIsDateRangeTooOld(
       err?.response?.status === 400 &&
-      err?.body?.message?.includes('`from` must not be older than 1 year')
+        Boolean(err?.body?.message?.includes('`from` must not be older than 1 year'))
     );
-  }, [anomalyOverview.error, anomalySummary.error]);
+  }, [
+    anomalyOverview.isFetching,
+    anomalyOverview.error,
+    anomalySummary.isFetching,
+    anomalySummary.error,
+  ]);
 
   const {
     services: { ml },

@@ -55,6 +55,6 @@ export const useAnomalyOverview = ({
       maxScore,
     ],
     ({ signal }) => fetchAnomalyOverview({ entityType, entityId, body, signal }),
-    { enabled: enabled && !!entityId }
+    { enabled: enabled && !!entityId, keepPreviousData: true }
   );
 };

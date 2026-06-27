@@ -40,6 +40,6 @@ export const useAnomalySummary = ({
   return useQuery(
     [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityId, resolvedBody],
     ({ signal }) => fetchAnomalySummary({ entityType, entityId, body: resolvedBody, signal }),
-    { enabled: enabled && !!entityId }
+    { enabled: enabled && !!entityId, keepPreviousData: true }
   );
 };
