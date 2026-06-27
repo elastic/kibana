@@ -453,7 +453,32 @@ describe('Criteria evaluator', () => {
     );
   });
 
-  it('sends resultYaml to judge for positive cases', async () => {
+  it('sends resultYaml + response transcript to judge for positive cases', async () => {
+    await evaluator.evaluate({
+      input: { instruction: 'Fix this YAML' },
+      output: {
+        messages: [
+          { message: 'Fix this YAML' },
+          { message: 'I see an indent mismatch on the steps key; fixing.' },
+        ],
+        steps: [],
+        errors: [],
+        resultYaml: 'name: test',
+      } as WorkflowTaskOutput,
+      expected: { criteria: ['Has a name'] },
+      metadata: { category: 'creation' },
+    });
+    expect(mockCriteriaEvaluate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        output: {
+          resultYaml: 'name: test',
+          response: 'Fix this YAML\nI see an indent mismatch on the steps key; fixing.',
+        },
+      })
+    );
+  });
+
+  it('forwards empty response when no messages are present', async () => {
     await evaluator.evaluate({
       input: { instruction: 'Create a workflow' },
       output: {
@@ -467,7 +492,7 @@ describe('Criteria evaluator', () => {
     });
     expect(mockCriteriaEvaluate).toHaveBeenCalledWith(
       expect.objectContaining({
-        output: { resultYaml: 'name: test' },
+        output: { resultYaml: 'name: test', response: '' },
       })
     );
   });

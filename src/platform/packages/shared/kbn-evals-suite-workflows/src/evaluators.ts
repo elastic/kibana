@@ -1064,6 +1064,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       }
 
       const isNegativeCase = metadata?.category === 'negative';
+      const responseText = output.messages?.map((m) => m.message).join('\n') ?? '';
 
       // Judge LLM calls can fail with transient infra errors (malformed
       // streaming chunks, fetch failed, 5xx). Convert those to N/A so a
@@ -1085,7 +1086,6 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       };
 
       if (isNegativeCase) {
-        const responseText = output.messages?.map((m) => m.message).join('\n') ?? '';
         return evaluateWithCriteria({
           input: cleanInput,
           expected,
@@ -1102,10 +1102,14 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
         };
       }
 
+      // Forward both the final YAML and the assistant transcript so chat-dependent
+      // criteria (e.g. "the agent diagnosed the indent issue before fixing it",
+      // "acknowledged the conflict between turn 2 and turn 3") can actually be
+      // scored — without this, the judge sees only the YAML and has to guess.
       return evaluateWithCriteria({
         input: cleanInput,
         expected,
-        output: { resultYaml: output.resultYaml },
+        output: { resultYaml: output.resultYaml, response: responseText },
         metadata: undefined,
       });
     },
