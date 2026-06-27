@@ -539,7 +539,11 @@ export type SlackGetFileInfoInput = z.infer<typeof SlackGetFileInfoInputSchema>;
 
 const SLACK_MAX_FILES_LIST_LIMIT = 200;
 const SLACK_DEFAULT_FILES_LIST_LIMIT = 100;
+const SLACK_MAX_FILES_LIST_PAGE = 10000;
 
+// Slack `files.list` is one of the legacy classic-paginated endpoints — it does
+// NOT support cursor-based pagination, so this action accepts a `page` number
+// and reads `paging.page` / `paging.pages` from the response.
 export const SlackListFilesInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -569,7 +573,7 @@ export const SlackListFilesInputSchema = lazySchema(() =>
       .describe(
         'Comma-separated Slack file type filter (e.g. "images,pdfs"). See Slack files.list for valid values.'
       ),
-    limit: z
+    count: z
       .number()
       .int()
       .min(1)
@@ -578,13 +582,13 @@ export const SlackListFilesInputSchema = lazySchema(() =>
       .describe(
         `Files per page (1-${SLACK_MAX_FILES_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_FILES_LIST_LIMIT}.`
       ),
-    cursor: z
-      .string()
-      .max(SLACK_MAX_CURSOR_LENGTH)
-      .optional()
-      .describe(
-        'Pagination cursor from a previous listFiles response (nextCursor). Omit for the first page.'
-      ),
+    page: z
+      .number()
+      .int()
+      .min(1)
+      .max(SLACK_MAX_FILES_LIST_PAGE)
+      .default(1)
+      .describe('1-indexed page number to fetch. Use nextPage from a previous response.'),
     raw: z
       .boolean()
       .optional()
@@ -617,7 +621,6 @@ export interface SlackFile {
 export interface SlackFilesListResponse extends SlackErrorFields {
   ok: boolean;
   files?: SlackFile[];
-  response_metadata?: { next_cursor?: string };
   paging?: { count?: number; total?: number; page?: number; pages?: number };
 }
 

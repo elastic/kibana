@@ -827,23 +827,24 @@ export const Slack: ConnectorSpec = {
     },
 
     // https://api.slack.com/methods/files.list
+    // Classic-paginated: uses `page`/`pages`, not cursor-based pagination.
     listFiles: {
       isTool: true,
       description:
-        'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextCursor to fetch the next page.',
+        'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextPage from the previous response to fetch the next page.',
       input: SlackListFilesInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackListFilesInput = SlackListFilesInputSchema.parse(input);
 
         const params: Record<string, string | number | boolean> = {
-          limit: typedInput.limit,
+          count: typedInput.count,
+          page: typedInput.page,
         };
         if (typedInput.channel) params.channel = typedInput.channel;
         if (typedInput.user) params.user = typedInput.user;
         if (typedInput.tsFrom) params.ts_from = typedInput.tsFrom;
         if (typedInput.tsTo) params.ts_to = typedInput.tsTo;
         if (typedInput.types) params.types = typedInput.types;
-        if (typedInput.cursor) params.cursor = typedInput.cursor;
 
         const response = await slackRequestWithRateLimitRetry<SlackFilesListResponse>({
           ctx,
@@ -883,13 +884,18 @@ export const Slack: ConnectorSpec = {
           channels: f.channels,
         }));
 
-        const nextCursor = response.data.response_metadata?.next_cursor;
-        const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+        const paging = response.data.paging;
+        const currentPage = paging?.page ?? typedInput.page;
+        const totalPages = paging?.pages ?? currentPage;
+        const hasMore = currentPage < totalPages;
 
         return {
           ok: true as const,
           files,
-          nextCursor: hasMore ? nextCursor : undefined,
+          page: currentPage,
+          pages: totalPages,
+          total: paging?.total,
+          nextPage: hasMore ? currentPage + 1 : undefined,
           hasMore,
         };
       },

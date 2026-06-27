@@ -1207,7 +1207,7 @@ describe('Slack', () => {
   });
 
   describe('listFiles action', () => {
-    it('should project files to a compact shape and strip heavy fields', async () => {
+    it('should project files to a compact shape, strip heavy fields, and surface paging.next via nextPage', async () => {
       mockClient.get.mockResolvedValue({
         data: {
           ok: true,
@@ -1236,7 +1236,8 @@ describe('Slack', () => {
               original_h: 768,
             },
           ],
-          response_metadata: { next_cursor: 'next' },
+          // Slack files.list is classic-paginated — `paging`, not `response_metadata`.
+          paging: { count: 100, total: 250, page: 1, pages: 3 },
         },
       });
 
@@ -1246,7 +1247,7 @@ describe('Slack', () => {
       );
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/files.list', {
-        params: { limit: 100 },
+        params: { count: 100, page: 1 },
       });
       expect(result).toEqual({
         ok: true,
@@ -1265,7 +1266,10 @@ describe('Slack', () => {
             channels: ['C1'],
           },
         ],
-        nextCursor: 'next',
+        page: 1,
+        pages: 3,
+        total: 250,
+        nextPage: 2,
         hasMore: true,
       });
 
@@ -1277,9 +1281,9 @@ describe('Slack', () => {
       expect(f).not.toHaveProperty('url_private_download');
     });
 
-    it('should pass channel, user, ts range, types, limit, cursor', async () => {
+    it('should pass channel, user, ts range, types, count, page', async () => {
       mockClient.get.mockResolvedValue({
-        data: { ok: true, files: [], response_metadata: { next_cursor: '' } },
+        data: { ok: true, files: [], paging: { count: 25, total: 0, page: 2, pages: 2 } },
       });
 
       await Slack.actions.listFiles.handler(
@@ -1290,27 +1294,27 @@ describe('Slack', () => {
           tsFrom: '1700000000',
           tsTo: '1700100000',
           types: 'images,pdfs',
-          limit: 25,
-          cursor: 'prev',
+          count: 25,
+          page: 2,
         })
       );
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/files.list', {
         params: {
-          limit: 25,
+          count: 25,
+          page: 2,
           channel: 'C1',
           user: 'U1',
           ts_from: '1700000000',
           ts_to: '1700100000',
           types: 'images,pdfs',
-          cursor: 'prev',
         },
       });
     });
 
-    it('should set hasMore false and omit nextCursor when there is no next page', async () => {
+    it('should set hasMore false and omit nextPage on the last page', async () => {
       mockClient.get.mockResolvedValue({
-        data: { ok: true, files: [], response_metadata: { next_cursor: '' } },
+        data: { ok: true, files: [], paging: { count: 100, total: 5, page: 1, pages: 1 } },
       });
 
       const result = await Slack.actions.listFiles.handler(
@@ -1318,11 +1322,37 @@ describe('Slack', () => {
         SlackListFilesInputSchema.parse({})
       );
 
-      expect(result).toEqual({ ok: true, files: [], nextCursor: undefined, hasMore: false });
+      expect(result).toEqual({
+        ok: true,
+        files: [],
+        page: 1,
+        pages: 1,
+        total: 5,
+        nextPage: undefined,
+        hasMore: false,
+      });
+    });
+
+    it('should treat a missing paging block as a single-page result', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: true, files: [{ id: 'F1' }] } });
+
+      const result = await Slack.actions.listFiles.handler(
+        mockContext,
+        SlackListFilesInputSchema.parse({ page: 3 })
+      );
+
+      expect(result).toMatchObject({
+        page: 3,
+        pages: 3,
+        nextPage: undefined,
+        hasMore: false,
+      });
     });
 
     it('should return raw response when raw=true', async () => {
-      const mockResponse = { data: { ok: true, files: [{ id: 'F1' }] } };
+      const mockResponse = {
+        data: { ok: true, files: [{ id: 'F1' }], paging: { count: 100, total: 1, page: 1, pages: 1 } },
+      };
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = await Slack.actions.listFiles.handler(

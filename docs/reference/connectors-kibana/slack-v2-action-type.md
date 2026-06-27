@@ -98,14 +98,14 @@ Get file info
     - `raw` (optional): If `true`, returns the full raw Slack response instead of the file object. Defaults to `false`.
 
 List files
-:   List Slack files (one page per call) using Slack `files.list`. Filter by channel, user, time range, or types.
+:   List Slack files (one page per call) using Slack `files.list`. Filter by channel, user, time range, or types. Slack `files.list` is classic-paginated, so this action uses `page`/`pages` rather than cursors.
     - `channel` (optional): Restrict results to a single channel/DM ID.
     - `user` (optional): Restrict results to files uploaded by a single user ID.
     - `tsFrom` (optional): Only include files created after this Unix timestamp (string form).
     - `tsTo` (optional): Only include files created before this Unix timestamp (string form).
     - `types` (optional): Comma-separated Slack file type filter (for example, `images,pdfs`).
-    - `limit` (optional): Files per page (1 to 200). Defaults to `100`.
-    - `cursor` (optional): Pagination cursor from a previous response.
+    - `count` (optional): Files per page (1 to 200). Defaults to `100`.
+    - `page` (optional): 1-indexed page number. Defaults to `1`. Use `nextPage` from the previous response to walk pages.
     - `raw` (optional): If `true`, returns the full raw Slack response.
 
 List user conversations
