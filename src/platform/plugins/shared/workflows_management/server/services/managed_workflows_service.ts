@@ -9,7 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -393,14 +393,21 @@ export class ManagedWorkflowsService {
     }
 
     const response = await this.deps.workflowsExecutionEngine.executeWorkflow(
-      {
-        id: workflowDocumentId,
-        name: existing.name,
-        enabled: existing.enabled,
-        definition: existing.definition,
-        yaml: existing.yaml,
-        ...pickManagedWorkflowFields(existing),
-      },
+      toWorkflowExecutionEngineModel(
+        {
+          id: workflowDocumentId,
+          name: existing.name,
+          enabled: existing.enabled,
+          definition: existing.definition,
+          yaml: existing.yaml,
+          version: existing.version,
+          managed: existing.managed,
+          managedBy: existing.managedBy,
+          originManagedWorkflowId: existing.originManagedWorkflowId,
+          managedVersion: existing.managedVersion,
+        },
+        { spaceId }
+      ),
       context,
       request
     );

@@ -327,6 +327,8 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       skills: false,
       subagents: false,
       todos: false,
+      datasets: false,
+      askUserQuestion: false,
       bash: false,
     },
     subAgentExecutor: {
@@ -378,6 +380,14 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     toolManager: createToolManagerMock(),
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
     runContext: { runId: 'mock-run-id', stack: [] },
+    experimentalFeatures: {
+      skills: false,
+      subagents: false,
+      todos: false,
+      datasets: false,
+      askUserQuestion: false,
+      bash: false,
+    },
   };
 };
 
@@ -419,6 +429,14 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    experimentalFeatures: {
+      skills: false,
+      subagents: false,
+      todos: false,
+      datasets: false,
+      askUserQuestion: false,
+      bash: false,
+    },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
       getExecution: jest.fn(),
