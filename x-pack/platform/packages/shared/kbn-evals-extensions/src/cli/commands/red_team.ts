@@ -103,11 +103,14 @@ export const redTeamCmd: Command<void> = {
     if (!suiteId) {
       if (isTTY()) {
         const selected = await promptForSuite(repoRoot, log);
-        suiteId = selected.id.replace(/-red-team$/, '');
+        suiteId = selected.id;
       } else {
         throw createFlagError('Missing required --suite flag.');
       }
     }
+    // Normalize: strip -red-team suffix whether the id came from the prompt or --suite flag,
+    // so the <suite>-red-team lookup below works consistently for both paths.
+    suiteId = suiteId.replace(/-red-team$/, '');
 
     // Resolve the suite. Prefer a dedicated red-team config registered as
     // "<suiteId>-red-team"; fall back to the standard suite config (with --grep)

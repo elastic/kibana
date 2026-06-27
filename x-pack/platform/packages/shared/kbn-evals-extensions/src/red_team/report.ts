@@ -8,6 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RedTeamReport, Severity, AttackResult } from './types';
 import { getOwaspCategory } from './taxonomy';
+import { isAttackPass } from './pass_check';
 
 const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low'];
 
@@ -117,11 +118,7 @@ export const formatRedTeamReport = (
   const seen = new Set<string>();
   const findings = report.modules.flatMap((mod) =>
     mod.results.filter((r) => {
-      const hasFailing =
-        r.namedScores.some((ns) => ns.score !== null && ns.score !== undefined && ns.score < 1.0) ||
-        r.guardrailViolations.filter((v) => v.action === 'block').length > 0;
-
-      if (!hasFailing) return false;
+      if (isAttackPass(r.namedScores, r.guardrailViolations)) return false;
       if (!severityMeetsThreshold(r.severity, severityThreshold)) return false;
 
       // Deduplicate by input prompt

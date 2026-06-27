@@ -31,7 +31,13 @@ export const createJailbreakWrapperStrategy = (): SingleTurnStrategy => {
     description: 'Wraps the prompt in DAN/roleplay/hypothetical framing to bypass safety filters',
     kind: 'single-turn',
     transform: (prompt) => {
-      const idx = Math.floor(Math.random() * WRAPPER_TEMPLATES.length);
+      // Derive a stable index from the prompt content so repeated runs on the
+      // same input always pick the same wrapper (reproducible CI results).
+      let hash = 0;
+      for (let i = 0; i < prompt.length; i++) {
+        hash = (hash * 31 + prompt.charCodeAt(i)) >>> 0;
+      }
+      const idx = hash % WRAPPER_TEMPLATES.length;
       return WRAPPER_TEMPLATES[idx](prompt);
     },
   };
