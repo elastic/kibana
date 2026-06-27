@@ -27,7 +27,7 @@ const labels = {
     defaultMessage: 'Significant event',
   }),
   open: i18n.translate('xpack.streams.significantEventAttachment.openButton', {
-    defaultMessage: 'Open',
+    defaultMessage: 'Open preview',
   }),
 };
 
@@ -53,6 +53,7 @@ export const significantEventAttachmentDefinition: AttachmentUIDefinition<Signif
         {
           label: labels.open,
           type: ActionButtonType.SECONDARY,
+          icon: 'eye',
           handler: openCanvas,
         },
       ];

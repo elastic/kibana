@@ -9,7 +9,7 @@ export { detectionSchema, type Detection } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
 export type { KnowledgeIndicator } from '../queries';
 export {
-  SIGNIFICANT_EVENT_STATUS_OPTIONS as SIG_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   significantEventSchema,
   significantEventStatusSchema,
   type SignificantEvent,

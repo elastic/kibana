@@ -34,16 +34,16 @@ import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  type SigEventsTuningConfig,
+  type SignificantEventsTuningConfig,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../../util/errors';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import {
-  SigEventsTuningConfigEditor,
+  SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
-} from './sig_events_tuning_config_editor';
+} from './significant_events_tuning_config_editor';
 
 export function SettingsTab() {
   const { core } = useKibana();
@@ -70,8 +70,8 @@ export function SettingsTab() {
       );
       const parsed =
         typeof raw === 'string'
-          ? (JSON.parse(raw) as Partial<SigEventsTuningConfig>)
-          : (raw as Partial<SigEventsTuningConfig>);
+          ? (JSON.parse(raw) as Partial<SignificantEventsTuningConfig>)
+          : (raw as Partial<SignificantEventsTuningConfig>);
       return configToAnnotatedYaml({ ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsed });
     } catch {
       return configToAnnotatedYaml(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
@@ -80,7 +80,7 @@ export function SettingsTab() {
   }, []);
 
   const [draftConfigYaml, setDraftConfigYaml] = useState<string>(savedConfigYaml);
-  const [parsedTuningConfig, setParsedTuningConfig] = useState<SigEventsTuningConfig | null>(null);
+  const [parsedTuningConfig, setParsedTuningConfig] = useState<SignificantEventsTuningConfig | null>(null);
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -448,7 +448,7 @@ export function SettingsTab() {
             })}
           />
           <EuiSpacer size="m" />
-          <SigEventsTuningConfigEditor
+          <SignificantEventsTuningConfigEditor
             value={draftConfigYaml}
             onChange={(yaml, parsed) => {
               setDraftConfigYaml(yaml);

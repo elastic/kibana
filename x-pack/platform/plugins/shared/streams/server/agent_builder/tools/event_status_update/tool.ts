@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { sigEventStatusSchema } from '@kbn/streams-schema';
+import { significantEventStatusSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -28,7 +28,7 @@ const eventStatusUpdateSchema = z.object({
       defaultMessage: 'Identifier of the significant event to update.',
     })
   ),
-  status: sigEventStatusSchema.describe(
+  status: significantEventStatusSchema.describe(
     i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.status', {
       defaultMessage: 'Target status value to set.',
     })

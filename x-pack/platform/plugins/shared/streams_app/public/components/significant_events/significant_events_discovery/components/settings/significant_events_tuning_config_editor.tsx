@@ -9,14 +9,14 @@ import React, { useCallback } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import type { SigEventsTuningConfig } from '@kbn/streams-plugin/common';
+import type { SignificantEventsTuningConfig } from '@kbn/streams-plugin/common';
 import { validateSignificantEventsTuningConfig } from './validate_significant_events_tuning_config';
 
 /**
- * Converts a SigEventsTuningConfig to an annotated YAML string with section headers
+ * Converts a SignificantEventsTuningConfig to an annotated YAML string with section headers
  * and field descriptions. Comments are regenerated on every render so they are never lost.
  */
-export function configToAnnotatedYaml(config: SigEventsTuningConfig): string {
+export function configToAnnotatedYaml(config: SignificantEventsTuningConfig): string {
   return [
     '# Significant Events Tuning',
     '# Changes take effect on the next feature identification run or query search.',
@@ -75,20 +75,20 @@ function parseSimpleYaml(input: string): Record<string, unknown> {
   return result;
 }
 
-export interface SigEventsTuningConfigEditorProps {
+export interface SignificantEventsTuningConfigEditorProps {
   value: string;
-  onChange: (yaml: string, parsed: SigEventsTuningConfig | null) => void;
+  onChange: (yaml: string, parsed: SignificantEventsTuningConfig | null) => void;
 }
 
-export function SigEventsTuningConfigEditor({ value, onChange }: SigEventsTuningConfigEditorProps) {
+export function SignificantEventsTuningConfigEditor({ value, onChange }: SignificantEventsTuningConfigEditorProps) {
   const handleChange = useCallback(
     (yaml: string) => {
-      let parsed: SigEventsTuningConfig | null = null;
+      let parsed: SignificantEventsTuningConfig | null = null;
       try {
         const rawParsed = parseSimpleYaml(yaml);
         const errors = validateSignificantEventsTuningConfig(rawParsed);
         if (errors.length === 0) {
-          parsed = rawParsed as unknown as SigEventsTuningConfig;
+          parsed = rawParsed as unknown as SignificantEventsTuningConfig;
         }
       } catch {
         // parse error -- parsed stays null

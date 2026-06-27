@@ -29,15 +29,7 @@ export function useIndexPatternsConfig() {
     return patterns.length > 0 ? patterns : [DEFAULT_INDEX_PATTERNS];
   }, [rawValue]);
 
-  const filterStreamsByIndexPatterns = useMemo(() => {
-    return <T extends { stream: { name: string } }>(streamsToFilter: T[]): T[] =>
-      streamsToFilter.filter((streamItem) =>
-        streamMatchesIndexPatterns(streamItem.stream.name, indexPatterns)
-      );
-  }, [indexPatterns]);
-
   return {
     indexPatterns,
-    filterStreamsByIndexPatterns,
   };
 }

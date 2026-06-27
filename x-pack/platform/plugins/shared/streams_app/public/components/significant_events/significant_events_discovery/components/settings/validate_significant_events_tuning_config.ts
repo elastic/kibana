@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SigEventsTuningConfig } from '@kbn/streams-plugin/common';
+import type { SignificantEventsTuningConfig } from '@kbn/streams-plugin/common';
 
 interface FieldBounds {
   min: number;
@@ -13,7 +13,7 @@ interface FieldBounds {
   integer?: boolean;
 }
 
-const FIELD_BOUNDS: Record<keyof SigEventsTuningConfig, FieldBounds> = {
+const FIELD_BOUNDS: Record<keyof SignificantEventsTuningConfig, FieldBounds> = {
   sample_size: { min: 1, max: 100, integer: true },
   max_iterations: { min: 1, max: 20, integer: true },
   feature_ttl_days: { min: 1, integer: true },

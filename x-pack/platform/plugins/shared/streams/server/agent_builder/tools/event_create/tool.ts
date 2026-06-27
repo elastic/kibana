@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { sigEventStatusSchema } from '@kbn/streams-schema';
+import { significantEventStatusSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -23,7 +23,7 @@ import { createEventToolHandler } from './handler';
 export const STREAMS_CREATE_EVENT_TOOL_ID = platformStreamsSigEventsTools.createEvent;
 
 const createEventSchema = z.object({
-  status: sigEventStatusSchema.optional().describe(
+  status: significantEventStatusSchema.optional().describe(
     i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.schema.status', {
       defaultMessage: 'Status for the new event.',
     })

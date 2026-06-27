@@ -7,6 +7,7 @@
 
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
+  Streams,
   StreamsKIsOnboardingStep,
   SigEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
@@ -81,7 +82,7 @@ export function KiGenerationProvider({
   // network calls.
   const enqueuedStreamNamesRef = useRef<Set<string>>(new Set());
 
-  const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
+  const { indexPatterns } = useIndexPatternsConfig();
 
   const featuresConnectors = useInferenceFeatureConnectors(
     STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
@@ -112,7 +113,12 @@ export function KiGenerationProvider({
   const streamsListFetch = useFetchStreams({
     select: (result) => ({
       ...result,
-      streams: filterStreamsByIndexPatterns(result.streams),
+      // Query streams are always included; other stream types are filtered by index patterns.
+      streams: result.streams.filter(
+        (item) =>
+          Streams.QueryStream.Definition.is(item.stream) ||
+          streamMatchesIndexPatterns(item.stream.name, indexPatterns)
+      ),
     }),
   });
   const filteredStreams = streamsListFetch.data?.streams;

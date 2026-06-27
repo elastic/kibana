@@ -16,6 +16,7 @@ import {
   type IdentifyFeaturesResult,
   type IterationResult,
   type FeatureUpsert,
+  getStreamSamplingSource,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -215,6 +216,7 @@ async function runFeaturesIdentification(
         logger: taskLogger,
         signal: runContext.abortController.signal,
         streamName: stream.name,
+        samplingSource: getStreamSamplingSource(stream),
         streamType,
         start,
         end,
