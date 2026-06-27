@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { castArray } from 'lodash';
 import styled from 'styled-components';
 import {
   EuiBasicTable,
@@ -250,13 +251,16 @@ const getEndpointListColumns = ({
         defaultMessage: 'IP address',
       }),
       sortable: true,
-      render: (ip: string[]) => {
+      render: (ip: string[] | string | undefined) => {
+        // `host.ip` is typed string[] but a custom ingest pipeline can coerce it to
+        // a string, or the whole `host` object can be missing (ip undefined).
+        // Normalize so the list does not crash. See security-team#17020 and
+        // sdh-security-team#1648/#1709.
+        const ips = castArray(ip ?? []).join(', ');
         return (
-          <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-textTruncate">
+          <EuiToolTip content={ips} anchorClassName="eui-textTruncate">
             <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
-              <p className="eui-displayInline eui-textTruncate">
-                {ip.toString().replace(',', ', ')}
-              </p>
+              <p className="eui-displayInline eui-textTruncate">{ips}</p>
             </EuiText>
           </EuiToolTip>
         );

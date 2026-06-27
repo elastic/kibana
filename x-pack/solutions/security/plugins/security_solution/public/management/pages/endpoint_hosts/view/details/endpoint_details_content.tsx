@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { castArray } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowInsights } from './components/insights/workflow_insights';
 import { WorkflowInsightsAB } from './components/insights/workflow_insights_ab';
@@ -178,7 +179,10 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
           ),
           description: (
             <EuiFlexGroup direction="column" gutterSize="s">
-              {hostInfo.metadata.host.ip.map((ip: string, index: number) => (
+              {/* `host.ip` is typed string[] but a custom ingest pipeline can coerce
+                  it to a string, and the whole `host` object can be missing. Normalize
+                  so the flyout does not crash. See security-team#17020. */}
+              {castArray(hostInfo.metadata.host?.ip ?? []).map((ip: string, index: number) => (
                 <EuiFlexItem key={index}>
                   <EuiText size="xs">{ip}</EuiText>
                 </EuiFlexItem>
