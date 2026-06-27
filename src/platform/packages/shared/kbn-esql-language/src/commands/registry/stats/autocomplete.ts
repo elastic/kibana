@@ -17,7 +17,6 @@ import type {
   ESQLAstAllCommands,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
-import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
@@ -44,7 +43,6 @@ import { endsWithComma } from '../../definitions/utils/regex';
 import { findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
-import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
 
 export async function autocomplete(
   query: string,
@@ -67,15 +65,13 @@ export async function autocomplete(
   // Find the function at cursor position for suggestions
   const foundFunction = cursorPosition ? findFunctionForSuggestions(command, cursorPosition) : null;
 
-  let filteringContext: StatsFilteringContext | undefined;
-
   if (
     foundFunction &&
     (foundFunction.subtype === 'variadic-call' || foundFunction.subtype === 'binary-expression')
   ) {
-    filteringContext = buildCustomFilteringContext(command, foundFunction, innerText, context);
+    const getFunctionsToIgnore = buildStatsFunctionsToIgnore(command, foundFunction);
 
-    if (filteringContext) {
+    if (getFunctionsToIgnore) {
       const isInBy = isNodeWithinByClause(foundFunction, command);
 
       let location: Location;
@@ -97,8 +93,7 @@ export async function autocomplete(
         context,
         callbacks,
         options: {
-          functionParameterContext: filteringContext.functionParameterContext,
-          functionsToIgnore: filteringContext.functionsToIgnore,
+          getFunctionsToIgnore,
         },
       });
 
@@ -292,8 +287,6 @@ async function getExpressionSuggestions({
   controlType,
   ignoredColumns = [],
   openSuggestions,
-  functionParameterContext,
-  functionsToIgnore,
 }: {
   query: string;
   command: ESQLAstAllCommands;
@@ -310,8 +303,6 @@ async function getExpressionSuggestions({
   controlType?: ESQLVariableType;
   ignoredColumns?: string[];
   openSuggestions?: boolean;
-  functionParameterContext?: FunctionParameterContext;
-  functionsToIgnore?: { names: string[] };
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -332,8 +323,6 @@ async function getExpressionSuggestions({
       suggestFunctions,
       controlType,
       openSuggestions,
-      functionParameterContext,
-      functionsToIgnore,
     },
   });
 
@@ -382,63 +371,66 @@ function alreadyUsedColumns(command: ESQLAstAllCommands) {
   return columnNodes.map((node) => node.parts.join('.'));
 }
 
-interface StatsFilteringContext {
-  functionParameterContext: FunctionParameterContext;
-  functionsToIgnore: { names: string[] };
+interface StatsFunctionParameterContext {
+  functionDefinition?: {
+    type: FunctionDefinitionTypes;
+  };
+  paramDefinitions: Array<{
+    hint?: {
+      kind?: string;
+    };
+  }>;
 }
 
-function buildCustomFilteringContext(
+function buildStatsFunctionsToIgnore(
   command: ESQLAstAllCommands,
-  foundFunction: ESQLFunction | null,
-  innerText: string,
-  context?: ICommandContext
-): StatsFilteringContext | undefined {
+  foundFunction: ESQLFunction | null
+):
+  | ((functionParameterContext?: StatsFunctionParameterContext) => { names: string[] } | undefined)
+  | undefined {
   if (!foundFunction) {
     return undefined;
   }
 
-  const shouldGetNextArgument = endsWithComma(innerText);
-  const basicContext = buildExpressionFunctionParameterContext(
-    foundFunction,
-    context,
-    shouldGetNextArgument
-  );
-
-  if (!basicContext) {
-    return undefined;
-  }
-
-  const statsSpecificFunctionsToIgnore: string[] = [];
-  if (basicContext.functionDefinition?.type === 'grouping') {
-    statsSpecificFunctionsToIgnore.push(
-      ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
-    );
-  }
-
-  const finalCommandArgIndex = command.args.length - 1;
   const isInBy = isNodeWithinByClause(foundFunction, command);
 
-  if (!isInBy) {
-    // The "no nested aggregations" rule does not apply when the current parameter
-    // explicitly expects an aggregation function (hint.kind === 'aggregation').
-    const expectsAggregation = basicContext.paramDefinitions.some(
-      (p) => p.hint?.kind === 'aggregation'
-    );
+  return (functionParameterContext) => {
+    if (!functionParameterContext) {
+      return undefined;
+    }
 
-    statsSpecificFunctionsToIgnore.push(
-      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex) && !expectsAggregation
-        ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
-        : []),
-      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex) && !expectsAggregation
-        ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
-        : [])
-    );
-  }
+    const statsSpecificFunctionsToIgnore: string[] = [];
 
-  return {
-    functionParameterContext: basicContext,
-    functionsToIgnore: { names: statsSpecificFunctionsToIgnore },
+    if (functionParameterContext.functionDefinition?.type === FunctionDefinitionTypes.GROUPING) {
+      statsSpecificFunctionsToIgnore.push(
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+      );
+    }
+
+    if (!isInBy) {
+      // The "no nested aggregations" rule does not apply when the current parameter
+      // explicitly expects an aggregation function (hint.kind === 'aggregation').
+      const expectsAggregation = functionParameterContext.paramDefinitions.some(
+        (p) => p.hint?.kind === 'aggregation'
+      );
+      const finalCommandArgIndex = command.args.length - 1;
+
+      statsSpecificFunctionsToIgnore.push(
+        ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+        ...(isAggFunctionUsedAlready(command, finalCommandArgIndex) && !expectsAggregation
+          ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+          : []),
+        ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex) && !expectsAggregation
+          ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+              ({ name }) => name
+            )
+          : [])
+      );
+    }
+
+    return {
+      names: statsSpecificFunctionsToIgnore,
+    };
   };
 }
 
