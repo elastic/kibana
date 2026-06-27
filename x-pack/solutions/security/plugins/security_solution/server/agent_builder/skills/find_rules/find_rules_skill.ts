@@ -32,7 +32,8 @@ export const createFindRulesSkill = ({
       'MITRE technique or tactic ID, severity, enabled state, custom vs prebuilt, or name search. ' +
       'Use when the user asks to list detection rules, count how many rules match, show rules ' +
       'tagged with MITRE, find rules for technique T1059, or inventory enabled custom rules. ' +
-      'Read-only; not for creating, editing, or ES|QL hunting over raw events.',
+      'Read-only; never use ES|QL or platform.core search for rule inventory — use ' +
+      'security.discover_rule_tags and security.find_rules only. Not for creating, editing, or hunting raw events.',
     content: `# Find Detection Rules
 
 ## When to Use
@@ -48,10 +49,43 @@ Do **not** use this skill when the user wants to **create or edit** a rule (use 
 
 ## Process
 
+**Allowed tools for rule inventory:** ONLY \`security.discover_rule_tags\`, \`security.find_rules\`, and (for noisy-rule ranking) \`security.alerts\`. Once this skill is loaded, do **not** call \`platform.core.search\`, \`platform.core.list_indices\`, \`platform.core.sml_search\`, \`platform.core.generate_esql\`, or \`platform.core.execute_esql\` — detection rules are not indexed documents you query with ES|QL.
+
 1. **Load this skill** (\`find-security-rules\`) — do not answer from platform search or ES|QL alone.
 2. **Call \`security.discover_rule_tags\` with \`{}\`** — required before every \`security.find_rules\` call in the same turn.
 3. **Call \`security.find_rules\`** with filters derived from discovery (tags, \`mitreTechnique\`, \`mitreTactic\`, \`enabled\`, \`ruleSource\`, \`perPage: 1\` for count-only questions, etc.).
 4. **Answer from tool results only** — cite \`total\` for counts; render the rule table from \`security.find_rules\` output.
+
+## Examples
+
+### Example 1: List enabled rules tagged with MITRE (tag filter)
+
+User: "List all enabled detection rules tagged with MITRE."
+
+Steps:
+1. \`security.discover_rule_tags({})\` — scan returned tag values for MITRE-related entries (e.g. \`MITRE\`, \`Tactic: …\`, \`Technique: …\`).
+2. \`security.find_rules({ enabled: true, tags: ["MITRE"], perPage: 10 })\` — use exact tag values from discovery; omit \`tags\` if no MITRE-like tag exists and say so.
+3. Reply with filter summary + **Name | Severity | Enabled | Type** table from tool output.
+
+Do **not** call \`platform.core.execute_esql\` or search \`.alerts-security.alerts-*\` indices — rule metadata comes only from \`security.find_rules\`.
+
+### Example 2: Rules for MITRE technique T1059 (structured MITRE filter)
+
+User: "Show me detection rules covering MITRE technique T1059."
+
+Steps:
+1. \`security.discover_rule_tags({})\` — still required every turn before \`find_rules\`.
+2. \`security.find_rules({ mitreTechnique: "T1059", perPage: 10 })\` — use \`mitreTechnique\`, not the \`tags\` filter, for technique IDs.
+3. Reply from \`total\` and returned rules.
+
+### Example 3: Count enabled custom rules
+
+User: "How many custom (non-prebuilt) detection rules do I have enabled?"
+
+Steps:
+1. \`security.discover_rule_tags({})\`
+2. \`security.find_rules({ enabled: true, ruleSource: "custom", perPage: 1 })\`
+3. Answer: "You have {total} enabled custom detection rules." — cite \`total\` from the tool result.
 
 ## Guardrails
 
@@ -176,6 +210,14 @@ Examples:
 - Sort: \`sortField: "severity"\` (or \`risk_score\`, \`updatedAt\`, etc.) + \`sortOrder: "desc"\`
 - Top-N: \`perPage: N\`
 - If \`truncated: true\`, mention that additional groups exist beyond the returned buckets.
+
+## Response Format
+
+- Open with one sentence stating the exact filters used (\`enabled\`, \`tags\`, \`mitreTechnique\`, etc.).
+- Rule inventory: markdown table **Name | Severity | Enabled | Type** (max 10 rows unless user asked for more).
+- Count-only questions: single sentence citing \`total\` from \`security.find_rules\`.
+- Zero results: say so explicitly; mention closest tag values from discovery when relevant.
+- Never include ES|QL queries or index names in the reply for rule inventory questions.
 
 ## No Actions
 

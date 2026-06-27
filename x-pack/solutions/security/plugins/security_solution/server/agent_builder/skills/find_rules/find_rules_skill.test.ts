@@ -249,6 +249,25 @@ describe('findRulesSkill', () => {
     expect(skill.content).toMatch(/## Process/);
     expect(skill.content).toMatch(/security\.discover_rule_tags.*\{\}/);
     expect(skill.content).toMatch(/Load this skill/);
+    expect(skill.content).toMatch(/Allowed tools for rule inventory/);
+  });
+
+  it('content includes eval-aligned Examples for MITRE tag, technique, and count queries', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/## Examples/);
+    expect(skill.content).toMatch(/List all enabled detection rules tagged with MITRE/);
+    expect(skill.content).toMatch(/MITRE technique T1059/);
+    expect(skill.content).toMatch(/How many custom \(non-prebuilt\) detection rules/);
+    expect(skill.content).toMatch(/Do \*\*not\*\* call `platform\.core\.execute_esql`/);
+  });
+
+  it('content defines Response Format for rule inventory replies', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/## Response Format/);
+    expect(skill.content).toMatch(/Name \| Severity \| Enabled \| Type/);
+    expect(skill.content).toMatch(/Never include ES\|QL queries/);
   });
 
   it('content teaches ruleId lookup for the noisy-rules flow', () => {
