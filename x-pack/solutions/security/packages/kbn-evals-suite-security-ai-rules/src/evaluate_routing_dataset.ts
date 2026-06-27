@@ -397,6 +397,29 @@ export type EvaluateRuleRoutingDataset = (options: {
   };
 }) => Promise<void>;
 
+export function filterRoutingExamplesByEnv(examples: RuleRoutingExample[]): RuleRoutingExample[] {
+  const raw = process.env.EXAMPLE_IDS?.trim();
+  if (!raw) {
+    return examples;
+  }
+  const ids = new Set(
+    raw
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean)
+  );
+  if (ids.size === 0) {
+    return examples;
+  }
+  const filtered = examples.filter((ex) => ids.has(ex.id));
+  if (filtered.length === 0) {
+    throw new Error(
+      `EXAMPLE_IDS matched no routing examples. Requested: ${[...ids].join(', ')}`
+    );
+  }
+  return filtered;
+}
+
 export const createEvaluateRuleRoutingDataset = ({
   chatClient,
   evaluators,
@@ -411,7 +434,13 @@ export const createEvaluateRuleRoutingDataset = ({
   log: ToolingLog;
 }): EvaluateRuleRoutingDataset => {
   return async ({ dataset: { name, description, examples } }) => {
-    const wrappedExamples = examples.map(toRoutingDatasetExample);
+    const selectedExamples = filterRoutingExamplesByEnv(examples);
+    if (selectedExamples.length !== examples.length) {
+      log.info(
+        `[security-ai-rules routing] EXAMPLE_IDS filter active — running ${selectedExamples.length}/${examples.length} example(s)`
+      );
+    }
+    const wrappedExamples = selectedExamples.map(toRoutingDatasetExample);
 
     const dataset = {
       name,

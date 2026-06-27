@@ -9,7 +9,12 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator, TaskOutput } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ruleRoutingExamples } from '../datasets/routing_examples';
-import { buildRuleRoutingEvaluators, toRoutingDatasetExample, type RuleRoutingDatasetExample } from './evaluate_routing_dataset';
+import {
+  buildRuleRoutingEvaluators,
+  filterRoutingExamplesByEnv,
+  toRoutingDatasetExample,
+  type RuleRoutingDatasetExample,
+} from './evaluate_routing_dataset';
 
 const stubTraceEvaluator = (name: string): Evaluator => ({
   name,
@@ -227,5 +232,20 @@ describe('routing evaluator behavior', () => {
     });
 
     expect(result.score).toBe(0);
+  });
+});
+
+describe('filterRoutingExamplesByEnv', () => {
+  it('returns only examples matching EXAMPLE_IDS', () => {
+    process.env.EXAMPLE_IDS = 'routing-find-mitre-tag';
+    const filtered = filterRoutingExamplesByEnv(ruleRoutingExamples);
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0]?.id).toBe('routing-find-mitre-tag');
+    delete process.env.EXAMPLE_IDS;
+  });
+
+  it('returns all examples when EXAMPLE_IDS is unset', () => {
+    delete process.env.EXAMPLE_IDS;
+    expect(filterRoutingExamplesByEnv(ruleRoutingExamples)).toHaveLength(ruleRoutingExamples.length);
   });
 });
