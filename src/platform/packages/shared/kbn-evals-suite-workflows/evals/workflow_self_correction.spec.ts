@@ -34,7 +34,6 @@ import {
   createCriteriaEvaluator,
   createNoErrorsEvaluator,
   skipInfraErrors,
-  extractResultYaml,
   extractYamlFromAttachments,
 } from '../src/evaluators';
 
@@ -109,28 +108,26 @@ const evaluate = base.extend<
                 // Infra error → abort without partial credit; surfaced via skipInfraErrors.
                 if (resp.errors.length > 0) break;
 
-                const turnYaml = extractResultYaml({
-                  messages: resp.messages,
-                  steps: resp.steps,
-                  errors: resp.errors,
-                });
+                // The composite generate_workflow agent writes the produced YAML
+                // to the conversation's workflow.yaml attachment rather than to
+                // tool params, so per-turn recovery has to be probed by reading
+                // the attachment store. Costs one extra request per turn — fine
+                // at maxTurns = 3–5.
+                const turnYaml = conversationId
+                  ? extractYamlFromAttachments(
+                      await chatClient.getConversationAttachments(conversationId)
+                    )
+                  : undefined;
 
-                if (isRecoveredYaml(turnYaml)) {
+                // The semantic-broken seed parses to a valid workflow with a
+                // steps array — it would pass `isRecoveredYaml` on its own — so
+                // we also need to confirm the agent actually wrote something
+                // different from the seed before claiming recovery.
+                const agentWroteNewYaml = !!turnYaml && turnYaml.trim() !== input.brokenYaml.trim();
+                if (agentWroteNewYaml && isRecoveredYaml(turnYaml)) {
                   finalResultYaml = turnYaml;
                   turnsToRecovery = i + 1;
                   break;
-                }
-              }
-
-              // Fall back to the latest YAML attached to the conversation if the agent
-              // wrote to attachments instead of tool params on its final turn.
-              if (!finalResultYaml && conversationId) {
-                const attachments = await chatClient.getConversationAttachments(conversationId);
-                const fallback = extractYamlFromAttachments(attachments);
-                if (isRecoveredYaml(fallback)) {
-                  finalResultYaml = fallback;
-                  // We don't know which turn produced this — credit conservatively.
-                  if (turnsToRecovery == null) turnsToRecovery = maxTurns;
                 }
               }
 
