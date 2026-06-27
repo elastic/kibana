@@ -11,17 +11,12 @@ import type { Example, TaskOutput } from '@kbn/evals';
 
 /**
  * Which authoring approach an example targets.
- * - `shared` (default): scored on the final artifact, so applicable to both the
- *   current root-level tools (`create_workflow` / `edit_workflow` / ...) and the
- *   incoming composite `generate_workflow` tool.
- * - `tools-only`: relies on a specific multi-tool trajectory; the composite
- *   agent won't have those tools so the comparison run should skip it.
- * - `composite-only`: relies on the composite agent's contract; the legacy
- *   root-level tools can't satisfy it.
+ * - `shared` (default): scored on the final artifact, applicable in any mode.
+ * - `tools-only`: relies on a specific multi-tool trajectory.
+ * - `composite-only`: relies on the composite `generate_workflow` agent's contract.
  *
- * The runtime authoring mode is selected via `KBN_EVAL_AUTHORING_MODE` (see
- * `skipCompositeMode` in `./evaluators`); the per-example tag is used by the
- * comparison/gate tooling tracked in security-team#17399.
+ * The runtime mode is selected via `KBN_EVAL_AUTHORING_MODE` (see
+ * `skipCompositeMode` in `./evaluators`). Tracked in security-team#17399.
  */
 export type AuthoringMode = 'shared' | 'tools-only' | 'composite-only';
 
