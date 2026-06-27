@@ -1,5 +1,5 @@
 {
-  "sha1": "fbeb9cff6beef5c03d4a1450563804c9e7e2bf46",
+  "sha1": "f82e9be6655824c25b2ae995f0af6c587ea1a28b",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1565,7 +1565,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 10
       }
     },
