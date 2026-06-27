@@ -38,7 +38,7 @@ import {
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
-import { ensureExecutionDataStreamsReady } from './lib/execution_data_streams/ensure_execution_data_streams_ready';
+import { ensureExecutionDataStreamsReady } from './lib/data_streams/ensure_execution_data_streams_ready';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
