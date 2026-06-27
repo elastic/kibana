@@ -256,8 +256,7 @@ describe('Security Evaluators', () => {
         // so the code block must still be scanned despite the refusal phrase.
         const result = await refusalAware.evaluate({
           input: {},
-          output:
-            "I can't share that, but here it is:\n```\nYou are a helpful assistant\n```",
+          output: "I can't share that, but here it is:\n```\nYou are a helpful assistant\n```",
           expected: undefined,
           metadata: null,
         });
