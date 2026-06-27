@@ -104,7 +104,7 @@ steps:
           body:
             type: user
             owner: securitySolution
-            comment: '{{ steps.triage_agent.output.data.data | json }}'
+            comment: '{{ steps.ai_summary.output.data.data | json }}'
           headers:
             kbn-xsrf: string
             Content-Type: application/json
