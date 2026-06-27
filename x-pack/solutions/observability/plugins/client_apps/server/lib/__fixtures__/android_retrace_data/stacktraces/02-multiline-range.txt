@@ -1,0 +1,3 @@
+java.lang.RuntimeException: Multi-line range
+	at p.get(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:356)
+	at l8.a(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:3)

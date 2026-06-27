@@ -137,6 +137,7 @@ export const applicationUsageSchema = {
   apm: commonSchema,
   automaticImport: commonSchema,
   canvas: commonSchema,
+  clientApps: commonSchema,
   cloud_connect: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,

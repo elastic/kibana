@@ -1,0 +1,17 @@
+FATAL EXCEPTION: main
+Process: co.elastic.otel.android.integration, PID: 4883
+java.lang.RuntimeException: Intentional crash for deobfuscation testing
+	at l8.b(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:9)
+	at l8.a(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:3)
+	at i8.run(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:20)
+	at android.os.Handler.handleCallback(Handler.java:789)
+	at android.os.Handler.dispatchMessage(Handler.java:98)
+	at android.os.Looper.loop(Looper.java:164)
+	at android.app.ActivityThread.main(ActivityThread.java:6541)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.Zygote$MethodAndArgsCaller.run(Zygote.java:240)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:767)
+Caused by: java.lang.IllegalArgumentException: Root cause: Intentional crash for deobfuscation testing
+	at l8.c(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:17)
+	at l8.b(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:1)
+	... 9 more

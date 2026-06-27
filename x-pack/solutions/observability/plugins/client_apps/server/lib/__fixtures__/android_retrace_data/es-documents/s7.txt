@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "s7",
+  "original_class": "com.example.synthetic.OutlineWithInline",
+  "source_file": "OutlineWithInline.kt",
+  "methods": {
+    "a": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            2
+          ],
+          "orig_range": [
+            75,
+            76
+          ],
+          "method": "inlined",
+          "class": "com.example.synthetic.Inlinee"
+        },
+        {
+          "obf_range": [
+            1,
+            2
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "outline",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.outline"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

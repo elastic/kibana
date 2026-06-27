@@ -1,0 +1,4 @@
+java.lang.RuntimeException: Synthesized frame
+	at l8.a(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:3)
+	at i8.run(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:20)
+	at android.os.Handler.handleCallback(Handler.java:789)
