@@ -8,8 +8,8 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { MemoryToolsOptions } from '../tools/memory';
 import { createMemoryTools } from '../tools/memory';
-import description from './sig_events_memory.description.text';
-import content from './sig_events_memory.skill.md.text';
+import description from './significant_events_memory.description.text';
+import content from './significant_events_memory.skill.md.text';
 
 export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
   defineSkillType({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface SigEventsTuningConfig {
+export interface SignificantEventsTuningConfig {
   sample_size: number;
   max_iterations: number;
   feature_ttl_days: number;
@@ -17,7 +17,7 @@ export interface SigEventsTuningConfig {
   rrf_rank_constant: number;
 }
 
-export const DEFAULT_SIG_EVENTS_TUNING_CONFIG: SigEventsTuningConfig = {
+export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
   sample_size: 20,
   max_iterations: 5,
   feature_ttl_days: 30,

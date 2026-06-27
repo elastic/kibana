@@ -11,7 +11,7 @@ import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
 import type { StreamsServer } from '../../types';
 
-export const createSigEventsAvailability = ({
+export const createSignificantEventsAvailability = ({
   server,
   logger,
 }: {
