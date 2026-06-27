@@ -12,9 +12,3 @@ export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 
 /** Hidden data stream name for workflow step executions. */
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
-
-/** Prefix of workflow execution backing indices (`.ds-.workflows-executions-{tail}`). */
-export const WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX = `.ds-${WORKFLOWS_EXECUTIONS_INDEX}-`;
-
-/** Prefix of step execution backing indices (`.ds-.workflows-step-executions-{tail}`). */
-export const WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX = `.ds-${WORKFLOWS_STEP_EXECUTIONS_INDEX}-`;

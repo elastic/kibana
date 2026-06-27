@@ -12,8 +12,7 @@
     "@kbn/utility-types",
     "@kbn/core",
     "@kbn/repo-info",
-    "@kbn/human-readable-id",
-    "@kbn/crypto"
+    "@kbn/human-readable-id"
   ],
   "exclude": ["target/**/*"]
 }
