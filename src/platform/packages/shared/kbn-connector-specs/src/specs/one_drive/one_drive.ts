@@ -209,7 +209,7 @@ export const OneDrive: ConnectorSpec = {
           : `https://graph.microsoft.com/v1.0/me/drive/items/${input.itemId}/content`;
         const response = await ctx.client.get(itemUrl, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(response.data);
-        const rawContentType: string = response.headers?.['content-type'] ?? '';
+        const rawContentType = String(response.headers?.['content-type'] ?? '');
         const mimeType = rawContentType.split(';')[0].trim();
         const isText = mimeType.startsWith('text/') || mimeType === 'application/json';
         return {
@@ -308,7 +308,7 @@ export const OneDrive: ConnectorSpec = {
     '  - Use `remoteItem.id` as `itemId` (NOT the top-level `id`)',
     '  - Use `remoteItem.parentReference.driveId` as `driveId`',
     'Using the top-level `id` without `driveId` will return a 404 — this is a Graph API limitation.',
-    'Items from `search` and `getItemChildren` are always on the user\'s own drive and need no `driveId`.',
+    "Items from `search` and `getItemChildren` are always on the user's own drive and need no `driveId`.",
     '',
     '### Authentication',
     'Requires OAuth 2.0 Authorization Code flow with tenant-specific Microsoft Entra ID URLs.',
