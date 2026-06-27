@@ -18,11 +18,10 @@ on:
     - kibanamachine
 resources:
   - prefetch-pr-context.yml
-imports:
-  - .github/agents/code-reviewer.md
 timeout-minutes: 20
-engine:  
+engine:
   id: codex
+  version: "0.142.2"
   model: gpt-5.5
   args:
     - -c
@@ -102,12 +101,14 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
-steps:
+pre-agent-steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
+  - name: Discover active reviewers
+    run: node .github/scripts/discover-reviewers.js
 safe-outputs:
   footer: true
   report-failure-as-issue: false
@@ -128,18 +129,21 @@ safe-outputs:
   reply-to-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
-  resolve-pull-request-review-thread:
-    max: 10
 # Codex engine does not expose workflow env vars like PR_NUMBER and REVIEWER_COMMENT_ID to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
 
-# Codex PR Reviewer
+# Kibana PR Review Coordinator
 
-Using the imported reviewer instructions:
-- Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
-- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
-- This reviewer's own gh-aw workflow id is `reviewer-codex`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
+## Review mode
 
-For dispatched follow-up runs, use this context:
-- PR number: `${{ github.event.inputs.pr_number }}`
-- Comment id: `${{ github.event.inputs.comment_id }}`
+This reviewer's own gh-aw workflow id is `reviewer-codex`.
+
+Read `/tmp/gh-aw/reviewers.csv`, trim it, split it on commas, and ignore empty entries. If there are no reviewer names, call `noop "No reviewers configured"`.
+
+Otherwise, spawn one sub-agent per reviewer name using the reviewer name as the configured agent type. Ask each sub-agent to run review mode for this PR, follow its configured instructions, and record findings with `node .github/scripts/report-finding.js`; sub-agents must not call safe-output tools directly. Wait for all spawned sub-agents to finish, then close completed sub-agent threads if the close tool is available.
+
+After all sub-agents finish, run `node .github/scripts/post-review.js`. Post each returned finding with `create-pull-request-review-comment`, and submit one `COMMENT` review with a concise non-empty body if any findings were posted so the workflow footer can identify this review on future reruns. If there are no findings, call `noop "No issues found"`.
+
+## Follow-up response mode
+
+When a comment id is present (`${{ github.event.inputs.comment_id }}`), do not run the review flow. Find the triggering comment by id in `pr-issue-comments.json` or `pr-review-comments.json`. Reply with `reply-to-pull-request-review-comment` for review comments or `add-comment` for timeline comments. Call `noop` if not actionable.
