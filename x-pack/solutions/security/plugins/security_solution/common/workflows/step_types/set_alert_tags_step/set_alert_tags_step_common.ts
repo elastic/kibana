@@ -16,21 +16,31 @@ export const SetAlertTagsStepId = 'security.setAlertTags' as const;
 
 const tagsArray = z.array(AlertTag).default([]);
 
-export const setAlertTagsInputSchema = z
-  .object({
-    alert_ids: z
-      .union([
-        z.string().min(1).max(MAX_ALERT_ID_LENGTH),
-        z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
-      ])
-      .describe('A single alert ID or a list of IDs to support bulk updates'),
-    tags_to_add: tagsArray.describe('Tags to add to the specified alerts'),
+const alertIdsBase = z.object({
+  alert_ids: z
+    .union([
+      z.string().min(1).max(MAX_ALERT_ID_LENGTH),
+      z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
+    ])
+    .describe('A single alert ID or a list of IDs to support bulk updates'),
+});
+
+// A plain `z.union` (rather than `.refine`) is used so the constraint "at least one of
+// tags_to_add / tags_to_remove must be non-empty" lowers to JSON Schema `anyOf`, which the
+// Monaco/AJV workflow editor surfaces at edit-time. A top-level `.refine` is unwrapped before
+// JSON Schema generation and would only fail at execution time. There is no natural discriminator
+// here, so a plain union (not `discriminatedUnion`) is the right fit.
+// See follow-up: https://github.com/elastic/security-team/issues/17984
+export const setAlertTagsInputSchema = z.union([
+  alertIdsBase.extend({
+    tags_to_add: z.array(AlertTag).min(1).describe('Tags to add to the specified alerts'),
     tags_to_remove: tagsArray.describe('Tags to remove from the specified alerts'),
-  })
-  .refine((value) => value.tags_to_add.length > 0 || value.tags_to_remove.length > 0, {
-    message: 'At least one of tags_to_add or tags_to_remove must be a non-empty array',
-    path: ['tags_to_add'],
-  });
+  }),
+  alertIdsBase.extend({
+    tags_to_add: tagsArray.describe('Tags to add to the specified alerts'),
+    tags_to_remove: z.array(AlertTag).min(1).describe('Tags to remove from the specified alerts'),
+  }),
+]);
 
 export const setAlertTagsOutputSchema = z.object({
   success: z.boolean(),

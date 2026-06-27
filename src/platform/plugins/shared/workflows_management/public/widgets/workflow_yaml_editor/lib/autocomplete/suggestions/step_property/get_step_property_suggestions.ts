@@ -72,7 +72,12 @@ export async function getStepPropertySuggestions(
   const scope = isInConfig ? 'config' : 'input';
   const { stepType } = focusedStepInfo;
 
-  const propertyHandler = getPropertyHandler(stepType, scope, composedKey);
+  // When the cursor is on an array element, the YAML path ends with the element index (e.g.
+  // `tags_to_add.0`). Selection handlers are registered against the array property key
+  // (`tags_to_add`), so fall back to that key for indexed positions. Non-array properties never end
+  // in a numeric segment, so their lookup is unchanged.
+  const handlerKey = stripTrailingArrayIndex(composedKey);
+  const propertyHandler = getPropertyHandler(stepType, scope, handlerKey);
   if (!propertyHandler || !propertyHandler.selection?.search) {
     return [];
   }
@@ -92,10 +97,10 @@ export async function getStepPropertySuggestions(
   const selection = propertyHandler.selection;
   const values = getContextValues(selection, focusedStepInfo);
 
-  const context: SelectionContext = { stepType, scope, propertyKey: composedKey, values };
+  const context: SelectionContext = { stepType, scope, propertyKey: handlerKey, values };
   const options = await selection.search(input, context);
 
-  cacheSearchOptions(focusedStepInfo.stepType, context.scope, composedKey, options, values);
+  cacheSearchOptions(focusedStepInfo.stepType, context.scope, handlerKey, options, values);
 
   return options.map(
     (option): monaco.languages.CompletionItem => ({
@@ -109,6 +114,16 @@ export async function getStepPropertySuggestions(
       sortText: option.label,
     })
   );
+}
+
+/**
+ * Drops a single trailing array-index segment from a dotted property key so cursor positions on an
+ * array element (e.g. `tags_to_add.0`) resolve to the array property's selection handler
+ * (`tags_to_add`). Keys for scalar/object properties never end in a numeric segment and are returned
+ * unchanged.
+ */
+function stripTrailingArrayIndex(key: string): string {
+  return key.replace(/\.\d+$/, '');
 }
 
 function sanitizeSearchInput(input: unknown): string {
