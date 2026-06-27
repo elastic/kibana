@@ -18,6 +18,7 @@ import type { ChromeStart } from '@kbn/core/public';
 
 import type { StreamsAppStartDependencies } from '../../../types';
 import { getSignificantEventStatusColor } from '../significant_events_discovery/components/shared/status_display';
+import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../significant_events_discovery/components/shared/translations';
 import { SigEventDetails } from '../significant_event_details/sig_event_details';
 import type { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
 import { registerSignificantEventAutoAttach } from '../lib/significant_event_auto_attach';
@@ -40,7 +41,7 @@ export const significantEventAttachmentDefinition: AttachmentUIDefinition<Signif
       subtitle: labels.fallback,
       badges: [
         {
-          label: attachment.data.status,
+          label: SIGNIFICANT_EVENT_STATUS_LABELS[attachment.data.status] ?? attachment.data.status,
           color: getSignificantEventStatusColor(attachment.data.status),
         },
       ],
