@@ -156,7 +156,9 @@ export const OneDrive: ConnectorSpec = {
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
         const url = input.query
-          ? `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encodeURIComponent(input.query)}')`
+          ? `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encodeURIComponent(
+              input.query
+            )}')`
           : 'https://graph.microsoft.com/v1.0/me/drive/root/search';
         const response = await ctx.client.get(url, {
           params: {
