@@ -62,6 +62,7 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import { transformSavedObjectToExternalModel } from './transform';
 import type { ConfigType } from '../../config';
 
 const createUpdateSOResponse = ({
@@ -3741,6 +3742,96 @@ describe('CasesService', () => {
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
         expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
         expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('patchCase', () => {
+      it('dispatches the persisted model to the analytics writer even when status/severity are not part of the patch', async () => {
+        // `originalCase` is the external model (string status/severity,
+        // external_service.connector_id). When the patch only touches `title`,
+        // the base must be converted to the persisted model before merging —
+        // otherwise `status`/`severity` silently become `undefined` (the
+        // *_TO_STRING maps are keyed by the numeric enum) and any pushed case
+        // carries `external_service.connector_id` into the strict mapping.
+        const persistedSO = createCaseSavedObjectResponse({
+          externalService: createExternalService({ connector_id: 'push-connector-1' }),
+        });
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { title: 'Updated Title' },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { title: 'Updated Title' },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.upsertCase).toHaveBeenCalledTimes(1);
+        const dispatchedDoc = analyticsV2Writer.upsertCase.mock.calls[0][0];
+
+        // status/severity must be the numeric persisted values, not the
+        // string external-model values.
+        expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
+        expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
+
+        // connector_id must not appear — it's stored as a reference, not a
+        // mapping field. Its presence in the doc triggers a
+        // strict_dynamic_mapping_exception on the .cases index.
+        expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
+      });
+    });
+
+    describe('patchCases', () => {
+      it('dispatches the persisted model to the analytics writer even when status/severity are not part of the bulk patch', async () => {
+        // Same model-mixing hazard as patchCase — both sites use the same
+        // synthesize-from-originalCase pattern and need the same fix.
+        const persistedSO = createCaseSavedObjectResponse({
+          externalService: createExternalService({ connector_id: 'push-connector-2' }),
+        });
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: persistedSO.id,
+              type: CASE_SAVED_OBJECT,
+              attributes: { title: 'Bulk Updated Title' },
+              references: persistedSO.references,
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCases({
+          cases: [
+            {
+              caseId: persistedSO.id,
+              updatedAttributes: { title: 'Bulk Updated Title' },
+              originalCase: externalModelOriginalCase,
+              version: 'WzAsMV0=',
+            },
+          ],
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.bulkUpsertCases).toHaveBeenCalledTimes(1);
+        const [mirrors] = analyticsV2Writer.bulkUpsertCases.mock.calls[0];
+        expect(mirrors).toHaveLength(1);
+        const dispatchedDoc = mirrors[0];
+
+        expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
+        expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
+        expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
       });
     });
   });

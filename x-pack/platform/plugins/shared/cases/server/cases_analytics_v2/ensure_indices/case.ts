@@ -22,6 +22,17 @@ import { CASE_INDEX_MAPPING } from '../mappings/case';
  *     the activity / attachments surfaces. Single primary shard; cases
  *     data fits comfortably (millions of cases at ~2KB/doc is a few GB,
  *     well under shard limits).
+ *   - `auto_expand_replicas: '0-1'` — 0 replicas on single-node clusters
+ *     (dev/CI), 1 replica on multi-node clusters. Without this, ES
+ *     defaults to `number_of_replicas: 1`, so the index costs 2 shards
+ *     (1 primary + 1 replica) even on a single-node cluster. Dev and CI
+ *     environments that already have many indices hit the default
+ *     `cluster.max_shards_per_node` limit (1000) and the bootstrap
+ *     fails with `validation_exception` before the feature can start.
+ *     `auto_expand_replicas` avoids this with no production trade-off:
+ *     on multi-node clusters the replica is added automatically for HA,
+ *     and `LOOKUP JOIN` is unaffected because it operates on the primary
+ *     shard — replicas are transparent read copies.
  *
  * Failure policy: log, don't throw. Bootstrap failure must not block
  * plugin start; cases-analytics is a downstream feature. Administrators
@@ -46,6 +57,7 @@ export async function ensureCaseIndex({
       settings: {
         'index.hidden': true,
         'index.mode': 'lookup',
+        'index.auto_expand_replicas': '0-1',
       },
       mappings: CASE_INDEX_MAPPING,
     });

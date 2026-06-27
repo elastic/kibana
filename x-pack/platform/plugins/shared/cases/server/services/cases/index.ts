@@ -1075,17 +1075,16 @@ export class CasesService {
         }
       );
 
-      // Cases-as-data v2: re-emit the full case doc post-patch. The SO
-      // `update` API returns a partial response (just the changed fields), so
-      // we synthesize the full post-update SO from `originalCase` + the patch
-      // attributes. This avoids an extra SO `get` round-trip per patch.
-      // The cast is safe: spreading `Partial<CasePersistedAttributes>` over a
-      // full `CasePersistedAttributes` yields a full attribute set; TS just
-      // can't carry that inference through the spread.
+      // Cases-as-data v2: synthesize the post-patch SO from originalCase + patch
+      // attributes to avoid an extra SO get round-trip.
+      // originalCase is the external model (string status/severity,
+      // external_service.connector_id). Convert to the persisted model first —
+      // using it raw silently drops status/severity for untouched fields and
+      // injects connector_id into the strict mapping.
       this.analyticsV2Writer.upsertCase({
         ...originalCase,
         attributes: {
-          ...originalCase.attributes,
+          ...transformAttributesToESModel(originalCase.attributes ?? {}).attributes,
           ...transformedAttributes.attributes,
         } as CasePersistedAttributes,
         version: updatedCase.version ?? originalCase.version,
@@ -1159,15 +1158,14 @@ export class CasesService {
           return acc;
         }
 
-        // Synthesize-from-originalCase pattern (mirrors patchCase). The SO
-        // bulkUpdate response only carries the changed fields, so we merge
-        // them onto the pre-update SO to model the post-update state.
+        // Same synthesize-from-originalCase pattern as patchCase: convert the
+        // external-model base to the persisted model before spreading the patch.
         const ctx = updateContextById.get(theCase.id);
         if (ctx) {
           analyticsV2Mirrors.push({
             ...ctx.originalCase,
             attributes: {
-              ...ctx.originalCase.attributes,
+              ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
               ...ctx.esAttributes,
             } as CasePersistedAttributes,
             version: theCase.version ?? ctx.originalCase.version,
