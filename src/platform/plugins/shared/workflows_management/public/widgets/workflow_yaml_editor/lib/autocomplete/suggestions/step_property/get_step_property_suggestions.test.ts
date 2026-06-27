@@ -336,9 +336,6 @@ describe('getStepPropertySuggestions', () => {
   });
 
   describe('array element fields', () => {
-    // When the cursor sits on an array element, the YAML path ends with the element index. The
-    // handler is registered against the array property key, so the indexed segment must be dropped
-    // before lookup (and when calling search / building the selection context).
     it('falls back to the array property handler for an indexed input path', async () => {
       const searchMock = jest.fn().mockResolvedValue([{ label: 'Duplicate', value: 'Duplicate' }]);
       const context = createMockContext({

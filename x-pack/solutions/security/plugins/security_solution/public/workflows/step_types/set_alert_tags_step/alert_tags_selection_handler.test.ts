@@ -92,8 +92,6 @@ describe('alertTagsSelection', () => {
 
       const resolved = await alertTagsSelection.resolve('   ', createSelectionContext());
 
-      // A non-null option with an empty label avoids a false step-property error while suppressing
-      // the inline "✓" decoration.
       expect(resolved).toEqual({ value: '', label: '' });
     });
   });
