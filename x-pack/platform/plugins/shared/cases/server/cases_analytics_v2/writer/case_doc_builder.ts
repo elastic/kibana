@@ -9,6 +9,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { Observable } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 
 /**
  * Shape of a single document indexed into `.cases`. Mirrors
@@ -142,6 +143,9 @@ const SEVERITY_TO_STRING: Record<CasePersistedSeverity, CaseSeverityString> = {
 export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnalyticsDoc {
   const a = so.attributes;
   const timestamp = a.updated_at ?? a.created_at;
+  // The connector id is stored in so.references (under CONNECTOR_ID_REFERENCE_NAME),
+  // not in a.connector, which is the persisted shape { name, type, fields }.
+  const connectorId = so.references?.find((r) => r.name === CONNECTOR_ID_REFERENCE_NAME)?.id;
 
   return {
     '@timestamp': timestamp,
@@ -179,9 +183,11 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       time_to_resolve: a.time_to_resolve,
       incremental_id: a.incremental_id,
       template: a.template,
-      // `connector` and `external_service` are fully indexed per the
-      // mapping. The SO shape is the analytics shape, so no transform.
-      connector: a.connector,
+      // Rehydrate connector.id from references — the persisted connector
+      // attribute is { name, type, fields } only; the id is in so.references.
+      connector: a.connector
+        ? { ...a.connector, ...(connectorId ? { id: connectorId } : {}) }
+        : a.connector,
       external_service: a.external_service,
       // `settings` is opaque (mapped `enabled: false`); `customFields`
       // is the SO's nested array. Both pass through.

@@ -7,8 +7,10 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { buildCaseDoc } from './case_doc_builder';
 
 const fullCaseSO = (
@@ -143,19 +145,21 @@ describe('buildCaseDoc', () => {
 
   it('passes connector and external_service through (fully indexed per mapping)', () => {
     const doc = buildCaseDoc(fullCaseSO());
+    // The none connector has no reference entry, so id is absent.
     expect(doc.cases.connector).toEqual({ name: 'none', type: '.none', fields: null });
     expect(doc.cases.external_service).toBeNull();
   });
 
-  it('passes through real-world connector shapes — id + polymorphic fields', () => {
-    // Regression guard: runtime jira connectors carry an `id` and a
-    // `fields` blob that is NOT `{key,value}`. The v2 strict mapping
-    // must accept both (mapped `connector.id` keyword + opaque
-    // `connector.fields`); a missing field declaration trips
-    // `dynamic introduction of [id] within [cases.connector] is not allowed`.
+  it('rehydrates connector.id from so.references', () => {
+    // The persisted connector attribute is { name, type, fields } only.
+    // The connector id lives in so.references under CONNECTOR_ID_REFERENCE_NAME.
+    // buildCaseDoc must look it up there — a fixture that hand-injects id into
+    // a.connector would pass even if the rehydration were removed.
     const so = fullCaseSO();
+    so.references = [
+      { id: 'connector-1', name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
+    ];
     (so.attributes as unknown as { connector: unknown }).connector = {
-      id: 'connector-1',
       name: 'jira',
       type: '.jira',
       fields: { issueType: '10006', priority: 'High', parent: null },
@@ -167,6 +171,12 @@ describe('buildCaseDoc', () => {
       type: '.jira',
       fields: { issueType: '10006', priority: 'High', parent: null },
     });
+  });
+
+  it('omits connector.id when no matching reference exists', () => {
+    // None connector — id is a sentinel not stored in references.
+    const doc = buildCaseDoc(fullCaseSO());
+    expect((doc.cases.connector as Record<string, unknown>)?.id).toBeUndefined();
   });
 
   it('preserves the case id under cases.id', () => {

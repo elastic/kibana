@@ -219,8 +219,11 @@ const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
 ]);
 
 describe('cases SO mapping is mirrored in CASE_INDEX_MAPPING', () => {
-  const soMapping = createCaseSavedObjectType(coreMock.createSetup(), loggerMock.create())
-    .mappings as MappingTypeMapping;
+  const soMapping = createCaseSavedObjectType(
+    coreMock.createSetup(),
+    loggerMock.create(),
+    {} as never // Do not need the config definition here
+  ).mappings as MappingTypeMapping;
   const soPaths = collectMappedPaths(soMapping);
   const v2Paths = collectMappedPaths(CASE_INDEX_MAPPING);
 
