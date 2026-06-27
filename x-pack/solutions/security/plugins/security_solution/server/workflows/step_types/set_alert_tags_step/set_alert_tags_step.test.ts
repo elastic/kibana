@@ -125,6 +125,53 @@ describe('setAlertTagsStepDefinition', () => {
       });
     });
 
+    // Workflows render the `with` block at runtime — they do NOT run `inputSchema.parse()` — so
+    // zod `.default([])` never materializes for omitted fields. These cases mirror the runtime
+    // shape produced by the documentation examples (one array omitted).
+    it('defaults tags_to_remove to [] when the workflow omits it', async () => {
+      const mockContext = createMockContext({
+        alert_ids: 'alert-1',
+        tags_to_add: ['triaged'],
+      });
+      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        body: {},
+      });
+
+      await setAlertTagsStepDefinition.handler(mockContext);
+
+      expect(mockContext.contextManager.callKibanaApi).toHaveBeenCalledWith({
+        method: 'POST',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: ['triaged'], tags_to_remove: [] },
+        },
+      });
+    });
+
+    it('defaults tags_to_add to [] when the workflow omits it', async () => {
+      const mockContext = createMockContext({
+        alert_ids: 'alert-1',
+        tags_to_remove: ['needs-review'],
+      });
+      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        body: {},
+      });
+
+      await setAlertTagsStepDefinition.handler(mockContext);
+
+      expect(mockContext.contextManager.callKibanaApi).toHaveBeenCalledWith({
+        method: 'POST',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: [], tags_to_remove: ['needs-review'] },
+        },
+      });
+    });
+
     it('should throw ExecutionError if API returns >= 400', async () => {
       const mockContext = createMockContext({
         alert_ids: 'alert-1',

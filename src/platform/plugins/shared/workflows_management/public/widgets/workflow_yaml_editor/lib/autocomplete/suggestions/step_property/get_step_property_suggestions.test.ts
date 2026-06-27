@@ -342,7 +342,7 @@ describe('getStepPropertySuggestions', () => {
         focusedYamlPair: {
           keyNode: { value: 'tags_to_add', range: [1, 1, 1] } as Scalar,
           valueNode: { value: 'Dup', range: [5, 15, 15] } as Scalar,
-          path: ['with', 'tags_to_add', 0],
+          path: ['with', 'tags_to_add', '0'],
         },
       });
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
@@ -365,7 +365,7 @@ describe('getStepPropertySuggestions', () => {
         focusedYamlPair: {
           keyNode: { value: 'indices', range: [1, 1, 1] } as Scalar,
           valueNode: { value: '', range: [5, 15, 15] } as Scalar,
-          path: ['indices', 2],
+          path: ['indices', '2'],
         },
       });
 
@@ -380,7 +380,7 @@ describe('getStepPropertySuggestions', () => {
         focusedYamlPair: {
           keyNode: { value: 'index', range: [1, 1, 1] } as Scalar,
           valueNode: { value: '', range: [5, 15, 15] } as Scalar,
-          path: ['with', 'items', 0, 'index'],
+          path: ['with', 'items', '0', 'index'],
         },
       });
 

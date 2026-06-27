@@ -13,10 +13,13 @@ import { setAlertTagsStepCommonDefinition } from '../../../../common/workflows/s
 export const setAlertTagsStepDefinition = createServerStepDefinition({
   ...setAlertTagsStepCommonDefinition,
   handler: async (context) => {
+    // zod `.default([])` doesn't apply at runtime: the engine renders `context.input` from the
+    // `with` block via `renderValueAccordingToContext` and never runs `inputSchema.parse()`. The
+    // sibling `setAlertStatus` handler probes for `close_reason` via `in` for the same reason.
     const {
       alert_ids: alertIds,
-      tags_to_add: tagsToAdd,
-      tags_to_remove: tagsToRemove,
+      tags_to_add: tagsToAdd = [],
+      tags_to_remove: tagsToRemove = [],
     } = context.input;
     const ids = Array.isArray(alertIds) ? alertIds : [alertIds];
 
