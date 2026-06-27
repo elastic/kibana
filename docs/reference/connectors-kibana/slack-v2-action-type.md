@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -88,6 +88,26 @@ List users
     - `includeLocale` (optional): Set to `true` to include the user locale.
     - `raw` (optional): If `true`, returns the full raw Slack response.
 
+Who am I
+:   Return the identity the connector is currently authenticated as, using Slack `auth.test`. Useful before a write action to confirm the workspace/user, or to resolve "me" to a concrete `user_id`.
+    - `raw` (optional): If `true`, returns the full raw Slack response. Defaults to `false`.
+
+Get file info
+:   Look up a single Slack file by ID using Slack `files.info`. Returns the file metadata (name, mimetype, size, URLs, sharing channels).
+    - `file` (required): Slack file ID (for example, `F0123ABCDE`).
+    - `raw` (optional): If `true`, returns the full raw Slack response instead of the file object. Defaults to `false`.
+
+List files
+:   List Slack files (one page per call) using Slack `files.list`. Filter by channel, user, time range, or types.
+    - `channel` (optional): Restrict results to a single channel/DM ID.
+    - `user` (optional): Restrict results to files uploaded by a single user ID.
+    - `tsFrom` (optional): Only include files created after this Unix timestamp (string form).
+    - `tsTo` (optional): Only include files created before this Unix timestamp (string form).
+    - `types` (optional): Comma-separated Slack file type filter (for example, `images,pdfs`).
+    - `limit` (optional): Files per page (1 to 200). Defaults to `100`.
+    - `cursor` (optional): Pagination cursor from a previous response.
+    - `raw` (optional): If `true`, returns the full raw Slack response.
+
 List user conversations
 :   List the channels a Slack user is a member of (one page per call) using Slack `users.conversations`. Omit `user` to list for the authenticated user.
     - `user` (optional): User ID (for example, `U...`) whose conversations to list.
@@ -129,7 +149,7 @@ To use the Slack (v2) connector, you need a Slack app configured for OAuth.
    - `channels:read` — list and resolve public channel IDs
    - `channels:history` — read public channel history (for **Get conversation history**)
    - `chat:write` — send messages
-   - `files:read` — access shared files
+   - `files:read` — access shared files (for **Get file info**, **List files**)
    - `groups:read` — list private channels (including for **List channels** when `types` includes `private_channel`)
    - `groups:history` — read private channel history (for **Get conversation history** on private channels)
    - `im:read` — list direct messages (when `types` includes `im`)

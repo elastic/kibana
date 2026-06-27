@@ -12,10 +12,13 @@ import { getConnectorSpec } from '../../..';
 import { Slack } from './slack';
 import {
   SlackGetConversationHistoryInputSchema,
+  SlackGetFileInfoInputSchema,
   SlackListChannelsInputSchema,
+  SlackListFilesInputSchema,
   SlackListUserConversationsInputSchema,
   SlackListUsersInputSchema,
   SlackResolveChannelIdInputSchema,
+  SlackWhoAmIInputSchema,
 } from './types';
 
 describe('Slack', () => {
@@ -853,12 +856,106 @@ describe('Slack', () => {
       expect(result).toEqual({
         ok: true,
         members: [
-          { id: 'U1', name: 'a' },
-          { id: 'U2', name: 'b' },
+          {
+            id: 'U1',
+            name: 'a',
+            real_name: undefined,
+            is_bot: undefined,
+            is_admin: undefined,
+            is_owner: undefined,
+            deleted: undefined,
+            profile: undefined,
+          },
+          {
+            id: 'U2',
+            name: 'b',
+            real_name: undefined,
+            is_bot: undefined,
+            is_admin: undefined,
+            is_owner: undefined,
+            deleted: undefined,
+            profile: undefined,
+          },
         ],
         nextCursor: 'next',
         hasMore: true,
       });
+    });
+
+    it('should project members to compact shape, stripping heavy fields', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          members: [
+            {
+              id: 'U1',
+              team_id: 'T1',
+              name: 'alice',
+              real_name: 'Alice Smith',
+              is_bot: false,
+              is_admin: true,
+              is_owner: false,
+              deleted: false,
+              tz: 'America/New_York',
+              tz_label: 'Eastern Daylight Time',
+              tz_offset: -14400,
+              updated: 1234567890,
+              is_app_user: false,
+              profile: {
+                email: 'alice@example.com',
+                display_name: 'alice',
+                real_name: 'Alice Smith',
+                title: 'Engineer',
+                phone: '555-0100',
+                skype: '',
+                image_24: 'https://example.com/24.png',
+                image_32: 'https://example.com/32.png',
+                image_48: 'https://example.com/48.png',
+                image_72: 'https://example.com/72.png',
+                image_192: 'https://example.com/192.png',
+                image_512: 'https://example.com/512.png',
+              },
+            },
+          ],
+          response_metadata: { next_cursor: '' },
+        },
+      });
+
+      const result = await Slack.actions.listUsers.handler(
+        mockContext,
+        SlackListUsersInputSchema.parse({})
+      );
+
+      expect(result).toEqual({
+        ok: true,
+        members: [
+          {
+            id: 'U1',
+            name: 'alice',
+            real_name: 'Alice Smith',
+            is_bot: false,
+            is_admin: true,
+            is_owner: false,
+            deleted: false,
+            profile: {
+              email: 'alice@example.com',
+              display_name: 'alice',
+              real_name: 'Alice Smith',
+              title: 'Engineer',
+            },
+          },
+        ],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+
+      const member = (result as { members: Array<Record<string, unknown>> }).members[0];
+      expect(member).not.toHaveProperty('team_id');
+      expect(member).not.toHaveProperty('tz');
+      expect(member).not.toHaveProperty('tz_offset');
+      expect(member.profile).not.toHaveProperty('image_24');
+      expect(member.profile).not.toHaveProperty('image_512');
+      expect(member.profile).not.toHaveProperty('phone');
     });
 
     it('should pass cursor, limit, includeLocale', async () => {
@@ -995,6 +1092,253 @@ describe('Slack', () => {
           SlackListUserConversationsInputSchema.parse({ user: 'UNKNOWN' })
         )
       ).rejects.toThrow('Slack listUserConversations error: user_not_found');
+    });
+  });
+
+  describe('whoAmI action', () => {
+    it('should return compact identity by default', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          url: 'https://elastic.slack.com/',
+          team: 'Elastic',
+          user: 'claude',
+          team_id: 'T0CUZ52US',
+          user_id: 'U09E1LQM6RY',
+          enterprise_id: 'E0123',
+          is_enterprise_install: false,
+          response_metadata: { scopes: ['users:read'] },
+        },
+      });
+
+      const result = await Slack.actions.whoAmI.handler(
+        mockContext,
+        SlackWhoAmIInputSchema.parse({})
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/auth.test');
+      expect(result).toEqual({
+        ok: true,
+        url: 'https://elastic.slack.com/',
+        team: 'Elastic',
+        user: 'claude',
+        team_id: 'T0CUZ52US',
+        user_id: 'U09E1LQM6RY',
+        bot_id: undefined,
+        enterprise_id: 'E0123',
+        is_enterprise_install: false,
+      });
+      expect(result).not.toHaveProperty('response_metadata');
+    });
+
+    it('should return raw response when raw=true', async () => {
+      const mockResponse = {
+        data: { ok: true, url: 'x', team: 'T', user: 'u', response_metadata: { scopes: [] } },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.whoAmI.handler(
+        mockContext,
+        SlackWhoAmIInputSchema.parse({ raw: true })
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'invalid_auth' } });
+
+      await expect(
+        Slack.actions.whoAmI.handler(mockContext, SlackWhoAmIInputSchema.parse({}))
+      ).rejects.toThrow('Slack whoAmI error: invalid_auth');
+    });
+  });
+
+  describe('getFileInfo action', () => {
+    it('should return just the file object by default', async () => {
+      const file = {
+        id: 'F123',
+        name: 'screenshot.png',
+        mimetype: 'image/png',
+        size: 12345,
+        permalink: 'https://example.com/f',
+      };
+      mockClient.get.mockResolvedValue({ data: { ok: true, file } });
+
+      const result = await Slack.actions.getFileInfo.handler(
+        mockContext,
+        SlackGetFileInfoInputSchema.parse({ file: 'F123' })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/files.info', {
+        params: { file: 'F123' },
+      });
+      expect(result).toEqual(file);
+    });
+
+    it('should return the full response when raw=true', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          file: { id: 'F123' },
+          response_metadata: { scopes: ['files:read'] },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getFileInfo.handler(
+        mockContext,
+        SlackGetFileInfoInputSchema.parse({ file: 'F123', raw: true })
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'file_not_found' } });
+
+      await expect(
+        Slack.actions.getFileInfo.handler(
+          mockContext,
+          SlackGetFileInfoInputSchema.parse({ file: 'F404' })
+        )
+      ).rejects.toThrow('Slack getFileInfo error: file_not_found');
+    });
+  });
+
+  describe('listFiles action', () => {
+    it('should project files to a compact shape and strip heavy fields', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          files: [
+            {
+              id: 'F1',
+              name: 'a.png',
+              title: 'A',
+              mimetype: 'image/png',
+              filetype: 'png',
+              pretty_type: 'PNG',
+              user: 'U1',
+              size: 100,
+              created: 1700000000,
+              url_private: 'https://example.com/a',
+              url_private_download: 'https://example.com/a?dl=1',
+              permalink: 'https://example.com/p/a',
+              permalink_public: 'https://example.com/pub/a',
+              channels: ['C1'],
+              groups: [],
+              ims: [],
+              thumb_64: 'https://example.com/t64',
+              thumb_360: 'https://example.com/t360',
+              thumb_480: 'https://example.com/t480',
+              original_w: 1024,
+              original_h: 768,
+            },
+          ],
+          response_metadata: { next_cursor: 'next' },
+        },
+      });
+
+      const result = await Slack.actions.listFiles.handler(
+        mockContext,
+        SlackListFilesInputSchema.parse({})
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/files.list', {
+        params: { limit: 100 },
+      });
+      expect(result).toEqual({
+        ok: true,
+        files: [
+          {
+            id: 'F1',
+            name: 'a.png',
+            title: 'A',
+            mimetype: 'image/png',
+            filetype: 'png',
+            user: 'U1',
+            size: 100,
+            created: 1700000000,
+            url_private: 'https://example.com/a',
+            permalink: 'https://example.com/p/a',
+            channels: ['C1'],
+          },
+        ],
+        nextCursor: 'next',
+        hasMore: true,
+      });
+
+      const f = (result as { files: Array<Record<string, unknown>> }).files[0];
+      expect(f).not.toHaveProperty('thumb_64');
+      expect(f).not.toHaveProperty('thumb_480');
+      expect(f).not.toHaveProperty('original_w');
+      expect(f).not.toHaveProperty('permalink_public');
+      expect(f).not.toHaveProperty('url_private_download');
+    });
+
+    it('should pass channel, user, ts range, types, limit, cursor', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, files: [], response_metadata: { next_cursor: '' } },
+      });
+
+      await Slack.actions.listFiles.handler(
+        mockContext,
+        SlackListFilesInputSchema.parse({
+          channel: 'C1',
+          user: 'U1',
+          tsFrom: '1700000000',
+          tsTo: '1700100000',
+          types: 'images,pdfs',
+          limit: 25,
+          cursor: 'prev',
+        })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/files.list', {
+        params: {
+          limit: 25,
+          channel: 'C1',
+          user: 'U1',
+          ts_from: '1700000000',
+          ts_to: '1700100000',
+          types: 'images,pdfs',
+          cursor: 'prev',
+        },
+      });
+    });
+
+    it('should set hasMore false and omit nextCursor when there is no next page', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, files: [], response_metadata: { next_cursor: '' } },
+      });
+
+      const result = await Slack.actions.listFiles.handler(
+        mockContext,
+        SlackListFilesInputSchema.parse({})
+      );
+
+      expect(result).toEqual({ ok: true, files: [], nextCursor: undefined, hasMore: false });
+    });
+
+    it('should return raw response when raw=true', async () => {
+      const mockResponse = { data: { ok: true, files: [{ id: 'F1' }] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listFiles.handler(
+        mockContext,
+        SlackListFilesInputSchema.parse({ raw: true })
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'missing_scope' } });
+
+      await expect(
+        Slack.actions.listFiles.handler(mockContext, SlackListFilesInputSchema.parse({}))
+      ).rejects.toThrow('Slack listFiles error: missing_scope');
     });
   });
 

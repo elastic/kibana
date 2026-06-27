@@ -15,31 +15,41 @@ import {
   SlackCreateConversationInputSchema,
   SlackGetConversationHistoryInputSchema,
   SlackGetConversationInfoInputSchema,
+  SlackGetFileInfoInputSchema,
   SlackInviteToConversationInputSchema,
   SlackListChannelsInputSchema,
+  SlackListFilesInputSchema,
   SlackListUserConversationsInputSchema,
   SlackListUsersInputSchema,
   SlackLookupUserByEmailInputSchema,
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
   SlackSendMessageInputSchema,
+  SlackWhoAmIInputSchema,
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
+  type SlackAuthTestResponse,
   type SlackConversationsHistoryResponse,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
   type SlackErrorFields,
+  type SlackFile,
+  type SlackFilesInfoResponse,
+  type SlackFilesListResponse,
   type SlackGetConversationHistoryInput,
   type SlackGetConversationInfoInput,
+  type SlackGetFileInfoInput,
   type SlackInviteToConversationInput,
   type SlackListChannelsInput,
+  type SlackListFilesInput,
   type SlackListUserConversationsInput,
   type SlackListUsersInput,
   type SlackLookupUserByEmailInput,
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackWhoAmIInput,
 } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
@@ -176,8 +186,11 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * - chat:write - send messages
  * - groups:write - create private channels and invite users
  * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
- * - files:read - read file metadata referenced by messages
+ * - files:read - look up file metadata (getFileInfo, listFiles) and file references on messages
  * - users:read, users:read.email - list workspace users and look up users by email
+ *
+ * auth.test (the underlying call for the whoAmI sub-action and the connector's
+ * own test handler) does not require an explicit scope — any valid token works.
  */
 export const Slack: ConnectorSpec = {
   metadata: {
@@ -185,7 +198,7 @@ export const Slack: ConnectorSpec = {
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
-        'Search messages, list channels and users, read conversation history, look up users by email, and send messages in Slack',
+        'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -638,9 +651,35 @@ export const Slack: ConnectorSpec = {
           return response.data;
         }
 
-        const members = Array.isArray(response.data.members) ? response.data.members : [];
+        const rawMembers = Array.isArray(response.data.members) ? response.data.members : [];
         const nextCursor = response.data.response_metadata?.next_cursor;
         const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+
+        // Slack users.list members carry tz fields, ~12 `is_*` flags, and a profile
+        // with the full set of `image_24`..`image_512` avatar URLs. With limit 200
+        // and isTool: true, returning them verbatim blows up agent token cost.
+        // Project to the fields a workflow / agent actually needs; use `raw: true`
+        // to opt back into the full payload.
+        const members = rawMembers.map((m: Record<string, unknown>) => {
+          const profile = isRecord(m.profile) ? m.profile : undefined;
+          return {
+            id: m.id,
+            name: m.name,
+            real_name: m.real_name,
+            is_bot: m.is_bot,
+            is_admin: m.is_admin,
+            is_owner: m.is_owner,
+            deleted: m.deleted,
+            profile: profile
+              ? {
+                  email: profile.email,
+                  display_name: profile.display_name,
+                  real_name: profile.real_name,
+                  title: profile.title,
+                }
+              : undefined,
+          };
+        });
 
         return {
           ok: true as const,
@@ -704,6 +743,152 @@ export const Slack: ConnectorSpec = {
             is_archived: c.is_archived,
             is_member: c.is_member,
           })),
+          nextCursor: hasMore ? nextCursor : undefined,
+          hasMore,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/auth.test
+    whoAmI: {
+      isTool: true,
+      description:
+        'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
+      input: SlackWhoAmIInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackWhoAmIInput = SlackWhoAmIInputSchema.parse(input);
+
+        const response = await slackRequestWithRateLimitRetry<SlackAuthTestResponse>({
+          ctx,
+          action: 'whoAmI',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/auth.test`),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'whoAmI',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true as const,
+          url: response.data.url,
+          team: response.data.team,
+          user: response.data.user,
+          team_id: response.data.team_id,
+          user_id: response.data.user_id,
+          bot_id: response.data.bot_id,
+          enterprise_id: response.data.enterprise_id,
+          is_enterprise_install: response.data.is_enterprise_install,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/files.info
+    getFileInfo: {
+      isTool: true,
+      description:
+        'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
+      input: SlackGetFileInfoInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackGetFileInfoInput = SlackGetFileInfoInputSchema.parse(input);
+
+        const response = await slackRequestWithRateLimitRetry<SlackFilesInfoResponse>({
+          ctx,
+          action: 'getFileInfo',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/files.info`, {
+              params: { file: typedInput.file },
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getFileInfo',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        return typedInput.raw ? response.data : response.data.file;
+      },
+    },
+
+    // https://api.slack.com/methods/files.list
+    listFiles: {
+      isTool: true,
+      description:
+        'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextCursor to fetch the next page.',
+      input: SlackListFilesInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackListFilesInput = SlackListFilesInputSchema.parse(input);
+
+        const params: Record<string, string | number | boolean> = {
+          limit: typedInput.limit,
+        };
+        if (typedInput.channel) params.channel = typedInput.channel;
+        if (typedInput.user) params.user = typedInput.user;
+        if (typedInput.tsFrom) params.ts_from = typedInput.tsFrom;
+        if (typedInput.tsTo) params.ts_to = typedInput.tsTo;
+        if (typedInput.types) params.types = typedInput.types;
+        if (typedInput.cursor) params.cursor = typedInput.cursor;
+
+        const response = await slackRequestWithRateLimitRetry<SlackFilesListResponse>({
+          ctx,
+          action: 'listFiles',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/files.list`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listFiles',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        // Slack file objects carry a dozen URL/thumbnail variants per file; project
+        // to the fields a workflow / agent actually needs. Opt into the full
+        // payload with raw: true.
+        const files = (response.data.files ?? []).map((f: SlackFile) => ({
+          id: f.id,
+          name: f.name,
+          title: f.title,
+          mimetype: f.mimetype,
+          filetype: f.filetype,
+          user: f.user,
+          size: f.size,
+          created: f.created,
+          url_private: f.url_private,
+          permalink: f.permalink,
+          channels: f.channels,
+        }));
+
+        const nextCursor = response.data.response_metadata?.next_cursor;
+        const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+
+        return {
+          ok: true as const,
+          files,
           nextCursor: hasMore ? nextCursor : undefined,
           hasMore,
         };
@@ -913,6 +1098,7 @@ export const Slack: ConnectorSpec = {
   },
 
   skill: [
+    'Use whoAmI before any write or "as me" action to confirm the authenticated workspace/user. It is also the cheapest way to translate the implicit "me" to a concrete user_id for listUserConversations or message attribution.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
@@ -921,5 +1107,6 @@ export const Slack: ConnectorSpec = {
     'To find a Slack user, prefer lookupUserByEmail when you have the email. Use listUsers only when you need to browse or enumerate the workspace; it is paginated.',
     'listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user’s memberships.',
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
+    'For Slack files: use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range. Both are paginated; listFiles supports a `types` filter (e.g. "images,pdfs").',
   ].join('\n'),
 };

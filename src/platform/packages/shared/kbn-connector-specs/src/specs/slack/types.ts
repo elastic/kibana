@@ -494,6 +494,139 @@ export const SlackListUserConversationsInputSchema = lazySchema(() =>
 );
 export type SlackListUserConversationsInput = z.infer<typeof SlackListUserConversationsInputSchema>;
 
+export const SlackWhoAmIInputSchema = lazySchema(() =>
+  z.object({
+    raw: z
+      .boolean()
+      .optional()
+      .describe(
+        'Return the full raw Slack API response instead of a compact result. Defaults to false.'
+      ),
+  })
+);
+export type SlackWhoAmIInput = z.infer<typeof SlackWhoAmIInputSchema>;
+
+export interface SlackAuthTestResponse extends SlackErrorFields {
+  ok: boolean;
+  url?: string;
+  team?: string;
+  user?: string;
+  team_id?: string;
+  user_id?: string;
+  enterprise_id?: string;
+  bot_id?: string;
+  is_enterprise_install?: boolean;
+}
+
+const SLACK_MAX_FILE_ID_LENGTH = 64;
+
+export const SlackGetFileInfoInputSchema = lazySchema(() =>
+  z.object({
+    file: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_FILE_ID_LENGTH)
+      .describe('Slack file ID to look up (e.g. F0123ABCDE).'),
+    raw: z
+      .boolean()
+      .optional()
+      .describe(
+        'Return the full raw Slack API response instead of just the file object. Defaults to false.'
+      ),
+  })
+);
+export type SlackGetFileInfoInput = z.infer<typeof SlackGetFileInfoInputSchema>;
+
+const SLACK_MAX_FILES_LIST_LIMIT = 200;
+const SLACK_DEFAULT_FILES_LIST_LIMIT = 100;
+
+export const SlackListFilesInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .max(SLACK_MAX_ID_LENGTH)
+      .optional()
+      .describe('Restrict results to a single channel/DM ID.'),
+    user: z
+      .string()
+      .max(SLACK_MAX_ID_LENGTH)
+      .optional()
+      .describe('Restrict results to files uploaded by a single user ID.'),
+    tsFrom: z
+      .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .optional()
+      .describe('Only include files created after this Unix timestamp (string form, seconds).'),
+    tsTo: z
+      .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .optional()
+      .describe('Only include files created before this Unix timestamp (string form, seconds).'),
+    types: z
+      .string()
+      .max(128)
+      .optional()
+      .describe(
+        'Comma-separated Slack file type filter (e.g. "images,pdfs"). See Slack files.list for valid values.'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(SLACK_MAX_FILES_LIST_LIMIT)
+      .default(SLACK_DEFAULT_FILES_LIST_LIMIT)
+      .describe(
+        `Files per page (1-${SLACK_MAX_FILES_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_FILES_LIST_LIMIT}.`
+      ),
+    cursor: z
+      .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
+      .optional()
+      .describe(
+        'Pagination cursor from a previous listFiles response (nextCursor). Omit for the first page.'
+      ),
+    raw: z
+      .boolean()
+      .optional()
+      .describe(
+        'Return the full raw Slack API response instead of a compact result. Defaults to false.'
+      ),
+  })
+);
+export type SlackListFilesInput = z.infer<typeof SlackListFilesInputSchema>;
+
+export interface SlackFile {
+  id?: string;
+  name?: string;
+  title?: string;
+  mimetype?: string;
+  filetype?: string;
+  pretty_type?: string;
+  user?: string;
+  size?: number;
+  created?: number;
+  url_private?: string;
+  url_private_download?: string;
+  permalink?: string;
+  permalink_public?: string;
+  channels?: string[];
+  groups?: string[];
+  ims?: string[];
+}
+
+export interface SlackFilesListResponse extends SlackErrorFields {
+  ok: boolean;
+  files?: SlackFile[];
+  response_metadata?: { next_cursor?: string };
+  paging?: { count?: number; total?: number; page?: number; pages?: number };
+}
+
+export interface SlackFilesInfoResponse extends SlackErrorFields {
+  ok: boolean;
+  file?: SlackFile;
+  response_metadata?: { next_cursor?: string };
+}
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
