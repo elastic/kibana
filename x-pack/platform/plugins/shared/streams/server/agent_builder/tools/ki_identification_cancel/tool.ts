@@ -15,7 +15,7 @@ import { classifyError } from '../../utils/error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 export const STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID =
-  'platform.streams.sig_events.ki_identification_cancel';
+  'platform.streams.significant_events.ki_identification_cancel';
 
 const cancelSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),

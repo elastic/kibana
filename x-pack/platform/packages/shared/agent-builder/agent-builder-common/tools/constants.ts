@@ -43,19 +43,19 @@ export const platformCoreTools = {
 
 /**
  * Sig Events tools should try to follow this naming convention when possible:
- * {namespace}.sig_events.{feature}_{entity}_{action}
+ * {namespace}.significant_events.{feature}_{entity}_{action}
  *
  * - {feature} refers to a high-level scope within Sig Events, for example KIs.
  * - {entity} is a more granular entity withing the {feature} scope, for example Feature KI or Query KI.
  * - {action} the action to perform on the entity
  */
 export const platformStreamsSigEventsTools = {
-  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.ki_search`,
-  createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
-  createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
-  searchEvent: `${internalNamespaces.platformStreams}.sig_events.event_search`,
-  createEvent: `${internalNamespaces.platformStreams}.sig_events.event_create`,
-  updateEventStatus: `${internalNamespaces.platformStreams}.sig_events.event_status_update`,
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.significant_events.ki_search`,
+  createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.significant_events.ki_feature_create`,
+  createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.significant_events.ki_query_create`,
+  searchEvent: `${internalNamespaces.platformStreams}.significant_events.event_search`,
+  createEvent: `${internalNamespaces.platformStreams}.significant_events.event_create`,
+  updateEventStatus: `${internalNamespaces.platformStreams}.significant_events.event_status_update`,
 } as const;
 
 export const attachmentTools = {

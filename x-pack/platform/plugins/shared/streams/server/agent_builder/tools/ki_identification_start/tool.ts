@@ -17,7 +17,7 @@ import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
 export const STREAMS_KI_IDENTIFICATION_START_TOOL_ID =
-  'platform.streams.sig_events.ki_identification_start';
+  'platform.streams.significant_events.ki_identification_start';
 
 const onboardingStartSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
