@@ -37,6 +37,7 @@ import {
   createLiquidCorrectnessEvaluator,
   createLiquidPresenceEvaluator,
   createEfficiencyEvaluator,
+  createToolTrajectoryEvaluator,
   createLatencyEvaluator,
   skipCompositeMode,
   skipInfraErrors,
@@ -117,6 +118,7 @@ const evaluate = base.extend<
             liquid,
             liquidPresence,
             skip(skipCompositeMode(createEfficiencyEvaluator())),
+            skip(skipCompositeMode(createToolTrajectoryEvaluator())),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])
