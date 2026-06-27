@@ -42,6 +42,14 @@ export interface I18nServiceStart {
 }
 
 /**
+ * Core's `i18n` request handler context. Exposed as `context.core.i18n`, it
+ * translates strings into the locale resolved for the current request.
+ *
+ * @public
+ */
+export type I18nRequestHandlerContext = RequestI18nClient;
+
+/**
  * @public
  */
 export interface I18nServiceSetup {
