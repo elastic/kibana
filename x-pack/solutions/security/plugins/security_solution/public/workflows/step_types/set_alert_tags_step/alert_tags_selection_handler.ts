@@ -10,25 +10,16 @@ import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/t
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-/**
- * Maximum number of tag suggestions returned while browsing (empty query).
- */
 const MAX_BROWSE_RESULTS = 15;
 
 const toOption = (tag: string): SelectionOption<string> => ({ value: tag, label: tag });
 
-// A non-error sentinel returned by `resolve` for values that are valid but have nothing to decorate
-// (e.g. an empty tags array). The empty label suppresses the inline "✓" decoration while keeping the
-// result non-null, which is what the validation pipeline treats as "no error".
+// Non-error sentinel for valid values with nothing to decorate (e.g. an empty array): an empty
+// label suppresses the inline "✓" while staying non-null so the validator doesn't flag an error.
 const VALID_NO_DECORATION: SelectionOption<string> = { value: '', label: '' };
 
-/**
- * The selection framework passes the raw property value to `search`/`resolve`/`getDetails`. For the
- * `tags_to_add` / `tags_to_remove` array fields this can be the whole array (during validation) or a
- * stringified value (during autocomplete), so every entry point coerces defensively to a string and
- * never assumes a scalar. See https://github.com/elastic/security-team/issues/17985 for the
- * follow-up that makes array-element selection a first-class concern.
- */
+// The framework passes either a scalar (autocomplete) or the whole array (validation), so coerce
+// defensively. Follow-up: elastic/security-team#17985.
 const toQueryString = (value: unknown): string => {
   if (typeof value === 'string') {
     return value;
@@ -39,24 +30,13 @@ const toQueryString = (value: unknown): string => {
   return value == null ? '' : String(value);
 };
 
-/**
- * Reads the configured default alert tags from the `securitySolution:alertTags` UI Setting.
- *
- * There is currently no endpoint that lists all alert tags in use, so this mirrors the first of
- * the two sources the alert bulk-tagging UI unions client-side (see `alert_bulk_tags.tsx`). A
- * follow-up will optionally union tags present on the alerts referenced by `input.alert_ids`.
- * See https://github.com/elastic/security-team/issues/17985
- */
+// Mirrors the first source the alert bulk-tagging UI unions client-side; there's no list-tags
+// endpoint yet (elastic/security-team#17985 will add per-alert tags + a real endpoint).
 const getDefaultAlertTags = (): string[] => {
   const tags = KibanaServices.get().uiSettings.get<string[]>(DEFAULT_ALERT_TAGS_KEY);
   return Array.isArray(tags) ? tags : [];
 };
 
-/**
- * Selection handler shared by the `tags_to_add` and `tags_to_remove` fields of the Set Alert Tags
- * step. It suggests the tags configured in the Security alert-tags UI Setting so workflow authors
- * get the same vocabulary as the in-app bulk-tagging control.
- */
 export const alertTagsSelection: PropertySelectionHandler<string> = {
   search: async (input) => {
     const query = toQueryString(input).trim().toLowerCase();
@@ -67,10 +47,8 @@ export const alertTagsSelection: PropertySelectionHandler<string> = {
   },
   resolve: async (value) => {
     const tag = toQueryString(value).trim();
-    // Both tag fields are optional and free-form: an empty list and an unknown tag are both valid.
-    // Returning a non-null option here keeps the step-property validator from flagging a false error
-    // (a `null` result for a non-null value is treated as an error). The "at least one of
-    // tags_to_add / tags_to_remove" constraint is enforced separately via the schema `anyOf` marker.
+    // Both fields are free-form: empty arrays and unknown tags are valid. The validator treats a
+    // null result as an error, so return a non-null sentinel for empties.
     if (tag.length === 0) {
       return VALID_NO_DECORATION;
     }
@@ -104,13 +82,10 @@ export const alertTagsSelection: PropertySelectionHandler<string> = {
   },
 };
 
-// The Set Alert Tags input schema is a `z.union` (so the "at least one tags array" constraint
-// lowers to JSON Schema `anyOf` and surfaces in the editor). `EditorHandlers` only derives
-// per-field input keys when the input schema is a `z.object`, so its `input` type collapses to
-// `{}` for a union. The editor resolves handlers purely by property key at runtime
-// (`scopeHandlers?.[key]` in `use_get_property_handler.ts`), so attaching handlers by key is safe.
-// We type this object explicitly and pass it as a named variable to `createPublicStepDefinition`
-// (a named variable is assignable to the `{}` input slot without excess-property errors).
+// The input schema is a `z.union`, so `EditorHandlers` can't derive per-field input keys and the
+// `input` slot collapses to `{}`. The editor resolves handlers by key at runtime, so attaching
+// them by key (via this explicitly-typed object, assigned through a named variable to bypass
+// excess-property checks) is safe.
 export const alertTagsInputEditorHandlers: {
   input: Record<'tags_to_add' | 'tags_to_remove', { selection: PropertySelectionHandler<string> }>;
 } = {

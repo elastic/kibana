@@ -72,10 +72,6 @@ export async function getStepPropertySuggestions(
   const scope = isInConfig ? 'config' : 'input';
   const { stepType } = focusedStepInfo;
 
-  // When the cursor is on an array element, the YAML path ends with the element index (e.g.
-  // `tags_to_add.0`). Selection handlers are registered against the array property key
-  // (`tags_to_add`), so fall back to that key for indexed positions. Non-array properties never end
-  // in a numeric segment, so their lookup is unchanged.
   const handlerKey = stripTrailingArrayIndex(composedKey);
   const propertyHandler = getPropertyHandler(stepType, scope, handlerKey);
   if (!propertyHandler || !propertyHandler.selection?.search) {
