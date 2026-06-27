@@ -328,21 +328,29 @@ export function createRejectionEvaluator() {
     kind: 'CODE' as const,
     evaluate: async ({
       output,
+      expected,
       metadata,
     }: {
       output: WorkflowTaskOutput;
+      expected: WorkflowExample['output'];
       metadata: WorkflowExample['metadata'];
     }) => {
       if (metadata?.category !== 'negative') {
         return { score: null, label: 'N/A' as const, explanation: 'Not a negative case' };
       }
+      const expectedRefusalReason =
+        (expected as NegativeWorkflowExample['output']).expectedRefusalReason ?? null;
       const refused = !output.resultYaml;
+      const reasonSuffix = expectedRefusalReason
+        ? ` (expected reason: ${expectedRefusalReason})`
+        : '';
       return {
         score: refused ? 1 : 0,
         label: refused ? ('PASS' as const) : ('FAIL' as const),
         explanation: refused
-          ? 'Model correctly refused to generate a workflow'
-          : 'Model incorrectly generated a workflow for a request it should have rejected',
+          ? `Model correctly refused to generate a workflow${reasonSuffix}`
+          : `Model incorrectly generated a workflow for a request it should have rejected${reasonSuffix}`,
+        metadata: { expectedRefusalReason },
       };
     },
   };
@@ -771,6 +779,62 @@ export function createLiquidCorrectnessEvaluator() {
   };
 }
 
+/**
+ * Asserts that each `expectedLiquidChains[].ref` declared in the example
+ * appears verbatim somewhere in the produced YAML. Complements
+ * {@link createLiquidCorrectnessEvaluator} (which scores whatever refs the
+ * agent did produce) by catching the failure mode where the agent skips a
+ * required reference entirely.
+ *
+ * Returns N/A when the example does not declare expected chains or when no
+ * YAML was produced.
+ */
+export function createLiquidPresenceEvaluator() {
+  return {
+    name: 'LiquidPresence',
+    kind: 'CODE' as const,
+    evaluate: async ({
+      output,
+      expected,
+    }: {
+      output: WorkflowTaskOutput;
+      expected: WorkflowExample['output'];
+    }) => {
+      const expectedChains = (expected as Partial<StructuralExpectations>).expectedLiquidChains;
+      if (!expectedChains || expectedChains.length === 0) {
+        return {
+          score: null,
+          label: 'N/A' as const,
+          explanation: 'No expected Liquid chains declared',
+        };
+      }
+      if (!output.resultYaml) {
+        return {
+          score: null,
+          label: 'N/A' as const,
+          explanation: 'No result YAML to check Liquid presence on',
+        };
+      }
+      const missing: string[] = [];
+      for (const chain of expectedChains) {
+        if (!output.resultYaml.includes(chain.ref)) missing.push(chain.ref);
+      }
+      const total = expectedChains.length;
+      const present = total - missing.length;
+      const score = present / total;
+      return {
+        score,
+        label: score === 1 ? ('PASS' as const) : ('FAIL' as const),
+        explanation:
+          missing.length === 0
+            ? `All ${total} expected Liquid references appear in the produced YAML.`
+            : `${present}/${total} expected references present. Missing: ${missing.join(', ')}`,
+        metadata: { total, present, missing },
+      };
+    },
+  };
+}
+
 const LOOKUP_TOOL_PATTERNS = [
   'get_step_definitions',
   'get_connectors',
@@ -1049,21 +1113,24 @@ export function createSelfCorrectionEvaluator() {
     name: 'SelfCorrection',
     kind: 'CODE' as const,
     evaluate: async ({
+      input,
       output,
       expected,
     }: {
+      input?: SelfCorrectionExample['input'];
       output: WorkflowTaskOutput;
       expected: SelfCorrectionExample['output'];
     }) => {
       const { turnsToRecovery } = output;
       const maxTurns = Math.max(1, expected.maxTurns);
+      const brokenKind = input?.brokenKind ?? null;
 
       if (turnsToRecovery == null) {
         return {
           score: 0,
           label: 'FAIL' as const,
           explanation: `Agent did not produce valid YAML within ${maxTurns} turns`,
-          metadata: { turnsToRecovery: null, maxTurns },
+          metadata: { turnsToRecovery: null, maxTurns, brokenKind },
         };
       }
 
@@ -1076,7 +1143,7 @@ export function createSelfCorrectionEvaluator() {
         score: rounded,
         label: rounded >= 0.75 ? ('PASS' as const) : ('FAIL' as const),
         explanation: `Recovered on turn ${clamped} of ${maxTurns}`,
-        metadata: { turnsToRecovery: clamped, maxTurns },
+        metadata: { turnsToRecovery: clamped, maxTurns, brokenKind },
       };
     },
   };

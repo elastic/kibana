@@ -38,6 +38,7 @@ import {
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
   createLiquidCorrectnessEvaluator,
+  createLiquidPresenceEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
@@ -52,6 +53,7 @@ const skip = <E extends WorkflowCreateExample>(e: Parameters<typeof skipInfraErr
   skipInfraErrors(skipNegativeCases(e));
 
 const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
+const liquidPresence = skipInfraErrors(skipNegativeCases(createLiquidPresenceEvaluator()));
 
 const evaluate = base.extend<
   {
@@ -101,6 +103,7 @@ const evaluate = base.extend<
             skip(createValidationPassEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
             liquid,
+            liquidPresence,
             skip(skipCompositeMode(createEfficiencyEvaluator())),
             skip(skipCompositeMode(createToolTrajectoryEvaluator())),
             skip(createLatencyEvaluator()),

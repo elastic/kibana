@@ -35,6 +35,7 @@ import {
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
   createLiquidCorrectnessEvaluator,
+  createLiquidPresenceEvaluator,
   createEfficiencyEvaluator,
   createLatencyEvaluator,
   skipCompositeMode,
@@ -56,6 +57,7 @@ const skip = <E extends WorkflowEditExample>(e: Parameters<typeof skipInfraError
   skipInfraErrors(skipNegativeCases(e));
 
 const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
+const liquidPresence = skipInfraErrors(skipNegativeCases(createLiquidPresenceEvaluator()));
 
 const evaluate = base.extend<
   {
@@ -113,6 +115,7 @@ const evaluate = base.extend<
             skip(createStructuralCorrectnessEvaluator()),
             skip(createEditPreservationEvaluator()),
             liquid,
+            liquidPresence,
             skip(skipCompositeMode(createEfficiencyEvaluator())),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),

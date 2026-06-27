@@ -17,6 +17,8 @@ import {
   createEditPreservationEvaluator,
   createStructuralCorrectnessEvaluator,
   createLiquidCorrectnessEvaluator,
+  createLiquidPresenceEvaluator,
+  createRejectionEvaluator,
   createSelfCorrectionEvaluator,
   skipCompositeMode,
   skipInfraErrors,
@@ -736,5 +738,117 @@ describe('SelfCorrection evaluator', () => {
     const result = await run(1, 1);
     expect(result.score).toBe(1);
     expect(result.label).toBe('PASS');
+  });
+
+  it('surfaces brokenKind from input in metadata', async () => {
+    const result = await evaluator.evaluate({
+      input: { brokenYaml: 'name:', brokenKind: 'syntax', instruction: 'fix it' },
+      output: { messages: [], errors: [], turnsToRecovery: 2 },
+      expected: { maxTurns: 3, criteria: [] },
+    });
+    expect(result.metadata?.brokenKind).toBe('syntax');
+  });
+
+  it('surfaces brokenKind even when the agent never recovers', async () => {
+    const result = await evaluator.evaluate({
+      input: { brokenYaml: 'name:', brokenKind: 'semantic', instruction: 'fix it' },
+      output: { messages: [], errors: [], turnsToRecovery: null },
+      expected: { maxTurns: 3, criteria: [] },
+    });
+    expect(result.metadata?.brokenKind).toBe('semantic');
+    expect(result.score).toBe(0);
+  });
+});
+
+describe('Rejection evaluator', () => {
+  const evaluator = createRejectionEvaluator();
+  const negativeExpected = {
+    criteria: [],
+    expectedRefusalReason: 'out-of-scope' as const,
+  };
+
+  it('returns N/A when the example is not a negative case', async () => {
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [] },
+      expected: negativeExpected,
+      metadata: undefined,
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.score).toBeNull();
+  });
+
+  it('passes when the agent refuses and surfaces the expected reason', async () => {
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [] },
+      expected: negativeExpected,
+      metadata: { category: 'negative' },
+    });
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('PASS');
+    expect(result.metadata?.expectedRefusalReason).toBe('out-of-scope');
+    expect(result.explanation).toContain('out-of-scope');
+  });
+
+  it('fails when the agent produced YAML despite the negative case', async () => {
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [], resultYaml: 'name: nope' },
+      expected: negativeExpected,
+      metadata: { category: 'negative' },
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('FAIL');
+    expect(result.metadata?.expectedRefusalReason).toBe('out-of-scope');
+  });
+});
+
+describe('LiquidPresence evaluator', () => {
+  const evaluator = createLiquidPresenceEvaluator();
+
+  it('returns N/A when no expected chains are declared', async () => {
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [], resultYaml: 'name: x' },
+      expected: { criteria: [] },
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.score).toBeNull();
+  });
+
+  it('returns N/A when no result YAML is produced', async () => {
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [] },
+      expected: {
+        criteria: [],
+        expectedLiquidChains: [{ ref: 'event.alerts' }],
+      },
+    });
+    expect(result.label).toBe('N/A');
+  });
+
+  it('passes when every expected reference appears in the YAML', async () => {
+    const yaml = 'name: x\nsteps:\n  - with: "{{ event.alerts }} {{ steps.a.output.id }}"';
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [], resultYaml: yaml },
+      expected: {
+        criteria: [],
+        expectedLiquidChains: [{ ref: 'event.alerts' }, { ref: 'steps.a.output.id' }],
+      },
+    });
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('PASS');
+    expect(result.metadata?.missing).toEqual([]);
+  });
+
+  it('reports missing references and scores partially', async () => {
+    const yaml = 'name: x\nsteps:\n  - with: "{{ event.alerts }}"';
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [], resultYaml: yaml },
+      expected: {
+        criteria: [],
+        expectedLiquidChains: [{ ref: 'event.alerts' }, { ref: 'steps.a.output.id' }],
+      },
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.label).toBe('FAIL');
+    expect(result.metadata?.missing).toEqual(['steps.a.output.id']);
   });
 });
