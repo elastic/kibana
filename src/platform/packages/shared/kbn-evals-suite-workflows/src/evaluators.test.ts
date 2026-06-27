@@ -693,6 +693,12 @@ steps:
     expect(result.score).toBe(0.5);
     expect(result.metadata?.total).toBe(2);
     expect(result.metadata?.correct).toBe(1);
+    const failures = result.metadata?.failures as Array<{ ref: string; reason: string }>;
+    expect(failures).toHaveLength(1);
+    expect(failures[0].ref).toBe('steps.missing.output.y');
+    expect(failures[0].reason).toContain('unknown step');
+    expect(failures[0].reason).toContain('missing');
+    expect(result.explanation).toContain('steps.missing.output.y');
   });
 });
 
