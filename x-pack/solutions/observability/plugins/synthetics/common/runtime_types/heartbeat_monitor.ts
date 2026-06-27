@@ -9,7 +9,8 @@ import * as t from 'io-ts';
 import { ConfigKey } from './monitor_management/config_key';
 import { MonitorTypeCodec } from './monitor_management/monitor_configs';
 import { MonitorServiceLocationCodec } from './monitor_management/locations';
-import type { EncryptedSyntheticsSavedMonitor } from './monitor_management/monitor_types';
+// Type-only import; the runtime value edge is external_monitor -> heartbeat_monitor.
+import type { SelectedSyntheticsMonitor } from './external_monitor';
 
 /**
  * Discriminates monitors that have no Synthetics saved object and are surfaced
@@ -59,7 +60,7 @@ export type HeartbeatSyntheticsMonitor = t.TypeOf<typeof HeartbeatSyntheticsMoni
  * guard.
  */
 export const isHeartbeatSyntheticsMonitor = (
-  monitor: (EncryptedSyntheticsSavedMonitor | HeartbeatSyntheticsMonitor) | null | undefined
+  monitor: SelectedSyntheticsMonitor | null | undefined
 ): monitor is HeartbeatSyntheticsMonitor => {
   return !!monitor && 'origin' in monitor && monitor.origin === 'heartbeat';
 };
