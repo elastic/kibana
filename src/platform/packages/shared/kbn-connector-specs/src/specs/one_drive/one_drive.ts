@@ -65,7 +65,7 @@ export const OneDrive: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.oneDrive.auth.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    'Replace {{tenant-id}} with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/{{tenant-id}}/oauth2/v2.0/authorize',
+                    "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize",
                 }
               ),
             },
@@ -75,7 +75,7 @@ export const OneDrive: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.oneDrive.auth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    'Replace {{tenant-id}} with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/{{tenant-id}}/oauth2/v2.0/token',
+                    "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token",
                 }
               ),
             },
@@ -157,7 +157,7 @@ export const OneDrive: ConnectorSpec = {
       handler: async (ctx, input: SearchInput) => {
         const url = input.query
           ? `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encodeURIComponent(
-              input.query
+              input.query.replace(/'/g, "''")
             )}')`
           : 'https://graph.microsoft.com/v1.0/me/drive/root/search';
         const response = await ctx.client.get(url, {

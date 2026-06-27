@@ -221,6 +221,18 @@ describe('OneDrive', () => {
       );
     });
 
+    it('escapes single quotes in query using OData doubling before encoding', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      const input = parse('search', { query: "Q3's report" });
+      await OneDrive.actions.search.handler(mockContext, input);
+
+      // OData literal: search(q='Q3''s%20report') — apostrophe doubled, then URL-encoded
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining("search(q='Q3''s%20report')"),
+        expect.any(Object)
+      );
+    });
+
     it('passes $skiptoken when pageToken is provided alongside query', async () => {
       mockGet.mockResolvedValue({ data: { value: [] } });
       const input = parse('search', { query: 'budget', pageToken: 'TOKEN456' });
