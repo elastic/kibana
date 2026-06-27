@@ -72,10 +72,10 @@ function getErrorMessage(error: unknown): string {
 }
 
 /**
- * Generate significant event definitions using a reasoning agent that fetches
+ * Generate KI queries using a reasoning agent that fetches
  * stream features (including computed dataset analysis) via tool calls.
  */
-export async function generateSignificantEvents({
+export async function identifyKIQueries({
   stream,
   esClient,
   getFeatures,
@@ -115,7 +115,7 @@ export async function generateSignificantEvents({
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  logger.debug('Starting significant event generation');
+  logger.debug('Starting Significant Events KI query generation');
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
 
@@ -139,7 +139,7 @@ export async function generateSignificantEvents({
   const returnedFeatureMap = new Map<string, string | undefined>();
   const validatedQueries: ParsedToolQuery[] = [];
 
-  logger.trace('Generating significant events via reasoning agent');
+  logger.trace('Generating Significant Events KI queries via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
@@ -334,7 +334,7 @@ export async function generateSignificantEvents({
     })
   );
 
-  logger.debug(`Generated ${validatedQueries.length} significant event queries`);
+  logger.debug(`Generated ${validatedQueries.length} Significant Event KI queries`);
 
   return {
     queries: validatedQueries,
