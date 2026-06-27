@@ -109,7 +109,12 @@ steps:
                             metricValue = 1;
                         - metric: 'stepExecution.createdAt'
                           unit: 'int'
-                          expression: metricValue = Instant.parse(startedAt).toEpochMilli();
+                          expression: |
+                            if (startedAt == null) {
+                              metricValue = null;
+                            } else {
+                              metricValue = Instant.parse(startedAt).toEpochMilli();
+                            }
                         - metric: 'stepExecution.duration'
                           unit: 'int'
                           expression: |
@@ -120,7 +125,7 @@ steps:
                         - metric: 'stepExecution.queueTime'
                           unit: int
                           expression: |
-                            if (createdAt == null) {
+                            if (createdAt == null || startedAt == null) {
                               metricValue = null;
                             } else {
                               metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
@@ -135,7 +140,12 @@ steps:
                             metricValue = 1;
                         - metric: 'workflowExecution.createdAt'
                           unit: 'int'
-                          expression: metricValue = Instant.parse(createdAt).toEpochMilli();
+                          expression: |
+                            if (createdAt == null) {
+                              metricValue = null;
+                            } else {
+                              metricValue = Instant.parse(createdAt).toEpochMilli();
+                            }
 
                         - metric: 'workflowExecution.duration'
                           unit: 'int'
@@ -144,7 +154,11 @@ steps:
                         - metric: 'workflowExecution.queueTime'
                           unit: int
                           expression: |
-                            metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
+                            if (createdAt == null || startedAt == null) {
+                              metricValue = null;
+                            } else {
+                              metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
+                            }
                   steps:
                     - name: get_backing_indexes_count
                       type: elasticsearch.request

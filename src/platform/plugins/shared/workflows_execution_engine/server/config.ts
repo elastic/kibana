@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
-export const DEFAULT_EXECUTION_DATA_STREAM_RETENTION = '20d';
+export const DEFAULT_EXECUTION_DATA_STREAM_RETENTION = '30d';
 
 const EventTriggersConfigSchema = schema.object({
   /**
@@ -73,7 +73,7 @@ const configSchema = schema.object({
       description:
         'Data lifecycle retention for workflow and step execution data streams. ' +
         'Written into the composable index template as data_stream.lifecycle.data_retention when streams are registered. ' +
-        'Uses Elasticsearch duration format (e.g. "30d", "1d"). Should be much greater than the maximum workflow timeout.',
+        'Uses Elasticsearch duration format (e.g. "7d", "1d"). Should be much greater than the maximum workflow timeout.',
     },
   }),
 });

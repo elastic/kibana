@@ -711,9 +711,9 @@ workflowsExecutionEngine:
   http:
     allowedHosts: ['*']  # Use specific hosts in production
 
-  # Data lifecycle retention for workflow and step execution data streams (e.g. "30d", "1d")
+  # Data lifecycle retention for workflow and step execution data streams (e.g. "7d", "1d")
   # Should exceed the maximum workflow timeout
-  executionDataStreamRetention: "30d"
+  executionDataStreamRetention: "7d"
 ```
 
 ### Event-driven and depth settings
