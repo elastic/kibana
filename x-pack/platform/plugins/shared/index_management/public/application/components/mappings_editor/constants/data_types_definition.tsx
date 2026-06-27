@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiCode } from '@elastic/eui';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 import { documentationService } from '../../../services/documentation';
 import type { MainType, SubType, DataType, DataTypeDefinition } from '../types';
@@ -926,6 +927,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  semantic: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.semanticDescription', {
+      defaultMessage: 'Semantic',
+    }),
+    value: 'semantic',
+    documentation: {
+      main: 'semantic',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.semanticLongDescription"
+          defaultMessage="Semantic fields enable semantic search using an embedding inference endpoint."
+        />
+      </p>
+    ),
+  },
   point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
       defaultMessage: 'Point',
@@ -1035,6 +1053,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'semantic_text',
+  'semantic',
   'shape',
   'sparse_vector',
   'text',
@@ -1081,3 +1100,45 @@ export const ALL_DATA_TYPES = [
   ...Object.keys(MAIN_DATA_TYPE_DEFINITION),
   ...Object.keys(SUB_TYPE_MAP_TO_MAIN),
 ];
+
+/**
+ * Field types that select an inference endpoint, mapped to the inference task
+ * types they are compatible with and the strategy used to pick a default endpoint.
+ */
+export type SemanticInferenceFieldType = Extract<MainType, 'semantic_text' | 'semantic'>;
+
+/**
+ * Strategy used to choose a default inference endpoint for a semantic field type.
+ * - `priority_with_elser_fallback`: pick the first endpoint from the priority list
+ *   present in the raw endpoints, otherwise fall back to ELSER.
+ * - `first_compatible`: pick the first priority endpoint among compatible ones,
+ *   otherwise the first compatible endpoint, otherwise none.
+ */
+export type DefaultEndpointStrategy = 'priority_with_elser_fallback' | 'first_compatible';
+
+interface SemanticFieldInferenceConfigEntry {
+  taskTypes: readonly InferenceTaskType[];
+  defaultStrategy: DefaultEndpointStrategy;
+}
+
+export const SEMANTIC_FIELD_INFERENCE_CONFIG: Record<
+  SemanticInferenceFieldType,
+  SemanticFieldInferenceConfigEntry
+> = {
+  semantic_text: {
+    taskTypes: ['text_embedding', 'sparse_embedding'],
+    defaultStrategy: 'priority_with_elser_fallback',
+  },
+  semantic: {
+    taskTypes: ['embedding'],
+    defaultStrategy: 'first_compatible',
+  },
+};
+
+export const getTaskTypesForFieldType = (
+  fieldType: SemanticInferenceFieldType
+): readonly InferenceTaskType[] => SEMANTIC_FIELD_INFERENCE_CONFIG[fieldType].taskTypes;
+
+export const getDefaultStrategyForFieldType = (
+  fieldType: SemanticInferenceFieldType
+): DefaultEndpointStrategy => SEMANTIC_FIELD_INFERENCE_CONFIG[fieldType].defaultStrategy;

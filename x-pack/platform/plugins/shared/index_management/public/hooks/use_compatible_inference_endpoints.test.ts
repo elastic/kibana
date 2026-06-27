@@ -113,6 +113,128 @@ describe('useCompatibleInferenceEndpoints', () => {
     });
   });
 
+  describe('semantic field type', () => {
+    it('should return undefined defaultInferenceId when only sparse/text endpoints are present', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+        {
+          inference_id: 'custom-text',
+          task_type: 'text_embedding',
+          service: 'openai',
+          service_settings: { model_id: 'text-embedding-3-large' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, 'semantic')
+      );
+      expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBeUndefined();
+    });
+
+    it('should return empty endpointDefinitions when only sparse/text endpoints are present', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, 'semantic')
+      );
+      expect(result.current?.compatibleEndpoints?.endpointDefinitions).toEqual([]);
+    });
+
+    it('should set defaultInferenceId to the compatible embedding endpoint when one exists', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+        {
+          inference_id: 'my-embedding-endpoint',
+          task_type: 'embedding',
+          service: 'elasticsearch',
+          service_settings: { model_id: 'my-model' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, 'semantic')
+      );
+      expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe('my-embedding-endpoint');
+      expect(result.current?.compatibleEndpoints?.endpointDefinitions).toHaveLength(1);
+      expect(result.current?.compatibleEndpoints?.endpointDefinitions?.[0].inference_id).toBe(
+        'my-embedding-endpoint'
+      );
+    });
+
+    it('should not include ELSER in endpointDefinitions for semantic field type', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+        {
+          inference_id: 'my-embedding-endpoint',
+          task_type: 'embedding',
+          service: 'elasticsearch',
+          service_settings: { model_id: 'my-model' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, 'semantic')
+      );
+      const ids = result.current?.compatibleEndpoints?.endpointDefinitions?.map(
+        (e) => e.inference_id
+      );
+      expect(ids).not.toContain(defaultInferenceEndpoints.ELSER);
+    });
+  });
+
+  describe('semantic_text regression: priority endpoint present but incompatible task type', () => {
+    it('should still pick ELSER fallback when priority endpoint has wrong task type', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.JINAv5,
+          task_type: 'embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'jina-embeddings-v5-text-small' },
+        },
+      ];
+      // JINAv5 is in the raw endpoints, but task_type is 'embedding' (not text_embedding/sparse_embedding)
+      // Pre-commit logic: priority check is against ALL endpoints (unfiltered), so JINAv5 IS found
+      // and picked as default even if not compatible with semantic_text task types.
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
+      expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
+        defaultInferenceEndpoints.JINAv5
+      );
+    });
+
+    it('should fall back to ELSER when no priority endpoint is in the raw endpoints list', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: 'custom-endpoint',
+          task_type: 'text_embedding',
+          service: 'openai',
+          service_settings: { model_id: 'text-embedding-3-large' },
+        },
+      ];
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
+      expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
+        defaultInferenceEndpoints.ELSER
+      );
+    });
+  });
+
   describe('endpoint definitions', () => {
     it('should filter out incompatible endpoints and only include compatible ones', () => {
       const endpoints: InferenceAPIConfigResponse[] = [

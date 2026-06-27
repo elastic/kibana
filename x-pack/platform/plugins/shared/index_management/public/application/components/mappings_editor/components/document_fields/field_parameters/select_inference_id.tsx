@@ -29,20 +29,26 @@ import { i18n } from '@kbn/i18n';
 import { InferenceCostsTransparencyTour } from '@kbn/search-api-panels';
 
 import { useCompatibleInferenceEndpoints } from '../../../../../../hooks/use_compatible_inference_endpoints';
+import { type SemanticInferenceFieldType, getTaskTypesForFieldType } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { documentationService, UseField } from '../../../shared_imports';
 
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
+
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
+  fieldType?: SemanticInferenceFieldType;
 }
 
-type SelectInferenceIdContentProps = SelectInferenceIdProps & {
-  setValue: (value: string) => void;
-  value: string;
-};
+type SelectInferenceIdContentProps = Required<Pick<SelectInferenceIdProps, 'fieldType'>> &
+  Omit<SelectInferenceIdProps, 'fieldType'> & {
+    setValue: (value: string) => void;
+    value: string;
+    isInvalid: boolean;
+    error: string | null;
+  };
 
 interface EndpointOptionData {
   description: string;
@@ -50,16 +56,23 @@ interface EndpointOptionData {
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
+  fieldType = 'semantic_text',
 }: SelectInferenceIdProps) => {
-  const config = getFieldConfig('inference_id');
+  const fieldConfig = getFieldConfig(
+    fieldType === 'semantic' ? 'inference_id_required' : 'inference_id'
+  );
+
   return (
-    <UseField path="inference_id" fieldConfig={config}>
+    <UseField path="inference_id" config={fieldConfig}>
       {(field) => {
         return (
           <SelectInferenceIdContent
             data-test-subj={dataTestSubj}
             value={field.value as string}
             setValue={field.setValue}
+            fieldType={fieldType}
+            isInvalid={field.errors.length > 0}
+            error={field.getErrorsMessages()}
           />
         );
       }}
@@ -71,6 +84,9 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   'data-test-subj': dataTestSubj,
   setValue,
   value,
+  fieldType = 'semantic_text',
+  isInvalid,
+  error,
 }) => {
   const {
     core: { application, http },
@@ -88,12 +104,13 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   } = useLoadInferenceEndpoints();
   const { euiTheme } = useEuiTheme();
   const { compatibleEndpoints, isLoading: isCompatibleEndpointsLoading } =
-    useCompatibleInferenceEndpoints(endpoints, endpointsLoading);
+    useCompatibleInferenceEndpoints(endpoints, endpointsLoading, fieldType);
   const [isSelectInferenceIdOpen, setIsSelectInferenceIdOpen] = useState(false);
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
 
   const config = getFieldConfig('inference_id');
+  const allowedTaskTypes = getTaskTypesForFieldType(fieldType);
   const inferenceEndpointsPageLink = share?.url.locators
     .get('SEARCH_INFERENCE_ENDPOINTS')
     ?.useUrl({});
@@ -116,7 +133,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 
   /**
    * Computes the selectable options for the inference endpoint dropdown.
-   * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
    * Includes optimistic updates for newly created endpoints that may not be in the list yet.
    */
   const options: EuiSelectableOption<EndpointOptionData>[] = useMemo(() => {
@@ -191,159 +207,167 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false} css={{ minWidth: euiTheme.base * 19 }}>
-          <EuiPopover
-            aria-label={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.ariaLabel',
-              { defaultMessage: 'Select inference endpoint' }
-            )}
-            button={
-              <>
-                <EuiText size="xs">
-                  <p>
-                    <strong>{config.label}</strong>
-                  </p>
-                </EuiText>
-                <EuiSpacer size="xs" />
-                <InferenceCostsTransparencyTour
-                  promoId="selectInferenceId"
-                  ctaLink={documentationService.getCloudPricing()}
-                  isCloudEnabled={cloud?.isCloudEnabled ?? false}
-                  isReady={isSelectInferenceIdOpen}
-                >
-                  <EuiButton
-                    iconType="chevronSingleDown"
-                    iconSide="right"
-                    color="text"
-                    fullWidth
-                    contentProps={{ style: { justifyContent: 'space-between' } }}
-                    data-test-subj="inferenceIdButton"
-                    onClick={() => {
-                      setIsInferencePopoverVisible((prev) => !prev);
-                    }}
-                  >
-                    {selectedOptionLabel ||
-                      i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.alreadyExistsLabel',
-                        { defaultMessage: 'No inference endpoint selected' }
-                      )}
-                  </EuiButton>
-                </InferenceCostsTransparencyTour>
-              </>
-            }
-            isOpen={isInferencePopoverVisible}
-            panelPaddingSize="none"
-            closePopover={closePopover}
+          <EuiFormRow
+            isInvalid={isInvalid}
+            error={error}
+            fullWidth
+            data-test-subj="inferenceIdFormRow"
           >
-            <EuiContextMenuPanel>
-              <EuiContextMenuItem
-                key="createInferenceEndpointButton"
-                icon="plusCircle"
-                data-test-subj="createInferenceEndpointButton"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsInferenceFlyoutVisible(true);
-                  setIsInferencePopoverVisible(false);
-                }}
-              >
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.createInferenceEndpointButton',
-                  {
-                    defaultMessage: 'Add inference endpoint',
-                  }
-                )}
-              </EuiContextMenuItem>
-              {inferenceEndpointsPageLink && (
+            <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.ariaLabel',
+                { defaultMessage: 'Select inference endpoint' }
+              )}
+              button={
+                <>
+                  <EuiText size="xs">
+                    <p>
+                      <strong>{config.label}</strong>
+                    </p>
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <InferenceCostsTransparencyTour
+                    promoId="selectInferenceId"
+                    ctaLink={documentationService.getCloudPricing()}
+                    isCloudEnabled={cloud?.isCloudEnabled ?? false}
+                    isReady={isSelectInferenceIdOpen}
+                    fieldName={fieldType}
+                  >
+                    <EuiButton
+                      iconType="chevronSingleDown"
+                      iconSide="right"
+                      color="text"
+                      fullWidth
+                      contentProps={{ style: { justifyContent: 'space-between' } }}
+                      data-test-subj="inferenceIdButton"
+                      onClick={() => {
+                        setIsInferencePopoverVisible((prev) => !prev);
+                      }}
+                    >
+                      {selectedOptionLabel ||
+                        i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.alreadyExistsLabel',
+                          { defaultMessage: 'No inference endpoint selected' }
+                        )}
+                    </EuiButton>
+                  </InferenceCostsTransparencyTour>
+                </>
+              }
+              isOpen={isInferencePopoverVisible}
+              panelPaddingSize="none"
+              closePopover={closePopover}
+            >
+              <EuiContextMenuPanel>
                 <EuiContextMenuItem
-                  key="manageInferenceEndpointButton"
-                  icon="gear"
-                  data-test-subj="manageInferenceEndpointButton"
-                  href={inferenceEndpointsPageLink}
+                  key="createInferenceEndpointButton"
+                  icon="plusCircle"
+                  data-test-subj="createInferenceEndpointButton"
                   onClick={(e) => {
                     e.preventDefault();
-                    application.navigateToUrl(inferenceEndpointsPageLink);
+                    setIsInferenceFlyoutVisible(true);
+                    setIsInferencePopoverVisible(false);
                   }}
                 >
                   {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
+                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.createInferenceEndpointButton',
                     {
-                      defaultMessage: 'Manage Inference Endpoints',
+                      defaultMessage: 'Add inference endpoint',
                     }
                   )}
                 </EuiContextMenuItem>
-              )}
-            </EuiContextMenuPanel>
-            <EuiHorizontalRule margin="none" />
-            <EuiContextMenuPanel>
-              <EuiPanel color="transparent" paddingSize="s">
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
-                    {
-                      defaultMessage: 'Existing endpoints',
-                    }
-                  )}
-                >
-                  <EuiSelectable<EndpointOptionData>
-                    id="inferenceEndpointsSelectable"
-                    aria-label={i18n.translate(
-                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+                {inferenceEndpointsPageLink && (
+                  <EuiContextMenuItem
+                    key="manageInferenceEndpointButton"
+                    icon="gear"
+                    data-test-subj="manageInferenceEndpointButton"
+                    href={inferenceEndpointsPageLink}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      application.navigateToUrl(inferenceEndpointsPageLink);
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
+                      {
+                        defaultMessage: 'Manage Inference Endpoints',
+                      }
+                    )}
+                  </EuiContextMenuItem>
+                )}
+              </EuiContextMenuPanel>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuPanel>
+                <EuiPanel color="transparent" paddingSize="s">
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
                       {
                         defaultMessage: 'Existing endpoints',
                       }
                     )}
-                    data-test-subj={dataTestSubj}
-                    searchable
-                    isLoading={isCompatibleEndpointsLoading}
-                    singleSelection="always"
-                    defaultChecked
-                    searchProps={{
-                      compressed: true,
-                      placeholder: i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
-                        {
-                          defaultMessage: 'Search',
-                        }
-                      ),
-                    }}
-                    options={options}
-                    onChange={(newOptions) => {
-                      setValue(newOptions.find((option) => option.checked)?.label || '');
-                    }}
-                    renderOption={renderEndpointOption}
-                    listProps={{
-                      isVirtualized: false,
-                    }}
-                    height={euiTheme.base * 15}
                   >
-                    {(list, search) => (
-                      <>
-                        {search}
-                        <EuiHorizontalRule margin="xs" />
-                        {list}
-                      </>
-                    )}
-                  </EuiSelectable>
-                </EuiFormRow>
-              </EuiPanel>
-            </EuiContextMenuPanel>
-            <EuiHorizontalRule margin="none" />
-            <EuiContextMenuItem
-              icon={<EuiIcon type="question" color="primary" aria-hidden={true} />}
-            >
-              <EuiLink
-                href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
-                target="_blank"
-                data-test-subj="learn-how-to-create-inference-endpoints"
+                    <EuiSelectable<EndpointOptionData>
+                      id="inferenceEndpointsSelectable"
+                      aria-label={i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+                        {
+                          defaultMessage: 'Existing endpoints',
+                        }
+                      )}
+                      data-test-subj={dataTestSubj}
+                      searchable
+                      isLoading={isCompatibleEndpointsLoading}
+                      singleSelection="always"
+                      defaultChecked
+                      searchProps={{
+                        compressed: true,
+                        placeholder: i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
+                          {
+                            defaultMessage: 'Search',
+                          }
+                        ),
+                      }}
+                      options={options}
+                      onChange={(newOptions) => {
+                        setValue(newOptions.find((option) => option.checked)?.label || '');
+                      }}
+                      renderOption={renderEndpointOption}
+                      listProps={{
+                        isVirtualized: false,
+                      }}
+                      height={euiTheme.base * 15}
+                    >
+                      {(list, search) => (
+                        <>
+                          {search}
+                          <EuiHorizontalRule margin="xs" />
+                          {list}
+                        </>
+                      )}
+                    </EuiSelectable>
+                  </EuiFormRow>
+                </EuiPanel>
+              </EuiContextMenuPanel>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                icon={<EuiIcon type="question" color="primary" aria-hidden={true} />}
               >
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.learnHowToCreateInferenceEndpoints',
-                  {
-                    defaultMessage: 'Learn how to create inference endpoints',
-                  }
-                )}
-              </EuiLink>
-            </EuiContextMenuItem>
-          </EuiPopover>
+                <EuiLink
+                  href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
+                  target="_blank"
+                  data-test-subj="learn-how-to-create-inference-endpoints"
+                >
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.parameters.learnHowToCreateInferenceEndpoints',
+                    {
+                      defaultMessage: 'Learn how to create inference endpoints',
+                    }
+                  )}
+                </EuiLink>
+              </EuiContextMenuItem>
+            </EuiPopover>
+          </EuiFormRow>
 
           {isInferenceFlyoutVisible && (
             <Suspense fallback={<EuiLoadingSpinner size="l" />}>
@@ -354,7 +378,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
-                allowedTaskTypes={['text_embedding', 'sparse_embedding']}
+                allowedTaskTypes={[...allowedTaskTypes]}
               />
             </Suspense>
           )}

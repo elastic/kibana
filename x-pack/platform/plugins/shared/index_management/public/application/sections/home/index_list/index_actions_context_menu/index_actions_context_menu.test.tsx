@@ -98,6 +98,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableTogglingDataRetention: true,
       enableProjectLevelRetentionChecks: true,
       enableSemanticText: false,
+      enableSemanticField: false,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
       isServerless: false,

@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { SemanticInferenceFieldType } from '../../../constants';
 
 import { Form, useForm } from '../../../shared_imports';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
@@ -54,7 +55,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
     toasts?: unknown;
     isEdit?: boolean;
     enforceAdaptiveAllocations?: boolean;
-    allowedTaskTypes?: InferenceTaskType[];
+    allowedTaskTypes?: readonly InferenceTaskType[];
   }) => (
     <div data-test-subj="inference-flyout-wrapper">
       <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
@@ -193,12 +194,44 @@ function TestFormWrapper({
   return <Form form={form}>{children}</Form>;
 }
 
-const renderSelectInferenceId = async ({ initialValue }: { initialValue?: string } = {}) => {
+function TestFormWithSubmit({
+  children,
+  initialValue = '',
+  onSubmit,
+}: {
+  children: React.ReactElement;
+  initialValue?: string;
+  onSubmit: (isValid: boolean) => void;
+}) {
+  const { form } = useForm({
+    defaultValue: { inference_id: initialValue },
+  });
+
+  return (
+    <Form form={form}>
+      {children}
+      <button
+        data-test-subj="submitForm"
+        onClick={async () => {
+          const { isValid } = await form.submit();
+          onSubmit(isValid);
+        }}
+      >
+        Submit
+      </button>
+    </Form>
+  );
+}
+
+const renderSelectInferenceId = async ({
+  initialValue,
+  fieldType,
+}: { initialValue?: string; fieldType?: SemanticInferenceFieldType } = {}) => {
   let result: ReturnType<typeof render> | undefined;
   await act(async () => {
     result = render(
       <TestFormWrapper initialValue={initialValue}>
-        <SelectInferenceId data-test-subj="data-inference-endpoint-list" />
+        <SelectInferenceId data-test-subj="data-inference-endpoint-list" fieldType={fieldType} />
       </TestFormWrapper>
     );
   });
@@ -331,7 +364,7 @@ describe('SelectInferenceId', () => {
       expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
     });
 
-    it('SHOULD pass allowedTaskTypes to restrict endpoint creation to compatible types', async () => {
+    it('SHOULD pass allowedTaskTypes to restrict endpoint creation to compatible types for semantic_text', async () => {
       await renderSelectInferenceId();
 
       await user.click(await screen.findByTestId('inferenceIdButton'));
@@ -339,6 +372,17 @@ describe('SelectInferenceId', () => {
 
       const allowedTaskTypes = await screen.findByTestId('mock-allowed-task-types');
       expect(allowedTaskTypes).toHaveTextContent('text_embedding,sparse_embedding');
+    });
+
+    it('SHOULD pass embedding as allowedTaskTypes when fieldType is semantic', async () => {
+      setupInferenceEndpointsMocks({ data: [] });
+      await renderSelectInferenceId({ fieldType: 'semantic', initialValue: '' });
+
+      await user.click(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('createInferenceEndpointButton'));
+
+      const allowedTaskTypes = await screen.findByTestId('mock-allowed-task-types');
+      expect(allowedTaskTypes).toHaveTextContent('embedding');
     });
 
     describe('AND flyout close is triggered', () => {
@@ -530,6 +574,49 @@ describe('SelectInferenceId', () => {
           expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)
         );
       });
+    });
+  });
+
+  describe('WHEN fieldType is semantic and no endpoint is selected', () => {
+    it('SHOULD fail form validation on submit', async () => {
+      // No compatible "embedding" endpoints, so nothing is auto-selected.
+      setupInferenceEndpointsMocks({ data: [] });
+      const onSubmit = jest.fn();
+
+      await act(async () => {
+        render(
+          <TestFormWithSubmit initialValue="" onSubmit={onSubmit}>
+            <SelectInferenceId data-test-subj="data-inference-endpoint-list" fieldType="semantic" />
+          </TestFormWithSubmit>
+        );
+      });
+
+      await user.click(await screen.findByTestId('submitForm'));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(false));
+      expect(await screen.findByText('Select an inference endpoint.')).toBeInTheDocument();
+    });
+  });
+
+  describe('WHEN fieldType is semantic_text and no endpoint is selected', () => {
+    it('SHOULD pass form validation on submit (inference_id is optional)', async () => {
+      setupInferenceEndpointsMocks({ data: [] });
+      const onSubmit = jest.fn();
+
+      await act(async () => {
+        render(
+          <TestFormWithSubmit initialValue="" onSubmit={onSubmit}>
+            <SelectInferenceId
+              data-test-subj="data-inference-endpoint-list"
+              fieldType="semantic_text"
+            />
+          </TestFormWithSubmit>
+        );
+      });
+
+      await user.click(await screen.findByTestId('submitForm'));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(true));
     });
   });
 });

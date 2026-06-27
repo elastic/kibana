@@ -101,10 +101,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
 
-  const { enableSemanticText: isSemanticTextEnabled } = config;
+  const { enableSemanticText: isSemanticTextEnabled, enableSemanticField: isSemanticFieldEnabled } =
+    config;
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
   const semanticTextInfo = {
     isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
+    isSemanticFieldEnabled,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,

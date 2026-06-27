@@ -74,6 +74,7 @@ export class IndexMgmtUIPlugin
     enableTogglingDataRetention: boolean;
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
+    enableSemanticField: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
     isServerless: boolean;
@@ -102,7 +103,7 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
       enableFailureStoreRetentionDisabling,
-      dev: { enableSemanticText },
+      dev: { enableSemanticText, enableSemanticField },
     } = ctx.config.get<ClientConfigType>();
 
     const isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
@@ -120,6 +121,7 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
+      enableSemanticField: enableSemanticField ?? false,
       enforceAdaptiveAllocations: isServerless,
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
