@@ -51,11 +51,13 @@ Get item children
 :   List the files and subfolders within a OneDrive folder.
     - `itemId` (optional): ID of the folder to list. Omit or pass an empty string to list the root of the drive.
     - `top` (optional): Maximum number of items to return (1–200). Defaults to 50.
+    - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
 Search
 :   Search for files and folders in OneDrive by keyword. Searches across file names and content.
-    - `query` (required): Keyword or phrase to search for, for example `Q3 budget report`.
+    - `query` (required on the first page): Keyword or phrase to search for, for example `Q3 budget report`. Must be re-passed alongside `pageToken` on subsequent pages.
     - `top` (optional): Maximum number of results to return (1–200). Defaults to 25.
+    - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
 Get file metadata
 :   Get detailed metadata for a specific file or folder by its item ID, including name, size, content type, modification date, path, and a time-limited download URL.
@@ -68,6 +70,7 @@ Get file content
 
 List shared with me
 :   List files that others have shared with the authenticated user, including name, URL, size, and sharing owner.
+    - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
 List recent files
 :   List files the authenticated user has recently accessed or modified, returning up to 25 items.

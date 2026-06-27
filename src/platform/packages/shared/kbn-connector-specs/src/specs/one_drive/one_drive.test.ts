@@ -132,6 +132,45 @@ describe('OneDrive', () => {
       );
     });
 
+    it('passes $skiptoken when pageToken is provided', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      const input = parse('getItemChildren', { pageToken: 'ABC123' });
+      await OneDrive.actions.getItemChildren.handler(mockContext, input);
+
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ params: expect.objectContaining({ $skiptoken: 'ABC123' }) })
+      );
+    });
+
+    it('extracts nextPageToken from @odata.nextLink when present', async () => {
+      mockGet.mockResolvedValue({
+        data: {
+          value: [],
+          '@odata.nextLink':
+            'https://graph.microsoft.com/v1.0/me/drive/root/children?$skiptoken=TOKEN123&$top=50',
+        },
+      });
+      const input = parse('getItemChildren', {});
+      const result = (await OneDrive.actions.getItemChildren.handler(mockContext, input)) as Record<
+        string,
+        unknown
+      >;
+
+      expect(result.nextPageToken).toBe('TOKEN123');
+    });
+
+    it('returns no nextPageToken when @odata.nextLink is absent', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      const input = parse('getItemChildren', {});
+      const result = (await OneDrive.actions.getItemChildren.handler(mockContext, input)) as Record<
+        string,
+        unknown
+      >;
+
+      expect(result.nextPageToken).toBeUndefined();
+    });
+
     it('lists children of a specific folder by itemId', async () => {
       mockGet.mockResolvedValue({ data: { value: [] } });
       const input = parse('getItemChildren', { itemId: 'folder-abc' });
@@ -180,6 +219,49 @@ describe('OneDrive', () => {
         expect.any(String),
         expect.objectContaining({ params: expect.objectContaining({ $top: 10 }) })
       );
+    });
+
+    it('passes $skiptoken when pageToken is provided alongside query', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      const input = parse('search', { query: 'budget', pageToken: 'TOKEN456' });
+      await OneDrive.actions.search.handler(mockContext, input);
+
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ params: expect.objectContaining({ $skiptoken: 'TOKEN456' }) })
+      );
+    });
+
+    it('uses base search URL and passes $skiptoken when only pageToken is provided', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      const input = parse('search', { pageToken: 'TOKEN_ONLY' });
+      await OneDrive.actions.search.handler(mockContext, input);
+
+      expect(mockGet).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/me/drive/root/search',
+        expect.objectContaining({ params: expect.objectContaining({ $skiptoken: 'TOKEN_ONLY' }) })
+      );
+    });
+
+    it('rejects when neither query nor pageToken is provided', () => {
+      expect(() => parse('search', {})).toThrow();
+    });
+
+    it('extracts nextPageToken from @odata.nextLink when present', async () => {
+      mockGet.mockResolvedValue({
+        data: {
+          value: [],
+          '@odata.nextLink':
+            "https://graph.microsoft.com/v1.0/me/drive/root/search(q='budget')?$skiptoken=NEXT123&$top=25",
+        },
+      });
+      const input = parse('search', { query: 'budget' });
+      const result = (await OneDrive.actions.search.handler(mockContext, input)) as Record<
+        string,
+        unknown
+      >;
+
+      expect(result.nextPageToken).toBe('NEXT123');
     });
   });
 
@@ -313,6 +395,16 @@ describe('OneDrive', () => {
         expect.objectContaining({
           params: expect.objectContaining({ $select: expect.stringContaining('remoteItem') }),
         })
+      );
+    });
+
+    it('passes $skiptoken when pageToken is provided', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      await OneDrive.actions.listSharedWithMe.handler(mockContext, { pageToken: 'TOKEN789' });
+
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ params: expect.objectContaining({ $skiptoken: 'TOKEN789' }) })
       );
     });
   });

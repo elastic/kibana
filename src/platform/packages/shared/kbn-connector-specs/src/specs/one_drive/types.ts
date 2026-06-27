@@ -14,25 +14,47 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // All schemas use lazySchema(). All z.string() fields have .max(N).
 // =============================================================================
 
+const pageTokenField = z
+  .string()
+  .max(2000)
+  .optional()
+  .describe(
+    'Pagination token for fetching the next page of results. ' +
+      'Pass the nextPageToken value from the previous response. Omit on the first call.'
+  );
+
 export const SearchInputSchema = lazySchema(() =>
-  z.object({
-    query: z
-      .string()
-      .min(1)
-      .max(2000)
-      .describe(
-        'Keyword or phrase to search for across file names and content. ' +
-          'Example: "Q3 budget report" or "product roadmap".'
-      ),
-    top: z
-      .number()
-      .int()
-      .min(1)
-      .max(200)
-      .optional()
-      .default(25)
-      .describe('Maximum number of results to return (1–200, default 25).'),
-  })
+  z
+    .object({
+      query: z
+        .string()
+        .min(1)
+        .max(2000)
+        .optional()
+        .describe(
+          'Keyword or phrase to search for across file names and content. ' +
+            'Example: "Q3 budget report" or "product roadmap". ' +
+            'Required for the first page; re-pass the same value alongside pageToken for subsequent pages.'
+        ),
+      top: z
+        .number()
+        .int()
+        .min(1)
+        .max(200)
+        .optional()
+        .default(25)
+        .describe('Maximum number of results to return (1–200, default 25).'),
+      pageToken: pageTokenField,
+    })
+    .superRefine((val, ctx) => {
+      if (!val.query && !val.pageToken) {
+        ctx.addIssue({
+          code: 'custom' as const,
+          message: 'Either query or pageToken must be provided.',
+          path: ['query'],
+        });
+      }
+    })
 );
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
@@ -54,9 +76,17 @@ export const GetItemChildrenInputSchema = lazySchema(() =>
       .optional()
       .default(50)
       .describe('Maximum number of items to return (1–200, default 50).'),
+    pageToken: pageTokenField,
   })
 );
 export type GetItemChildrenInput = z.infer<typeof GetItemChildrenInputSchema>;
+
+export const ListSharedWithMeInputSchema = lazySchema(() =>
+  z.object({
+    pageToken: pageTokenField,
+  })
+);
+export type ListSharedWithMeInput = z.infer<typeof ListSharedWithMeInputSchema>;
 
 const driveIdField = z
   .string()

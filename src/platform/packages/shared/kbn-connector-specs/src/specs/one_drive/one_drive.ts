@@ -25,12 +25,14 @@ import type {
   GetFileContentInput,
   GetFileMetadataInput,
   GetItemChildrenInput,
+  ListSharedWithMeInput,
   SearchInput,
 } from './types';
 import {
   GetFileContentInputSchema,
   GetFileMetadataInputSchema,
   GetItemChildrenInputSchema,
+  ListSharedWithMeInputSchema,
   SearchInputSchema,
 } from './types';
 
@@ -121,7 +123,8 @@ export const OneDrive: ConnectorSpec = {
       description:
         'List the files and subfolders within a OneDrive folder. Pass an empty string or omit ' +
         'itemId to list the root of the drive. Use the item IDs returned here with getFileMetadata ' +
-        'or getFileContent to drill into a specific file.',
+        'or getFileContent to drill into a specific file. ' +
+        'If the response contains a nextPageToken field, pass it as pageToken to fetch the next page.',
       input: GetItemChildrenInputSchema,
       handler: async (ctx, input: GetItemChildrenInput) => {
         const url =
@@ -134,9 +137,10 @@ export const OneDrive: ConnectorSpec = {
             $select:
               'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,@microsoft.graph.downloadUrl',
             $top: input.top ?? 50,
+            ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
           },
         });
-        return response.data;
+        return withNextPageToken(response.data);
       },
     },
 
@@ -146,22 +150,23 @@ export const OneDrive: ConnectorSpec = {
       description:
         'Search for files and folders in OneDrive by keyword. Searches across file names and ' +
         'content. Returns matching items with IDs, names, paths, and metadata. Use this as the ' +
-        'primary way to locate a specific file before reading its content.',
+        'primary way to locate a specific file before reading its content. ' +
+        'If the response contains a nextPageToken field, pass it as pageToken to fetch the next page. ' +
+        'For page 2+, pass the same query value alongside pageToken.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encodeURIComponent(
-            input.query
-          )}')`,
-          {
-            params: {
-              $select:
-                'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,parentReference',
-              $top: input.top ?? 25,
-            },
-          }
-        );
-        return response.data;
+        const url = input.query
+          ? `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${encodeURIComponent(input.query)}')`
+          : 'https://graph.microsoft.com/v1.0/me/drive/root/search';
+        const response = await ctx.client.get(url, {
+          params: {
+            $select:
+              'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,parentReference',
+            $top: input.top ?? 25,
+            ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
+          },
+        });
+        return withNextPageToken(response.data);
       },
     },
 
@@ -227,19 +232,21 @@ export const OneDrive: ConnectorSpec = {
         "List files that others have shared with the authenticated user's OneDrive. " +
         'Items on external drives include a remoteItem property. To use getFileMetadata or ' +
         'getFileContent on those items, pass remoteItem.id as itemId and ' +
-        'remoteItem.parentReference.driveId as driveId — the top-level id alone will 404.',
-      input: lazySchema(() => z.object({})),
-      handler: async (ctx) => {
+        'remoteItem.parentReference.driveId as driveId — the top-level id alone will 404. ' +
+        'If the response contains a nextPageToken field, pass it as pageToken to fetch the next page.',
+      input: ListSharedWithMeInputSchema,
+      handler: async (ctx, input: ListSharedWithMeInput) => {
         const response = await ctx.client.get(
           'https://graph.microsoft.com/v1.0/me/drive/sharedWithMe',
           {
             params: {
               $select:
                 'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,remoteItem',
+              ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
             },
           }
         );
-        return response.data;
+        return withNextPageToken(response.data);
       },
     },
 
@@ -293,6 +300,12 @@ export const OneDrive: ConnectorSpec = {
     'Use `getItemChildren` to browse folder contents — pass an empty string for the root folder,',
     'or pass an item ID from a previous search/browse result for a subfolder.',
     '',
+    '### Pagination',
+    'search, getItemChildren, and listSharedWithMe support multi-page results.',
+    'When more pages are available, the response includes a nextPageToken field.',
+    'Pass that value as pageToken in the next call (with the same other parameters) to fetch the next page.',
+    'For search: the Graph API ties the continuation token to the original query, so pass the same query alongside pageToken for page 2+.',
+    '',
     '### Reading file content',
     'To read a file: call `search` or `getItemChildren` to find the item ID, then `getFileContent`.',
     'For metadata only (size, dates, path), use `getFileMetadata` instead.',
@@ -320,4 +333,18 @@ export const OneDrive: ConnectorSpec = {
     '- `@microsoft.graph.downloadUrl` fields in responses are time-limited pre-authenticated URLs.',
     '- The Graph API uses delta tokens for efficient change tracking — not exposed here yet.',
   ].join('\n'),
+};
+
+// The token to support paging is buried in the @odata.nextLink link as the $skipToken param, this extracts it to
+// help the LLM more consistently work.
+const withNextPageToken = (data: unknown): unknown => {
+  let obj = data as Record<string, unknown>;
+  const nextLink = obj['@odata.nextLink'];
+  if (typeof nextLink === 'string') {
+    const token = new URL(nextLink).searchParams.get('$skiptoken');
+    if (token) {
+      obj = { ...obj, nextPageToken: token };
+    }
+  }
+  return obj;
 };
