@@ -224,13 +224,13 @@ Runs adversarial attack modules against a suite's AI assistant to test security 
 Like `start`, this boots the full eval stack (EDOT + Scout + EIS CCM) as background daemons before running, then leaves them alive for subsequent runs. Pass `--skip-server` to reuse already-running services, and `node scripts/evals stop` to shut them down.
 
 ```bash
-node scripts/evals red-team --suite agent-builder
-node scripts/evals red-team --suite agent-builder --module prompt-injection --count 5
-node scripts/evals red-team --suite agent-builder --strategy jailbreak-wrapper
-node scripts/evals red-team --suite agent-builder --strategy crescendo
-node scripts/evals red-team --suite agent-builder --difficulty advanced
-node scripts/evals red-team --suite agent-builder --templates-only --count 20
-node scripts/evals red-team --suite agent-builder --skip-server
+node scripts/evals ext red-team --suite agent-builder
+node scripts/evals ext red-team --suite agent-builder --module prompt-injection --count 5
+node scripts/evals ext red-team --suite agent-builder --strategy jailbreak-wrapper
+node scripts/evals ext red-team --suite agent-builder --strategy crescendo
+node scripts/evals ext red-team --suite agent-builder --difficulty advanced
+node scripts/evals ext red-team --suite agent-builder --templates-only --count 20
+node scripts/evals ext red-team --suite agent-builder --skip-server
 ```
 
 | Flag | Alias | Description |

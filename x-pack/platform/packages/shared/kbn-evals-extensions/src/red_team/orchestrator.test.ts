@@ -24,7 +24,7 @@ const createMockLog = () => ({
 });
 
 const createMockExecutorClient = (): jest.Mocked<EvalsExecutorClient> => {
-  const runExperiment = jest.fn().mockImplementation(async (options) => {
+  const runExperiment = jest.fn().mockImplementation(async (options, evaluators: any[] = []) => {
     const { datasets, task } = options;
     const [dataset] = datasets;
     const runs: Record<string, any> = {};
@@ -42,6 +42,20 @@ const createMockExecutorClient = (): jest.Mocked<EvalsExecutorClient> => {
         metadata: example.metadata,
         output,
       };
+
+      for (const evaluator of evaluators) {
+        try {
+          const result = await evaluator.evaluate({
+            input: example.input,
+            output,
+            expected: example.output,
+            metadata: example.metadata ?? null,
+          });
+          evaluationRuns.push({ experimentRunId: runKey, name: evaluator.name, result });
+        } catch {
+          // evaluator crash → no result added (fail-closed: no score = fails gating)
+        }
+      }
     }
 
     return [
