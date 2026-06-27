@@ -12,7 +12,6 @@ import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 const TARGET_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 const NEXT_INDEX = '.ds-.workflows-step-executions-2026.06.22-000002';
-const LOCATOR = { index: TARGET_INDEX, seqNo: 7, primaryTerm: 2 };
 
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
@@ -58,7 +57,7 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      const result = await underTest.bulkUpsert([
+      await underTest.bulkUpsert([
         {
           operation: 'create',
           doc: { id: 'step-1', stepId: 'my-step', status: 'completed' as any },
@@ -76,19 +75,28 @@ describe('StepExecutionRepository', () => {
           }),
         ],
       });
-      expect(result).toEqual({
-        'step-1': { index: NEXT_INDEX, seqNo: 1, primaryTerm: 1 },
-      });
     });
 
-    it('updates existing step executions through their tracked locator', async () => {
+    it('updates existing step executions through freshly resolved document versions', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _id: 'step-1',
+            _index: NEXT_INDEX,
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: { id: 'step-1' },
+          },
+        ],
+      });
       esClient.bulk.mockResolvedValue({
         errors: false,
         items: [
           {
             update: {
               _id: 'step-1',
-              _index: TARGET_INDEX,
+              _index: NEXT_INDEX,
               _seq_no: 8,
               _primary_term: 2,
             },
@@ -96,20 +104,23 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      const result = await underTest.bulkUpsert([
+      await underTest.bulkUpsert([
         {
           operation: 'update',
           doc: { id: 'step-1', status: 'failed' as any },
-          locator: LOCATOR,
         },
       ]);
 
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: NEXT_INDEX,
+        ids: ['step-1'],
+      });
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
         operations: [
           {
             update: {
-              _index: TARGET_INDEX,
+              _index: NEXT_INDEX,
               _id: 'step-1',
               if_seq_no: 7,
               if_primary_term: 2,
@@ -124,13 +135,10 @@ describe('StepExecutionRepository', () => {
           },
         ],
       });
-      expect(result).toEqual({
-        'step-1': { index: TARGET_INDEX, seqNo: 8, primaryTerm: 2 },
-      });
     });
 
-    it('returns an empty locator map without calling ES for empty writes', async () => {
-      await expect(underTest.bulkUpsert([])).resolves.toEqual({});
+    it('returns without calling ES for empty writes', async () => {
+      await expect(underTest.bulkUpsert([])).resolves.toBeUndefined();
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
@@ -142,6 +150,18 @@ describe('StepExecutionRepository', () => {
     });
 
     it('throws with per-item details when bulk write has errors', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _id: 'step-2',
+            _index: TARGET_INDEX,
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: { id: 'step-2' },
+          },
+        ],
+      });
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
@@ -159,20 +179,20 @@ describe('StepExecutionRepository', () => {
       await expect(
         underTest.bulkUpsert([
           { operation: 'create', doc: { id: 'step-1' } },
-          { operation: 'update', doc: { id: 'step-2' }, locator: LOCATOR },
+          { operation: 'update', doc: { id: 'step-2' } },
         ])
       ).rejects.toThrow('Failed to upsert 1 step executions');
     });
   });
 
-  describe('getStepExecutionsWithLocatorsByIds', () => {
-    it('checks recent backing indices and returns locators', async () => {
+  describe('getStepExecutionsByIds', () => {
+    it('checks the write index and returns docs', async () => {
       esClient.mget.mockResolvedValue({
         docs: [
-          { found: false },
           {
             found: true,
-            _index: TARGET_INDEX,
+            _id: 'step-1',
+            _index: NEXT_INDEX,
             _seq_no: 3,
             _primary_term: 1,
             _source: { id: 'step-1', stepId: 'my-step', status: 'completed' },
@@ -180,21 +200,16 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      const result = await underTest.getStepExecutionsWithLocatorsByIds(['step-1']);
+      const result = await underTest.getStepExecutionsByIds(['step-1']);
 
       expect(esClient.mget).toHaveBeenCalledWith({
-        docs: [
-          { _index: NEXT_INDEX, _id: 'step-1' },
-          { _index: TARGET_INDEX, _id: 'step-1' },
-        ],
+        index: NEXT_INDEX,
+        ids: ['step-1'],
       });
-      expect(result).toEqual({
-        docs: [{ id: 'step-1', stepId: 'my-step', status: 'completed' }],
-        locators: { 'step-1': { index: TARGET_INDEX, seqNo: 3, primaryTerm: 1 } },
-      });
+      expect(result).toEqual([{ id: 'step-1', stepId: 'my-step', status: 'completed' }]);
     });
 
-    it('falls back to ids search for documents outside recent backing indices', async () => {
+    it('falls back to ids search for documents outside the write index', async () => {
       esClient.mget.mockResolvedValue({ docs: [{ found: false }] });
       esClient.search.mockResolvedValue({
         hits: {
@@ -209,7 +224,7 @@ describe('StepExecutionRepository', () => {
         },
       });
 
-      const result = await underTest.getStepExecutionsWithLocatorsByIds(['step-1']);
+      const result = await underTest.getStepExecutionsByIds(['step-1']);
 
       expect(esClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -217,11 +232,7 @@ describe('StepExecutionRepository', () => {
         query: { ids: { values: ['step-1'] } },
         size: 1,
       });
-      expect(result.locators['step-1']).toEqual({
-        index: TARGET_INDEX,
-        seqNo: 4,
-        primaryTerm: 1,
-      });
+      expect(result).toEqual([{ id: 'step-1', stepId: 'my-step', status: 'completed' }]);
     });
   });
 

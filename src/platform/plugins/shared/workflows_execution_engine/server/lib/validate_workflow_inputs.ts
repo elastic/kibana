@@ -28,20 +28,6 @@ const hasInputChanges = (
   nextInputs: Record<string, unknown> | undefined
 ): boolean => !isDeepStrictEqual(currentInputs, nextInputs);
 
-const getWorkflowExecutionLocator = async (
-  workflowExecution: WorkflowExecutionForInputRendering,
-  workflowExecutionRepository: WorkflowExecutionRepository
-) => {
-  const locatedExecution = await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
-    workflowExecution.id,
-    workflowExecution.spaceId
-  );
-  if (!locatedExecution) {
-    throw new Error(`Workflow execution ${workflowExecution.id} not found`);
-  }
-  return locatedExecution.locator;
-};
-
 /**
  * Validates workflow inputs against the workflow's input schema.
  * On failure, marks the execution as FAILED with an InputValidationError.
@@ -74,15 +60,12 @@ export const validateWorkflowInputs = async (
     const message = error instanceof Error ? error.message : String(error);
     try {
       await workflowExecutionRepository.updateWorkflowExecution({
-        doc: {
-          id: workflowExecution.id,
-          status: ExecutionStatus.FAILED,
-          error: {
-            type: 'InputValidationError',
-            message: `Workflow input validation failed: ${message}`,
-          },
+        id: workflowExecution.id,
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'InputValidationError',
+          message: `Workflow input validation failed: ${message}`,
         },
-        locator: await getWorkflowExecutionLocator(workflowExecution, workflowExecutionRepository),
       });
     } catch (updateError) {
       logger.error(
@@ -99,15 +82,12 @@ export const validateWorkflowInputs = async (
 
     try {
       await workflowExecutionRepository.updateWorkflowExecution({
-        doc: {
-          id: workflowExecution.id,
-          status: ExecutionStatus.FAILED,
-          error: {
-            type: 'InputValidationError',
-            message: `Workflow input validation failed: ${issues}`,
-          },
+        id: workflowExecution.id,
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'InputValidationError',
+          message: `Workflow input validation failed: ${issues}`,
         },
-        locator: await getWorkflowExecutionLocator(workflowExecution, workflowExecutionRepository),
       });
     } catch (updateError) {
       logger.error(
@@ -125,11 +105,8 @@ export const validateWorkflowInputs = async (
     };
     workflowExecution.context = context;
     await workflowExecutionRepository.updateWorkflowExecution({
-      doc: {
-        id: workflowExecution.id,
-        context,
-      },
-      locator: await getWorkflowExecutionLocator(workflowExecution, workflowExecutionRepository),
+      id: workflowExecution.id,
+      context,
     });
   }
 

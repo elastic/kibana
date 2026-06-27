@@ -38,11 +38,10 @@ export const cancelWorkflow = async ({
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
 }): Promise<void> => {
-  const locatedWorkflowExecution = await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
+  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowExecutionId,
     spaceId
   );
-  const workflowExecution = locatedWorkflowExecution?.doc;
 
   if (!workflowExecution) {
     throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -53,7 +52,6 @@ export const cancelWorkflow = async ({
   }
 
   await workflowExecutionRepository.updateWorkflowExecution({
-    doc: {
       id: workflowExecution.id,
       ...(workflowExecution.status === ExecutionStatus.PENDING
         ? { status: ExecutionStatus.CANCELLED }
@@ -62,8 +60,6 @@ export const cancelWorkflow = async ({
       cancellationReason: 'Cancelled by user',
       cancelledAt: new Date().toISOString(),
       cancelledBy: 'system',
-    },
-    locator: locatedWorkflowExecution.locator,
   });
 
   await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {

@@ -121,24 +121,20 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
-      const locatedExecution =
-        await this.workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
-          currentExecutionId,
-          spaceId
-        );
-      if (!locatedExecution) {
+      const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
+        currentExecutionId,
+        spaceId
+      );
+      if (!execution) {
         throw new Error(`Workflow execution ${currentExecutionId} not found for concurrency drop`);
       }
       await this.workflowExecutionRepository.updateWorkflowExecution({
-        doc: {
-          id: currentExecutionId,
-          status: ExecutionStatus.SKIPPED,
-          cancelRequested: true,
-          cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
-          cancelledAt: skipTimestamp,
-          cancelledBy: 'system',
-        },
-        locator: locatedExecution.locator,
+        id: currentExecutionId,
+        status: ExecutionStatus.SKIPPED,
+        cancelRequested: true,
+        cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
+        cancelledAt: skipTimestamp,
+        cancelledBy: 'system',
       });
       return false; // Drop the new execution
     }
@@ -153,27 +149,24 @@ export class ConcurrencyManager {
 
       // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
-      const locatedExecutions = await Promise.all(
+      const executions = await Promise.all(
         executionIdsToCancel.map((id) =>
-          this.workflowExecutionRepository.getWorkflowExecutionWithLocatorById(id, spaceId)
+          this.workflowExecutionRepository.getWorkflowExecutionById(id, spaceId)
         )
       );
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
-        locatedExecutions.flatMap((locatedExecution, idx) => {
-          if (!locatedExecution) {
+        executions.flatMap((execution, idx) => {
+          if (!execution) {
             return [];
           }
           const id = executionIdsToCancel[idx];
           return {
-          doc: {
             id,
             status: ExecutionStatus.CANCELLED,
             cancelRequested: true,
             cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
             cancelledAt: cancellationTimestamp,
             cancelledBy: 'system',
-          },
-            locator: locatedExecution.locator,
           };
         })
       );

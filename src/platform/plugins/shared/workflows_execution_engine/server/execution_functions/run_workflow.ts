@@ -90,19 +90,12 @@ export async function runWorkflow({
   const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
-    const locator = workflowExecutionState.getWorkflowDocumentLocator(workflowRunId);
-    if (!locator) {
-      throw new Error(`Missing workflow execution document locator for ${workflowRunId}`);
-    }
     await workflowExecutionRepository.updateWorkflowExecution({
-      doc: {
-        id: workflowRunId,
-        status: ExecutionStatus.SKIPPED,
-        cancellationReason: 'Event-driven execution disabled by operator',
-        cancelledAt,
-        cancelledBy: 'system',
-      },
-      locator,
+      id: workflowRunId,
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason: 'Event-driven execution disabled by operator',
+      cancelledAt,
+      cancelledBy: 'system',
     });
     logger.debug(
       `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`

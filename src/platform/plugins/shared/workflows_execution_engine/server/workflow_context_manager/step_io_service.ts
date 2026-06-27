@@ -191,6 +191,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * outputs they only briefly needed.
    */
   private transientlyRehydratedIds: string[] = [];
+  private readonly persistedStepExecutionIds = new Set<string>();
 
   /**
    * Per-execution `data.set` output, keyed by step execution id. Populated
@@ -454,10 +455,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       );
     }
 
-    const { docs: foundSteps, locators } =
-      await this.stepRepository.getStepExecutionsWithLocatorsByIds(stepExecutionIds, undefined, [
-        'output',
-      ]);
+    const foundSteps = await this.stepRepository.getStepExecutionsByIds(
+      stepExecutionIds,
+      undefined,
+      ['output']
+    );
+    this.persistedStepExecutionIds.clear();
+    for (const step of foundSteps) {
+      this.persistedStepExecutionIds.add(step.id);
+    }
 
     // Capture inputs and hand `output`-stripped metadata to state. The
     // `output` sourceExclude above should already drop output from the
@@ -480,7 +486,6 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       metadata.push(stripIo(step));
     }
     this.state.ingestLoadedStepDocs(metadata);
-    this.state.setStepDocumentLocators(locators);
 
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
     if (pinnedIdsToFetch.length > 0) {
@@ -894,13 +899,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const flushedIds = Array.from(merged.keys());
-    const locators = await this.stepRepository.bulkUpsert(
+    await this.stepRepository.bulkUpsert(
       Array.from(merged.values()).map((doc) => {
-        const locator = doc.id ? this.state.getStepDocumentLocator(doc.id) : undefined;
-        return locator ? { operation: 'update', doc, locator } : { operation: 'create', doc };
+        const persisted = doc.id ? this.persistedStepExecutionIds.has(doc.id) : false;
+        return persisted ? { operation: 'update', doc } : { operation: 'create', doc };
       })
     );
-    this.state.setStepDocumentLocators(locators);
+    for (const id of flushedIds) {
+      this.persistedStepExecutionIds.add(id);
+    }
     return flushedIds;
   }
 

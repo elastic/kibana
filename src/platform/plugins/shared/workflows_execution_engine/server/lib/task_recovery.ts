@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
-import type { EsDocumentLocator } from '../repositories/document_version';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -58,11 +57,10 @@ export async function resolveInterruptedWorkflowRunTask({
     return 'run_workflow';
   }
 
-  const locatedExecution = await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
+  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
     spaceId
   );
-  const execution = locatedExecution?.doc;
 
   if (!execution) {
     logger.warn(
@@ -86,7 +84,6 @@ export async function resolveInterruptedWorkflowRunTask({
     workflowRunId,
     {
       message: taskRecoveryMessages.workflowRunInterrupted,
-      locator: locatedExecution.locator,
     }
   );
 
@@ -123,11 +120,10 @@ export async function resolveInterruptedWorkflowResumeTask({
     return 'resume_workflow';
   }
 
-  const locatedExecution = await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
+  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
     spaceId
   );
-  const execution = locatedExecution?.doc;
 
   if (!execution) {
     logger.warn(
@@ -153,7 +149,6 @@ export async function resolveInterruptedWorkflowResumeTask({
     workflowRunId,
     {
       message: taskRecoveryMessages.workflowResumeInterrupted,
-      locator: locatedExecution.locator,
     }
   );
 
@@ -171,24 +166,19 @@ export async function markExecutionFailedTaskRecovery(
   {
     message,
     type = TASK_RECOVERY_ERROR_TYPE,
-    locator,
   }: {
     message: string;
     type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
-    locator: EsDocumentLocator;
   }
 ): Promise<void> {
   const error = { type, message };
   const finishedAt = new Date().toISOString();
 
   await workflowExecutionRepository.updateWorkflowExecution({
-    doc: {
-      id: executionId,
-      status: ExecutionStatus.FAILED,
-      error,
-      finishedAt,
-    },
-    locator,
+    id: executionId,
+    status: ExecutionStatus.FAILED,
+    error,
+    finishedAt,
   });
 
   await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error);
@@ -225,11 +215,10 @@ export async function resolveExhaustedWorkflowRunTask({
   }
 
   try {
-    const locatedExecution = await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
       workflowRunId,
       spaceId
     );
-    const execution = locatedExecution?.doc;
     if (execution && !isTerminalStatus(execution.status)) {
       const lastMessage = error instanceof Error ? error.message : String(error);
       await markExecutionFailedTaskRecovery(
@@ -239,7 +228,6 @@ export async function resolveExhaustedWorkflowRunTask({
         {
           type: 'TaskAttemptsExhaustedError',
           message: buildTaskAttemptsExhaustedMessage(lastMessage),
-          locator: locatedExecution.locator,
         }
       );
     }

@@ -1303,20 +1303,16 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       if (context) {
-        const locatedExecution =
-          await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
-            executionId,
-            spaceId
-          );
-        if (!locatedExecution) {
+        const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+          executionId,
+          spaceId
+        );
+        if (!execution) {
           throw new WorkflowExecutionNotFoundError(executionId);
         }
         await workflowExecutionRepository.updateWorkflowExecution({
-          doc: {
-            id: executionId,
-            context,
-          },
-          locator: locatedExecution.locator,
+          id: executionId,
+          context,
         });
       }
 
