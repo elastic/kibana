@@ -104,7 +104,7 @@ const evaluate = base.extend<
                 const lastAssistant = resp.messages[resp.messages.length - 1];
                 if (lastAssistant) allMessages.push(lastAssistant);
                 if (resp.steps) allSteps.push(...resp.steps);
-                if (resp.errors) allErrors.push(...resp.errors);
+                if (resp.errors.length) allErrors.push(...resp.errors);
 
                 // Infra error → abort without partial credit; surfaced via skipInfraErrors.
                 if (resp.errors.length > 0) break;

@@ -198,7 +198,7 @@ export class WorkflowsEvalsChatClient {
         allMessages.push(assistantResponse);
       }
       if (resp.steps) allSteps.push(...resp.steps);
-      if (resp.errors) allErrors.push(...resp.errors);
+      if (resp.errors.length) allErrors.push(...resp.errors);
 
       // Stop early on infra errors — there's nothing useful to be learned
       // from continuing to fire turns at a broken backend.
