@@ -428,7 +428,10 @@ evaluate.describe(
                     'The log_done step is byte-identical to the original and is still the last step in the workflow.',
                     'No new top-level workflow fields were introduced (no extra triggers, no extra consts).',
                   ],
-                  expectedStepTypes: ['email', 'servicenow'],
+                  expectedStepTypes: [
+                    'email',
+                    'servicenow-itsm.pushToService|servicenow-sir.pushToService',
+                  ],
                   preservedStepNames: ['enrich_alert', 'post_to_slack', 'log_done'],
                   expectedMaxToolCalls: 3,
                   expectedToolSequence: ['platform.core.generate_workflow'],
