@@ -1351,7 +1351,11 @@ describe('Slack', () => {
 
     it('should return raw response when raw=true', async () => {
       const mockResponse = {
-        data: { ok: true, files: [{ id: 'F1' }], paging: { count: 100, total: 1, page: 1, pages: 1 } },
+        data: {
+          ok: true,
+          files: [{ id: 'F1' }],
+          paging: { count: 100, total: 1, page: 1, pages: 1 },
+        },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
