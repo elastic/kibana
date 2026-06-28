@@ -5,10 +5,24 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
+=======
+import { schema } from '@kbn/config-schema';
+>>>>>>> 9.4
 import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
 import { lensResponseItemSchema } from './common';
 
+<<<<<<< HEAD
+=======
+export const lensCreateRequestQuerySchema = schema.object(
+  {
+    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
+  },
+  { unknowns: 'forbid' }
+);
+
+>>>>>>> 9.4
 export const lensCreateRequestBodySchema = lensApiConfigSchemaNoESQL;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

@@ -29,7 +29,11 @@ export const TagsSection: React.FC = () => {
       </EuiText>
       <EuiSpacer size="l" />
 
+<<<<<<< HEAD
       <EuiFormRow aria-label={flyoutLabels.tagsTitle} fullWidth>
+=======
+      <EuiFormRow aria-label={flyoutLabels.tagsLabel} fullWidth>
+>>>>>>> 9.4
         <Controller
           name="labels"
           control={control}

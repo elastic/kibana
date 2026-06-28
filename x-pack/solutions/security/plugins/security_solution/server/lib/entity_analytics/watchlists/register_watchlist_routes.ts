@@ -28,9 +28,15 @@ export const registerWatchlistRoutes = ({
   telemetrySender,
   hasEncryptionKey,
 }: EntityAnalyticsRoutesDeps) => {
+<<<<<<< HEAD
   installPrebuiltWatchlistsRoute(router, logger, getStartServices, hasEncryptionKey);
   createWatchlistRoute(router, logger, telemetrySender, getStartServices, hasEncryptionKey);
   deleteWatchlistRoute(router, logger, getStartServices, hasEncryptionKey);
+=======
+  installPrebuiltWatchlistsRoute(router, logger);
+  createWatchlistRoute(router, logger);
+  deleteWatchlistRoute(router, logger);
+>>>>>>> 9.4
   getWatchlistRoute(router, logger);
   watchlistsPrivilegesRoute(router, logger, getStartServices);
   listWatchlistsRoute(router, logger);

@@ -18,7 +18,10 @@ import { useDefaultModelSettings } from '../../hooks/use_default_model_settings'
 import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+<<<<<<< HEAD
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
+=======
+>>>>>>> 9.4
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('./use_model_settings_form');
@@ -87,8 +90,11 @@ const defaultFormState = {
     },
   ],
   invalidEndpointIds: new Set<string>(),
+<<<<<<< HEAD
   hasSavedObject: {} as Record<string, boolean>,
   dirtyFeatureIds: new Set<string>() as ReadonlySet<string>,
+=======
+>>>>>>> 9.4
   updateEndpoints: jest.fn(),
   save: jest.fn().mockResolvedValue(undefined),
 };
@@ -128,6 +134,7 @@ describe('ModelSettings', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
+<<<<<<< HEAD
         application: {
           navigateToUrl: mockNavigateToUrl,
           capabilities: {
@@ -135,6 +142,9 @@ describe('ModelSettings', () => {
             advancedSettings: { save: true },
           },
         },
+=======
+        application: { navigateToUrl: mockNavigateToUrl },
+>>>>>>> 9.4
         http: { basePath: mockBasePath },
       },
     });
@@ -344,6 +354,22 @@ describe('ModelSettings', () => {
     expect(screen.queryByTestId('defaultModelSection')).not.toBeInTheDocument();
   });
 
+<<<<<<< HEAD
+=======
+  it('renders loading spinner when connectors are loading', () => {
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-no-models')).not.toBeInTheDocument();
+  });
+
+>>>>>>> 9.4
   it('shows unsaved changes modal and navigates away when discard is confirmed', async () => {
     const resetDefaultModel = jest.fn();
     const history = createMemoryHistory();
@@ -365,24 +391,46 @@ describe('ModelSettings', () => {
       </Router>
     );
 
+<<<<<<< HEAD
+=======
+    // Trigger navigation while dirty to invoke the history block
+>>>>>>> 9.4
     act(() => {
       history.push('/some-other-page');
     });
 
+<<<<<<< HEAD
+=======
+    // The unsaved changes modal should appear
+>>>>>>> 9.4
     await waitFor(() => {
       expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
     });
 
+<<<<<<< HEAD
     fireEvent.click(screen.getByText('Discard changes'));
 
     expect(resetDefaultModel).toHaveBeenCalledTimes(1);
     expect(mockNavigateToUrl).toHaveBeenCalledWith('/some-other-page', expect.any(Object));
 
+=======
+    // Click "Discard changes"
+    fireEvent.click(screen.getByText('Discard changes'));
+
+    // defaultModelSettings.reset should be called
+    expect(resetDefaultModel).toHaveBeenCalledTimes(1);
+
+    // navigateToUrl should be called with the pending destination
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/some-other-page', expect.any(Object));
+
+    // Modal should be closed
+>>>>>>> 9.4
     await waitFor(() => {
       expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
     });
   });
 
+<<<<<<< HEAD
   describe('deprecated/EOL assigned models callouts', () => {
     const gaConnector = {
       connectorId: 'ep-ga',
@@ -531,6 +579,11 @@ describe('ModelSettings', () => {
 
   it('closes unsaved changes modal without navigating when cancel is clicked', async () => {
     const history = createMemoryHistory();
+=======
+  it('closes unsaved changes modal without navigating when cancel is clicked', async () => {
+    const history = createMemoryHistory();
+
+>>>>>>> 9.4
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
 
     render(
@@ -551,6 +604,7 @@ describe('ModelSettings', () => {
       expect(screen.getByTestId('unsavedChangesModal')).toBeInTheDocument();
     });
 
+<<<<<<< HEAD
     fireEvent.click(screen.getByText('Cancel'));
 
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
@@ -745,6 +799,15 @@ describe('ModelSettings', () => {
       );
 
       expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'false');
+=======
+    // Click "Cancel"
+    fireEvent.click(screen.getByText('Cancel'));
+
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
+>>>>>>> 9.4
     });
   });
 });

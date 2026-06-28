@@ -69,8 +69,25 @@ export async function loadDashboardApi({
     return;
   }
 
+<<<<<<< HEAD
   if (readResult?.warnings?.length) {
     showWarningToast({ warnings: readResult.warnings });
+=======
+  let droppedPanelsCount = 0;
+  readResult?.warnings?.forEach(({ type }) => {
+    if (type === 'dropped_panel') {
+      droppedPanelsCount++;
+    }
+  });
+  if (droppedPanelsCount) {
+    coreServices.notifications.toasts.addWarning(
+      i18n.translate('dashboard.droppedPanelsWarning', {
+        defaultMessage:
+          '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed from the dashboard.',
+        values: { droppedPanelsCount },
+      })
+    );
+>>>>>>> 9.4
   }
 
   await initializeDashboardApiServices();

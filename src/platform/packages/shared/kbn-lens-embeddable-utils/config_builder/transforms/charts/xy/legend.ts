@@ -9,6 +9,7 @@
 
 import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
+<<<<<<< HEAD
 import type {
   XYConfig,
   XYLegendOutsideHorizontal,
@@ -17,6 +18,9 @@ import type {
   XYLegendStatistic,
   XYLegendSize,
 } from '../../../schema';
+=======
+import type { XYConfig } from '../../../schema';
+>>>>>>> 9.4
 import { legendSizeCompat } from '../legend_sizes';
 import { getReversibleMappings, stripUndefined } from '../utils';
 
@@ -89,7 +93,11 @@ function getLegendTruncation(legend: XYConfig['legend']):
     : undefined;
 }
 
+<<<<<<< HEAD
 function getOutsideLegendSize(legend: XYConfig['legend']): XYLegendSize | undefined {
+=======
+function getOutsideLegendSize(legend: XYConfig['legend']): LegendSizeType | undefined {
+>>>>>>> 9.4
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
@@ -240,9 +248,15 @@ function getApiLegendTruncate(
   };
 }
 
+<<<<<<< HEAD
 function convertSeriesHeaderToAPIFormat(
   legend: XYVisualizationState['legend']
 ): Pick<XYLegendInside, 'series_header'> {
+=======
+function convertSeriesHeaderToAPIFormat(legend: XYVisualizationState['legend']): {
+  series_header?: { text?: string; visible?: boolean };
+} {
+>>>>>>> 9.4
   const { title, isTitleVisible } = legend;
   if (isTitleVisible === false) {
     return { series_header: stripUndefined({ visible: false, text: undefined }) };
@@ -258,7 +272,11 @@ function convertSeriesHeaderToAPIFormat(
 
 export function convertLegendToAPIFormat(
   legend: XYVisualizationState['legend']
+<<<<<<< HEAD
 ): Pick<XYConfig, 'legend'> {
+=======
+): Pick<XYConfig, 'legend'> | {} {
+>>>>>>> 9.4
   const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible';
   const statistics = legend.legendStats?.length
     ? legend.legendStats.map((stat) => legendStatisticCompat.toAPI(stat))
@@ -266,6 +284,11 @@ export function convertLegendToAPIFormat(
 
   return {
     legend: stripUndefined({
+<<<<<<< HEAD
+=======
+      visibility,
+      statistics,
+>>>>>>> 9.4
       ...convertSeriesHeaderToAPIFormat(legend),
       ...getLegendAlignment(legend),
       ...getLegendLayout(legend),

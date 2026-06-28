@@ -10,7 +10,11 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { registerRoutes } from './api/register_routes';
+<<<<<<< HEAD
 import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+=======
+import { MARKDOWN_EMBEDDABLE_TYPE, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
+>>>>>>> 9.4
 import { markdownEmbeddableSchema } from './embeddable/schemas';
 import type { MarkdownAttributes } from './markdown_saved_object';
 import { markdownSavedObjectType } from './markdown_saved_object';

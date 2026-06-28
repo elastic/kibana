@@ -33,9 +33,13 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
   PublishesESQLVariable &
+<<<<<<< HEAD
   PublishesESQLQuery &
   PublishesUnsavedChanges &
   PublishesRelatedPanels &
+=======
+  PublishesUnsavedChanges &
+>>>>>>> 9.4
   HasEditCapabilities &
   PublishesDataLoading &
   PublishesTooltipLabel &

@@ -15,9 +15,14 @@ import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+<<<<<<< HEAD
 import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { getMonitorAction } from '../../../../state';
+=======
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+>>>>>>> 9.4
 
 jest.mock('@kbn/observability-shared-plugin/public');
 

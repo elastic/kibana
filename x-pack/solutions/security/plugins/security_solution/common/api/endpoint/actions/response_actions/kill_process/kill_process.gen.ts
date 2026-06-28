@@ -49,6 +49,12 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
 );
 export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
 
+<<<<<<< HEAD
+=======
+export const KillProcessRouteResponse = lazySchema(() => z.object({}));
+export type KillProcessRouteResponse = z.infer<typeof KillProcessRouteResponse>;
+
+>>>>>>> 9.4
 export const EndpointKillProcessActionRequestBody = lazySchema(() => KillProcessRouteRequestBody);
 export type EndpointKillProcessActionRequestBody = z.infer<
   typeof EndpointKillProcessActionRequestBody
@@ -57,7 +63,11 @@ export type EndpointKillProcessActionRequestBodyInput = z.input<
   typeof EndpointKillProcessActionRequestBody
 >;
 
+<<<<<<< HEAD
 export const EndpointKillProcessActionResponse = lazySchema(
   () => ResponseActionCreateSuccessResponse
 );
+=======
+export const EndpointKillProcessActionResponse = lazySchema(() => KillProcessRouteResponse);
+>>>>>>> 9.4
 export type EndpointKillProcessActionResponse = z.infer<typeof EndpointKillProcessActionResponse>;

@@ -99,7 +99,10 @@ export function TraceContextLogEvents({
           nonHighlightingQuery={query}
           timeRange={savedSearchTimeRange}
           index={indexes.logs}
+<<<<<<< HEAD
           executionContext={{ meta: { operation_id: FETCH_TRACE_CONTEXT_LOGS_OPERATION_ID } }}
+=======
+>>>>>>> 9.4
         />
       </div>
     </ContentFrameworkSection>

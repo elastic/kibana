@@ -11,7 +11,11 @@ import pMap from 'p-map';
 import type { WatchlistCsvUploadResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
+<<<<<<< HEAD
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+=======
+import { getExistingEntitiesMap, getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+>>>>>>> 9.4
 import { MANUAL_SOURCE_ID } from '../manual/constants';
 import type { MatchedEntity, Watchlist } from './types';
 import { lookupEntitiesForRow } from './lookup';
@@ -72,7 +76,11 @@ const upsertToWatchlistIndex = async (
     logger,
     watchlist
   )({
+<<<<<<< HEAD
     entities,
+=======
+    entities: enriched,
+>>>>>>> 9.4
     sourceLabel: MANUAL_SOURCE_ID,
     targetIndex: watchlist.index,
   });

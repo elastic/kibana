@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<<< HEAD:src/platform/plugins/shared/dashboard_markdown/public/markdown_client/has_library_item_with_title.ts
 import { markdownClient } from './markdown_client';
 
 export const hasLibraryItemWithTitle = async (title: string) => {
@@ -16,3 +17,13 @@ export const hasLibraryItemWithTitle = async (title: string) => {
 
   return markdowns.some((markdown) => markdown.data.title.toLowerCase() === title.toLowerCase());
 };
+========
+import { schema } from '@kbn/config-schema';
+import { markdownAttributesSchema } from '../markdown_saved_object';
+import { markdownByValueStateSchema } from '../embeddable/schemas';
+
+export const markdownLibraryItemSchema = schema.object({
+  ...markdownAttributesSchema.getPropSchemas(),
+  ...markdownByValueStateSchema.getPropSchemas(),
+});
+>>>>>>>> 9.4:src/platform/plugins/shared/dashboard_markdown/server/api/schema.ts

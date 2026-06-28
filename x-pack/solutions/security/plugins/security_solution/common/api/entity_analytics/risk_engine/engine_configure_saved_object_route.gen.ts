@@ -53,11 +53,14 @@ export const ConfigureRiskEngineSavedObjectRequestBody = lazySchema(() =>
         })
       )
       .optional(),
+<<<<<<< HEAD
     /**
       * Number of entities to score per page. Higher values reduce total scoring time by reducing the number of alert-index scans, but cannot exceed the ES|QL result limit (10,000 by default).
 
       */
     page_size: z.number().int().min(100).max(10000).optional(),
+=======
+>>>>>>> 9.4
   })
 );
 export type ConfigureRiskEngineSavedObjectRequestBody = z.infer<

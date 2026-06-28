@@ -27,6 +27,7 @@ import {
 export const DefendInsightsGetRequestQuery = lazySchema(() =>
   z.object({
     /**
+<<<<<<< HEAD
      * The insight ids for which to get Defend insights.
      */
     ids: ArrayFromString(NonEmptyString).optional(),
@@ -48,6 +49,29 @@ export const DefendInsightsGetRequestQuery = lazySchema(() =>
     endpoint_ids: ArrayFromString(NonEmptyString).optional(),
     /**
      * The number of Defend insights to return.
+=======
+     * The insight ids for which to get Defend insights
+     */
+    ids: ArrayFromString(NonEmptyString).optional(),
+    /**
+     * The connector id for which to get Defend insights
+     */
+    connector_id: NonEmptyString.optional(),
+    /**
+     * The insight type for which to get Defend insights
+     */
+    type: DefendInsightType.optional(),
+    /**
+     * The status for which to get Defend insights
+     */
+    status: DefendInsightStatus.optional(),
+    /**
+     * The endpoint ids for which to get Defend insights
+     */
+    endpoint_ids: ArrayFromString(NonEmptyString).optional(),
+    /**
+     * The number of Defend insights to return
+>>>>>>> 9.4
      */
     size: z.coerce.number().optional(),
   })

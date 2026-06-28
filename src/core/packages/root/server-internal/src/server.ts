@@ -65,7 +65,10 @@ import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
+<<<<<<< HEAD
 import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+=======
+>>>>>>> 9.4
 import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';

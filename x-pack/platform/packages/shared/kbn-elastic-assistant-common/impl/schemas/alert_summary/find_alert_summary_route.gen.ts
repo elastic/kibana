@@ -27,6 +27,7 @@ export const FindAlertSummarySortFieldEnum = FindAlertSummarySortField.enum;
 
 export const FindAlertSummaryRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * A list of fields to include in the response. If omitted, all fields are returned.
      */
@@ -53,6 +54,31 @@ export const FindAlertSummaryRequestQuery = lazySchema(() =>
     page: z.coerce.number().int().min(1).optional().default(1),
     /**
      * Number of alert summaries to return per page. Defaults to 20.
+=======
+    fields: ArrayFromString(z.string()).optional(),
+    /**
+     * Search query
+     */
+    filter: z.string().optional(),
+    /**
+     * Connector id used for prompt lookup
+     */
+    connector_id: z.string(),
+    /**
+     * Field to sort by
+     */
+    sort_field: FindAlertSummarySortField.optional(),
+    /**
+     * Sort order
+     */
+    sort_order: SortOrder.optional(),
+    /**
+     * Page number
+     */
+    page: z.coerce.number().int().min(1).optional().default(1),
+    /**
+     * Alert Summary per page
+>>>>>>> 9.4
      */
     per_page: z.coerce.number().int().min(0).optional().default(20),
   })

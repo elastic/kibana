@@ -124,7 +124,10 @@ describe('useDeprecatedRuleDetailsCallout', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: { navigateToApp: mockNavigateToApp },
+<<<<<<< HEAD
         telemetry: { reportEvent: jest.fn() },
+=======
+>>>>>>> 9.4
         docLinks: {
           links: {
             securitySolution: {

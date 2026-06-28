@@ -6,11 +6,17 @@
  */
 
 import { EuiConfirmModal, euiTextBreakWord, useGeneratedHtmlId } from '@elastic/eui';
+<<<<<<< HEAD
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../../hooks/use_kibana';
+=======
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+>>>>>>> 9.4
 
 const linkStyles = css`
   ${euiTextBreakWord()}

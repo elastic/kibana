@@ -187,6 +187,7 @@ describe('PackagePolicyInputConfig', () => {
     expect(utils.queryByText('Authentication')).not.toBeInTheDocument();
   });
 
+<<<<<<< HEAD
   describe('condition field', () => {
     const baseInput = { enabled: true, type: 'logfile', streams: [] };
 
@@ -241,6 +242,8 @@ describe('PackagePolicyInputConfig', () => {
     });
   });
 
+=======
+>>>>>>> 9.4
   it('should show deprecated vars on edit page (isEditPage=true)', () => {
     const renderer = createFleetTestRendererMock();
     const mockOnChange = jest.fn();

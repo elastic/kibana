@@ -21,9 +21,12 @@ import { SavedTimeline, PersistTimelineResponse } from '../model/components.gen'
 export const CopyTimelineRequestBody = lazySchema(() =>
   z.object({
     timeline: SavedTimeline,
+<<<<<<< HEAD
     /**
      * The `savedObjectId` of the timeline or template to duplicate.
      */
+=======
+>>>>>>> 9.4
     timelineIdToCopy: z.string(),
   })
 );

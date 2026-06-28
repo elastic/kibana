@@ -30,7 +30,10 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+<<<<<<< HEAD
   EuiToolTip,
+=======
+>>>>>>> 9.4
   htmlIdGenerator,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -176,7 +179,10 @@ export const ReviewApproveModal: React.FC<{
     useState<ReviewDataStream | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<EuiComboBoxOptionOption[]>([]);
   const [autoInstallAfterApproval, setAutoInstallAfterApproval] = useState(true);
+<<<<<<< HEAD
   const savedCategoriesAppliedRef = useRef(false);
+=======
+>>>>>>> 9.4
 
   const autoInstallCheckboxId = useMemo(
     () => htmlIdGenerator('manageIntegrationReviewAutoInstall')(),
@@ -236,7 +242,10 @@ export const ReviewApproveModal: React.FC<{
       setReviewError(null);
       setSelectedDataStreamForFlyout(null);
       setSelectedCategories([]);
+<<<<<<< HEAD
       savedCategoriesAppliedRef.current = false;
+=======
+>>>>>>> 9.4
       setAutoInstallAfterApproval(true);
       loadReviewDetails();
     }

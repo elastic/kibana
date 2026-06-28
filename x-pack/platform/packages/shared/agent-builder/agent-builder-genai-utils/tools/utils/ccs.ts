@@ -9,8 +9,14 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
+<<<<<<< HEAD
 import { flattenMapping, getIndexMappings } from './mappings';
 import type { GetIndexMappingsResult } from './mappings/get_index_mappings';
+=======
+import { flattenMapping, getIndexMappings, getDataStreamMappings } from './mappings';
+import type { GetIndexMappingsResult } from './mappings/get_index_mappings';
+import type { GetDataStreamMappingsResults } from './mappings/get_datastream_mappings';
+>>>>>>> 9.4
 import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
 import { batchByUrlLength } from './batch_by_url_length';
 import { listSearchSources } from '../steps/list_search_sources';
@@ -140,6 +146,10 @@ const resolveLocalTarget = async ({
   const res = await listSearchSources({
     pattern: input,
     esClient,
+<<<<<<< HEAD
+=======
+    includeKibanaIndices: true,
+>>>>>>> 9.4
     includeHidden: true,
     excludeIndicesRepresentedAsAlias: true,
     excludeIndicesRepresentedAsDatastream: true,
@@ -200,6 +210,7 @@ export const getIndexFields = async ({
       buckets[r.kind].push({ input: r.input, concrete });
     }
 
+<<<<<<< HEAD
     // Shared concurrency cap across all fetch paths (index/ds/alias/pattern).
     // Each per-input field_caps call and each batched mapping call counts as
     // one slot against this limit.
@@ -222,6 +233,13 @@ export const getIndexFields = async ({
       );
 
     const [indexMappings, dsResults, aliasResults, patternResults] = await Promise.all([
+=======
+    // Shared concurrency cap across all four fetch paths (index/ds/alias/
+    // pattern). Each per-input field_caps call and each batched mapping call
+    // counts as one slot against this limit.
+    const fetchLimit = pLimit(5);
+    const [indexMappings, dsMappings, aliasResults, patternResults] = await Promise.all([
+>>>>>>> 9.4
       buckets.index.length > 0
         ? fetchLimit(() =>
             getIndexMappings({
@@ -231,9 +249,37 @@ export const getIndexFields = async ({
             })
           )
         : Promise.resolve({} as GetIndexMappingsResult),
+<<<<<<< HEAD
       fetchPerInputFieldCaps(buckets.dataStream),
       fetchPerInputFieldCaps(buckets.alias),
       fetchPerInputFieldCaps(buckets.indexPattern),
+=======
+      buckets.dataStream.length > 0
+        ? fetchLimit(() =>
+            getDataStreamMappings({
+              datastreams: buckets.dataStream.map((i) => i.concrete),
+              cleanup,
+              esClient,
+            })
+          )
+        : Promise.resolve({} as GetDataStreamMappingsResults),
+      Promise.all(
+        buckets.alias.map(async (a) => ({
+          input: a.input,
+          fields: await fetchLimit(() =>
+            getFieldsFromFieldCaps({ resource: a.concrete, esClient })
+          ),
+        }))
+      ),
+      Promise.all(
+        buckets.indexPattern.map(async (p) => ({
+          input: p.input,
+          fields: await fetchLimit(() =>
+            getFieldsFromFieldCaps({ resource: p.concrete, esClient })
+          ),
+        }))
+      ),
+>>>>>>> 9.4
     ]);
 
     for (const { input, concrete } of buckets.index) {
@@ -250,8 +296,22 @@ export const getIndexFields = async ({
         rawMapping: entry.mappings,
       };
     }
+<<<<<<< HEAD
     for (const { input, fields } of dsResults) {
       result[input] = { type: 'dataStream', fields };
+=======
+    for (const { input, concrete } of buckets.dataStream) {
+      const entry = dsMappings[concrete];
+      if (!entry) {
+        result[input] = { type: 'indexPattern', fields: [] };
+        continue;
+      }
+      result[input] = {
+        type: 'dataStream',
+        fields: flattenMapping(entry.mappings),
+        rawMapping: entry.mappings,
+      };
+>>>>>>> 9.4
     }
     for (const { input, fields } of aliasResults) {
       result[input] = { type: 'alias', fields };

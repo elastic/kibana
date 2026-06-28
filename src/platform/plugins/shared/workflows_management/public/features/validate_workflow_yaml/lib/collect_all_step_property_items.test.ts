@@ -197,12 +197,20 @@ steps:
         return null;
       }
     );
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_step_property_items.test.ts
     const stepPropertyItems = collectAllStepPropertyItems(
+=======
+    const customPropertyItems = collectAllCustomPropertyItems(
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_custom_property_items.test.ts
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_step_property_items.test.ts
     expect(stepPropertyItems[0].context.values).toEqual({ config: {}, input: {} });
+=======
+    expect(customPropertyItems[0].context.values).toEqual({ config: {}, input: {} });
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_custom_property_items.test.ts
   });
 
   it('should pass filtered context.values when dependsOnValues is set', () => {
@@ -231,17 +239,27 @@ steps:
         return null;
       }
     );
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_step_property_items.test.ts
     const stepPropertyItems = collectAllStepPropertyItems(
+=======
+    const customPropertyItems = collectAllCustomPropertyItems(
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_custom_property_items.test.ts
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_step_property_items.test.ts
     expect(stepPropertyItems).toHaveLength(1);
     expect(stepPropertyItems[0].context.values).toEqual({
+=======
+    expect(customPropertyItems).toHaveLength(1);
+    expect(customPropertyItems[0].context.values).toEqual({
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_custom_property_items.test.ts
       config: { other: 'ignored', proxy: { ssl: true } },
       input: {},
     });
   });
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_step_property_items.test.ts
 
   it('should collect step property items for internal steps like elasticsearch.search when resolver returns a handler', () => {
     const yaml = `
@@ -282,4 +300,6 @@ steps:
       key: 'index',
     });
   });
+=======
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_custom_property_items.test.ts
 });

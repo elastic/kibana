@@ -52,7 +52,10 @@ const createActionsConfigMock = () => {
     getMaxEmailBodyLength: jest.fn().mockReturnValue(DEFAULT_EMAIL_BODY_LENGTH),
     getEarsUrl: jest.fn().mockReturnValue(undefined),
     isEarsEnabled: jest.fn().mockReturnValue(false),
+<<<<<<< HEAD
     isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
+=======
+>>>>>>> 9.4
   };
   return mocked;
 };

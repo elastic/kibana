@@ -53,6 +53,9 @@
     "@kbn/workflows",
     "@kbn/usage-api-plugin",
     "@kbn/workflows-management-plugin",
+<<<<<<< HEAD
     "@kbn/navigation-plugin",
+=======
+>>>>>>> 9.4
   ]
 }

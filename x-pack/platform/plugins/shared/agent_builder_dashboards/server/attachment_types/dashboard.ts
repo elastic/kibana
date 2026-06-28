@@ -130,7 +130,11 @@ export const createDashboardAttachmentType = ({
       };
     },
     getAgentDescription: () =>
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/server/attachment_types/dashboard.ts
       `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboard-management skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardAttachmentId\`; the tool reads and updates this attachment in place.`,
+=======
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this attachment, use the \`platform.dashboard.manage_dashboard\` tool (load the dashboard-management skill first).`,
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/server/attachment_types/dashboard.ts
     getTools: () => [],
   };
 };

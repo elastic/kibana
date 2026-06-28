@@ -96,6 +96,7 @@ export async function fetchAssetsByVersion(
     ruleAssetsMap.set(getPrebuiltRuleAssetSoId(asset.rule_id, asset.version), asset);
   }
 
+<<<<<<< HEAD
   // When the caller specifies `sort`, ES already returned hits in the requested
   // order and `Map` preserves insertion order, so emitting the map's values
   // honors that sort. Otherwise (no sort) we restore the caller's `versions`
@@ -107,6 +108,17 @@ export async function fetchAssetsByVersion(
         const asset = ruleAssetsMap.get(id);
         return asset !== undefined ? [asset] : [];
       });
+=======
+  // Ensure the order of the returned assets matches the order of the "versions" argument.
+  const orderedRuleAssets: PrebuiltRuleAsset[] = [];
+
+  for (const soId of soIds) {
+    const asset = ruleAssetsMap.get(soId);
+    if (asset !== undefined) {
+      orderedRuleAssets.push(asset);
+    }
+  }
+>>>>>>> 9.4
 
   return {
     assets: validatePrebuiltRuleAssets(orderedRuleAssets),

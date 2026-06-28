@@ -10,6 +10,7 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/
 import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { WatchlistsFlyoutKey } from '../../shared/constants';
 import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from '../constants';
+<<<<<<< HEAD
 
 const WATCHLIST_RISK_MODIFIER_MIN = 0;
 const WATCHLIST_RISK_MODIFIER_MAX = 2;
@@ -29,6 +30,8 @@ export const isValidWatchlistRiskModifier = (value: unknown): boolean => {
 export const getWatchlistRiskModifierValidation = (watchlist: CreateWatchlistRequestBodyInput) => ({
   isRiskModifierInvalid: !isValidWatchlistRiskModifier(watchlist.riskModifier),
 });
+=======
+>>>>>>> 9.4
 
 export const getDefaultWatchlist = (): CreateWatchlistRequestBodyInput => ({
   name: '',

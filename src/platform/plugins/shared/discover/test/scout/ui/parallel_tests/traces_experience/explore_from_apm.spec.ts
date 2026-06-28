@@ -17,6 +17,7 @@ import {
   teardownTracesExperience,
   expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
+<<<<<<< HEAD
 
 // APM chart toolbars re-layout as sparkline data streams in, which can push the
 // "Open in Discover" icon out of the actionability window while Playwright is
@@ -44,6 +45,8 @@ const clickAndWaitForDiscover = (
     locator.click(clickOptions),
   ]);
 };
+=======
+>>>>>>> 9.4
 
 const APM_TIME_RANGE = {
   rangeFrom: TRACES.DEFAULT_START_TIME,
@@ -338,21 +341,30 @@ spaceTest.describe(
         });
 
         await spaceTest.step('unified waterfall size warning is visible', async () => {
+<<<<<<< HEAD
           await expect(pageObjects.tracesExperience.apm.waterfall.container).toBeVisible({
             timeout: WATERFALL_RENDER_TIMEOUT,
           });
           await expect(pageObjects.tracesExperience.apm.waterfall.sizeWarning).toBeVisible({
             timeout: WATERFALL_RENDER_TIMEOUT,
           });
+=======
+          await expect(pageObjects.tracesExperience.apm.waterfall.container).toBeVisible();
+          await expect(pageObjects.tracesExperience.apm.waterfall.sizeWarning).toBeVisible();
+>>>>>>> 9.4
         });
 
         await spaceTest.step(
           'warning "view in Discover" link opens traces experience',
           async () => {
+<<<<<<< HEAD
             await clickAndWaitForDiscover(
               page,
               pageObjects.tracesExperience.apm.waterfall.sizeWarningDiscoverLink
             );
+=======
+            await pageObjects.tracesExperience.apm.waterfall.sizeWarningDiscoverLink.click();
+>>>>>>> 9.4
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
           }

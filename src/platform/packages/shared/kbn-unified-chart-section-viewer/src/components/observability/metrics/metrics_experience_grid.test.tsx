@@ -301,6 +301,7 @@ describe('MetricsExperienceGrid', () => {
       metricItems: [],
       allDimensions: [],
       activeDimensions: [],
+<<<<<<< HEAD
       loading: false,
       error: new Error('Network error'),
     });
@@ -349,6 +350,8 @@ describe('MetricsExperienceGrid', () => {
       metricItems: [],
       allDimensions: [],
       activeDimensions: [],
+=======
+>>>>>>> 9.4
       loading: false,
       error: new Error('METRICS_INFO failed'),
     });

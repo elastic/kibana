@@ -10,7 +10,11 @@ import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { groupBy, isEmpty } from 'lodash';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EnrichmentSection } from './threat_details_view_enrichment_section';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view.tsx
 import { ENRICHMENT_TYPES } from '../../../../../../common/cti/constants';
+=======
+import { ENRICHMENT_TYPES } from '../../../../common/cti/constants';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/threat_intelligence/components/threat_intelligence_details_view.tsx
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 import {
@@ -19,7 +23,11 @@ import {
   THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_MATCHES_TEST_ID,
 } from './test_ids';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view.tsx
 import { FlyoutLoading } from '../../../../shared/components/flyout_loading';
+=======
+import { FlyoutLoading } from '../../../flyout/shared/components/flyout_loading';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/threat_intelligence/components/threat_intelligence_details_view.tsx
 
 export interface ThreatIntelligenceDetailsViewProps {
   /**

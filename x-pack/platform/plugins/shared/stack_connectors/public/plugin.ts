@@ -43,6 +43,17 @@ export class StackConnectorsPublicPlugin
         validateEmailAddresses: actions.validateEmailAddresses,
       },
     });
+<<<<<<< HEAD
+=======
+
+    if (ExperimentalFeaturesService.get().connectorsFromSpecs) {
+      registerConnectorTypesFromSpecs({
+        connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
+        uiSettingsPromise: core.getStartServices().then(([coreStart]) => coreStart.uiSettings),
+        isEarsEnabled: actions.isEarsEnabled,
+      });
+    }
+>>>>>>> 9.4
   }
 
   public start() {}

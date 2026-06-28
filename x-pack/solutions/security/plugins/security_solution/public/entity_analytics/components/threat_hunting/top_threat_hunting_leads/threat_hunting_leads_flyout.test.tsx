@@ -114,7 +114,11 @@ describe('ThreatHuntingLeadsFlyout', () => {
   it('renders tags as badges in list items', () => {
     mockUseQuery.mockReturnValue({
       data: {
+<<<<<<< HEAD
         leads: [createApiLead({ id: 'lead-tags', tags: ['malware'] })],
+=======
+        leads: [createApiLead({ id: 'lead-tags', tags: ['malware', 'lateral-movement'] })],
+>>>>>>> 9.4
         total: 1,
       },
       isLoading: false,
@@ -123,6 +127,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
     expect(screen.getByText('malware')).toBeInTheDocument();
+<<<<<<< HEAD
   });
 
   it('shows overflow badge when tags exceed the visible limit', () => {
@@ -138,6 +143,9 @@ describe('ThreatHuntingLeadsFlyout', () => {
 
     expect(screen.getByText('malware')).toBeInTheDocument();
     expect(screen.getByText('+1')).toBeInTheDocument();
+=======
+    expect(screen.getByText('lateral-movement')).toBeInTheDocument();
+>>>>>>> 9.4
   });
 
   it('does not render timestamps on lead list items', () => {

@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
+=======
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
+import type { LineCounter } from 'yaml';
+import YAML from 'yaml';
+>>>>>>> 9.4
 import type { RecursivePartial } from '@kbn/utility-types';
 import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
 import { getValueFromValueNode, type StepInfo } from '@kbn/workflows-yaml';

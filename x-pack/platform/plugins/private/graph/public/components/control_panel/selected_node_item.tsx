@@ -41,7 +41,10 @@ export const SelectedNodeItem = ({
   return (
     <button
       className="gphSelectionList__field"
+<<<<<<< HEAD
       data-test-subj={`graphSelectionListField-${node.label}`}
+=======
+>>>>>>> 9.4
       aria-label={i18n.translate('xpack.graph.sidebar.selections.selectedNodeItemButtonLabel', {
         defaultMessage: 'Select {nodeLabel}',
         values: { nodeLabel: node.label },

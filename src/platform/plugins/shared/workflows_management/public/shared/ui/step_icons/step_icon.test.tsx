@@ -187,6 +187,7 @@ describe('StepIcon', () => {
       expect(container.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
     });
+<<<<<<< HEAD
 
     it('skips a family sibling without an icon and uses one that has an icon', () => {
       // Some family members (e.g. `cases.noop`) can be registered without an icon. Aggregating
@@ -231,6 +232,8 @@ describe('StepIcon', () => {
       // The glyph icon is a data URL SVG rendered inline via a masked span, not an EuiIcon.
       expect(container.querySelector('span[aria-hidden="true"]')).toBeInTheDocument();
     });
+=======
+>>>>>>> 9.4
   });
 
   describe('__overview pseudo-step', () => {

@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 export const ADDED_NOTE_TO_TIMELINE = i18n.translate(
   'xpack.securitySolution.assistant.commentActions.addedNoteToTimelineToast',
   {
+<<<<<<< HEAD
     defaultMessage: 'Added note to Timeline',
+=======
+    defaultMessage: 'Added note to timeline',
+>>>>>>> 9.4
   }
 );
 

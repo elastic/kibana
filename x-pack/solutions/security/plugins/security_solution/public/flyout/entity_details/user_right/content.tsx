@@ -124,7 +124,10 @@ export const UserPanelContent = ({
         />
       )}
       <EntityInsight
+<<<<<<< HEAD
         entityRecord={entityRecord}
+=======
+>>>>>>> 9.4
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}

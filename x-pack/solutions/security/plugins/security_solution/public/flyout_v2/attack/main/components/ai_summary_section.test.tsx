@@ -71,11 +71,19 @@ describe('AISummarySection (v2)', () => {
 
   it('renders the section title, settings menu, and background title', async () => {
     const user = userEvent.setup();
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack/main/components/ai_summary_section.test.tsx
     render(<AISummarySection hit={buildHit()} />);
+=======
+    render(<AISummarySection />);
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/components/ai_summary_section.test.tsx
 
     expect(screen.getByText('Attack Summary')).toBeInTheDocument();
     expect(screen.getByText('Background')).toBeInTheDocument();
     expect(screen.getByTestId('overview-tab-ai-summary-settings-menu')).toBeInTheDocument();
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack/main/components/ai_summary_section.test.tsx
+=======
+
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/components/ai_summary_section.test.tsx
     expect(document.querySelector(`[data-test-subj="${KEY}"]`)).toBeTruthy();
 
     await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
@@ -101,12 +109,22 @@ describe('AISummarySection (v2)', () => {
 
   it('toggles to anonymized markdown when the switch is clicked', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack/main/components/ai_summary_section.test.tsx
     render(<AISummarySection hit={buildHit()} />);
 
     await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
     const toggleSwitch = await screen.findByTestId('overview-tab-toggle-anonymized');
 
     // Toggle ON → anonymized
+=======
+    render(<AISummarySection />);
+
+    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
+
+    const toggleSwitch = await screen.findByTestId('overview-tab-toggle-anonymized');
+
+    // ON -> anonymized
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/components/ai_summary_section.test.tsx
     await user.click(toggleSwitch);
 
     expect(
@@ -116,7 +134,10 @@ describe('AISummarySection (v2)', () => {
       document.querySelector('[data-test-subj="overview-tab-ai-background-content"]')
     ).toHaveTextContent('DETAILS (ANONYMIZED)');
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack/main/components/ai_summary_section.test.tsx
     // Toggle OFF → with replacements
+=======
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/components/ai_summary_section.test.tsx
     await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
     await user.click(await screen.findByTestId('overview-tab-toggle-anonymized'));
 
@@ -130,7 +151,11 @@ describe('AISummarySection (v2)', () => {
 
   it('renders the anonymized switch with the expected data-test-subj when the menu is open', async () => {
     const user = userEvent.setup();
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack/main/components/ai_summary_section.test.tsx
     render(<AISummarySection hit={buildHit()} />);
+=======
+    render(<AISummarySection />);
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/components/ai_summary_section.test.tsx
 
     await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
 
@@ -141,6 +166,7 @@ describe('AISummarySection (v2)', () => {
 
   it('disables the anonymized switch when there is no anonymized markdown', async () => {
     const user = userEvent.setup();
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack/main/components/ai_summary_section.test.tsx
     render(
       <AISummarySection
         hit={buildHit({
@@ -149,6 +175,16 @@ describe('AISummarySection (v2)', () => {
         })}
       />
     );
+=======
+    mockedUseOverviewTabData.mockReturnValue({
+      summaryMarkdown: '',
+      summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
+      detailsMarkdown: '',
+      detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
+    });
+
+    render(<AISummarySection />);
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/components/ai_summary_section.test.tsx
     await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
 
     const toggle = document.querySelector(

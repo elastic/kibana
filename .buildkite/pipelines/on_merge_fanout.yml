@@ -2,6 +2,7 @@ x-on-merge-gates: &on_merge_gates
 - build
 
 steps:
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     branches: main
@@ -164,6 +165,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
@@ -259,6 +262,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     branches: main
@@ -299,6 +303,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
@@ -337,6 +343,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     branches: main
@@ -357,6 +364,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
@@ -454,6 +463,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     branches: main
@@ -475,6 +485,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
@@ -496,6 +508,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     branches: main
@@ -518,6 +531,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:

@@ -129,7 +129,11 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
         css={stepTypesListStyles.iconGroup}
       >
         {visibleItems.map((baseType) => (
+<<<<<<< HEAD
           <EuiFlexItem grow={false} key={baseType} css={{ backgroundColor: 'red' }}>
+=======
+          <EuiFlexItem grow={false} key={baseType}>
+>>>>>>> 9.4
             <StepIcon
               stepType={baseType}
               executionStatus={undefined}

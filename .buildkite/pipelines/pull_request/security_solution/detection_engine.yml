@@ -1,4 +1,5 @@
 steps:
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     key: security-serverless-detection-engine
@@ -37,6 +38,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     key: security-detection-engine

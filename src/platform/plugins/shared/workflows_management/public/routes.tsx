@@ -12,7 +12,10 @@ import type { RouteComponentProps } from 'react-router-dom';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
+<<<<<<< HEAD
 import { WorkflowExecutionsRouteGate } from './components/workflow_executions_route_gate';
+=======
+>>>>>>> 9.4
 import { WorkflowsAvailabilityWrapper } from './components/workflows_availability';
 import { WorkflowsPrivilegesWrapper } from './components/workflows_privileges';
 import { WorkflowDetailStoreProvider } from './entities/workflows/store/provider';
@@ -39,7 +42,10 @@ export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
       <WorkflowsAvailabilityWrapper>
         <WorkflowsPrivilegesWrapper>
           <Routes>
+<<<<<<< HEAD
             <Route path="/executions" exact component={WorkflowExecutionsRouteGate} />
+=======
+>>>>>>> 9.4
             <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
             <Route path="/" exact component={WorkflowsPage} />
           </Routes>

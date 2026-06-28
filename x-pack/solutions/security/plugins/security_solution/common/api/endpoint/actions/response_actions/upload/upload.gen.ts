@@ -39,5 +39,12 @@ export const UploadRouteRequestBody = lazySchema(() =>
 );
 export type UploadRouteRequestBody = z.infer<typeof UploadRouteRequestBody>;
 
+<<<<<<< HEAD
 export const EndpointUploadActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
+=======
+export const UploadRouteResponse = lazySchema(() => z.object({}));
+export type UploadRouteResponse = z.infer<typeof UploadRouteResponse>;
+
+export const EndpointUploadActionResponse = lazySchema(() => UploadRouteResponse);
+>>>>>>> 9.4
 export type EndpointUploadActionResponse = z.infer<typeof EndpointUploadActionResponse>;

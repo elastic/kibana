@@ -1582,6 +1582,7 @@ describe('getInputId', () => {
     expect(id1).not.toBe(id2);
   });
 });
+<<<<<<< HEAD
 
 describe('storedPackagePolicyToAgentInputs - condition handling', () => {
   const basePolicy: PackagePolicy = {
@@ -1751,3 +1752,5 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     expect(result[0].condition).toBe("${host.platform} == 'darwin'");
   });
 });
+=======
+>>>>>>> 9.4

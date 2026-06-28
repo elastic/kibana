@@ -294,7 +294,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9.4
     registerSkills({
       agentBuilder,
       experimentalFeatures,
@@ -491,7 +494,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       if (experimentalFeatures.leadGenerationEnabled) {
         plugins.searchInferenceEndpoints.features.register({
+<<<<<<< HEAD
           parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+=======
+          parentFeatureId: 'security_search_inference_parent',
+>>>>>>> 9.4
           featureId: 'lead_generation',
           featureName: 'Threat Hunting Lead Generation',
           featureDescription: 'Lead generation inference endpoint configuration',
@@ -499,6 +506,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           recommendedEndpoints: [],
         });
       }
+<<<<<<< HEAD
 
       plugins.searchInferenceEndpoints.features.register({
         parentFeatureId: 'security_search_inference_parent',
@@ -508,6 +516,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
+=======
+>>>>>>> 9.4
     }
 
     const requestContextFactory = new RequestContextFactory({

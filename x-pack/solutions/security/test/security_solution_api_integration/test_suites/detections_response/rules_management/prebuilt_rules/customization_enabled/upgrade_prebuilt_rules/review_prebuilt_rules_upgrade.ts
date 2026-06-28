@@ -320,6 +320,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(ruleIds).not.toContain('rule-b');
       });
     });
+<<<<<<< HEAD
 
     describe('Granular request shape (filter / search / aggregations / fields / sort)', () => {
       const setUpThreeUpgradeableRules = async () => {
@@ -540,5 +541,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(descOrder).toEqual([...ascOrder].sort().reverse());
       });
     });
+=======
+>>>>>>> 9.4
   });
 };

@@ -26,19 +26,31 @@ export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
 
 export const Matcher = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     fields: z.array(z.string().max(256)).max(100),
+=======
+    fields: z.array(z.string()),
+>>>>>>> 9.4
     /**
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
 
       */
+<<<<<<< HEAD
     values: z.union([z.array(z.string().max(256)).max(1000), z.array(z.boolean()).max(1000)]),
+=======
+    values: z.union([z.array(z.string()), z.array(z.boolean())]),
+>>>>>>> 9.4
   })
 );
 export type Matcher = z.infer<typeof Matcher>;
 
 export const Filter = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     kuery: z.union([z.string().max(4096), z.object({}).strict()]).optional(),
+=======
+    kuery: z.union([z.string(), z.object({})]).optional(),
+>>>>>>> 9.4
   })
 );
 export type Filter = z.infer<typeof Filter>;
@@ -48,7 +60,11 @@ export const Integrations = lazySchema(() =>
     /**
      * Index to read latest sync markers from
      */
+<<<<<<< HEAD
     syncMarkerIndex: z.string().max(1000).optional(),
+=======
+    syncMarkerIndex: z.string().optional(),
+>>>>>>> 9.4
     /**
      * integrations latest full sync and update syncData
      */
@@ -70,11 +86,19 @@ export type Integrations = z.infer<typeof Integrations>;
 
 export const UpdateableMonitoringEntitySourceProperties = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     name: z.string().max(256).optional(),
     indexPattern: z.string().max(1000).optional(),
     integrationName: z.string().max(256).optional(),
     enabled: z.boolean().optional(),
     matchers: z.array(Matcher).max(100).optional(),
+=======
+    name: z.string().optional(),
+    indexPattern: z.string().optional(),
+    integrationName: z.string().optional(),
+    enabled: z.boolean().optional(),
+    matchers: z.array(Matcher).optional(),
+>>>>>>> 9.4
     filter: Filter.optional(),
     integrations: Integrations.optional(),
   })
@@ -120,10 +144,17 @@ export const CreateEntitySourceRequestBody = lazySchema(() =>
   z
     .object({
       type: MonitoringEntitySourceType,
+<<<<<<< HEAD
       name: z.string().max(256),
       indexPattern: z.string().max(1000).optional(),
       enabled: z.boolean().optional(),
       matchers: z.array(Matcher).max(100).optional(),
+=======
+      name: z.string(),
+      indexPattern: z.string().optional(),
+      enabled: z.boolean().optional(),
+      matchers: z.array(Matcher).optional(),
+>>>>>>> 9.4
       filter: Filter.optional(),
     })
     .strict()
@@ -136,7 +167,11 @@ export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceRespon
 
 export const DeleteEntitySourceRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     id: z.string().max(256),
+=======
+    id: z.string(),
+>>>>>>> 9.4
   })
 );
 export type DeleteEntitySourceRequestParams = z.infer<typeof DeleteEntitySourceRequestParams>;
@@ -144,7 +179,11 @@ export type DeleteEntitySourceRequestParamsInput = z.input<typeof DeleteEntitySo
 
 export const GetEntitySourceRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     id: z.string().max(256),
+=======
+    id: z.string(),
+>>>>>>> 9.4
   })
 );
 export type GetEntitySourceRequestParams = z.infer<typeof GetEntitySourceRequestParams>;
@@ -154,12 +193,21 @@ export const GetEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
 export type GetEntitySourceResponse = z.infer<typeof GetEntitySourceResponse>;
 export const ListEntitySourcesRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     type: z.string().max(256).optional(),
     managed: BooleanFromString.optional(),
     name: z.string().max(256).optional(),
     page: z.coerce.number().int().min(1).optional(),
     per_page: z.coerce.number().int().min(1).max(10000).optional(),
     sort_field: z.string().max(256).optional(),
+=======
+    type: z.string().optional(),
+    managed: BooleanFromString.optional(),
+    name: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    per_page: z.coerce.number().int().min(1).max(10000).optional(),
+    sort_field: z.string().optional(),
+>>>>>>> 9.4
     sort_order: z.enum(['asc', 'desc']).optional(),
   })
 );
@@ -178,7 +226,11 @@ export type ListEntitySourcesResponse = z.infer<typeof ListEntitySourcesResponse
 
 export const UpdateEntitySourceRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     id: z.string().max(256),
+=======
+    id: z.string(),
+>>>>>>> 9.4
   })
 );
 export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;

@@ -51,8 +51,267 @@ export function getFeaturesIdentificationTaskId(streamName: string) {
   return `${FEATURES_IDENTIFICATION_TASK_TYPE}_${streamName}`;
 }
 
+<<<<<<< HEAD
 function isCancellationError(message: string): boolean {
   return message.includes('ERR_CANCELED') || message.includes('Request was aborted');
+=======
+export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext) {
+  return {
+    [FEATURES_IDENTIFICATION_TASK_TYPE]: {
+      createTaskRunner: (runContext) => {
+        return {
+          run: cancellableTask(
+            async () => {
+              if (!runContext.fakeRequest) {
+                throw new Error('Request is required to run this task');
+              }
+              const { fakeRequest } = runContext;
+
+              const {
+                start,
+                end,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
+
+              const runId = uuid();
+              const trackEmptyTelemetry = (state: 'canceled' | 'failure') => {
+                taskContext.telemetry.trackFeaturesIdentified({
+                  run_id: runId,
+                  iteration: 0,
+                  stream_name: streamName,
+                  stream_type: 'unknown',
+                  state,
+                  docs_count: 0,
+                  features_new: 0,
+                  features_updated: 0,
+                  input_tokens_used: 0,
+                  output_tokens_used: 0,
+                  total_tokens_used: 0,
+                  cached_tokens_used: 0,
+                  duration_ms: 0,
+                  total_filters: 0,
+                  filters_capped: false,
+                  has_filtered_documents: false,
+                  excluded_features_count: 0,
+                  llm_ignored_count: 0,
+                  code_ignored_count: 0,
+                });
+              };
+
+              const {
+                taskClient,
+                scopedClusterClient,
+                getFeatureClient,
+                streamsClient,
+                inferenceClient,
+                soClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
+
+              const featureClient = await getFeatureClient();
+
+              const taskLogger = taskContext.logger.get('features_identification', streamName);
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                  featureName: 'knowledge indicator extraction',
+                  request: fakeRequest,
+                }));
+              taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
+
+              let hasTrackedIteration = false;
+              const iterationResults: IterationResult[] = [];
+              try {
+                const [
+                  stream,
+                  { hits: allExistingFeatures },
+                  { hits: excludedFeatures },
+                  { featurePromptOverride },
+                ] = await Promise.all([
+                  streamsClient.getStream(streamName),
+                  featureClient.getFeatures(streamName),
+                  featureClient.getExcludedFeatures(streamName),
+                  new PromptsConfigService({
+                    soClient,
+                    logger: taskLogger,
+                  }).getPrompt(),
+                ]);
+
+                const streamType = getStreamTypeFromDefinition(stream);
+                const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+                const esClient = scopedClusterClient.asCurrentUser;
+
+                const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
+
+                const [
+                  { features: inferredFeatures, tokensUsed: totalTokensUsed },
+                  computedFeatures,
+                ] = await Promise.all([
+                  identifyStreamFeatures({
+                    streamName: stream.name,
+                    esClient,
+                    start,
+                    end,
+                    existingFeatures,
+                    excludedFeatures,
+                    inferenceClient: boundInferenceClient,
+                    logger: taskLogger,
+                    signal: runContext.abortController.signal,
+                    systemPrompt: featurePromptOverride,
+                    onIterationComplete: async (it, changes) => {
+                      const allChanged = [...changes.newFeatures, ...changes.updatedFeatures];
+                      if (allChanged.length > 0) {
+                        await featureClient.bulk(
+                          stream.name,
+                          allChanged.map((feature) => ({ index: { feature } }))
+                        );
+                      }
+                      iterationResults.push({
+                        iteration: it.iteration,
+                        durationMs: it.durationMs,
+                        state: it.state,
+                        tokensUsed: it.tokensUsed,
+                        newFeatures: changes.newFeatures.map(toFeatureSummary),
+                        updatedFeatures: changes.updatedFeatures.map(toFeatureSummary),
+                      });
+                      taskContext.telemetry.trackFeaturesIdentified({
+                        run_id: runId,
+                        iteration: it.iteration,
+                        stream_name: streamName,
+                        stream_type: streamType,
+                        state: it.state,
+                        docs_count: it.docsCount,
+                        features_new: it.featuresNew,
+                        features_updated: it.featuresUpdated,
+                        input_tokens_used: it.tokensUsed.prompt,
+                        output_tokens_used: it.tokensUsed.completion,
+                        total_tokens_used: it.tokensUsed.total,
+                        cached_tokens_used: it.tokensUsed.cached ?? 0,
+                        duration_ms: it.durationMs,
+                        excluded_features_count: excludedFeatures.length,
+                        llm_ignored_count: it.ignoredFeaturesCount,
+                        code_ignored_count: it.codeIgnoredCount,
+                        total_filters: it.totalFilters,
+                        filters_capped: it.filtersCapped,
+                        has_filtered_documents: it.hasFilteredDocuments,
+                      });
+                      hasTrackedIteration = true;
+                    },
+                  }),
+                  generateAllComputedFeatures({
+                    stream,
+                    start,
+                    end,
+                    esClient,
+                    logger: taskContext.logger.get('computed_features', streamName),
+                  }),
+                ]);
+
+                const durationMs = Date.now() - new Date(_task.created_at).getTime();
+
+                const reconciledComputedFeatures = reconcileComputedFeatures({
+                  computedFeatures,
+                  streamName,
+                });
+
+                if (reconciledComputedFeatures.length > 0) {
+                  await featureClient.bulk(
+                    stream.name,
+                    reconciledComputedFeatures.map((feature) => ({ index: { feature } }))
+                  );
+                }
+
+                const allFeatures = [...inferredFeatures, ...reconciledComputedFeatures];
+
+                await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+                  _task,
+                  { start, end, streamName, connectorId: connectorIdOverride },
+                  {
+                    features: allFeatures,
+                    durationMs,
+                    iterations: iterationResults,
+                    totalTokensUsed,
+                  }
+                );
+              } catch (error) {
+                const failDurationMs = Date.now() - new Date(_task.created_at).getTime();
+
+                if (isDefinitionNotFoundError(error)) {
+                  taskLogger.debug(
+                    () =>
+                      `Stream ${streamName} was deleted before features identification task started, skipping`
+                  );
+                  return getDeleteTaskRunResult();
+                }
+
+                let connector;
+                try {
+                  connector = await inferenceClient.getConnectorById(connectorId);
+                } catch (connectorErr) {
+                  taskLogger.warn(
+                    `Failed to fetch connector ${connectorId} for error enrichment: ${
+                      connectorErr instanceof Error ? connectorErr.message : String(connectorErr)
+                    }`
+                  );
+                }
+
+                const errorMessage =
+                  isInferenceProviderError(error) && connector
+                    ? formatInferenceProviderError(error, connector)
+                    : parseError(error).message;
+
+                if (
+                  errorMessage.includes('ERR_CANCELED') ||
+                  errorMessage.includes('Request was aborted')
+                ) {
+                  taskLogger.debug(
+                    () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
+                  );
+                  trackEmptyTelemetry('canceled');
+                  return getDeleteTaskRunResult();
+                }
+
+                taskLogger.error(`Task ${runContext.taskInstance.id} failed: ${errorMessage}`, {
+                  error,
+                } as LogMeta);
+
+                const partialTokensUsed = iterationResults.reduce(
+                  (acc, iter) => sumTokens(acc, iter.tokensUsed),
+                  { ...EMPTY_TOKENS }
+                );
+
+                await taskClient.fail<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+                  _task,
+                  { start, end, streamName, connectorId: connectorIdOverride },
+                  errorMessage,
+                  {
+                    features: [],
+                    durationMs: failDurationMs,
+                    iterations: iterationResults,
+                    totalTokensUsed: partialTokensUsed,
+                  }
+                );
+
+                if (!hasTrackedIteration) {
+                  trackEmptyTelemetry('failure');
+                }
+
+                return getDeleteTaskRunResult();
+              }
+            },
+            runContext,
+            taskContext
+          ),
+        };
+      },
+    },
+  } satisfies TaskDefinitionRegistry;
+>>>>>>> 9.4
 }
 
 function buildTaskResult(iterationResults: IterationResult[], durationMs: number) {

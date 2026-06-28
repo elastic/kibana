@@ -52,11 +52,15 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
+<<<<<<< HEAD
   - '@kbn/scout'
   - '@kbn/search-api-panels'
   - '@kbn/usage-collection-plugin'
   - '@kbn/analytics'
   - '@kbn/datemath'
+=======
+  - '@kbn/search-api-panels'
+>>>>>>> 9.4
 tags:
   - plugin
   - prod

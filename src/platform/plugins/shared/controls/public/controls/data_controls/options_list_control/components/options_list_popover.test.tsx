@@ -11,7 +11,11 @@ import React from 'react';
 import { BehaviorSubject, first } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
+<<<<<<< HEAD
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+=======
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+>>>>>>> 9.4
 import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -64,11 +68,18 @@ describe('Options list popover', () => {
       initializeDrilldownsManager: jest.fn(),
       initialState: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
         data_view_id: 'myDataViewId',
         field_name: 'myFieldName',
         ...overwriteState,
       } as OptionsListDSLControlState,
+=======
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+        ...overwriteState,
+      },
+>>>>>>> 9.4
       finalizeApi,
       uuid,
       parentApi: {},
@@ -130,7 +141,13 @@ describe('Options list popover', () => {
       });
       stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
         return {
+<<<<<<< HEAD
           convertToText: (value: string) => `${value}:formatted`,
+=======
+          getConverterFor: () => {
+            return (value: string) => `${value}:formatted`;
+          },
+>>>>>>> 9.4
           toJSON: (value: any) => JSON.stringify(value),
         };
       });

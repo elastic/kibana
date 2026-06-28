@@ -47,9 +47,16 @@ export interface CorrelationsDetailsViewProps {
    */
   onShowAttack?: (id: string, indexName: string) => void;
   /**
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.tsx
    * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
    */
   useLegacyExpandableFlyout: boolean;
+=======
+   * Whether to hide the rule preview link in the correlations table.
+   * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
+   */
+  hidePreviewLink?: boolean;
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.tsx
 }
 
 /**
@@ -63,7 +70,11 @@ export const CorrelationsDetailsView = memo(
     isRulePreview,
     onShowAlert,
     onShowAttack,
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.tsx
     useLegacyExpandableFlyout,
+=======
+    hidePreviewLink = true,
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.tsx
   }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
@@ -122,7 +133,11 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.tsx
                   useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+=======
+                  hidePreviewLink={hidePreviewLink}
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.tsx
                 />
               </EuiFlexItem>
             )}
@@ -133,7 +148,11 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.tsx
                   useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+=======
+                  hidePreviewLink={hidePreviewLink}
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.tsx
                 />
               </EuiFlexItem>
             )}
@@ -143,7 +162,11 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.tsx
                   useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+=======
+                  hidePreviewLink={hidePreviewLink}
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.tsx
                 />
               </EuiFlexItem>
             )}

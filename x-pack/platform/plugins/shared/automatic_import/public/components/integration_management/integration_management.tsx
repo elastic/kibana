@@ -109,10 +109,13 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   useEffect(() => {
     setReanalysisJustScheduled(false);
   }, [integrationId]);
+<<<<<<< HEAD
 
   const pageTitle = integrationId
     ? i18n.PAGE_TITLE_EDIT_INTEGRATION
     : i18n.PAGE_TITLE_NEW_INTEGRATION;
+=======
+>>>>>>> 9.4
 
   return (
     <>

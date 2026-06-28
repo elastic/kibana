@@ -262,7 +262,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
 
   const otelDisableBeatsauthInput = useSwitchInput(
+<<<<<<< HEAD
     otelOutput?.otel_disable_beatsauth ?? false,
+=======
+    (output as NewElasticsearchOutput)?.otel_disable_beatsauth ?? false,
+>>>>>>> 9.4
     isDisabled('otel_disable_beatsauth')
   );
 
@@ -1110,7 +1114,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+<<<<<<< HEAD
               ...otelExporterParams,
+=======
+              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+>>>>>>> 9.4
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,

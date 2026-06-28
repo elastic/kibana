@@ -41,6 +41,7 @@ import {
   ENDPOINT_EXCEPTION_CARD_HEADER_TITLE,
   ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
   ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
+<<<<<<< HEAD
   ENTRY_DELETE_BTN,
   EXCEPTION_ITEM_CONTAINER,
   FIELD_INPUT,
@@ -48,6 +49,11 @@ import {
 } from '../../../../../screens/exceptions';
 import {
   navigateToEndpointExceptions,
+=======
+} from '../../../../../screens/exceptions';
+import {
+  goToEndpointExceptions,
+>>>>>>> 9.4
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
@@ -258,12 +264,17 @@ describe(
       selectCloseSingleAlerts();
       submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
+<<<<<<< HEAD
       navigateToEndpointExceptions();
+=======
+      goToEndpointExceptions();
+>>>>>>> 9.4
 
       // new exception item displays
       cy.get(ENDPOINT_EXCEPTION_CARD).should('have.length', 1);
       cy.get(ENDPOINT_EXCEPTION_CARD_HEADER_TITLE).should('have.text', ITEM_NAME_EDIT);
       cy.get(ENDPOINT_EXCEPTION_CARD_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+<<<<<<< HEAD
     });
 
     it('Should close all matching alerts when an Endpoint exception wildcard value contains backslashes', () => {
@@ -314,6 +325,8 @@ describe(
 
       goToClosedAlertsOnRuleDetailsPage();
       cy.get(ALERTS_COUNT).should('contain', '2');
+=======
+>>>>>>> 9.4
     });
   }
 );

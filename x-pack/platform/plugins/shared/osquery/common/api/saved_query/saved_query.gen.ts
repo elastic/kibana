@@ -31,9 +31,12 @@ import { CopySavedQueryResponse } from './copy_saved_query.gen';
 
 export const OsqueryCopySavedQueryRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The ID of the saved query to copy.
      */
+=======
+>>>>>>> 9.4
     id: SavedQueryId,
   })
 );
@@ -56,9 +59,12 @@ export type OsqueryCreateSavedQueryResponse = z.infer<typeof OsqueryCreateSavedQ
 
 export const OsqueryDeleteSavedQueryRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The saved query ID.
      */
+=======
+>>>>>>> 9.4
     id: SavedQueryId,
   })
 );
@@ -73,6 +79,7 @@ export const OsqueryDeleteSavedQueryResponse = lazySchema(() => DefaultSuccessRe
 export type OsqueryDeleteSavedQueryResponse = z.infer<typeof OsqueryDeleteSavedQueryResponse>;
 export const OsqueryFindSavedQueriesRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The page number to return.
      */
@@ -88,6 +95,11 @@ export const OsqueryFindSavedQueriesRequestQuery = lazySchema(() =>
     /**
      * The sort order.
      */
+=======
+    page: PageOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional(),
+    sort: SortOrUndefined.optional(),
+>>>>>>> 9.4
     sortOrder: SortOrderOrUndefined.optional(),
   })
 );
@@ -103,9 +115,12 @@ export type OsqueryFindSavedQueriesResponse = z.infer<typeof OsqueryFindSavedQue
 
 export const OsqueryGetSavedQueryDetailsRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The saved query ID.
      */
+=======
+>>>>>>> 9.4
     id: SavedQueryId,
   })
 );
@@ -123,9 +138,12 @@ export type OsqueryGetSavedQueryDetailsResponse = z.infer<
 
 export const OsqueryUpdateSavedQueryRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The saved query ID.
      */
+=======
+>>>>>>> 9.4
     id: SavedQueryId,
   })
 );

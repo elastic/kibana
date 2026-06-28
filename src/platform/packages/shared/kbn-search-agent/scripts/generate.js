@@ -199,6 +199,7 @@ function generateSkills() {
     }
   }
 
+<<<<<<< HEAD
   if (validationErrors.length > 0) {
     console.error('\nSkill validation failed:');
     for (const message of validationErrors) {
@@ -207,6 +208,8 @@ function generateSkills() {
     process.exit(1);
   }
 
+=======
+>>>>>>> 9.4
   return exports;
 }
 

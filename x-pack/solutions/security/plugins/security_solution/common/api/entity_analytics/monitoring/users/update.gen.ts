@@ -20,9 +20,12 @@ import { MonitoredUserUpdateDoc, MonitoredUserDoc } from './common.gen';
 
 export const UpdatePrivMonUserRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The document ID of the monitored user to update
      */
+=======
+>>>>>>> 9.4
     id: z.string(),
   })
 );

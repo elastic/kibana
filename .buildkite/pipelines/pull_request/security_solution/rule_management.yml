@@ -1,4 +1,5 @@
 steps:
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     key: security-serverless-rule-management
@@ -95,6 +96,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     key: security-rule-management

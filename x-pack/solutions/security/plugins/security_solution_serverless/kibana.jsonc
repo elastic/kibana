@@ -23,6 +23,15 @@
       "discover",
       "navigation"
     ],
+<<<<<<< HEAD
     "optionalPlugins": ["securitySolutionEss", "automaticImport", "usageApi", "workflowsManagement"]
+=======
+    "optionalPlugins": [
+      "securitySolutionEss",
+      "automaticImport",
+      "usageApi",
+      "workflowsManagement"
+    ]
+>>>>>>> 9.4
   }
 }

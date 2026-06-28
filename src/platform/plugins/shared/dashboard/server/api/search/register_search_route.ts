@@ -13,12 +13,19 @@ import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+<<<<<<< HEAD
 
+=======
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+>>>>>>> 9.4
 import { getRouteConfig } from '../get_route_config';
 import { logRequest } from '../log_request';
 import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
+<<<<<<< HEAD
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+=======
+>>>>>>> 9.4
 
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -32,6 +39,7 @@ export function registerSearchRoute(
     ...routeConfig,
     description:
       'Returns a paginated list of dashboards. Each result includes title, description, tags, and metadata, but not the full panel layout. Use `GET /api/dashboards/{id}` to retrieve the complete state.',
+<<<<<<< HEAD
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -39,6 +47,8 @@ export function registerSearchRoute(
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
     return getDashboardStateSchema(false, true);
+=======
+>>>>>>> 9.4
   });
 
   searchRoute.addVersion(

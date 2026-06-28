@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+<<<<<<< HEAD
 import {
   PackName,
   PackDescriptionOrUndefined,
@@ -88,4 +89,7 @@ export const CopyPacksResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const CopyPacksResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type CopyPacksResponse = z.infer<typeof CopyPacksResponse>;

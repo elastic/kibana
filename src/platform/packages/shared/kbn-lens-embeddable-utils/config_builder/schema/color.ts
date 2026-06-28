@@ -347,6 +347,7 @@ export const colorMappingSchema = schema.oneOf(
     gradientColorMappingSchema,
   ],
   {
+<<<<<<< HEAD
     meta: {
       id: 'colorMapping',
       title: 'Color Mapping',
@@ -384,6 +385,36 @@ export const allColoringTypeSchema = schema.oneOf(
     },
   }
 );
+=======
+    meta: { id: 'colorMapping', title: 'Color Mapping' },
+    defaultValue: DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE,
+  }
+);
+
+export const noColorSchema = schema.object(
+  { type: schema.literal('none') },
+  { meta: { id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring' } }
+);
+
+export const autoColorSchema = schema.object(
+  { type: schema.literal('auto') },
+  {
+    meta: {
+      id: 'autoColor',
+      title: 'Auto Color',
+      description: 'Coloring determined at runtime based on chart defaults',
+    },
+  }
+);
+
+export const allColoringTypeSchema = schema.oneOf([
+  colorByValueSchema,
+  staticColorSchema,
+  colorMappingSchema,
+  noColorSchema,
+  autoColorSchema,
+]);
+>>>>>>> 9.4
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;

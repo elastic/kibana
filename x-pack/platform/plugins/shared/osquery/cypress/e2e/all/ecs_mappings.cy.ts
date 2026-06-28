@@ -44,7 +44,29 @@ describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }
     cy.contains('test3');
   });
 
+<<<<<<< HEAD
   // Removed: 'should hide and show ecs mappings on Advanced accordion click'
   // Migrated to Jest component test: public/live_queries/form/live_query_query_field.test.tsx
   // Phase 2 migration — accordion toggle visibility is a UI-only assertion
+=======
+  it('should hide and show ecs mappings on Advanced accordion click', () => {
+    navigateTo('/app/osquery/new');
+    selectAllAgents();
+    cy.getBySel('savedQuerySelect').within(() => {
+      cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');
+    });
+
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'not.be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
+  });
+>>>>>>> 9.4
 });

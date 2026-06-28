@@ -57,6 +57,11 @@ export const FailedFieldInfo = () => {
           </EuiTitle>
           <EuiIconTip
             content={failedDocsErrorsColumnNameTooltip}
+<<<<<<< HEAD
+=======
+            size="s"
+            color="subdued"
+>>>>>>> 9.4
             type="question"
             className="eui-alignTop"
           />

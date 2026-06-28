@@ -44,7 +44,11 @@ async function resolveSecretField(
 ): Promise<string> {
   if (field == null) {
     throw new Error(
+<<<<<<< HEAD
       `Secret "${name}" in manifest "${manifestName}" has no value. Either provide a "value", a "vault" + "field" pair, or a "template" + "vars" object, or remove the key.`
+=======
+      `Secret "${name}" in manifest "${manifestName}" has no value. Either provide a "value" or a "vault" + "field" pair, or remove the key.`
+>>>>>>> 9.4
     );
   }
 
@@ -56,6 +60,7 @@ async function resolveSecretField(
     return vaultRead(field.vault, field.field);
   }
 
+<<<<<<< HEAD
   if (field.template !== undefined) {
     if (!field.vars || Object.keys(field.vars).length === 0) {
       throw new Error(
@@ -73,6 +78,10 @@ async function resolveSecretField(
 
   throw new Error(
     `Secret "${name}" in manifest "${manifestName}" must have either a "value" or a "vault" + "field" pair, or a "template" + "vars" object.`
+=======
+  throw new Error(
+    `Secret "${name}" in manifest "${manifestName}" must have either a "value" or a "vault" + "field" pair.`
+>>>>>>> 9.4
   );
 }
 

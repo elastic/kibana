@@ -17,10 +17,13 @@ import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+<<<<<<< HEAD
 import {
   getOutboundEventChainHeaders,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '../trigger_events/event_context/event_chain_context';
+=======
+>>>>>>> 9.4
 import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';

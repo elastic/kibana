@@ -23,7 +23,11 @@ import {
   RESOLUTION_GROUP_LINK_TITLE,
   RESOLUTION_GROUP_LINK_TOOLTIP,
 } from './translations';
+<<<<<<< HEAD
 import { RESOLUTION_GROUP_LINK_TEST_ID, RESOLUTION_SECTION_TEST_ID } from './test_ids';
+=======
+import { RESOLUTION_SECTION_TEST_ID } from './test_ids';
+>>>>>>> 9.4
 import { getEntityId, getEntityName } from './helpers';
 
 interface ResolutionSectionProps {

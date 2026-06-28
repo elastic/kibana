@@ -41,10 +41,18 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
+<<<<<<< HEAD
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   getAlertingV2RulesClient: () => Promise<RulesClientApi | undefined>;
+=======
+  getFeatureClient: () => Promise<FeatureClient>;
+  insightClient: InsightClient;
+  inferenceClient: InferenceClient;
+  contentClient: ContentClient;
+  getQueryClient: () => Promise<QueryClient>;
+>>>>>>> 9.4
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;

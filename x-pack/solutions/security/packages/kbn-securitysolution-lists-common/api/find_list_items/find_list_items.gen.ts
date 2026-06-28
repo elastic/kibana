@@ -33,9 +33,12 @@ export type FindListItemsFilter = z.infer<typeof FindListItemsFilter>;
 
 export const FindListItemsRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * Parent value list's `id` to page through items for.
      */
+=======
+>>>>>>> 9.4
     list_id: ListId,
     /**
      * The page number to return.
@@ -53,10 +56,13 @@ export const FindListItemsRequestQuery = lazySchema(() =>
      * Determines the sort order, which can be `desc` or `asc`
      */
     sort_order: z.enum(['desc', 'asc']).optional(),
+<<<<<<< HEAD
     /**
       * Opaque cursor returned in a previous response; pass it to continue listing from the next page. Omit on the first request.
 
       */
+=======
+>>>>>>> 9.4
     cursor: FindListItemsCursor.optional(),
     /**
       * Filters the returned results according to the value of the specified field,

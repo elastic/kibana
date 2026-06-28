@@ -14,8 +14,12 @@
  *   version: 2023-10-31
  */
 
+<<<<<<< HEAD
 import type { z } from '@kbn/zod/v4';
 import { lazySchema } from '@kbn/zod/v4';
+=======
+import { z, lazySchema } from '@kbn/zod/v4';
+>>>>>>> 9.4
 
 import {
   ResponseActionCreateSuccessResponse,
@@ -24,6 +28,12 @@ import {
 
 export const GetProcessesRouteRequestBody = lazySchema(() => BaseActionSchema);
 export type GetProcessesRouteRequestBody = z.infer<typeof GetProcessesRouteRequestBody>;
+<<<<<<< HEAD
+=======
+
+export const GetProcessesRouteResponse = lazySchema(() => z.object({}));
+export type GetProcessesRouteResponse = z.infer<typeof GetProcessesRouteResponse>;
+>>>>>>> 9.4
 
 export const EndpointGetProcessesActionRequestBody = lazySchema(() => GetProcessesRouteRequestBody);
 export type EndpointGetProcessesActionRequestBody = z.infer<
@@ -33,7 +43,11 @@ export type EndpointGetProcessesActionRequestBodyInput = z.input<
   typeof EndpointGetProcessesActionRequestBody
 >;
 
+<<<<<<< HEAD
 export const EndpointGetProcessesActionResponse = lazySchema(
   () => ResponseActionCreateSuccessResponse
 );
+=======
+export const EndpointGetProcessesActionResponse = lazySchema(() => GetProcessesRouteResponse);
+>>>>>>> 9.4
 export type EndpointGetProcessesActionResponse = z.infer<typeof EndpointGetProcessesActionResponse>;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 /**
  * Produces the code-changes file consumed by the Scout selective-testing CLI.
  *
@@ -43,6 +44,27 @@ const [mergeBase, outPath] = process.argv.slice(2);
 
 if (!mergeBase || !outPath) {
   console.error('Usage: resolve_selective_testing.ts <mergeBase> <outPath>');
+=======
+import fs from 'node:fs';
+import path from 'node:path';
+import {
+  getAffectedPackages,
+  listChangedFiles,
+  touchedCriticalFiles,
+  CRITICAL_FILES_SCOUT,
+} from '#pipeline-utils';
+
+const mergeBase = process.env.AFFECTED_MERGE_BASE;
+const outPath = process.env.AFFECTED_MODULES_FILE;
+
+if (!mergeBase) {
+  console.error('AFFECTED_MERGE_BASE environment variable is required');
+  process.exit(1);
+}
+
+if (!outPath) {
+  console.error('AFFECTED_MODULES_FILE environment variable is required');
+>>>>>>> 9.4
   process.exit(1);
 }
 
@@ -50,6 +72,7 @@ if (!mergeBase || !outPath) {
   // List changed files once; reuse for both affected-packages and critical-files check.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
+<<<<<<< HEAD
   // Compute affected @kbn/ modules (replaces the legacy `list_affected` binary).
   // Overlay implicit runtime-registry consumers — see scout_implicit_consumers.ts.
   const affectedPackages = expandWithImplicitConsumers(
@@ -72,4 +95,26 @@ if (!mergeBase || !outPath) {
   const resolvedOutPath = path.resolve(outPath);
   fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
   fs.writeFileSync(resolvedOutPath, JSON.stringify(codeChanges, null, 2));
+=======
+  // Write affected modules JSON (replaces the list_affected binary call).
+  const affectedPackages = await getAffectedPackages(mergeBase, {
+    strategy: 'git',
+    includeDownstream: true,
+    ignoreUncategorizedChanges: true,
+  });
+  const resolvedOutPath = path.resolve(outPath);
+  fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
+  fs.writeFileSync(resolvedOutPath, JSON.stringify(Array.from(affectedPackages).sort(), null, 2));
+
+  // Top-level check: if critical Scout files were touched, the all Scout tests should run.
+  const criticalTouched = touchedCriticalFiles(changedFiles, CRITICAL_FILES_SCOUT);
+  if (criticalTouched) {
+    console.warn(
+      'Critical Scout files changed — selective testing will be skipped (full suite run)'
+    );
+  }
+
+  // Output true/false to stdout for the shell script to capture.
+  process.stdout.write(criticalTouched ? 'true' : 'false');
+>>>>>>> 9.4
 })();

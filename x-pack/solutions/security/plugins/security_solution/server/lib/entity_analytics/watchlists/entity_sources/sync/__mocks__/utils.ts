@@ -7,6 +7,10 @@
 
 const actual = jest.requireActual('../utils');
 
+<<<<<<< HEAD
+=======
+export const getExistingEntitiesMap = jest.fn().mockResolvedValue(new Map());
+>>>>>>> 9.4
 export const getErrorFromBulkResponse = jest.fn().mockReturnValue([]);
 export const errorsMsg = jest.fn().mockReturnValue('');
 export const isTimestampGreaterThan = jest.fn().mockReturnValue(false);

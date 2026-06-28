@@ -15,6 +15,10 @@ import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { validateConnectorIds } from './validate_connector_ids';
+<<<<<<< HEAD
+=======
+import { validateCustomProperties } from './validate_custom_properties';
+>>>>>>> 9.4
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';

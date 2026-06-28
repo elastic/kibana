@@ -17,6 +17,7 @@ steps:
         - exit_status: '-1'
           limit: 3
         - exit_status: '*'
+<<<<<<< HEAD
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
@@ -39,3 +40,6 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+=======
+          limit: 1
+>>>>>>> 9.4

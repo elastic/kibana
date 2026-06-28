@@ -18,6 +18,10 @@ jest.mock('../../../entity_sources/manual/service');
 jest.mock('@kbn/entity-store/server/domain/crud', () => ({
   CRUDClient: jest.fn(),
 }));
+<<<<<<< HEAD
+=======
+jest.mock('../../../shared/utils');
+>>>>>>> 9.4
 
 const { mockWatchlistGet } = jest.requireMock('../../watchlist_config');
 const { mockUnassign } = jest.requireMock('../../../entity_sources/manual/service');

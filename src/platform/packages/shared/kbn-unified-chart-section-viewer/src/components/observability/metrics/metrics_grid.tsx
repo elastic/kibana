@@ -323,9 +323,16 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
+<<<<<<< HEAD
     const applicableDimensions = useStableApplicableDimensions(
       dimensions,
       metricItem.dimensionFields
+=======
+    const applicableDimensions = useMemo(
+      () =>
+        dimensions.filter((dim) => metricItem.dimensionFields.some((df) => df.name === dim.name)),
+      [dimensions, metricItem.dimensionFields]
+>>>>>>> 9.4
     );
 
     const esqlQuery = useMemo(() => {
@@ -339,7 +346,11 @@ const ChartItem = React.memo(
             originalSource: userSource,
           })
         : '';
+<<<<<<< HEAD
     }, [metricItem, applicableDimensions, whereStatements, userSource]);
+=======
+    }, [metricItem, applicableDimensions, whereStatements]);
+>>>>>>> 9.4
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({ dimensions: applicableDimensions, metricItem, color });

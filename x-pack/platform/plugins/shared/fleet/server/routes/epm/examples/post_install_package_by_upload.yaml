@@ -5,11 +5,14 @@ requestBody:
         postInstallByUploadRequestExample:
           description: 'Upload a .zip or .tar.gz package archive (max 100MB)'
           value: '<binary package archive>'
+<<<<<<< HEAD
     application/gzip; application/zip:
       examples:
         postInstallByUploadRequestExample:
           description: 'Upload a .zip or .tar.gz package archive (max 100MB)'
           value: '<binary package archive>'
+=======
+>>>>>>> 9.4
 responses:
   200:
     description: 'Successful response'
@@ -24,6 +27,7 @@ responses:
                   type: 'index_template'
               _meta:
                 install_source: 'upload'
+<<<<<<< HEAD
       application/gzip; application/zip:
         examples:
           postInstallByUploadExample:
@@ -34,6 +38,8 @@ responses:
                   type: 'index_template'
               _meta:
                 install_source: 'upload'
+=======
+>>>>>>> 9.4
   400:
     description: 'Bad Request'
     content:
@@ -45,6 +51,7 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+<<<<<<< HEAD
       application/gzip; application/zip:
         examples:
           genericErrorResponseExample:
@@ -53,3 +60,5 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+=======
+>>>>>>> 9.4

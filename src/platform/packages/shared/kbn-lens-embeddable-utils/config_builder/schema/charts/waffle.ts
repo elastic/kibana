@@ -109,8 +109,12 @@ export const waffleConfigSchemaNoESQL = schema.object(
     styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+<<<<<<< HEAD
         partitionConfigPrimaryMetricOptionsSchema,
         'waffleMetric'
+=======
+        partitionConfigPrimaryMetricOptionsSchema
+>>>>>>> 9.4
       ),
       {
         minSize: 1,
@@ -120,10 +124,14 @@ export const waffleConfigSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
+<<<<<<< HEAD
         mergeAllBucketsWithChartDimensionSchema(
           partitionConfigBreakdownByOptionsSchema,
           'waffleGroupBy'
         ),
+=======
+        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+>>>>>>> 9.4
         {
           minSize: 1,
           maxSize: 100,

@@ -60,7 +60,11 @@ export function transformDashboardOut(
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
+<<<<<<< HEAD
     references
+=======
+    references ?? []
+>>>>>>> 9.4
   );
 
   const timeRange =
@@ -143,6 +147,10 @@ export function transformDashboardOut(
       pinned_panels: pinnedPanels,
       ...(query && { query }),
     },
+<<<<<<< HEAD
     warnings: [...warnings, ...pinnedPanelWarnings, ...searchSourceWarnings, ...otherStateWarnings],
+=======
+    warnings: [...warnings, ...pinnedPanelWarnings],
+>>>>>>> 9.4
   };
 }

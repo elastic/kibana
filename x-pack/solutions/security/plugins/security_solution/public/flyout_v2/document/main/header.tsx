@@ -20,10 +20,18 @@ import { Notes } from '../../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
 import { Timestamp } from '../../shared/components/timestamp';
 import { RiskScore } from './components/risk_score';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/header.tsx
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+=======
+import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { noopCellActionRenderer } from '../shared/components/cell_actions';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { RemoteDocumentBadge } from './components/remote_document_badge';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/header.tsx
 
 export interface HeaderProps {
   /**
@@ -62,12 +70,20 @@ export const Header: FC<HeaderProps> = memo(
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/header.tsx
         <EuiText size="s">
           <Timestamp hit={hit} />
         </EuiText>
         <EuiSpacer size="xs" />
 
         <Title hit={hit} hideLink={!canReadRules} />
+=======
+        <Timestamp hit={hit}>
+          <EuiSpacer size="xs" />
+        </Timestamp>
+        <Title hit={hit} hideLink={!canReadRules} />
+        <RemoteDocumentBadge hit={hit} />
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/header.tsx
         {isAlert && (
           <>
             <EuiSpacer size="m" />

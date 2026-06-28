@@ -155,7 +155,13 @@ paths:
           schema:
             nullable: true
             type: string
+<<<<<<< HEAD
         - description: Sort order (`asc` or `desc`) for saved-objects find (list mode only).
+=======
+        - description: >-
+            Sort order (`asc` or `desc`) for saved-objects find (list mode
+            only).
+>>>>>>> 9.4
           example: desc
           in: query
           name: sortOrder
@@ -228,7 +234,12 @@ paths:
         Requires the **Timeline and Notes** write privilege (`notes_write`).
       externalDocs:
         description: Add or update a note on a Timeline
+<<<<<<< HEAD
         url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
+=======
+        url: >-
+          https://www.elastic.co/guide/en/security/current/timeline-api-update.html
+>>>>>>> 9.4
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -246,16 +257,32 @@ paths:
               properties:
                 note:
                   $ref: '#/components/schemas/BareNote'
+<<<<<<< HEAD
                   description: Note payload (timeline, text, optional event linkage, metadata).
                 noteId:
                   description: The `savedObjectId` of the note to update. Omit when creating a new
                     note.
+=======
+                  description: >-
+                    Note payload (timeline, text, optional event linkage,
+                    metadata).
+                noteId:
+                  description: >-
+                    The `savedObjectId` of the note to update. Omit when
+                    creating a new note.
+>>>>>>> 9.4
                   example: 709f99c6-89b6-4953-9160-35945c8e174e
                   nullable: true
                   type: string
                 version:
+<<<<<<< HEAD
                   description: Saved object version string from a previous read; optional on
                     update.
+=======
+                  description: >-
+                    Saved object version string from a previous read; optional
+                    on update.
+>>>>>>> 9.4
                   example: WzQ2LDFd
                   nullable: true
                   type: string
@@ -1383,8 +1410,14 @@ components:
               nullable: true
               type: string
             timelineId:
+<<<<<<< HEAD
               description: The `savedObjectId` of the Timeline this note belongs to (not the
                 note's own ID).
+=======
+              description: >-
+                The `savedObjectId` of the Timeline this note belongs to (not
+                the note's own ID).
+>>>>>>> 9.4
               example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
           required:
@@ -1624,7 +1657,12 @@ components:
             $ref: '#/components/schemas/Note'
           type: array
         totalCount:
+<<<<<<< HEAD
           description: Number of notes returned (may be adjusted after the query when
+=======
+          description: >-
+            Number of notes returned (may be adjusted after the query when
+>>>>>>> 9.4
             `associatedFilter` applies post-filtering).
           type: number
       required:

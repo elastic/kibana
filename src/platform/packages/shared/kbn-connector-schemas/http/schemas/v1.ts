@@ -58,6 +58,7 @@ export const SecretsSchema = lazySchema(() =>
     })
 );
 
+<<<<<<< HEAD
 export const HttpMethodSchema = lazySchema(() => z.enum(HTTP_METHODS).default('GET'));
 
 export const HttpRequestBodySchema = lazySchema(() =>
@@ -98,3 +99,32 @@ export const ParamsSchema = lazySchema(() =>
     })
     .strict()
 );
+=======
+export const HttpMethodSchema = z.enum(HTTP_METHODS).default('GET');
+
+export const HttpRequestBodySchema = z.union([
+  z.string(),
+  z.array(z.unknown()),
+  z.record(z.string(), z.unknown()),
+]);
+
+export const ParamsSchema = z
+  .object({
+    url: z.string().url().optional(),
+    path: z.string().optional(),
+    method: HttpMethodSchema,
+    body: HttpRequestBodySchema.optional(),
+    query: z.record(z.string(), z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
+    fetcher: z
+      .object({
+        skip_ssl_verification: z.boolean().optional(),
+        follow_redirects: z.boolean().optional(),
+        max_redirects: z.number().optional(),
+        keep_alive: z.boolean().optional(),
+        max_content_length: z.number().positive().finite().optional(),
+      })
+      .optional(),
+  })
+  .strict();
+>>>>>>> 9.4

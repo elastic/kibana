@@ -65,6 +65,7 @@ const pieStylingSchema = schema.object(
     labels: schema.maybe(
       schema.object(
         {
+<<<<<<< HEAD
           visible: schema.maybe(
             schema.boolean({ meta: { description: 'When `true`, displays slice labels.' } })
           ),
@@ -72,6 +73,13 @@ const pieStylingSchema = schema.object(
             schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
               meta: {
                 description: 'Slice label position: `inside` or `outside`.',
+=======
+          visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
+          position: schema.maybe(
+            schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
+              meta: {
+                description: 'Renders pie chart slice labels inside or outside the pie',
+>>>>>>> 9.4
               },
             })
           ),
@@ -86,11 +94,15 @@ const pieStylingSchema = schema.object(
     donut_hole: schema.maybe(
       schema.oneOf(
         [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
+<<<<<<< HEAD
         {
           meta: {
             description: 'Donut hole size. Accepted values: `none` (full pie), `s`, `m`, `l`.',
           },
         }
+=======
+        { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
+>>>>>>> 9.4
       )
     ),
   },
@@ -158,8 +170,12 @@ export const pieConfigSchemaNoESQL = schema.object(
     styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+<<<<<<< HEAD
         partitionConfigPrimaryMetricOptionsSchema,
         'pieMetric'
+=======
+        partitionConfigPrimaryMetricOptionsSchema
+>>>>>>> 9.4
       ),
       {
         minSize: 1,
@@ -169,10 +185,14 @@ export const pieConfigSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
+<<<<<<< HEAD
         mergeAllBucketsWithChartDimensionSchema(
           partitionConfigBreakdownByOptionsSchema,
           'pieGroupBy'
         ),
+=======
+        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+>>>>>>> 9.4
         {
           minSize: 1,
           maxSize: 100,

@@ -49,6 +49,12 @@ export const useUpdateWatchlist = ({
       const isRuleBasedType = (t: string): t is SourceType => t === 'store' || t === 'index';
       const deletedIds = new Set<string>();
 
+<<<<<<< HEAD
+=======
+      const isRuleBasedType = (t: string): t is SourceType => t === 'store' || t === 'index';
+      const deletedIds = new Set<string>();
+
+>>>>>>> 9.4
       for (const source of watchlist.entitySources ?? []) {
         const sourceType = source.type ?? 'index';
         // Only process rule-based sources; integration sources are managed separately
@@ -85,6 +91,21 @@ export const useUpdateWatchlist = ({
               body: { type: sourceType, ...sourceBody },
             });
           }
+<<<<<<< HEAD
+=======
+        }
+      }
+
+      // Clean up any existing rule-based sources that weren't processed above.
+      // Only run when entitySources is defined (user interacted with the source section).
+      // undefined means entity sources weren't modified at all.
+      if (watchlist.entitySources) {
+        const processedTypes = new Set<string>(watchlist.entitySources.map((s) => s.type));
+        for (const [type, id] of Object.entries(ruleBasedSourceIds)) {
+          if (id && !deletedIds.has(id) && !processedTypes.has(type)) {
+            await deleteWatchlistEntitySource({ watchlistId, entitySourceId: id });
+          }
+>>>>>>> 9.4
         }
       }
 

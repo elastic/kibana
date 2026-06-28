@@ -19,8 +19,11 @@ plugins:
     - dashboard
     - dashboard_markdown
     - data
+<<<<<<< HEAD
     - data_view_editor
     - data_view_management
+=======
+>>>>>>> 9.4
     - data_views
     - data_views_as_code
     - dev_tools
@@ -47,7 +50,10 @@ plugins:
     - kql
     - lens
     - logstash
+<<<<<<< HEAD
     - management
+=======
+>>>>>>> 9.4
     - maps
     - ml
     - monitoring
@@ -91,9 +97,13 @@ packages:
   enabled:
     - core
     - kbn-scout
+<<<<<<< HEAD
     - kbn-security-hardening
     - kbn-streamlang-tests
     - user-storage
+=======
+    - kbn-streamlang-tests
+>>>>>>> 9.4
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
 

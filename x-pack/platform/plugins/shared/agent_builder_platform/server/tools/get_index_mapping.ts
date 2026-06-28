@@ -86,6 +86,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
 
       const resources = Object.fromEntries(
         Object.entries(indexFields).map(([name, v]) => {
+<<<<<<< HEAD
           const totalFields = v.fields.length;
           const truncated = totalFields > FIELD_LIMIT;
           const cappedFields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
@@ -128,6 +129,21 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
         })
       );
 
+=======
+          if (raw && v.rawMapping) {
+            return [name, { type: v.type, mappings: v.rawMapping }];
+          }
+          if (raw) {
+            return [
+              name,
+              { type: v.type, fields: v.fields.map(({ path, type }) => ({ path, type })) },
+            ];
+          }
+          return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];
+        })
+      );
+
+>>>>>>> 9.4
       return { results: [otherResult({ resources })] };
     },
     tags: [],

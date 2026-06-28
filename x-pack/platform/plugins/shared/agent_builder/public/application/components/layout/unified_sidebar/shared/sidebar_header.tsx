@@ -19,8 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
+<<<<<<< HEAD
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+=======
+>>>>>>> 9.4
 import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
@@ -132,6 +135,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size="s"
               flush="both"
               color="text"
+<<<<<<< HEAD
               onClick={() => {
                 navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
@@ -140,6 +144,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
                 detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
               })}
+=======
+              onClick={() => navigate(appPaths.agent.root({ agentId: getLastAgentId() }))}
+>>>>>>> 9.4
             >
               {labels.manageComponents}
             </EuiButtonEmpty>

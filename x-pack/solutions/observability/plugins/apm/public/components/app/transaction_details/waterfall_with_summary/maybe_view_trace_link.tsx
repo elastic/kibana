@@ -61,6 +61,30 @@ export function MaybeViewTraceLink({
   traceItems?: TraceItem[];
   onViewFullTrace: () => void;
 }) {
+<<<<<<< HEAD
+=======
+  const {
+    query,
+    query: { comparisonEnabled, offset },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation'
+  );
+
+  const { link } = useApmRouter();
+  const { core } = useApmPluginContext();
+
+  const defaultComparisonEnabled = getComparisonEnabled({
+    core,
+    urlComparisonEnabled: comparisonEnabled,
+  });
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
+
+>>>>>>> 9.4
   const rootTransactionInfo = useMemo(() => {
     const traceMap = getTraceParentChildrenMap(traceItems, false);
     const root = traceMap.root?.[0];

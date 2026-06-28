@@ -22,8 +22,11 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
+<<<<<<< HEAD
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+=======
+>>>>>>> 9.4
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
@@ -35,9 +38,13 @@ export interface CreateModelProviderOpts {
   trackingService?: TrackingService;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+<<<<<<< HEAD
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+=======
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+>>>>>>> 9.4
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -74,8 +81,11 @@ export const createModelProvider = ({
   uiSettings,
   savedObjects,
   searchInferenceEndpoints,
+<<<<<<< HEAD
   logger,
   telemetryMetadata,
+=======
+>>>>>>> 9.4
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {

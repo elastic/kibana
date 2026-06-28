@@ -118,8 +118,15 @@ export function isFormBasedLayer(
   return 'columnOrder' in layer;
 }
 
+<<<<<<< HEAD
 export function isTextBasedLayer(layer: DataSourceStateLayer): layer is TextBasedLayer {
   return 'columns' in layer && Array.isArray(layer.columns) && 'query' in layer;
+=======
+export function isTextBasedLayer(
+  layer: LensApiConfig | DataSourceStateLayer
+): layer is TextBasedLayer {
+  return 'index' in layer && 'query' in layer;
+>>>>>>> 9.4
 }
 
 function sha256Sync(str: string): string {

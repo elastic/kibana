@@ -144,11 +144,17 @@ const upsertQueryStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context, logger }) => {
+<<<<<<< HEAD
     const { streamsClient, getKnowledgeIndicatorClient, attachmentClient } = await getScopedClients(
       {
         request,
       }
     );
+=======
+    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
+      request,
+    });
+>>>>>>> 9.4
 
     const core = await context.core;
     const queryStreamsEnabled = await core.uiSettings.client.get(
@@ -198,12 +204,33 @@ const upsertQueryStreamRoute = createServerRoute({
       throw badData(`The stream "${name}" already exists and is not a query stream.`);
     }
 
+<<<<<<< HEAD
     const kiClient = await getKnowledgeIndicatorClient();
     const { dashboards, queries, rules } = await getStreamAssets({
       name,
       kiClient,
       attachmentClient,
     });
+=======
+    // Get existing assets and attachments to preserve them
+    const queryClient = await getQueryClient();
+    const [assets, attachments] = await Promise.all([
+      queryClient.getAssets(name),
+      attachmentClient.getAttachments(name),
+    ]);
+
+    const dashboards = attachments
+      .filter((attachment) => attachment.type === 'dashboard')
+      .map((attachment) => attachment.id);
+
+    const rules = attachments
+      .filter((attachment) => attachment.type === 'rule')
+      .map((attachment) => attachment.id);
+
+    const queries = assets
+      .filter((asset) => asset[ASSET_TYPE] === 'query')
+      .map((asset) => asset.query);
+>>>>>>> 9.4
 
     // Remove name and updated_at from definition - these are not allowed in UpsertRequest
     const { name: _name, updated_at: _updatedAt, ...stream } = definition;

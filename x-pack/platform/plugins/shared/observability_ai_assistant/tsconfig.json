@@ -60,7 +60,11 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/core-spaces-common",
     "@kbn/usage-collection-plugin",
+<<<<<<< HEAD
     "@kbn/agent-builder-browser",
+=======
+    "@kbn/agent-builder-plugin",
+>>>>>>> 9.4
     "@kbn/zod",
     "@kbn/search-inference-endpoints",
     "@kbn/inference-connectors",

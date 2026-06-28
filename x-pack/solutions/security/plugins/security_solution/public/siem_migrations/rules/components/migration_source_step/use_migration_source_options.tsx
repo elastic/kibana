@@ -5,7 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+<<<<<<< HEAD
 import { EuiIcon } from '@elastic/eui';
+=======
+>>>>>>> 9.4
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { MigrationSource } from '../../../common/types';

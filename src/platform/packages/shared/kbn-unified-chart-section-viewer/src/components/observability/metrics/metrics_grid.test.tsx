@@ -226,6 +226,7 @@ describe('MetricsGrid', () => {
     );
   });
 
+<<<<<<< HEAD
   it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
     const descriptionForFirst = 'Data stream: metrics-system.cpu-default';
 
@@ -251,6 +252,8 @@ describe('MetricsGrid', () => {
     );
   });
 
+=======
+>>>>>>> 9.4
   it('filters dimensions to only those applicable to each metric', () => {
     // mockMetricItems only have dimensionFields: [{ name: 'host.name' }]
     // so service.name and container.id should be filtered out
@@ -285,7 +288,11 @@ describe('MetricsGrid', () => {
     const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'fieldsense.energy.battery.voltage',
+<<<<<<< HEAD
         indexName: 'fieldsense-station-metrics',
+=======
+        dataStream: 'fieldsense-station-metrics',
+>>>>>>> 9.4
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -293,7 +300,11 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'system.cpu.utilization',
+<<<<<<< HEAD
         indexName: 'metrics-hostmetricsreceiver.otel-default',
+=======
+        dataStream: 'metrics-hostmetricsreceiver.otel-default',
+>>>>>>> 9.4
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -324,6 +335,7 @@ describe('MetricsGrid', () => {
     );
   });
 
+<<<<<<< HEAD
   // Regression coverage for issue #262360: the user-typed source must be threaded
   // from `fetchParams.query` through `MetricsGrid` into `createESQLQuery` as
   // `originalSource`, so backing-index queries stay at the same scope METRICS_INFO
@@ -378,6 +390,8 @@ describe('MetricsGrid', () => {
     });
   });
 
+=======
+>>>>>>> 9.4
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
       jest.useFakeTimers();

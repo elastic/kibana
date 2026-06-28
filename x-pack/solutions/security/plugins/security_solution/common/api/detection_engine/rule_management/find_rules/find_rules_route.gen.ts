@@ -46,12 +46,15 @@ export const FindRulesSortFieldEnum = FindRulesSortField.enum;
 
 export const FindRulesRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
       * List of `alert.attributes` field names to return for each rule (for example `name`, `enabled`).
 If omitted, the default field set is returned. Repeat the parameter to pass multiple field names, or
 use comma-separated values when supported by your client.
 
       */
+=======
+>>>>>>> 9.4
     fields: ArrayFromString(z.string()).optional(),
     /**
       * Search query

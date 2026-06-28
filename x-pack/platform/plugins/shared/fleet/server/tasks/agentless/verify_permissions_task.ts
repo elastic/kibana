@@ -92,8 +92,12 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
 }
 
 /*
+<<<<<<< HEAD
  * Task flow (fires on a 12 h cron, and self-reschedules at VERIFICATION_TTL_MS
  * cadence whenever additional work remains):
+=======
+ * Task flow (runs every 12 hours):
+>>>>>>> 9.4
  *
  * Phase 1 - Gate: If a non-expired verifier agent policy exists, skip this run.
  *

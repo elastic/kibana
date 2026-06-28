@@ -62,11 +62,17 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 streamsClient,
                 inferenceClient,
                 soClient,
+<<<<<<< HEAD
                 getKnowledgeIndicatorClient,
+=======
+                getFeatureClient,
+>>>>>>> 9.4
                 scopedClusterClient,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
               });
+
+              const featureClient = await getFeatureClient();
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
 

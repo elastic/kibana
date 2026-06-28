@@ -84,11 +84,15 @@ async function mockIntegrationsList(page: ScoutPage, items: unknown[]) {
   );
 }
 
+<<<<<<< HEAD
 async function mockIntegrationDetails(
   page: ScoutPage,
   integrationId: string,
   options?: { categories?: string[] }
 ) {
+=======
+async function mockIntegrationDetails(page: ScoutPage, integrationId: string) {
+>>>>>>> 9.4
   await page.route(`**/api/automatic_import/integrations/${integrationId}`, (route) =>
     route.fulfill({
       status: 200,
@@ -308,6 +312,8 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
 
     await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
 
+    await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
+
     const approveRequest = page.waitForRequest(
       (req) =>
         req.url().includes(`/integrations/${MOCK_COMPLETED.integrationId}/approve`) &&
@@ -442,8 +448,11 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
+<<<<<<< HEAD
     // close the combobox to ensure the listbox doesn't overlay the checkbox
     await categoryInput.press('Escape');
+=======
+>>>>>>> 9.4
     await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
     await expect(
       pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox()
@@ -961,8 +970,11 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await categoryInput.click();
     await categoryInput.press('ArrowDown');
     await categoryInput.press('Enter');
+<<<<<<< HEAD
     // close the combobox to ensure the listbox doesn't overlay the checkbox
     await categoryInput.press('Escape');
+=======
+>>>>>>> 9.4
 
     await pageObjects.manageIntegrationsTable.getReviewModalAutoInstallCheckbox().uncheck();
     await pageObjects.manageIntegrationsTable.getReviewApproveInstallButton().click();

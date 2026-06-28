@@ -11,6 +11,7 @@ export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
 
 export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
 export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
+<<<<<<< HEAD
 export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '1m';
 // Max amount of entities to extract in one ESQL query
 export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
@@ -21,6 +22,14 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 // Max total raw log documents to process per task run; 0 = no cap
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
+=======
+export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '30s';
+// Max amount of entities to extract in one ESQL query
+export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
+// Max raw log documents per logs to be processed in a query (inside elastic search)
+export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 40000;
+export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '25s';
+>>>>>>> 9.4
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({

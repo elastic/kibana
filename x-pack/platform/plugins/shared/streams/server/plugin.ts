@@ -59,7 +59,13 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
+<<<<<<< HEAD
 import { KnowledgeIndicatorService, initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
+=======
+import { FeatureService } from './lib/streams/feature/feature_service';
+import type { FeatureClient } from './lib/streams/feature/feature_client';
+import type { QueryClient } from './lib/streams/assets/query/query_client';
+>>>>>>> 9.4
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
@@ -196,11 +202,16 @@ export class StreamsPlugin
         this.logger
       );
 
+<<<<<<< HEAD
       const [attachmentClient, contentClient, tuningConfig] = await Promise.all([
+=======
+      const [attachmentClient, insightClient, contentClient] = await Promise.all([
+>>>>>>> 9.4
         attachmentService.getClient({
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
+<<<<<<< HEAD
         contentService.getClient(),
         getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
@@ -273,6 +284,32 @@ export class StreamsPlugin
       const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
         const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
         return alertingV2RulesClient;
+=======
+        insightService.getInternalClient(),
+        contentService.getClient(),
+      ]);
+
+      let featureClientPromise: Promise<FeatureClient> | undefined;
+      const getFeatureClient = (): Promise<FeatureClient> => {
+        featureClientPromise ??= featureService.getClient();
+        return featureClientPromise;
+      };
+
+      let queryClientPromise: Promise<QueryClient> | undefined;
+      const getQueryClient = (): Promise<QueryClient> => {
+        queryClientPromise ??= (async () => {
+          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+            request,
+            DEFAULT_SPACE_ID
+          );
+          return queryService.getClient({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            soClient,
+            rulesClient,
+          });
+        })();
+        return queryClientPromise;
+>>>>>>> 9.4
       };
 
       const license = await licensing.getLicense();
@@ -280,7 +317,12 @@ export class StreamsPlugin
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
+<<<<<<< HEAD
         getKnowledgeIndicatorClient,
+=======
+        getQueryClient,
+        getFeatureClient,
+>>>>>>> 9.4
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -297,11 +339,19 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
+<<<<<<< HEAD
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
         inferenceClient,
         contentClient,
         getAlertingV2RulesClient,
+=======
+        getFeatureClient,
+        insightClient,
+        inferenceClient,
+        contentClient,
+        getQueryClient,
+>>>>>>> 9.4
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,

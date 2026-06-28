@@ -1103,6 +1103,7 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
+<<<<<<< HEAD
     it('should update output if preconfigured remote ES output exists and otel_exporter_config_yaml changed', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1147,6 +1148,8 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
     });
 
+=======
+>>>>>>> 9.4
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

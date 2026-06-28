@@ -14,8 +14,13 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { GetWatchlistRequestParams as WatchlistIdParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import { WatchlistConfigClient } from '../watchlist_config';
+<<<<<<< HEAD
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
+=======
+import { getRequestSavedObjectClient } from '../../shared/utils';
+import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
+>>>>>>> 9.4
 
 interface DeleteWatchlistResponse {
   deleted: true;
@@ -54,7 +59,11 @@ export const deleteWatchlistRoute = (
             const core = await context.core;
 
             const namespace = secSol.getSpaceId();
+<<<<<<< HEAD
             const soClient = getWatchlistSavedObjectClient(core);
+=======
+            const soClient = getRequestSavedObjectClient(core);
+>>>>>>> 9.4
             const esClient = core.elasticsearch.client.asCurrentUser;
 
             const entitySourcesService = createEntitySourcesService({
@@ -62,20 +71,29 @@ export const deleteWatchlistRoute = (
               soClient,
               esClient,
               logger,
+<<<<<<< HEAD
               getStartServices,
               hasEncryptionKey,
+=======
+>>>>>>> 9.4
             });
 
             // Clean up entities from the watchlist index and entity store before
             // removing the saved objects, so we can still resolve the watchlist name.
             await entitySourcesService.deleteWatchlistEntities(request.params.id);
 
+<<<<<<< HEAD
             const [coreStart] = await getStartServices();
+=======
+>>>>>>> 9.4
             const watchlistClient = new WatchlistConfigClient({
               namespace,
               soClient,
               esClient,
+<<<<<<< HEAD
               securityServiceStart: coreStart.security,
+=======
+>>>>>>> 9.4
               logger,
             });
 

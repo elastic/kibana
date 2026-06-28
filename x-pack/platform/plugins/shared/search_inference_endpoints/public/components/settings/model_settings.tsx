@@ -18,7 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
+<<<<<<< HEAD
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
+=======
+import * as translations from '../../../common/translations';
+>>>>>>> 9.4
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
@@ -29,12 +33,15 @@ import { useDefaultModelSettings } from '../../hooks/use_default_model_settings'
 import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+<<<<<<< HEAD
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
 import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
 import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
 import { ModelsCallout } from './models_callout';
+=======
+>>>>>>> 9.4
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -45,13 +52,17 @@ export const ModelSettings: React.FC = () => {
     effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
+<<<<<<< HEAD
     hasSavedObject,
     dirtyFeatureIds,
+=======
+>>>>>>> 9.4
     updateEndpoints,
     save: saveFeatures,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
+<<<<<<< HEAD
   const {
     state: defaultModelState,
     isDirty: isDefaultModelDirty,
@@ -60,10 +71,13 @@ export const ModelSettings: React.FC = () => {
   } = defaultModelSettings;
   const { enableAi, featureSpecificModels } = defaultModelState;
   const defaultModelValidation = useDefaultModelValidation(defaultModelState);
+=======
+>>>>>>> 9.4
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
     services: { application, http },
   } = useKibana();
+<<<<<<< HEAD
   const { canManage } = useInferenceCapabilities();
   const usageTracker = useUsageTracker();
   const deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = useMemo(() => {
@@ -84,6 +98,8 @@ export const ModelSettings: React.FC = () => {
   const [deprecatedAssignedModels, eolAssignedModels] = useMemo(() => {
     const eolModels = new Set<string>();
     const deprecatedModels = new Set<string>();
+=======
+>>>>>>> 9.4
 
     if (defaultModelState.defaultModelId !== NO_DEFAULT_MODEL) {
       const depInfo = deprecatedEndpointsMap.get(defaultModelState.defaultModelId);
@@ -190,7 +206,11 @@ export const ModelSettings: React.FC = () => {
       application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
+<<<<<<< HEAD
   }, [application, http.basePath, pendingLocation, resetDefaultModel]);
+=======
+  }, [application, http.basePath, pendingLocation, defaultModelSettings]);
+>>>>>>> 9.4
 
   const showFeatureSections = enableAi && featureSpecificModels;
 
@@ -214,13 +234,18 @@ export const ModelSettings: React.FC = () => {
     <>
       <EuiPageTemplate.Header
         data-test-subj="modelSettingsPageHeader"
+<<<<<<< HEAD
         pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
           defaultMessage: 'Feature settings',
         })}
+=======
+        pageTitle={translations.SETTINGS_TITLE}
+>>>>>>> 9.4
         bottomBorder
         paddingSize="none"
         restrictWidth={true}
         rightSideItems={[
+<<<<<<< HEAD
           ...(canManage
             ? [
                 <EuiButton
@@ -236,6 +261,17 @@ export const ModelSettings: React.FC = () => {
                 </EuiButton>,
               ]
             : []),
+=======
+          <EuiButton
+            fill
+            onClick={handleSave}
+            isLoading={isSaving}
+            isDisabled={!isDirty}
+            data-test-subj="save-settings-button"
+          >
+            {translations.SETTINGS_SAVE_BUTTON}
+          </EuiButton>,
+>>>>>>> 9.4
           <EuiButtonEmpty
             iconType="popout"
             iconSide="right"
@@ -245,9 +281,13 @@ export const ModelSettings: React.FC = () => {
             data-test-subj="settings-api-documentation"
             href={docLinks.featureSettings}
           >
+<<<<<<< HEAD
             {i18n.translate('xpack.searchInferenceEndpoints.settings.documentationLabel', {
               defaultMessage: 'Documentation',
             })}
+=======
+            {translations.API_DOCUMENTATION_LINK}
+>>>>>>> 9.4
           </EuiButtonEmpty>,
         ]}
       />
@@ -361,10 +401,42 @@ export const ModelSettings: React.FC = () => {
         />
         {showFeatureSections && (
           <>
+            {invalidEndpointIds.size > 0 && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
+                    {
+                      defaultMessage: 'Some assigned inference endpoints are no longer available',
+                    }
+                  )}
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="invalidEndpointsCallout"
+                  announceOnMount
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                      {
+                        defaultMessage:
+                          'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                        values: {
+                          endpointList: [...invalidEndpointIds].join(', '),
+                        },
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+              </>
+            )}
+
             <EuiSpacer size="xl" />
             {sections.length === 0 ? (
               <EuiEmptyPrompt
                 iconType="gear"
+<<<<<<< HEAD
                 title={
                   <h2>
                     {i18n.translate('xpack.searchInferenceEndpoints.settings.noFeatures.title', {
@@ -383,6 +455,10 @@ export const ModelSettings: React.FC = () => {
                     )}
                   </p>
                 }
+=======
+                title={<h2>{translations.SETTINGS_NO_FEATURES_TITLE}</h2>}
+                body={<p>{translations.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
+>>>>>>> 9.4
                 data-test-subj="settings-no-features"
               />
             ) : (
@@ -401,7 +477,10 @@ export const ModelSettings: React.FC = () => {
                     }))}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
+<<<<<<< HEAD
                     deprecatedEndpointsMap={deprecatedEndpointsMap}
+=======
+>>>>>>> 9.4
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                     globalDefaultId={defaultModelState.defaultModelId}

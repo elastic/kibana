@@ -25,8 +25,13 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
 import { EntitiesDetails } from '../components/entities_details';
+<<<<<<< HEAD
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/document/tools/threat_intelligence';
 import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view';
+=======
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/threat_intelligence';
+import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/threat_intelligence/components/threat_intelligence_details_view';
+>>>>>>> 9.4
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';

@@ -336,6 +336,7 @@ describe('MarkdownEmbeddable', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+<<<<<<< HEAD
 
   describe('anyStateChange$', () => {
     let embeddableApi: MarkdownEditorApi;
@@ -368,4 +369,6 @@ describe('MarkdownEmbeddable', () => {
       embeddableApi.setTitle('cute puppies');
     });
   });
+=======
+>>>>>>> 9.4
 });

@@ -15,8 +15,11 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+<<<<<<< HEAD
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+=======
+>>>>>>> 9.4
 import { DELAY_MODE } from './form/types';
 import type { FormValues } from './form/types';
 import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
@@ -87,7 +90,18 @@ export const defaultTestFormValues: FormValues = {
   },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
+<<<<<<< HEAD
   query: { format: 'standalone', breach: { query: '' } },
+=======
+  evaluation: {
+    query: {
+      base: '',
+    },
+  },
+  recoveryPolicy: {
+    type: 'no_breach',
+  },
+>>>>>>> 9.4
   stateTransitionAlertDelayMode: DELAY_MODE.immediate,
   stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
 };

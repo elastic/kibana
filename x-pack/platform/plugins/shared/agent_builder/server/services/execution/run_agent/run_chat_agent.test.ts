@@ -12,7 +12,10 @@ import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/
 
 import { createAgentHandlerContextMock } from '../../../test_utils/runner';
 import { createRound } from '../../../test_utils/conversations';
+<<<<<<< HEAD
 import { createMockedExecutableTool } from '../../../test_utils/tools';
+=======
+>>>>>>> 9.4
 
 import { runDefaultAgentMode } from './run_chat_agent';
 import { prepareConversation, selectTools, extractRound, getPendingRound } from './utils';
@@ -29,10 +32,13 @@ jest.mock('./utils', () => ({
   estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
 }));
 
+<<<<<<< HEAD
 jest.mock('./tools/register_internal_tools', () => ({
   registerInternalTools: jest.fn(),
 }));
 
+=======
+>>>>>>> 9.4
 jest.mock('./utils/create_result_transformer', () => ({
   createResultTransformer: jest.fn(() => ({})),
 }));

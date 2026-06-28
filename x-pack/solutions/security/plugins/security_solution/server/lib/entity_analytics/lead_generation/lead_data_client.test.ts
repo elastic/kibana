@@ -269,6 +269,7 @@ describe('LeadDataClient', () => {
       expect(result).toEqual({ leads: [], total: 0, page: 1, perPage: 20 });
     });
 
+<<<<<<< HEAD
     it('returns empty results when error type is index_not_found_exception', async () => {
       const indexNotFound = {
         statusCode: 404,
@@ -289,6 +290,8 @@ describe('LeadDataClient', () => {
     });
   });
 
+=======
+>>>>>>> 9.4
   describe('dismissLead', () => {
     it('sets status to dismissed via updateByQuery', async () => {
       esClient.updateByQuery.mockResolvedValueOnce({

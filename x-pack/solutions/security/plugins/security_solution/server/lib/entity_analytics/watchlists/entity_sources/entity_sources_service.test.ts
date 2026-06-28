@@ -18,9 +18,12 @@ jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
 jest.mock('./bulk/soft_delete');
+<<<<<<< HEAD
 jest.mock('@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request', () => ({
   getFakeKibanaRequest: jest.fn().mockReturnValue({ fakeRequest: true }),
 }));
+=======
+>>>>>>> 9.4
 
 const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
   mockListEntitySources: jest.Mock;
@@ -315,8 +318,13 @@ describe('createEntitySourcesService', () => {
           staleEntities: [{ docId: 'user:alice:doc1', sourceId: 'orphaned-source-1' }],
         })
       );
+<<<<<<< HEAD
       // no active sources so plainIndexSync is never called
       expect(mockPlainIndexSync).not.toHaveBeenCalled();
+=======
+      // plainIndexSync still runs (with empty sources) but cleanup handles orphans
+      expect(mockPlainIndexSync).toHaveBeenCalledWith([]);
+>>>>>>> 9.4
     });
 
     it('continues syncing remaining watchlists when one fails', async () => {

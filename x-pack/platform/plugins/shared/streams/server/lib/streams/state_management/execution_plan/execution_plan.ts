@@ -279,6 +279,7 @@ export class ExecutionPlan {
       return;
     }
 
+<<<<<<< HEAD
     const { getKnowledgeIndicatorClient } = this.dependencies;
     if (!getKnowledgeIndicatorClient) {
       throw new Error(
@@ -289,6 +290,14 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) => kiClient.deleteAllQueries(action.request.definition.name))
     );
+=======
+    const { getQueryClient } = this.dependencies;
+    if (!getQueryClient) {
+      throw new Error('queryClient is required for deleteQueries but was not provided');
+    }
+    const queryClient = await getQueryClient();
+    return Promise.all(actions.map((action) => queryClient.deleteAll(action.request.definition)));
+>>>>>>> 9.4
   }
 
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
@@ -316,6 +325,7 @@ export class ExecutionPlan {
       return;
     }
 
+<<<<<<< HEAD
     const { getKnowledgeIndicatorClient } = this.dependencies;
     if (!getKnowledgeIndicatorClient) {
       throw new Error(
@@ -329,6 +339,14 @@ export class ExecutionPlan {
         await kiClient.deleteIndicators(action.request.name);
       })
     );
+=======
+    const { getFeatureClient } = this.dependencies;
+    if (!getFeatureClient) {
+      throw new Error('featureClient is required for unlinkFeatures but was not provided');
+    }
+    const featureClient = await getFeatureClient();
+    return Promise.all(actions.map((action) => featureClient.deleteFeatures(action.request.name)));
+>>>>>>> 9.4
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {

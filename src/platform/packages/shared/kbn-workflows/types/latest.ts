@@ -97,4 +97,10 @@ export {
   UpdateWorkflowCommandSchema,
   // shared constants
   MAX_WORKFLOW_YAML_LENGTH,
+<<<<<<< HEAD
+=======
+  WORKFLOW_ID_PATTERN,
+  WORKFLOW_ID_MIN_LENGTH,
+  WORKFLOW_ID_MAX_LENGTH,
+>>>>>>> 9.4
 } from './v1';

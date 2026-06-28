@@ -92,6 +92,7 @@ export const TakeActionButton = memo(
 
     const isInSecurityApp = useIsInSecurityApp();
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/take_action_button.tsx
     const hostIsolationActionItems = useHostIsolationAction({
       closePopover: closePopoverHandler,
       detailsData,
@@ -99,6 +100,9 @@ export const TakeActionButton = memo(
     });
 
     const documentId = hit.raw._id ?? '';
+=======
+    const documentId = hit.raw._id as string;
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/take_action_button.tsx
     const isRemoteDocument = useMemo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
@@ -187,6 +191,7 @@ export const TakeActionButton = memo(
     });
 
     const items = useMemo(
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/take_action_button.tsx
       () => [
         ...(!isRemoteDocument ? addToCaseActionItems : []),
         ...(!isRemoteDocument && isAlert ? statusActionItems : []),
@@ -198,6 +203,21 @@ export const TakeActionButton = memo(
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
         ...(!isInSecurityApp ? exploreActionItems : []),
       ],
+=======
+      () =>
+        isRemoteDocument
+          ? [...(isInSecurityApp ? investigateInTimelineActionItems : [])]
+          : [
+              ...addToCaseActionItems,
+              ...(isAlert ? statusActionItems : []),
+              ...(isAlert ? alertTagsItems : []),
+              ...(isAlert ? alertAssigneesItems : []),
+              ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
+              ...(isAlert ? [] : noteItems),
+              ...(isInSecurityApp ? investigateInTimelineActionItems : []),
+              ...(!isInSecurityApp ? exploreActionItems : []),
+            ],
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/take_action_button.tsx
       [
         addToCaseActionItems,
         alertAssigneesItems,

@@ -9,7 +9,11 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { PrevalenceDetails } from './prevalence_details';
+<<<<<<< HEAD
 import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/document/tools/prevalence/components/prevalence_details_view';
+=======
+import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/prevalence/components/prevalence_details_view';
+>>>>>>> 9.4
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,

@@ -21,7 +21,10 @@ import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 import { DateRangeRedirect } from '../date_range_redirect';
+<<<<<<< HEAD
 import { DiscoverySettingsProvider } from '../sig_events/significant_events_discovery/context';
+=======
+>>>>>>> 9.4
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
 
 const queryClient = new QueryClient();
@@ -57,6 +60,7 @@ export function AppRoot({
           {/* @ts-expect-error upgrade typescript v5.4.5 */}
           <RouterProvider history={history} router={streamsAppRouter}>
             <UpdateExecutionContextOnRouteChange>
+<<<<<<< HEAD
               <DiscoverySettingsProvider>
                 <DateRangeRedirect>
                   <PerformanceContextProvider>
@@ -68,6 +72,17 @@ export function AppRoot({
                   </PerformanceContextProvider>
                 </DateRangeRedirect>
               </DiscoverySettingsProvider>
+=======
+              <DateRangeRedirect>
+                <PerformanceContextProvider>
+                  <KbnUrlStateStorageFromRouterProvider>
+                    <BreadcrumbsContextProvider>
+                      <RouteRenderer />
+                    </BreadcrumbsContextProvider>
+                  </KbnUrlStateStorageFromRouterProvider>
+                </PerformanceContextProvider>
+              </DateRangeRedirect>
+>>>>>>> 9.4
             </UpdateExecutionContextOnRouteChange>
           </RouterProvider>
         </QueryClientProvider>

@@ -33,7 +33,11 @@ export function APMLatencyAlertDetails({
       <APMEmbeddableRoot
         slo={slo}
         dataTimeRange={dataTimeRange}
+<<<<<<< HEAD
         embeddableId={APM_ALERTING_LATENCY_CHART_EMBEDDABLE}
+=======
+        embeddableId={'apm_alerting_latency_chart'}
+>>>>>>> 9.4
         alert={alert}
         rule={rule}
       />
@@ -42,7 +46,11 @@ export function APMLatencyAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
+<<<<<<< HEAD
             embeddableId={APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE}
+=======
+            embeddableId={'apm_alerting_throughput_chart'}
+>>>>>>> 9.4
             alert={alert}
             rule={rule}
           />
@@ -51,7 +59,11 @@ export function APMLatencyAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
+<<<<<<< HEAD
             embeddableId={APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE}
+=======
+            embeddableId={'apm_alerting_failed_transactions_chart'}
+>>>>>>> 9.4
             alert={alert}
             rule={rule}
           />
@@ -72,7 +84,11 @@ export function APMAvailabilityAlertDetails({
       <APMEmbeddableRoot
         slo={slo}
         dataTimeRange={dataTimeRange}
+<<<<<<< HEAD
         embeddableId={APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE}
+=======
+        embeddableId={'apm_alerting_failed_transactions_chart'}
+>>>>>>> 9.4
         alert={alert}
         rule={rule}
       />
@@ -81,7 +97,11 @@ export function APMAvailabilityAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
+<<<<<<< HEAD
             embeddableId={APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE}
+=======
+            embeddableId={'apm_alerting_throughput_chart'}
+>>>>>>> 9.4
             alert={alert}
             rule={rule}
           />
@@ -90,7 +110,11 @@ export function APMAvailabilityAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
+<<<<<<< HEAD
             embeddableId={APM_ALERTING_LATENCY_CHART_EMBEDDABLE}
+=======
+            embeddableId={'apm_alerting_latency_chart'}
+>>>>>>> 9.4
             alert={alert}
             rule={rule}
           />

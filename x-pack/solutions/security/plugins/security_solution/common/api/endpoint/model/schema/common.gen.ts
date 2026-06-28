@@ -16,9 +16,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+<<<<<<< HEAD
 /**
  * A unique identifier
  */
+=======
+>>>>>>> 9.4
 export const Id = lazySchema(() => z.string());
 export type Id = z.infer<typeof Id>;
 
@@ -140,17 +143,24 @@ export type Commands = z.infer<typeof Commands>;
 export const Timeout = lazySchema(() => z.number().int().min(1));
 export type Timeout = z.infer<typeof Timeout>;
 
+<<<<<<< HEAD
 /**
  * The status of a response action.
  */
 export const Status = lazySchema(() => z.enum(['failed', 'pending', 'successful', 'canceled']));
+=======
+export const Status = lazySchema(() => z.enum(['failed', 'pending', 'successful']));
+>>>>>>> 9.4
 export type Status = z.infer<typeof Status>;
 export type StatusEnum = typeof Status.enum;
 export const StatusEnum = Status.enum;
 
+<<<<<<< HEAD
 /**
  * A list of response action statuses to filter by.
  */
+=======
+>>>>>>> 9.4
 export const Statuses = lazySchema(() => z.array(Status));
 export type Statuses = z.infer<typeof Statuses>;
 
@@ -239,9 +249,12 @@ export type NoParametersRequestSchema = z.infer<typeof NoParametersRequestSchema
 
 export const ProtectionUpdatesNoteResponse = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * A note associated with the protection updates for the given package policy.
      */
+=======
+>>>>>>> 9.4
     note: z.string().optional(),
   })
 );
@@ -268,10 +281,13 @@ export const ResponseActionDetails = lazySchema(() =>
      */
     wasSuccessful: z.boolean().optional(),
     /**
+<<<<<<< HEAD
      * Whether the response action was canceled
      */
     wasCanceled: z.boolean().optional(),
     /**
+=======
+>>>>>>> 9.4
      * The response action status
      */
     status: z.string().optional(),
@@ -325,10 +341,13 @@ export const ResponseActionDetails = lazySchema(() =>
            */
           wasSuccessful: z.boolean().optional(),
           /**
+<<<<<<< HEAD
            * Whether the response action was canceled for the agent ID
            */
           wasCanceled: z.boolean().optional(),
           /**
+=======
+>>>>>>> 9.4
            * The date and time the response action was completed for the agent ID
            */
           completedAt: z.string().optional(),
@@ -365,8 +384,11 @@ export type ResponseActionCreateSuccessResponse = z.infer<
   typeof ResponseActionCreateSuccessResponse
 >;
 
+<<<<<<< HEAD
 /**
  * A generic successful response.
  */
+=======
+>>>>>>> 9.4
 export const SuccessResponse = lazySchema(() => z.object({}));
 export type SuccessResponse = z.infer<typeof SuccessResponse>;

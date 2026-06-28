@@ -563,7 +563,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
               sections={packageInput.sections}
+<<<<<<< HEAD
               isUpgrade={isUpgrade}
+=======
+>>>>>>> 9.4
             />
             {hasInputStreams &&
             !shouldConsolidateAdvancedSections &&

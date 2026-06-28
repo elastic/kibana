@@ -54,6 +54,7 @@ export const MAX_INPUTS_COUNT = 10;
 export const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
 
 /**
+<<<<<<< HEAD
  * Page size for entity store cursor-mode (`search_after`) reads.
  *
  * Bounded only by `index.max_result_window` (default 10,000) when the cursor's
@@ -76,3 +77,10 @@ export const MAX_ENTITY_SEARCH_PAGE_SIZE = 10_000;
  * matches the ES|QL row-output cap so the in-query LIMIT never truncates.
  */
 export const MAX_RESOLUTION_TARGETS_PER_PAGE = 10_000;
+=======
+ * Page size for auxiliary entity store searches (e.g. resolution-member lookups).
+ * Kept well below Elasticsearch's default index.max_result_window (10,000) to
+ * avoid search_phase_execution_exception on any index configuration.
+ */
+export const MAX_ENTITY_SEARCH_PAGE_SIZE = 1_000;
+>>>>>>> 9.4

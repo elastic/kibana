@@ -28,7 +28,10 @@ export interface WatchlistFormState {
   isDisabled: boolean;
   isNameTooLong: boolean;
   isDescriptionTooLong: boolean;
+<<<<<<< HEAD
   isRiskModifierInvalid: boolean;
+=======
+>>>>>>> 9.4
   setWatchlistField: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]

@@ -8,7 +8,16 @@
  */
 
 import type { LineCounter } from 'yaml';
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_step_property_items.ts
 import { isBuiltInStepProperty, isBuiltInStepType, type SelectionContext } from '@kbn/workflows';
+=======
+import {
+  isBuiltInStepProperty,
+  isBuiltInStepType,
+  type SelectionContext,
+  type StepPropertyHandler,
+} from '@kbn/workflows';
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/collect_all_custom_property_items.ts
 import type { WorkflowLookup } from '../../../entities/workflows/store';
 import {
   buildStepSelectionValues,

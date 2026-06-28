@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensPartitionVisualizationState } from '@kbn/lens-common';
 
@@ -16,6 +17,20 @@ import type { PieConfig } from '../../schema/charts/pie';
 import type { TreemapConfig } from '../../schema/charts/treemap';
 import type { WaffleConfig } from '../../schema/charts/waffle';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
+=======
+import type { LensApiConfig } from '../../schema';
+import type { PieConfig } from '../../schema/charts/pie';
+import { mosaicConfigSchema } from '../../schema/charts/mosaic';
+import { partitionConfigSchema } from '../../schema/charts/partition';
+import { pieConfigSchema } from '../../schema/charts/pie';
+import type { TreemapConfig } from '../../schema/charts/treemap';
+import { treemapConfigSchema } from '../../schema/charts/treemap';
+import type { WaffleConfig } from '../../schema/charts/waffle';
+import { waffleConfigSchema } from '../../schema/charts/waffle';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
+import { validateAPIConverter, validateConverter } from '../validate';
+>>>>>>> 9.4
 import { esqlCharts } from './lens_api_config.mock';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -39,49 +54,85 @@ import type { PartitionConfig } from '../../schema/charts/partition';
 describe('Partition', () => {
   describe('state transform validation', () => {
     const datasets = [
+<<<<<<< HEAD
       { name: 'pie basic', type: 'pie', config: pieLegacyBasicState },
       { name: 'treemap basic', type: 'treemap', config: treemapLegacyBasicState },
       { name: 'mosaic basic', type: 'mosaic', config: mosaicLegacyBasicState },
       { name: 'waffle basic', type: 'waffle', config: waffleLegacyBasicState },
+=======
+      { name: 'pie basic', config: pieLegacyBasicState, schema: pieConfigSchema },
+      { name: 'treemap basic', config: treemapLegacyBasicState, schema: treemapConfigSchema },
+      { name: 'mosaic basic', config: mosaicLegacyBasicState, schema: mosaicConfigSchema },
+      { name: 'waffle basic', config: waffleLegacyBasicState, schema: waffleConfigSchema },
+>>>>>>> 9.4
       {
         name: 'pie advanced with collapsed groups',
         type: 'pie',
         config: pieLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
+<<<<<<< HEAD
+=======
+        schema: pieConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'treemap advanced with collapsed groups',
         type: 'treemap',
         config: treemapLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
+<<<<<<< HEAD
+=======
+        schema: treemapConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'mosaic advanced with collapsed groups',
         type: 'mosaic',
         config: mosaicLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
+<<<<<<< HEAD
+=======
+        schema: mosaicConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'waffle advanced with collapsed groups',
         type: 'waffle',
         config: waffleLegacyAdvancedStateWithCollapsedGroups,
+<<<<<<< HEAD
+=======
+        schema: waffleConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'pie esql basic',
         type: 'pie',
         config: pieLegacyESQLState,
+<<<<<<< HEAD
+=======
+        schema: pieConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'treemap esql basic',
         type: 'treemap',
         config: treemapLegacyESQLState,
+<<<<<<< HEAD
+=======
+        schema: treemapConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'mosaic esql basic',
         type: 'mosaic',
         config: mosaicLegacyESQLState,
+<<<<<<< HEAD
+=======
+        schema: mosaicConfigSchema,
+>>>>>>> 9.4
       },
       {
         name: 'waffle esql basic',
         type: 'waffle',
         config: waffleLegacyESQLState,
+<<<<<<< HEAD
       },
     ] satisfies {
       name: string;
@@ -92,6 +143,15 @@ describe('Partition', () => {
     for (const { name, type, config } of datasets) {
       it(`should convert from state ${name} chart`, () => {
         validator[type].fromState(config);
+=======
+        schema: waffleConfigSchema,
+      },
+    ];
+    for (const { name, config, schema } of datasets) {
+      it(`should convert a legacy ${name} chart`, () => {
+        validateConverter(config, schema);
+        validateConverter(config, partitionConfigSchema);
+>>>>>>> 9.4
       });
     }
   });
@@ -99,10 +159,17 @@ describe('Partition', () => {
   describe('api transform validation', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
+<<<<<<< HEAD
         validator[config.type].fromApi(
           config as any, // TODO fix test types here'
           ['ignore_global_filters', 'sampling']
         );
+=======
+        validateAPIConverter(config as LensApiConfig, partitionConfigSchema, [
+          'sampling',
+          'ignore_global_filters',
+        ]);
+>>>>>>> 9.4
       });
     }
   });
@@ -205,6 +272,7 @@ describe('Partition', () => {
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
     });
   });
+<<<<<<< HEAD
 
   describe('API to state colorsByDimension index preservation', () => {
     const baseDataSource = {
@@ -387,4 +455,6 @@ describe('Partition', () => {
       expect(apiOutput.legend?.position).toBe('bottom');
     });
   });
+=======
+>>>>>>> 9.4
 });

@@ -34,8 +34,11 @@
     "@kbn/deeplinks-management",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
+<<<<<<< HEAD
     "@kbn/alerting-v2-utils",
     "@kbn/scout-oblt",
+=======
+>>>>>>> 9.4
     "@kbn/workflows-management-plugin",
   ]
 }

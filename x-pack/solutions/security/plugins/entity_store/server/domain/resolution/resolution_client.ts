@@ -91,6 +91,7 @@ export class ResolutionClient {
    * Validates chain prevention (can't link an alias) and has-aliases prevention
    * (can't link an entity that has aliases pointing to it).
    */
+<<<<<<< HEAD
   public async linkEntities(
     targetId: string,
     rawEntityIds: string[],
@@ -98,6 +99,9 @@ export class ResolutionClient {
   ): Promise<LinkResult> {
     const { awaitVisibility = false } = options;
     const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
+=======
+  public async linkEntities(targetId: string, rawEntityIds: string[]): Promise<LinkResult> {
+>>>>>>> 9.4
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate entity_ids
@@ -166,12 +170,16 @@ export class ResolutionClient {
    * Unlinks alias entities by removing their resolved_to field.
    * Unlinked entities become standalone.
    */
+<<<<<<< HEAD
   public async unlinkEntities(
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<UnlinkResult> {
     const { awaitVisibility = false } = options;
     const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
+=======
+  public async unlinkEntities(rawEntityIds: string[]): Promise<UnlinkResult> {
+>>>>>>> 9.4
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate and fetch all entities

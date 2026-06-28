@@ -30,8 +30,11 @@ xpack.features.overrides:
   searchInferenceEndpoints.hidden: true
   ### Workflows Management feature should be hidden in this tier
   workflowsManagement.hidden: true
+<<<<<<< HEAD
   ### Agent Context Layer is hidden when Agent Builder is disabled for this tier
   agentContextLayer.hidden: true
+=======
+>>>>>>> 9.4
 
 
 xpack.fleet.internal.registry.excludePackages: [

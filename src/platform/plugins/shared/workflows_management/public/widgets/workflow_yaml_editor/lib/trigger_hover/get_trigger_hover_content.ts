@@ -84,11 +84,17 @@ function buildTriggerHoverFromDefinition(
   triggerType: string
 ): monaco.IMarkdownString {
   const lines: string[] = [];
+<<<<<<< HEAD
   const stabilityBadge = getStabilityBadgeHtml('tech_preview');
   if (stabilityBadge) {
     lines.push(stabilityBadge);
     lines.push('');
   }
+=======
+  // all custom triggers are tech preview now, later we should get the stability from the definition
+  lines.push(getStabilityNote('tech_preview'));
+  lines.push('');
+>>>>>>> 9.4
   lines.push(
     i18n.translate('workflows.triggerHover.workflowTriggerLabel', {
       defaultMessage: '**Workflow Trigger**: `{title}`',

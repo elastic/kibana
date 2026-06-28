@@ -11,7 +11,10 @@
 
 import { catalogEcommerceSkill } from './catalog_ecommerce';
 import { elasticsearchOnboardingSkill } from './elasticsearch_onboarding';
+<<<<<<< HEAD
 import { elasticsearchTutorialSkill } from './elasticsearch_tutorial';
+=======
+>>>>>>> 9.4
 import { keywordSearchSkill } from './keyword_search';
 import { ragChatbotSkill } from './rag_chatbot';
 import { useCaseLibrarySkill } from './use_case_library';
@@ -19,7 +22,10 @@ import { vectorHybridSearchSkill } from './vector_hybrid_search';
 export {
   catalogEcommerceSkill,
   elasticsearchOnboardingSkill,
+<<<<<<< HEAD
   elasticsearchTutorialSkill,
+=======
+>>>>>>> 9.4
   keywordSearchSkill,
   ragChatbotSkill,
   useCaseLibrarySkill,
@@ -29,7 +35,10 @@ export {
 export const skills = [
   catalogEcommerceSkill,
   elasticsearchOnboardingSkill,
+<<<<<<< HEAD
   elasticsearchTutorialSkill,
+=======
+>>>>>>> 9.4
   keywordSearchSkill,
   ragChatbotSkill,
   useCaseLibrarySkill,

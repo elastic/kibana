@@ -25,7 +25,11 @@ import {
 } from './notes_remote_callout';
 
 let mockCloud: unknown;
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/tools/notes/components/notes_remote_callout.test.tsx
 jest.mock('../../../../../common/lib/kibana', () => ({
+=======
+jest.mock('../../../common/lib/kibana', () => ({
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/notes/components/notes_remote_callout.test.tsx
   useKibana: () => ({
     services: {
       cloud: mockCloud,

@@ -25,7 +25,10 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { createAvailabilityServiceMock } from './common/lib/availability/mock';
+<<<<<<< HEAD
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
+=======
+>>>>>>> 9.4
 import type { WorkflowsPublicPluginStart, WorkflowsServices } from './types';
 
 export const createStartServicesMock = () => ({
@@ -49,9 +52,12 @@ export const createStartServicesMock = () => ({
       reportEvent: jest.fn(),
     },
     availability: createAvailabilityServiceMock(),
+<<<<<<< HEAD
     globalExecutionsView: {
       enabled: false,
     },
+=======
+>>>>>>> 9.4
   },
 });
 
@@ -80,7 +86,10 @@ export const createUseKibanaMockValue = (services?: StartServicesMock) => {
 export const workflowsManagementMocks = {
   createStart: (): jest.Mocked<WorkflowsPublicPluginStart> => ({
     setUnavailableInServerlessTier: jest.fn(),
+<<<<<<< HEAD
     getTelemetry: jest.fn(async () => ({} as WorkflowsBaseTelemetry)),
     getQueryClient: jest.fn(async () => new QueryClient()),
+=======
+>>>>>>> 9.4
   }),
 };

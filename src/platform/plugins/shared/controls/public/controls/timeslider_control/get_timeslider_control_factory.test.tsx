@@ -317,6 +317,7 @@ describe('TimeSliderControlApi', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+<<<<<<< HEAD
 
   describe('anyStateChange$', () => {
     let embeddableApi: TimeSliderControlApi;
@@ -359,4 +360,6 @@ describe('TimeSliderControlApi', () => {
       embeddableApi.clearSelections();
     });
   });
+=======
+>>>>>>> 9.4
 });

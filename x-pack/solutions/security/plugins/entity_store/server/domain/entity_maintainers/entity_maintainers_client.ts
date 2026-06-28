@@ -6,12 +6,16 @@
  */
 
 import type { Logger } from '@kbn/logging';
+<<<<<<< HEAD
 import {
   SavedObjectsErrorHelpers,
   type CoreStart,
   type ElasticsearchClient,
   type KibanaRequest,
 } from '@kbn/core/server';
+=======
+import { SavedObjectsErrorHelpers, type CoreStart, type KibanaRequest } from '@kbn/core/server';
+>>>>>>> 9.4
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -30,13 +34,20 @@ import {
 } from '../../tasks/entity_maintainers/execution';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import type {
+<<<<<<< HEAD
+=======
+  EntityMaintainerTaskMethodContext,
+>>>>>>> 9.4
   EntityMaintainerState,
   EntityMaintainerStatus,
 } from '../../tasks/entity_maintainers/types';
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { CRUDClient } from '../crud';
+<<<<<<< HEAD
 import { createMaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
+=======
+>>>>>>> 9.4
 
 interface TaskSnapshot {
   runs: number;
@@ -64,6 +75,7 @@ interface EntityMaintainersClientDeps {
   licensing: LicensingPluginStart;
 }
 
+<<<<<<< HEAD
 interface SyncExecutionContext {
   taskId: string;
   status: EntityMaintainerStatus;
@@ -73,6 +85,10 @@ interface SyncExecutionContext {
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
+=======
+interface SyncExecutionContext extends EntityMaintainerTaskMethodContext {
+  taskId: string;
+>>>>>>> 9.4
 }
 
 export class EntityMaintainersClient {
@@ -199,19 +215,25 @@ export class EntityMaintainersClient {
         initialState,
       });
 
+<<<<<<< HEAD
       const telemetryClient = createMaintainerTelemetryClient({
         id,
         namespace: this.namespace,
         analytics: this.analytics,
       });
 
+=======
+>>>>>>> 9.4
       const result = await runEntityMaintainerTask({
         ...executionContext,
         id,
         run,
         setup,
         analytics: this.analytics,
+<<<<<<< HEAD
         telemetryClient,
+=======
+>>>>>>> 9.4
       });
 
       await persistMaintainerState({
@@ -226,6 +248,7 @@ export class EntityMaintainersClient {
     }
   }
 
+<<<<<<< HEAD
   public async stopAll(request: KibanaRequest): Promise<void> {
     this.logger.debug('Stopping all entity maintainer tasks');
     const tasks = entityMaintainersRegistry.getAll();
@@ -270,6 +293,8 @@ export class EntityMaintainersClient {
     }
   }
 
+=======
+>>>>>>> 9.4
   public async removeAll(): Promise<void> {
     this.logger.debug('Removing all entity maintainer tasks');
     try {
@@ -360,9 +385,12 @@ export class EntityMaintainersClient {
       initialState,
     });
     const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+<<<<<<< HEAD
     const cpsEsClient = this.coreStart.elasticsearch.client.asScoped(request, {
       projectRouting: 'space',
     }).asCurrentUser;
+=======
+>>>>>>> 9.4
     const crudClient = new CRUDClient({
       logger: this.logger,
       esClient,
@@ -378,7 +406,10 @@ export class EntityMaintainersClient {
       logger,
       abortController,
       esClient,
+<<<<<<< HEAD
       cpsEsClient,
+=======
+>>>>>>> 9.4
       crudClient,
     };
   }

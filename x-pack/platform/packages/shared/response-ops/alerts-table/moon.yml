@@ -49,11 +49,14 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/es-query'
+<<<<<<< HEAD
   - '@kbn/rison'
   - '@kbn/reporting-common'
   - '@kbn/core-rendering-browser-mocks'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-rendering-browser'
+=======
+>>>>>>> 9.4
 tags:
   - shared-browser
   - package

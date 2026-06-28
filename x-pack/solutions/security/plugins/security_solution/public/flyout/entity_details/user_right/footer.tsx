@@ -40,6 +40,7 @@ export const UserPanelFooter = ({
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
+<<<<<<< HEAD
             <AiAssistantButton
               entityType={EntityType.user}
               entityName={userName}
@@ -47,6 +48,8 @@ export const UserPanelFooter = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+=======
+>>>>>>> 9.4
             <TakeAction
               isDisabled={!userName}
               kqlQuery={euidEntityFilter ?? `user.name: "${userName}"`}

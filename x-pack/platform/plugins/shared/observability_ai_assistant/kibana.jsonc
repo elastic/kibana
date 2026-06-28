@@ -29,6 +29,11 @@
       "evals"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
+<<<<<<< HEAD
     "runtimePluginDependencies": ["ml"]
+=======
+    "runtimePluginDependencies": ["ml"],
+    "extraPublicDirs": []
+>>>>>>> 9.4
   }
 }

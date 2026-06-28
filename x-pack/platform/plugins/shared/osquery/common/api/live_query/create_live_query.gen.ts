@@ -67,6 +67,7 @@ export const CreateLiveQueryRequestBody = lazySchema(() =>
 );
 export type CreateLiveQueryRequestBody = z.infer<typeof CreateLiveQueryRequestBody>;
 
+<<<<<<< HEAD
 /**
  * The response for creating a live query.
  */
@@ -146,4 +147,7 @@ export const CreateLiveQueryResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const CreateLiveQueryResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type CreateLiveQueryResponse = z.infer<typeof CreateLiveQueryResponse>;

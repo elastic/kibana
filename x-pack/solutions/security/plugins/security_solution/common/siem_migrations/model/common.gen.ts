@@ -62,9 +62,13 @@ export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptio
 /**
  * The vendor identifier.
  */
+<<<<<<< HEAD
 export const SiemMigrationVendor = lazySchema(() =>
   z.enum(['splunk', 'qradar', 'microsoft-sentinel'])
 );
+=======
+export const SiemMigrationVendor = lazySchema(() => z.enum(['splunk', 'qradar']));
+>>>>>>> 9.4
 export type SiemMigrationVendor = z.infer<typeof SiemMigrationVendor>;
 export type SiemMigrationVendorEnum = typeof SiemMigrationVendor.enum;
 export const SiemMigrationVendorEnum = SiemMigrationVendor.enum;
@@ -285,6 +289,7 @@ export const MigrationTaskStats = lazySchema(() =>
 );
 export type MigrationTaskStats = z.infer<typeof MigrationTaskStats>;
 
+<<<<<<< HEAD
 export const SiemMigrationResourceTypeInternal = lazySchema(() =>
   z.union([SplunkResourceType, QradarResourceType, SentinelResourceType])
 );
@@ -292,6 +297,12 @@ export const SiemMigrationResourceTypeInternal = lazySchema(() =>
 export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceTypeInternal>;
 export const SiemMigrationResourceType =
   SiemMigrationResourceTypeInternal as z.ZodType<SiemMigrationResourceType>;
+=======
+export const SiemMigrationResourceType = lazySchema(() =>
+  z.union([SplunkResourceType, QradarResourceType])
+);
+export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
+>>>>>>> 9.4
 
 /**
  * A resource of a migration

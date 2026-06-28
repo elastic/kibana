@@ -109,6 +109,7 @@ export function transformDataControlOut<
       state as LegacyStoredDataControlState
     );
 
+<<<<<<< HEAD
   const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
   const convertedState = {
     ...DEFAULT_DATA_CONTROL_STATE,
@@ -121,6 +122,22 @@ export function transformDataControlOut<
   } as FieldDataControlState;
 
   ensureRequiredFields(convertedState);
+=======
+  // get the data view ID from the reference, or fall back to an explicitly stored dataViewId
+  const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
+  const convertedState = {
+    ...DEFAULT_DATA_CONTROL_STATE,
+    title,
+    data_view_id: dataViewId,
+    ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
+    ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
+    field_name: field_name ?? '',
+  };
+
+  // will throw if one of the required fields is the empty string
+  ensureRequiredFields(convertedState);
+
+>>>>>>> 9.4
   return convertedState;
 }
 
@@ -128,6 +145,7 @@ function getLegacyReferenceName(controlId: string, refName: string) {
   return `controlGroup_${controlId}:${refName}`;
 }
 
+<<<<<<< HEAD
 const ensureRequiredFields = (state: StrictDataControlState) => {
   if (state.values_source === ControlValuesSource.ESQL) {
     if (!state.esql_query.length) {
@@ -142,4 +160,13 @@ const ensureRequiredFields = (state: StrictDataControlState) => {
   if (!state.field_name.length) {
     throw new Error('Must include a non-empty field name');
   }
+=======
+const ensureRequiredFields = (state: DataControlState) => {
+  if (!state.data_view_id.length) {
+    throw new Error('Must include a non-empty data view ID');
+  } else if (!state.field_name.length) {
+    throw new Error('Must include a non-empty field name ID');
+  }
+  return;
+>>>>>>> 9.4
 };

@@ -32,11 +32,14 @@ export const ReadExceptionListSummaryRequestQuery = lazySchema(() =>
      * Exception list's human readable identifier.
      */
     list_id: ExceptionListHumanId.optional(),
+<<<<<<< HEAD
     /**
       * `single` returns summary for a list in the current space; `agnostic` for a space-agnostic list. Must
 line up with `id` / `list_id` used to look up the list.
 
       */
+=======
+>>>>>>> 9.4
     namespace_type: ExceptionNamespaceType.optional().default('single'),
     /**
      * Search filter clause

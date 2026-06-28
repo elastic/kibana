@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+=======
+import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+>>>>>>> 9.4
 import {
   LensConfigBuilder,
   type LensApiConfig,

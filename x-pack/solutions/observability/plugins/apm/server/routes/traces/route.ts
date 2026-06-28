@@ -30,6 +30,11 @@ import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
+<<<<<<< HEAD
+=======
+import type { TraceItems } from './get_trace_items';
+import { getTraceItems } from './get_trace_items';
+>>>>>>> 9.4
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';

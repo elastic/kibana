@@ -981,6 +981,7 @@ describe('execute()', () => {
         },
       },
     };
+<<<<<<< HEAD
     const result = await connectorType.executor?.({
       actionId: 'some-id',
       services,
@@ -1390,6 +1391,24 @@ describe('execute()', () => {
 
       expect(requestMock).toHaveBeenCalledTimes(1);
     });
+=======
+    await expect(
+      connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/my-endpoint',
+          body: body as any,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).rejects.toThrow('Error serializing request body: foo is not serializable');
+>>>>>>> 9.4
   });
 
   test('renders parameter templates as expected', async () => {

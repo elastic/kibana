@@ -38,7 +38,10 @@ export const useDeprecatedRuleDetailsCallout = ({
 }: UseDeprecatedRuleDetailsCalloutProps) => {
   const {
     application: { navigateToApp },
+<<<<<<< HEAD
     telemetry,
+=======
+>>>>>>> 9.4
     docLinks: {
       links: {
         securitySolution: { manageDetectionRules },
@@ -96,10 +99,13 @@ export const useDeprecatedRuleDetailsCallout = ({
       return;
     }
 
+<<<<<<< HEAD
     telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked, {
       count: 1,
     });
 
+=======
+>>>>>>> 9.4
     const duplicateResult = await executeBulkAction({
       type: BulkActionTypeEnum.duplicate,
       ids: [rule.id],
@@ -129,7 +135,11 @@ export const useDeprecatedRuleDetailsCallout = ({
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(newRuleId),
     });
+<<<<<<< HEAD
   }, [rule, showBulkDuplicateConfirmation, executeBulkAction, navigateToApp, telemetry]);
+=======
+  }, [rule, showBulkDuplicateConfirmation, executeBulkAction, navigateToApp]);
+>>>>>>> 9.4
 
   const deprecatedRule = data?.rules?.[0];
 

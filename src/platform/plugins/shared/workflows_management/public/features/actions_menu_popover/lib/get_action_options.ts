@@ -13,6 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+<<<<<<< HEAD
+=======
+import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+>>>>>>> 9.4
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
@@ -306,19 +310,30 @@ export function getActionOptions(
           stability: connector.stability,
         });
       } else if (isDynamicConnector(connector)) {
+<<<<<<< HEAD
         const baseType = connector.actionTypeId.replace(/^\./, '');
         const hasSubAction = connector.type.startsWith(`${baseType}.`);
         let groupOption = externalGroup;
         if (hasSubAction) {
+=======
+        const [baseType, subtype] = connector.type.split('.');
+        let groupOption = externalGroup;
+        if (subtype) {
+>>>>>>> 9.4
           let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
           // create a group for the basetype if not yet exists
           if (!connectorGroup) {
             baseTypeInstancesCount[baseType] = 0;
             const newConnectorGroup: ActionConnectorGroup = {
               id: baseType,
+<<<<<<< HEAD
               label: connector.displayName,
               description: connector.actionTypeId.replace(/^\./, ''),
               connectorType: connector.actionTypeId,
+=======
+              label: baseType,
+              connectorType: baseType,
+>>>>>>> 9.4
               options: [],
             };
             connectorGroup = newConnectorGroup;
@@ -330,6 +345,10 @@ export function getActionOptions(
             groupOption = connectorGroup;
           }
         }
+<<<<<<< HEAD
+=======
+        const iconType = getStepIconType(connector.type);
+>>>>>>> 9.4
         baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
         groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
 
@@ -337,10 +356,18 @@ export function getActionOptions(
         if (isActionGroup(groupOption)) {
           groupOption.options.push({
             id: connector.type,
+<<<<<<< HEAD
             label: connector.summary || connector.displayName,
             description: connector.type,
             connectorType: connector.actionTypeId,
             instancesLabel: getInstancesLabel(connector.instances?.length),
+=======
+            label: connector.description || connector.type,
+            description: connector.type,
+            connectorType: connector.type,
+            instancesLabel: getInstancesLabel(connector.instances?.length),
+            iconType,
+>>>>>>> 9.4
             stability: connector.stability,
           });
         }

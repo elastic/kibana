@@ -9,7 +9,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view.test.tsx
 import { TestProviders } from '../../../../../common/mock';
+=======
+import { TestProviders } from '../../../common/mock';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/threat_intelligence/components/threat_intelligence_details_view.test.tsx
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
@@ -18,7 +22,11 @@ import {
 } from './test_ids';
 import { ThreatIntelligenceDetailsView } from './threat_intelligence_details_view';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view.test.tsx
 import { buildEventEnrichmentMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
+=======
+import { buildEventEnrichmentMock } from '../../../../common/search_strategy/security_solution/cti/index.mock';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/threat_intelligence/components/threat_intelligence_details_view.test.tsx
 
 jest.mock('../hooks/use_threat_intelligence_details');
 

@@ -59,7 +59,11 @@ const formatLeadsPayload = (groups: ScoredEntityInput[][]): string => {
 
       const obsLines = group
         .flatMap((s) => {
+<<<<<<< HEAD
           const key = s.entity.id;
+=======
+          const key = entityToKey(s.entity);
+>>>>>>> 9.4
           return s.observations
             .filter((o) => o.entityId === key)
             .map((obs) => {

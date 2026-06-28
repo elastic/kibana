@@ -34,7 +34,8 @@ const getStatusRequest: HttpFetchOptionsWithPath = {
 };
 
 const getStatusV1Request: HttpFetchOptionsWithPath = {
-  path: '/api/entity_store/status',
+  path: '/internal/entity_store/status',
+  version: '1',
 };
 
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {

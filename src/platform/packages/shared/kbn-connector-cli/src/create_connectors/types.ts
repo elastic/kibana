@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 /** A single secret field in a manifest — either a static value, a vault reference, or a URL template. */
+=======
+/** A single secret field in a manifest — either a static value or a vault reference. */
+>>>>>>> 9.4
 export interface ManifestSecretField {
   /** Static value (e.g., a fixed headerField name or URL). */
   value?: string;
@@ -15,6 +19,7 @@ export interface ManifestSecretField {
   vault?: string;
   /** Vault field name within the secret (e.g., "token", "client-id"). */
   field?: string;
+<<<<<<< HEAD
   /**
    * URL template with `{varName}` placeholders, resolved using `vars`.
    * Example: "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize"
@@ -22,6 +27,8 @@ export interface ManifestSecretField {
   template?: string;
   /** Variable sources for `template` placeholders — each resolved as a vault or static value. */
   vars?: Record<string, { vault: string; field: string } | { value: string }>;
+=======
+>>>>>>> 9.4
 }
 
 /** Raw YAML manifest structure for a single connector. */

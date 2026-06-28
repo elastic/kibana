@@ -48,9 +48,12 @@ export const UpdateEndpointListItemRequestBody = lazySchema(() =>
     tags: ExceptionListItemTags.optional(),
     meta: ExceptionListItemMeta.optional(),
     comments: ExceptionListItemCommentArray.optional().default([]),
+<<<<<<< HEAD
     /**
      * The version id, normally returned by the API when the item is retrieved. Use it ensure updates are made against the latest version.
      */
+=======
+>>>>>>> 9.4
     _version: z.string().optional(),
   })
 );

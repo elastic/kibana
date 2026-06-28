@@ -22,6 +22,7 @@
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
     "@kbn/lens-common",
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/tsconfig.json
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
     "@kbn/data-plugin",
@@ -30,6 +31,16 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
+=======
+    "@kbn/presentation-publishing",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/data-views-plugin",
+    "@kbn/test-jest-helpers"
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/tsconfig.json
   ],
   "exclude": ["target/**/*"]
 }

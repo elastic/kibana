@@ -64,6 +64,7 @@ export class LinksPlugin
       name: APP_NAME,
     });
 
+<<<<<<< HEAD
     plugins.embeddable.registerAddFromLibraryType({
       onAdd: async (container, savedObject) => {
         container.addNewPanel<LinksEmbeddableState>(
@@ -71,6 +72,77 @@ export class LinksPlugin
             panelType: LINKS_EMBEDDABLE_TYPE,
             serializedState: {
               ref_id: savedObject.id,
+=======
+      plugins.embeddable.registerAddFromLibraryType({
+        onAdd: async (container, savedObject) => {
+          container.addNewPanel<LinksEmbeddableState>(
+            {
+              panelType: LINKS_EMBEDDABLE_TYPE,
+              serializedState: {
+                savedObjectId: savedObject.id,
+              },
+            },
+            {
+              displaySuccessMessage: true,
+            }
+          );
+        },
+        savedObjectType: LINKS_SAVED_OBJECT_TYPE,
+        savedObjectName: APP_NAME,
+        getIconForSavedObject: () => APP_ICON,
+      });
+
+      plugins.embeddable.registerEmbeddablePublicDefinition(LINKS_EMBEDDABLE_TYPE, async () => {
+        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
+        return getLinksEmbeddableFactory();
+      });
+
+      plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
+        const { transformOut } = await import('../common/embeddable/transforms/transform_out');
+        return transformOut;
+      });
+
+      plugins.visualizations.registerAlias({
+        disableCreate: true, // do not allow creation through visualization listing page
+        name: CONTENT_ID,
+        title: APP_NAME,
+        icon: APP_ICON,
+        description: i18n.translate('links.description', {
+          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+        }),
+        stage: 'production',
+        appExtensions: {
+          visualizations: {
+            docTypes: [CONTENT_ID],
+            searchFields: ['title^3'],
+            client: getLinksClient,
+            toListItem(
+              linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
+                attributes: { title: string; description?: string };
+              }
+            ) {
+              const { id, type, updatedAt, attributes } = linkItem;
+              const { title, description } = attributes;
+
+              return {
+                id,
+                title,
+                editor: {
+                  onEdit: async (savedObjectId: string) => {
+                    const { onVisualizationsEdit } = await import(
+                      './editor/on_visualizations_edit'
+                    );
+                    onVisualizationsEdit(savedObjectId);
+                  },
+                },
+                description,
+                updatedAt,
+                icon: APP_ICON,
+                typeTitle: APP_NAME,
+                stage: 'production',
+                savedObjectType: type,
+              };
+>>>>>>> 9.4
             },
           },
           {

@@ -7,6 +7,10 @@
 
 import { useMemo } from 'react';
 import deepmerge from 'deepmerge';
+<<<<<<< HEAD
+=======
+import { useSelector } from 'react-redux';
+>>>>>>> 9.4
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -59,10 +63,16 @@ export const useObservedHost = (
       endDate: to,
       hostName,
       entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
+<<<<<<< HEAD
       indexNames: indexPatterns,
       id: HOST_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
       startDate: from,
+=======
+      indexNames: securityDefaultPatterns,
+      id: HOST_PANEL_RISK_SCORE_QUERY_ID,
+      skip: isInitializing,
+>>>>>>> 9.4
     });
 
   useQueryInspector({

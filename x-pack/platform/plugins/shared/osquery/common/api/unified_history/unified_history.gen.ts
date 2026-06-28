@@ -20,6 +20,7 @@ import { GetUnifiedHistoryResponse } from './get_unified_history.gen';
 
 export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The number of results to return per page.
      */
@@ -47,6 +48,14 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
     /**
      * The end of the time range filter (ISO 8601).
      */
+=======
+    pageSize: z.coerce.number().int().min(1).max(100).optional().default(20),
+    nextPage: z.string().optional(),
+    kuery: z.string().optional(),
+    userIds: z.string().optional(),
+    sourceFilters: z.string().optional(),
+    startDate: z.string().optional(),
+>>>>>>> 9.4
     endDate: z.string().optional(),
   })
 );

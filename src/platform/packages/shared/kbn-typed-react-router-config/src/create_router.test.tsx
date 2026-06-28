@@ -10,7 +10,11 @@
 import React from 'react';
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+<<<<<<< HEAD
 import { createRouter, MAX_PATH_LENGTH, toReactRouterPath } from './create_router';
+=======
+import { createRouter } from './create_router';
+>>>>>>> 9.4
 import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { createMemoryHistory } from 'history';
 import { last } from 'lodash';
@@ -665,6 +669,7 @@ describe('createRouter', () => {
       });
     });
   });
+<<<<<<< HEAD
 });
 
 describe('toReactRouterPath', () => {
@@ -712,4 +717,6 @@ describe('toReactRouterPath', () => {
       toReactRouterPath(malicious);
     }).toThrowError('Path is too long to process');
   });
+=======
+>>>>>>> 9.4
 });

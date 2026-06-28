@@ -23,9 +23,37 @@ const getModuleIdForConfigPath = (configPath: string): string | undefined => {
 };
 
 /**
+<<<<<<< HEAD
  * Mark each module with `isAffected` against an in-memory set of @kbn/ IDs.
  * All modules are returned; downstream callers can drop non-affected ones to
  * implement selective testing.
+=======
+ * Read the affected modules JSON file produced by the `list_affected` CLI.
+ * Returns null on any error (missing file, invalid JSON) to allow graceful fallback.
+ */
+export const readAffectedModules = (filePath: string, log: ToolingLog): Set<string> | null => {
+  try {
+    const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(REPO_ROOT, filePath);
+    const content = fs.readFileSync(absolutePath, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    if (!Array.isArray(parsed)) {
+      log.warning(`Affected modules file does not contain a JSON array: ${filePath}`);
+      return null;
+    }
+
+    return new Set<string>(parsed);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log.warning(`Failed to read affected modules file '${filePath}': ${message}`);
+    return null;
+  }
+};
+
+/**
+ * Mark modules with isAffected based on the affected modules set (see --affected-modules).
+ * All modules are returned; use --selective-testing in discover-playwright-configs to drop non-affected.
+>>>>>>> 9.4
  *
  * Behavior:
  * - Module maps to an affected @kbn/ ID -> isAffected: true

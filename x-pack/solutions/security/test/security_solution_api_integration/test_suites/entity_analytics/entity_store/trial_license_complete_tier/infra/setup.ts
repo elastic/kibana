@@ -22,7 +22,7 @@ interface Options {
 }
 
 /**
- * Enables the Entity Store using the standard /api/entity_store/enable endpoint.
+ * Enables the Entity Store using the standard /internal/entity_store/enable endpoint.
  * Uses retry logic with backoff to handle transient task conflicts that can occur
  * when multiple engines initialize concurrently.
  */
@@ -48,8 +48,10 @@ export async function enableEntityStore(
     );
 
     const response = await supertest
-      .post('/api/entity_store/enable')
+      .post('/internal/entity_store/enable')
       .set('kbn-xsrf', 'xxxx')
+      .set('x-elastic-internal-origin', 'kibana')
+      .set('elastic-api-version', '1')
       .send({ indexPattern, entityTypes });
 
     if (response.statusCode !== 200) {
@@ -74,7 +76,9 @@ export async function enableEntityStore(
     try {
       await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
         const { body } = await supertest
-          .get('/api/entity_store/status')
+          .get('/internal/entity_store/status')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', '1')
           .query({ include_components: true })
           .expect(200);
 

@@ -25,14 +25,18 @@ import {
 } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
+<<<<<<< HEAD
 /**
  * The reason an alert summary was skipped during a bulk action.
  */
+=======
+>>>>>>> 9.4
 export const AlertSummaryBulkActionSkipReason = lazySchema(() =>
   z.literal('ALERT_SUMMARY_NOT_MODIFIED')
 );
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
 
+<<<<<<< HEAD
 /**
  * Details about an alert summary that was skipped during a bulk action.
  */
@@ -45,12 +49,18 @@ export const AlertSummaryBulkActionSkipResult = lazySchema(() =>
     /**
      * The ID of the alert associated with the skipped summary.
      */
+=======
+export const AlertSummaryBulkActionSkipResult = lazySchema(() =>
+  z.object({
+    id: z.string(),
+>>>>>>> 9.4
     alertId: z.string().optional(),
     skip_reason: AlertSummaryBulkActionSkipReason,
   })
 );
 export type AlertSummaryBulkActionSkipResult = z.infer<typeof AlertSummaryBulkActionSkipResult>;
 
+<<<<<<< HEAD
 /**
  * Details about an alert summary that encountered an error during a bulk action.
  */
@@ -63,11 +73,17 @@ export const AlertSummaryDetailsInError = lazySchema(() =>
     /**
      * The ID of the alert summary that encountered an error.
      */
+=======
+export const AlertSummaryDetailsInError = lazySchema(() =>
+  z.object({
+    alertId: z.string().optional(),
+>>>>>>> 9.4
     id: z.string(),
   })
 );
 export type AlertSummaryDetailsInError = z.infer<typeof AlertSummaryDetailsInError>;
 
+<<<<<<< HEAD
 /**
  * A normalized error object returned when one or more alert summaries fail during a bulk action.
  */
@@ -88,19 +104,30 @@ export const NormalizedAlertSummaryError = lazySchema(() =>
     /**
      * The alert summaries that encountered this error.
      */
+=======
+export const NormalizedAlertSummaryError = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    status_code: z.number().int(),
+    err_code: z.string().optional(),
+>>>>>>> 9.4
     alert_summaries: z.array(AlertSummaryDetailsInError),
   })
 );
 export type NormalizedAlertSummaryError = z.infer<typeof NormalizedAlertSummaryError>;
 
+<<<<<<< HEAD
 /**
  * An alert summary created by the Elastic Assistant for a specific security alert.
  */
+=======
+>>>>>>> 9.4
 export const AlertSummaryResponse = lazySchema(() =>
   z.object({
     id: NonEmptyString,
     alertId: NonEmptyString,
     timestamp: NonEmptyTimestamp.optional(),
+<<<<<<< HEAD
     /**
      * The AI-generated summary of the alert.
      */
@@ -129,6 +156,15 @@ export const AlertSummaryResponse = lazySchema(() =>
     /**
      * The users associated with this alert summary.
      */
+=======
+    summary: z.string(),
+    recommendedActions: z.string().optional(),
+    replacements: Replacements,
+    updatedAt: z.string().optional(),
+    updatedBy: z.string().optional(),
+    createdAt: z.string().optional(),
+    createdBy: z.string().optional(),
+>>>>>>> 9.4
     users: z.array(User).optional(),
     /**
      * Kibana space
@@ -138,6 +174,7 @@ export const AlertSummaryResponse = lazySchema(() =>
 );
 export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
 
+<<<<<<< HEAD
 /**
  * The results of a bulk action on alert summaries.
  */
@@ -158,6 +195,13 @@ export const AlertSummaryBulkCrudActionResults = lazySchema(() =>
     /**
      * Alert summaries that were skipped because no changes were needed.
      */
+=======
+export const AlertSummaryBulkCrudActionResults = lazySchema(() =>
+  z.object({
+    updated: z.array(AlertSummaryResponse),
+    created: z.array(AlertSummaryResponse),
+    deleted: z.array(z.string()),
+>>>>>>> 9.4
     skipped: z.array(AlertSummaryBulkActionSkipResult),
   })
 );

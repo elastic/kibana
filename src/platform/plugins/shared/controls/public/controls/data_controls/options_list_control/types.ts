@@ -19,7 +19,10 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasType,
   HasUniqueId,
+<<<<<<< HEAD
   PublishesRelatedPanels,
+=======
+>>>>>>> 9.4
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -32,8 +35,12 @@ import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../.
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
   DataControlApi &
+<<<<<<< HEAD
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {
+=======
+  PublishesUnsavedChanges & {
+>>>>>>> 9.4
     setSelectedOptions: (options: OptionsListSelection[]) => void;
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;

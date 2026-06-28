@@ -10,7 +10,11 @@ import path from 'path';
 import { get } from 'lodash';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
 import type { EsqlColumn } from '../../types';
+<<<<<<< HEAD
 import { processPanel, toKibanaFieldType } from './process_panel';
+=======
+import { processPanel } from './process_panel';
+>>>>>>> 9.4
 
 const readTemplate = (vizType: string): object => {
   const templatePath = path.join(__dirname, `./templates/${vizType}.viz.json`);
@@ -193,6 +197,7 @@ describe('processPanel', () => {
       expect(JSON.stringify(panel)).toBe(originalJSON);
     });
   });
+<<<<<<< HEAD
 
   describe('column type mapping', () => {
     it('should apply proper Kibana types to all columns, not just the first', () => {
@@ -298,4 +303,6 @@ describe('processPanel', () => {
       expect(toKibanaFieldType('int')).toBe('unknown');
     });
   });
+=======
+>>>>>>> 9.4
 });

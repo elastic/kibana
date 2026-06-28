@@ -43,6 +43,7 @@ const droppedPanelWarningSchema = schema.object(
   }
 );
 
+<<<<<<< HEAD
 const droppedDashboardProperty = schema.object(
   {
     type: schema.literal('dropped_property'),
@@ -78,3 +79,12 @@ export const warningsSchema = schema.arrayOf(
     },
   }
 );
+=======
+export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema, {
+  maxSize: 100,
+  meta: {
+    description:
+      'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.',
+  },
+});
+>>>>>>> 9.4

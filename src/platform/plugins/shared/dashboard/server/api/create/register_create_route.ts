@@ -8,6 +8,7 @@
  */
 
 import { once } from 'lodash';
+<<<<<<< HEAD
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { VersionedRouter } from '@kbn/core-http-server';
@@ -17,6 +18,13 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { trackCreateDashboardAction } from '../../user_activity';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
+=======
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { getRouteConfig } from '../get_route_config';
+import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
+import { create } from './create';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+>>>>>>> 9.4
 import { writeErrorHandler } from '../write_error_handler';
 import { create } from './create';
 import { getCreateResponseBodySchema } from './schemas';

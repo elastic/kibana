@@ -11,7 +11,11 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+<<<<<<< HEAD
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+=======
+import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
+>>>>>>> 9.4
 import type { ConversationService } from '../../conversation';
 import type { AgentsServiceStart } from '../../agents';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';

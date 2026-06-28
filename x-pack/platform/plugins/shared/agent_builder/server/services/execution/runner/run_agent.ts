@@ -11,11 +11,14 @@ import type {
   RunAgentReturn,
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+<<<<<<< HEAD
 import { getConnectorProvider } from '@kbn/inference-common';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
 } from '@kbn/management-settings-ids';
+=======
+>>>>>>> 9.4
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';

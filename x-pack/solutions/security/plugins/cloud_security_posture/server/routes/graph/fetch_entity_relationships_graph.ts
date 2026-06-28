@@ -10,6 +10,7 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
+import { type EuidSourceFields, GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
   type EuidSourceFields,
   GRAPH_ACTOR_EUID_SOURCE_FIELDS,
@@ -80,7 +81,34 @@ FROM ${indexName}
 | FORK
 ${forkBranches}
 | WHERE _target_id != ""
+<<<<<<< HEAD
 // Build actors doc data with entity metadata (from the entity store source entity)
+=======
+// Store source entity fields before lookup (they get overwritten by target entity fields)
+| RENAME _source_id = entity.id
+| RENAME _source_name = entity.name
+| RENAME _source_type = entity.type
+| RENAME _source_sub_type = entity.sub_type
+| RENAME _source_host_ip = host.ip
+| RENAME _source_engine_metadata_type = entity.EngineMetadata.Type
+// Lookup target entity metadata
+| EVAL entity.id = _target_id
+| LOOKUP JOIN ${indexName} ON entity.id
+| EVAL _target_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
+| RENAME _target_name = entity.name
+| RENAME _target_type = entity.type
+| RENAME _target_sub_type = entity.sub_type
+| RENAME _target_host_ip = host.ip
+| RENAME _target_engine_metadata_type = entity.EngineMetadata.Type
+// Restore source entity fields
+| RENAME entity.id = _source_id
+| RENAME entity.name = _source_name
+| RENAME entity.type = _source_type
+| RENAME entity.sub_type = _source_sub_type
+| RENAME host.ip = _source_host_ip
+| RENAME entity.EngineMetadata.Type = _source_engine_metadata_type
+// Build enriched actors doc data with entity metadata (from the queried entity)
+>>>>>>> 9.4
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', 'entity.id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
@@ -111,6 +139,7 @@ ${forkBranches}
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
+<<<<<<< HEAD
   ${JSON_OBJECT_END})
 // Per-triple rows. All grouping (actor × relationship × target type/sub_type) happens in
 // TypeScript via regroupRelationships. STATS … BY (entity.id, relationship, _target_id)
@@ -123,6 +152,64 @@ ${forkBranches}
   \`entity.name\` AS actorEntityName,
   \`host.ip\` AS actorHostIps
 | KEEP actorId, actorEntityType, actorEntitySubType, actorEntityName, actorHostIps, actorDocData, relationship, relationshipNodeId, targetId, targetDocData
+=======
+    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyEsqlExpr(
+        'availableInEntityStore',
+        'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
+      )},
+      CASE(_target_name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
+      CASE(_target_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
+      CASE(_target_sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
+      CASE(
+        _target_host_ip IS NOT NULL,
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"",
+          ${JSON_OBJECT_END}),
+        ""
+      ),
+      CASE(_target_engine_metadata_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString(
+          'engine_type',
+          '_target_engine_metadata_type'
+        )}), ""),
+      ${JSON_OBJECT_SEPARATOR}, _target_source_fields,
+    ${JSON_OBJECT_END},
+  ${JSON_OBJECT_END})
+// Group by actor entity, relationship, and target type/subtype (for target grouping)
+// This ensures targets with the same type are grouped together
+| STATS badge = COUNT(*),
+  // Actor entity grouping
+  actorIds = VALUES(entity.id),
+  actorNodeId = CASE(
+    MV_COUNT(VALUES(entity.id)) == 1, TO_STRING(VALUES(entity.id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(entity.id)), ","))
+  ),
+  actorIdsCount = COUNT_DISTINCT(entity.id),
+  actorsDocData = VALUES(actorDocData),
+  actorEntityType = VALUES(entity.type),
+  actorEntitySubType = VALUES(entity.sub_type),
+  actorEntityName = VALUES(entity.name),
+  actorHostIps = VALUES(host.ip),
+  // Target entity grouping - targets with same type/subtype are grouped
+  targetIds = VALUES(_target_id),
+  targetNodeId = CASE(
+    MV_COUNT(VALUES(_target_id)) == 1, TO_STRING(VALUES(_target_id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(_target_id)), ","))
+  ),
+  targetIdsCount = COUNT_DISTINCT(_target_id),
+  targetsDocData = VALUES(targetDocData),
+  targetEntityName = VALUES(_target_name),
+  targetHostIps = VALUES(_target_host_ip)
+    BY entity.id, relationship, targetEntityType = _target_type, targetEntitySubType = _target_sub_type
+// Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
+// Multiple records with different target types share the same relationshipNodeId
+| EVAL relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)
+// Sort by relationship alphabetically to ensure deterministic ordering
+>>>>>>> 9.4
 | SORT relationship ASC`;
 };
 
@@ -235,7 +322,11 @@ export const fetchEntities = async ({
   spaceId: string;
   entityStoreIndexExists: boolean;
 }): Promise<EsqlToRecords<EntityRecord>> => {
+<<<<<<< HEAD
   if (entityIds.length === 0 || !entityStoreIndexExists) {
+=======
+  if (entityIds.length === 0) {
+>>>>>>> 9.4
     return { columns: [], records: [] };
   }
 
@@ -492,4 +583,42 @@ export const enrichEntityRecords = (
       sub_type: enrichment.subType ?? record.sub_type,
     };
   });
+};
+
+const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
+
+const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
+  const properties = Object.keys(fields)
+    .map((type) => {
+      if (type === 'all') {
+        return fields.all.map(
+          (field) =>
+            `CASE(${field} IS NOT NULL, ${concatJsonObjectPropertyEsqlExprSafe(field, field)}, "")`
+        );
+      } else if (type === 'generic') {
+        // Generic entities don't have a type prefix in their EUID,
+        // so use a negative condition to match them
+        const notTypedCondition = TYPED_ENTITY_PREFIXES.map(
+          (p) => `NOT STARTS_WITH(entity.id, "${p}:")`
+        ).join(' AND ');
+        return fields[type as keyof EuidSourceFields].map(
+          (field) => `CASE(${notTypedCondition} AND ${field} IS NOT NULL,
+            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), field)}, "")`
+        );
+      } else {
+        const typeEuidFields = fields[type as keyof EuidSourceFields];
+        return typeEuidFields.map(
+          (field) => `CASE(STARTS_WITH(entity.id, "${type}:") AND ${field} IS NOT NULL,
+            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), field)}, "")`
+        );
+      }
+    })
+    .flat()
+    .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
+  return `
+  REPLACE(
+    REPLACE(
+      REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
+    "\\\\{,", ${JSON_OBJECT_START}),
+  ",}", ${JSON_OBJECT_END})`;
 };

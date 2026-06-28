@@ -27,6 +27,7 @@ import { GetScheduledActionResultsResponse } from './get_scheduled_action_result
 import { GetScheduledQueryResultsResponse } from './get_scheduled_query_results.gen';
 import { ExportFormat, ExportRequestBody, ExportJsonResponse } from '../export/export_results.gen';
 
+<<<<<<< HEAD
 export const OsqueryExportScheduledQueryResultsRequestQuery = lazySchema(() =>
   z.object({
     /**
@@ -98,6 +99,14 @@ export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
     /**
      * Specifies the sort order.
      */
+=======
+export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
+  z.object({
+    kuery: KueryOrUndefined.optional(),
+    page: PageOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional(),
+    sort: SortOrUndefined.optional(),
+>>>>>>> 9.4
     sortOrder: SortOrderOrUndefined.optional(),
   })
 );
@@ -110,6 +119,7 @@ export type OsqueryGetScheduledActionResultsRequestQueryInput = z.input<
 
 export const OsqueryGetScheduledActionResultsRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The schedule ID of the scheduled query.
      */
@@ -117,6 +127,9 @@ export const OsqueryGetScheduledActionResultsRequestParams = lazySchema(() =>
     /**
      * The execution count for this scheduled query run.
      */
+=======
+    scheduleId: z.string(),
+>>>>>>> 9.4
     executionCount: z.number().int(),
   })
 );
@@ -135,6 +148,7 @@ export type OsqueryGetScheduledActionResultsResponse = z.infer<
 >;
 export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The kuery to filter the results by.
      */
@@ -158,6 +172,13 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The start date filter (ISO 8601) to narrow down results.
      */
+=======
+    kuery: KueryOrUndefined.optional(),
+    page: PageOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional(),
+    sort: SortOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional(),
+>>>>>>> 9.4
     startDate: z.string().optional(),
   })
 );
@@ -170,6 +191,7 @@ export type OsqueryGetScheduledQueryResultsRequestQueryInput = z.input<
 
 export const OsqueryGetScheduledQueryResultsRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The schedule ID of the scheduled query.
      */
@@ -177,6 +199,9 @@ export const OsqueryGetScheduledQueryResultsRequestParams = lazySchema(() =>
     /**
      * The execution count for this scheduled query run.
      */
+=======
+    scheduleId: z.string(),
+>>>>>>> 9.4
     executionCount: z.number().int(),
   })
 );

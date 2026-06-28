@@ -6,6 +6,10 @@
  */
 
 import { useMemo } from 'react';
+<<<<<<< HEAD
+=======
+import { useSelector } from 'react-redux';
+>>>>>>> 9.4
 import deepmerge from 'deepmerge';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { type inputsModel, inputsSelectors } from '../../../../common/store';
@@ -59,7 +63,11 @@ export const useObservedUser = (
       startDate: from,
       userName,
       entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
+<<<<<<< HEAD
       indexNames: indexPatterns,
+=======
+      indexNames: securityDefaultPatterns,
+>>>>>>> 9.4
       id: USER_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
     });

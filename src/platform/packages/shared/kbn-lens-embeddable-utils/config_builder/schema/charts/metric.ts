@@ -59,6 +59,7 @@ const compareToSchemaShared = schema.object(
   {
     palette: schema.maybe(
       schema.string({
+<<<<<<< HEAD
         meta: {
           description:
             "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
@@ -72,6 +73,13 @@ const compareToSchemaShared = schema.object(
         defaultValue: true,
       })
     ),
+=======
+        meta: { description: 'Palette' },
+        defaultValue: DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
+      })
+    ),
+    icon: schema.maybe(schema.boolean({ meta: { description: 'Show icon' }, defaultValue: true })),
+>>>>>>> 9.4
     value: schema.maybe(
       schema.boolean({
         meta: { description: 'When `true`, displays the secondary value.' },
@@ -194,10 +202,14 @@ const metricStylingSchema = schema.object(
            */
           alignment: schema.maybe(
             leftRightAlignmentSchema({
+<<<<<<< HEAD
               meta: {
                 description:
                   'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
               },
+=======
+              meta: { description: 'Icon alignment' },
+>>>>>>> 9.4
               defaultValue: DEFAULT_PRIMARY_ICON_ALIGNMENT,
             })
           ),
@@ -377,7 +389,10 @@ const metricConfigPrimaryMetricOptionsSchema = {
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, staticColorSchema, autoColorSchema], {
+<<<<<<< HEAD
       meta: { description: 'Color configuration for the primary metric value or background.' },
+=======
+>>>>>>> 9.4
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -478,6 +493,7 @@ function validateMetrics(metrics: (PrimaryMetricType | SecondaryMetricType)[]) {
   }
 }
 
+<<<<<<< HEAD
 export const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
   {
     ...metricConfigPrimaryMetricOptionsSchema,
@@ -488,6 +504,14 @@ export const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchema
 const secondaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
   metricConfigSecondaryMetricOptionsSchema,
   'metricSecondary'
+=======
+export const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
+  ...metricConfigPrimaryMetricOptionsSchema,
+  ...metricConfigBackgroundChartSchemaNoESQL,
+});
+const secondaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+  metricConfigSecondaryMetricOptionsSchema
+>>>>>>> 9.4
 );
 
 export const metricConfigSchemaNoESQL = schema.object(
@@ -517,10 +541,14 @@ export const metricConfigSchemaNoESQL = schema.object(
      * Configure how to break down the metric (e.g. show one metric per term).
      */
     breakdown_by: schema.maybe(
+<<<<<<< HEAD
       mergeAllBucketsWithChartDimensionSchema(
         metricConfigBreakdownByOptionsSchema,
         'metricBreakdown'
       )
+=======
+      mergeAllBucketsWithChartDimensionSchema(metricConfigBreakdownByOptionsSchema)
+>>>>>>> 9.4
     ),
   },
   {
@@ -594,12 +622,16 @@ export const metricConfigSchemaESQL = schema.object(
 );
 
 export const metricConfigSchema = objectUnion([metricConfigSchemaNoESQL, metricConfigSchemaESQL], {
+<<<<<<< HEAD
   meta: {
     id: 'metricChart',
     title: 'Metric Chart',
     description:
       'One or two metric values with optional color coding, trend line, and breakdown by dimension.',
   },
+=======
+  meta: { id: 'metricChart', title: 'Metric Chart' },
+>>>>>>> 9.4
 });
 
 export type MetricConfig = TypeOf<typeof metricConfigSchema>;

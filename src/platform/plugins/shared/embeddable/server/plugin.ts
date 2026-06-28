@@ -32,7 +32,10 @@ import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
 import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
 import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
+<<<<<<< HEAD
 import { registerSearchRoute } from './search_route';
+=======
+>>>>>>> 9.4
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;

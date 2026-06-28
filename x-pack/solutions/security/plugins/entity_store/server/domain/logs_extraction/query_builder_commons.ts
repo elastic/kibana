@@ -46,7 +46,13 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
+<<<<<<< HEAD
 export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
+=======
+export const DOCUMENT_ID_FIELD = '_id';
+
+const METADATA_FIELDS = ['_index', '_id'];
+>>>>>>> 9.4
 
 export interface PaginationParams {
   timestampCursor: string;
@@ -72,6 +78,7 @@ export interface LogPageProbeSourceClauseParams {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
+<<<<<<< HEAD
   /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
   logsPageCursorStart?: LogSlicePaginationParams;
 }
@@ -87,6 +94,24 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
   const baseWhere = `FROM ${indexPatterns.join(', ')}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
+=======
+  recoveryId?: string;
+  /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
+  logsPageCursorStart?: PaginationParams;
+}
+
+/** Bounded extraction: same as probe plus optional inclusive upper bound on (@timestamp, _id). */
+export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
+  logsPageCursorEnd?: PaginationParams;
+};
+
+export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
+  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
+  const baseWhere = `FROM ${indexPatterns.join(', ')}
+    METADATA ${METADATA_FIELDS.join(', ')}
+  | WHERE 
+      ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+>>>>>>> 9.4
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
       AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
 
@@ -99,7 +124,11 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
 }
 
 export function buildExtractionSourceClause(
+<<<<<<< HEAD
   params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: LogSlicePaginationParams }
+=======
+  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: PaginationParams }
+>>>>>>> 9.4
 ): string {
   if (params.logsPageCursorEnd) {
     const { logsPageCursorEnd, ...probeParams } = params;
@@ -111,12 +140,35 @@ export function buildExtractionSourceClause(
   return buildLogPageProbeSourceClause(params);
 }
 
+<<<<<<< HEAD
 function buildLogsPageStartFilter(cursor: LogSlicePaginationParams): string {
   return `${TIMESTAMP_FIELD} >= TO_DATETIME("${cursor.timestampCursor}")`;
 }
 
 function buildLogsPageEndFilter(end: LogSlicePaginationParams): string {
   return `${TIMESTAMP_FIELD} <= TO_DATETIME("${end.timestampCursor}")`;
+=======
+function buildLogsPageStartFilter(cursor: PaginationParams): string {
+  const escapedId = escapeEsqlStringLiteral(cursor.idCursor);
+  return `(
+      ${TIMESTAMP_FIELD} > TO_DATETIME("${cursor.timestampCursor}")
+      OR (
+        ${TIMESTAMP_FIELD} == TO_DATETIME("${cursor.timestampCursor}")
+        AND \`${DOCUMENT_ID_FIELD}\` > "${escapedId}"
+      )
+    )`;
+}
+
+function buildLogsPageEndFilter(end: PaginationParams): string {
+  const escapedId = escapeEsqlStringLiteral(end.idCursor);
+  return `(
+      ${TIMESTAMP_FIELD} < TO_DATETIME("${end.timestampCursor}")
+      OR (
+        ${TIMESTAMP_FIELD} == TO_DATETIME("${end.timestampCursor}")
+        AND \`${DOCUMENT_ID_FIELD}\` <= "${escapedId}"
+      )
+    )`;
+>>>>>>> 9.4
 }
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
@@ -127,7 +179,11 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
       const castedSrc = castEntityField(field);
       switch (retention.operation) {
         case 'collect_values':
+<<<<<<< HEAD
           return `${finalDest} = VALUES(${castedSrc})`;
+=======
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
+>>>>>>> 9.4
         case 'prefer_newest_value':
           return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':

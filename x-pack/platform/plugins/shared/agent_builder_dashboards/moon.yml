@@ -37,7 +37,10 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/moon.yml
   - '@kbn/agent-context-layer-plugin'
+=======
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/moon.yml
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/data-views-plugin'

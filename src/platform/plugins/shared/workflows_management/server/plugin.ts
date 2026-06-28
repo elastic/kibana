@@ -18,11 +18,14 @@ import { defineRoutes } from './api/routes';
 import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
+<<<<<<< HEAD
 import { AvailabilityUpdater } from './availability';
 import {
   createManagedWorkflowsSystemApiProvider,
   createWorkflowsClientProvider,
 } from './client/workflows_client';
+=======
+>>>>>>> 9.4
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -54,12 +57,25 @@ export class WorkflowsPlugin
   private readonly kibanaVersion: string;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
+<<<<<<< HEAD
   private workflowsService: WorkflowsService | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsManagementConfig>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+=======
+  private spaces?: SpacesServiceStart | null = null;
+  private securityStart?: SecurityServiceStart;
+  private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
+  private analytics?: AnalyticsServiceStart;
+  private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
+  private config: WorkflowsManagementConfig;
+
+  constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
+    this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
+>>>>>>> 9.4
   }
 
   public setup(
@@ -92,12 +108,72 @@ export class WorkflowsPlugin
       }
     }
 
+<<<<<<< HEAD
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
     );
+=======
+    // Register the workflows management feature and its privileges
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
+
+    this.logger.debug('Workflows Management: Creating workflows service');
+
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
+    const getPluginsStart = () => core.getStartServices().then(([, pluginsStart]) => pluginsStart);
+    const getWorkflowExecutionEngine = () =>
+      getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
+
+    this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
+
+    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
+    this.spaces = plugins.spaces?.spacesService;
+
+    if (!this.spaces) {
+      throw new Error('Spaces service not initialized');
+    }
+
+    if (!this.api) {
+      throw new Error('Workflows management API not initialized');
+    }
+    const api = this.api;
+    const resolveMatchingWorkflowSubscriptionsFn = (
+      params: ResolveMatchingWorkflowSubscriptionsParams
+    ) => resolveMatchingWorkflowSubscriptions(params, { api, logger: this.logger });
+    const telemetryClient = new WorkflowsManagementTelemetryClient({
+      logger: this.logger,
+      getAnalytics: () => this.analytics,
+    });
+
+    const triggerEventHandler = createTriggerEventHandler({
+      api: this.api,
+      logger: this.logger,
+      telemetryClient,
+      getTriggerEventsClient: () => this.triggerEventsClient,
+      getWorkflowExecutionEngine,
+      resolveMatchingWorkflowSubscriptions: resolveMatchingWorkflowSubscriptionsFn,
+    });
+
+    plugins.workflowsExtensions.registerTriggerEventHandler(triggerEventHandler);
+
+    this.logger.debug('Workflows Management: Creating router');
+    const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
+
+    if (this.config.available) {
+      // Register server side APIs only when the plugin is available (only set to false in serverless)
+      // TODO: improve this logic and define all the routes but respond with a 403 when the plugin is not available
+      defineRoutes(
+        router,
+        this.api,
+        this.logger,
+        this.spaces,
+        getWorkflowExecutionEngine,
+        () => this.securityStart
+      );
+    }
+>>>>>>> 9.4
 
     const spaces = plugins.spaces.spacesService;
 

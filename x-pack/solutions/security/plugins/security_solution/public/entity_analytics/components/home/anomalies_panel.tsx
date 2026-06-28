@@ -44,6 +44,7 @@ export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> 
   const anomalyExplorerUrl = useRecentAnomaliesMlExplorerUrl();
   const spaceId = useSpaceId();
   return (
+<<<<<<< HEAD
     <InspectButtonContainer>
       <EuiFlexItem data-test-subj="recent-anomalies-panel">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -90,5 +91,36 @@ export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> 
         <RecentAnomaliesChart watchlistId={watchlistId} spaceId={spaceId} />
       </EuiFlexItem>
     </InspectButtonContainer>
+=======
+    <EuiFlexItem data-test-subj="recent-anomalies-panel">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies"
+                defaultMessage="Recent anomalies"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color={'primary'}
+            iconType={'popout'}
+            href={anomalyExplorerUrl}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies.viewAllInAnomalyExplorer"
+              defaultMessage="Open in Anomaly Explorer"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
+      <RecentAnomaliesChart watchlistId={watchlistId} spaceId={spaceId} />
+    </EuiFlexItem>
+>>>>>>> 9.4
   );
 };

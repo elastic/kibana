@@ -8,6 +8,7 @@
  */
 
 import { once } from 'lodash';
+<<<<<<< HEAD
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { schema } from '@kbn/config-schema';
@@ -18,6 +19,13 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../user_activity';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
+=======
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { getRouteConfig } from '../get_route_config';
+import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
+import { update } from './update';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+>>>>>>> 9.4
 import { writeErrorHandler } from '../write_error_handler';
 import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
@@ -54,11 +62,15 @@ export function registerUpdateRoute(
           params: schema.object({
             // Can not validate id at route level
             // existing dashboards may have invalid "as code" ids
+<<<<<<< HEAD
             id: schema.string({
               meta: {
                 description: 'The unique ID of the dashboard to be created or updated',
               },
             }),
+=======
+            id: schema.string(),
+>>>>>>> 9.4
           }),
           body: getDashboardStateSchema(isDashboardAppRequest),
         },

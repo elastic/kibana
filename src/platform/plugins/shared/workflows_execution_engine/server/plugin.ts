@@ -44,7 +44,10 @@ import {
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
+<<<<<<< HEAD
 import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
+=======
+>>>>>>> 9.4
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -84,11 +87,15 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
+<<<<<<< HEAD
 import {
   getWorkflowGlobalTimeoutResumeTaskId,
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
+=======
+import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+>>>>>>> 9.4
 import { createIndexes } from '../common';
 
 /**
@@ -186,7 +193,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
+<<<<<<< HEAD
         createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+=======
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+>>>>>>> 9.4
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
           }
@@ -231,6 +242,7 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
+<<<<<<< HEAD
               const esClient = coreStart.elasticsearch.client.asInternalUser;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
@@ -238,6 +250,14 @@ export class WorkflowsExecutionEnginePlugin
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
                 stepExecutionRepository,
+=======
+              const workflowExecutionRepository = new WorkflowExecutionRepository(
+                coreStart.elasticsearch.client.asInternalUser
+              );
+
+              const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
+                workflowExecutionRepository,
+>>>>>>> 9.4
                 workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
@@ -259,12 +279,20 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+<<<<<<< HEAD
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+=======
+                  isEventDrivenExecutionEnabled:
+                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
+>>>>>>> 9.4
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
+<<<<<<< HEAD
                   stepExecutionRepository,
+=======
+>>>>>>> 9.4
                   workflowRunId,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
@@ -292,7 +320,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+<<<<<<< HEAD
         createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+=======
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+>>>>>>> 9.4
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
           }
@@ -342,6 +374,7 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
+<<<<<<< HEAD
               const esClient = coreStart.elasticsearch.client.asInternalUser;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
@@ -349,6 +382,14 @@ export class WorkflowsExecutionEnginePlugin
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
                 stepExecutionRepository,
+=======
+              const workflowExecutionRepository = new WorkflowExecutionRepository(
+                coreStart.elasticsearch.client.asInternalUser
+              );
+
+              const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
+                workflowExecutionRepository,
+>>>>>>> 9.4
                 workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
@@ -370,12 +411,18 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+<<<<<<< HEAD
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+=======
+>>>>>>> 9.4
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
+<<<<<<< HEAD
                   stepExecutionRepository,
+=======
+>>>>>>> 9.4
                   workflowRunId,
                   spaceId,
                   taskAttempts: taskInstance.attempts,

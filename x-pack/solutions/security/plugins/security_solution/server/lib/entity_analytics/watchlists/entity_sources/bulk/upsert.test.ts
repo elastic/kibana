@@ -31,9 +31,15 @@ describe('bulkUpsertOperationsFactory', () => {
     // Two entities → 4 elements (action + body pairs)
     expect(ops).toHaveLength(4);
 
+<<<<<<< HEAD
     // First entity — update action with deterministic _id
     expect(ops[0]).toEqual({ update: { _index: targetIndex, _id: 'watchlist-1:user:alice' } });
     // First entity — scripted upsert body
+=======
+    // First entity — index action
+    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'watchlist-1:user:alice' } });
+    // First entity — doc body
+>>>>>>> 9.4
     expect(ops[1]).toEqual(
       expect.objectContaining({
         script: expect.objectContaining({
@@ -48,8 +54,13 @@ describe('bulkUpsertOperationsFactory', () => {
       })
     );
 
+<<<<<<< HEAD
     // Second entity
     expect(ops[2]).toEqual({ update: { _index: targetIndex, _id: 'watchlist-1:user:bob' } });
+=======
+    // Second entity — index action
+    expect(ops[2]).toEqual({ index: { _index: targetIndex, _id: 'watchlist-1:user:bob' } });
+>>>>>>> 9.4
     expect(ops[3]).toEqual(
       expect.objectContaining({
         script: expect.objectContaining({ source: UPDATE_SCRIPT_SOURCE }),
@@ -83,6 +94,32 @@ describe('bulkUpsertOperationsFactory', () => {
     );
   });
 
+<<<<<<< HEAD
+=======
+  it('generates mixed operations for a mix of new and existing entities', () => {
+    const entities: WatchlistBulkEntity[] = [
+      { euid: 'user:new-user', type: 'user', name: 'new-user', sourceId: 'src-1' },
+      {
+        euid: 'user:existing-user',
+        type: 'user',
+        name: 'existing-user',
+        existingEntityId: 'doc-456',
+        sourceId: 'src-1',
+      },
+    ];
+
+    const ops = buildOps({ entities, sourceLabel: 'index', targetIndex });
+
+    expect(ops).toHaveLength(4);
+
+    // First is an index op
+    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'watchlist-1:user:new-user' } });
+
+    // Second pair is an update op
+    expect(ops[2]).toEqual({ update: { _index: targetIndex, _id: 'doc-456' } });
+  });
+
+>>>>>>> 9.4
   it('returns an empty array when no entities are provided', () => {
     const ops = buildOps({ entities: [], sourceLabel: 'index', targetIndex });
     expect(ops).toHaveLength(0);

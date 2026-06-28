@@ -152,6 +152,7 @@ describe('Watchlist update detection service', () => {
       expect(sourceSearchParams.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: 'now-10d', lte: 'now' } },
       });
+<<<<<<< HEAD
       expect(dataEsClient.search).toHaveBeenCalledWith({
         index: indexSource.indexPattern,
         ...sourceSearchParams,
@@ -159,6 +160,9 @@ describe('Watchlist update detection service', () => {
       expect(internalEsClient.search).not.toHaveBeenCalled();
       expect(internalEsClient.bulk).toHaveBeenCalled();
       expect(dataEsClient.bulk).not.toHaveBeenCalled();
+=======
+      expect(esClient.bulk).toHaveBeenCalled();
+>>>>>>> 9.4
     });
 
     it('skips sync when correlation map is empty', async () => {

@@ -30,6 +30,7 @@ import {
   ResponseActionDetails,
 } from '../../model/schema/common.gen';
 
+<<<<<<< HEAD
 export const GetEndpointActionListResponse = lazySchema(() =>
   z.object({
     /**
@@ -78,10 +79,14 @@ export const GetEndpointActionListResponse = lazySchema(() =>
     data: z.array(ResponseActionDetails).optional(),
   })
 );
+=======
+export const GetEndpointActionListResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type GetEndpointActionListResponse = z.infer<typeof GetEndpointActionListResponse>;
 
 export const EndpointGetActionsListRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The page number to return.
      */
@@ -121,6 +126,17 @@ export const EndpointGetActionsListRequestQuery = lazySchema(() =>
     /**
      * A list of response action types to filter by (`automated`, `manual`).
      */
+=======
+    page: Page.optional(),
+    pageSize: PageSize.optional(),
+    commands: Commands.optional(),
+    agentIds: AgentIds.optional(),
+    userIds: UserIds.optional(),
+    startDate: StartDate.optional(),
+    endDate: EndDate.optional(),
+    agentTypes: AgentTypes.optional(),
+    withOutputs: WithOutputs.optional(),
+>>>>>>> 9.4
     types: Types.optional(),
   })
 );

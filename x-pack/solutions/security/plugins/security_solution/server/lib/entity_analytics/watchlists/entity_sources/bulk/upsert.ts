@@ -79,10 +79,21 @@ export const bulkUpsertOperationsFactory =
               source_id: entity.sourceId,
               source_type: sourceLabel,
             },
+<<<<<<< HEAD
           },
           upsert: buildCreateDoc(entity, sourceLabel, watchlist),
         }
       );
+=======
+          }
+        );
+      } else {
+        ops.push(
+          { index: { _index: targetIndex, _id: buildWatchlistDocId(watchlist.id, entity.euid) } },
+          buildCreateDoc(entity, sourceLabel, watchlist)
+        );
+      }
+>>>>>>> 9.4
     }
     return ops;
   };

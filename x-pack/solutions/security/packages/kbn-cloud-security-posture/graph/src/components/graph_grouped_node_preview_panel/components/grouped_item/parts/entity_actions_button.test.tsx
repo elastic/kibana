@@ -13,15 +13,21 @@ import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 import {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+<<<<<<< HEAD
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+=======
+>>>>>>> 9.4
 } from '../../../../test_ids';
 import {
   emitFilterToggle,
   emitIsOneOfFilterToggle,
   isFilterActiveForScope,
+<<<<<<< HEAD
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
   emitPinnedEuidToggle,
+=======
+>>>>>>> 9.4
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 
@@ -45,6 +51,7 @@ const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFuncti
 const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
   typeof isFilterActiveForScope
 >;
+<<<<<<< HEAD
 const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
   typeof emitEntityRelationshipToggle
 >;
@@ -55,6 +62,8 @@ const mockIsEntityRelationshipExpandedForScope =
   isEntityRelationshipExpandedForScope as jest.MockedFunction<
     typeof isEntityRelationshipExpandedForScope
   >;
+=======
+>>>>>>> 9.4
 
 // Mock useExpandableFlyoutApi
 const mockOpenPreviewPanel = jest.fn();
@@ -263,6 +272,7 @@ describe('EntityActionsButton', () => {
       expect(screen.getByText('Hide related events')).toBeInTheDocument();
     });
   });
+<<<<<<< HEAD
 
   describe('entity relationships toggle', () => {
     it('should emit both emitEntityRelationshipToggle and emitPinnedEuidToggle with "show" when clicking Show entity relationships', () => {
@@ -339,4 +349,6 @@ describe('EntityActionsButton', () => {
       expect(relationshipsBtn).toBeDisabled();
     });
   });
+=======
+>>>>>>> 9.4
 });

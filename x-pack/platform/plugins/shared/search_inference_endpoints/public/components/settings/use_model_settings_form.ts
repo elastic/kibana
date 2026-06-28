@@ -25,8 +25,11 @@ export interface ModelSettingsForm {
   effectiveRecommendedEndpoints: Record<string, string[]>;
   sections: FeatureSection[];
   invalidEndpointIds: Set<string>;
+<<<<<<< HEAD
   hasSavedObject: Record<string, boolean>;
   dirtyFeatureIds: ReadonlySet<string>;
+=======
+>>>>>>> 9.4
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   save: () => Promise<void>;
 }
@@ -165,6 +168,14 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
   const invalidEndpointIds = useMemo(
     () => new Set<string>(settingsData?.invalidEndpoints ?? []),
     [settingsData]
+<<<<<<< HEAD
+=======
+  );
+
+  const isDirty = useMemo(
+    () => JSON.stringify(assignments) !== JSON.stringify(defaultAssignments),
+    [assignments, defaultAssignments]
+>>>>>>> 9.4
   );
 
   const dirtyFeatureIds = useMemo<ReadonlySet<string>>(() => {
@@ -201,8 +212,11 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
+<<<<<<< HEAD
     hasSavedObject,
     dirtyFeatureIds,
+=======
+>>>>>>> 9.4
     updateEndpoints,
     save,
   };

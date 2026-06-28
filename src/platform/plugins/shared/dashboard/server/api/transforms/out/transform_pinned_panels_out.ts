@@ -19,19 +19,37 @@ import { pinnedControlSchema } from '@kbn/controls-schemas/src/controls_group_sc
 
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
+<<<<<<< HEAD
 import { embeddableService } from '../../../kibana_services';
 import type { Warnings } from '../../types';
 
 export type StoredPinnedPanels =
   Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+=======
+import type { DashboardState, Warnings } from '../../types';
+
+import type {
+  DashboardPinnedPanelsState as DashboardControlsState,
+  DashboardPinnedPanelsState,
+} from '../../../../common';
+import { embeddableService } from '../../../kibana_services';
+
+type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
+type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+>>>>>>> 9.4
 
 export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
+<<<<<<< HEAD
   containerReferences: Reference[] = []
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   let warnings: Warnings = [];
   let transformedPanels: DashboardPinnedPanelsState = [];
+=======
+  containerReferences: Reference[]
+): { panels: DashboardState['pinned_panels']; warnings: Warnings } {
+>>>>>>> 9.4
   if (pinnedPanels) {
     /**
      * >=9.4, pinned panels are stored in the SO under the key `pinned_panels` without any JSON bucketing
@@ -45,8 +63,13 @@ export function transformPinnedPanelsOut(
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
      * This was before pinned panels were transformed to be generic - they **only** stored controls
      */
+<<<<<<< HEAD
     ({ warnings, panels: transformedPanels } = controlGroupInput.panelsJSON
       ? transformPanels(
+=======
+    const { warnings, panels: controls } = controlGroupInput.panelsJSON
+      ? injectPinnedPanelReferences(
+>>>>>>> 9.4
           flow(
             JSON.parse,
             transformPinnedPanelsObjectToArray,
@@ -54,7 +77,11 @@ export function transformPinnedPanelsOut(
           )(controlGroupInput.panelsJSON),
           containerReferences
         )
+<<<<<<< HEAD
       : { warnings: [], panels: [] });
+=======
+      : { warnings: [], panels: [] };
+>>>>>>> 9.4
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
     const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
       controlGroupInput.ignoreParentSettingsJSON
@@ -77,9 +104,15 @@ export function transformPinnedPanelsOut(
         },
       }));
     }
+<<<<<<< HEAD
   }
 
   return { warnings, panels: transformedPanels };
+=======
+    return { warnings, panels: controls };
+  }
+  return { warnings: [], panels: [] };
+>>>>>>> 9.4
 }
 
 /**
@@ -123,6 +156,7 @@ function transformPanels(
   panels: DashboardPinnedPanelsState,
   containerReferences: Reference[]
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
+<<<<<<< HEAD
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
 
@@ -138,6 +172,27 @@ function transformPanels(
           containerReferences,
           panel.id
         ) as DashboardPinnedPanel['config'];
+=======
+  const transformedControls: DashboardControlsState = [];
+  const warnings: Warnings = [];
+
+  controls.forEach((control) => {
+    const transforms = embeddableService.getTransforms(control.type);
+    const { config, ...rest } = control;
+    if (transforms?.transformOut) {
+      try {
+        transformedControls.push({
+          ...rest,
+          config: transforms.transformOut(config, [], containerReferences, control.id),
+        } as DashboardControlsState[number]);
+      } catch (e) {
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: control.type,
+          panel_config: control.config,
+          message: `Unable to transform pinned panel config. Error: ${e.message}`,
+        });
+>>>>>>> 9.4
       }
       if (schema) {
         config = schema.validate(config, undefined, undefined, {
@@ -158,5 +213,9 @@ function transformPanels(
       });
     }
   });
+<<<<<<< HEAD
   return { warnings, panels: transformedPanels };
+=======
+  return { warnings, panels: transformedControls };
+>>>>>>> 9.4
 }

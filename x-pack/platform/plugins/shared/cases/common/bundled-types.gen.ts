@@ -409,6 +409,73 @@ export const CaseResponseClosedByProperties = lazySchema(() =>
 );
 export type CaseResponseClosedByProperties = z.infer<typeof CaseResponseClosedByProperties>;
 
+<<<<<<< HEAD
+=======
+export const CaseResponseCreatedByProperties = lazySchema(() =>
+  z.object({
+    email: z.string().nullable(),
+    full_name: z.string().nullable(),
+    username: z.string().nullable(),
+    profile_uid: z.string().optional(),
+  })
+);
+export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
+
+export const CaseResponsePushedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
+export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
+
+export const CaseResponseUpdatedByProperties = lazySchema(() =>
+  z
+    .object({
+      email: z.string().nullable(),
+      full_name: z.string().nullable(),
+      username: z.string().nullable(),
+      profile_uid: z.string().optional(),
+    })
+    .nullable()
+);
+export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
+
+export const ActionsCommentResponseProperties = lazySchema(() =>
+  z.object({
+    actions: z
+      .object({
+        targets: z
+          .array(
+            z.object({
+              endpointId: z.string().optional(),
+              hostname: z.string().optional(),
+            })
+          )
+          .optional(),
+        type: z.string().optional(),
+      })
+      .optional(),
+    comment: z.string().optional(),
+    created_at: z.string().datetime().optional(),
+    created_by: CaseResponseCreatedByProperties.optional(),
+    id: z.string().optional(),
+    owner: Owner.optional(),
+    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_by: CaseResponsePushedByProperties.optional(),
+    type: z.literal('actions'),
+    updated_at: z.string().datetime().nullable().optional(),
+    updated_by: CaseResponseUpdatedByProperties.optional(),
+    version: z.string().optional(),
+  })
+);
+export type ActionsCommentResponseProperties = z.infer<typeof ActionsCommentResponseProperties>;
+
+>>>>>>> 9.4
 export const AlertCommentResponseProperties = lazySchema(() =>
   z.object({
     alertId: z.array(z.string()).optional(),
@@ -462,6 +529,7 @@ export const AlertCommentResponseProperties = lazySchema(() =>
 );
 export type AlertCommentResponseProperties = z.infer<typeof AlertCommentResponseProperties>;
 
+<<<<<<< HEAD
 export const CaseResponseCreatedByProperties = lazySchema(() =>
   z.object({
     email: z.string().nullable(),
@@ -496,6 +564,8 @@ export const CaseResponseUpdatedByProperties = lazySchema(() =>
 );
 export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
 
+=======
+>>>>>>> 9.4
 export const EventCommentResponseProperties = lazySchema(() =>
   z.object({
     created_at: z.string().datetime().optional(),
@@ -610,6 +680,10 @@ export const CaseResponseProperties = lazySchema(() =>
     comments: z
       .array(
         z.discriminatedUnion('type', [
+<<<<<<< HEAD
+=======
+          ActionsCommentResponseProperties,
+>>>>>>> 9.4
           AlertCommentResponseProperties,
           EventCommentResponseProperties,
           UserCommentResponseProperties,
@@ -660,6 +734,7 @@ export const CaseResponseProperties = lazySchema(() =>
     external_service: ExternalService,
     id: z.string(),
     /**
+<<<<<<< HEAD
       * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
 
       */
@@ -691,6 +766,34 @@ export const CaseResponseProperties = lazySchema(() =>
 );
 export type CaseResponseProperties = z.infer<typeof CaseResponseProperties>;
 
+=======
+     * Observables attached to the case.
+     */
+    observables: z.array(CaseObservable),
+    owner: Owner,
+    settings: Settings,
+    severity: CaseSeverity,
+    status: CaseStatus,
+    tags: z.array(z.string()),
+    title: z.string(),
+    totalAlerts: z.number().int(),
+    totalComment: z.number().int(),
+    /**
+     * The number of observables attached to the case.
+     */
+    total_observables: z.number().int().nullable(),
+    /**
+     * The number of events attached to the case.
+     */
+    totalEvents: z.number().int().optional(),
+    updated_at: z.string().datetime().nullable(),
+    updated_by: CaseResponseUpdatedByProperties,
+    version: z.string(),
+  })
+);
+export type CaseResponseProperties = z.infer<typeof CaseResponseProperties>;
+
+>>>>>>> 9.4
 export const Response4Xx = lazySchema(() =>
   z.object({
     error: z.string().optional(),
@@ -1159,6 +1262,7 @@ export const CaseResponseGetCase = lazySchema(() =>
     external_service: ExternalService,
     id: z.string(),
     /**
+<<<<<<< HEAD
       * A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
 
       */
@@ -1193,6 +1297,37 @@ export const CaseResponseGetCase = lazySchema(() =>
 );
 export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
 
+=======
+     * Observables attached to the case.
+     */
+    observables: z.array(CaseObservable),
+    owner: Owner,
+    settings: Settings,
+    severity: CaseSeverity,
+    status: CaseStatus,
+    tags: z.array(z.string()),
+    title: z.string(),
+    totalAlerts: z.number().int(),
+    /**
+     * The number of user comments on the case. Use the find case comments API to retrieve comment content.
+     */
+    totalComment: z.number().int(),
+    /**
+     * The number of observables attached to the case.
+     */
+    total_observables: z.number().int().nullable(),
+    /**
+     * The number of events attached to the case.
+     */
+    totalEvents: z.number().int().optional(),
+    updated_at: z.string().datetime().nullable(),
+    updated_by: CaseResponseUpdatedByProperties,
+    version: z.string(),
+  })
+);
+export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
+
+>>>>>>> 9.4
 export const AlertResponseProperties = lazySchema(() =>
   z.object({
     attached_at: z.string().datetime().optional(),
@@ -1699,6 +1834,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
      */
     type: z.enum([
       'assignees',
+<<<<<<< HEAD
       'category',
       'comment',
       'connector',
@@ -1714,6 +1850,18 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       'status',
       'tags',
       'title',
+=======
+      'create_case',
+      'comment',
+      'connector',
+      'description',
+      'pushed',
+      'tags',
+      'title',
+      'status',
+      'settings',
+      'severity',
+>>>>>>> 9.4
     ]),
   })
 );

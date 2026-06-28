@@ -30,7 +30,11 @@ export const AttackDiscoveryGenericResponse = lazySchema(() => z.object({}).catc
 export type AttackDiscoveryGenericResponse = z.infer<typeof AttackDiscoveryGenericResponse>;
 
 /**
+<<<<<<< HEAD
  * Error response for Attack discovery schedule operations when the request is rejected. Uses `status_code` (snake_case), `error`, and `message` to match the implementation.
+=======
+ * Generic error response for Attack Discovery schedule operations
+>>>>>>> 9.4
  */
 export const AttackDiscoveryGenericError = lazySchema(() =>
   z.object({
@@ -50,6 +54,7 @@ export const AttackDiscoveryGenericError = lazySchema(() =>
 );
 export type AttackDiscoveryGenericError = z.infer<typeof AttackDiscoveryGenericError>;
 
+<<<<<<< HEAD
 export const BulkActionAttackDiscoverySchedulesRequestBody = lazySchema(() =>
   z.object({
     /**
@@ -156,6 +161,8 @@ export type BulkEnableAttackDiscoverySchedulesResponse = z.infer<
   typeof BulkEnableAttackDiscoverySchedulesResponse
 >;
 
+=======
+>>>>>>> 9.4
 export const CreateAttackDiscoverySchedulesRequestBody = lazySchema(
   () => AttackDiscoveryApiScheduleCreateProps
 );

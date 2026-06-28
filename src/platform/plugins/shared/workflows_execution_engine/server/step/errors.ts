@@ -67,6 +67,7 @@ export function parseByteSize(value: string | number): number {
  * Safely measures the serialized size of an output value.
  * For Buffer outputs (binary HTTP responses) uses the raw byte length directly,
  * avoiding the ~4x amplification from JSON.stringify({ type: "Buffer", data: [...] }).
+<<<<<<< HEAD
  * Returns the byte count on success, or `null` if the value is not serializable
  * to JSON. This covers both the throwing cases (circular references, BigInt)
  * and the silent ones — `JSON.stringify(undefined)` and `JSON.stringify(fn)`
@@ -77,6 +78,12 @@ export function parseByteSize(value: string | number): number {
  * it through.
  */
 export function safeOutputSize(output: unknown): number | null {
+=======
+ * Returns the byte count on success, or -1 if the value is not serializable
+ * (e.g., streams, circular references, functions).
+ */
+export function safeOutputSize(output: unknown): number {
+>>>>>>> 9.4
   if (Buffer.isBuffer(output)) {
     return output.byteLength;
   }

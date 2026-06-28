@@ -59,8 +59,13 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
       <h2>{overviewLabels.capabilitiesTitle}</h2>
     </EuiTitle>
     <EuiSpacer size="m" />
+<<<<<<< HEAD
     <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
       <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
+=======
+    <EuiFlexGroup gutterSize="m" alignItems="stretch">
+      <EuiFlexItem grow={1}>
+>>>>>>> 9.4
         <CapabilityCard
           dataTestSubj="agentOverviewCapabilityCardSkills"
           count={skillsCount}

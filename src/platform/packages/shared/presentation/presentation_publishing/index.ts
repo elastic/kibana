@@ -282,5 +282,8 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
+<<<<<<< HEAD
 
 export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
+=======
+>>>>>>> 9.4

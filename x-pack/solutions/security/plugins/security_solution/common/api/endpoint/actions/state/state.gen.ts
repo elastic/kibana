@@ -18,11 +18,18 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ActionStateSuccessResponse = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     data: z.object({
       /**
        * Whether the Kibana instance has encryption enabled for response actions.
        */
       canEncrypt: z.boolean().optional(),
+=======
+    body: z.object({
+      data: z.object({
+        canEncrypt: z.boolean().optional(),
+      }),
+>>>>>>> 9.4
     }),
   })
 );

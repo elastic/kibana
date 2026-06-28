@@ -236,6 +236,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
       </EuiFormRow>
       <EuiSpacer size="m" />
 
+<<<<<<< HEAD
       {!isNone && !isEntityStore && !!indexSourceWithMissingApiKey && !!watchlistId && (
         <>
           <EuiCallOut
@@ -271,6 +272,8 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         </>
       )}
 
+=======
+>>>>>>> 9.4
       {!isNone && !isEntityStore && (
         <EuiFormRow
           label={WATCHLIST_INDEX_PATTERN_LABEL}
@@ -301,7 +304,11 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
 
       {!isNone && (
         <FilterQueryRow
+<<<<<<< HEAD
           dataView={status === 'ready' ? dataView : undefined}
+=======
+          dataView={dataView}
+>>>>>>> 9.4
           filterQuery={filterQuery}
           filterManager={filterManager}
           filters={filters}

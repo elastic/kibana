@@ -7,8 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
+<<<<<<< HEAD
 import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+=======
+>>>>>>> 9.4
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';

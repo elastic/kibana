@@ -6,6 +6,10 @@
  */
 
 import path from 'node:path';
+<<<<<<< HEAD
+=======
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+>>>>>>> 9.4
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { unflattenObject } from '@kbn/object-utils';

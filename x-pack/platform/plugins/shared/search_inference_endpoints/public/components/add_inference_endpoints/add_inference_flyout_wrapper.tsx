@@ -15,6 +15,8 @@ import { EventType } from '../../analytics/constants';
 
 const EXCLUDED_PROVIDERS = [ServiceProviderKeys.elasticsearch, ServiceProviderKeys.elastic];
 
+const EXCLUDED_PROVIDERS = [ServiceProviderKeys.elasticsearch, ServiceProviderKeys.elastic];
+
 interface AddInferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
   reloadFn: () => void;

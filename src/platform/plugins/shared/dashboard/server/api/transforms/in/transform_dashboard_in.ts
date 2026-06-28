@@ -57,6 +57,7 @@ export const transformDashboardIn = (
           references: [],
         };
 
+<<<<<<< HEAD
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,
       query
@@ -65,6 +66,29 @@ export const transformDashboardIn = (
     const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
       pinned_panels ?? []
     );
+=======
+  const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
+    pinned_panels ?? []
+  );
+
+  const attributes = {
+    description: '',
+    title: '',
+    ...rest,
+    ...(Object.keys(pinnedPanels).length && {
+      pinned_panels: { panels: pinnedPanels },
+    }),
+    optionsJSON: transformOptionsIn(options ?? {}),
+    panelsJSON,
+    ...(refresh_interval && { refreshInterval: refresh_interval }),
+    ...(sections?.length && { sections }),
+    ...(time_range
+      ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }
+      : { timeRestore: false }),
+    kibanaSavedObjectMeta: { searchSourceJSON },
+    ...(project_routing !== undefined && { projectRouting: project_routing }),
+  };
+>>>>>>> 9.4
 
     const attributes = {
       description: '',

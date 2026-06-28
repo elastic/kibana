@@ -62,8 +62,11 @@ const defaultProps = {
   onHuntInChat: jest.fn(),
   onGenerate: jest.fn(),
   connectorId: 'test-connector-id',
+<<<<<<< HEAD
   hasValidConnector: true,
   isAgentChatExperienceEnabled: true,
+=======
+>>>>>>> 9.4
   onConnectorIdSelected: jest.fn(),
 };
 
@@ -144,6 +147,7 @@ describe('TopThreatHuntingLeads', () => {
     expect(onSeeAll).toHaveBeenCalledTimes(1);
   });
 
+<<<<<<< HEAD
   it('shows "Open GenAI Settings" button when Classic AI Assistant experience is active, regardless of connectorId', () => {
     render(
       <TopThreatHuntingLeads
@@ -187,6 +191,27 @@ describe('TopThreatHuntingLeads', () => {
 
     const generateButton = screen.getByTestId('generateLeadsButton');
     expect(generateButton).toBeInTheDocument();
+=======
+  it('"Generate" button is disabled when connectorId is not provided', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId={undefined} />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
+  it('"Generate" button is disabled when connectorId is empty string', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
+  it('shows "Generate" button when no leads exist and calls onGenerate', () => {
+    const onGenerate = jest.fn();
+
+    render(<TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} />);
+
+    const generateButton = screen.getByTestId('generateLeadsButton');
+    expect(generateButton).toBeInTheDocument();
+>>>>>>> 9.4
     expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
 
     fireEvent.click(generateButton);

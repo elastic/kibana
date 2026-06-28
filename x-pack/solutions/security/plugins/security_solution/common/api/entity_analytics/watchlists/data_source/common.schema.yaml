@@ -138,6 +138,20 @@ components:
           maxLength: 256
           description: End of the lookback period (date math or ISO string, e.g. "now")
 
+    DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+        end:
+          type: string
+          description: End of the lookback period (date math or ISO string, e.g. "now")
+
     Integrations:
       type: object
       properties:

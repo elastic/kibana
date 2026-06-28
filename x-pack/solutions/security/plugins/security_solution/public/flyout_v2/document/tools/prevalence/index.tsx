@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/index.tsx
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
+=======
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/index.tsx
 import type { PrevalenceDetailsRow } from './utils/get_columns';
 import { PrevalenceDetailsView } from './components/prevalence_details_view';
 
@@ -57,7 +61,11 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/index.tsx
         <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+=======
+        <ToolsFlyoutHeader hit={hit} title={TITLE} />
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/index.tsx
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <PrevalenceDetailsView

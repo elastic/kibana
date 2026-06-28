@@ -43,7 +43,11 @@ import {
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
+<<<<<<< HEAD
 import { fromDateHistogramLensApiToLensState } from '../columns/date_histogram';
+=======
+import { getHistogramColumn } from '../../columns/date_histogram';
+>>>>>>> 9.4
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type { MetricConfig } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
@@ -191,9 +195,15 @@ function convertStylingToAPIFormat(
   const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
 
   return stripUndefined({
+<<<<<<< HEAD
     icon: iconName
       ? {
           name: iconName,
+=======
+    icon: visualization.icon
+      ? {
+          name: iconCompat.toAPI(visualization.icon),
+>>>>>>> 9.4
           alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
         }
       : undefined,
@@ -471,8 +481,12 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.trendlineLayerType) {
+<<<<<<< HEAD
       // Trend takes precedence; do not retain bar-only fields (e.g. max_value) on the API config.
       primaryMetric.background_chart = { type: 'trend' };
+=======
+      primaryMetric.background_chart = { ...primaryMetric.background_chart, type: 'trend' };
+>>>>>>> 9.4
     }
 
     if (visualization.palette) {
@@ -584,6 +598,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   addLayerColumn(defaultLayer, getAccessorName('metric'), newPrimaryColumns);
   if (trendLineLayer) {
     // Histogram first so columnOrder matches editor-built trendline layers and tabify agg order.
+<<<<<<< HEAD
     addLayerColumn(
       trendLineLayer,
       HISTOGRAM_COLUMN_NAME,
@@ -596,6 +611,9 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
         drop_partial_intervals: false,
       })
     );
+=======
+    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, getHistogramColumn({}));
+>>>>>>> 9.4
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
   }
 

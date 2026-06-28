@@ -38,6 +38,7 @@ const flexGrowZeroStyles = css`
 
 const InputContainer: React.FC<
   PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
+<<<<<<< HEAD
 > = ({ children, isDisabled, isCollapsed }) => (
   <ConversationInputShell
     isDisabled={isDisabled}
@@ -49,6 +50,42 @@ const InputContainer: React.FC<
     {children}
   </ConversationInputShell>
 );
+=======
+> = ({ children, isDisabled, isCollapsed }) => {
+  const { euiTheme } = useEuiTheme();
+  const inputContainerStyles = css`
+    width: 100%;
+    min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
+    padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base};
+    flex-grow: 0;
+    transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+
+    ${useInputBorderStyles()}
+    ${useInputShadowStyles()}
+
+    &[aria-disabled='true'] {
+      background-color: ${euiTheme.colors.backgroundBaseDisabled};
+    }
+  `;
+
+  return (
+    <EuiFlexGroup
+      css={inputContainerStyles}
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+      alignItems="stretch"
+      justifyContent="center"
+      data-test-subj="agentBuilderConversationInputForm"
+      aria-label={containerAriaLabel}
+      aria-disabled={isDisabled}
+    >
+      {children}
+    </EuiFlexGroup>
+  );
+};
+>>>>>>> 9.4
 
 interface ConversationInputProps {
   onSubmit?: () => void;

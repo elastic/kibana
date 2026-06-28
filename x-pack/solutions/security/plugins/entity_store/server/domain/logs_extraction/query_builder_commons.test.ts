@@ -59,6 +59,7 @@ describe('buildExtractionSourceClause', () => {
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
 
+<<<<<<< HEAD
   it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
     const withCursor = buildExtractionSourceClause({
       ...baseParams,
@@ -69,6 +70,17 @@ describe('buildExtractionSourceClause', () => {
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+=======
+  it('should build FROM, METADATA, and time range with strict lower bound when recoveryId is absent', () => {
+    const clause = buildExtractionSourceClause(baseParams);
+    expect(clause).toContain('FROM logs-*, metrics-*');
+    expect(clause).toContain('METADATA _index, _id');
+    expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    expect(clause).not.toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    expect(clause).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
+    expect(clause).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+  });
+>>>>>>> 9.4
 
     const withoutCursor = buildExtractionSourceClause({ ...baseParams });
     expect(withoutCursor).toContain(
@@ -107,7 +119,13 @@ describe('aggregationStats', () => {
       mapping: { type: 'keyword' },
       retention: { operation: 'collect_values' },
     };
+<<<<<<< HEAD
     expect(aggregationStats([field], false)).toBe('tags = VALUES(TO_STRING(tags))');
+=======
+    expect(aggregationStats([field], false)).toBe(
+      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
+    );
+>>>>>>> 9.4
   });
 
   it('should emit collect_values aggregation using VALUES for main pipeline', () => {
@@ -128,7 +146,11 @@ describe('aggregationStats', () => {
       retention: { operation: 'collect_values' },
     };
     expect(aggregationStats([field], false)).toBe(
+<<<<<<< HEAD
       'entity.source = VALUES(TO_STRING(entity.source))'
+=======
+      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
+>>>>>>> 9.4
     );
   });
 

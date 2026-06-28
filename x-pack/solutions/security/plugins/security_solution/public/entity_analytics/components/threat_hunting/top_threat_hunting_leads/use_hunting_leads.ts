@@ -23,9 +23,12 @@ const MAX_POLLS = 30;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+<<<<<<< HEAD
 const isPermissionDenied = (error: unknown): boolean =>
   (error as { body?: { statusCode?: number } })?.body?.statusCode === 403;
 
+=======
+>>>>>>> 9.4
 const FETCH_LEADS_PARAMS = {
   params: {
     page: 1 as const,
@@ -73,6 +76,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     queryKey: [HUNTING_LEADS_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
     enabled: isEnabled,
+<<<<<<< HEAD
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {
         setReadPermissionError(true);
@@ -80,6 +84,9 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
         addError(error, { title: i18n.FETCH_LEADS_ERROR });
       }
     },
+=======
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_LEADS_ERROR }),
+>>>>>>> 9.4
   });
 
   const pollForCompletion = useCallback(
@@ -97,6 +104,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
 
           const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+<<<<<<< HEAD
           queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
           return 'success';
         }
@@ -113,6 +121,11 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
         queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
         queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
       }
+=======
+          return 'success';
+        }
+      }
+>>>>>>> 9.4
       return 'timeout';
     },
     [fetchLeadGenerationStatus, fetchLeads, queryClient]
@@ -148,6 +161,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
     enabled: isEnabled,
+<<<<<<< HEAD
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {
         setReadPermissionError(true);
@@ -155,6 +169,9 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
         addError(error, { title: i18n.FETCH_STATUS_ERROR });
       }
     },
+=======
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_STATUS_ERROR }),
+>>>>>>> 9.4
   });
 
   const { mutate: toggleSchedule } = useMutation({

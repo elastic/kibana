@@ -129,7 +129,10 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
       scrollToContextOnMount={scrollToContextOnMount}
+<<<<<<< HEAD
       ebt={ebt}
+=======
+>>>>>>> 9.4
     >
       {exceedMax && (
         <>
@@ -350,6 +353,7 @@ function TraceTree({
     const index = visibleList.findIndex((item) => item.id === scrollTarget);
     return index >= 0 ? index : undefined;
   }, [scrollToContextOnMount, scrollStrategy, scrollComplete, contextSpanIds, visibleList]);
+<<<<<<< HEAD
 
   const { onScrolled } = useScrollToOrigin({
     contextSpanId: contextSpanIds?.[0],
@@ -358,6 +362,8 @@ function TraceTree({
     scrollToOriginRef,
     setIsContextSpanVisible,
   });
+=======
+>>>>>>> 9.4
 
   const onRowsRendered = useCallback(
     ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {

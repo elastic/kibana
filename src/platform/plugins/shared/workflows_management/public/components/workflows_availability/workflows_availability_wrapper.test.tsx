@@ -127,7 +127,10 @@ describe('WorkflowsAvailabilityWrapper', () => {
           requiredProducts: ['Security Complete'],
         })
       );
+<<<<<<< HEAD
       mockUseKibanaServices.cloud.getPrivilegedUrls.mockResolvedValue({ billingUrl: undefined });
+=======
+>>>>>>> 9.4
     });
 
     it('should render access denied with serverless tier title and description', () => {
@@ -158,15 +161,30 @@ describe('WorkflowsAvailabilityWrapper', () => {
     });
 
     it('should show contact admin text when billing URL is not available', async () => {
+<<<<<<< HEAD
+=======
+      mockUseKibanaServices.cloud.getPrivilegedUrls.mockResolvedValue({
+        billingUrl: undefined,
+      });
+
+>>>>>>> 9.4
       renderWithProviders(
         <WorkflowsAvailabilityWrapper>
           <div />
         </WorkflowsAvailabilityWrapper>
       );
 
+<<<<<<< HEAD
       expect(
         await screen.findByText('Contact your administrator to upgrade your subscription.')
       ).toBeInTheDocument();
+=======
+      await waitFor(() =>
+        expect(
+          screen.getByText('Contact your administrator to upgrade your subscription.')
+        ).toBeInTheDocument()
+      );
+>>>>>>> 9.4
     });
 
     it('should show manage subscription button when billing URL is available', async () => {
@@ -180,6 +198,7 @@ describe('WorkflowsAvailabilityWrapper', () => {
         </WorkflowsAvailabilityWrapper>
       );
 
+<<<<<<< HEAD
       expect(await screen.findByText('Manage subscription')).toBeInTheDocument();
     });
 
@@ -198,6 +217,9 @@ describe('WorkflowsAvailabilityWrapper', () => {
         await screen.findByText('Contact your administrator to upgrade your subscription.')
       ).toBeInTheDocument();
       expect(screen.queryByText('Manage subscription')).not.toBeInTheDocument();
+=======
+      await waitFor(() => expect(screen.getByText('Manage subscription')).toBeInTheDocument());
+>>>>>>> 9.4
     });
 
     it('should report telemetry when workflows are unavailable due to serverless tier', async () => {

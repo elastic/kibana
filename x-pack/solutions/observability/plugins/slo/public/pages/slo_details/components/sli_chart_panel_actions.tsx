@@ -11,7 +11,10 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../../../hooks/use_kibana';
+<<<<<<< HEAD
 import { SLO_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
+=======
+>>>>>>> 9.4
 import { useFetchApmIndices } from '../../../hooks/use_fetch_apm_indices';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { getResolvedApmParams } from '../../../utils/slo/get_apm_source_field_link';

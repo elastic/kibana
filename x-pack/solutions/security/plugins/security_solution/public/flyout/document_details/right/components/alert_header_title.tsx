@@ -30,6 +30,7 @@ import { Status } from '../../../../flyout_v2/document/main/components/status';
 import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { CellActions } from '../../shared/components/cell_actions';
+import { RemoteDocumentBadge } from '../../../../flyout_v2/document/components/remote_document_badge';
 
 /**
  * Alert details flyout right section header
@@ -86,11 +87,19 @@ export const AlertHeaderTitle = memo(() => {
       <DocumentSeverity hit={hit}>
         <EuiSpacer size="m" />
       </DocumentSeverity>
+<<<<<<< HEAD
       <EuiText size="s">
         <Timestamp hit={hit} />
       </EuiText>
       <EuiSpacer size="xs" />
       <Title hit={hit} hideLink={isRulePreview || !canReadRules} />
+=======
+      <Timestamp hit={hit}>
+        <EuiSpacer size="xs" />
+      </Timestamp>
+      <Title hit={hit} hideLink={isRulePreview || !canReadRules} />
+      <RemoteDocumentBadge hit={hit} />
+>>>>>>> 9.4
       <EuiSpacer size="m" />
       <EuiFlexGroup
         direction="row"

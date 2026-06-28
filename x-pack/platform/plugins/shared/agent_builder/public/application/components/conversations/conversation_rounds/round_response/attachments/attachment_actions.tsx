@@ -54,6 +54,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     );
   }, []);
 
+<<<<<<< HEAD
   // Derive the navigation/click props for an EUI button. When `href` is set we
   // render an anchor (so middle-click / cmd-click / "Open in new tab" all work
   // natively); `rel="noopener noreferrer"` is added automatically when
@@ -65,10 +66,13 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     onClick: button.handler,
   });
 
+=======
+>>>>>>> 9.4
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       {secondaryButtons.map((button) => (
         <EuiFlexItem grow={false} key={button.label}>
+<<<<<<< HEAD
           {iconOnly ? (
             <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
               <span tabIndex={button.disabled ? 0 : undefined}>
@@ -95,11 +99,25 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                 {button.label}
               </EuiButtonEmpty>
             )
+=======
+          {maybeWrapWithTooltip(
+            button,
+            <EuiButtonEmpty
+              color="text"
+              size="s"
+              iconType={button.icon}
+              onClick={button.handler}
+              isDisabled={button.disabled}
+            >
+              {button.label}
+            </EuiButtonEmpty>
+>>>>>>> 9.4
           )}
         </EuiFlexItem>
       ))}
       {primaryButtons.map((button) => (
         <EuiFlexItem grow={false} key={button.label}>
+<<<<<<< HEAD
           {iconOnly ? (
             <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
               <span tabIndex={button.disabled ? 0 : undefined}>
@@ -126,6 +144,19 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                 {button.label}
               </EuiButton>
             )
+=======
+          {maybeWrapWithTooltip(
+            button,
+            <EuiButton
+              color="text"
+              size="s"
+              iconType={button.icon}
+              onClick={button.handler}
+              isDisabled={button.disabled}
+            >
+              {button.label}
+            </EuiButton>
+>>>>>>> 9.4
           )}
         </EuiFlexItem>
       ))}
@@ -168,9 +199,12 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                     icon: button.icon,
                     disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
+<<<<<<< HEAD
                     href: button.href,
                     target: button.href && button.openInNewTab ? '_blank' : undefined,
                     rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
+=======
+>>>>>>> 9.4
                     onClick: () => {
                       closePopover();
                       button.handler();

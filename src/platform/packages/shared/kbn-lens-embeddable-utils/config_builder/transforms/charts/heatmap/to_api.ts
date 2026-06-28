@@ -43,7 +43,10 @@ import type { XScaleSchemaType } from '../../../schema/charts/shared';
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapConfig['legend'] {
   return {
     visibility: legend.isVisible ? 'visible' : 'hidden',
+<<<<<<< HEAD
     position: legend.position,
+=======
+>>>>>>> 9.4
     ...stripUndefined<HeatmapConfig['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legendSizeCompat.toAPI(legend.legendSize),
@@ -53,8 +56,12 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapCon
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig'],
+<<<<<<< HEAD
   xAxisScale: XScaleSchemaType | undefined,
   yAccessor: HeatmapVisualizationState['yAccessor']
+=======
+  xAxisScale?: XScaleSchemaType
+>>>>>>> 9.4
 ): HeatmapConfig['axis'] {
   return {
     x: {
@@ -110,7 +117,11 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
+<<<<<<< HEAD
     axis: getGridConfigProps(visualization.gridConfig, xAxisScale, visualization.yAccessor),
+=======
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
+>>>>>>> 9.4
     styling: {
       cells: {
         labels: { visible: visualization.gridConfig.isCellLabelVisible },
@@ -159,9 +170,13 @@ function reverseBuildVisualizationState(
       ...paletteProps,
     } as LensApiAllMetricOperations,
     x: operationFromColumn(visualization.xAccessor!, layer),
+<<<<<<< HEAD
     ...(visualization.yAccessor && {
       y: operationFromColumn(visualization.yAccessor, layer),
     }),
+=======
+    y: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
+>>>>>>> 9.4
   } as HeatmapConfigNoESQL;
 }
 

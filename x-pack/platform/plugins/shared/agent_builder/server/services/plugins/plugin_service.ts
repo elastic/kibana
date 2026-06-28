@@ -62,7 +62,10 @@ export interface PluginsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   config: AgentBuilderConfig;
+<<<<<<< HEAD
   getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
+=======
+>>>>>>> 9.4
   analyticsService?: AnalyticsService;
   trackingService?: TrackingService;
 }
@@ -176,8 +179,11 @@ class PluginsServiceImpl implements PluginsService {
       toSkillCreateRequest({ skill, pluginName, pluginId })
     );
 
+<<<<<<< HEAD
     await this.validateSkillToolIds({ request, createRequests });
 
+=======
+>>>>>>> 9.4
     await skillClient.bulkCreate(createRequests);
 
     const skillIds = createRequests.map((req) => req.id);
@@ -201,6 +207,7 @@ class PluginsServiceImpl implements PluginsService {
     trackingService?.trackPluginImport(source.type);
 
     return created;
+<<<<<<< HEAD
   }
 
   private async validateSkillToolIds({
@@ -216,6 +223,8 @@ class PluginsServiceImpl implements PluginsService {
     for (const req of createRequests) {
       await validateToolIds(req.tool_ids, toolRegistry);
     }
+=======
+>>>>>>> 9.4
   }
 
   private async deletePlugin({

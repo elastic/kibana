@@ -12,11 +12,15 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
+<<<<<<< HEAD
 import {
   HttpFormDataFieldSchema,
   HttpMethodSchema,
   HttpRequestBodySchema,
 } from '@kbn/connector-schemas/http/schemas/v1';
+=======
+import { HttpMethodSchema, HttpRequestBodySchema } from '@kbn/connector-schemas/http/schemas/v1';
+>>>>>>> 9.4
 import { z } from '@kbn/zod/v4';
 
 // HTTP connector parameter schema
@@ -32,9 +36,12 @@ export const HttpParamsSchema = z.object({
   body: HttpRequestBodySchema.optional().describe(
     'The body of the request. Can be a raw string, a JSON object, or a JSON array.'
   ),
+<<<<<<< HEAD
   form_data: HttpFormDataFieldSchema.optional().describe(
     'The form data to send in the request. Can be a JSON object with the field name as the key and the field value as the value. Supports utf8 (default) and base64 encoding.'
   ),
+=======
+>>>>>>> 9.4
   query: z.record(z.string(), z.string()).optional(),
   headers: z.record(z.string(), z.string()).optional(),
   fetcher: z

@@ -1,18 +1,28 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
+<<<<<<<< HEAD:x-pack/platform/plugins/private/otel_telemetry_collection/tsconfig.json
     "outDir": "target/types"
+========
+    "outDir": "target/types",
+>>>>>>>> 9.4:src/platform/packages/shared/as-code/shared-telemetry/tsconfig.json
   },
   "include": [
-    "server/**/*"
+    "**/*.ts",
   ],
   "kbn_references": [
     "@kbn/core",
+<<<<<<<< HEAD:x-pack/platform/plugins/private/otel_telemetry_collection/tsconfig.json
     "@kbn/task-manager-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/config-schema"
   ],
   "exclude": [
     "target/**/*"
+========
+    "@kbn/core-http-common",
+    "@kbn/core-http-server-mocks",
+    "@kbn/usage-collection-plugin",
+>>>>>>>> 9.4:src/platform/packages/shared/as-code/shared-telemetry/tsconfig.json
   ]
 }

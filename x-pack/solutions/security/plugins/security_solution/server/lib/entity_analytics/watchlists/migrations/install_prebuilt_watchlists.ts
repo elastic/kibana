@@ -176,9 +176,12 @@ const ensureEntitySources = async ({
   logger: Logger;
   watchlistId: string;
   entitySources: PrebuiltWatchlistDefinition['entitySources'];
+<<<<<<< HEAD
   esClient: ElasticsearchClient;
   getStartServices: StartServicesAccessor<StartPlugins>;
   hasEncryptionKey: boolean;
+=======
+>>>>>>> 9.4
 }) => {
   const sourceClient = new WatchlistEntitySourceClient({
     soClient,

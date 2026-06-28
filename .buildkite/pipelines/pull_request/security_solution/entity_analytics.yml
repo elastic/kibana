@@ -1,4 +1,5 @@
 steps:
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     key: security-serverless-entity-analytics
@@ -18,6 +19,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
     key: security-entity-analytics

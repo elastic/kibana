@@ -121,10 +121,21 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
+<<<<<<< HEAD
       await entityStoreUtils.enableEntityStoreV2();
       // Stop before seeding — any TM auto-run between install and stop cannot touch
       // test entities that haven't been seeded yet, so no wait-for-idle is needed.
       await maintainerRoutes.stopMaintainer(AUTOMATED_RESOLUTION_MAINTAINER_ID);
+=======
+      // Use enableEntityStoreV2 and explicitly stop
+      // the automated-resolution maintainer so it cannot race with CSV upload tests.
+      // The maintainer would link entities sharing the same user.email,
+      // interfering with the test's own resolution assertions.
+      await entityStoreUtils.enableEntityStoreV2();
+      await entityMaintainerRouteHelpersFactory(supertest).stopMaintainer(
+        AUTOMATED_RESOLUTION_MAINTAINER_ID
+      );
+>>>>>>> 9.4
       await cleanEntities();
       await seedEntities();
       await waitForEntities();

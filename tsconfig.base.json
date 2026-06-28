@@ -34,6 +34,7 @@
       "@kbn/agent-builder-plugin/*": ["x-pack/platform/plugins/shared/agent_builder/*"],
       "@kbn/agent-builder-server": ["x-pack/platform/packages/shared/agent-builder/agent-builder-server"],
       "@kbn/agent-builder-server/*": ["x-pack/platform/packages/shared/agent-builder/agent-builder-server/*"],
+<<<<<<< HEAD
       "@kbn/agent-builder-tools-base": ["x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base"],
       "@kbn/agent-builder-tools-base/*": ["x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/*"],
       "@kbn/agent-builder-workflow-gen": ["x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen"],
@@ -42,6 +43,8 @@
       "@kbn/agent-builder-workflows-plugin/*": ["x-pack/platform/plugins/shared/agent_builder_workflows/*"],
       "@kbn/agent-context-layer-plugin": ["x-pack/platform/plugins/shared/agent_context_layer"],
       "@kbn/agent-context-layer-plugin/*": ["x-pack/platform/plugins/shared/agent_context_layer/*"],
+=======
+>>>>>>> 9.4
       "@kbn/ai-assistant": ["x-pack/platform/packages/shared/kbn-ai-assistant"],
       "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],

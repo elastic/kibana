@@ -25,9 +25,12 @@ export const GetFileRouteRequestBody = lazySchema(() =>
   BaseActionSchema.merge(
     z.object({
       parameters: z.object({
+<<<<<<< HEAD
         /**
          * The full file path to retrieve from the endpoint.
          */
+=======
+>>>>>>> 9.4
         path: z.string(),
       }),
     })
@@ -35,11 +38,21 @@ export const GetFileRouteRequestBody = lazySchema(() =>
 );
 export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
 
+<<<<<<< HEAD
+=======
+export const GetFileRouteResponse = lazySchema(() => z.object({}));
+export type GetFileRouteResponse = z.infer<typeof GetFileRouteResponse>;
+
+>>>>>>> 9.4
 export const EndpointGetFileActionRequestBody = lazySchema(() => GetFileRouteRequestBody);
 export type EndpointGetFileActionRequestBody = z.infer<typeof EndpointGetFileActionRequestBody>;
 export type EndpointGetFileActionRequestBodyInput = z.input<
   typeof EndpointGetFileActionRequestBody
 >;
 
+<<<<<<< HEAD
 export const EndpointGetFileActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
+=======
+export const EndpointGetFileActionResponse = lazySchema(() => GetFileRouteResponse);
+>>>>>>> 9.4
 export type EndpointGetFileActionResponse = z.infer<typeof EndpointGetFileActionResponse>;

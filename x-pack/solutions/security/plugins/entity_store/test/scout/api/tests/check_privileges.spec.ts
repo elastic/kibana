@@ -8,12 +8,16 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { INTERNAL_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+<<<<<<< HEAD
 import {
   FF_ENABLE_ENTITY_STORE_V2,
   getEntitiesAlias,
   ENTITY_LATEST,
   getLatestEntityIndexPattern,
 } from '../../../../common';
+=======
+import { FF_ENABLE_ENTITY_STORE_V2, getEntitiesAlias, ENTITY_LATEST } from '../../../../common';
+>>>>>>> 9.4
 
 apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }, () => {
   const ENTITIES_ALIAS_INDEX = getEntitiesAlias(ENTITY_LATEST, 'default');
@@ -74,6 +78,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
 
       const response = await apiClient.get(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
         headers: { ...cookieHeader, ...INTERNAL_HEADERS },
+<<<<<<< HEAD
         responseType: 'json',
       });
 
@@ -105,6 +110,8 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
 
       const response = await apiClient.get(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
         headers: { ...cookieHeader, ...INTERNAL_HEADERS },
+=======
+>>>>>>> 9.4
         responseType: 'json',
       });
 

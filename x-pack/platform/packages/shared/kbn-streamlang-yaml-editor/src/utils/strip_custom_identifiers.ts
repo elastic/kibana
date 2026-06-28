@@ -5,4 +5,38 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 export { stripCustomIdentifiers } from '@kbn/streamlang';
+=======
+import type { StreamlangDSL, StreamlangStep } from '@kbn/streamlang/types/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
+
+/**
+ * Recursively removes customIdentifier from all steps in the DSL.
+ * This is used to clean the DSL before displaying it to users, as customIdentifiers
+ * are internal implementation details used for tracking and should not be visible.
+ */
+export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
+  const stripFromSteps = (steps: StreamlangStep[]): StreamlangStep[] => {
+    return steps.map((step) => {
+      if (isConditionBlock(step)) {
+        const { customIdentifier: _, ...restOfStep } = step;
+        return {
+          ...restOfStep,
+          condition: {
+            ...step.condition,
+            steps: stripFromSteps(step.condition.steps),
+          },
+        };
+      } else {
+        const { customIdentifier: _, ...restOfStep } = step;
+        return restOfStep;
+      }
+    });
+  };
+
+  return {
+    steps: stripFromSteps(dsl.steps ?? []),
+  };
+}
+>>>>>>> 9.4

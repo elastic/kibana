@@ -6,7 +6,11 @@
  */
 
 import path from 'node:path';
+<<<<<<< HEAD
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
+=======
+import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+>>>>>>> 9.4
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { unflattenObject } from '@kbn/object-utils';

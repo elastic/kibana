@@ -25,7 +25,11 @@ const dim = (name: string, type: string = 'keyword'): Dimension => ({ name, type
 
 const makeMetric = (metricName: string, dimensionFields: Dimension[]): ParsedMetricItem => ({
   metricName,
+<<<<<<< HEAD
   indexName: 'metrics-test',
+=======
+  dataStream: 'metrics-test',
+>>>>>>> 9.4
   units: [],
   metricTypes: [],
   fieldTypes: [],

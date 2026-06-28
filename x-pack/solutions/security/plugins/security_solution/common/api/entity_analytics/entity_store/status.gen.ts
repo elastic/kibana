@@ -11,7 +11,11 @@
  *
  * info:
  *   title: Get Entity Store Status
+<<<<<<< HEAD
  *   version: 2023-10-31
+=======
+ *   version: 1
+>>>>>>> 9.4
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';

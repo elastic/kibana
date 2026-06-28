@@ -8,12 +8,22 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+<<<<<<< HEAD
 import { Timestamp } from '../../../../flyout_v2/shared/components/timestamp';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentSeverity } from '../../../../flyout_v2/document/main/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { getDocumentTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 import { EVENT_TITLE_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
+=======
+import { Timestamp } from '../../../../flyout_v2/document/components/timestamp';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
+import { EVENT_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import { RemoteDocumentBadge } from '../../../../flyout_v2/document/components/remote_document_badge';
+>>>>>>> 9.4
 
 /**
  * Event details flyout right section header
@@ -28,11 +38,18 @@ export const EventHeaderTitle = memo(() => {
       <DocumentSeverity hit={hit}>
         <EuiSpacer size="m" />
       </DocumentSeverity>
+<<<<<<< HEAD
       <EuiText size="s">
         <Timestamp hit={hit} />
       </EuiText>
       <EuiSpacer size="xs" />
+=======
+      <Timestamp hit={hit}>
+        <EuiSpacer size="xs" />
+      </Timestamp>
+>>>>>>> 9.4
       <FlyoutTitle title={title} iconType={'analyzeEvent'} data-test-subj={EVENT_TITLE_TEST_ID} />
+      <RemoteDocumentBadge hit={hit} />
     </>
   );
 });

@@ -26,6 +26,7 @@ export interface EntitiesGroupingAggregation {
   resolutionRiskScore?: {
     value: number | null;
   };
+<<<<<<< HEAD
   bucketRiskScore?: {
     value: number | null;
   };
@@ -71,6 +72,45 @@ export const parseTargetMetadataHits = (hits: Array<{ _source?: unknown }>): Tar
 
     if (id && name && type) {
       result.set(id, { name, type, riskScore, individualRiskScore });
+=======
+}
+
+export interface TargetEntityMetadata {
+  name: string;
+  type: EntityType;
+  riskScore: number | null;
+}
+
+export type TargetMetadataMap = Map<string, TargetEntityMetadata>;
+
+const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
+
+interface TargetEntitySource {
+  entity?: {
+    id?: string;
+    name?: string;
+    EngineMetadata?: { Type?: EntityType };
+    relationships?: {
+      resolution?: {
+        risk?: {
+          calculated_score_norm?: number;
+        };
+      };
+    };
+  };
+}
+
+export const parseTargetMetadataHits = (hits: Array<{ _source?: unknown }>): TargetMetadataMap => {
+  const result: TargetMetadataMap = new Map();
+  for (const hit of hits) {
+    const { id, name, EngineMetadata, relationships } =
+      (hit._source as TargetEntitySource)?.entity ?? {};
+    const type = EngineMetadata?.Type;
+    const riskScore = relationships?.resolution?.risk?.calculated_score_norm ?? null;
+
+    if (id && name && type) {
+      result.set(id, { name, type, riskScore });
+>>>>>>> 9.4
     }
   }
   return result;
@@ -156,7 +196,10 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
               ENTITY_FIELDS.ENTITY_ID,
               ENTITY_FIELDS.ENTITY_NAME,
               ENTITY_FIELDS.ENTITY_TYPE,
+<<<<<<< HEAD
               ENTITY_FIELDS.ENTITY_RISK,
+=======
+>>>>>>> 9.4
               ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
             ],
             query: {

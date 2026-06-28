@@ -177,10 +177,13 @@ export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
   disabled: 0,
 });
 
+<<<<<<< HEAD
 export const getInitialRuleDeprecatedStatus = (): DeprecatedRulesSummary => ({
   total: 0,
 });
 
+=======
+>>>>>>> 9.4
 export const getInitialAiCreatedRulesUsage = (): AiCreatedRulesUsage => ({
   total: 0,
   enabled: 0,

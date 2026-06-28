@@ -438,12 +438,16 @@ export const EntitiesDataTable = ({
               const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
               const isTarget = resolvedTo === null || resolvedTo === undefined;
               const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
+<<<<<<< HEAD
               const formattedValue = formatFieldValueText({
                 value,
                 fieldFormats: ff,
                 dataView: dv,
                 field,
               });
+=======
+              const formattedValue = formatFieldValue(value, row.raw, ff, dv, field, 'text');
+>>>>>>> 9.4
 
               if (isTarget) {
                 return (

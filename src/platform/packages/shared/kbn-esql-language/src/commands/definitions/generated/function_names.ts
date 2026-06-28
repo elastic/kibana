@@ -73,7 +73,10 @@ export const esqlFunctionNames = [
   'DERIV',
   'E',
   'EARLIEST',
+<<<<<<< HEAD
   'EMBEDDING',
+=======
+>>>>>>> 9.4
   'ENDS_WITH',
   'EXP',
   'FIELD_EXTRACT',
@@ -324,7 +327,10 @@ export enum EsqlFunctionNames {
   DERIV = 'deriv',
   E = 'e',
   EARLIEST = 'earliest',
+<<<<<<< HEAD
   EMBEDDING = 'embedding',
+=======
+>>>>>>> 9.4
   ENDS_WITH = 'ends_with',
   EXP = 'exp',
   FIELD_EXTRACT = 'field_extract',

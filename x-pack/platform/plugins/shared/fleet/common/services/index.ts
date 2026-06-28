@@ -18,7 +18,10 @@ export {
   varsReducer,
   getInputEffectiveName,
   buildInputKey,
+<<<<<<< HEAD
   dataStreamUsesOtelInput,
+=======
+>>>>>>> 9.4
 } from './package_to_package_policy';
 export type {
   DocumentationPageInput,

@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+<<<<<<< HEAD
 import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { AddModelPopover } from './add_model_popover';
@@ -18,6 +19,14 @@ import { useConnectors } from '../../hooks/use_connectors';
 jest.mock('../../hooks/use_connectors');
 
 const mockUseConnectors = useConnectors as jest.Mock;
+=======
+import { AddModelPopover } from './add_model_popover';
+import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+
+jest.mock('../../hooks/use_inference_endpoints');
+
+const mockUseQueryInferenceEndpoints = useQueryInferenceEndpoints as jest.Mock;
+>>>>>>> 9.4
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient();
@@ -30,6 +39,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+<<<<<<< HEAD
 const createConnector = (overrides: Partial<InferenceConnector>): InferenceConnector => ({
   type: InferenceConnectorType.Inference,
   name: 'test-connector',
@@ -90,6 +100,45 @@ const mockConnectors: InferenceConnector[] = [
     config: {},
     isInferenceEndpoint: false,
   }),
+=======
+const mockEndpoints = [
+  {
+    inference_id: 'ep-1',
+    service: 'openai',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'gpt-4o' },
+  },
+  {
+    inference_id: 'ep-2',
+    service: 'openai',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'gpt-4o-mini' },
+  },
+  {
+    inference_id: 'ep-eis',
+    service: 'elastic',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'claude-sonnet' },
+    metadata: {
+      display: {
+        name: 'Claude Sonnet',
+        model_creator: 'Anthropic',
+      },
+    },
+  },
+  {
+    inference_id: 'ep-eis-no-meta',
+    service: 'elastic',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'some-model' },
+  },
+  {
+    inference_id: 'ep-embed',
+    service: 'elastic',
+    task_type: 'text_embedding',
+    service_settings: { model_id: 'e5' },
+  },
+>>>>>>> 9.4
 ];
 
 describe('AddModelPopover', () => {
@@ -97,7 +146,11 @@ describe('AddModelPopover', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+<<<<<<< HEAD
     mockUseConnectors.mockReturnValue({ data: mockConnectors });
+=======
+    mockUseQueryInferenceEndpoints.mockReturnValue({ data: mockEndpoints });
+>>>>>>> 9.4
   });
 
   it('renders the add model button', () => {
@@ -131,6 +184,7 @@ describe('AddModelPopover', () => {
 
     fireEvent.click(screen.getByTestId('add-model-button'));
 
+<<<<<<< HEAD
     expect(screen.queryByText('OpenAI GPT-4o')).not.toBeInTheDocument();
     expect(screen.getByText('OpenAI GPT-4o-mini')).toBeInTheDocument();
   });
@@ -163,6 +217,13 @@ describe('AddModelPopover', () => {
     ];
     mockUseConnectors.mockReturnValue({ data: withEmbedding });
 
+=======
+    expect(screen.queryByText('gpt-4o')).not.toBeInTheDocument();
+    expect(screen.getByText('gpt-4o-mini')).toBeInTheDocument();
+  });
+
+  it('filters by task type when provided', () => {
+>>>>>>> 9.4
     render(
       <Wrapper>
         <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} taskType="text_embedding" />
@@ -171,12 +232,19 @@ describe('AddModelPopover', () => {
 
     fireEvent.click(screen.getByTestId('add-model-button'));
 
+<<<<<<< HEAD
     expect(screen.getByText('Embedding model')).toBeInTheDocument();
     expect(screen.queryByText('OpenAI GPT-4o')).not.toBeInTheDocument();
     expect(screen.queryByText('My OpenAI Connector')).not.toBeInTheDocument();
   });
 
   it('calls onAdd with the selected connector ID', () => {
+=======
+    expect(screen.queryByText('gpt-4o')).not.toBeInTheDocument();
+  });
+
+  it('uses display name for EIS endpoints with metadata', () => {
+>>>>>>> 9.4
     render(
       <Wrapper>
         <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
@@ -184,6 +252,7 @@ describe('AddModelPopover', () => {
     );
 
     fireEvent.click(screen.getByTestId('add-model-button'));
+<<<<<<< HEAD
     fireEvent.click(screen.getByText('My Gemini Connector'));
 
     expect(onAdd).toHaveBeenCalledWith('stack-gemini-1');
@@ -207,6 +276,53 @@ describe('AddModelPopover', () => {
       }),
     ];
     mockUseConnectors.mockReturnValue({ data: duplicateConnectors });
+=======
+
+    expect(screen.getByText('Claude Sonnet')).toBeInTheDocument();
+  });
+
+  it('falls back to model_id for EIS endpoints without display metadata', () => {
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.getByText('some-model')).toBeInTheDocument();
+  });
+
+  it('calls onAdd with the selected endpoint inference_id', () => {
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+    fireEvent.click(screen.getByText('gpt-4o-mini'));
+
+    expect(onAdd).toHaveBeenCalledWith('ep-2');
+  });
+
+  it('shows disambiguation suffix when multiple endpoints share a model name', () => {
+    const duplicateEndpoints = [
+      {
+        inference_id: 'ep-a',
+        service: 'openai',
+        task_type: 'chat_completion',
+        service_settings: { model_id: 'gpt-4o' },
+      },
+      {
+        inference_id: 'ep-b',
+        service: 'openai',
+        task_type: 'chat_completion',
+        service_settings: { model_id: 'gpt-4o' },
+      },
+    ];
+    mockUseQueryInferenceEndpoints.mockReturnValue({ data: duplicateEndpoints });
+>>>>>>> 9.4
 
     render(
       <Wrapper>
@@ -216,6 +332,7 @@ describe('AddModelPopover', () => {
 
     fireEvent.click(screen.getByTestId('add-model-button'));
 
+<<<<<<< HEAD
     expect(screen.getByText('My Connector (ep-a)')).toBeInTheDocument();
     expect(screen.getByText('My Connector (ep-b)')).toBeInTheDocument();
   });
@@ -327,5 +444,9 @@ describe('AddModelPopover', () => {
     // Verify the dialog has an aria-label for screen readers
     const dialog = screen.getByRole('dialog', { name: 'Model selection' });
     expect(dialog).toBeInTheDocument();
+=======
+    expect(screen.getByText('gpt-4o (ep-a)')).toBeInTheDocument();
+    expect(screen.getByText('gpt-4o (ep-b)')).toBeInTheDocument();
+>>>>>>> 9.4
   });
 });

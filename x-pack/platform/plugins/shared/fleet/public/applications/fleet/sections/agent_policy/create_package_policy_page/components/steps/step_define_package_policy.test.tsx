@@ -29,6 +29,7 @@ jest.mock('./components/hooks', () => ({
   }),
 }));
 
+<<<<<<< HEAD
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
   useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
@@ -42,6 +43,8 @@ jest.mock('../../../../../../../hooks/use_space_settings_context', () => ({
   }),
 }));
 
+=======
+>>>>>>> 9.4
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {
     name: 'apache',

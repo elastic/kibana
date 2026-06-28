@@ -23,4 +23,7 @@ export * from './review_install_prebuilt_rules';
 export * from './review_upgrade_prebuilt_rules';
 export * from './perform_upgrade_prebuilt_rules';
 export * from './review_rule_deprecation';
+<<<<<<< HEAD
 export * from './initialize_security_solution';
+=======
+>>>>>>> 9.4

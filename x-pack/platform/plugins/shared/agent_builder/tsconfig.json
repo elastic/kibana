@@ -126,6 +126,7 @@
     "@kbn/search-inference-endpoints",
     "@kbn/response-ops-oauth-hooks",
     "@kbn/connector-specs",
+<<<<<<< HEAD
     "@kbn/core-user-profile-browser",
     "@kbn/security-plugin-types-public",
     "@kbn/scout-synthtrace",
@@ -140,5 +141,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/user-profile-components",
     "@kbn/telemetry",
+=======
+    "@kbn/core-user-profile-browser"
+>>>>>>> 9.4
   ]
 }

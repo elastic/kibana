@@ -569,15 +569,23 @@ export const getBaseScoreESQL = (
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+<<<<<<< HEAD
     ${euidEvalClause}
     | WHERE ${rangeClause}
+=======
+>>>>>>> 9.4
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
+<<<<<<< HEAD
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
+=======
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
+>>>>>>> 9.4
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
     | STATS
@@ -659,18 +667,26 @@ export const getResolutionScoreESQLByIds = (
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
+<<<<<<< HEAD
     ${euidEvalClause}
     | LOOKUP JOIN ${lookupIndex} ON entity_id
     | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
            relationship_type = COALESCE(relationship_type, "self")
     | WHERE resolution_target_id IN (${idsClause})
+=======
+>>>>>>> 9.4
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
+<<<<<<< HEAD
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
+=======
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
+>>>>>>> 9.4
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)

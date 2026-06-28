@@ -45,10 +45,13 @@ or available in all spaces (`agnostic` or `single`)
 
       */
     namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
+<<<<<<< HEAD
     /**
       * Free-text search term applied to exception list item fields (for example a hostname or file path fragment).
 
       */
+=======
+>>>>>>> 9.4
     search: z.string().optional(),
     /**
      * The page number to return

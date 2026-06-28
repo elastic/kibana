@@ -57,6 +57,7 @@ export default function (providerContext: FtrProviderContext) {
     // Helpers
     // -----------------------------------------------------------------------
 
+<<<<<<< HEAD
     async function createOutput(fields: Record<string, unknown> = {}): Promise<string> {
       const type = (fields.type as string) ?? 'elasticsearch';
       const defaults: Record<string, unknown> =
@@ -70,12 +71,21 @@ export default function (providerContext: FtrProviderContext) {
               name: `otel-output-test-${uuidv4()}`,
               hosts: ['https://es.example.com:9200'],
             };
+=======
+    async function createOutput(fields: Record<string, unknown>): Promise<string> {
+>>>>>>> 9.4
       const { body } = await supertest
         .post('/api/fleet/outputs')
         .set('kbn-xsrf', 'xxxx')
         .send({
+<<<<<<< HEAD
           ...defaults,
           type,
+=======
+          name: `otel-output-test-${uuidv4()}`,
+          type: 'elasticsearch',
+          hosts: ['https://es.example.com:9200'],
+>>>>>>> 9.4
           is_default: false,
           is_default_monitoring: false,
           ...fields,
@@ -160,6 +170,12 @@ export default function (providerContext: FtrProviderContext) {
       return fullPolicy.exporters?.[`elasticsearch/${outputId}`];
     }
 
+<<<<<<< HEAD
+=======
+    // -----------------------------------------------------------------------
+    // Test 1: ssl params from config_yaml appear in beatsauth extension
+    // -----------------------------------------------------------------------
+>>>>>>> 9.4
     it('includes ssl parameters from config_yaml in the beatsauth extension', async () => {
       const outputId = await createOutput({
         config_yaml:
@@ -184,6 +200,12 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+<<<<<<< HEAD
+=======
+    // -----------------------------------------------------------------------
+    // Test 2: timeout / idle_connection_timeout from config_yaml appear in beatsauth
+    // -----------------------------------------------------------------------
+>>>>>>> 9.4
     it('includes timeout and idle_connection_timeout from config_yaml in the beatsauth extension', async () => {
       const outputId = await createOutput({
         config_yaml: 'timeout: 30s\nidle_connection_timeout: 5s',
@@ -205,6 +227,12 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+<<<<<<< HEAD
+=======
+    // -----------------------------------------------------------------------
+    // Test 3: structured ssl fields take precedence over config_yaml
+    // -----------------------------------------------------------------------
+>>>>>>> 9.4
     it('structured ssl fields take precedence over config_yaml values in beatsauth', async () => {
       const outputId = await createOutput({
         // config_yaml sets verification_mode to none — structured field should override to full
@@ -234,6 +262,12 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+<<<<<<< HEAD
+=======
+    // -----------------------------------------------------------------------
+    // Test 4: otel_disable_beatsauth=true — no beatsauth extension, no auth in exporter
+    // -----------------------------------------------------------------------
+>>>>>>> 9.4
     it('omits beatsauth extension and exporter auth when otel_disable_beatsauth is true', async () => {
       const outputId = await createOutput({
         otel_disable_beatsauth: true,
@@ -260,6 +294,12 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+<<<<<<< HEAD
+=======
+    // -----------------------------------------------------------------------
+    // Test 5: otel_disable_beatsauth=true — otel_exporter_config_yaml still merged
+    // -----------------------------------------------------------------------
+>>>>>>> 9.4
     it('still merges otel_exporter_config_yaml into the exporter when otel_disable_beatsauth is true', async () => {
       const outputId = await createOutput({
         otel_disable_beatsauth: true,
@@ -283,6 +323,12 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+<<<<<<< HEAD
+=======
+    // -----------------------------------------------------------------------
+    // Test 6: otel_disable_beatsauth=false (explicit) — beatsauth is still generated
+    // -----------------------------------------------------------------------
+>>>>>>> 9.4
     it('generates beatsauth normally when otel_disable_beatsauth is false', async () => {
       const outputId = await createOutput({
         otel_disable_beatsauth: false,
@@ -306,6 +352,7 @@ export default function (providerContext: FtrProviderContext) {
         await deleteOutput(outputId);
       }
     });
+<<<<<<< HEAD
 
     it('rejects updating a policy data output to Logstash when the policy has an OTel integration', async () => {
       const { body: logstashBody } = await supertest
@@ -413,5 +460,7 @@ export default function (providerContext: FtrProviderContext) {
         await deleteOutput(outputId);
       }
     });
+=======
+>>>>>>> 9.4
   });
 }

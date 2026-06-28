@@ -517,8 +517,12 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
+<<<<<<< HEAD
       expect(result.recovery_strategy).toBe('no_breach');
       expect(result.no_data_strategy).toBe('emit');
+=======
+      expect(result.recovery_policy).toEqual({ type: 'no_breach' });
+>>>>>>> 9.4
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',
@@ -778,7 +782,11 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
+<<<<<<< HEAD
     it('splits artifacts by field ownership when present', () => {
+=======
+    it('maps artifacts when present', () => {
+>>>>>>> 9.4
       const rule = {
         ...baseRuleResponse,
         artifacts: [

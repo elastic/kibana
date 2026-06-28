@@ -237,7 +237,11 @@ interface SolutionSideNavItemProps {
  * and it adds a button to open the item secondary panel if needed.
  */
 const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
+<<<<<<< HEAD
   function SolutionSideNavItem({ item, isSelected, isMobileSize, onOpenPanelNav }) {
+=======
+  function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
+>>>>>>> 9.4
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
@@ -259,7 +263,11 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
 
     const effectiveHref = firstPanelChild ? firstPanelChild.href : href;
 
+<<<<<<< HEAD
     const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
+=======
+    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme, 'primary');
+>>>>>>> 9.4
     const itemClassNames = classNames(
       'solutionSideNavItem',
       { 'solutionSideNavItem--isSelected': isSelected },

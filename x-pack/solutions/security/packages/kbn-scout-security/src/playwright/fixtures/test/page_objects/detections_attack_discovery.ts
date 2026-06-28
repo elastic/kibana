@@ -195,6 +195,7 @@ export class DetectionsAttackDiscoveryPage {
 
   async expandDetectionsSection() {
     await this.detectionsNavItem.click();
+<<<<<<< HEAD
   }
 
   async collapseKpisSection() {
@@ -234,5 +235,7 @@ export class DetectionsAttackDiscoveryPage {
 
   getActiveTypeFilterOption(label: string): Locator {
     return this.page.locator('[role="option"][aria-checked="true"]', { hasText: label });
+=======
+>>>>>>> 9.4
   }
 }

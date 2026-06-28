@@ -23,6 +23,7 @@ import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/index.tsx
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
@@ -41,6 +42,14 @@ const headerStyles = css`
     overflow: auto;
   }
 `;
+=======
+import { NotesDetails } from '../notes';
+import { useKibana } from '../../common/lib/kibana';
+import { flyoutProviders } from '../shared/components/flyout_provider';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { alertFlyoutHistoryKey } from './constants/flyout_history';
+import { RemoteDocumentCallout } from './components/remote_document_callout';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/index.tsx
 
 export interface DocumentFlyoutProps {
   /**
@@ -71,7 +80,11 @@ export const DocumentFlyout = memo(
       [hit]
     );
     const isSecurityApp = useIsInSecurityApp();
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/index.tsx
     const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+=======
+    const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/index.tsx
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
@@ -101,7 +114,11 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/index.tsx
         <EuiFlyoutHeader css={headerStyles}>
+=======
+        <EuiFlyoutHeader>
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/index.tsx
           <Header
             hit={hit}
             renderCellActions={renderCellActions}

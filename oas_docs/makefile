@@ -66,6 +66,7 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
+<<<<<<< HEAD
 	@./node_modules/.bin/bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp8.yaml"
 	@./node_modules/.bin/redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana.serverless.yaml
 	@./node_modules/.bin/redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.yaml
@@ -111,6 +112,12 @@ api-docs-overlay-external: merge-api-docs-stateful ## Apply all overlays except 
 	@./node_modules/.bin/bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.strip_request_examples.yaml" > "output/kibana.tmp8.yaml"
 	@./node_modules/.bin/redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.external.yaml
 	rm -f output/kibana.tmp*.yaml
+=======
+	@./node_modules/.bin/redocly bundle output/kibana.serverless.tmp5.yaml --ext yaml -o output/kibana.serverless.yaml
+	@./node_modules/.bin/redocly bundle output/kibana.tmp7.yaml --ext yaml -o output/kibana.yaml
+	rm output/kibana.tmp*.yaml
+	rm output/kibana.serverless.tmp*.yaml
+>>>>>>> 9.4
 
 .PHONY: api-docs-preview
 api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml

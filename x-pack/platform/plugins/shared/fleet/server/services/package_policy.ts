@@ -55,9 +55,12 @@ import {
   checkIntegrationFipsLooseCompatibility,
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
+<<<<<<< HEAD
   getRegistryStreamWithDataStreamForInputType,
   syncDataStreamTypeFromVar,
   validateFleetSavedObjectId,
+=======
+>>>>>>> 9.4
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -4163,11 +4166,14 @@ export function updatePackageInputs(
       ? Object.fromEntries(Object.entries(originalInput.vars).map(([k, v]) => [k, { ...v }]))
       : undefined;
 
+<<<<<<< HEAD
     // Var-level scope migration runs before any merge so that values can be seeded into the
     // new scope's source slot; deepMergeVars then carries them through and removeStaleVars
     // drops the old scope automatically (the var is no longer in the new schema there).
     applyVarScopeMigration(originalInput, registryInputVarDefs, registryStreams);
 
+=======
+>>>>>>> 9.4
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -4221,6 +4227,7 @@ export function updatePackageInputs(
               const registryStream = registryStreams?.find(
                 (rs) => rs.data_stream.dataset === stream.data_stream.dataset
               );
+<<<<<<< HEAD
               originalInput.streams.push(
                 migrateStreamVars(
                   stream as InputsOverride,
@@ -4229,6 +4236,8 @@ export function updatePackageInputs(
                   registryStream?.vars
                 )
               );
+=======
+>>>>>>> 9.4
               streamMigratedFromOldInput = true;
               if (!oldSourceInput) oldSourceInput = oldInputForStream;
               continue;
@@ -4278,6 +4287,7 @@ export function updatePackageInputs(
           // Start with httpjson vars as the base — the migrate_from declaration signals that
           // httpjson is the authoritative source for these vars.
           const seededVars: typeof storedCelVars = { ...oldSourceVars };
+<<<<<<< HEAD
           // Merge in the new input's own stored vars:
           // - For keys NOT in the old source: always keep the stored value (new-input-only var).
           // - For shared keys: keep the stored value when it was explicitly set by the user
@@ -4289,6 +4299,16 @@ export function updatePackageInputs(
           for (const [key, celEntry] of Object.entries(storedCelVars)) {
             if (!(key in oldSourceVars) || (celEntry?.value != null && celEntry.value !== '')) {
               seededVars[key] = celEntry;
+=======
+          // Merge in cel's own stored vars only for keys NOT present in the old source input
+          // (i.e. cel-only vars). For shared keys (url, api_token, etc.), the old source
+          // (httpjson) always wins — that is the purpose of the migrate_from migration.
+          for (const [key, celEntry] of Object.entries(storedCelVars)) {
+            if (!(key in oldSourceVars)) {
+              if (celEntry?.value != null && celEntry.value !== '') {
+                seededVars[key] = celEntry;
+              }
+>>>>>>> 9.4
             }
           }
           const merged = deepMergeVars(

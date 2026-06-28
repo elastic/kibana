@@ -20,6 +20,11 @@ export default createTestConfig({
     require.resolve('../../test_suites/platform_security'),
     require.resolve('../../test_suites/scripts_tests'),
     require.resolve('../../test_suites/search_oss'),
+<<<<<<< HEAD
+=======
+    require.resolve('../../test_suites/search_profiler'),
+    require.resolve('../../test_suites/search_inference_endpoints'),
+>>>>>>> 9.4
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/telemetry'),
     require.resolve('../../test_suites/data_usage'),

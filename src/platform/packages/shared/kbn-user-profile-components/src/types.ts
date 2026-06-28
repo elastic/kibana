@@ -18,6 +18,7 @@ import type {
   UserSettingsData,
 } from '@kbn/core-user-settings-types';
 
+<<<<<<< HEAD
 export type {
   UserProfileAvatarData,
   DarkModeValue,
@@ -26,6 +27,35 @@ export type {
   UserSettingsData,
   UserProfileData,
 };
+=======
+export type DarkModeValue = 'system' | 'dark' | 'light' | 'space_default';
+
+export type ContrastModeValue = 'system' | 'standard' | 'high';
+
+/**
+ * User settings stored in the data object of the User Profile
+ */
+export interface UserSettingsData {
+  darkMode?: DarkModeValue;
+  contrastMode?: ContrastModeValue;
+  solutionNavOptOut?: boolean;
+  /**
+   * Whether the Agent Builder announcement modal was dismissed for the current user (all spaces).
+   */
+  agentBuilderAnnouncementModalSeen?: boolean;
+  /**
+   * Legacy: stringified JSON map of space id → dismissed (`true`). Superseded by
+   * `agentBuilderAnnouncementModalSeen`; read for backward compatibility.
+   */
+  agentBuilderAnnouncementModalSeenBySpaceJson?: string;
+}
+
+export interface UserProfileData {
+  avatar?: UserProfileAvatarData;
+  userSettings?: UserSettingsData;
+  [key: string]: unknown;
+}
+>>>>>>> 9.4
 
 export interface UserProfileAPIClient {
   userProfile$: Observable<UserProfileData | null>;

@@ -245,16 +245,41 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
         // If all we have is the ID, the watchlist has likely been deleted
         return watchlistName !== id ? watchlistName : undefined;
       })
+<<<<<<< HEAD
       .filter((name): name is string => name !== undefined);
+=======
+      .filter((name) => name !== undefined);
+>>>>>>> 9.4
   }, [watchlistIds, watchlistNamesById]);
 
   return (
+<<<<<<< HEAD
     <TruncatedBadgeList
       values={resolvedNames}
       overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
       data-test-subj="entityWatchlistsCell"
       textSize="xs"
     />
+=======
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{firstName}</EuiText>
+      </EuiFlexItem>
+      {moreCount > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={resolvedNames.slice(1).join(', ')}>
+            <EuiButtonEmpty size="xs" flush="left">
+              {`+${moreCount} `}
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.grid.watchlistsMore"
+                defaultMessage="More"
+              />
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+>>>>>>> 9.4
   );
 });
 WatchlistsCell.displayName = 'WatchlistsCell';

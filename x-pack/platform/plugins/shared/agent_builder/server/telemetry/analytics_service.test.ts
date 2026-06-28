@@ -273,6 +273,7 @@ describe('AnalyticsService', () => {
   });
 
   describe.each([
+<<<<<<< HEAD
     {
       method: 'reportSkillCreated' as const,
       eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated,
@@ -336,6 +337,10 @@ describe('AnalyticsService', () => {
   });
 
   describe.each([
+=======
+    { method: 'reportSkillCreated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated },
+    { method: 'reportSkillUpdated' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated },
+>>>>>>> 9.4
     { method: 'reportSkillDeleted' as const, eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted },
   ])('$method', ({ method, eventType }) => {
     it('normalizes the skill_id and passes origin for custom skills', () => {

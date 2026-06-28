@@ -13,7 +13,11 @@ import { BehaviorSubject, of } from 'rxjs';
 import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
   registerEmbeddablePublicDefinition,
+<<<<<<< HEAD
   type EmbeddablePublicDefinition,
+=======
+  type EmbeddableFactory,
+>>>>>>> 9.4
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { render, waitFor } from '@testing-library/react';

@@ -20,11 +20,14 @@ import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+<<<<<<< HEAD
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_VIEW_DETAILS,
 } from '../../common/constants';
+=======
+>>>>>>> 9.4
 
 // Mock the EmbeddableComponent
 const mockEmbeddableComponent = jest.fn((props) => (
@@ -298,6 +301,73 @@ describe('LensWrapper', () => {
       });
 
       expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
+    });
+  });
+
+  describe('handleExploreInDiscoverTab', () => {
+    function captureExploreHandler(): { handler: (() => void) | undefined } {
+      const captured: { handler: (() => void) | undefined } = { handler: undefined };
+      useLensExtraActionsMock.mockImplementation((actions) => {
+        captured.handler = actions.exploreInDiscoverTab?.onClick;
+        return [];
+      });
+      return captured;
+    }
+
+    it('resolves esqlVariables from lensProps before calling onExploreInDiscoverTab', () => {
+      const captured = captureExploreHandler();
+      const onExploreInDiscoverTab = jest.fn();
+
+      render(
+        <EuiThemeProvider>
+          <LensWrapper
+            {...defaultProps}
+            lensProps={{
+              ...mockLensProps,
+              esqlVariables: [{ key: 'event_type', value: 'Bad', type: ESQLVariableType.VALUES }],
+              attributes: {
+                ...mockLensProps.attributes,
+                state: {
+                  ...mockLensProps.attributes.state,
+                  query: { esql: 'FROM traces-apm* | WHERE ?event_type == "Bad"' },
+                },
+              },
+            }}
+            onExploreInDiscoverTab={onExploreInDiscoverTab}
+          />
+        </EuiThemeProvider>
+      );
+
+      act(() => {
+        captured.handler?.();
+      });
+
+      expect(onExploreInDiscoverTab).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { esql: 'FROM traces-apm* | WHERE "Bad" == "Bad"' },
+        })
+      );
+    });
+
+    it('passes non-esql queries through unchanged', () => {
+      const captured = captureExploreHandler();
+      const onExploreInDiscoverTab = jest.fn();
+
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} onExploreInDiscoverTab={onExploreInDiscoverTab} />
+        </EuiThemeProvider>
+      );
+
+      act(() => {
+        captured.handler?.();
+      });
+
+      expect(onExploreInDiscoverTab).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: mockLensProps.attributes.state.query,
+        })
+      );
     });
   });
 

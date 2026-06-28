@@ -44,6 +44,7 @@ export const CreateSavedQueryRequestBody = lazySchema(() =>
 );
 export type CreateSavedQueryRequestBody = z.infer<typeof CreateSavedQueryRequestBody>;
 
+<<<<<<< HEAD
 /**
  * The response for creating a saved query.
  */
@@ -86,4 +87,7 @@ export const CreateSavedQueryResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const CreateSavedQueryResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type CreateSavedQueryResponse = z.infer<typeof CreateSavedQueryResponse>;

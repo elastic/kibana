@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import type {
   DatatableConfig,
   DatatableConfigESQL,
@@ -15,6 +16,10 @@ import type {
 import type { TermsIndexPatternColumn } from '@kbn/lens-common';
 import { buildFormBasedLayer, buildVisualizationState, getValueColumns } from '.';
 import { DEFAULT_LAYER_ID } from '../../../../constants';
+=======
+import type { DatatableConfig, DatatableConfigESQL } from '../../../../schema';
+import { buildVisualizationState, getValueColumns } from '.';
+>>>>>>> 9.4
 
 describe('Datatable ES|QL column ordering', () => {
   describe('buildVisualizationState', () => {

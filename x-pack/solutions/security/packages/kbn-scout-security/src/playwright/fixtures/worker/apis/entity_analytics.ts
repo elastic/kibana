@@ -13,9 +13,14 @@ import type {
   StoreStatus,
 } from '../../../constants/entity_analytics';
 
+<<<<<<< HEAD
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
 const ENTITY_STORE_V2_STATUS_URL = '/api/security/entity_store/status';
+=======
+const ENTITY_STORE_ENGINES_URL = '/internal/entity_store/engines';
+const ENTITY_STORE_STATUS_URL = '/internal/entity_store/status';
+>>>>>>> 9.4
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
@@ -72,6 +77,10 @@ export const getEntityAnalyticsApiService = ({
             path: `${basePath}${ENTITY_STORE_ENGINES_URL}`,
             query: {
               delete_data: 'true',
+            },
+            headers: {
+              'elastic-api-version': API_VERSIONS.internal.v1,
+              'x-elastic-internal-origin': 'kibana',
             },
             ignoreErrors: [404, 500],
           });
@@ -157,7 +166,7 @@ export const getEntityAnalyticsApiService = ({
             method: 'GET',
             path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
             headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
+              'elastic-api-version': API_VERSIONS.internal.v1,
             },
           });
           return response.data;

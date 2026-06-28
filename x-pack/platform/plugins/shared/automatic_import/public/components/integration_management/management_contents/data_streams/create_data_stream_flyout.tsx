@@ -158,9 +158,12 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
     if (!meetsMinLength(params.integrationTitle)) {
       reasons.push(formI18n.NAME_TOO_SHORT);
     }
+<<<<<<< HEAD
     if (params.hasDuplicateIntegrationName) {
       reasons.push(formI18n.TITLE_ALREADY_EXISTS);
     }
+=======
+>>>>>>> 9.4
     if (!isValidNameFormat(params.integrationTitle)) {
       reasons.push(formI18n.NAME_INVALID_FORMAT);
     }

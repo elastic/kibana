@@ -99,6 +99,7 @@ export interface ActionButton {
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
   disabledReason?: string;
+<<<<<<< HEAD
   /**
    * Optional URL. When provided, the button renders as an anchor (`<a href>`)
    * so it honors native browser behaviors like middle-click and cmd-click /
@@ -113,6 +114,9 @@ export interface ActionButton {
   /**
    * Handler function called when the button is clicked.
    */
+=======
+  /** Handler function called when the button is clicked */
+>>>>>>> 9.4
   handler: () => void | Promise<void>;
 }
 

@@ -36,7 +36,10 @@ export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, Start
 
     plugins.embeddable.registerEmbeddableServerDefinition(FIELD_STATS_EMBEDDABLE_TYPE, {
       title: 'Field statistics table',
+<<<<<<< HEAD
       getSchema: () => fieldStatsTableEmbeddableSchema,
+=======
+>>>>>>> 9.4
       getTransforms: () => ({
         transformIn,
         transformOut,

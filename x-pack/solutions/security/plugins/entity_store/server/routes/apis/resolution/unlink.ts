@@ -6,6 +6,10 @@
  */
 
 import path from 'node:path';
+<<<<<<< HEAD
+=======
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+>>>>>>> 9.4
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
@@ -31,9 +35,13 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Unlink entities',
       description:
+<<<<<<< HEAD
         'Remove one or more entities from their resolution group. Changes become ' +
         'visible on subsequent reads after the next index refresh (typically <1s). ' +
         'Requires an enterprise license.',
+=======
+        'Remove one or more entities from their resolution group. Requires an enterprise license.',
+>>>>>>> 9.4
       options: {
         tags: ['oas-tag:Security entity store'],
       },

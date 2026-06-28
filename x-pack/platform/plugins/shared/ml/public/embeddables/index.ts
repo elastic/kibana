@@ -24,6 +24,7 @@ export function registerEmbeddables(
     const { getAnomalySwimLaneEmbeddableFactory } = await import('./anomaly_swimlane');
     return getAnomalySwimLaneEmbeddableFactory(core.getStartServices);
   });
+<<<<<<< HEAD
   embeddable.registerLegacyURLTransform(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
     const { transformOut } = await import(
       '../../common/embeddables/anomaly_swimlane/transform_out'
@@ -46,6 +47,20 @@ export function registerEmbeddables(
   });
 
   embeddable.registerEmbeddablePublicDefinition(
+=======
+
+  embeddable.registerEmbeddablePublicDefinition(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    async () => {
+      const { getAnomalyChartsReactEmbeddableFactory } = await import(
+        './anomaly_charts/anomaly_charts_embeddable_factory'
+      );
+      return getAnomalyChartsReactEmbeddableFactory(core.getStartServices, usageCollection);
+    }
+  );
+
+  embeddable.registerEmbeddablePublicDefinition(
+>>>>>>> 9.4
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     async () => {
       const { getSingleMetricViewerEmbeddableFactory } = await import('./single_metric_viewer');

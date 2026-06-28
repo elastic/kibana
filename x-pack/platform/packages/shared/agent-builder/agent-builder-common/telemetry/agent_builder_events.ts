@@ -164,8 +164,11 @@ export interface ReportSkillCreatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API creates, `plugin` for plugin-bundled creates). */
   origin?: SkillCreationOrigin;
+<<<<<<< HEAD
   /** Deduplicated, normalized tool IDs included in the created skill. */
   tool_ids: string[];
+=======
+>>>>>>> 9.4
 }
 
 /** Telemetry params reported when a user-created skill is updated. */
@@ -178,8 +181,11 @@ export interface ReportSkillUpdatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API updates, `plugin` for plugin-bundled updates). */
   origin?: SkillCreationOrigin;
+<<<<<<< HEAD
   /** Deduplicated, normalized tool IDs included in the updated skill. */
   tool_ids: string[];
+=======
+>>>>>>> 9.4
 }
 
 /** Telemetry params reported when a user-created skill is deleted. */
@@ -426,6 +432,7 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'Source of the opt-out action (security_settings_menu|stack_management|agent_builder_nav_control)',
+<<<<<<< HEAD
         optional: false,
       },
     },
@@ -475,7 +482,23 @@ const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Kind of activated control (button|link|role_button|input_button|other)',
+=======
+>>>>>>> 9.4
         optional: false,
+      },
+    },
+    announcement_variant: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent Builder announcement modal variant (1a|1b|2a)',
+        optional: true,
+      },
+    },
+    had_prior_ai_assistant_usage: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the user had prior AI Assistant conversations in the current space',
+        optional: true,
       },
     },
   },
@@ -602,6 +625,7 @@ const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the created skill (normalized: custom skills become "custom-<sha256_prefix>", plugin-bundled creates become "plugin-<plugin_id_hash>-<sha256_prefix>")',
+<<<<<<< HEAD
         optional: false,
       },
     },
@@ -625,7 +649,17 @@ const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'Tool IDs included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+=======
+>>>>>>> 9.4
         optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Origin of the created skill (custom for direct API creates, plugin for plugin-bundled creates)',
+        optional: true,
       },
     },
   },
@@ -639,6 +673,7 @@ const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'ID of the updated skill (normalized: custom skills become "custom-<sha256_prefix>", plugin-bundled updates become "plugin-<plugin_id_hash>-<sha256_prefix>")',
+<<<<<<< HEAD
         optional: false,
       },
     },
@@ -662,7 +697,17 @@ const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'Tool IDs included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+=======
+>>>>>>> 9.4
         optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Origin of the updated skill (custom for direct API updates, plugin for plugin-bundled updates)',
+        optional: true,
       },
     },
   },

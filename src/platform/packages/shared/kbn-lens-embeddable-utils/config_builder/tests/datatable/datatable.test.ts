@@ -9,10 +9,18 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
+<<<<<<< HEAD
 import type { DatatableConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import { validator } from '../utils/validator';
+=======
+import { datatableConfigSchema } from '../../schema';
+import type { DatatableConfig } from '../../schema';
+import { AUTO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import { validateAPIConverter, validateConverter } from '../validate';
+>>>>>>> 9.4
 import {
   singleMetricDatatableAttributes,
   singleMetricRowSplitDatatableAttributes,
@@ -49,6 +57,7 @@ import {
 describe('Datatable', () => {
   describe('state transform validation', () => {
     it('should convert a datatable chart with single metric column', () => {
+<<<<<<< HEAD
       validator.data_table.fromState(singleMetricDatatableAttributes);
     });
 
@@ -98,11 +107,66 @@ describe('Datatable', () => {
 
     it('should convert a selector color by value palette', () => {
       validator.data_table.fromState(selectorColorByValueAttributes);
+=======
+      validateConverter(singleMetricDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart with single metric, row, split by columns', () => {
+      validateConverter(singleMetricRowSplitDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart with multiple metrics, rows, split by columns', () => {
+      validateConverter(multiMetricRowSplitDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart with full config', () => {
+      validateConverter(fullConfigDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart sorted by a transposed metric column', () => {
+      validateConverter(sortedByTransposedMetricColumnDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart sorted by a row', () => {
+      validateConverter(sortedByRowDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with single metric column', () => {
+      validateConverter(singleMetricESQLDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with single metric, row, split by columns', () => {
+      validateConverter(singleMetricRowSplitESQLDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with multiple metrics, rows, split by columns', () => {
+      validateConverter(multipleMetricRowSplitESQLDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with full config', () => {
+      validateConverter(fullConfigESQLDatatableAttributes, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart sorted by a transposed metric column', () => {
+      validateConverter(
+        sortedByTransposedMetricColumnESQLDatatableAttributes,
+        datatableConfigSchema
+      );
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, datatableConfigSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, datatableConfigSchema);
+>>>>>>> 9.4
     });
   });
 
   describe('api transform validation', () => {
     it('should convert a datatable chart with single metric column', () => {
+<<<<<<< HEAD
       validator.data_table.fromApi(singleMetricDatatableWithAdhocDataView);
     });
 
@@ -144,6 +208,49 @@ describe('Datatable', () => {
 
     it('should convert an ESQL datatable chart sorted by a row column', () => {
       validator.data_table.fromApi(sortedByRowColumnESQLDatatable);
+=======
+      validateAPIConverter(singleMetricDatatableWithAdhocDataView, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart with multiple metrics, rows, split by columns', () => {
+      validateAPIConverter(multiMetricRowSplitByDatatableWithAdhocDataView, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart with full config and ad hoc dataView', () => {
+      validateAPIConverter(fullConfigDatatableWithAdhocDataView, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart with full config and dataView', () => {
+      validateAPIConverter(fullConfigDatatableWithDataView, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart sorted by a transposed column', () => {
+      validateAPIConverter(sortedByPivotedMetricColumnDatatable, datatableConfigSchema);
+    });
+
+    it('should convert a datatable chart sorted by a row column', () => {
+      validateAPIConverter(sortedByRowDatatable, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with single metric column', () => {
+      validateAPIConverter(singleMetricESQLDatatable, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with multiple metrics, rows, split by columns', () => {
+      validateAPIConverter(multipleMetricRowSplitESQLDatatable, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart with full config', () => {
+      validateAPIConverter(fullConfigESQLDatatable, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart sorted by a transposed column', () => {
+      validateAPIConverter(sortedByPivotedMetricColumnESQLDatatable, datatableConfigSchema);
+    });
+
+    it('should convert an ESQL datatable chart sorted by a row column', () => {
+      validateAPIConverter(sortedByRowColumnESQLDatatable, datatableConfigSchema);
+>>>>>>> 9.4
     });
   });
 

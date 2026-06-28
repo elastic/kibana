@@ -40,6 +40,7 @@ export const HostPanelFooter = ({
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
+<<<<<<< HEAD
             <AiAssistantButton
               entityType={EntityType.host}
               entityName={hostName}
@@ -47,6 +48,8 @@ export const HostPanelFooter = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+=======
+>>>>>>> 9.4
             <TakeAction
               isDisabled={!hostName}
               kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}

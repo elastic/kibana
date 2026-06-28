@@ -36,13 +36,17 @@ export const UpdatePacksRequestBody = lazySchema(() =>
     policy_ids: PolicyIdsOrUndefined.optional(),
     shards: Shards.optional(),
     queries: ObjectQueries.optional(),
+<<<<<<< HEAD
     schedule_type: ScheduleTypeOrUndefined.optional(),
     interval: PackIntervalOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+=======
+>>>>>>> 9.4
   })
 );
 export type UpdatePacksRequestBody = z.infer<typeof UpdatePacksRequestBody>;
 
+<<<<<<< HEAD
 /**
  * The response for updating a pack.
  */
@@ -77,4 +81,7 @@ export const UpdatePacksResponse = lazySchema(() =>
       .optional(),
   })
 );
+=======
+export const UpdatePacksResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type UpdatePacksResponse = z.infer<typeof UpdatePacksResponse>;

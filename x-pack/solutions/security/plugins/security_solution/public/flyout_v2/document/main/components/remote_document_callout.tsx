@@ -19,7 +19,11 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
 } from '@kbn/elastic-assistant-common';
 import { EventKind } from '../constants/event_kinds';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/remote_document_callout.tsx
 import { useKibana } from '../../../../common/lib/kibana';
+=======
+import { useKibana } from '../../../common/lib/kibana';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/remote_document_callout.tsx
 
 const ATTACK_DISCOVERY_RULE_TYPES = new Set<string>([
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,

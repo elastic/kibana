@@ -57,7 +57,11 @@ const mockScoutTestConfig: ScoutTestConfig = {
   },
   serverless: true,
   http2: false,
+<<<<<<< HEAD
   uiam: true,
+=======
+  uiam: false,
+>>>>>>> 9.4
   projectType: 'oblt',
   productTier: 'complete',
   isCloud: true,

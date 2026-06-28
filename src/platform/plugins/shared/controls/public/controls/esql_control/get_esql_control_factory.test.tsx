@@ -18,7 +18,10 @@ import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+<<<<<<< HEAD
 import type { ESQLControlApi } from './types';
+=======
+>>>>>>> 9.4
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
@@ -256,6 +259,7 @@ describe('ESQLControlApi', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+<<<<<<< HEAD
 
   describe('anyStateChange$', () => {
     let embeddableApi: ESQLControlApi<OptionsListESQLControlState>;
@@ -297,4 +301,6 @@ describe('ESQLControlApi', () => {
       embeddableApi.setTitle('cute puppies');
     });
   });
+=======
+>>>>>>> 9.4
 });

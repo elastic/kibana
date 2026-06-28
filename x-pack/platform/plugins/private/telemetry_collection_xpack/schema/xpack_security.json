@@ -7993,6 +7993,7 @@
                     }
                   }
                 },
+<<<<<<< HEAD
                 "elastic_detection_rule_deprecated_status": {
                   "properties": {
                     "total": {
@@ -8003,6 +8004,8 @@
                     }
                   }
                 },
+=======
+>>>>>>> 9.4
                 "ai_created_rules": {
                   "properties": {
                     "total": {

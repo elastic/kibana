@@ -14,6 +14,7 @@ import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_h
 import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
 
+<<<<<<< HEAD
 export const OAUTH_AUTHORIZATION_CODE_AUTH_ID = 'oauth_authorization_code';
 
 const authSchema = lazySchema(() =>
@@ -53,6 +54,29 @@ const authSchema = lazySchema(() =>
     })
     .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL })
 );
+=======
+const authSchema = z
+  .object({
+    authorizationUrl: z.url().meta({
+      label: i18n.OAUTH_AUTHORIZATION_URL_LABEL,
+      validate: { allowedHosts: true },
+    }),
+    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
+    clientId: z
+      .string()
+      .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+      .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+    clientSecret: z
+      .string()
+      .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
+      .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+    useBasicAuth: z.boolean().default(true).optional().meta({
+      hidden: true, // Hidden from UI - uses connector spec defaults
+    }),
+  })
+  .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
+>>>>>>> 9.4
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

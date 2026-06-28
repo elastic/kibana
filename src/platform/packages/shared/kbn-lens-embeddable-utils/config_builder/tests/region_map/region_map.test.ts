@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { validator } from '../utils/validator';
+=======
+import { regionMapConfigSchema } from '../../schema';
+import { validateAPIConverter, validateConverter } from '../validate';
+>>>>>>> 9.4
 import {
   basicRegionMapWithAdHocDataView,
   basicRegionMapWithDataView,
@@ -27,6 +32,7 @@ import {
 describe('Region Map', () => {
   describe('state transform validation', () => {
     it('should convert a simple region map', () => {
+<<<<<<< HEAD
       validator.region_map.fromState(regionMapAttributes);
     });
     it('should convert a region map with full config', () => {
@@ -40,11 +46,27 @@ describe('Region Map', () => {
     });
     it('should convert an esql region map with full config', () => {
       validator.region_map.fromState(regionmapESQLAttributesWithEms);
+=======
+      validateConverter(regionMapAttributes, regionMapConfigSchema);
+    });
+    it('should convert a region map with full config', () => {
+      validateConverter(regionMapAttributesWithEms, regionMapConfigSchema);
+    });
+    it('should convert a region map with filters for region', () => {
+      validateConverter(regionMapAttributesWithFilterForRegion, regionMapConfigSchema);
+    });
+    it('should convert an esql region map', () => {
+      validateConverter(regionMapESQLAttributes, regionMapConfigSchema);
+    });
+    it('should convert an esql region map with full config', () => {
+      validateConverter(regionmapESQLAttributesWithEms, regionMapConfigSchema);
+>>>>>>> 9.4
     });
   });
 
   describe('api transform validation', () => {
     it('should convert a basic regionMap chart with ad hoc dataView', () => {
+<<<<<<< HEAD
       validator.region_map.fromApi(basicRegionMapWithAdHocDataView);
     });
 
@@ -66,6 +88,29 @@ describe('Region Map', () => {
 
     it('should convert a comprehensive ESQL-based regionMap chart', () => {
       validator.region_map.fromApi(comprehensiveEsqlRegionMap);
+=======
+      validateAPIConverter(basicRegionMapWithAdHocDataView, regionMapConfigSchema);
+    });
+
+    it('should convert a basic regionMap chart with dataView', () => {
+      validateAPIConverter(basicRegionMapWithDataView, regionMapConfigSchema);
+    });
+
+    it('should convert a ESQL-based regionMap chart', () => {
+      validateAPIConverter(basicEsqlRegionMap, regionMapConfigSchema);
+    });
+
+    it('should convert a comprehensive regionMap chart with ad hoc data view', () => {
+      validateAPIConverter(comprehensiveRegionMapWithAdHocDataView, regionMapConfigSchema);
+    });
+
+    it('should convert a comprehensive regionMap chart with data view', () => {
+      validateAPIConverter(comprehensiveRegionMapWithDataView, regionMapConfigSchema);
+    });
+
+    it('should convert a comprehensive ESQL-based regionMap chart', () => {
+      validateAPIConverter(comprehensiveEsqlRegionMap, regionMapConfigSchema);
+>>>>>>> 9.4
     });
   });
 });

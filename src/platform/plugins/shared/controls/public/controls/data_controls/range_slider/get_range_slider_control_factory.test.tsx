@@ -20,7 +20,10 @@ import { dataService, dataViewsService } from '../../../services/kibana_services
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/controls-schemas';
+<<<<<<< HEAD
 import { ControlValuesSource } from '@kbn/controls-constants';
+=======
+>>>>>>> 9.4
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -297,15 +300,23 @@ describe('RangeSliderControlApi', () => {
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
       const lastSavedState = rangeSliderControlSchema.validate({
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
+=======
+>>>>>>> 9.4
         data_view_id: 'oldDataViewId',
         field_name: 'myFieldName',
       });
       const initialState = {
         ...lastSavedState,
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
         data_view_id: 'newDataViewId',
       } as RangeSliderControlState;
+=======
+        data_view_id: 'newDataViewId',
+      };
+>>>>>>> 9.4
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
@@ -322,7 +333,10 @@ describe('RangeSliderControlApi', () => {
 
     test('should not have unsaved changes when there are no changes', async () => {
       const initialState = rangeSliderControlSchema.validate({
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
+=======
+>>>>>>> 9.4
         data_view_id: 'myDataViewId',
         field_name: 'myFieldName',
       });
@@ -340,6 +354,7 @@ describe('RangeSliderControlApi', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+<<<<<<< HEAD
 
   describe('anyStateChange$', () => {
     let embeddableApi: RangeSliderControlApi;
@@ -378,4 +393,6 @@ describe('RangeSliderControlApi', () => {
       embeddableApi.setTitle('cute puppies');
     });
   });
+=======
+>>>>>>> 9.4
 });

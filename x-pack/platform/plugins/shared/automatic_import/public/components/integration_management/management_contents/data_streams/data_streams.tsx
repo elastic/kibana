@@ -19,7 +19,11 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
+<<<<<<< HEAD
 import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
+=======
+import { meetsMinLength } from '../../../../common/lib/helper_functions';
+>>>>>>> 9.4
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';

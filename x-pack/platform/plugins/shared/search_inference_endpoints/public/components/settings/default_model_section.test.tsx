@@ -117,7 +117,25 @@ describe('DefaultModelSection', () => {
     expect(setFeatureSpecificModels).toHaveBeenCalledWith(false);
   });
 
+<<<<<<< HEAD
   it('renders validation errors on the global model field when AI is on and a global default is required', () => {
+=======
+  it('shows loading state when connectors are loading', () => {
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={createMockSettings()} />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('defaultModelComboBox')).toBeInTheDocument();
+  });
+
+  it('does not show connector-not-exist error while connector existence is loading', () => {
+    mockUseConnectorExists.mockReturnValue({ exists: false, loading: true });
+
+>>>>>>> 9.4
     const settings = createMockSettings({
       state: { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: false },
     });

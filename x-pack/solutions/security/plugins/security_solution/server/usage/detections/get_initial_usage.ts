@@ -34,7 +34,10 @@ export const getInitialDetectionMetrics = (): DetectionMetrics => ({
     detection_rule_status: getInitialEventLogUsage(),
     elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
     elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+<<<<<<< HEAD
     elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+=======
+>>>>>>> 9.4
     ai_created_rules: getInitialAiCreatedRulesUsage(),
     spaces_usage: getInitialSpacesUsage(),
   },

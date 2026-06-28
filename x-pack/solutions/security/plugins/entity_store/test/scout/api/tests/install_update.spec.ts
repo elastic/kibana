@@ -29,12 +29,15 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
+<<<<<<< HEAD
   });
 
   apiTest.beforeEach(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+=======
+>>>>>>> 9.4
   });
 
   apiTest(

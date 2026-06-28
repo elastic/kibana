@@ -9,10 +9,18 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
+<<<<<<< HEAD
 import { validator } from '../utils/validator';
 import type { GaugeConfig } from '../../schema/charts/gauge';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
+=======
+import { gaugeConfigSchema } from '../../schema/charts/gauge';
+import type { GaugeConfig } from '../../schema/charts/gauge';
+import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import { validateAPIConverter, validateConverter } from '../validate';
+>>>>>>> 9.4
 import {
   basicGaugeWithAdHocDataView,
   basicGaugeWithDataView,
@@ -32,6 +40,7 @@ import {
 describe('Gauge', () => {
   describe('state transform validation', () => {
     it('should convert a gauge chart with full config and absolute color mode', () => {
+<<<<<<< HEAD
       validator.gauge.fromState(gaugeAttributes);
     });
 
@@ -49,11 +58,31 @@ describe('Gauge', () => {
 
     it('should convert a selector color by value palette', () => {
       validator.gauge.fromState(selectorColorByValueAttributes);
+=======
+      validateConverter(gaugeAttributes, gaugeConfigSchema);
+    });
+
+    it('should convert a gauge chart with full config and percentage color mode', () => {
+      validateConverter(gaugeAttributesWithPercentageColorMode, gaugeConfigSchema);
+    });
+
+    it('should convert a gauge chart with ESQL datasource', () => {
+      validateConverter(gaugeESQLAttributes, gaugeConfigSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, gaugeConfigSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, gaugeConfigSchema);
+>>>>>>> 9.4
     });
   });
 
   describe('api transform validation', () => {
     it('should convert a basic gauge chart with ad hoc dataView', () => {
+<<<<<<< HEAD
       validator.gauge.fromApi(basicGaugeWithAdHocDataView);
     });
 
@@ -75,6 +104,29 @@ describe('Gauge', () => {
 
     it('should convert a comprehensive ESQL-based gauge chart', () => {
       validator.gauge.fromApi(comprehensiveEsqlGauge);
+=======
+      validateAPIConverter(basicGaugeWithAdHocDataView, gaugeConfigSchema);
+    });
+
+    it('should convert a basic gauge chart with dataView', () => {
+      validateAPIConverter(basicGaugeWithDataView, gaugeConfigSchema);
+    });
+
+    it('should convert a ESQL-based gauge chart', () => {
+      validateAPIConverter(esqlGauge, gaugeConfigSchema);
+    });
+
+    it('should convert a comprehensive gauge chart with ad hoc data view', () => {
+      validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeConfigSchema);
+    });
+
+    it('should convert a comprehensive gauge chart with data view', () => {
+      validateAPIConverter(comprehensiveGaugeWithDataView, gaugeConfigSchema);
+    });
+
+    it('should convert a comprehensive ESQL-based gauge chart', () => {
+      validateAPIConverter(comprehensiveEsqlGauge, gaugeConfigSchema);
+>>>>>>> 9.4
     });
   });
 

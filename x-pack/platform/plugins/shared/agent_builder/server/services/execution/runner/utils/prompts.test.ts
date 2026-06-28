@@ -6,6 +6,7 @@
  */
 
 import type { ConverseInput } from '@kbn/agent-builder-common';
+<<<<<<< HEAD
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import {
   AgentPromptType,
@@ -13,6 +14,10 @@ import {
   ConfirmationStatus,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
+=======
+import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
+import { createEmptyConversation } from '../../../../test_utils/conversations';
+>>>>>>> 9.4
 import { createPromptManager, getAgentPromptStorageState, toolConfirmationId } from './prompts';
 
 describe('prompts utilities', () => {
@@ -162,6 +167,7 @@ describe('prompts utilities', () => {
 
         expect(result).toEqual({ status: ConfirmationStatus.accepted });
       });
+<<<<<<< HEAD
 
       it('returns an authorization prompt payload from askForAuthorization', () => {
         const manager = createPromptManager();
@@ -269,6 +275,8 @@ describe('prompts utilities', () => {
           'Trying to check confirmation status of non-confirmation prompt.'
         );
       });
+=======
+>>>>>>> 9.4
     });
   });
 
@@ -334,6 +342,7 @@ describe('prompts utilities', () => {
         response: { allow: false },
       });
     });
+<<<<<<< HEAD
 
     it('discriminates confirmation and authorization responses when merging from input', () => {
       const input: ConverseInput = {
@@ -449,6 +458,8 @@ describe('prompts utilities', () => {
         expect(result.responses['auth-prompt']).toEqual(declinedResponse);
       });
     });
+=======
+>>>>>>> 9.4
   });
 
   describe('toolConfirmationId', () => {

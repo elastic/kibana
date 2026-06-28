@@ -16,13 +16,19 @@ export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
 
 let isSetupComplete = false;
 
+export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
+
 /**
  * Registers an embeddable public defintion. This should be called at plugin setup time.
  * Be sure to register an embeddable server definition for this type.
  *
  * @param type The key to register the embeddable public defintion. Part of public "dashboards as code" REST API.
  * Must be lower case, snake cased, and concise.
+<<<<<<< HEAD
  * @param getEmbeddable an async function that gets the factory definition for this key. This should always async import the
+=======
+ * @param getFactory an async function that gets the factory definition for this key. This should always async import the
+>>>>>>> 9.4
  * actual factory definition file to avoid polluting page load.
  */
 export const registerEmbeddablePublicDefinition = <
@@ -54,7 +60,11 @@ export const registerEmbeddablePublicDefinition = <
       })
     );
 
+<<<<<<< HEAD
   registry[type] = getEmbeddableDefinition;
+=======
+  registry[type] = getFactory;
+>>>>>>> 9.4
 };
 
 export const getEmbeddableDefinition = async <

@@ -65,6 +65,7 @@ export const DashboardPreviewErrorCallout = ({}: {}) => (
       announceOnMount
       color="danger"
       iconType="error"
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/dashboard_renderer_error_boundary.tsx
       title={i18n.translate(
         'xpack.agentBuilderDashboards.attachments.dashboard.previewErrorCalloutTitle',
         {
@@ -79,6 +80,16 @@ export const DashboardPreviewErrorCallout = ({}: {}) => (
           defaultMessage: 'Ask the agent to repair the invalid or incomplete dashboard state.',
         }
       )}
+=======
+      title={i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewErrorCalloutTitle', {
+        defaultMessage: 'This dashboard preview could not be rendered.',
+      })}
+      data-test-subj="dashboardRendererError"
+    >
+      {i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewErrorCalloutBody', {
+        defaultMessage: 'Ask the agent to repair the invalid or incomplete dashboard state.',
+      })}
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/dashboard_renderer_error_boundary.tsx
     </EuiCallOut>
   </div>
 );

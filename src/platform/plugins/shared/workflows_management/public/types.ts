@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+=======
+import type {
+  AttachmentServiceStartContract,
+  EventsServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/agent-builder-browser';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+>>>>>>> 9.4
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -68,6 +77,33 @@ export interface WorkflowsPublicPluginStart {
   getQueryClient: () => Promise<QueryClient>;
 }
 
+<<<<<<< HEAD
+=======
+export interface AgentBuilderPluginStartContract {
+  openChat: (options?: EmbeddableConversationProps & { onClose?: () => void }) => {
+    chatRef: { close: () => void };
+  };
+  tools: ToolServiceStartContract;
+  attachments: AttachmentServiceStartContract;
+  events: EventsServiceStartContract;
+  addAttachment: (attachment: AttachmentInput) => void;
+  setChatConfig: (config: EmbeddableConversationProps) => void;
+  clearChatConfig: () => void;
+}
+
+export interface WorkflowsPublicPluginStart {
+  /**
+   * Sets Workflows availability status to unavailable. Should only be called in serverless mode.
+   *
+   * The `requiredProducts` parameter is used to render the upselling message,
+   * so the user is aware of which products to upgrade to in order to have Workflows available.
+   * */
+  setUnavailableInServerlessTier: (options: {
+    requiredProducts: ServerlessTierRequiredProducts;
+  }) => void;
+}
+
+>>>>>>> 9.4
 export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   serverless?: ServerlessPluginStart;
@@ -80,7 +116,10 @@ export interface WorkflowsPublicPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart;
   licensing: LicensingPluginStart;
+<<<<<<< HEAD
   uiActions: UiActionsStart;
+=======
+>>>>>>> 9.4
   cloud?: CloudStart;
 }
 
@@ -88,11 +127,16 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
+<<<<<<< HEAD
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
     globalExecutionsView: {
       enabled: boolean;
     };
+=======
+    agentBuilder?: AgentBuilderPluginStartContract;
+    availability: AvailabilityService;
+>>>>>>> 9.4
   };
 }
 

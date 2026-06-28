@@ -23,6 +23,7 @@ import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pi
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -148,6 +149,7 @@ export const scoreBaseEntities = async ({
 
   for await (const page of calculateBaseEntityScores(params)) {
     pagesProcessed += 1;
+<<<<<<< HEAD
     // Drop scores for entities that aren't in the entity store. The composite
     // aggregation discovers EUIDs from alerts, which can include identifiers
     // with no canonical store entity (host.id variations, synthetic identifiers,
@@ -163,6 +165,39 @@ export const scoreBaseEntities = async ({
           `from page (kept ${inStoreScores.length})`
       );
     }
+=======
+    const categorized = categorizePhase1Entities(page);
+    const resolutionTargetIds = await findResolutionTargetIdsForPage({
+      page,
+      crudClient: params.crudClient,
+      logger: params.logger,
+    });
+    const lookupSyncResult = await syncLookupIndexForCategorizedPage({
+      esClient: params.esClient,
+      index: lookupIndex,
+      page,
+      categorized,
+      now: params.now,
+      resolutionTargetIds,
+    });
+
+    writeNowCount += categorized.write_now.length;
+    deferToPhase2Count += categorized.defer_to_phase_2.length;
+    notInStoreCount += categorized.not_in_store.length;
+    lookupDocsUpserted += lookupSyncResult.upserted;
+    lookupDocsDeleted += lookupSyncResult.deleted;
+
+    params.logger.debug(
+      `[page:${pagesProcessed}] categorization: write_now=${categorized.write_now.length}, defer_to_phase_2=${categorized.defer_to_phase_2.length}, not_in_store=${categorized.not_in_store.length}`
+    );
+    params.logger.debug(
+      `[page:${pagesProcessed}] lookup sync: upserts=${lookupSyncResult.upserted}, deletes=${lookupSyncResult.deleted}`
+    );
+
+    // Keep dual-write semantics from phase 1 categorization:
+    // `defer_to_phase_2` remains persisted to the risk index for continuity.
+    const riskIndexWrites = [...categorized.write_now, ...categorized.defer_to_phase_2];
+>>>>>>> 9.4
     scoresWritten += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
@@ -277,4 +312,68 @@ const applyBaseScoreModifiers = ({
   });
 
   return { entityIds: scores.map((score) => score.entity_id), scores: finalScores, entities };
+};
+
+/**
+ * Temporary phase-1 backfill for lookup self-rows.
+ *
+ * Why this exists:
+ * - Some scored entities are resolution targets and do not have
+ *   `entity.relationships.resolution.resolved_to` on their own document.
+ * - Without explicitly detecting those targets, lookup sync can miss the
+ *   target self-row and phase 2 cannot discover/score the group when only the
+ *   target has alerts.
+ *
+ * Fixes behavior reported in https://github.com/elastic/security-team/issues/16838
+ *
+ * Remove this helper once https://github.com/elastic/security-team/issues/16839 implemented
+ */
+const findResolutionTargetIdsForPage = async ({
+  page,
+  crudClient,
+  logger,
+}: {
+  page: ScoredEntityPage;
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+}): Promise<string[]> => {
+  const candidateTargetIds = page.entityIds.filter((id) => {
+    const entity = page.entities.get(id);
+    return entity && !entity.entity?.relationships?.resolution?.resolved_to;
+  });
+
+  if (candidateTargetIds.length === 0) {
+    return [];
+  }
+
+  const candidateSet = new Set(candidateTargetIds);
+  const confirmedTargetIds = new Set<string>();
+
+  try {
+    let searchAfter: Array<string | number> | undefined;
+    do {
+      const { entities, nextSearchAfter } = await crudClient.listEntities({
+        filter: {
+          terms: { 'entity.relationships.resolution.resolved_to': candidateTargetIds },
+        },
+        size: MAX_ENTITY_SEARCH_PAGE_SIZE,
+        searchAfter,
+        source: ['entity.relationships.resolution.resolved_to'],
+      });
+      for (const entity of entities) {
+        const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
+        if (typeof resolvedTo === 'string' && candidateSet.has(resolvedTo)) {
+          confirmedTargetIds.add(resolvedTo);
+        }
+      }
+      searchAfter = nextSearchAfter;
+    } while (searchAfter !== undefined);
+  } catch (error) {
+    logger.warn(
+      `Error checking resolution targets for lookup sync. Continuing without additional target self-rows: ${error}`
+    );
+    return [];
+  }
+
+  return [...confirmedTargetIds];
 };

@@ -21,7 +21,10 @@ import {
   installPrebuiltRules,
   getInstalledRules,
   reviewPrebuiltRulesToInstall,
+<<<<<<< HEAD
   initializeSecuritySolution,
+=======
+>>>>>>> 9.4
 } from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -332,7 +335,11 @@ export default ({ getService }: FtrProviderContext): void => {
             { rule_id: 'deprecated-rule-1', version: 1 },
           ]);
 
+<<<<<<< HEAD
           await initializeSecuritySolution(supertest, ['init-prebuilt-rules']).expect(200);
+=======
+          await detectionsApi.bootstrapPrebuiltRules().expect(200);
+>>>>>>> 9.4
 
           const response = await reviewPrebuiltRulesToInstall(supertest);
           const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+=======
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+>>>>>>> 9.4
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { waitFor } from '@testing-library/react';
@@ -15,10 +19,15 @@ import { waitFor } from '@testing-library/react';
 import { dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
+<<<<<<< HEAD
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import { optionsListDSLControlSchema } from '@kbn/controls-schemas';
 import { firstValueFrom, of } from 'rxjs';
 import type { OptionsListControlApi } from './types';
+=======
+import { optionsListDSLControlSchema } from '@kbn/controls-schemas';
+import { firstValueFrom, of } from 'rxjs';
+>>>>>>> 9.4
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
@@ -251,7 +260,11 @@ describe('Options List Control Api', () => {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
+<<<<<<< HEAD
         } as OptionsListDSLControlState,
+=======
+        },
+>>>>>>> 9.4
         finalizeApi,
         uuid,
         parentApi: {},
@@ -275,15 +288,23 @@ describe('Options List Control Api', () => {
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
       const lastSavedState = optionsListDSLControlSchema.validate({
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
+=======
+>>>>>>> 9.4
         data_view_id: 'oldDataViewId',
         field_name: 'myFieldName',
       });
       const initialState = {
         ...lastSavedState,
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
         data_view_id: 'newDataViewId',
       } as OptionsListDSLControlState;
+=======
+        data_view_id: 'newDataViewId',
+      };
+>>>>>>> 9.4
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
@@ -300,7 +321,10 @@ describe('Options List Control Api', () => {
 
     test('should not have unsaved changes when there are no changes', async () => {
       const initialState = optionsListDSLControlSchema.validate({
+<<<<<<< HEAD
         values_source: ControlValuesSource.FIELD,
+=======
+>>>>>>> 9.4
         data_view_id: 'myDataViewId',
         field_name: 'myFieldName',
       });
@@ -313,6 +337,7 @@ describe('Options List Control Api', () => {
           lastSavedStateForChild$: () => of(initialState),
           getLastSavedStateForChild: initialState,
         },
+<<<<<<< HEAD
       });
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
       expect(hasUnsavedChanges).toBe(false);
@@ -354,6 +379,11 @@ describe('Options List Control Api', () => {
         done();
       });
       embeddableApi.setTitle('cute puppies');
+=======
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
+>>>>>>> 9.4
     });
   });
 });

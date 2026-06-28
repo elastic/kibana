@@ -47,7 +47,11 @@ export const useObservedUserDetails = ({
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
+<<<<<<< HEAD
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+=======
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+>>>>>>> 9.4
   const euidApi = useEntityStoreEuidApi();
 
   const shouldSkip =

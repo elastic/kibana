@@ -21,6 +21,7 @@ import type {
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
+import { resolveCollisionId } from '../../../../common/lib/import';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';

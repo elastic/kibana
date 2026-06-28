@@ -13,6 +13,10 @@ import type {
   RecoveryStrategy,
   NoDataStrategy,
 } from '@kbn/alerting-v2-schemas';
+<<<<<<< HEAD
+=======
+import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+>>>>>>> 9.4
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
 import {
@@ -66,6 +70,37 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
 
+<<<<<<< HEAD
+=======
+const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
+  if (!recoveryPolicy) return undefined;
+  return {
+    type: recoveryPolicy.type,
+    ...(recoveryPolicy.type === 'query' ? buildRecoveryQuery(recoveryPolicy) : {}),
+  };
+};
+
+/** Derives alert-delay mode from persisted `state_transition` (same rules as `AlertDelayField`). */
+export const deriveAlertDelayModeFromStateTransition = (
+  stateTransition?: StateTransition | null
+): FormValues['stateTransitionAlertDelayMode'] => {
+  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
+    return DELAY_MODE.breaches;
+  return DELAY_MODE.immediate;
+};
+
+/** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
+export const deriveRecoveryDelayModeFromStateTransition = (
+  stateTransition?: StateTransition | null
+): FormValues['stateTransitionRecoveryDelayMode'] => {
+  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
+    return DELAY_MODE.recoveries;
+  return DELAY_MODE.immediate;
+};
+
+>>>>>>> 9.4
 const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
   if (kind !== 'alert') return undefined;

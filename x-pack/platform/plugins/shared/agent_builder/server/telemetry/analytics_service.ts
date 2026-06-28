@@ -122,12 +122,18 @@ export class AnalyticsService {
     skillId,
     origin,
     pluginId,
+<<<<<<< HEAD
     toolIds,
+=======
+>>>>>>> 9.4
   }: {
     skillId: string;
     origin?: SkillCreationOrigin;
     pluginId?: string;
+<<<<<<< HEAD
     toolIds: string[];
+=======
+>>>>>>> 9.4
   }): void {
     try {
       const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
@@ -140,7 +146,10 @@ export class AnalyticsService {
           plugin_id: pluginId,
         }),
         origin,
+<<<<<<< HEAD
         tool_ids: toolsIncluded,
+=======
+>>>>>>> 9.4
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillCreated telemetry event', { error });
@@ -151,12 +160,18 @@ export class AnalyticsService {
     skillId,
     origin,
     pluginId,
+<<<<<<< HEAD
     toolIds,
+=======
+>>>>>>> 9.4
   }: {
     skillId: string;
     origin?: SkillCreationOrigin;
     pluginId?: string;
+<<<<<<< HEAD
     toolIds: string[];
+=======
+>>>>>>> 9.4
   }): void {
     try {
       const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
@@ -169,7 +184,10 @@ export class AnalyticsService {
           plugin_id: pluginId,
         }),
         origin,
+<<<<<<< HEAD
         tool_ids: toolsIncluded,
+=======
+>>>>>>> 9.4
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillUpdated telemetry event', { error });

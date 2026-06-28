@@ -108,8 +108,11 @@ function buildServices({
 
   const http = createHttpMock({ observabilityConversationCount, securityTotal });
 
+<<<<<<< HEAD
   const addSuccess = jest.fn();
 
+=======
+>>>>>>> 9.4
   const services = {
     settings: {
       client: {
@@ -117,7 +120,11 @@ function buildServices({
         get$: jest.fn((key: string) =>
           key === AI_CHAT_EXPERIENCE_TYPE ? of(chatExperience) : of(undefined)
         ),
+<<<<<<< HEAD
         set: jest.fn().mockResolvedValue(undefined),
+=======
+        set: jest.fn(),
+>>>>>>> 9.4
       },
       globalClient: {
         get: (key: string) => (key === HIDE_ANNOUNCEMENTS_ID ? hideAnnouncements : undefined),
@@ -128,6 +135,7 @@ function buildServices({
       getActiveSpace$: () => space$.asObservable(),
     },
     analytics: { reportEvent },
+<<<<<<< HEAD
     application: {
       navigateToApp,
       getUrlForApp: jest.fn().mockReturnValue('/app/management/ai/genAiSettings'),
@@ -136,10 +144,14 @@ function buildServices({
     notifications: { toasts: { addSuccess } },
     i18n: { Context: ({ children }: { children: React.ReactNode }) => <>{children}</> },
     theme: {},
+=======
+    application: { navigateToApp, capabilities: chatExperienceCapabilities },
+>>>>>>> 9.4
     userProfile,
     http,
   };
 
+<<<<<<< HEAD
   return {
     services,
     reportEvent,
@@ -150,6 +162,9 @@ function buildServices({
     space$,
     http,
   };
+=======
+  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$, http };
+>>>>>>> 9.4
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -167,7 +182,10 @@ function renderController(services: ReturnType<typeof buildServices>['services']
 describe('AgentBuilderAnnouncementModalController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+<<<<<<< HEAD
     localStorage.clear();
+=======
+>>>>>>> 9.4
   });
 
   it('does not render the modal when hideAnnouncements is true', async () => {
@@ -299,9 +317,15 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
+<<<<<<< HEAD
   it('calls partialUpdate, reports OptOut telemetry, sets Classic experience, shows success toast, and hides the modal on revert', async () => {
     const user = userEvent.setup();
     const { services, reportEvent, addSuccess, partialUpdate } = buildServices({
+=======
+  it('calls partialUpdate, reports OptOut telemetry, navigates to GenAI settings, and hides the modal on revert', async () => {
+    const user = userEvent.setup();
+    const { services, reportEvent, navigateToApp, partialUpdate } = buildServices({
+>>>>>>> 9.4
       observabilityConversationCount: 1,
     });
     renderController(services);
@@ -324,6 +348,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
       announcement_variant: '1b',
       had_prior_ai_assistant_usage: true,
     });
+<<<<<<< HEAD
     expect(services.settings.client.set).toHaveBeenCalledWith(
       AI_CHAT_EXPERIENCE_TYPE,
       AIChatExperience.Classic
@@ -331,6 +356,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Reverted to AI Assistant' })
     );
+=======
+    expect(navigateToApp).toHaveBeenCalledWith('management', { path: '/ai/genAiSettings' });
+>>>>>>> 9.4
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
   });
 
@@ -351,6 +379,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.getByTestId('agentBuilderAnnouncementModal-2a')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
   });
+<<<<<<< HEAD
 
   it('does not show the modal on remount when dismissed before a slow profile update completes', async () => {
     // Simulate a slow profile update (e.g. high-latency proxy environment) that hasn't
@@ -385,4 +414,6 @@ describe('AgentBuilderAnnouncementModalController', () => {
     // Let the pending update resolve to avoid unhandled promise warnings.
     resolvePartialUpdate();
   });
+=======
+>>>>>>> 9.4
 });

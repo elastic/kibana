@@ -14,12 +14,19 @@ import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+<<<<<<< HEAD
 
+=======
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+>>>>>>> 9.4
 import { getRouteConfig } from '../get_route_config';
 import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
+<<<<<<< HEAD
 import { logRequest } from '../log_request';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+=======
+>>>>>>> 9.4
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -32,6 +39,7 @@ export function registerDeleteRoute(
     summary: `Delete a dashboard`,
     ...routeConfig,
     description: 'Permanently deletes a dashboard by ID.',
+<<<<<<< HEAD
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -39,6 +47,8 @@ export function registerDeleteRoute(
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
     return getDashboardStateSchema(false);
+=======
+>>>>>>> 9.4
   });
 
   deleteRoute.addVersion(

@@ -568,7 +568,11 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render both input panels with their respective titles', async () => {
+<<<<<<< HEAD
     const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
+=======
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
+>>>>>>> 9.4
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -590,7 +594,11 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render two separate input panels with independent stream toggles, not mixed', async () => {
+<<<<<<< HEAD
     const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
+=======
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, load);
+>>>>>>> 9.4
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}

@@ -9,8 +9,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { firstValueFrom, take } from 'rxjs';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 
+<<<<<<< HEAD
 const ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY = 'kibana.agentBuilderAnnouncementModalSeen';
 
+=======
+>>>>>>> 9.4
 function parseSeenMap(json: string | undefined): Record<string, boolean> {
   if (!json) {
     return {};
@@ -37,6 +40,7 @@ function legacyMapHasAnyDismissed(map: Record<string, boolean>): boolean {
 export async function getAnnouncementModalSeen(
   userProfile: UserProfileServiceStart
 ): Promise<boolean> {
+<<<<<<< HEAD
   // localStorage fallback for environments where user profile updates are unavailable (e.g. reverse proxy auth)
   try {
     if (localStorage.getItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY) === 'true') {
@@ -46,6 +50,8 @@ export async function getAnnouncementModalSeen(
     // ignore storage access errors
   }
 
+=======
+>>>>>>> 9.4
   const enabled = await firstValueFrom(userProfile.getEnabled$().pipe(take(1)));
   if (!enabled) {
     return true;
@@ -70,12 +76,17 @@ export async function getAnnouncementModalSeen(
 
 /**
  * Persists global dismissal in user profile data.
+<<<<<<< HEAD
  * Also writes to localStorage immediately so the modal does not reappear on fast
  * navigation before the async profile update completes.
+=======
+ * No-ops when user profiles are disabled.
+>>>>>>> 9.4
  */
 export async function setAnnouncementModalSeen(
   userProfile: UserProfileServiceStart
 ): Promise<void> {
+<<<<<<< HEAD
   try {
     if (localStorage.getItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY) === 'true') {
       return;
@@ -86,6 +97,8 @@ export async function setAnnouncementModalSeen(
   } catch {
     // ignore storage access errors
   }
+=======
+>>>>>>> 9.4
   const enabled = await firstValueFrom(userProfile.getEnabled$().pipe(take(1)));
   if (!enabled) {
     return;
@@ -107,7 +120,11 @@ export async function setAnnouncementModalSeen(
       },
     });
   } catch {
+<<<<<<< HEAD
     // localStorage was already written above; nothing more to do.
+=======
+    // No browser fallback; UI still hides via local isDismissed on the controller.
+>>>>>>> 9.4
   }
 }
 

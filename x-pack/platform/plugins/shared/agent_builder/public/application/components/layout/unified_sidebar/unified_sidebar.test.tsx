@@ -29,10 +29,13 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 jest.mock('../../../hooks/use_last_agent_id', () => ({
   useLastAgentId: () => 'test-agent',
   getLastAgentId: () => 'test-agent',
+<<<<<<< HEAD
 }));
 
 jest.mock('../../../context/active_space_context', () => ({
   useActiveSpaceId: () => 'default',
+=======
+>>>>>>> 9.4
 }));
 
 jest.mock('../../../hooks/use_conversation_list', () => ({

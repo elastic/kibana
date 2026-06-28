@@ -30,9 +30,12 @@ import { CopyPacksResponse } from './copy_pack.gen';
 
 export const OsqueryCopyPacksRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The ID of the pack to copy.
      */
+=======
+>>>>>>> 9.4
     id: PackId,
   })
 );
@@ -51,9 +54,12 @@ export type OsqueryCreatePacksResponse = z.infer<typeof OsqueryCreatePacksRespon
 
 export const OsqueryDeletePacksRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The pack ID.
      */
+=======
+>>>>>>> 9.4
     id: PackId,
   })
 );
@@ -64,6 +70,7 @@ export const OsqueryDeletePacksResponse = lazySchema(() => z.object({}));
 export type OsqueryDeletePacksResponse = z.infer<typeof OsqueryDeletePacksResponse>;
 export const OsqueryFindPacksRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The page number to return.
      */
@@ -79,6 +86,11 @@ export const OsqueryFindPacksRequestQuery = lazySchema(() =>
     /**
      * The sort order.
      */
+=======
+    page: PageOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional(),
+    sort: SortOrUndefined.optional(),
+>>>>>>> 9.4
     sortOrder: SortOrderOrUndefined.optional(),
   })
 );
@@ -90,9 +102,12 @@ export type OsqueryFindPacksResponse = z.infer<typeof OsqueryFindPacksResponse>;
 
 export const OsqueryGetPacksDetailsRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The pack ID.
      */
+=======
+>>>>>>> 9.4
     id: PackId,
   })
 );
@@ -108,9 +123,12 @@ export type OsqueryGetPacksDetailsResponse = z.infer<typeof OsqueryGetPacksDetai
 
 export const OsqueryUpdatePacksRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The pack ID.
      */
+=======
+>>>>>>> 9.4
     id: PackId,
   })
 );

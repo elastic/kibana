@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+=======
+>>>>>>> 9.4
 import {
   classifySkill,
   normalizePluginIdForTelemetry,
   normalizeSkillIdForTelemetry,
+<<<<<<< HEAD
   normalizeToolIdForTelemetry,
 } from './utils';
 
@@ -47,6 +51,10 @@ describe('normalizeToolIdForTelemetry', () => {
   });
 });
 
+=======
+} from './utils';
+
+>>>>>>> 9.4
 describe('normalizePluginIdForTelemetry', () => {
   it('returns undefined when no plugin id is provided', () => {
     expect(normalizePluginIdForTelemetry()).toBeUndefined();

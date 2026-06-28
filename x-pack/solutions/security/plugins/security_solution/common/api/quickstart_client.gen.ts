@@ -644,9 +644,9 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
     this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
     return this.kbnClient
       .request<ApplyEntityEngineDataviewIndicesResponse>({
-        path: '/api/entity_store/engines/apply_dataview_indices',
+        path: '/internal/entity_store/engines/apply_dataview_indices',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -678,6 +678,28 @@ is added to its existing source labels instead.
     */
   async assignWatchlistEntities(props: AssignWatchlistEntitiesProps) {
     this.log.info(`${new Date().toISOString()} Calling API AssignWatchlistEntities`);
+<<<<<<< HEAD
+=======
+    return this.kbnClient
+      .request<AssignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/assign',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
+   */
+  async bootstrapPrebuiltRules() {
+    this.log.info(`${new Date().toISOString()} Calling API BootstrapPrebuiltRules`);
+>>>>>>> 9.4
     return this.kbnClient
       .request<AssignWatchlistEntitiesResponse>({
         path: replaceParams(
@@ -1198,9 +1220,9 @@ Delete the asset criticality record for a specific entity.
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngine`);
     return this.kbnClient
       .request<DeleteEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        path: replaceParams('/internal/entity_store/engines/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
 
@@ -1212,9 +1234,9 @@ Delete the asset criticality record for a specific entity.
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
     return this.kbnClient
       .request<DeleteEntityEnginesResponse>({
-        path: '/api/entity_store/engines',
+        path: '/internal/entity_store/engines',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
 
@@ -1336,9 +1358,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
     this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
     return this.kbnClient
       .request<DeleteSingleEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        path: replaceParams('/internal/entity_store/entities/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'DELETE',
         body: props.body,
@@ -2068,9 +2090,9 @@ finishes and then call this operation once.
     this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
     return this.kbnClient
       .request<GetEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        path: replaceParams('/internal/entity_store/engines/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
       })
@@ -2095,9 +2117,9 @@ finishes and then call this operation once.
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
       .request<GetEntityStoreStatusResponse>({
-        path: '/api/entity_store/status',
+        path: '/internal/entity_store/status',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -2503,9 +2525,9 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
     return this.kbnClient
       .request<InitEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+        path: replaceParams('/internal/entity_store/engines/{entityType}/init', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -2519,9 +2541,9 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
     return this.kbnClient
       .request<InitEntityStoreResponse>({
-        path: '/api/entity_store/enable',
+        path: '/internal/entity_store/enable',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -2693,9 +2715,9 @@ Each row will match up to 10,000 entities.
     this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
     return this.kbnClient
       .request<ListEntitiesResponse>({
-        path: '/api/entity_store/entities/list',
+        path: '/internal/entity_store/entities/list',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -2710,9 +2732,9 @@ Each row will match up to 10,000 entities.
     this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
     return this.kbnClient
       .request<ListEntityEnginesResponse>({
-        path: '/api/entity_store/engines',
+        path: '/internal/entity_store/engines',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
       })
@@ -3516,9 +3538,9 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
       .request<StartEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+        path: replaceParams('/internal/entity_store/engines/{entityType}/start', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -3565,9 +3587,9 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
     return this.kbnClient
       .request<StopEntityEngineResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+        path: replaceParams('/internal/entity_store/engines/{entityType}/stop', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
       })
@@ -3880,9 +3902,9 @@ The creation is asynchronous. The time for a document to be present in the  fina
     this.log.info(`${new Date().toISOString()} Calling API UpsertEntitiesBulk`);
     return this.kbnClient
       .request({
-        path: '/api/entity_store/entities/bulk',
+        path: '/internal/entity_store/entities/bulk',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
         body: props.body,
@@ -3901,9 +3923,9 @@ If the specified entity already exists, it is updated with the provided values. 
     this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
     return this.kbnClient
       .request<UpsertEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        path: replaceParams('/internal/entity_store/entities/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
         body: props.body,

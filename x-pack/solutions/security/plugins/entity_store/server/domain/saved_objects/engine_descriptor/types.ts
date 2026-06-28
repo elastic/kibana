@@ -217,6 +217,7 @@ const version4: SavedObjectsFullModelVersion = {
     forwardCompatibility: engineDescriptorSchemaV4.extends({}, { unknowns: 'ignore' }),
   },
 };
+<<<<<<< HEAD
 
 const logExtractionRuntimeStateSchemaV5 = schema.object({
   paginationTimestamp: schema.nullable(schema.string()),
@@ -317,12 +318,18 @@ const version6: SavedObjectsFullModelVersion = {
     forwardCompatibility: engineDescriptorSchemaV6.extends({}, { unknowns: 'ignore' }),
   },
 };
+=======
+>>>>>>> 9.4
 
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
+<<<<<<< HEAD
   modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
+=======
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
+>>>>>>> 9.4
   hiddenFromHttpApis: true,
 };

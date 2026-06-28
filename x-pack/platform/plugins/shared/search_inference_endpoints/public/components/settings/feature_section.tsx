@@ -36,7 +36,10 @@ interface FeatureSectionProps {
   features: FeatureSettingItem[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+<<<<<<< HEAD
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
+=======
+>>>>>>> 9.4
   isTechPreview?: boolean;
   isBeta?: boolean;
   globalDefaultId: string | undefined;
@@ -49,7 +52,10 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   features,
   onEndpointsChange,
   invalidEndpointIds,
+<<<<<<< HEAD
   deprecatedEndpointsMap,
+=======
+>>>>>>> 9.4
   isTechPreview = false,
   isBeta = false,
   globalDefaultId,
@@ -102,6 +108,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
           </EuiText>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="xl">
+<<<<<<< HEAD
             {features.map(
               ({
                 endpointIds,
@@ -131,6 +138,19 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                 </EuiFlexItem>
               )
             )}
+=======
+            {features.map(({ endpointIds, feature }) => (
+              <EuiFlexItem key={feature.featureId} grow={false}>
+                <SubFeatureCard
+                  featureId={feature.featureId}
+                  feature={feature}
+                  endpointIds={endpointIds}
+                  onEndpointsChange={onEndpointsChange}
+                  invalidEndpointIds={invalidEndpointIds}
+                />
+              </EuiFlexItem>
+            ))}
+>>>>>>> 9.4
           </EuiFlexGroup>
         )}
       </EuiPanel>

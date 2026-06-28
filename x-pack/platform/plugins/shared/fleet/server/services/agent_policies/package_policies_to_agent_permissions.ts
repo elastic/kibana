@@ -266,12 +266,19 @@ export function storedPackagePoliciesToAgentPermissions(
                   const datasetIsPrefix = registryDs?.dataset_is_prefix;
 
                   const ds: DataStreamMeta = {
+<<<<<<< HEAD
                     type: effectiveStreamType,
                     dataset: applyOtelDatasetSuffixIfNeeded(rawDataset, {
                       isOtelInput,
                       dynamicDataset: stream.data_stream.elasticsearch?.dynamic_dataset,
                       datasetIsPrefix,
                     }),
+=======
+                    type: stream.data_stream.type,
+                    dataset: isOtelInput
+                      ? getEffectiveOtelStreamDataset(stream)
+                      : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+>>>>>>> 9.4
                   };
 
                   if (stream.data_stream.elasticsearch) {
@@ -294,11 +301,15 @@ export function storedPackagePoliciesToAgentPermissions(
                     );
                     dataStreams_.push({
                       type: 'logs',
+<<<<<<< HEAD
                       dataset: applyOtelDatasetSuffixIfNeeded(rawDataset, {
                         isOtelInput: true,
                         dynamicDataset: spanEventElasticsearch?.dynamic_dataset,
                         datasetIsPrefix,
                       }),
+=======
+                      dataset: getEffectiveOtelStreamDataset(stream),
+>>>>>>> 9.4
                       ...(spanEventElasticsearch ? { elasticsearch: spanEventElasticsearch } : {}),
                     });
 

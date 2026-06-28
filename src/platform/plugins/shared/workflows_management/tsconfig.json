@@ -97,6 +97,7 @@
     "@kbn/share-plugin",
     "@kbn/core-security-server",
     "@kbn/logging",
+<<<<<<< HEAD
     "@kbn/management-settings-ids",
     "@kbn/agent-context-layer-plugin",
     "@kbn/std",
@@ -115,6 +116,15 @@
     "@kbn/datemath",
     "@kbn/controls-plugin",
     "@kbn/controls-schemas"
+=======
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/management-settings-ids",
+    "@kbn/std",
+    "@kbn/use-observable",
+    "@kbn/cloud-plugin",
+    "@kbn/std",
+    "@kbn/kbn-client"
+>>>>>>> 9.4
   ],
   "exclude": ["target/**/*"]
 }

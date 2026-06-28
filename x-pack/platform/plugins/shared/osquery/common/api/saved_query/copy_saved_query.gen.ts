@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+<<<<<<< HEAD
 import {
   SavedQueryId,
   SavedQueryDescriptionOrUndefined,
@@ -51,4 +52,7 @@ export const CopySavedQueryResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const CopySavedQueryResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type CopySavedQueryResponse = z.infer<typeof CopySavedQueryResponse>;

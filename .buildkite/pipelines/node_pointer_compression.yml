@@ -61,8 +61,14 @@ steps:
     key: build_scout_tests
     timeout_in_minutes: 15
     env:
+<<<<<<< HEAD
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+=======
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+>>>>>>> 9.4
     retry:
       automatic:
         - exit_status: '*'

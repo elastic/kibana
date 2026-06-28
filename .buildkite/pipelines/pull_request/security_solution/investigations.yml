@@ -17,6 +17,7 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+<<<<<<< HEAD
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
@@ -37,3 +38,5 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+=======
+>>>>>>> 9.4

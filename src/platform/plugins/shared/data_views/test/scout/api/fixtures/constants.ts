@@ -53,6 +53,7 @@ export const FIELDS_ROUTE_PATH = 'internal/data_views/fields';
 export const RESOLVE_INDEX_PATH = 'internal/index-pattern-management/resolve_index';
 export const SWAP_REFERENCES_PATH = `${SERVICE_PATH}/swap_references`;
 export const SWAP_REFERENCES_PREVIEW_PATH = `${SERVICE_PATH}/swap_references/_preview`;
+<<<<<<< HEAD
 
 export const CAPABILITIES_API_PATH = '/api/core/capabilities';
 
@@ -94,3 +95,5 @@ export const API_CUSTOM_SPACE_INDEX_PATTERNS_DISABLED = {
   name: 'api_data_views_index_patterns_disabled',
   disabledFeatures: ['indexPatterns'],
 };
+=======
+>>>>>>> 9.4

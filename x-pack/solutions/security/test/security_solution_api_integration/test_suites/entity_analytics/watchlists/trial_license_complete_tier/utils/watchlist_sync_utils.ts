@@ -22,18 +22,36 @@ export const WatchlistSyncUtils = (
       index: indexName,
       mappings: {
         properties: {
+<<<<<<< HEAD
           '@timestamp': { type: 'date' },
           user: { properties: { name: { type: 'keyword' } } },
           department: { type: 'keyword' },
+=======
+          '@timestamp': {
+            type: 'date',
+          },
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+            },
+          },
+>>>>>>> 9.4
         },
       },
     });
 
+<<<<<<< HEAD
   const addUsersToSourceIndex = async (users: string[], indexName: string, timestamp?: string) => {
+=======
+  const addUsersToSourceIndex = async (users: string[], timestamp?: string) => {
+>>>>>>> 9.4
     const ops = users.flatMap((name) => [
       { index: {} },
       { '@timestamp': timestamp ?? new Date().toISOString(), user: { name } },
     ]);
+<<<<<<< HEAD
     await es.bulk({ index: indexName, body: ops, refresh: true });
   };
 
@@ -45,6 +63,12 @@ export const WatchlistSyncUtils = (
   const deleteSourceIndex = async (indexName: string) => {
     await es.indices.delete({ index: indexName }, { ignore: [404] }).catch((err) => {
       log.error(`Error deleting index ${indexName}: ${err}`);
+=======
+    await es.bulk({
+      index: sourceIndexName,
+      body: ops,
+      refresh: true,
+>>>>>>> 9.4
     });
   };
 
@@ -54,6 +78,7 @@ export const WatchlistSyncUtils = (
     }
   };
 
+<<<<<<< HEAD
   const clearSourceIndex = async (indexName: string) => {
     await es
       .deleteByQuery(
@@ -70,6 +95,11 @@ export const WatchlistSyncUtils = (
     sourceIndexPattern: string,
     range?: { start: string; end: string },
     queryRule?: string
+=======
+  const createWatchlistAndEntitySource = async (
+    watchlistName: string,
+    range?: { start: string; end: string }
+>>>>>>> 9.4
   ) => {
     const { body: watchlist } = await entityAnalyticsApi.createWatchlist({
       body: {
@@ -90,7 +120,10 @@ export const WatchlistSyncUtils = (
         identifierField: 'user.name',
         enabled: true,
         range: range ?? { start: 'now-10d', end: 'now' },
+<<<<<<< HEAD
         ...(queryRule ? { queryRule } : {}),
+=======
+>>>>>>> 9.4
       },
     });
 

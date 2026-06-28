@@ -43,6 +43,12 @@ export const SuspendProcessRouteRequestBody = lazySchema(() =>
 );
 export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
 
+<<<<<<< HEAD
+=======
+export const SuspendProcessRouteResponse = lazySchema(() => z.object({}));
+export type SuspendProcessRouteResponse = z.infer<typeof SuspendProcessRouteResponse>;
+
+>>>>>>> 9.4
 export const EndpointSuspendProcessActionRequestBody = lazySchema(
   () => SuspendProcessRouteRequestBody
 );
@@ -53,9 +59,13 @@ export type EndpointSuspendProcessActionRequestBodyInput = z.input<
   typeof EndpointSuspendProcessActionRequestBody
 >;
 
+<<<<<<< HEAD
 export const EndpointSuspendProcessActionResponse = lazySchema(
   () => ResponseActionCreateSuccessResponse
 );
+=======
+export const EndpointSuspendProcessActionResponse = lazySchema(() => SuspendProcessRouteResponse);
+>>>>>>> 9.4
 export type EndpointSuspendProcessActionResponse = z.infer<
   typeof EndpointSuspendProcessActionResponse
 >;

@@ -93,6 +93,7 @@ describe('getInputsWithIds', () => {
     expect(inputs[0].streams[1].id).toBe('existing-input-id-2');
   });
 
+<<<<<<< HEAD
   it('should force endpoint input id to the package policy id when already present', () => {
     const inputs = getInputsWithIds(
       {
@@ -194,6 +195,8 @@ describe('getInputsWithIds', () => {
     expect(inputs[0].id).toBe('default');
   });
 
+=======
+>>>>>>> 9.4
   it('should use name instead of type when generating IDs for inputs with name', () => {
     const inputs = getInputsWithIds(
       {

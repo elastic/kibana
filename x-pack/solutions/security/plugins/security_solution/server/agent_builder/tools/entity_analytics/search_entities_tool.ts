@@ -748,7 +748,11 @@ export const searchEntitiesTool = (
           index: entitySnapshotIndex,
         });
         const query = buildQuery(
+<<<<<<< HEAD
           normalized,
+=======
+          params,
+>>>>>>> 9.4
           entityIndex,
           snapshotIndexExists ? entitySnapshotIndex : undefined
         );

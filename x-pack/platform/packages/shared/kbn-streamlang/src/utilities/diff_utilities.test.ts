@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type {
   StreamlangDSL,
   StreamlangDSLWithUpdatedAt,
   StreamlangStep,
 } from '../../types/streamlang';
 import { isConditionBlock, streamlangDSLSchemaStrict } from '../../types/streamlang';
+=======
+import type { StreamlangDSL, StreamlangDSLWithUpdatedAt } from '../../types/streamlang';
+import { streamlangDSLSchemaStrict } from '../../types/streamlang';
+>>>>>>> 9.4
 import {
   addDeterministicCustomIdentifiers,
   addDeterministicCustomIdentifiersFromIngestProcessing,
@@ -83,6 +88,7 @@ describe('addDeterministicCustomIdentifiers', () => {
     expect(result).not.toHaveProperty('updated_at');
     expect(streamlangDSLSchemaStrict.safeParse(result).success).toBe(true);
   });
+<<<<<<< HEAD
 });
 
 describe('stripCustomIdentifiers', () => {
@@ -208,6 +214,8 @@ describe('addDeterministicCustomIdentifiers - else branches', () => {
       );
     }
   });
+=======
+>>>>>>> 9.4
 });
 
 describe('checkAdditiveChanges', () => {

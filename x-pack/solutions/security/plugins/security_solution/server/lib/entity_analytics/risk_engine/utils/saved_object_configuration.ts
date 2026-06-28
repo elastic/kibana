@@ -164,7 +164,11 @@ const adoptLegacyConfigurationSavedObject = async ({
   const adoptedConfiguration = await createConfigurationSavedObject({
     savedObjectsClient,
     namespace,
+<<<<<<< HEAD
     attributes: { ...chosenConfiguration.attributes, pageSize: DEFAULT_RISK_SCORE_PAGE_SIZE },
+=======
+    attributes: chosenConfiguration.attributes,
+>>>>>>> 9.4
   });
 
   for (const legacy of allLegacyConfigurations) {

@@ -51,6 +51,10 @@ const defaultActionsConfig: ActionsConfig = {
     },
     ears: { enabled: false, enableExperimental: false },
   },
+<<<<<<< HEAD
+=======
+  ears: { enabled: false },
+>>>>>>> 9.4
 };
 
 describe('ensureUriAllowed', () => {
@@ -911,10 +915,14 @@ describe('getEarsUrl()', () => {
   test('returns the configured URL when auth.ears.url is set', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
+<<<<<<< HEAD
       auth: {
         ...defaultActionsConfig.auth,
         ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
       },
+=======
+      ears: { enabled: false, url: 'https://ears.example.com' },
+>>>>>>> 9.4
     });
     expect(acu.getEarsUrl()).toBe('https://ears.example.com');
   });

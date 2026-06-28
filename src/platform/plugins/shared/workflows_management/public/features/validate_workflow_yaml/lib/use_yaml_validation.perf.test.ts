@@ -336,8 +336,12 @@ beforeEach(() => {
 });
 
 for (const suite of SUITES) {
+<<<<<<< HEAD
   // Regression guard for validation latency; per-step budgets fix #261389 CI flake.
   // Failing: See https://github.com/elastic/kibana/issues/261389
+=======
+  // FLAKY: https://github.com/elastic/kibana/issues/261389
+>>>>>>> 9.4
   describe.skip(`YAML validation performance: ${suite.name}`, () => {
     let yamlContent: string;
 

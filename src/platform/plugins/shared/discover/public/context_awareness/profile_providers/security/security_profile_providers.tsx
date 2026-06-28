@@ -38,6 +38,7 @@ export const createSecurityDocumentProfileProviders = (
   const enhancedProvider = extendProfileProvider(baseProvider, {
     profileId: SECURITY_PROFILE_ID.enhanced_document,
     profile: {
+<<<<<<< HEAD
       getDocViewer:
         (prev, { toolkit }) =>
         (params) => {
@@ -76,6 +77,36 @@ export const createSecurityDocumentProfileProviders = (
               />
             );
           }
+=======
+      getDocViewer: (prev) => (params) => {
+        const prevDocViewer = prev(params);
+        const isAlert = isAlertDocument(params.record);
+        const isEvent = isEventDocument(params.record);
+
+        return {
+          ...prevDocViewer,
+          renderHeader:
+            isAlert || isEvent
+              ? (props) => (
+                  <EnhancedAlertFlyoutHeaderLazy
+                    {...props}
+                    providerServices={providerServices}
+                    fallbackRenderHeader={prevDocViewer.renderHeader}
+                  />
+                )
+              : prevDocViewer.renderHeader,
+          docViewsRegistry: (registry) => {
+            if (isAlert || isEvent) {
+              registry.add({
+                id: 'doc_view_alerts_overview',
+                title: i18n.overviewTabTitle(isAlert),
+                order: 0,
+                render: (props) => (
+                  <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
+                ),
+              });
+            }
+>>>>>>> 9.4
 
           let renderHeader = prevDocViewer.renderHeader;
           if (isIOC) {

@@ -20,6 +20,10 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
+<<<<<<< HEAD
+=======
+import { apmRouter } from '../../components/routing/apm_route_config';
+>>>>>>> 9.4
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
@@ -162,16 +166,23 @@ export const mockCore = {
 };
 
 /** Satisfies `useKibana` consumers (e.g. service map) that read `services.telemetry`. */
+<<<<<<< HEAD
 export const storybookTelemetry: ITelemetryClient = {
+=======
+const storybookTelemetry: ITelemetryClient = {
+>>>>>>> 9.4
   reportSearchQuerySubmitted: () => {},
   reportSloOverviewFlyoutViewed: () => {},
   reportSloOverviewFlyoutSearchQueried: () => {},
   reportSloOverviewFlyoutStatusFiltered: () => {},
   reportSloInfoShown: () => {},
   reportServiceMapDagreLayoutFallback: () => {},
+<<<<<<< HEAD
   reportServiceMapAddedToDashboard: () => {},
   reportMetricsCalloutDateRangeSelected: () => {},
   reportMetricsCalloutLoaded: () => {},
+=======
+>>>>>>> 9.4
 };
 
 const mockUnifiedSearchBar = {
@@ -217,6 +228,7 @@ export function MockApmPluginStorybook({
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
   const KibanaReactContext = createKibanaReactContext(
+<<<<<<< HEAD
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
       securityService: {
@@ -236,6 +248,9 @@ export function MockApmPluginStorybook({
         actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
       },
     }) as unknown as Partial<CoreStart>
+=======
+    merge({}, contextMock.core, { telemetry: storybookTelemetry }) as unknown as Partial<CoreStart>
+>>>>>>> 9.4
   );
 
   const history = createMemoryHistory({

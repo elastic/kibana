@@ -44,6 +44,7 @@ export const UpdateSavedQueryRequestBody = lazySchema(() =>
 );
 export type UpdateSavedQueryRequestBody = z.infer<typeof UpdateSavedQueryRequestBody>;
 
+<<<<<<< HEAD
 /**
  * The response for updating a saved query.
  */
@@ -74,4 +75,7 @@ export const UpdateSavedQueryResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const UpdateSavedQueryResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type UpdateSavedQueryResponse = z.infer<typeof UpdateSavedQueryResponse>;

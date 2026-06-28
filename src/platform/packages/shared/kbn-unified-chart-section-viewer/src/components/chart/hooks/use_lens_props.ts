@@ -12,11 +12,17 @@ import {
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+<<<<<<< HEAD
   type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
 import type React from 'react';
+=======
+  type LensSeriesLayer,
+  type LensYBoundsConfig,
+} from '@kbn/lens-embeddable-utils';
+>>>>>>> 9.4
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';

@@ -132,6 +132,7 @@ export function useBrowseIntegrationHook({
     urlFilters.showContent,
   ]);
 
+<<<<<<< HEAD
   // Apply category filter on top of non-category filters.
   // When multiple effective categories are active, show cards matching ANY of them (OR logic).
   const filteredCards = useMemo(() => {
@@ -143,6 +144,23 @@ export function useBrowseIntegrationHook({
     }
     return nonCategoryFilteredCards;
   }, [nonCategoryFilteredCards, effectiveCategories, selectedSubCategory]);
+=======
+  // Apply category filter on top of non-category filters
+  const filteredCards = useMemo(() => {
+    if (selectedCategory || selectedSubCategory) {
+      return nonCategoryFilteredCards.filter((c) => {
+        if (selectedCategory === '') {
+          return true;
+        }
+        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
+
+        return c.categories.includes(selectedSubCategory);
+      });
+    }
+
+    return nonCategoryFilteredCards;
+  }, [nonCategoryFilteredCards, selectedCategory, selectedSubCategory]);
+>>>>>>> 9.4
 
   // Recompute category counts based on non-category filtered cards so
   // sidebar counts reflect active filters (e.g. agentless, search, signal).
@@ -163,10 +181,15 @@ export function useBrowseIntegrationHook({
   }, [filteredAllCategories]);
 
   const availableSubCategories = useMemo(() => {
+<<<<<<< HEAD
     return filteredAllCategories?.filter(
       (c) => c.parent_id !== undefined && effectiveCategories.includes(c.parent_id)
     );
   }, [filteredAllCategories, effectiveCategories]);
+=======
+    return filteredAllCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [filteredAllCategories, selectedCategory]);
+>>>>>>> 9.4
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
@@ -180,7 +203,10 @@ export function useBrowseIntegrationHook({
   return {
     initialSelectedCategory,
     selectedCategory,
+<<<<<<< HEAD
     selectedCategories: effectiveCategories,
+=======
+>>>>>>> 9.4
     allCategories: filteredAllCategories,
     mainCategories: filteredMainCategories,
     isLoading,

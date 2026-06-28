@@ -13,6 +13,10 @@ interface GetInstallPkgRouteOptionsParams {
   agentPolicyId?: string;
   pkgkey: string;
   isAgentlessIntegration?: boolean;
+<<<<<<< HEAD
+=======
+  isAgentlessByDefault?: boolean;
+>>>>>>> 9.4
   prerelease?: boolean;
 }
 
@@ -31,9 +35,22 @@ export const getInstallPkgRouteOptions = ({
   agentPolicyId,
   pkgkey,
   isAgentlessIntegration,
+<<<<<<< HEAD
   prerelease,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
+=======
+  isAgentlessByDefault,
+  prerelease,
+}: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
+  const integrationOpts: { integration?: string } = integration ? { integration } : {};
+  const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
+  // Multi-page layout leads with "Install Elastic Agent" — not applicable when
+  // agentless is the effective default for this integration (agentless-only or
+  // agentless marked as default).
+  const useMultiPageLayout =
+    isCloud && isFirstTimeAgentUser && !packageExemptFromStepsLayout && !isAgentlessByDefault;
+>>>>>>> 9.4
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     prerelease: prerelease ?? false,

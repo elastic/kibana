@@ -17,7 +17,11 @@ import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RemoteDocumentCallout } from './remote_document_callout';
 
 let mockCloud: unknown;
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/remote_document_callout.test.tsx
 jest.mock('../../../../common/lib/kibana', () => ({
+=======
+jest.mock('../../../common/lib/kibana', () => ({
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/remote_document_callout.test.tsx
   useKibana: () => ({
     services: {
       cloud: mockCloud,

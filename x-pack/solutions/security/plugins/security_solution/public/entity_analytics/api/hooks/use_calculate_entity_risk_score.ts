@@ -25,7 +25,11 @@ export const useCalculateEntityRiskScore = (
   const { addError } = useAppToasts();
   const { data: riskEngineStatus } = useRiskEngineStatus();
   const { calculateEntityRiskScore } = useEntityAnalyticsRoutes();
+<<<<<<< HEAD
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+=======
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+>>>>>>> 9.4
 
   const onError = useCallback(
     (error: unknown) => {

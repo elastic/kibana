@@ -41,6 +41,7 @@ interface EntityStoreUtilsLike {
   installEntityStoreV2: (body?: {
     entityTypes: string[];
     dataViewPattern?: string;
+    maintainerAutoStart?: boolean;
   }) => Promise<unknown>;
   forceUpdateEntityViaCrud: (params: {
     entityType: EntityType;
@@ -355,6 +356,7 @@ export const riskScoreMaintainerScenarioFactory = ({
     minRuns?: number;
     timeoutMs?: number;
   } = {}) => {
+<<<<<<< HEAD
     // installEntityStoreV2 stops the maintainer and waits for it to settle
     // after install so tests start from a clean slate.
     await entityStoreUtils.installEntityStoreV2({
@@ -401,6 +403,22 @@ export const riskScoreMaintainerScenarioFactory = ({
         }
       );
     }
+=======
+    await entityStoreUtils.installEntityStoreV2({
+      entityTypes,
+      dataViewPattern,
+      maintainerAutoStart: false,
+    });
+    await routes.stopMaintainer('risk-score');
+
+    if (runMode === 'sync') {
+      await routes.runMaintainerSync('risk-score');
+      return;
+    }
+
+    await routes.startMaintainer('risk-score');
+    await waitForMaintainerRun({ retry, routes, minRuns, timeoutMs });
+>>>>>>> 9.4
   };
 
   const setEntityWatchlists = async ({

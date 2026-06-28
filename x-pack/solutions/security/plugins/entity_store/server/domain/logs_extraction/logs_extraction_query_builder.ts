@@ -24,6 +24,10 @@ import {
 import {
   buildExtractionSourceClause,
   buildLogPageProbeSourceClause,
+<<<<<<< HEAD
+=======
+  buildFieldEvaluations,
+>>>>>>> 9.4
   buildSetFieldsByCondition,
   buildSetFieldsByConditionAssignments,
   type PaginationParams,
@@ -72,8 +76,13 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
   recoveryId?: string;
   pagination?: PaginationParams;
+<<<<<<< HEAD
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+=======
+  logsPageCursorStart?: PaginationParams;
+  logsPageCursorEnd?: PaginationParams;
+>>>>>>> 9.4
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -81,10 +90,17 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
+<<<<<<< HEAD
   logsPageCursorStart?: LogSlicePaginationParams;
 }): string {
   return (
     `${NULLIFY_UNMAPPED_FIELDS_SETTING}\n` +
+=======
+  recoveryId?: string;
+  logsPageCursorStart?: PaginationParams;
+}): string {
+  return (
+>>>>>>> 9.4
     buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
@@ -116,6 +132,10 @@ export function buildLogsExtractionEsqlQuery({
       type,
       fromDateISO,
       toDateISO,
+<<<<<<< HEAD
+=======
+      recoveryId,
+>>>>>>> 9.4
       logsPageCursorStart,
       logsPageCursorEnd,
     })

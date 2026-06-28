@@ -16,6 +16,7 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+<<<<<<< HEAD
 
   - command: .buildkite/scripts/steps/functional/asset_inventory.sh
     label: 'Asset Inventory Cypress Tests on Serverless'
@@ -35,3 +36,5 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+=======
+>>>>>>> 9.4

@@ -1618,6 +1618,19 @@ describe('generateOtelcolConfig', () => {
             statements: [
               'set(attributes["data_stream.type"], "logs")',
               'set(attributes["data_stream.dataset"], "multidataset")',
+<<<<<<< HEAD
+=======
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+>>>>>>> 9.4
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1664,6 +1677,19 @@ describe('generateOtelcolConfig', () => {
             statements: [
               'set(attributes["data_stream.type"], "logs")',
               'set(attributes["data_stream.dataset"], "multidataset")',
+<<<<<<< HEAD
+=======
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+>>>>>>> 9.4
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -2855,6 +2881,7 @@ describe('generateOtelcolConfig', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('remote_elasticsearch output', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
     const remoteOutput: Output = {
@@ -2957,6 +2984,8 @@ describe('generateOtelcolConfig', () => {
     });
   });
 
+=======
+>>>>>>> 9.4
   describe('otel_disable_beatsauth toggle', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
 
@@ -3035,6 +3064,7 @@ describe('generateOtelcolConfig', () => {
       expect(result.exporters?.['elasticsearch/default']).toHaveProperty('auth');
     });
   });
+<<<<<<< HEAD
 
   it('should fall back to default output when packageOutputs is empty', () => {
     const inputA: FullAgentPolicyInput = {
@@ -3495,4 +3525,6 @@ describe('generateOtelcolConfig', () => {
       },
     });
   });
+=======
+>>>>>>> 9.4
 });

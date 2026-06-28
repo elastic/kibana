@@ -19,7 +19,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'disable:entityAnalyticsEntityStoreV2',
+<<<<<<< HEAD
           'disable:entityAnalyticsWatchlistEnabled',
+=======
+>>>>>>> 9.4
         ])}`,
         '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
       ],

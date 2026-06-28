@@ -117,6 +117,7 @@ export const PackagePolicyInputsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
+<<<<<<< HEAD
   condition: schema.maybe(
     schema.nullable(
       schema.string({
@@ -127,6 +128,8 @@ export const PackagePolicyInputsSchema = {
       })
     )
   ),
+=======
+>>>>>>> 9.4
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -584,6 +587,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
             deprecated: true,
           },
         })
+<<<<<<< HEAD
       ),
       policy_ids: schema.maybe(
         schema.arrayOf(schema.string(), {
@@ -626,6 +630,87 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
     },
     { meta: { id: 'simplified_create_package_policy_request' } }
   );
+=======
+      )
+    ),
+  });
+
+export const UpdatePackagePolicyRequestBodySchema = schema.object({
+  ...CreatePackagePolicyProps,
+  name: schema.maybe(schema.string()),
+  inputs: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        ...PackagePolicyInputsSchema,
+        streams: schema.maybe(
+          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
+        ),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+  version: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+});
+
+export const UpdatePackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
+  version: schema.maybe(schema.string()),
+});
+
+export const PackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
+  id: schema.string({
+    meta: {
+      description: 'Package policy unique identifier.',
+    },
+  }),
+  version: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Package policy ES version.',
+      },
+    })
+  ),
+  revision: schema.number({
+    meta: {
+      description: 'Package policy revision.',
+    },
+  }),
+  updated_at: schema.string(),
+  updated_by: schema.string(),
+  created_at: schema.string(),
+  created_by: schema.string(),
+  elasticsearch: schema
+    .maybe(
+      schema.object({
+        privileges: schema.maybe(
+          schema.object({
+            cluster: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          })
+        ),
+      })
+    )
+    .extendsDeep({
+      unknowns: 'allow',
+    }),
+  inputs: schema.arrayOf(
+    schema.object({
+      ...PackagePolicyInputsSchema,
+      compiled_input: schema.maybe(schema.any()),
+    }),
+    { maxSize: 100 }
+  ),
+  secret_references: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+});
+>>>>>>> 9.4
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object(
   {

@@ -92,6 +92,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
+<<<<<<< HEAD
     const {
       streamsClient,
       getKnowledgeIndicatorClient,
@@ -102,17 +103,27 @@ const readStreamSignificantEventsRoute = createServerRoute({
     } = await getScopedClients({
       request,
     });
+=======
+    const { streamsClient, getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+>>>>>>> 9.4
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
+<<<<<<< HEAD
     const alertsSource = await resolveAlertsSource({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
     const kiClient = await getKnowledgeIndicatorClient();
+=======
+    const queryClient = await getQueryClient();
+>>>>>>> 9.4
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -123,7 +134,126 @@ const readStreamSignificantEventsRoute = createServerRoute({
         searchMode,
         alertsSource,
       },
+<<<<<<< HEAD
       { kiClient, scopedClusterClient }
+=======
+      { queryClient, scopedClusterClient }
+    );
+  },
+});
+
+/**
+ * This should be @deprecated and removed since it is no longer used.
+ */
+const generateSignificantEventsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    query: z.object({
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+      from: dateFromString,
+      to: dateFromString,
+      sampleDocsSize: z
+        .number()
+        .optional()
+        .describe(
+          'Number of sample documents to use for generation from the current data of stream'
+        ),
+    }),
+  }),
+  options: {
+    access: 'public',
+    summary: 'Generate significant events',
+    description: 'Generate significant events queries based on the stream data',
+    availability: {
+      since: '9.2.0',
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+  }): Promise<SignificantEventsGenerateResponse> => {
+    const {
+      streamsClient,
+      licensing,
+      inferenceClient,
+      uiSettingsClient,
+      soClient,
+      getFeatureClient,
+      scopedClusterClient,
+    } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
+
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
+
+    // Get connector info for error enrichment
+    const [connector, definition, { significantEventsPromptOverride }, featureClient] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        getFeatureClient(),
+      ]);
+
+    return fromRxjs(
+      generateSignificantEventDefinitions(
+        {
+          definition,
+          connectorId,
+          start: params.query.from.valueOf(),
+          end: params.query.to.valueOf(),
+          systemPrompt: significantEventsPromptOverride,
+        },
+        {
+          inferenceClient,
+          featureClient,
+          logger: logger.get('significant_events'),
+          signal: getRequestAbortSignal(request),
+          esClient: scopedClusterClient.asCurrentUser,
+        }
+      )
+    ).pipe(
+      map(({ queries, tokensUsed, toolUsage }) => {
+        telemetry.trackSignificantEventsQueriesGenerated({
+          count: queries.length,
+          stream_name: definition.name,
+          stream_type: getStreamTypeFromDefinition(definition),
+          input_tokens_used: tokensUsed.prompt,
+          output_tokens_used: tokensUsed.completion,
+          tool_usage: toolUsage,
+        });
+
+        return {
+          type: 'generated_queries' as const,
+          queries,
+          tokensUsed,
+        };
+      }),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
+      })
+>>>>>>> 9.4
     );
   },
 });

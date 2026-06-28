@@ -17,8 +17,13 @@ import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
 } from '@kbn/elastic-assistant-common';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/tools/notes/components/notes_remote_callout.tsx
 import { useKibana } from '../../../../../common/lib/kibana';
 import { EventKind } from '../../../../document/main/constants/event_kinds';
+=======
+import { useKibana } from '../../../common/lib/kibana';
+import { EventKind } from '../../document/constants/event_kinds';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/notes/components/notes_remote_callout.tsx
 
 const ATTACK_DISCOVERY_RULE_TYPES = new Set<string>([
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,

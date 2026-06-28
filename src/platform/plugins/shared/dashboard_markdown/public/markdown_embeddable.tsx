@@ -34,7 +34,11 @@ import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
+<<<<<<< HEAD
 import { hasLibraryItemWithTitle } from './markdown_client/has_library_item_with_title';
+=======
+import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
+>>>>>>> 9.4
 import { markdownClient } from './markdown_client/markdown_client';
 import type { MarkdownSettingsState } from '../server/embeddable/schemas';
 
@@ -127,8 +131,13 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
+<<<<<<< HEAD
           content$.next((nextState as MarkdownByValueState).content);
           settings$.next((nextState as MarkdownByValueState).settings);
+=======
+          content$.next((initialState as MarkdownByValueState).content);
+          settings$.next((initialState as MarkdownByValueState).settings);
+>>>>>>> 9.4
         }
       },
     });

@@ -167,7 +167,10 @@ export function TraceWaterfallContextProvider({
   onShowCriticalPathChange,
   entryTransactionId,
   scrollToContextOnMount,
+<<<<<<< HEAD
   ebt,
+=======
+>>>>>>> 9.4
 }: Props) {
   const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
     useTraceWaterfall({

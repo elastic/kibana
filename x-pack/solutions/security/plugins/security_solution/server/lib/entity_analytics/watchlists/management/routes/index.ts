@@ -10,6 +10,9 @@ export * from './delete';
 export * from './get';
 export * from './list';
 export * from './prebuilt_install';
+<<<<<<< HEAD
 export * from './privileges';
+=======
+>>>>>>> 9.4
 export * from './search_indices';
 export * from './update';

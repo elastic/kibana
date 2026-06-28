@@ -15,7 +15,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
+=======
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
 import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
 import { useDashboardPreviewUnifiedSearch } from './use_dashboard_preview_unified_search';
 import { useRegisterCanvasActionButtons } from './use_register_canvas_action_buttons';
@@ -33,6 +37,12 @@ const dashboardCanvasContentStyles = {
       '& .dashboardViewport': {
         minHeight: 0,
       },
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
+=======
+      '& .embPanel__hoverActions': {
+        display: 'none !important',
+      },
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
       '.controlGroup': {
         flexGrow: `0 !important` as unknown as number,
         padding: `${euiTheme.size.s} !important`,
@@ -55,7 +65,11 @@ export const DashboardCanvasContent = ({
   openSidebarConversation,
   dashboardLocator,
   searchBarComponent: SearchBar,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
   data,
+=======
+  filterManager,
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
   checkSavedDashboardExist,
   canWriteDashboards,
 }: AttachmentRenderProps<DashboardAttachment> & {
@@ -66,7 +80,11 @@ export const DashboardCanvasContent = ({
   dashboardLocator?: DashboardRendererProps['locator'];
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
   data: DataPublicPluginStart;
+=======
+  filterManager: DataPublicPluginStart['query']['filterManager'];
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
 }) => {
@@ -108,7 +126,11 @@ export const DashboardCanvasContent = ({
   const { filters, query, searchBarProps, timeRange } = useDashboardPreviewUnifiedSearch({
     dashboardApi,
     dashboardState,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
     data,
+=======
+    filterManager,
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/dashboard_canvas_content.tsx
   });
 
   const getCreationOptions = useCallback(

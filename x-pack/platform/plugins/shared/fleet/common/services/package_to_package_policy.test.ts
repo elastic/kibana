@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type { NewPackagePolicyInput, PackageInfo, RegistryDataStream } from '../types';
 
 import { DATASET_VAR_NAME } from '../constants';
 
+=======
+import type { NewPackagePolicyInput, PackageInfo } from '../types';
+
+>>>>>>> 9.4
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
   getInputEffectiveName,
+<<<<<<< HEAD
   dataStreamUsesOtelInput,
+=======
+>>>>>>> 9.4
 } from './package_to_package_policy';
 import { AWS_PACKAGE } from './fixtures/aws_package';
 
@@ -162,6 +170,7 @@ describe('Fleet - packageToPackagePolicy', () => {
       });
     });
 
+<<<<<<< HEAD
     it('scopes streams per policy template for input packages with multiple templates sharing an input type', () => {
       const result = packageToPackagePolicyInputs({
         ...mockPackage,
@@ -228,6 +237,8 @@ describe('Fleet - packageToPackagePolicy', () => {
       expect(lambdaVarNames).not.toContain('region');
     });
 
+=======
+>>>>>>> 9.4
     it('does not set name when registry input has no id', () => {
       const result = packageToPackagePolicyInputs({
         ...mockPackage,

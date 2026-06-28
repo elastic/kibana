@@ -138,9 +138,16 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `- NEVER paste full YAML into your response text.\n` +
     `- Render the diff with <render_attachment id="{diffAttachmentId}"/>\n` +
     `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_workflows/server/attachment_types/workflow_yaml_attachment.ts
     `- If a legacy/deprecated step type appears in the existing YAML and you need its schema to fix an error, call \`${workflowTools.getStepDefinitions}\` with the exact \`stepType\` ID or \`includeDeprecated: true\`.\n` +
     `- \`${platformCoreTools.generateWorkflow}\` does not know the user's index schemas. If the user wants to run/save the workflow and it contains an ES query step against a real index, you may call \`${workflowTools.executeStep}\` on that step after generation to verify it returns rows. Do NOT pre-discover index fields before generation.\n` +
     `- The \`if\` step's \`condition\` uses KQL, not Liquid. To check computed values (e.g. array size), use a \`data.set\` step to compute a number, then a KQL comparison like \`steps.set_count.output.count > 0\`.\n\n` +
+=======
+    `- Edit tools auto-validate the result and return a \`validation\` field — no need to call ${workflowTools.validateWorkflow} separately after edits.\n` +
+    `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.setYaml}\n` +
+    `- **ALWAYS call ${workflowTools.getStepDefinitions} to verify the exact step type ID before changing a step's type or inserting a new step.** Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`). Deprecated steps are excluded from discovery by default; use an exact \`stepType\` lookup or \`includeDeprecated: true\` when maintaining legacy workflows.\n` +
+    `- Use ${workflowTools.getExamples} to find working workflow patterns\n\n` +
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/server/agent_builder/attachments/workflow_yaml_attachment.ts
     `## Rendering\n\n` +
     `- The ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is rendered in chat as a YAML code preview with a Save button.\n` +
     `- You can render it with <render_attachment id="{attachmentId}"/> where {attachmentId} is the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment ID.\n` +

@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import React, { memo, useCallback, useMemo } from 'react';
+=======
+import React, { useCallback, useMemo } from 'react';
+>>>>>>> 9.4
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
+<<<<<<< HEAD
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+=======
+>>>>>>> 9.4
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
@@ -88,7 +95,11 @@ export const UserPanel = memo(function UserPanel({
   isPreviewMode = false,
   userName,
   entityId: entityIdProp,
+<<<<<<< HEAD
 }: UserPanelProps) {
+=======
+}: UserPanelProps) => {
+>>>>>>> 9.4
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -233,11 +244,18 @@ export const UserPanel = memo(function UserPanel({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
+<<<<<<< HEAD
   const onCriticalitySave =
     !!assetCriticalityPrivileges.data?.has_write_permissions && entityFromStoreResult.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
           updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
       : undefined;
+=======
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) =>
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+    : undefined;
+>>>>>>> 9.4
 
   const defaultTab = useMemo(() => {
     if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;

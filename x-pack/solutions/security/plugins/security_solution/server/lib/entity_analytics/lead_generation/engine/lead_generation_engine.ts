@@ -16,6 +16,10 @@ import type {
   ObservationModule,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
+<<<<<<< HEAD
+=======
+import { entityToKey } from '../observation_modules/utils';
+>>>>>>> 9.4
 import { llmSynthesizeBatch } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {

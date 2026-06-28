@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
+  version: '1'
   title: Entity Store - Update or Create Entity
 paths:
-  /api/entity_store/entities/{entityType}:
+  /internal/entity_store/entities/{entityType}:
     put:
       x-labels: [ess, serverless]
       x-codegen-enabled: true

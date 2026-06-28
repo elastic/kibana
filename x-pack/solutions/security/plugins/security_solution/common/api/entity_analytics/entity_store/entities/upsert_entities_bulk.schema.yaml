@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
+  version: '1'
   title: Entity Store - Update or Create Entities Bulk
 paths:
-  /api/entity_store/entities/bulk:
+  /internal/entity_store/entities/bulk:
     put:
       x-labels: [ess, serverless]
       x-codegen-enabled: true

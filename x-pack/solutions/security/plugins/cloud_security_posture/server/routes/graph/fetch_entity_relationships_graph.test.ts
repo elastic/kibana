@@ -62,7 +62,11 @@ describe('fetchEntityRelationships', () => {
 
       // Verify query uses the entity store index and does NOT use LOOKUP JOIN
       expect(query).toContain(`FROM ${indexName}`);
+<<<<<<< HEAD
       expect(query).not.toContain('LOOKUP JOIN');
+=======
+      expect(query).toContain(`LOOKUP JOIN ${indexName} ON entity.id`);
+>>>>>>> 9.4
       expect(query).toContain('`entity.relationships.owns.ids`');
     });
 
@@ -229,10 +233,17 @@ describe('fetchEntityRelationships', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
+<<<<<<< HEAD
       // Per-triple shape: relationship fork branches and per-row doc data
       expect(query).toContain('_rel_targets_owns');
       expect(query).toContain('actorDocData');
       expect(query).toContain('targetDocData');
+=======
+      // Verify doc data fields are generated
+      expect(query).toContain('_rel_targets_owns');
+      expect(query).toContain('actorsDocData');
+      expect(query).toContain('targetsDocData');
+>>>>>>> 9.4
       expect(query).toContain('availableInEntityStore');
       expect(query).toContain('relationshipNodeId');
 

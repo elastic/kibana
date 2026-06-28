@@ -10,7 +10,12 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/header.test.tsx
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
+=======
+import { REMOTE_DOCUMENT_BADGE_TEST_ID } from './components/remote_document_badge';
+import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/header.test.tsx
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -104,6 +109,18 @@ const alertHitNoRiskScore = createMockHit({
 const eventHit = createMockHit({
   'event.kind': 'event',
   'kibana.alert.risk_score': 21,
+});
+
+const remoteAlertHit = createMockHit({
+  'event.kind': 'signal',
+  'kibana.alert.rule.name': 'Test Rule',
+  'kibana.alert.rule.uuid': 'test-rule-id',
+  _index: 'remote-cluster:index-name',
+});
+
+const remoteEventHit = createMockHit({
+  'event.kind': 'event',
+  _index: 'remote-cluster:index-name',
 });
 
 const defaultHeaderProps: Pick<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'> = {
@@ -202,5 +219,23 @@ describe('<DocumentHeader />', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render the remote badge for local documents', () => {
+    const { queryByTestId } = renderHeader({ hit: alertHit });
+
+    expect(queryByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render "Remote alert" badge for remote alerts', () => {
+    const { getByTestId } = renderHeader({ hit: remoteAlertHit });
+
+    expect(getByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).toHaveTextContent('Remote alert');
+  });
+
+  it('should render "Remote event" badge for remote non-alert documents', () => {
+    const { getByTestId } = renderHeader({ hit: remoteEventHit });
+
+    expect(getByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).toHaveTextContent('Remote event');
   });
 });

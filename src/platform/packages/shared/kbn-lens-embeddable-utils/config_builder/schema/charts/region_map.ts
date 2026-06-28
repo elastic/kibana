@@ -42,10 +42,14 @@ export const regionMapConfigSchemaNoESQL = schema.object(
     /**
      * Configure how to break down to regions
      */
+<<<<<<< HEAD
     region: mergeAllBucketsWithChartDimensionSchema(
       regionMapConfigRegionOptionsSchema,
       'regionMapRegion'
     ),
+=======
+    region: mergeAllBucketsWithChartDimensionSchema(regionMapConfigRegionOptionsSchema),
+>>>>>>> 9.4
   },
   {
     meta: {
@@ -84,6 +88,7 @@ export const regionMapConfigSchemaESQL = schema.object(
 
 export const regionMapConfigSchema = objectUnion(
   [regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL],
+<<<<<<< HEAD
   {
     meta: {
       id: 'regionMapChart',
@@ -92,6 +97,9 @@ export const regionMapConfigSchema = objectUnion(
         'A choropleth map with geographic regions colored by the aggregated metric value.',
     },
   }
+=======
+  { meta: { id: 'regionMapChart', title: 'Region Map' } }
+>>>>>>> 9.4
 );
 
 export type RegionMapConfig = TypeOf<typeof regionMapConfigSchema>;

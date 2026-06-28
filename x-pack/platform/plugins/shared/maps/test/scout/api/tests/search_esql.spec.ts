@@ -33,7 +33,13 @@ apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () 
     const { took, ...rawResponse } = response.body.rawResponse;
     expect(rawResponse.columns).toStrictEqual([{ name: 'geo.coordinates', type: 'geo_point' }]);
     expect(rawResponse.values).toStrictEqual([]);
+<<<<<<< HEAD
     expect(rawResponse.is_partial).toBe(false);
+=======
+    expect(rawResponse.values_loaded).toBe(0);
+    expect(rawResponse.is_partial).toBe(false);
+    expect(rawResponse.documents_found).toBe(0);
+>>>>>>> 9.4
   });
 
   apiTest('should return getValues response in expected shape', async ({ apiClient }) => {
@@ -57,9 +63,17 @@ apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () 
       { name: 'geo.coordinates', type: 'geo_point' },
       { name: '@timestamp', type: 'date' },
     ]);
+<<<<<<< HEAD
+=======
+    expect(rawResponse.documents_found).toBe(3);
+>>>>>>> 9.4
     expect(rawResponse.is_partial).toBe(false);
     expect(rawResponse.values).toStrictEqual([
       ['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z'],
     ]);
+<<<<<<< HEAD
+=======
+    expect(rawResponse.values_loaded).toBe(4);
+>>>>>>> 9.4
   });
 });

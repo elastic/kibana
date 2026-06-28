@@ -14,9 +14,12 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
+<<<<<<< HEAD
     // telemtry takes inventory of saved objects
     // make sure there are no unexpected saved objects before running test
     await kbnClient.savedObjects.clean({ types: ['dashboard', 'index-pattern', 'map'] });
+=======
+>>>>>>> 9.4
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
@@ -44,12 +47,22 @@ apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, (
       const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_point'
       );
+<<<<<<< HEAD
       expect(geoPointFieldStats.count).toBeGreaterThanOrEqual(71);
+=======
+      expect(geoPointFieldStats.count).toBe(71);
+      expect(geoPointFieldStats.index_count).toBe(14);
+>>>>>>> 9.4
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_shape'
       );
+<<<<<<< HEAD
       expect(geoShapeFieldStats.count).toBeGreaterThanOrEqual(3);
+=======
+      expect(geoShapeFieldStats.count).toBe(3);
+      expect(geoShapeFieldStats.index_count).toBe(3);
+>>>>>>> 9.4
 
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;

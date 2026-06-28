@@ -61,12 +61,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   responseActionsScriptLibraryManagement: true,
+<<<<<<< HEAD
 
   /**
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
   responseActionsEndpointCancel: false,
+=======
+>>>>>>> 9.4
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -253,17 +256,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: true,
+<<<<<<< HEAD
 
   /**
    * Enables entity ML anomaly details API
    */
   entityAnalyticsAnomalyDetails: false,
+=======
+>>>>>>> 9.4
 
   /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: true,
+<<<<<<< HEAD
 
   /**
    * Enables the Detection Rule Changes History API endpoint
@@ -296,6 +303,8 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the risk score history API endpoint for Entity Analytics.
    */
   riskScoreHistoryEnabled: false,
+=======
+>>>>>>> 9.4
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

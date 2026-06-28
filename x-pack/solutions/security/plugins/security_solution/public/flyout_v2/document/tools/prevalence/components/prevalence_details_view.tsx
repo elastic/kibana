@@ -23,10 +23,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsRow } from '../utils/get_columns';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/components/prevalence_details_view.tsx
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../../main/constants/local_storage';
 import { useLicense } from '../../../../../common/hooks/use_license';
+=======
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from '../../document/constants/local_storage';
+import { useLicense } from '../../../common/hooks/use_license';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/components/prevalence_details_view.tsx
 import { usePrevalence } from '../hooks/use_prevalence';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
@@ -35,7 +42,11 @@ import {
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from '../test_ids';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/components/prevalence_details_view.tsx
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+=======
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/components/prevalence_details_view.tsx
 
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';

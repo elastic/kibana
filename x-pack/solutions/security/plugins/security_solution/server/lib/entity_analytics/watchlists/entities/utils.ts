@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
+=======
+import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+>>>>>>> 9.4
 import { EntityType } from '../../../../../common/entity_analytics/types';
 
 export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = '.entity_analytics.watchlists';
@@ -12,13 +16,18 @@ export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = '.entity_analytics.watchlists'
 export const getIndexForWatchlist = (namespace: string) =>
   `${ENTITY_ANALYTICS_WATCHLISTS_PREFIX}.${namespace}`;
 
+<<<<<<< HEAD
 // Design debt: this creates a per-(watchlist, entity) key instead of a per-entity key.
 // The intended design is one doc per entity across all watchlists; fixing this requires a migration.
+=======
+/** Builds a composite document _id for the watchlist entity index. */
+>>>>>>> 9.4
 export const buildWatchlistDocId = (watchlistId: string, euid: string) => `${watchlistId}:${euid}`;
 
 /** Extracts the euid from a composite watchlist doc _id ({watchlistId}:{euid}). */
 export const extractEuidFromDocId = (docId: string) => docId.substring(docId.indexOf(':') + 1);
 
+<<<<<<< HEAD
 /** Minimal fields needed by {@link getEntityType} to resolve the entity type. */
 export interface EntityTypeSource {
   entity: {
@@ -28,6 +37,9 @@ export interface EntityTypeSource {
 }
 
 export const getEntityType = (record: EntityTypeSource): EntityType => {
+=======
+export const getEntityType = (record: EntityStoreEntity): EntityType => {
+>>>>>>> 9.4
   const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
 
   if (!entityType || !Object.values(EntityType).includes(entityType as EntityType)) {

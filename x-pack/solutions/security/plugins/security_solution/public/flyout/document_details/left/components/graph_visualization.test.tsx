@@ -74,9 +74,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
           securitySolutionTimeline: { read: true, crud: true },
         },
       },
+<<<<<<< HEAD
       overlays: {
         openSystemFlyout: jest.fn(),
       },
+=======
+>>>>>>> 9.4
     },
   }),
   KibanaServices: {

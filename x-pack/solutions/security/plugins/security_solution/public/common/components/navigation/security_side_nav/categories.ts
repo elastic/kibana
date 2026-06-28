@@ -12,9 +12,13 @@ import { SecurityPageName } from '../../../../../common';
 export const getNavCategories = (
   chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
+<<<<<<< HEAD
   isNewEAHomePageEnabled?: boolean,
   securityClassicNavExternalLinks?: boolean,
   isAgentBuilderNavAtTop?: boolean
+=======
+  isNewEAHomePageEnabled?: boolean
+>>>>>>> 9.4
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {

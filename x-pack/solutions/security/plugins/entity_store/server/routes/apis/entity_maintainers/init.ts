@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
@@ -35,7 +36,11 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
+<<<<<<< HEAD
             body: buildStrictRouteValidationWithZod(initMaintainersBodySchema),
+=======
+            body: buildRouteValidationWithZod(initMaintainersBodySchema),
+>>>>>>> 9.4
           },
         },
       },

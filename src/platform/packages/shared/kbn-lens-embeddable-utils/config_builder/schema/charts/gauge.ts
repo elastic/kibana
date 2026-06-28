@@ -37,7 +37,11 @@ const gaugeStylingSchema = schema.object(
               meta: {
                 id: 'gaugeShapeBullet',
                 title: 'Shape (Bullet)',
+<<<<<<< HEAD
                 description: 'Bullet gauge shape.',
+=======
+                description: 'Bullet gauge shape',
+>>>>>>> 9.4
               },
             }
           ),
@@ -53,7 +57,11 @@ const gaugeStylingSchema = schema.object(
               meta: {
                 id: 'gaugeShapeCircular',
                 title: 'Shape (Circular)',
+<<<<<<< HEAD
                 description: 'Circular gauge shape.',
+=======
+                description: 'Circular gauge shape',
+>>>>>>> 9.4
               },
             }
           ),
@@ -133,7 +141,10 @@ const gaugeConfigMetricOptionsSchema = {
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, noColorSchema, autoColorSchema], {
+<<<<<<< HEAD
       meta: { description: 'Color configuration for the gauge fill.' },
+=======
+>>>>>>> 9.4
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -151,7 +162,11 @@ const gaugeConfigMetricOptionsSchema = {
         ),
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
+<<<<<<< HEAD
             meta: { description: 'Tick placement mode.' },
+=======
+            meta: { description: 'Tick placement mode' },
+>>>>>>> 9.4
             defaultValue: 'bands',
           })
         ),
@@ -172,6 +187,7 @@ export const gaugeConfigSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
+<<<<<<< HEAD
     metric: mergeAllMetricsWithChartDimensionSchema(
       {
         ...gaugeConfigMetricOptionsSchema,
@@ -179,6 +195,12 @@ export const gaugeConfigSchemaNoESQL = schema.object(
       },
       'gaugeMetric'
     ),
+=======
+    metric: mergeAllMetricsWithChartDimensionSchema({
+      ...gaugeConfigMetricOptionsSchema,
+      ...gaugeConfigMetricInnerNoESQLOpsSchema,
+    }),
+>>>>>>> 9.4
   },
   {
     meta: {
@@ -214,12 +236,16 @@ export const gaugeConfigSchemaESQL = schema.object(
 );
 
 export const gaugeConfigSchema = objectUnion([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL], {
+<<<<<<< HEAD
   meta: {
     id: 'gaugeChart',
     title: 'Gauge Chart',
     description:
       'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',
   },
+=======
+  meta: { id: 'gaugeChart', title: 'Gauge Chart' },
+>>>>>>> 9.4
 });
 
 export type GaugeConfig = TypeOf<typeof gaugeConfigSchema>;

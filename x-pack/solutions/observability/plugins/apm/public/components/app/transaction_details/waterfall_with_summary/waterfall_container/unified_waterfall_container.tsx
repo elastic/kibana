@@ -93,11 +93,14 @@ export function UnifiedWaterfallContainer({
         traceDocsTotal={traceDocsTotal}
         maxTraceItems={maxTraceItems}
         discoverHref={discoverHref}
+<<<<<<< HEAD
         ebt={{
           row: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ROW },
           errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
           serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
         }}
+=======
+>>>>>>> 9.4
       >
         <UnifiedWaterfallFlyout
           waterfallItemId={waterfallItemId}

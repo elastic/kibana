@@ -740,7 +740,11 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+<<<<<<< HEAD
                     scriptInput: --path= /usr/log/exec.log
+=======
+                    scriptInput: '--path= /usr/log/exec.log'
+>>>>>>> 9.4
               MDE:
                 description: Microsoft Defender Endpoint runscript
                 summary: Run a script against a Microsoft Defender Endpoint agent
@@ -1395,7 +1399,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Page'
+<<<<<<< HEAD
         - description: Number of results to return per page. Defaults to 10. Max value is
+=======
+        - description: >-
+            Number of results to return per page. Defaults to 10. Max value is
+>>>>>>> 9.4
             1000.
           in: query
           name: pageSize
@@ -1542,11 +1551,19 @@ paths:
               examples:
                 response:
                   summary: Delete script response example.
+<<<<<<< HEAD
                   value: {}
               schema:
                 type: object
           description: Delete script response.
       summary: Delete a script
+=======
+                  value: null
+              schema:
+                type: object
+          description: Delete script response.
+      summary: Delete a scripts
+>>>>>>> 9.4
       tags:
         - Security Endpoint Management API
     get:
@@ -1668,7 +1685,11 @@ paths:
               schema:
                 description: A download stream is returned.
                 format: binary
+<<<<<<< HEAD
                 type: string
+=======
+                type: object
+>>>>>>> 9.4
           description: Download script file response.
       summary: Download a script file
       tags:
@@ -1780,7 +1801,12 @@ components:
       example: updatedAt
       type: string
     ArchivePathToExecutableSchema:
+<<<<<<< HEAD
       description: Used only for when the uploaded script is an archive (.zip file for
+=======
+      description: >-
+        Used only for when the uploaded script is an archive (.zip file for
+>>>>>>> 9.4
         example). This property defines the relative path to the file included
         in the archive that should be executed once its contents are extracted.
         The path should be relative to the root of the archive.
@@ -1922,7 +1948,12 @@ components:
         fileType:
           $ref: '#/components/schemas/EndpointScriptFileType'
         instructions:
+<<<<<<< HEAD
           description: Instructions for using the script, including details around its
+=======
+          description: >-
+            Instructions for using the script, including details around its
+>>>>>>> 9.4
             supported input arguments
           type: string
         name:
@@ -2063,22 +2094,37 @@ components:
       type: object
       properties: {}
     EndpointRunScriptParameters:
+<<<<<<< HEAD
       description: Parameters for Run Script response action against Elastic Defend
         agent type.
+=======
+      description: >-
+        Parameters for Run Script response action against Elastic Defend agent
+        type.
+>>>>>>> 9.4
       example:
         agent_type: endpoint
         endpoint_ids:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+<<<<<<< HEAD
           scriptInput: --some-parameter some-value
+=======
+          scriptInput: '--some-parameter some-value'
+>>>>>>> 9.4
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
           minLength: 1
           type: string
         scriptInput:
+<<<<<<< HEAD
           description: The input parameter arguments (if any) for the script that will be
+=======
+          description: >-
+            The input parameter arguments (if any) for the script that will be
+>>>>>>> 9.4
             executed.
           minLength: 1
           type: string
@@ -2100,9 +2146,17 @@ components:
           example: Collects host data for investigation
           type: string
         downloadUri:
+<<<<<<< HEAD
           description: URI to download the script file. Note that this is the relative
             path and does not include the space (if applicable)
           example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+=======
+          description: >-
+            URI to download the script file. Note that this is the relative path
+            and does not include the space (if applicable)
+          example: >-
+            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+>>>>>>> 9.4
           type: string
         example:
           type: string
@@ -2123,7 +2177,12 @@ components:
           format: uuid
           type: string
         instructions:
+<<<<<<< HEAD
           description: Instructions for using the script, including details around its
+=======
+          description: >-
+            Instructions for using the script, including details around its
+>>>>>>> 9.4
             supported input arguments
           type: string
         name:
@@ -2155,10 +2214,18 @@ components:
         version:
           type: string
     EndpointScriptFileType:
+<<<<<<< HEAD
       description: The type of the uploaded file, which determines the expected value
         of `pathToExecutable`. If `fileType` is "script", then
         `pathToExecutable` should not be included. If `fileType` is "archive",
         then `pathToExecutable` is required and should specify the path to the
+=======
+      description: >-
+        The type of the uploaded file, which determines the expected value of
+        `pathToExecutable`. If `fileType` is "script", then `pathToExecutable`
+        should not be included. If `fileType` is "archive", then
+        `pathToExecutable` is required and should specify the path to the
+>>>>>>> 9.4
         executable file within the archive.
       enum:
         - script
@@ -3043,8 +3110,14 @@ components:
       description: Parameters object
       type: object
     PatchUpdateScriptRouteRequestBody:
+<<<<<<< HEAD
       description: The script entry properties to be updated. At least one property
         must be provided.
+=======
+      description: >-
+        The script entry properties to be updated. At least one property must be
+        provided.
+>>>>>>> 9.4
       minProperties: 1
       type: object
       properties:
@@ -3061,7 +3134,12 @@ components:
         fileType:
           $ref: '#/components/schemas/EndpointScriptFileType'
         instructions:
+<<<<<<< HEAD
           description: Instructions for using the script, including details around its
+=======
+          description: >-
+            Instructions for using the script, including details around its
+>>>>>>> 9.4
             supported input arguments
           type: string
         name:
@@ -3513,6 +3591,28 @@ components:
             - macos
           requiresInput: false
       type: object
+<<<<<<< HEAD
+=======
+      properties: {}
+    ScriptsApiResponse:
+      example:
+        data:
+          description: Collects host data for investigation
+          downloadUri: >-
+            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          example: ./collect_host_data.sh --help
+          fileHash: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          fileName: collect_host_data.sh
+          fileSize: 12345
+          id: 123e4567-e89b-12d3-a456-426655440000
+          instructions: Collects host data for investigation
+          name: Collect host data
+          platform:
+            - linux
+            - macos
+          requiresInput: false
+      type: object
+>>>>>>> 9.4
       properties:
         data:
           $ref: '#/components/schemas/EndpointScript'

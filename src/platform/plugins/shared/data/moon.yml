@@ -89,7 +89,10 @@ fileGroups:
     - common/**/*.json
     - public/**/*.json
     - test/scout/**/*
+<<<<<<< HEAD
     - test/scout_http2/**/*
+=======
+>>>>>>> 9.4
     - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:

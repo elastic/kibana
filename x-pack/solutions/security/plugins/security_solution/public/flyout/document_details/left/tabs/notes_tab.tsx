@@ -9,12 +9,21 @@ import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
+<<<<<<< HEAD
 import { NotesRemoteCallout } from '../../../../flyout_v2/shared/tools/notes/components/notes_remote_callout';
 import type { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types';
 import { useTimelineConfig } from '../../../../flyout_v2/shared/tools/notes/hooks/use_timeline_config';
 import { NotesDetailsContent } from '../../../../flyout_v2/shared/tools/notes/components/notes_details_content';
+=======
+import { NotesRemoteCallout } from '../../../../flyout_v2/notes/components/notes_remote_callout';
+import type { State } from '../../../../common/store';
+import { timelineSelectors } from '../../../../timelines/store';
+import { TimelineId } from '../../../../../common/types';
+import { useTimelineConfig } from '../../../../flyout_v2/notes/hooks/use_timeline_config';
+import { NotesDetailsContent } from '../../../../flyout_v2/notes/components/notes_details_content';
+>>>>>>> 9.4
 import { useDocumentDetailsContext } from '../../shared/context';
 
 /**

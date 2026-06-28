@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
+<<<<<<< HEAD
 export const dashboardNavigationOptionsSchema = schema.object(
   {
     use_filters: schema.boolean({
@@ -34,5 +35,27 @@ export const dashboardNavigationOptionsSchema = schema.object(
   },
   { defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS }
 );
+=======
+export const dashboardNavigationOptionsSchema = schema.object({
+  use_filters: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters,
+    meta: {
+      description: 'When enabled, filters are passed to the opening dashboard.',
+    },
+  }),
+  use_time_range: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range,
+    meta: {
+      description: 'When enabled, time range is passed to the opening dashboard.',
+    },
+  }),
+  open_in_new_tab: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab,
+    meta: {
+      description: 'When enabled, the dashboard opens in a new browser tab.',
+    },
+  }),
+});
+>>>>>>> 9.4
 
 export type DashboardNavigationOptions = TypeOf<typeof dashboardNavigationOptionsSchema>;

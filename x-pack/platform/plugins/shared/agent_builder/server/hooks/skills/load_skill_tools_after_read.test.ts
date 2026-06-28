@@ -16,7 +16,11 @@ import type {
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
+<<<<<<< HEAD
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
+=======
+import { ToolType } from '@kbn/agent-builder-common';
+>>>>>>> 9.4
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
 import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
@@ -373,7 +377,11 @@ describe('createLoadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue([]),
       });
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(
+>>>>>>> 9.4
         createSkillFileEntry({ skillId: 'security-skill' })
       );
       toolHandlerContext.skills.get.mockResolvedValue(skill);
@@ -411,7 +419,11 @@ describe('createLoadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
       });
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+>>>>>>> 9.4
       toolHandlerContext.skills.get.mockResolvedValue(skill);
       toolHandlerContext.skills.convertSkillTool.mockReturnValue(convertedInline);
       toolHandlerContext.toolProvider.list.mockResolvedValue([registryTool]);
@@ -433,7 +445,11 @@ describe('createLoadSkillToolsAfterRead', () => {
         basePath: '/skills/my-plugin',
       });
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(
+>>>>>>> 9.4
         createSkillFileEntry({ skillId: 'my-plugin-skill' })
       );
       toolHandlerContext.skills.get.mockResolvedValue(skill);
@@ -462,7 +478,11 @@ describe('createLoadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue([]),
       });
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(
+>>>>>>> 9.4
         createSkillFileEntry({ skillId: 'security-skill' })
       );
       toolHandlerContext.skills.get.mockResolvedValue(skill);
@@ -488,7 +508,11 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       const skill = createMockSkill();
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+>>>>>>> 9.4
       toolHandlerContext.skills.get.mockResolvedValue(skill);
 
       const context = createHookContext({ toolHandlerContext });
@@ -501,7 +525,11 @@ describe('createLoadSkillToolsAfterRead', () => {
     it('does not report telemetry when no analytics service is provided', async () => {
       const skill = createMockSkill();
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+>>>>>>> 9.4
       toolHandlerContext.skills.get.mockResolvedValue(skill);
 
       const context = createHookContext({ toolHandlerContext });
@@ -514,7 +542,11 @@ describe('createLoadSkillToolsAfterRead', () => {
     it('does not throw and warns when reportSkillInvoked throws', async () => {
       const skill = createMockSkill();
 
+<<<<<<< HEAD
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+=======
+      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+>>>>>>> 9.4
       toolHandlerContext.skills.get.mockResolvedValue(skill);
       analyticsService.reportSkillInvoked.mockImplementation(() => {
         throw new Error('boom');

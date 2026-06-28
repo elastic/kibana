@@ -28,6 +28,7 @@ import {
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from '../test_ids';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/components/prevalence_details_view.test.tsx
 import type { CellActionRenderer } from '../../../../shared/components/cell_actions';
 import { getColumns } from '../utils/get_columns';
 import { usePrevalence } from '../hooks/use_prevalence';
@@ -37,12 +38,27 @@ import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 jest.mock('../../../../../common/components/user_privileges');
+=======
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
+import { getColumns } from '../utils/get_columns';
+import { usePrevalence } from '../hooks/use_prevalence';
+import { TestProviders } from '../../../common/mock';
+import { licenseService } from '../../../common/hooks/use_license';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+
+jest.mock('../../../common/components/user_privileges');
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/components/prevalence_details_view.test.tsx
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockStorage = jest.fn();
 const mockUiSettingsGet = jest.fn();
 let mockServerless: unknown;
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/components/prevalence_details_view.test.tsx
 jest.mock('../../../../../common/lib/kibana', () => {
+=======
+jest.mock('../../../common/lib/kibana', () => {
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/components/prevalence_details_view.test.tsx
   return {
     useKibana: () => ({
       services: {
@@ -67,7 +83,11 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/prevalence/components/prevalence_details_view.test.tsx
 jest.mock('../../../../../common/hooks/use_license', () => {
+=======
+jest.mock('../../../common/hooks/use_license', () => {
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/prevalence/components/prevalence_details_view.test.tsx
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
   };

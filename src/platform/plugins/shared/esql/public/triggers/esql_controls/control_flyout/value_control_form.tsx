@@ -215,11 +215,15 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setEsqlQueryErrors([]);
+<<<<<<< HEAD
           setIsValid(true);
         } else {
           setIsValid(false);
         }
 
+=======
+        }
+>>>>>>> 9.4
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
@@ -237,7 +241,12 @@ export function ValueControlForm({
     const response = (await core.http
       ?.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: `FROM ${indexPattern}` }) })
       .catch((error) => {
+<<<<<<< HEAD
         reportEsqlError(error, { errorType: 'ControlFlyoutTimefieldFetch' });
+=======
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch the timefield', error);
+>>>>>>> 9.4
         return undefined;
       })) as { timeField?: string } | undefined;
 

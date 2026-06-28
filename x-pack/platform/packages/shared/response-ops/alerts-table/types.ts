@@ -24,7 +24,11 @@ import type {
   AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
+<<<<<<< HEAD
 import type { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
+=======
+import type { Alert, BrowserFields, EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+>>>>>>> 9.4
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,

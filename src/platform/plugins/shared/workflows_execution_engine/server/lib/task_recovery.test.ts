@@ -20,7 +20,10 @@ import {
   TASK_RECOVERY_ERROR_TYPE,
   taskRecoveryMessages,
 } from './task_recovery';
+<<<<<<< HEAD
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
+=======
+>>>>>>> 9.4
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 function createElasticsearchNotFoundError(): Error {
@@ -60,21 +63,30 @@ describe('shouldFailOnWorkflowRunRetry', () => {
 describe('resolveInterruptedWorkflowRunTask', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let repository: WorkflowExecutionRepository;
+<<<<<<< HEAD
   let stepExecutionRepository: StepExecutionRepository;
+=======
+>>>>>>> 9.4
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     repository = new WorkflowExecutionRepository(esClient);
+<<<<<<< HEAD
     stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+=======
+>>>>>>> 9.4
   });
 
   it('returns run_workflow when attempts is 1', async () => {
     await expect(
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 1,
@@ -98,7 +110,10 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     await expect(
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -111,7 +126,10 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         id: 'x',
         doc: expect.objectContaining({
           status: ExecutionStatus.FAILED,
+<<<<<<< HEAD
           finishedAt: expect.any(String),
+=======
+>>>>>>> 9.4
           error: {
             type: TASK_RECOVERY_ERROR_TYPE,
             message: taskRecoveryMessages.workflowRunInterrupted,
@@ -128,7 +146,10 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     await expect(
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'missing-id',
         spaceId: 'default',
         taskAttempts: 2,
@@ -156,7 +177,10 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     await expect(
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -181,7 +205,10 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     await expect(
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -208,7 +235,10 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     await expect(
       resolveInterruptedWorkflowRunTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -223,21 +253,30 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 describe('resolveInterruptedWorkflowResumeTask', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let repository: WorkflowExecutionRepository;
+<<<<<<< HEAD
   let stepExecutionRepository: StepExecutionRepository;
+=======
+>>>>>>> 9.4
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     repository = new WorkflowExecutionRepository(esClient);
+<<<<<<< HEAD
     stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+=======
+>>>>>>> 9.4
   });
 
   it('returns resume_workflow when attempts is 1', async () => {
     await expect(
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 1,
@@ -261,7 +300,10 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     await expect(
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -290,7 +332,10 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     await expect(
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'missing-id',
         spaceId: 'default',
         taskAttempts: 2,
@@ -318,7 +363,10 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     await expect(
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -342,7 +390,10 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     await expect(
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -366,7 +417,10 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
     await expect(
       resolveInterruptedWorkflowResumeTask({
         workflowExecutionRepository: repository,
+<<<<<<< HEAD
         stepExecutionRepository,
+=======
+>>>>>>> 9.4
         workflowRunId: 'x',
         spaceId: 'default',
         taskAttempts: 2,
@@ -381,14 +435,20 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 describe('resolveExhaustedWorkflowRunTask', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let repository: WorkflowExecutionRepository;
+<<<<<<< HEAD
   let stepExecutionRepository: StepExecutionRepository;
+=======
+>>>>>>> 9.4
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     repository = new WorkflowExecutionRepository(esClient);
+<<<<<<< HEAD
     stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+=======
+>>>>>>> 9.4
     jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
@@ -399,7 +459,10 @@ describe('resolveExhaustedWorkflowRunTask', () => {
   it('does nothing when taskAttempts is below maxAttempts', async () => {
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
+<<<<<<< HEAD
       stepExecutionRepository,
+=======
+>>>>>>> 9.4
       workflowRunId: 'run-1',
       spaceId: 'default',
       taskAttempts: 2,
@@ -427,7 +490,10 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
+<<<<<<< HEAD
       stepExecutionRepository,
+=======
+>>>>>>> 9.4
       workflowRunId: 'run-1',
       spaceId: 'default',
       taskAttempts: 3,
@@ -462,7 +528,10 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
+<<<<<<< HEAD
       stepExecutionRepository,
+=======
+>>>>>>> 9.4
       workflowRunId: 'run-1',
       spaceId: 'default',
       taskAttempts: 3,
@@ -479,7 +548,10 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
+<<<<<<< HEAD
       stepExecutionRepository,
+=======
+>>>>>>> 9.4
       workflowRunId: 'run-1',
       spaceId: 'default',
       taskAttempts: 3,
@@ -499,7 +571,10 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
+<<<<<<< HEAD
       stepExecutionRepository,
+=======
+>>>>>>> 9.4
       workflowRunId: 'run-1',
       spaceId: 'default',
       taskAttempts: 3,
@@ -528,7 +603,10 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     await resolveExhaustedWorkflowRunTask({
       workflowExecutionRepository: repository,
+<<<<<<< HEAD
       stepExecutionRepository,
+=======
+>>>>>>> 9.4
       workflowRunId: 'run-1',
       spaceId: 'default',
       taskAttempts: 3,

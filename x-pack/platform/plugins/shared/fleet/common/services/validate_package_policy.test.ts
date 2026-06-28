@@ -872,7 +872,11 @@ describe('Fleet - validatePackagePolicy()', () => {
         ],
       };
 
+<<<<<<< HEAD
       const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, deps);
+=======
+      const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, load);
+>>>>>>> 9.4
 
       // The first input (filelog_otel) has a valid var, so no error
       // Single policy template packages use just the effectiveName as key (no template prefix)

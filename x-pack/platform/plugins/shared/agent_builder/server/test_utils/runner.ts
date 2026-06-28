@@ -41,9 +41,15 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStart } from '../services/attachments';
+<<<<<<< HEAD
 import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
 import type { ModelProviderFactoryMock, ModelProviderMock } from './model_provider';
 import { createModelProviderFactoryMock, createModelProviderMock } from './model_provider';
+=======
+import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/execution/runner/runner';
+import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
+import { createModelProviderMock, createModelProviderFactoryMock } from './model_provider';
+>>>>>>> 9.4
 import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';

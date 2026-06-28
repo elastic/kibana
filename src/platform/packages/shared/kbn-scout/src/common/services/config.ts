@@ -40,6 +40,11 @@ export function createScoutConfig(
     process.env.IS_FTR_RUNNER = 'true';
   }
 
+  if (config.http2) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    process.env.IS_FTR_RUNNER = 'true';
+  }
+
   log.serviceLoaded('config');
 
   return config;

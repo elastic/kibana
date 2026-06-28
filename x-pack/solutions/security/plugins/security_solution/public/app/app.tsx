@@ -122,7 +122,13 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   // Skip if the sidebar is already open (e.g. navigating from Agent Builder
   // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
+<<<<<<< HEAD
     if (services.agentBuilder?.setChatConfig && !services.chrome.sidebar.isOpen()) {
+=======
+    const isSidebarOpen = services.chrome.sidebar.isOpen();
+
+    if (services.agentBuilder?.setChatConfig && !isSidebarOpen) {
+>>>>>>> 9.4
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
         newConversation: false,
@@ -131,12 +137,16 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     }
 
     return () => {
+<<<<<<< HEAD
       if (consumePreserveAgentBuilderSessionGate()) {
         return;
       }
       // Re-read at teardown time: the Agent Builder panel may have opened after this effect
       // ran; using a stale `isOpen` from mount would incorrectly clear chat config mid-session.
       if (services.agentBuilder?.clearChatConfig && !services.chrome.sidebar.isOpen()) {
+=======
+      if (services.agentBuilder?.clearChatConfig && !isSidebarOpen) {
+>>>>>>> 9.4
         services.agentBuilder.clearChatConfig();
       }
     };

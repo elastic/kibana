@@ -94,7 +94,11 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
                 {
                   defaultMessage:
+<<<<<<< HEAD
                     "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
+=======
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
+>>>>>>> 9.4
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -109,7 +113,11 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
                 {
                   defaultMessage:
+<<<<<<< HEAD
                     "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+=======
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+>>>>>>> 9.4
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -341,9 +349,15 @@ export const MicrosoftTeams: ConnectorSpec = {
     '- Direct/group chats: listChats → listChatMessages (with chatId)',
     '',
     'AUTH DIFFERENCES (delegated vs app-only):',
+<<<<<<< HEAD
     '- Delegated auth (bearer token or oauth_authorization_code or ears): userId is optional — omit it to operate as the signed-in user.',
     '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
     '- searchMessages only works with delegated auth (bearer or oauth_authorization_code or ears); app-only (client credentials) is not supported.',
+=======
+    '- Delegated auth (bearer token or oauth_authorization_code): userId is optional — omit it to operate as the signed-in user.',
+    '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
+    '- searchMessages only works with delegated auth (bearer or oauth_authorization_code); app-only (client credentials) is not supported.',
+>>>>>>> 9.4
   ].join('\n'),
 
   test: {

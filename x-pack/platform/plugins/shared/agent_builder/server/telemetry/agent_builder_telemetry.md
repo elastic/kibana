@@ -295,8 +295,13 @@ Fired when a tool call fails.
 
 ### Skill CRUD events
 
+<<<<<<< HEAD
 Skill create/update/delete events fire on skill CRUD via the public API. Created and Updated
 include `tool_ids`; Deleted does not.
+=======
+These three events share the same schema. They fire on skill create/update/delete via the
+public API or during plugin import.
+>>>>>>> 9.4
 
 | Event type | Constant |
 |------------|----------|
@@ -304,11 +309,18 @@ include `tool_ids`; Deleted does not.
 | `agent_builder_skill_updated` | `AGENT_BUILDER_EVENT_TYPES.SkillUpdated` |
 | `agent_builder_skill_deleted` | `AGENT_BUILDER_EVENT_TYPES.SkillDeleted` |
 
+<<<<<<< HEAD
 | Field | Type | Required | Events | Description |
 |-------|------|----------|--------|-------------|
 | `skill_id` | keyword | yes | all | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
 | `origin` | keyword | no | all | `custom` (direct API) or `plugin` (plugin-bundled). |
 | `tool_ids` | keyword[] | yes | created, updated | Deduplicated, normalized tool IDs included in the skill after create/update. |
+=======
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `skill_id` | keyword | yes | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
+| `origin` | keyword | no | `custom` (direct API) or `plugin` (plugin-bundled). |
+>>>>>>> 9.4
 
 ### `agent_builder_skill_invoked`
 

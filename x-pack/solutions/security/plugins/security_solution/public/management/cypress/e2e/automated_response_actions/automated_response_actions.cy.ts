@@ -13,13 +13,18 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
+<<<<<<< HEAD
 import { changeAlertsFilter, waitForAlertsToPopulate } from '../../tasks/alerts';
+=======
+import { waitForAlertsToPopulate } from '../../tasks/alerts';
+>>>>>>> 9.4
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/207773
+describe.skip(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -81,9 +86,12 @@ describe(
 
       visitRuleAlerts(ruleName);
       closeAllToasts();
+<<<<<<< HEAD
       changeAlertsFilter(
         `agent.id: "${createdHost.agentId}" and process.name: "sshd" and kibana.alert.rule.uuid: "${ruleId}"`
       );
+=======
+>>>>>>> 9.4
       waitForAlertsToPopulate(1, 2000, 120000);
 
       cy.getByTestSubj('expand-event').first().click();

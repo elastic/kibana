@@ -39,6 +39,7 @@ import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
+<<<<<<< HEAD
 import { applyServiceMapLayout } from '../../shared/service_map/layout';
 import {
   FIT_VIEW_PADDING,
@@ -51,6 +52,13 @@ import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
+=======
+import { applyDagreLayout } from './layout';
+import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
+import { ServiceNode } from './service_node';
+import { DependencyNode } from './dependency_node';
+import { GroupedResourcesNode } from './grouped_resources_node';
+>>>>>>> 9.4
 import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
@@ -258,6 +266,7 @@ function GraphInner({
     [getAnimationDuration]
   );
 
+<<<<<<< HEAD
   // Camera placement used for both initial load and the "fit view" control. Most maps use fitView;
   // very large, sprawling maps center on the median node so the user lands on content rather than the
   // empty middle of the bounding box.
@@ -291,6 +300,21 @@ function GraphInner({
       fitView,
       getFitViewOptions,
     ]
+=======
+  // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
+  // not strictly once per page visit—intentional for measuring failure frequency.
+  const onDagreLayoutFailure = useCallback(
+    (error: unknown) => {
+      telemetry.reportServiceMapDagreLayoutFallback(getDagreLayoutFailureDiagnostics(error));
+      console.error('[APM Service map] Dagre.layout failed; using grid fallback.', error);
+    },
+    [telemetry]
+  );
+
+  const layoutedNodes = useMemo(
+    () => applyDagreLayout(initialNodes, initialEdges, {}, onDagreLayoutFailure),
+    [initialNodes, initialEdges, onDagreLayoutFailure]
+>>>>>>> 9.4
   );
 
   // The first time nodes appear we place the viewport without animation to avoid the visible

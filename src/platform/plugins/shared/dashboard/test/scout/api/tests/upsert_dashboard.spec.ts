@@ -21,6 +21,7 @@ import {
 apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
+<<<<<<< HEAD
   let privilegedRoleCookieHeader: Record<string, string>;
   let otherPrivilegedRoleCookieHeader: Record<string, string>;
 
@@ -40,6 +41,13 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
         kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
       })
     ).cookieHeader;
+=======
+
+  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
+>>>>>>> 9.4
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(
       'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/dashboards_api.json'
@@ -105,6 +113,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe(title);
   });
 
+<<<<<<< HEAD
   apiTest('should update existing dashboard access mode', async ({ apiClient }) => {
     const id = 'interactive-can-change-access-mode';
 
@@ -143,6 +152,8 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(updated.body.data.access_control.access_mode).toBe('default');
   });
 
+=======
+>>>>>>> 9.4
   apiTest(
     'validation - returns 400 when creating a new dashboard with an invalid id',
     async ({ apiClient }) => {
@@ -184,7 +195,11 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     }
   );
 
+<<<<<<< HEAD
   apiTest('validation - returns 400 for invalid access_mode values', async ({ apiClient }) => {
+=======
+  apiTest('validation - returns 400 when access_control is provided', async ({ apiClient }) => {
+>>>>>>> 9.4
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -193,7 +208,11 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       body: {
         title: 'Refresh Requests (Updated)',
         access_control: {
+<<<<<<< HEAD
           access_mode: 'invalid' as any,
+=======
+          access_mode: 'write_restricted',
+>>>>>>> 9.4
         },
       },
       responseType: 'json',
@@ -219,6 +238,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       expect(response).toHaveStatusCode(403);
     }
   );
+<<<<<<< HEAD
 
   apiTest(
     'authorization - does not apply state changes when access mode update fails',
@@ -339,4 +359,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       expect(updated.body.data.access_control.access_mode).toBe('write_restricted');
     }
   );
+=======
+>>>>>>> 9.4
 });

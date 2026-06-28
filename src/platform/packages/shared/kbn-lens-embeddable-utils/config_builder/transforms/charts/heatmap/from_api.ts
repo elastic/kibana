@@ -128,9 +128,12 @@ function buildFormBasedLayer(layer: HeatmapConfigNoESQL): FormBasedPersistedStat
 }
 
 function getValueColumns(layer: HeatmapConfigESQL) {
+<<<<<<< HEAD
   const xFieldType = layer.axis?.x?.scale
     ? getColumnTypeFromScaleType(layer.axis.x.scale)
     : undefined;
+=======
+>>>>>>> 9.4
   return [
     getValueColumn(getAccessorName('value'), layer.metric, 'number'),
     ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x, xFieldType)] : []),

@@ -145,7 +145,10 @@ export const InvestigationSection = memo(
           ancestorsIndexName={ancestorsIndexName}
           renderCellActions={renderCellActions}
           hideEditButton={isRemoteDocument}
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/investigation_section.tsx
           renderFlyoutLink={renderFlyoutLink}
+=======
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/investigation_section.tsx
         />
       </ExpandableSection>
     );

@@ -180,8 +180,11 @@ dependsOn:
   - '@kbn/core-user-activity-server-mocks'
   - '@kbn/core-user-activity-server-internal'
   - '@kbn/scout'
+<<<<<<< HEAD
   - '@kbn/core-user-storage-server-internal'
   - '@kbn/core-user-storage-common'
+=======
+>>>>>>> 9.4
 tags:
   - core
   - package

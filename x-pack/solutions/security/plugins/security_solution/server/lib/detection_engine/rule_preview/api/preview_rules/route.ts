@@ -74,7 +74,286 @@ export const previewRulesRoute = (
           const actionsClient = (await context.actions).getActionsClient();
           const license = (await context.licensing).license;
 
+<<<<<<< HEAD
           const previewResponse = await runRulePreview(
+=======
+          const timeframeEnd = request.body.timeframeEnd;
+          let invocationCount = request.body.invocationCount;
+          if (invocationCount < 1) {
+            return response.ok({
+              body: {
+                logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }],
+                previewId: undefined,
+                isAborted: undefined,
+              },
+            });
+          }
+
+          const internalRule = convertRuleResponseToAlertingRule(
+            applyRuleDefaults(request.body),
+            actionsClient
+          );
+          const previewRuleParams = internalRule.params;
+
+          const mlAuthz = buildMlAuthz({
+            license: (await context.licensing).license,
+            ml,
+            request,
+            savedObjectsClient,
+          });
+          throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
+
+          const spaceId = siemClient.getSpaceId();
+          const previewId = uuidv4();
+          const username = security?.authc.getCurrentUser(request)?.username;
+          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
+          const runState: Record<string, unknown> = {
+            isLoggedRequestsEnabled: request.query.enable_logged_requests,
+          };
+          const logs: RulePreviewLogs[] = [];
+          let isAborted = false;
+
+          const { hasAllRequested } = await securityService.authz
+            .checkPrivilegesWithRequest(request)
+            .atSpace(spaceId, {
+              elasticsearch: {
+                index: {
+                  [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
+                  [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
+                },
+                cluster: [],
+              },
+            });
+
+          if (!hasAllRequested) {
+            return response.ok({
+              body: {
+                logs: [
+                  {
+                    errors: [
+                      'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+                    ],
+                    warnings: [],
+                    duration: 0,
+                  },
+                ],
+                previewId: undefined,
+                isAborted: undefined,
+              },
+            });
+          }
+
+          // Create the preview index so the Lens histogram can resolve field
+          // mappings even when no preview alerts have been generated yet.
+          try {
+            await previewRuleDataClient.getWriter({ namespace: spaceId });
+          } catch (err) {
+            logger.warn(`Failed to bootstrap preview index for space "${spaceId}": ${err.message}`);
+          }
+
+          const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
+            ...securityRuleTypeOptions,
+            ruleDataClient: previewRuleDataClient,
+            ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
+            isPreview: true,
+          });
+
+          const runExecutors = async <TParams extends RuleParams, TState extends RuleTypeState>(
+            securityRuleType: SecurityAlertType<TParams, TState>,
+            params: TParams
+          ) => {
+            const ruleType = previewRuleTypeWrapper(securityRuleType);
+            let statePreview = runState as TState;
+            let loggedRequests = [];
+
+            const abortController = new AbortController();
+            setTimeout(() => {
+              abortController.abort();
+              isAborted = true;
+            }, PREVIEW_TIMEOUT_SECONDS * 1000);
+
+            const startedAt = moment(timeframeEnd);
+            const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
+            startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
+
+            let previousStartedAt = null;
+
+            const rule = {
+              ...internalRule,
+              id: previewId,
+              createdAt: new Date(),
+              createdBy: username ?? 'preview-created-by',
+              producer: 'preview-producer',
+              consumer: SERVER_APP_ID,
+              enabled: true,
+              revision: 0,
+              ruleTypeId: ruleType.id,
+              ruleTypeName: ruleType.name,
+              updatedAt: new Date(),
+              updatedBy: username ?? 'preview-updated-by',
+              muteAll: false,
+              snoozeSchedule: [],
+              // In Security Solution, action params are typed as Record<string,
+              // unknown>, which is a correct type for action params, but we
+              // need to cast here to comply with the alerting types
+              actions: internalRule.actions as RuleAction[],
+            };
+
+            let invocationStartTime;
+
+            const dataViewsService = await dataViews.dataViewsServiceFactory(
+              savedObjectsClient,
+              coreContext.elasticsearch.client.asInternalUser
+            );
+
+            while (invocationCount > 0 && !isAborted) {
+              invocationStartTime = moment();
+
+              ({ state: statePreview, loggedRequests } = (await ruleType.executor({
+                executionId: uuidv4(),
+                params,
+                previousStartedAt,
+                rule,
+                services: {
+                  shouldWriteAlerts: () => true,
+                  shouldStopExecution: () => isAborted,
+                  alertsClient: null,
+                  alertFactory: {
+                    create: alertInstanceFactoryStub<
+                      TParams,
+                      TState,
+                      AlertInstanceState,
+                      AlertInstanceContext,
+                      'default'
+                    >,
+                    alertLimit: {
+                      getValue: () => 1000,
+                      setLimitReached: () => {},
+                    },
+                    done: () => ({ getRecoveredAlerts: () => [] }),
+                  },
+                  savedObjectsClient: coreContext.savedObjects.client,
+                  scopedClusterClient: wrapScopedClusterClient({
+                    abortController,
+                    scopedClusterClient: scopedClusterClientWithCps,
+                  }),
+                  getSearchSourceClient: async () =>
+                    wrapSearchSourceClient({
+                      abortController,
+                      searchSourceClient: searchSourceClientWithCps,
+                    }),
+                  getMaintenanceWindowIds: async () => [],
+                  getMaintenanceWindowNames: async () => [],
+                  uiSettingsClient: coreContext.uiSettings.client,
+                  getDataViews: async () => dataViewsService,
+                  share,
+                  getAsyncSearchClient: (strategy) => {
+                    const clientWithCps = data.search.asScoped(request, {
+                      projectRouting: 'space',
+                    });
+                    return wrapAsyncSearchClient({
+                      rule: {
+                        name: rule.name,
+                        id: rule.id,
+                        alertTypeId: rule.ruleTypeId,
+                        spaceId,
+                      },
+                      logger,
+                      strategy,
+                      client: clientWithCps,
+                      abortController,
+                    });
+                  },
+                },
+                spaceId,
+                startedAt: startedAt.toDate(),
+                startedAtOverridden: true,
+                state: statePreview,
+                logger,
+                flappingSettings: DISABLE_FLAPPING_SETTINGS,
+                getTimeRange: () => {
+                  const date = startedAt.toISOString();
+                  return { dateStart: date, dateEnd: date };
+                },
+                isServerless,
+                ruleExecutionTimeout: `${PREVIEW_TIMEOUT_SECONDS}s`,
+              })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
+
+              const executionResult = previewRuleExecutionLogger.getExecutionResult();
+
+              logs.push({
+                errors:
+                  executionResult?.status === RuleExecutionStatusEnum.failed
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getErrors()]
+                    : previewRuleExecutionLogger.getErrors(),
+                warnings:
+                  executionResult?.status === RuleExecutionStatusEnum['partial failure']
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getWarnings()]
+                    : previewRuleExecutionLogger.getWarnings(),
+                startedAt: startedAt.toDate().toISOString(),
+                duration: moment().diff(invocationStartTime, 'milliseconds'),
+                ...(loggedRequests ? { requests: loggedRequests } : {}),
+              });
+
+              if (executionResult?.status === RuleExecutionStatusEnum.failed) {
+                break;
+              }
+
+              previousStartedAt = startedAt.toDate();
+              startedAt.add(parseInterval(internalRule.schedule.interval));
+              invocationCount--;
+            }
+          };
+
+          switch (previewRuleParams.type) {
+            case 'query':
+              const queryAlertType = createQueryAlertType({
+                id: QUERY_RULE_TYPE_ID,
+                name: 'Custom Query Rule',
+              });
+              await runExecutors(queryAlertType, previewRuleParams);
+              break;
+            case 'saved_query':
+              const savedQueryAlertType = createQueryAlertType({
+                id: SAVED_QUERY_RULE_TYPE_ID,
+                name: 'Saved Query Rule',
+              });
+              await runExecutors(savedQueryAlertType, previewRuleParams);
+              break;
+            case 'threshold':
+              const thresholdAlertType = createThresholdAlertType();
+              await runExecutors(thresholdAlertType, previewRuleParams);
+              break;
+            case 'threat_match':
+              const threatMatchAlertType = createIndicatorMatchAlertType();
+              await runExecutors(threatMatchAlertType, previewRuleParams);
+              break;
+            case 'eql':
+              const eqlAlertType = createEqlAlertType();
+              await runExecutors(eqlAlertType, previewRuleParams);
+              break;
+            case 'esql':
+              if (config.experimentalFeatures.esqlRulesDisabled) {
+                throw Error('ES|QL rule type is not supported');
+              }
+              const esqlAlertType = createEsqlAlertType();
+              await runExecutors(esqlAlertType, previewRuleParams);
+              break;
+            case 'machine_learning':
+              const mlAlertType = createMlAlertType(ml);
+              await runExecutors(mlAlertType, previewRuleParams);
+              break;
+            case 'new_terms':
+              const newTermsAlertType = createNewTermsAlertType();
+              await runExecutors(newTermsAlertType, previewRuleParams);
+              break;
+            default:
+              assertUnreachable(previewRuleParams);
+          }
+
+          // Refreshes alias to ensure index is able to be read before returning
+          await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
+>>>>>>> 9.4
             {
               config,
               ml,

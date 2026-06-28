@@ -15,6 +15,7 @@ export function getEmbeddableServerRegistry(
   drilldownRegistry: ReturnType<typeof getDrilldownRegistry>
 ) {
   const registry: { [key: string]: EmbeddableServerDefinition<any, any> } = {};
+<<<<<<< HEAD
   let schemaCache: Record<string, Type<object> | undefined> = {};
 
   function getCachedSchema(type: string) {
@@ -27,6 +28,8 @@ export function getEmbeddableServerRegistry(
     schemaCache[type] = schema;
     return schema;
   }
+=======
+>>>>>>> 9.4
 
   return {
     registerEmbeddableServerDefinition: (
@@ -42,7 +45,11 @@ export function getEmbeddableServerRegistry(
     getAllEmbeddableSchemas: () => {
       const schemas: { [key: string]: { schema: ObjectType; title: string } } = {};
       Object.entries(registry).forEach(([type, definition]) => {
+<<<<<<< HEAD
         const schema = getCachedSchema(type);
+=======
+        const schema = definition?.getSchema?.(drilldownRegistry.getSchema);
+>>>>>>> 9.4
         if (schema) {
           schemas[type] = {
             schema: schema as ObjectType,
@@ -53,8 +60,12 @@ export function getEmbeddableServerRegistry(
       return schemas;
     },
     getEmbeddableTransforms: (type: string) => {
+<<<<<<< HEAD
       const { getTransforms, throwOnUnmappedPanel } = registry[type] ?? {};
       const schema = getCachedSchema(type);
+=======
+      const { getTransforms, getSchema, throwOnUnmappedPanel } = registry[type] ?? {};
+>>>>>>> 9.4
       return {
         ...getTransforms?.(drilldownRegistry.transforms),
         ...(schema ? { schema } : {}),

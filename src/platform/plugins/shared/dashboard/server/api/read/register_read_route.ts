@@ -13,11 +13,19 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
+<<<<<<< HEAD
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { logRequest } from '../log_request';
 import { read } from './read';
 import { getReadResponseBodySchema } from './schemas';
+=======
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { getRouteConfig } from '../get_route_config';
+import { getReadResponseBodySchema } from './schemas';
+import { read } from './read';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+>>>>>>> 9.4
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,

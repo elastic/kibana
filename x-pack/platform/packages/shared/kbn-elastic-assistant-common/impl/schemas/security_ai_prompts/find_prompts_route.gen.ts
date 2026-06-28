@@ -22,6 +22,7 @@ import { PromptItemArray } from './common_attributes.gen';
 export const FindSecurityAIPromptsRequestQuery = lazySchema(() =>
   z.object({
     /**
+<<<<<<< HEAD
      * Connector id used for prompt lookup. When provided, connector-specific prompt overrides are applied.
      */
     connector_id: z.string().optional(),
@@ -31,6 +32,17 @@ export const FindSecurityAIPromptsRequestQuery = lazySchema(() =>
     prompt_group_id: z.string(),
     /**
      * List of prompt IDs to retrieve within the specified prompt group.
+=======
+     * Connector id used for prompt lookup
+     */
+    connector_id: z.string().optional(),
+    /**
+     * The unique identifier for the prompt group
+     */
+    prompt_group_id: z.string(),
+    /**
+     * Comma-separated list of prompt IDs to retrieve
+>>>>>>> 9.4
      */
     prompt_ids: ArrayFromString(z.string()),
   })

@@ -53,7 +53,11 @@ import {
   fromAPItoLensState as fromDatatableAPItoLensState,
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
+<<<<<<< HEAD
 import type { LensApiConfig, LensApiConfigChartType } from './schema';
+=======
+import type { LensApiConfig } from './schema';
+>>>>>>> 9.4
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat, isEsqlTableTypeDataSource } from './utils';
 

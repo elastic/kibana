@@ -12,12 +12,21 @@ import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_p
 import { z } from '@kbn/zod/v4';
 
 import {
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_step_properties.test.ts
   clearStepPropertyValidationOutcomeCache,
   validateStepProperties,
 } from './validate_step_properties';
 import { stepSchemas } from '../../../../common/step_schemas';
 import * as stepPropertySelectionCache from '../../../shared/lib/step_property_selection_cache';
 import type { StepPropertyItem } from '../model/types';
+=======
+  clearCustomPropertyValidationOutcomeCache,
+  validateCustomProperties,
+} from './validate_custom_properties';
+import { stepSchemas } from '../../../../common/step_schemas';
+import * as customPropertySelectionCache from '../../../shared/lib/custom_property_selection_cache';
+import type { CustomPropertyItem } from '../model/types';
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_custom_properties.test.ts
 
 // Mock the dependencies
 jest.mock('../../../../common/step_schemas', () => ({
@@ -30,10 +39,17 @@ jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
   getSchemaAtPath: jest.fn(),
 }));
 
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_step_properties.test.ts
 jest.mock('../../../shared/lib/step_property_selection_cache', () => {
   const actual = jest.requireActual<
     typeof import('../../../shared/lib/step_property_selection_cache')
   >('../../../shared/lib/step_property_selection_cache');
+=======
+jest.mock('../../../shared/lib/custom_property_selection_cache', () => {
+  const actual = jest.requireActual<
+    typeof import('../../../shared/lib/custom_property_selection_cache')
+  >('../../../shared/lib/custom_property_selection_cache');
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_custom_properties.test.ts
   return {
     ...actual,
     getCachedSearchOption: jest.fn(actual.getCachedSearchOption),
@@ -47,17 +63,30 @@ const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jes
 >;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
 const mockGetCachedSearchOption =
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_step_properties.test.ts
   stepPropertySelectionCache.getCachedSearchOption as jest.MockedFunction<
     typeof stepPropertySelectionCache.getCachedSearchOption
+=======
+  customPropertySelectionCache.getCachedSearchOption as jest.MockedFunction<
+    typeof customPropertySelectionCache.getCachedSearchOption
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_custom_properties.test.ts
   >;
 
 describe('validateStepProperties', () => {
   beforeEach(() => {
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_step_properties.test.ts
     clearStepPropertyValidationOutcomeCache();
     jest.clearAllMocks();
     const actual = jest.requireActual<
       typeof import('../../../shared/lib/step_property_selection_cache')
     >('../../../shared/lib/step_property_selection_cache');
+=======
+    clearCustomPropertyValidationOutcomeCache();
+    jest.clearAllMocks();
+    const actual = jest.requireActual<
+      typeof import('../../../shared/lib/custom_property_selection_cache')
+    >('../../../shared/lib/custom_property_selection_cache');
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_custom_properties.test.ts
     mockGetCachedSearchOption.mockImplementation(actual.getCachedSearchOption);
   });
 
@@ -532,7 +561,11 @@ describe('validateStepProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['cache-test', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'field' });
 
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_step_properties.test.ts
     const item: StepPropertyItem = {
+=======
+    const item: CustomPropertyItem = {
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_custom_properties.test.ts
       id: 'cache-test-item',
       stepId: 'cache-step',
       startLineNumber: 2,
@@ -552,11 +585,19 @@ describe('validateStepProperties', () => {
       propertyKey: 'field',
       stepType: 'cache-test',
       scope: 'config',
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_step_properties.test.ts
       type: 'step-property',
     };
 
     await validateStepProperties([item]);
     await validateStepProperties([item]);
+=======
+      type: 'custom-property',
+    };
+
+    await validateCustomProperties([item]);
+    await validateCustomProperties([item]);
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_custom_properties.test.ts
 
     expect(selectionHandler.resolve).toHaveBeenCalledTimes(1);
     expect(selectionHandler.getDetails).toHaveBeenCalledTimes(1);

@@ -8,10 +8,20 @@
  */
 
 import { v4 as generateUuid } from 'uuid';
+<<<<<<< HEAD
 import { buildCandidateIds } from '@kbn/human-readable-id';
 
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { isValidWorkflowId } from '../../common/lib/import';
+=======
+
+import { WorkflowValidationError } from '../../common/lib/errors';
+import {
+  buildSuffixedCandidate,
+  isValidWorkflowId,
+  MAX_COLLISION_RETRIES,
+} from '../../common/lib/import';
+>>>>>>> 9.4
 
 const ES_MAX_IDS_PER_QUERY = 10_000;
 
@@ -34,6 +44,33 @@ export const validateWorkflowId = (id: string): void => {
 };
 
 /**
+<<<<<<< HEAD
+=======
+ * Builds the list of candidate IDs for a given base ID:
+ * [baseId, baseId-1, baseId-2, ..., baseId-{MAX_COLLISION_RETRIES}].
+ * Delegates truncation to `buildSuffixedCandidate` so the rule is shared
+ * with the client-side `resolveCollisionId`.
+ *
+ * When a base ID is near WORKFLOW_ID_MAX_LENGTH and already ends with a
+ * hyphen-digit pattern (e.g. `<252 chars>-1`), truncation + re-suffixing
+ * can reconstruct the original base, producing a duplicate entry. Duplicates
+ * are skipped so every element in the returned array is unique.
+ */
+export const buildCandidateIds = (baseId: string): string[] => {
+  const candidates = [baseId];
+  const seen = new Set<string>([baseId]);
+  for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
+    const candidate = buildSuffixedCandidate(baseId, i);
+    if (!seen.has(candidate)) {
+      seen.add(candidate);
+      candidates.push(candidate);
+    }
+  }
+  return candidates;
+};
+
+/**
+>>>>>>> 9.4
  * Resolves unique workflow IDs for one or more base IDs.
  * Generates candidate IDs for each base (baseId, baseId-1, baseId-2, ...),
  * checks them via the provided `checkExisting` callback, and picks the first

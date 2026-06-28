@@ -82,6 +82,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
+<<<<<<< HEAD
               const { taskClient, getKnowledgeIndicatorClient, streamsClient } =
                 await taskContext.getScopedClients({
                   request: fakeRequest,
@@ -89,6 +90,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 });
 
               const kiClient = await getKnowledgeIndicatorClient();
+=======
+              const { taskClient, getQueryClient, streamsClient } =
+                await taskContext.getScopedClients({
+                  request: fakeRequest,
+                });
+>>>>>>> 9.4
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -159,10 +166,19 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
+<<<<<<< HEAD
                       await persistQueries(streamName, queriesTaskResult.queries, {
                         kiClient,
                         streamsClient,
                       });
+=======
+                      if (saveQueries) {
+                        await persistQueries(streamName, queriesTaskResult.queries, {
+                          queryClient: await getQueryClient(),
+                          streamsClient,
+                        });
+                      }
+>>>>>>> 9.4
                       break;
 
                     default:

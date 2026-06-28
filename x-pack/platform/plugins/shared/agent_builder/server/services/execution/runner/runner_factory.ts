@@ -30,7 +30,10 @@ export class RunnerFactoryImpl implements RunnerFactory {
       hooks,
       savedObjects,
       searchInferenceEndpoints,
+<<<<<<< HEAD
       getExecutionService,
+=======
+>>>>>>> 9.4
       ...otherDeps
     } = this.deps;
     return {

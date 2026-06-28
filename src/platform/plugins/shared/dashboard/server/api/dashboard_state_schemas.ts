@@ -237,13 +237,21 @@ export function getDashboardStateSchema(
 ) {
   return schema.object(
     {
+<<<<<<< HEAD
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
+=======
+      pinned_panels: getPinnedPanelsSchema(),
+>>>>>>> 9.4
       description: schema.maybe(
         schema.string({ meta: { description: 'A short description of the dashboard.' } })
       ),
       filters: schema.maybe(
         schema.arrayOf(asCodeFilterSchema, {
+<<<<<<< HEAD
           maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 500,
+=======
+          maxSize: 500,
+>>>>>>> 9.4
           meta: {
             description: 'Filters applied across all panels, including pinned panels.',
           },
@@ -261,7 +269,11 @@ export function getDashboardStateSchema(
           : schema.oneOf([getPanelSchema(), getSectionSchema()]),
         {
           defaultValue: [],
+<<<<<<< HEAD
           maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
+=======
+          maxSize: MAX_PANELS,
+>>>>>>> 9.4
           meta: {
             description:
               'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
@@ -280,15 +292,23 @@ export function getDashboardStateSchema(
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
         schema.arrayOf(schema.string(), {
+<<<<<<< HEAD
           maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 100,
+=======
+          maxSize: 100,
+>>>>>>> 9.4
           meta: { description: 'Tag IDs to associate with this dashboard.' },
         })
       ),
       time_range: schema.maybe(timeRangeSchema),
+<<<<<<< HEAD
       title: schema.string({
         minLength: 1,
         meta: { description: 'A human-readable title for the dashboard.' },
       }),
+=======
+      title: schema.string({ meta: { description: 'A human-readable title for the dashboard.' } }),
+>>>>>>> 9.4
       access_control: accessControlSchema,
     },
     {

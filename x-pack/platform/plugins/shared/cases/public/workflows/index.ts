@@ -97,10 +97,13 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+<<<<<<< HEAD
     import('./simple_steps').then((m) => m.removeTagsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+=======
+>>>>>>> 9.4
     import('./set_category').then((m) => m.setCategoryStepDefinition)
   );
 
@@ -127,10 +130,13 @@ export function registerCasesSteps(
   workflowsExtensions.registerStepDefinition(() =>
     import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
   );
+<<<<<<< HEAD
 }
 
 export function registerCasesWorkflowTriggers(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
 ) {
   registerCasesTriggerDefinitions(workflowsExtensions);
+=======
+>>>>>>> 9.4
 }

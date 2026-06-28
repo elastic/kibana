@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+<<<<<<<< HEAD:x-pack/platform/plugins/private/canvas/test/scout/api/fixtures/index.ts
 export { apiTest } from '@kbn/scout';
 
 export * as testData from './constants';
+========
+export { BackToExternalAppLink } from './back_to_external_app_link';
+>>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/management/components/back_to_external_app_link/index.ts

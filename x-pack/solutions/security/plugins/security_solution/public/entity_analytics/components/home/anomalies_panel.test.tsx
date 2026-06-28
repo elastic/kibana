@@ -40,6 +40,7 @@ describe('AnomaliesPanel', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', MOCK_ML_HREF);
   });
+<<<<<<< HEAD
 
   it('should render the inspect button', () => {
     render(
@@ -50,4 +51,6 @@ describe('AnomaliesPanel', () => {
 
     expect(screen.getByTestId('inspect-icon-button')).toBeInTheDocument();
   });
+=======
+>>>>>>> 9.4
 });

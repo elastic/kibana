@@ -14,6 +14,10 @@ import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks'
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+<<<<<<< HEAD
+=======
+import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+>>>>>>> 9.4
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';

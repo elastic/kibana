@@ -16,11 +16,15 @@ import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-taggin
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
+<<<<<<< HEAD
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
   registerEmbeddablePublicDefinition,
 } from './react_embeddable_system';
+=======
+import type { registerEmbeddablePublicDefinition } from './react_embeddable_system';
+>>>>>>> 9.4
 import type { EmbeddableStateTransfer } from './state_transfer';
 import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
 import type {

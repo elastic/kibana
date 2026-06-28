@@ -115,6 +115,7 @@ export class Config {
     const projectType = isServerless ? getProjectType(serverArgs) : undefined;
 
     return {
+<<<<<<< HEAD
       serverless: isServerless,
       http2: this.get('http2'),
       // `uiam` reflects what the local server was actually started with:
@@ -127,6 +128,17 @@ export class Config {
       projectType,
       productTier: isServerless ? getProductTier(serverArgs, projectType) : undefined,
       organizationId: isServerless ? getOrganizationId(serverArgs) : undefined,
+=======
+      serverless: this.get('serverless'),
+      http2: this.get('http2'),
+      uiam: this.get('esServerlessOptions.uiam', false),
+      projectType: this.get('serverless')
+        ? getProjectType(this.get('kbnTestServer.serverArgs'))
+        : undefined,
+      organizationId: this.get('serverless')
+        ? getOrganizationId(this.get('kbnTestServer.serverArgs'))
+        : undefined,
+>>>>>>> 9.4
       isCloud: false,
       license: this.get('esTestCluster.license'),
       cloudUsersFilePath: Path.resolve(REPO_ROOT, '.ftr', 'role_users.json'),

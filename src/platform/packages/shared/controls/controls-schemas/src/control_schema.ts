@@ -20,6 +20,17 @@ export const controlTitleSchema = schema.object({
 
 const sharedDataControlProps = {
   ...controlTitleSchema.getPropSchemas(),
+<<<<<<< HEAD
+=======
+  data_view_id: schema.string({
+    meta: { description: 'The ID of the data view that the control is tied to' }, // this will generate a reference
+    minLength: 1,
+  }),
+  field_name: schema.string({
+    meta: { description: 'The name of the field in the data view that the control is tied to' },
+    minLength: 1,
+  }),
+>>>>>>> 9.4
   use_global_filters: schema.boolean({
     defaultValue: DEFAULT_DATA_CONTROL_STATE.use_global_filters,
     meta: {

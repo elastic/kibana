@@ -9,7 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
+<<<<<<< HEAD
 import { CorrelationsDetailsView } from '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view';
+=======
+import { CorrelationsDetailsView } from '../../../../flyout_v2/correlations/components/correlations_details_view';
+>>>>>>> 9.4
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';

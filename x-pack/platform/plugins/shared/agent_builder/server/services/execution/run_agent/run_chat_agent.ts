@@ -35,6 +35,7 @@ import {
   selectTools,
   getPendingRound,
   evictInternalEvents,
+<<<<<<< HEAD
   estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
@@ -42,6 +43,13 @@ import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
+=======
+} from './utils';
+import { resolveCapabilities } from './utils/capabilities';
+import { resolveConfiguration } from './utils/configuration';
+import { ensureValidInput } from './utils/preflight_checks';
+import { roundToActions } from './utils/round_to_actions';
+>>>>>>> 9.4
 import { computeContextBudget } from './utils/context_budget';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';

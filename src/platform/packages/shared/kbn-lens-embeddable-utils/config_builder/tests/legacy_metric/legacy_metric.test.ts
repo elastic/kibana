@@ -9,9 +9,17 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
+<<<<<<< HEAD
 import type { LegacyMetricConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
+=======
+import { legacyMetricConfigSchema } from '../../schema/charts/legacy_metric';
+import type { LensApiConfig, LegacyMetricConfig } from '../../schema';
+import { AUTO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import { validateConverter, validateAPIConverter } from '../validate';
+>>>>>>> 9.4
 import {
   customColorByValueAttributes,
   defaultColorByValueAttributes,
@@ -33,6 +41,7 @@ import { validator } from '../utils/validator';
 describe('Legacy Metric', () => {
   describe('state transform validation', () => {
     it('should convert a simple legacy metric', () => {
+<<<<<<< HEAD
       validator.legacy_metric.fromState(simpleLegacyMetricAttributes);
     });
 
@@ -46,48 +55,152 @@ describe('Legacy Metric', () => {
 
     it('should convert a custom metric with a color by value palette', () => {
       validator.legacy_metric.fromState(customColorByValueAttributes);
+=======
+      validateConverter(simpleLegacyMetricAttributes, legacyMetricConfigSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, legacyMetricConfigSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, legacyMetricConfigSchema);
+    });
+
+    it('should convert a custom metric with a color by value palette', () => {
+      validateConverter(customColorByValueAttributes, legacyMetricConfigSchema);
+>>>>>>> 9.4
     });
   });
 
   describe('api transform validation', () => {
     it('should convert abasic legacy metric chart with ad hoc dataView', () => {
+<<<<<<< HEAD
       validator.legacy_metric.fromApi(basicLegacyMetricWithAdHocDataView);
     });
 
     it('should convert a basic legacy metric chart with dataView', () => {
       validator.legacy_metric.fromApi(basicLegacyMetricWithDataView);
+=======
+      validateAPIConverter(basicLegacyMetricWithAdHocDataView, legacyMetricConfigSchema);
+    });
+
+    it('should convert a basic legacy metric chart with dataView', () => {
+      validateAPIConverter(basicLegacyMetricWithDataView, legacyMetricConfigSchema);
+>>>>>>> 9.4
     });
 
     it('should reject a ESQL-based legacy metric chart', () => {
       expect(() =>
+<<<<<<< HEAD
         validator.legacy_metric.fromApi(esqlLegacyMetric as unknown as LegacyMetricConfig)
+=======
+        validateAPIConverter(esqlLegacyMetric as unknown as LensApiConfig, legacyMetricConfigSchema)
+>>>>>>> 9.4
       ).toThrow();
     });
 
     it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
+<<<<<<< HEAD
       validator.legacy_metric.fromApi(comprehensiveLegacyMetricWithAdHocDataView);
     });
 
     it('should convert a comprehensive legacy metric chart with data view', () => {
       validator.legacy_metric.fromApi(comprehensiveLegacyMetricWithDataView);
+=======
+      validateAPIConverter(comprehensiveLegacyMetricWithAdHocDataView, legacyMetricConfigSchema);
+    });
+
+    it('should convert a comprehensive legacy metric chart with data view', () => {
+      validateAPIConverter(comprehensiveLegacyMetricWithDataView, legacyMetricConfigSchema);
+>>>>>>> 9.4
     });
 
     it('should reject a comprehensive ESQL-based legacy metric chart', () => {
       expect(() =>
+<<<<<<< HEAD
         validator.legacy_metric.fromApi(
           comprehensiveEsqlLegacyMetric as unknown as LegacyMetricConfig
+=======
+        validateAPIConverter(
+          comprehensiveEsqlLegacyMetric as unknown as LensApiConfig,
+          legacyMetricConfigSchema
+>>>>>>> 9.4
         )
       ).toThrow();
     });
 
     it('should convert a legacy metric chart with apply_color_to, but without color', () => {
+<<<<<<< HEAD
       validator.legacy_metric.fromApi(legacyMetricWithApplyColorToWithoutColor, [
+=======
+      validateAPIConverter(legacyMetricWithApplyColorToWithoutColor, legacyMetricConfigSchema, [
+>>>>>>> 9.4
         'metric.apply_color_to',
       ]);
     });
 
     it('should convert a legacy metric chart with color, but without apply_color_to', () => {
+<<<<<<< HEAD
       validator.legacy_metric.fromApi(legacyMetricWithColorWithoutApplyColorTo, ['metric.color']);
+    });
+  });
+
+  describe('color default application', () => {
+    it('should emit AUTO_COLOR when apply_color_to is set without color', () => {
+      const config = {
+        type: 'legacy_metric',
+        title: 'Color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+          apply_color_to: 'background',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies LegacyMetricConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
+
+      expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metric.apply_color_to).toBe('background');
+    });
+
+    it('should omit color when apply_color_to is not specified', () => {
+      const config = {
+        type: 'legacy_metric',
+        title: 'Color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies LegacyMetricConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
+
+      expect(apiOutput.metric.color).not.toBeDefined();
+      expect(apiOutput.metric.apply_color_to).not.toBeDefined();
+=======
+      validateAPIConverter(legacyMetricWithColorWithoutApplyColorTo, legacyMetricConfigSchema, [
+        'metric.color',
+      ]);
+>>>>>>> 9.4
     });
   });
 

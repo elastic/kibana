@@ -19,8 +19,11 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+<<<<<<< HEAD
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+=======
+>>>>>>> 9.4
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
@@ -177,11 +180,21 @@ export const ConnectorSelector: React.FC<{}> = () => {
     services: { http, settings },
   } = useKibana();
   const {
+<<<<<<< HEAD
     selectConnector: onSelectConnector,
     selectedConnector: selectedConnectorId,
     defaultConnectorId,
     defaultConnectorOnly,
   } = useConnectorSelection();
+=======
+    connectorSelection: {
+      selectConnector: onSelectConnector,
+      selectedConnector: selectedConnectorId,
+      defaultConnectorId,
+      defaultConnectorOnly,
+    },
+  } = useSendMessage();
+>>>>>>> 9.4
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({

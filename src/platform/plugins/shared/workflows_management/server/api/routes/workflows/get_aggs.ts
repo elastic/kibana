@@ -23,6 +23,7 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 const MAX_AGG_FIELDS = 25;
 const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
 
+<<<<<<< HEAD
 const emptyFieldErrorMessage = () =>
   i18n.translate('workflowsManagement.getAggs.emptyFieldErrorMessage', {
     defaultMessage: 'Aggregation field cannot be empty.',
@@ -42,6 +43,12 @@ const fieldSchema = schema.string({
 
     return !FIELDS_DENY_LIST.has(field) ? undefined : forbiddenFieldErrorMessage();
   },
+=======
+const fieldSchema = schema.string({
+  meta: { description: 'Field name to aggregate.' },
+  validate: (field) =>
+    !FIELDS_DENY_LIST.has(field) ? undefined : 'Field is not allowed for aggregation.',
+>>>>>>> 9.4
 });
 
 export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
@@ -71,12 +78,16 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
                 [
                   fieldSchema,
                   schema.arrayOf(fieldSchema, {
+<<<<<<< HEAD
                     minSize: 1,
+=======
+>>>>>>> 9.4
                     maxSize: MAX_AGG_FIELDS,
                     meta: { description: 'Fields to aggregate on.' },
                   }),
                 ],
                 { meta: { description: 'Field or fields to aggregate on.' } }
+<<<<<<< HEAD
               ),
               managed: schema.maybe(
                 schema.oneOf(
@@ -85,6 +96,8 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
                     meta: { description: 'Filter aggregations by managed status.' },
                   }
                 )
+=======
+>>>>>>> 9.4
               ),
             }),
           },
@@ -92,10 +105,14 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+<<<<<<< HEAD
           if (!hasWorkflowReadPrivilege(request)) {
             return response.forbidden();
           }
           const { fields: rawFields, managed } = request.query;
+=======
+          const { fields: rawFields } = request.query;
+>>>>>>> 9.4
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
           const spaceId = spaces.getSpaceId(request);
           const managedFilter = resolveAuthorizedManagedFilter(request, managed);

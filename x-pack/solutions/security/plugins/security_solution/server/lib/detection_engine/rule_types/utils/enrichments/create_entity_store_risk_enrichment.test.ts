@@ -229,7 +229,11 @@ describe('createEntityStoreEnrichment', () => {
     expect(Object.keys(result).length).toBe(totalEvents);
   });
 
+<<<<<<< HEAD
   it('returns empty object and does not throw when listEntities throws', async () => {
+=======
+  it('returns empty object and logs an error when listEntities throws', async () => {
+>>>>>>> 9.4
     mockGetEuidFromObject.mockReturnValue('host:server1');
 
     const crudClient = {
@@ -247,6 +251,7 @@ describe('createEntityStoreEnrichment', () => {
     });
 
     expect(result).toEqual({});
+<<<<<<< HEAD
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -270,5 +275,8 @@ describe('createEntityStoreEnrichment', () => {
 
     expect(result).toEqual({});
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
+=======
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
+>>>>>>> 9.4
   });
 });

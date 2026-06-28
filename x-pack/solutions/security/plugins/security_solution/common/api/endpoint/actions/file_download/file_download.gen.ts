@@ -18,9 +18,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const EndpointFileDownloadRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The ID of the response action that generated the file.
      */
+=======
+>>>>>>> 9.4
     action_id: z.string(),
     /**
       * The file identifier is constructed in one of two ways:

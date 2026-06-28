@@ -116,7 +116,11 @@ const datatableStylingSchema = schema.object(
               [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
               {
                 defaultValue: 'default',
+<<<<<<< HEAD
                 meta: { description: 'Display density mode.' },
+=======
+                meta: { description: 'Density mode' },
+>>>>>>> 9.4
               }
             )
           ),
@@ -140,7 +144,11 @@ const datatableStylingSchema = schema.object(
                   ],
                   {
                     meta: {
+<<<<<<< HEAD
                       description: 'Number of lines before the header is truncated.',
+=======
+                      description: 'Maximum number of lines to use before header is truncated',
+>>>>>>> 9.4
                     },
                   }
                 )
@@ -160,7 +168,11 @@ const datatableStylingSchema = schema.object(
                   ],
                   {
                     meta: {
+<<<<<<< HEAD
                       description: 'Number of lines to display per table body cell.',
+=======
+                      description: 'Number of lines to display per table body cell',
+>>>>>>> 9.4
                     },
                   }
                 )
@@ -171,7 +183,11 @@ const datatableStylingSchema = schema.object(
         {
           meta: {
             id: 'datatableDensity',
+<<<<<<< HEAD
             description: 'Density configuration for the datatable.',
+=======
+            description: 'Density configuration for the datatable',
+>>>>>>> 9.4
           },
         }
       )
@@ -190,8 +206,12 @@ const datatableStylingSchema = schema.object(
         ],
         {
           meta: {
+<<<<<<< HEAD
             description:
               'Rows per page. When set, pagination is enabled with the specified number of rows.',
+=======
+            description: 'Enables pagination and sets the number of rows to display per page',
+>>>>>>> 9.4
           },
         }
       )
@@ -206,7 +226,11 @@ const datatableStylingSchema = schema.object(
     row_numbers: schema.maybe(
       schema.object(
         {
+<<<<<<< HEAD
           visible: schema.boolean({ meta: { description: 'When `true`, displays row numbers.' } }),
+=======
+          visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
+>>>>>>> 9.4
         },
         {
           meta: {
@@ -418,10 +442,14 @@ export const datatableConfigSchemaNoESQL = schema.object(
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
+<<<<<<< HEAD
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         datatableConfigMetricsOptionsSchema,
         'datatableMetric'
       ),
+=======
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableConfigMetricsOptionsSchema),
+>>>>>>> 9.4
       {
         minSize: 1,
         maxSize: 1000,
@@ -433,10 +461,14 @@ export const datatableConfigSchemaNoESQL = schema.object(
      */
     rows: schema.maybe(
       schema.arrayOf(
+<<<<<<< HEAD
         mergeAllBucketsWithChartDimensionSchema(
           datatableConfigRowsOptionsNoESQLSchema,
           'datatableRow'
         ),
+=======
+        mergeAllBucketsWithChartDimensionSchema(datatableConfigRowsOptionsNoESQLSchema),
+>>>>>>> 9.4
         {
           minSize: 1,
           maxSize: 50,

@@ -33,6 +33,10 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
+<<<<<<< HEAD
+=======
+import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
+>>>>>>> 9.4
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -208,6 +212,7 @@ export class AgentBuilderPlugin
     };
   }
 
+<<<<<<< HEAD
   start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
     this.startDeps = startDeps;
     void registerTracingExporter({
@@ -218,6 +223,18 @@ export class AgentBuilderPlugin
       this.teardownTracing = teardownTracing;
     });
     const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
+=======
+  start(
+    coreStart: CoreStart,
+    {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+    }: AgentBuilderStartDependencies
+  ): AgentBuilderPluginStart {
+>>>>>>> 9.4
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
@@ -266,7 +283,10 @@ export class AgentBuilderPlugin
       savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
+<<<<<<< HEAD
       logger: this.logger.get('model-provider'),
+=======
+>>>>>>> 9.4
     });
 
     return {

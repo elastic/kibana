@@ -59,6 +59,7 @@ export const IMPORTANT_NOTES_TITLE = i18n.translate(
   { defaultMessage: 'Important notes:' }
 );
 
+<<<<<<< HEAD
 export const NOTE_REPLACES_LEGACY_AGENTS = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteReplacesLegacyAgents',
   {
@@ -75,13 +76,23 @@ export const NOTE_HISTORY_UNTOUCHED = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteHistoryUntouched',
   {
     defaultMessage: 'AI Assistant chat history, prompts, and data are untouched',
+=======
+export const NOTE_HISTORY_UNTOUCHED = i18n.translate(
+  'xpack.agentBuilder.announcementModal.noteHistoryUntouched',
+  {
+    defaultMessage: 'Your chat history, prompts, and data are untouched',
+>>>>>>> 9.4
   }
 );
 
 export const NOTE_REVERT_IN_SETTINGS = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteRevertInSettings',
   {
+<<<<<<< HEAD
     defaultMessage: 'Revert all users in this space to AI Assistant anytime in GenAI Settings',
+=======
+    defaultMessage: 'Revert back to AI Assistant anytime in GenAI Settings',
+>>>>>>> 9.4
   }
 );
 

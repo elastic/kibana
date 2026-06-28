@@ -37,7 +37,10 @@ export const upgradePrebuiltRules = async (
       executor: async (rule) => {
         return detectionRulesClient.upgradePrebuiltRule({
           ruleAsset: rule,
+<<<<<<< HEAD
           changeTracking,
+=======
+>>>>>>> 9.4
         });
       },
     });

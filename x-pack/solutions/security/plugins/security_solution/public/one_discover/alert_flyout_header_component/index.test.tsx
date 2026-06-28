@@ -378,6 +378,7 @@ describe('AlertFlyoutHeader', () => {
     });
   });
 
+<<<<<<< HEAD
   it('shows linked project callout text for remote docs in serverless', async () => {
     const hit = {
       id: '1',
@@ -411,6 +412,8 @@ describe('AlertFlyoutHeader', () => {
     });
   });
 
+=======
+>>>>>>> 9.4
   it('does not show the callout when both _id and _index are present in hit.raw', async () => {
     const hit = {
       id: '1',

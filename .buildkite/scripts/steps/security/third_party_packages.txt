@@ -42,6 +42,7 @@ tar-fs
 browserslist
 react-day-picker
 jszip
+<<<<<<< HEAD
 @rsdoctor/rspack-plugin
 @rspack/core
 @rspack/plugin-react-refresh
@@ -50,3 +51,6 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+=======
+patch-package
+>>>>>>> 9.4

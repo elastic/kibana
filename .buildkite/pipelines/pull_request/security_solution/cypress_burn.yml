@@ -16,6 +16,7 @@ steps:
     retry:
       automatic: false
 
+<<<<<<< HEAD
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     key: defend-workflows-serverless-burn
@@ -34,6 +35,8 @@ steps:
     retry:
       automatic: false
 
+=======
+>>>>>>> 9.4
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
     label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
     key: security-solution-burn

@@ -13,6 +13,15 @@ import { HeaderTitle } from './header_title';
 import { TestProviders } from '../../../common/mock';
 import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
+<<<<<<< HEAD
+=======
+import {
+  HEADER_ALERTS_BLOCK_TEST_ID,
+  HEADER_ASSIGNEES_BLOCK_TEST_ID,
+  HEADER_BADGE_TEST_ID,
+} from '../constants/test_ids';
+import { REMOTE_DOCUMENT_BADGE_TEST_ID } from '../../../flyout_v2/document/components/remote_document_badge';
+>>>>>>> 9.4
 
 jest.mock('../../../flyout_v2/attack/main/components/header_title', () => ({
   HeaderTitle: () => <div data-test-subj="v2-header-title" />,
@@ -46,8 +55,24 @@ jest.mock('../../../flyout_v2/shared/components/notes', () => ({
   ),
 }));
 
+<<<<<<< HEAD
 jest.mock('../../../flyout_v2/shared/components/flyout_header_block', () => ({
   flyoutHeaderBlockStyles: {},
+=======
+jest.mock('../../../flyout_v2/document/components/remote_document_badge', () => ({
+  ...jest.requireActual('../../../flyout_v2/document/components/remote_document_badge'),
+  RemoteDocumentBadge: () => <div data-test-subj="remoteDocumentBadge" />,
+}));
+
+jest.mock('../../../flyout_v2/shared/components/alert_header_block', () => ({
+  AlertHeaderBlock: ({
+    children,
+    'data-test-subj': dataTestSubj,
+  }: {
+    children: React.ReactNode;
+    'data-test-subj': string;
+  }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+>>>>>>> 9.4
 }));
 
 const mockedUseAttackDetailsContext = useAttackDetailsContext as jest.Mock;
@@ -70,6 +95,13 @@ describe('HeaderTitle (legacy wrapper)', () => {
       searchHit: mockSearchHit,
       refetch: jest.fn(),
     });
+<<<<<<< HEAD
+=======
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+>>>>>>> 9.4
     mockedUseNavigateToAttackDetailsLeftPanel.mockReturnValue(jest.fn());
   });
 
@@ -77,14 +109,42 @@ describe('HeaderTitle (legacy wrapper)', () => {
     jest.clearAllMocks();
   });
 
+<<<<<<< HEAD
   it('renders the v2 HeaderTitle component', () => {
+=======
+  it('renders the attack badge for a local document', () => {
+>>>>>>> 9.4
     render(
       <TestProviders>
         <HeaderTitle />
       </TestProviders>
     );
 
+<<<<<<< HEAD
     expect(screen.getByTestId('v2-header-title')).toBeInTheDocument();
+=======
+    expect(screen.getByTestId(HEADER_BADGE_TEST_ID)).toHaveTextContent('Attack');
+    expect(screen.queryByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('renders the remote document badge instead of the attack badge for a remote document', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      searchHit: {
+        _index: 'remote-cluster:.alerts-security.alerts-default',
+        _id: 'attack-1',
+      },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(REMOTE_DOCUMENT_BADGE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(HEADER_BADGE_TEST_ID)).not.toBeInTheDocument();
+>>>>>>> 9.4
   });
 
   it('renders the status component', () => {

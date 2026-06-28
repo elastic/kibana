@@ -7,4 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<<< HEAD:src/platform/plugins/private/event_annotation_listing/test/scout/ui/fixtures/page_objects/index.ts
 export { AnnotationListingPage } from './annotation_listing_page';
+========
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+} as const;
+
+export const INTERNAL_HEADERS = {
+  ...COMMON_HEADERS,
+  'x-elastic-internal-origin': 'kibana',
+} as const;
+>>>>>>>> 9.4:src/core/test/scout/api/fixtures/constants.ts

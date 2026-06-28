@@ -78,7 +78,10 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+<<<<<<< HEAD
       hasEncryptionKey: true,
+=======
+>>>>>>> 9.4
     });
 
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
@@ -127,7 +130,10 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+<<<<<<< HEAD
       hasEncryptionKey: true,
+=======
+>>>>>>> 9.4
     });
 
     expect(mockStopTransform).not.toHaveBeenCalled();
@@ -156,7 +162,10 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+<<<<<<< HEAD
       hasEncryptionKey: true,
+=======
+>>>>>>> 9.4
     });
 
     expect(logger.warn).toHaveBeenCalledWith(
@@ -180,7 +189,10 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+<<<<<<< HEAD
       hasEncryptionKey: true,
+=======
+>>>>>>> 9.4
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -204,7 +216,10 @@ describe('cleanupLegacyRiskEngine', () => {
       getStartServices: getStartServicesMock,
       auditLogger: undefined,
       kibanaVersion: '9.0.0',
+<<<<<<< HEAD
       hasEncryptionKey: true,
+=======
+>>>>>>> 9.4
     });
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('remove failed'));

@@ -58,6 +58,7 @@ export const fetchCandidateEntities = async (
     page: 1,
   });
 
+<<<<<<< HEAD
   const leadEntities = entities
     .map(entityRecordToLeadEntity)
     .filter((entity): entity is LeadEntity => entity !== undefined);
@@ -69,6 +70,14 @@ export const fetchCandidateEntities = async (
     } candidates (cap ${MAX_CANDIDATE_ENTITIES}${
       skipped > 0 ? `, skipped ${skipped} without EUID` : ''
     })`
+=======
+  const leadEntities = entities.map(entityRecordToLeadEntity);
+
+  logger?.debug(
+    `[LeadGeneration] Entity selection: ${total ?? leadEntities.length} total -> ${
+      leadEntities.length
+    } candidates (cap ${MAX_CANDIDATE_ENTITIES})`
+>>>>>>> 9.4
   );
 
   return leadEntities;

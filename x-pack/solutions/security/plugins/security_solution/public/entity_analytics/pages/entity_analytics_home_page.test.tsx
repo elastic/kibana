@@ -18,6 +18,7 @@ import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_pr
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 
+<<<<<<< HEAD
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mockReact = require('react');
@@ -31,11 +32,24 @@ jest.mock('../../common/components/links/link_props', () => {
   };
 });
 
+=======
+>>>>>>> 9.4
 jest.mock('../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl:
     () =>
     ({ deepLinkId, path = '' }: { deepLinkId: string; path?: string }) =>
       `/app/security/${deepLinkId}${path}`,
+<<<<<<< HEAD
+=======
+}));
+
+jest.mock('../../sourcerer/containers', () => ({
+  useSourcererDataView: jest.fn(() => ({
+    indicesExist: true,
+    loading: false,
+    sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
+  })),
+>>>>>>> 9.4
 }));
 
 jest.mock('../components/home/dynamic_risk_level_panel', () => ({
@@ -289,6 +303,17 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
+  });
+
+  it('renders the watchlists settings button', () => {
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByRole('link', { name: 'Watchlists settings' })).toBeInTheDocument();
   });
 
   it('renders the watchlists settings button', () => {

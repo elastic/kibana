@@ -68,7 +68,10 @@ export const getRuleMetrics = async ({
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+<<<<<<< HEAD
         elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+=======
+>>>>>>> 9.4
         ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
       };
@@ -172,7 +175,10 @@ export const getRuleMetrics = async ({
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
       elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
+<<<<<<< HEAD
       elastic_detection_rule_deprecated_status: { total: numDeprecated },
+=======
+>>>>>>> 9.4
       ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
     };
@@ -187,7 +193,10 @@ export const getRuleMetrics = async ({
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
       elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+<<<<<<< HEAD
       elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+=======
+>>>>>>> 9.4
       ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),
     };

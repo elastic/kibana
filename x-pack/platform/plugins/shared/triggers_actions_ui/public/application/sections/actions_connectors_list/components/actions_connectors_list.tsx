@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+=======
+import React, { useState, useEffect, useCallback } from 'react';
+>>>>>>> 9.4
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -106,7 +110,11 @@ const ActionsConnectorsList = ({
     setBreadcrumbs,
     chrome,
     docLinks,
+<<<<<<< HEAD
     actions: { isEarsEnabled, isEarsExperimentalEnabled },
+=======
+    actions: { isEarsEnabled },
+>>>>>>> 9.4
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -116,6 +124,7 @@ const ActionsConnectorsList = ({
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
   const isDisabledEarsConnector = useCallback(
+<<<<<<< HEAD
     (item: ActionConnectorTableItem | ActionConnector) => {
       if (!('config' in item) || (item.config as Record<string, unknown>)?.authType !== 'ears') {
         return false;
@@ -125,6 +134,13 @@ const ActionsConnectorsList = ({
       return false;
     },
     [isEarsEnabled, isEarsExperimentalEnabled]
+=======
+    (item: ActionConnectorTableItem | ActionConnector) =>
+      !isEarsEnabled &&
+      'config' in item &&
+      (item.config as Record<string, unknown>)?.authType === 'ears',
+    [isEarsEnabled]
+>>>>>>> 9.4
   );
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -264,6 +280,7 @@ const ActionsConnectorsList = ({
         const link = (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
+<<<<<<< HEAD
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiLink
@@ -302,6 +319,20 @@ const ActionsConnectorsList = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+=======
+              <EuiLink
+                data-test-subj={`edit${item.id}`}
+                title={name}
+                onClick={() => editItem(item, EditConnectorTabs.Configuration)}
+                key={item.id}
+                disabled={
+                  isDisabledEarsConnector(item) ||
+                  (actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true)
+                }
+              >
+                {name}
+              </EuiLink>
+>>>>>>> 9.4
             </EuiFlexItem>
             {item.isPreconfigured && (
               <EuiFlexItem grow={false}>
@@ -333,6 +364,22 @@ const ActionsConnectorsList = ({
                     {
                       defaultMessage:
                         'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
+                    }
+                  )}
+                  position="right"
+                />
+              </EuiFlexItem>
+            )}
+            {isDisabledEarsConnector(item) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
+                    {
+                      defaultMessage:
+                        'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
                     }
                   )}
                   position="right"
@@ -473,6 +520,7 @@ const ActionsConnectorsList = ({
         const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
 
         return (
+<<<<<<< HEAD
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
             {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
               <>
@@ -496,6 +544,11 @@ const ActionsConnectorsList = ({
                   )
                 )}
               </>
+=======
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
+              <OAuthOperations item={item} />
+>>>>>>> 9.4
             )}
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {showFixButton && (

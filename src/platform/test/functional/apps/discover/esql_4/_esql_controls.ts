@@ -20,11 +20,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esql = getService('esql');
 
+<<<<<<< HEAD
   const { dashboard, dashboardControls, discover, timePicker } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'discover',
     'timePicker',
+=======
+  const { dashboard, dashboardControls, discover } = getPageObjects([
+    'dashboard',
+    'dashboardControls',
+    'discover',
+>>>>>>> 9.4
   ]);
 
   describe('discover esql controls', () => {
@@ -93,7 +100,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when viewing an unlinked by-value ES|QL panel in Discover', () => {
       it('should retain the controls and their state', async () => {
+<<<<<<< HEAD
         await addUnlinkedSavedSearch();
+=======
+        // Go to dashboards
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+
+        // Add the saved search
+        await dashboardAddPanel.addSavedSearch('ESQL control unlink test');
+
+        // Unlink the saved search
+        await dashboardPanelActions.clickPanelActionByTitle(
+          'embeddablePanelAction-unlinkFromLibrary',
+          'ESQL control unlink test'
+        );
+>>>>>>> 9.4
 
         // Save dashboard and go to view mode
         await dashboard.saveDashboard('ESQL control unlink test dashboard');

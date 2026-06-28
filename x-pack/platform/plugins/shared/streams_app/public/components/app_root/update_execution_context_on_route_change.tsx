@@ -10,6 +10,7 @@ import { useMatchRoutes } from '@kbn/typed-react-router-config';
 import { last } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 
+<<<<<<< HEAD
 const getPageName = (path: string, params: Record<string, Record<string, string>>): string => {
   if (path === '/') {
     return 'stream_list';
@@ -23,6 +24,8 @@ const getPageName = (path: string, params: Record<string, Record<string, string>
   return path;
 };
 
+=======
+>>>>>>> 9.4
 export function UpdateExecutionContextOnRouteChange({
   children,
 }: {
@@ -31,6 +34,7 @@ export function UpdateExecutionContextOnRouteChange({
   const { core } = useKibana();
   const lastMatch = last(useMatchRoutes());
 
+<<<<<<< HEAD
   const page = lastMatch
     ? getPageName(
         lastMatch.match.path,
@@ -42,6 +46,12 @@ export function UpdateExecutionContextOnRouteChange({
     type: 'application',
     name: 'streams',
     page,
+=======
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    name: 'streams',
+    page: lastMatch?.match?.path,
+>>>>>>> 9.4
   });
 
   return children;

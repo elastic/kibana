@@ -12,7 +12,16 @@ import { uniq } from 'lodash';
 
 import type { WatchlistEntityAssignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/assign.gen';
 import type { WatchlistEntityUnassignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/unassign.gen';
+<<<<<<< HEAD
 import { getErrorFromBulkResponse, errorsMsg, partitionBulkResults } from '../sync/utils';
+=======
+import {
+  getExistingEntitiesMap,
+  getErrorFromBulkResponse,
+  errorsMsg,
+  partitionBulkResults,
+} from '../sync/utils';
+>>>>>>> 9.4
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 import { applyBulkRemoveSource } from '../bulk/soft_delete';
@@ -20,7 +29,11 @@ import { MANUAL_SOURCE_ID } from './constants';
 import type { BulkItemOutcome, WatchlistBulkEntity } from '../types';
 import type { WatchlistEntityDoc } from '../../entities/types';
 import type { WatchlistsByEuid } from '../../entities/service';
+<<<<<<< HEAD
 import { getEntityType, type EntityTypeSource } from '../../entities/utils';
+=======
+import { getEntityType } from '../../entities/utils';
+>>>>>>> 9.4
 
 interface ServiceDeps {
   esClient: ElasticsearchClient;
@@ -79,11 +92,19 @@ export const createManualEntityService = ({
     }
 
     try {
+<<<<<<< HEAD
+=======
+      const existingMap = await getExistingEntitiesMap(esClient, watchlist, [...foundEuids]);
+>>>>>>> 9.4
       const bulkEntities: WatchlistBulkEntity[] = foundEntities.map((e) => ({
         euid: e.euid,
         type: e.type,
         name: e.name,
         sourceId: MANUAL_SOURCE_ID,
+<<<<<<< HEAD
+=======
+        existingEntityId: existingMap.get(e.euid),
+>>>>>>> 9.4
         currentWatchlists: e.currentWatchlists,
       }));
 
@@ -204,7 +225,11 @@ const findEntitiesInStore = async (crudClient: CRUDClient, euids: string[]) => {
     return [
       {
         euid: id,
+<<<<<<< HEAD
         type: getEntityType(entity as EntityTypeSource),
+=======
+        type: getEntityType(entity as Parameters<typeof getEntityType>[0]),
+>>>>>>> 9.4
         name: entity.entity?.name,
         currentWatchlists: normalizeWatchlists(entity.entity?.attributes?.watchlists),
       },

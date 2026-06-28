@@ -756,6 +756,7 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result2,
     });
     expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
+<<<<<<< HEAD
   });
 
   const makeEsqlCols = (names: string[]) =>
@@ -874,5 +875,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
 
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
+=======
+>>>>>>> 9.4
   });
 });

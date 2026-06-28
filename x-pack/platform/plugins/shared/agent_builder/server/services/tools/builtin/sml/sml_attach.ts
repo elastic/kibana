@@ -60,6 +60,10 @@ export const createSmlAttachTool = ({
 
     const resolvedItems = await agentContextLayer.resolveSmlAttachItems({
       chunkIds,
+<<<<<<< HEAD
+=======
+      sml: smlService,
+>>>>>>> 9.4
       esClient,
       request,
       spaceId,

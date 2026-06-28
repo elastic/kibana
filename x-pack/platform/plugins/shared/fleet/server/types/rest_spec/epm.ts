@@ -129,6 +129,7 @@ export const InstallationInfoSchema = schema.object(
     installed_es: schema.arrayOf(EsAssetReferenceSchema, { maxSize: 10000 }),
     name: schema.string(),
     version: schema.string(),
+<<<<<<< HEAD
     install_status: schema.oneOf([
       schema.literal('installed'),
       schema.literal('installing'),
@@ -161,13 +162,110 @@ export const InstallationInfoSchema = schema.object(
           }),
         }),
         { maxSize: 10 }
+=======
+    description: schema.maybe(schema.string()),
+    title: schema.string(),
+    icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
+    deprecated: schema.maybe(DeprecationInfoSchema),
+    conditions: schema.maybe(
+      schema.object({
+        kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
+        elastic: schema.maybe(
+          schema.object({
+            subscription: schema.maybe(schema.string()),
+            capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+          })
+        ),
+        deprecated: schema.maybe(DeprecationInfoSchema),
+      })
+    ),
+    release: schema.maybe(
+      schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
+    ),
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('integration'),
+        schema.literal('input'),
+        schema.literal('content'),
+        schema.string(),
+      ])
+    ),
+    path: schema.maybe(schema.string()),
+    download: schema.maybe(schema.string()),
+    internal: schema.maybe(schema.boolean()),
+    data_streams: schema.maybe(
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    policy_templates: schema.maybe(
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    owner: schema.maybe(
+      schema.object({
+        github: schema.maybe(schema.string()),
+        type: schema.maybe(
+          schema.oneOf([
+            schema.literal('elastic'),
+            schema.literal('partner'),
+            schema.literal('community'),
+          ])
+        ),
+      })
+    ),
+    readme: schema.maybe(schema.string()),
+    signature_path: schema.maybe(schema.string()),
+    source: schema.maybe(
+      schema.object({
+        license: schema.string(),
+      })
+    ),
+    format_version: schema.maybe(schema.string()),
+    vars: schema.maybe(
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    var_groups: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          selector_title: schema.string(),
+          description: schema.maybe(schema.string()),
+          options: schema.arrayOf(
+            schema
+              .object({
+                name: schema.string(),
+                title: schema.string(),
+                description: schema.maybe(schema.string()),
+                vars: schema.arrayOf(schema.string(), { maxSize: 100 }),
+                hide_in_deployment_modes: schema.maybe(
+                  schema.arrayOf(
+                    schema.oneOf([schema.literal('default'), schema.literal('agentless')]),
+                    { maxSize: 2 }
+                  )
+                ),
+              })
+              .extendsDeep({ unknowns: 'allow' }),
+            { maxSize: 100 }
+          ),
+        }),
+        { maxSize: 100 }
+>>>>>>> 9.4
       )
     ),
     latest_executed_state: schema.maybe(
       schema.object({
+<<<<<<< HEAD
         name: schema.maybe(schema.string()),
         started_at: schema.maybe(schema.string()),
         error: schema.maybe(schema.string()),
+=======
+        fields: schema.maybe(
+          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 100 })
+        ),
+        datasets: schema.maybe(
+          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 100 })
+        ),
+>>>>>>> 9.4
       })
     ),
     previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
@@ -316,6 +414,7 @@ export const GetPackagesResponseSchema = schema.object(
   { meta: { id: 'get_packages_response' } }
 );
 
+<<<<<<< HEAD
 export const InstalledPackageSchema = schema.object(
   {
     name: schema.string(),
@@ -325,6 +424,56 @@ export const InstalledPackageSchema = schema.object(
     description: schema.maybe(schema.string()),
     icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
     dataStreams: schema.arrayOf(
+=======
+export const InstalledPackageSchema = schema.object({
+  name: schema.string(),
+  version: schema.string(),
+  status: schema.string(),
+  title: schema.maybe(schema.string()),
+  description: schema.maybe(schema.string()),
+  icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
+  dataStreams: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      title: schema.string(),
+    }),
+    { maxSize: 10000 }
+  ),
+});
+
+export const GetInstalledPackagesResponseSchema = schema.object({
+  items: schema.arrayOf(InstalledPackageSchema, { maxSize: 10000 }),
+  total: schema.number(),
+  searchAfter: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.string(),
+        schema.number(),
+        schema.boolean(),
+        schema.literal(null),
+        schema.any(),
+      ]),
+      { maxSize: 2 }
+    )
+  ),
+});
+
+export const GetLimitedPackagesResponseSchema = schema.object({
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+});
+
+export const GetStatsResponseSchema = schema.object({
+  response: schema.object({
+    agent_policy_count: schema.number(),
+    package_policy_count: schema.number(),
+  }),
+});
+
+export const GetInputsResponseSchema = schema.oneOf([
+  schema.string(),
+  schema.object({
+    inputs: schema.arrayOf(
+>>>>>>> 9.4
       schema.object({
         name: schema.string(),
         title: schema.string(),
@@ -411,6 +560,7 @@ export const PackageMetadataSchema = schema.object(
   { meta: { id: 'package_metadata' } }
 );
 
+<<<<<<< HEAD
 export const GetPackageInfoSchema = PackageInfoSchema.extends(
   {
     assets: schema.recordOf(schema.string(), schema.maybe(schema.any())),
@@ -442,6 +592,36 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends(
   },
   { meta: { id: 'get_package_info' } }
 );
+=======
+export const GetPackageInfoSchema = PackageInfoSchema.extends({
+  assets: schema.recordOf(schema.string(), schema.maybe(schema.any())),
+  notice: schema.maybe(schema.string()),
+  licensePath: schema.maybe(schema.string()),
+  keepPoliciesUpToDate: schema.maybe(schema.boolean()),
+  license: schema.maybe(schema.string()),
+  screenshots: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
+  elasticsearch: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  agent: schema.maybe(
+    schema.object({
+      privileges: schema.maybe(
+        schema.object({
+          root: schema.maybe(schema.boolean()),
+        })
+      ),
+    })
+  ),
+  asset_tags: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        text: schema.string(),
+        asset_types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+        asset_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+});
+>>>>>>> 9.4
 
 export const GetInfoResponseSchema = schema.object(
   {

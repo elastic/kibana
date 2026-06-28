@@ -25,19 +25,31 @@ export const EntitySourceTypeEnum = EntitySourceType.enum;
 
 export const Matcher = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     fields: z.array(z.string().max(256)).max(100),
+=======
+    fields: z.array(z.string()),
+>>>>>>> 9.4
     /**
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
 
       */
+<<<<<<< HEAD
     values: z.union([z.array(z.string().max(256)).max(1000), z.array(z.boolean()).max(1000)]),
+=======
+    values: z.union([z.array(z.string()), z.array(z.boolean())]),
+>>>>>>> 9.4
   })
 );
 export type Matcher = z.infer<typeof Matcher>;
 
 export const Filter = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     kuery: z.union([z.string().max(4096), z.object({}).strict()]).optional(),
+=======
+    kuery: z.union([z.string(), z.object({})]).optional(),
+>>>>>>> 9.4
   })
 );
 export type Filter = z.infer<typeof Filter>;
@@ -47,7 +59,11 @@ export const Integrations = lazySchema(() =>
     /**
      * Index to read latest sync markers from
      */
+<<<<<<< HEAD
     syncMarkerIndex: z.string().max(1000).optional(),
+=======
+    syncMarkerIndex: z.string().optional(),
+>>>>>>> 9.4
     /**
      * integrations latest full sync and update syncData
      */
@@ -75,11 +91,19 @@ export const DateRange = lazySchema(() =>
     /**
      * Start of the lookback period (date math or ISO string, e.g. "now-10d")
      */
+<<<<<<< HEAD
     start: z.string().max(256),
     /**
      * End of the lookback period (date math or ISO string, e.g. "now")
      */
     end: z.string().max(256),
+=======
+    start: z.string(),
+    /**
+     * End of the lookback period (date math or ISO string, e.g. "now")
+     */
+    end: z.string(),
+>>>>>>> 9.4
   })
 );
 export type DateRange = z.infer<typeof DateRange>;
@@ -87,19 +111,34 @@ export type DateRange = z.infer<typeof DateRange>;
 export const UpdateableMonitoringEntitySourceProperties = lazySchema(() =>
   z.object({
     type: EntitySourceType.optional(),
+<<<<<<< HEAD
     name: z.string().max(256).optional(),
     indexPattern: z.string().max(1000).optional(),
     integrationName: z.string().max(256).optional(),
+=======
+    name: z.string().optional(),
+    indexPattern: z.string().optional(),
+    integrationName: z.string().optional(),
+>>>>>>> 9.4
     enabled: z.boolean().optional(),
     /**
      * Field used to query the entity store for index-type sources
      */
+<<<<<<< HEAD
     identifierField: z.string().max(256).optional(),
     /**
      * KQL query used to filter data from the provided index patterns
      */
     queryRule: z.string().max(4096).optional(),
     matchers: z.array(Matcher).max(100).optional(),
+=======
+    identifierField: z.string().optional(),
+    /**
+     * KQL query used to filter data from the provided index patterns
+     */
+    queryRule: z.string().optional(),
+    matchers: z.array(Matcher).optional(),
+>>>>>>> 9.4
     filter: Filter.optional(),
     integrations: Integrations.optional(),
     range: DateRange.optional(),
@@ -134,10 +173,13 @@ export const MonitoringEntitySource = lazySchema(() =>
   MonitoringEntitySourceProperties.merge(
     z.object({
       id: z.string(),
+<<<<<<< HEAD
       /**
        * ID of the API key used for scoped reads from the source index. Only present for index-type sources.
        */
       apiKeyId: z.string().max(64).nullable().optional(),
+=======
+>>>>>>> 9.4
     })
   )
 );

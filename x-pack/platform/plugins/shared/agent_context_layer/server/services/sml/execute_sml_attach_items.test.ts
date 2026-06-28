@@ -210,7 +210,11 @@ describe('resolveSmlAttachItems', () => {
   });
 
   it('uses toAttachment description when provided', async () => {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/execute_sml_attach_items.test.ts
     const smlDoc = createSmlDoc({ origin_id: 'so-1', origin: { uri: 'so-1' } });
+=======
+    const smlDoc = createSmlDoc({ origin_id: 'so-1' });
+>>>>>>> 9.4:x-pack/platform/plugins/shared/agent_builder/server/services/sml/execute_sml_attach_items.test.ts
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
@@ -243,7 +247,10 @@ describe('resolveSmlAttachItems', () => {
       type: 'connector',
       title: 'My Drive',
       origin_id: 'so-1',
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/execute_sml_attach_items.test.ts
       origin: { uri: 'so-1' },
+=======
+>>>>>>> 9.4:x-pack/platform/plugins/shared/agent_builder/server/services/sml/execute_sml_attach_items.test.ts
     });
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
@@ -266,11 +273,16 @@ describe('resolveSmlAttachItems', () => {
     }
   });
 
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/execute_sml_attach_items.test.ts
   it('uses smlDoc.origin.uri when converted attachment has no origin', async () => {
     const smlDoc = createSmlDoc({
       origin_id: 'fallback-origin',
       origin: { uri: 'fallback-origin' },
     });
+=======
+  it('uses smlDoc.origin_id when converted attachment has no origin', async () => {
+    const smlDoc = createSmlDoc({ origin_id: 'fallback-origin' });
+>>>>>>> 9.4:x-pack/platform/plugins/shared/agent_builder/server/services/sml/execute_sml_attach_items.test.ts
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({

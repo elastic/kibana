@@ -180,6 +180,7 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('sha256 filter', () => {
     it('should return the SHA-256 hex digest (Shopify reference vector)', () => {
       const template = '{{ text | sha256 }}';
@@ -216,6 +217,9 @@ describe('WorkflowTemplatingEngine', () => {
   });
 
   describe('base64_encode filter', () => {
+=======
+  describe('base64_encode filter with Buffer support', () => {
+>>>>>>> 9.4
     it('should base64 encode a plain string', () => {
       const template = '{{ text | base64_encode }}';
       const context = { text: 'Hello World' };

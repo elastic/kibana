@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+<<<<<<< HEAD
 import { ECSMappingOrUndefined } from '../model/schema/common_attributes.gen';
 
 export const FindLiveQueryRequestQuery = lazySchema(() =>
@@ -39,6 +40,14 @@ export const FindLiveQueryRequestQuery = lazySchema(() =>
     /**
      * The sort order.
      */
+=======
+export const FindLiveQueryRequestQuery = lazySchema(() =>
+  z.object({
+    kuery: z.string().optional(),
+    page: z.number().int().optional(),
+    pageSize: z.number().int().optional(),
+    sort: z.string().optional(),
+>>>>>>> 9.4
     sortOrder: z.enum(['asc', 'desc']).optional(),
     /**
       * When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.
@@ -49,6 +58,7 @@ export const FindLiveQueryRequestQuery = lazySchema(() =>
 );
 export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
 
+<<<<<<< HEAD
 export const FindLiveQueryResponse = lazySchema(() =>
   z.object({
     data: z
@@ -166,4 +176,10 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
       .optional(),
   })
 );
+=======
+export const FindLiveQueryResponse = lazySchema(() => z.object({}));
+export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
+
+export const FindLiveQueryDetailsResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;

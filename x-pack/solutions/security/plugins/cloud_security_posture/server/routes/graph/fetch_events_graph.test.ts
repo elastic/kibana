@@ -9,9 +9,15 @@ import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
+<<<<<<< HEAD
 import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
+=======
+import type { OriginEventId, EsQuery } from './types';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
+>>>>>>> 9.4
 
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();

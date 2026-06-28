@@ -129,7 +129,11 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.earliest', {
         defaultMessage: 'EARLIEST',
       }),
+<<<<<<< HEAD
       preview: false,
+=======
+      preview: true,
+>>>>>>> 9.4
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -244,7 +248,11 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.latest', {
         defaultMessage: 'LATEST',
       }),
+<<<<<<< HEAD
       preview: false,
+=======
+      preview: true,
+>>>>>>> 9.4
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.latest.markdown', {

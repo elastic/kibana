@@ -18,15 +18,19 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AgentIds, AgentId } from '../../model/schema/common.gen';
 
+<<<<<<< HEAD
 /**
  * Number of pending actions of this type.
  */
+=======
+>>>>>>> 9.4
 export const PendingActionDataType = lazySchema(() => z.number().int());
 export type PendingActionDataType = z.infer<typeof PendingActionDataType>;
 
 export const PendingActionsSchema = lazySchema(() =>
   z.union([
     z.object({
+<<<<<<< HEAD
       /**
        * Number of pending isolate actions.
        */
@@ -62,6 +66,16 @@ export const PendingActionsSchema = lazySchema(() =>
       /**
        * Number of pending scan actions.
        */
+=======
+      isolate: PendingActionDataType.optional(),
+      unisolate: PendingActionDataType.optional(),
+      'kill-process': PendingActionDataType.optional(),
+      'suspend-process': PendingActionDataType.optional(),
+      'running-processes': PendingActionDataType.optional(),
+      'get-file': PendingActionDataType.optional(),
+      execute: PendingActionDataType.optional(),
+      upload: PendingActionDataType.optional(),
+>>>>>>> 9.4
       scan: PendingActionDataType.optional(),
     }),
     z.object({}).catchall(z.unknown()),
@@ -71,6 +85,7 @@ export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
 
 export const ActionStatusSuccessResponse = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * One pending-actions summary entry per requested agent.
      */
@@ -80,16 +95,30 @@ export const ActionStatusSuccessResponse = lazySchema(() =>
         pending_actions: PendingActionsSchema,
       })
     ),
+=======
+    body: z.object({
+      data: z.object({
+        agent_id: AgentId,
+        pending_actions: PendingActionsSchema,
+      }),
+    }),
+>>>>>>> 9.4
   })
 );
 export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
 
 export const EndpointGetActionsStatusRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * A list of agent IDs to get the action status for.
      */
     agent_ids: AgentIds,
+=======
+    query: z.object({
+      agent_ids: AgentIds.optional(),
+    }),
+>>>>>>> 9.4
   })
 );
 export type EndpointGetActionsStatusRequestQuery = z.infer<

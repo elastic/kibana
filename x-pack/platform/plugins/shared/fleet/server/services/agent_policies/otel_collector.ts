@@ -281,6 +281,7 @@ export function generateOtelcolConfig({
   return attachOtelcolExporter(config, outputsById, pipelineIdsByOutputId, proxy, logger);
 }
 
+<<<<<<< HEAD
 /**
  * Resolve the set of Outputs referenced by the per-stream routing pass, keyed by the
  * pipeline-suffix output ID used in the OTel config. The returned IDs are either the
@@ -316,6 +317,8 @@ function resolveOutputsById({
   return outputsById;
 }
 
+=======
+>>>>>>> 9.4
 function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
   return [
     `set(attributes["data_stream.type"], "${type}")`,
@@ -369,6 +372,18 @@ function generateOtelTypeTransforms(
             // See: x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts
             context: 'spanevent',
             statements: buildDataStreamStatements('logs', dataset, namespace),
+<<<<<<< HEAD
+=======
+          },
+        ],
+      };
+    case 'profiles':
+      return {
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: buildDataStreamStatements('profiles', dataset, namespace),
+>>>>>>> 9.4
           },
         ],
       };
@@ -404,6 +419,7 @@ function generateOTelAttributesTransform(
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {
+<<<<<<< HEAD
     signalTypes
       // Fleet-unmanaged signals (e.g. profiles) are routed by the Elasticsearch exporter,
       // not by Fleet, so they must not get a data_stream.* routing transform.
@@ -413,6 +429,13 @@ function generateOTelAttributesTransform(
         Object.assign(transformStatements, typeTransforms);
       });
   } else if (!FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type)) {
+=======
+    signalTypes.forEach((signalType) => {
+      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
+      Object.assign(transformStatements, typeTransforms);
+    });
+  } else {
+>>>>>>> 9.4
     // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }
@@ -673,7 +696,15 @@ function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, 
     }
     return {};
   } catch (e) {
+<<<<<<< HEAD
     throw new FleetError(`Failed to parse output config_yaml for beatsauth: ${e.message}`);
+=======
+    throw new FleetError(
+      `Failed to parse output config_yaml for beatsauth: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    );
+>>>>>>> 9.4
   }
 }
 

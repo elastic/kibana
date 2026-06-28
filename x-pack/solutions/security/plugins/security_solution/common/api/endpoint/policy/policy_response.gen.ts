@@ -20,10 +20,16 @@ import { AgentId, SuccessResponse } from '../model/schema/common.gen';
 
 export const GetPolicyResponseRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The agent ID to retrieve the policy response for.
      */
     agentId: AgentId,
+=======
+    query: z.object({
+      agentId: AgentId.optional(),
+    }),
+>>>>>>> 9.4
   })
 );
 export type GetPolicyResponseRequestQuery = z.infer<typeof GetPolicyResponseRequestQuery>;

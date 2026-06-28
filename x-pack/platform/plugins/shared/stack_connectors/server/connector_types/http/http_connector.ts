@@ -29,7 +29,10 @@ import {
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+<<<<<<< HEAD
 import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
+=======
+>>>>>>> 9.4
 import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
@@ -210,6 +213,7 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
+<<<<<<< HEAD
 function checkFormDataMaxSize(formData: HttpFormDataField, maxSize: number | undefined): void {
   if (maxSize != null) {
     let total = 0;
@@ -260,6 +264,8 @@ function buildFormData(formData: HttpFormDataField, maxSize: number | undefined)
   return form;
 }
 
+=======
+>>>>>>> 9.4
 function processResponseHeaders(headers: object): Record<string, string> {
   return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
     if (value != null) {
@@ -269,11 +275,15 @@ function processResponseHeaders(headers: object): Record<string, string> {
   }, {});
 }
 
+<<<<<<< HEAD
 /*
  * Action executor for the HTTP connector. Shared by the regular and system connector types.
  * @param execOptions - The executor options
  * @returns The HTTP connector execution response
  */
+=======
+// action executor
+>>>>>>> 9.4
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
 ): Promise<HttpConnectorTypeExecutorResult> {
@@ -396,7 +406,11 @@ export async function executor(
       url,
       logger,
       headers: finalHeaders,
+<<<<<<< HEAD
       data: requestData,
+=======
+      data: serializeHttpRequestBody(body),
+>>>>>>> 9.4
       configurationUtilities,
       sslOverrides,
       proxyOverrides,

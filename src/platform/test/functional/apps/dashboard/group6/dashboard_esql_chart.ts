@@ -45,7 +45,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
       await header.waitUntilLoadingHasFinished();
+<<<<<<< HEAD
       await dashboardAddPanel.clickAddEsqlPanel();
+=======
+      await dashboardAddPanel.openAddPanelFlyout();
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+>>>>>>> 9.4
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
 
@@ -111,7 +116,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to edit the query and render another chart', async () => {
+<<<<<<< HEAD
       await dashboardAddPanel.clickAddEsqlPanel();
+=======
+      await dashboardAddPanel.openAddPanelFlyout();
+      log.debug('After openAddPanelFlyout');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+>>>>>>> 9.4
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();

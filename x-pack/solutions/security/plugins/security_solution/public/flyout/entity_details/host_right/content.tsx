@@ -121,7 +121,10 @@ export const HostPanelContent = ({
         />
       )}
       <EntityInsight
+<<<<<<< HEAD
         entityRecord={entityRecord}
+=======
+>>>>>>> 9.4
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}

@@ -17,7 +17,10 @@ import type {
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
+<<<<<<< HEAD
   generateLightweightYamlSchema,
+=======
+>>>>>>> 9.4
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
@@ -264,10 +267,13 @@ function convertDynamicConnectorsToContractsInternal(
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
+<<<<<<< HEAD
 export interface WorkflowZodSchemaOptions {
   lightweight?: boolean;
 }
 
+=======
+>>>>>>> 9.4
 // NOTE: The former `WORKFLOW_ZOD_SCHEMA` / `WORKFLOW_ZOD_SCHEMA_LOOSE`
 // module-level constants were removed in favour of `getWorkflowZodSchema()` /
 // `getWorkflowZodSchemaLoose()`. They were unreferenced and their eager

@@ -63,6 +63,18 @@ export const generateLeadsRoute = (
           const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const { connectorId } = request.body;
+<<<<<<< HEAD
+=======
+
+          await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
+          logger.info(
+            `[LeadGeneration] Resolving connector (connectorId=${connectorId}, executionUuid=${executionUuid})`
+          );
+          const chatModel = await resolveChatModel(startPlugins.inference, request, connectorId);
+          logger.info(
+            `[LeadGeneration] Connector resolved successfully (connectorId=${connectorId}, executionUuid=${executionUuid})`
+          );
+>>>>>>> 9.4
 
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
           logger.info(

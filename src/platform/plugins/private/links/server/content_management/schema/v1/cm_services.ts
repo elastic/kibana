@@ -18,7 +18,10 @@ import {
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
+<<<<<<< HEAD
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
+=======
+>>>>>>> 9.4
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,

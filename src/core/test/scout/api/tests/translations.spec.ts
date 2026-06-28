@@ -42,6 +42,7 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     }
   });
 
+<<<<<<< HEAD
   apiTest(
     'serves a non-default locale file with the locale field intact',
     async ({ apiClient }) => {
@@ -68,6 +69,8 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     }
   );
 
+=======
+>>>>>>> 9.4
   apiTest('returns a 404 when not using the correct locale', async ({ apiClient }) => {
     const response = await apiClient.get('/translations/foo.json', {
       headers: {

@@ -248,6 +248,15 @@ export const configSchema = schema.object({
       })
     ),
   }),
+<<<<<<< HEAD
+=======
+  ears: schema.maybe(
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      url: schema.maybe(schema.uri({ scheme: ['https'] })),
+    })
+  ),
+>>>>>>> 9.4
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

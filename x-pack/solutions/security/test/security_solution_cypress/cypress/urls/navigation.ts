@@ -124,10 +124,13 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
 
+<<<<<<< HEAD
 // Configurations
 export const CONFIGURATIONS_INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
 export const CONFIGURATIONS_BASIC_RULES_URL_FRAGMENT = '/configurations/basic_rules';
 
+=======
+>>>>>>> 9.4
 // Launchpad
 export const GET_STARTED_URL = '/app/security/get_started';
 export const SIEM_READINESS_URL = 'app/security/siem_readiness/visibility/coverage';

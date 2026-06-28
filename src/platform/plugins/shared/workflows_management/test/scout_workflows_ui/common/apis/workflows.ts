@@ -272,17 +272,25 @@ export class WorkflowsApiService {
   }
 
   /** GET /api/workflows/workflow/aggs —  */
+<<<<<<< HEAD
   async rawGetAggs(
     fields: string | string[],
     managed?: 'all' | 'managed' | 'unmanaged'
   ): Promise<{
+=======
+  async rawGetAggs(fields: string | string[]): Promise<{
+>>>>>>> 9.4
     data: WorkflowAggsDto;
     status: number;
   }> {
     const response = await this.kbnClient.request<WorkflowAggsDto>({
       method: 'GET',
       path: `/s/${this.spaceId}/api/workflows/aggs`,
+<<<<<<< HEAD
       query: { fields, ...(managed ? { managed } : {}) },
+=======
+      query: { fields },
+>>>>>>> 9.4
       ignoreErrors: [400, 404], // allow 400 & 404 responses through for assertion in tests
     });
     return response;

@@ -159,6 +159,7 @@ export type ECSMapping = z.infer<typeof ECSMapping>;
 export const ECSMappingOrUndefined = lazySchema(() => ECSMapping.nullable());
 export type ECSMappingOrUndefined = z.infer<typeof ECSMappingOrUndefined>;
 
+<<<<<<< HEAD
 /**
  * ECS mapping item in saved-object storage format (key-value pair).
  */
@@ -182,6 +183,8 @@ export type ECSMappingArray = z.infer<typeof ECSMappingArray>;
 export const ECSMappingArrayOrUndefined = lazySchema(() => ECSMappingArray.nullable());
 export type ECSMappingArrayOrUndefined = z.infer<typeof ECSMappingArrayOrUndefined>;
 
+=======
+>>>>>>> 9.4
 export const ArrayQueriesItem = lazySchema(() =>
   z.object({
     id: QueryId.optional(),
@@ -201,6 +204,7 @@ export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
 export const ArrayQueries = lazySchema(() => z.array(ArrayQueriesItem));
 export type ArrayQueries = z.infer<typeof ArrayQueries>;
 
+<<<<<<< HEAD
 /**
   * Discriminator for the pack's schedule mode. `interval` uses native
 osqueryd interval scheduling (seconds). `rrule` uses osquerybeat's
@@ -264,6 +268,8 @@ export type RRuleScheduleConfig = z.infer<typeof RRuleScheduleConfig>;
 export const RRuleScheduleConfigOrUndefined = lazySchema(() => RRuleScheduleConfig.nullable());
 export type RRuleScheduleConfigOrUndefined = z.infer<typeof RRuleScheduleConfigOrUndefined>;
 
+=======
+>>>>>>> 9.4
 export const ObjectQueriesItem = lazySchema(() =>
   z.object({
     query: Query.optional(),
@@ -274,8 +280,11 @@ export const ObjectQueriesItem = lazySchema(() =>
     saved_query_id: SavedQueryIdOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+<<<<<<< HEAD
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+=======
+>>>>>>> 9.4
   })
 );
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
@@ -332,6 +341,7 @@ export type Shards = z.infer<typeof Shards>;
 
 export const DefaultSuccessResponse = lazySchema(() => z.object({}));
 export type DefaultSuccessResponse = z.infer<typeof DefaultSuccessResponse>;
+<<<<<<< HEAD
 
 /**
  * Pack-level interval, in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.
@@ -341,3 +351,5 @@ export type PackInterval = z.infer<typeof PackInterval>;
 
 export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
 export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
+=======
+>>>>>>> 9.4

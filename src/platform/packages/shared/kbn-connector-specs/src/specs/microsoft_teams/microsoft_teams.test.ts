@@ -66,6 +66,7 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
+<<<<<<< HEAD
     it('should support bearer, oauth_authorization_code, oauth_client_credentials, and ears', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
@@ -74,6 +75,15 @@ describe('MicrosoftTeams', () => {
       expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
       expect(auth?.types[2]).toEqual(expect.objectContaining({ type: 'oauth_client_credentials' }));
       expect(auth?.types[3]).toEqual(expect.objectContaining({ type: 'ears' }));
+=======
+    it('should support bearer, oauth_authorization_code, and oauth_client_credentials', () => {
+      const { auth } = MicrosoftTeams;
+      expect(auth).toBeDefined();
+      expect(auth?.types).toHaveLength(3);
+      expect(auth?.types[0]).toEqual(expect.objectContaining({ type: 'bearer' }));
+      expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
+      expect(auth?.types[2]).toEqual(expect.objectContaining({ type: 'oauth_client_credentials' }));
+>>>>>>> 9.4
     });
 
     it('should have correct oauth_authorization_code defaults', () => {
@@ -89,6 +99,7 @@ describe('MicrosoftTeams', () => {
       });
     });
 
+<<<<<<< HEAD
     it('should have correct ears defaults with microsoft provider and Teams scopes', () => {
       const earsType = MicrosoftTeams.auth?.types.find(
         (t) => typeof t === 'object' && t.type === 'ears'
@@ -109,6 +120,8 @@ describe('MicrosoftTeams', () => {
       expect(earsType?.overrides?.meta?.scope?.disabled).toBe(true);
     });
 
+=======
+>>>>>>> 9.4
     it('oauth_authorization_code scope should include Teams-required permissions', () => {
       const oauthType = MicrosoftTeams.auth?.types.find(
         (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'

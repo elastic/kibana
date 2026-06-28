@@ -16,6 +16,7 @@ import type { CorrelationsDetailsProps } from '../../../../flyout_v2/document/to
 
 jest.mock('@kbn/expandable-flyout');
 
+<<<<<<< HEAD
 jest.mock(
   '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view',
   () => ({
@@ -33,6 +34,18 @@ jest.mock(
     ),
   })
 );
+=======
+jest.mock('../../../../flyout_v2/correlations/components/correlations_details_view', () => ({
+  CorrelationsDetailsView: ({ scopeId, isRulePreview, onShowAttack }: CorrelationsDetailsProps) => (
+    <div
+      data-test-subj="correlationsDetailsV2Mock"
+      data-scope-id={scopeId}
+      data-is-rule-preview={String(isRulePreview)}
+      data-has-on-show-attack={String(typeof onShowAttack === 'function')}
+    />
+  ),
+}));
+>>>>>>> 9.4
 
 const renderCorrelationDetails = () =>
   render(

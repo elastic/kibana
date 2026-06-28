@@ -242,6 +242,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+<<<<<<< HEAD
   it('omits index template settings when isServerless option is true', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
       isServerless: true,
@@ -376,6 +377,8 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+=======
+>>>>>>> 9.4
   it('works without transport options (backward compatible)', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -409,6 +412,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
       transportOptions
     );
   });
+<<<<<<< HEAD
 });
 
 describe('StorageIndexAdapter - esql method', () => {
@@ -661,4 +665,6 @@ describe('StorageIndexAdapter - esql method', () => {
 
     expect(esqlQuery).toHaveBeenCalledTimes(1);
   });
+=======
+>>>>>>> 9.4
 });

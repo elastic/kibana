@@ -42,9 +42,18 @@ import { getRiskIndex } from '../../../../../../common/search_strategy';
 const resolveV2Enrichments = async <T extends DetectionAlertLatest>(
   opts: EnrichmentOptions<T>
 ): Promise<Array<Promise<EventsMapByEnrichments>>> => {
+<<<<<<< HEAD
   const { services, spaceId, entityStoreCrudClient } = opts;
 
   if (entityStoreCrudClient === undefined) {
+=======
+  const { services, spaceId, logger, entityStoreCrudClient } = opts;
+
+  if (entityStoreCrudClient === undefined) {
+    logger.warn(
+      'Enrichments: entityStoreCrudClient is not available, skipping entity store enrichments'
+    );
+>>>>>>> 9.4
     return [];
   }
 

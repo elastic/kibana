@@ -13,7 +13,10 @@ import { deduplicateUserIds, partitionByIdSource, removeConflictingIds } from '.
 const makeEntry = (overrides: Partial<BulkWorkflowEntry> & { id: string }): BulkWorkflowEntry => ({
   idx: 0,
   idSource: 'server-generated' as const,
+<<<<<<< HEAD
   baseId: overrides.id,
+=======
+>>>>>>> 9.4
   workflowData: {} as BulkWorkflowEntry['workflowData'],
   ...overrides,
 });

@@ -36,6 +36,7 @@ export type OsqueryCreateLiveQueryRequestBodyInput = z.input<
 
 export const OsqueryCreateLiveQueryResponse = lazySchema(() => CreateLiveQueryResponse);
 export type OsqueryCreateLiveQueryResponse = z.infer<typeof OsqueryCreateLiveQueryResponse>;
+<<<<<<< HEAD
 export const OsqueryExportLiveQueryResultsRequestQuery = lazySchema(() =>
   z.object({
     /**
@@ -107,6 +108,14 @@ export const OsqueryFindLiveQueriesRequestQuery = lazySchema(() =>
     /**
      * The sort order.
      */
+=======
+export const OsqueryFindLiveQueriesRequestQuery = lazySchema(() =>
+  z.object({
+    kuery: KueryOrUndefined.optional(),
+    page: PageOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional(),
+    sort: SortOrUndefined.optional(),
+>>>>>>> 9.4
     sortOrder: SortOrderOrUndefined.optional(),
   })
 );
@@ -120,9 +129,12 @@ export type OsqueryFindLiveQueriesResponse = z.infer<typeof OsqueryFindLiveQueri
 
 export const OsqueryGetLiveQueryDetailsRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The ID of the live query.
      */
+=======
+>>>>>>> 9.4
     id: z.string(),
   })
 );
@@ -137,6 +149,7 @@ export const OsqueryGetLiveQueryDetailsResponse = lazySchema(() => FindLiveQuery
 export type OsqueryGetLiveQueryDetailsResponse = z.infer<typeof OsqueryGetLiveQueryDetailsResponse>;
 export const OsqueryGetLiveQueryResultsRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * A KQL search string to filter results.
      */
@@ -156,6 +169,12 @@ export const OsqueryGetLiveQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The sort order.
      */
+=======
+    kuery: KueryOrUndefined.optional(),
+    page: PageOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional(),
+    sort: SortOrUndefined.optional(),
+>>>>>>> 9.4
     sortOrder: SortOrderOrUndefined.optional(),
   })
 );
@@ -168,6 +187,7 @@ export type OsqueryGetLiveQueryResultsRequestQueryInput = z.input<
 
 export const OsqueryGetLiveQueryResultsRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The ID of the live query.
      */
@@ -175,6 +195,9 @@ export const OsqueryGetLiveQueryResultsRequestParams = lazySchema(() =>
     /**
      * The ID of the query action.
      */
+=======
+    id: z.string(),
+>>>>>>> 9.4
     actionId: z.string(),
   })
 );

@@ -1364,7 +1364,13 @@ paths:
                       $ref: '#/components/schemas/WatchlistEntityUnassignResponseItem'
                     type: array
                   not_found:
+<<<<<<< HEAD
                     description: Number of entities not found in the manual watchlist assignment
+=======
+                    description: >-
+                      Number of entities not found in the manual watchlist
+                      assignment
+>>>>>>> 9.4
                     example: 1
                     type: integer
                   successful:
@@ -1421,6 +1427,7 @@ paths:
       tags:
         - Security Entity Analytics API
       x-state: Technical Preview
+<<<<<<< HEAD
   /api/entity_store/enable:
     post:
       description: Initialize the entire Entity Store, creating engines for all or
@@ -2280,6 +2287,8 @@ paths:
       summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
+=======
+>>>>>>> 9.4
   /api/risk_score/engine/dangerously_delete_data:
     delete:
       description: Cleaning up the the Risk Engine by removing the indices, mapping
@@ -2505,6 +2514,7 @@ paths:
         - Security Entity Analytics API
 components:
   schemas:
+<<<<<<< HEAD
     Asset:
       additionalProperties: false
       description: Asset metadata associated with the entity.
@@ -2538,6 +2548,8 @@ components:
         vendor:
           description: Vendor or manufacturer.
           type: string
+=======
+>>>>>>> 9.4
     AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -2738,6 +2750,7 @@ components:
             - criticality_level
     DateRange:
       description: Defines the lookback period for filtering source data by timestamp.
+<<<<<<< HEAD
       type: object
       properties:
         end:
@@ -2937,6 +2950,21 @@ components:
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
         - $ref: '#/components/schemas/GenericEntity'
+=======
+      type: object
+      properties:
+        end:
+          description: End of the lookback period (date math or ISO string, e.g. "now")
+          type: string
+        start:
+          description: >-
+            Start of the lookback period (date math or ISO string, e.g.
+            "now-10d")
+          type: string
+      required:
+        - start
+        - end
+>>>>>>> 9.4
     EntityAnalyticsPrivileges:
       type: object
       properties:
@@ -2971,6 +2999,7 @@ components:
       required:
         - has_all_required
         - privileges
+<<<<<<< HEAD
     EntityContainer:
       description: A wrapper that pairs an entity type with the entity record to upsert.
       type: object
@@ -3258,12 +3287,15 @@ components:
         - category_1_count
         - inputs
         - notes
+=======
+>>>>>>> 9.4
     EntitySourceType:
       enum:
         - index
         - entity_analytics_integration
         - store
       type: string
+<<<<<<< HEAD
     EntityType:
       description: The type of entity.
       enum:
@@ -3272,11 +3304,14 @@ components:
         - service
         - generic
       type: string
+=======
+>>>>>>> 9.4
     Filter:
       type: object
       properties:
         kuery:
           oneOf:
+<<<<<<< HEAD
             - maxLength: 4096
               type: string
             - additionalProperties: false
@@ -3400,6 +3435,10 @@ components:
             - name
       required:
         - entity
+=======
+            - type: string
+            - type: object
+>>>>>>> 9.4
     IdField:
       enum:
         - host.name
@@ -3407,6 +3446,7 @@ components:
         - service.name
         - entity.id
       type: string
+<<<<<<< HEAD
     IndexPattern:
       description: An additional Elasticsearch index pattern to include as a source
         for entity data. Merged with the default data view indices when the
@@ -3430,6 +3470,8 @@ components:
       required:
         - dsl
         - response
+=======
+>>>>>>> 9.4
     Integrations:
       type: object
       properties:
@@ -3449,6 +3491,7 @@ components:
           description: Index to read latest sync markers from
           maxLength: 1000
           type: string
+<<<<<<< HEAD
     Interval:
       description: Interval in which enrich policy runs. For example, `"1h"` means the
         rule runs every hour. Must be less than or equal to half the duration of
@@ -3456,6 +3499,8 @@ components:
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+=======
+>>>>>>> 9.4
     Matcher:
       type: object
       properties:
@@ -3484,8 +3529,6 @@ components:
       required:
         - fields
         - values
-    Metadata:
-      $ref: '#/components/schemas/TransformStatsMetadata'
     MonitoredUserDoc:
       allOf:
         - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
@@ -3673,6 +3716,7 @@ components:
       properties:
         success:
           type: boolean
+<<<<<<< HEAD
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object
@@ -3762,6 +3806,8 @@ components:
         - stopped
         - error
       type: string
+=======
+>>>>>>> 9.4
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -3774,6 +3820,7 @@ components:
       required:
         - status_code
         - message
+<<<<<<< HEAD
     TransformStatsMetadata:
       description: Statistics from the underlying Elasticsearch transform.
       type: object
@@ -3845,6 +3892,8 @@ components:
         - exponential_avg_checkpoint_duration_ms
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
+=======
+>>>>>>> 9.4
     UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
@@ -3880,6 +3929,7 @@ components:
           $ref: '#/components/schemas/DateRange'
         type:
           $ref: '#/components/schemas/EntitySourceType'
+<<<<<<< HEAD
     UserEntity:
       additionalProperties: false
       description: An entity record representing a user, stored in the Entity Store
@@ -3948,6 +3998,8 @@ components:
             - name
       required:
         - entity
+=======
+>>>>>>> 9.4
     UserName:
       type: object
       properties:

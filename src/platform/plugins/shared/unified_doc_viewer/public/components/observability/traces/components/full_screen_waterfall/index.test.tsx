@@ -22,6 +22,17 @@ const renderWithHistoryKey = (ui: React.ReactElement) =>
     <FlyoutHistoryKeyContext.Provider value={testHistoryKey}>{ui}</FlyoutHistoryKeyContext.Provider>
   );
 
+<<<<<<< HEAD
+=======
+jest.mock('./waterfall_flyout/span_flyout', () => ({
+  spanFlyoutId: 'spanDetailFlyout',
+}));
+
+jest.mock('./waterfall_flyout/logs_flyout', () => ({
+  logsFlyoutId: 'logsFlyout',
+}));
+
+>>>>>>> 9.4
 let capturedDocFlyoutHasAnimation: boolean | undefined;
 
 jest.mock('./waterfall_flyout/document_detail_flyout', () => ({

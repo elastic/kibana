@@ -10687,10 +10687,17 @@ describe('Package policy service', () => {
         }
       );
 
+<<<<<<< HEAD
       it('seeds httpjson input-level vars into cel input-level vars when cel vars are null/empty (partial migration)', () => {
         // The SentinelOne partial-migration scenario: cel existed alongside httpjson but the user
         // never configured cel (its vars are null or empty). httpjson values seed the new cel
         // input because the user's configuration lives on the httpjson side.
+=======
+      it('seeds httpjson input-level vars into cel input-level vars even when cel vars are non-empty (partial migration)', () => {
+        // Regression test for the SentinelOne upgrade scenario: cel existed alongside httpjson
+        // with url: 'elastic' (non-empty). httpjson always wins for shared keys during
+        // stream migration — that is the purpose of migrate_from.
+>>>>>>> 9.4
         const basePolicyWithDisabledCelNonEmpty: NewPackagePolicy = {
           ...makePartialMigrationBasePolicy(),
           inputs: [
@@ -10731,6 +10738,7 @@ describe('Package policy service', () => {
         );
 
         const celInput = result.inputs.find((i) => i.type === 'cel');
+<<<<<<< HEAD
         // cel's non-empty url wins; httpjson seeds the empty api_token
         expect(celInput?.vars?.url?.value).toBe('elastic');
         expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
@@ -10741,6 +10749,17 @@ describe('Package policy service', () => {
         // collects alerts and cel collects vulnerabilities with different credentials), the cel
         // input's own values must win for shared keys — httpjson credentials must not overwrite
         // independently-set cel credentials.
+=======
+        // httpjson always wins for shared keys — cel's non-empty 'elastic' value is overridden
+        expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
+        expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
+      });
+
+      it('httpjson input-level vars always win over cel vars for shared keys during stream migration', () => {
+        // When stream migrate_from fires, httpjson is the authoritative source for shared vars
+        // (url, api_token). Even if cel had non-empty values, httpjson wins because the whole
+        // point of migrate_from is to carry over the user's configuration from the old input.
+>>>>>>> 9.4
         const basePolicyWithBothConfigured: NewPackagePolicy = {
           ...makePartialMigrationBasePolicy(),
           inputs: [
@@ -10781,6 +10800,7 @@ describe('Package policy service', () => {
         );
 
         const celInput = result.inputs.find((i) => i.type === 'cel');
+<<<<<<< HEAD
         // cel's own non-empty values win — cel was independently configured by the user
         expect(celInput?.vars?.url?.value).toBe('http://cel-url.com');
         expect(celInput?.vars?.api_token?.value).toBe('cel-token');
@@ -10832,6 +10852,11 @@ describe('Package policy service', () => {
         // cel vars were null — httpjson seeds them
         expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
         expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
+=======
+        // httpjson values win for shared keys — that is the purpose of migrate_from
+        expect(celInput?.vars?.url?.value).toBe('http://httpjson-url.com');
+        expect(celInput?.vars?.api_token?.value).toBe('httpjson-token');
+>>>>>>> 9.4
       });
 
       it('migrates old httpjson input-level vars to new cel stream-level vars when going through packageToPackagePolicyInputs end-to-end', () => {
@@ -11254,6 +11279,7 @@ describe('Package policy service', () => {
       });
     });
 
+<<<<<<< HEAD
     describe('when stream-level vars are renamed via migrate_from (issue #264045)', () => {
       // Mirrors the m365_defender scenario: httpjson stream has `request_url`, CEL stream
       // renames it to `url` and declares `migrate_from: request_url` on the var definition.
@@ -11486,6 +11512,8 @@ describe('Package policy service', () => {
       });
     });
 
+=======
+>>>>>>> 9.4
     describe('when re-upgrading to a package version that removes deprecated/migrate_from', () => {
       it('clears deprecated and migrate_from on an existing input when new package no longer declares them', () => {
         const basePackagePolicy: NewPackagePolicy = {

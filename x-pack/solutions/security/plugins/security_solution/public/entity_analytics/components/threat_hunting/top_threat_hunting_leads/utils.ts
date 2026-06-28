@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 export const MAX_VISIBLE_TAGS = 1;
+=======
+export const MAX_VISIBLE_TAGS = 3;
+>>>>>>> 9.4
 
 export const getEntityIcon = (entityType: string): string => {
   switch (entityType) {

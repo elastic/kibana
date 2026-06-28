@@ -8,7 +8,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CorrelationsDetailsView } from './correlations_details_view';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.test.tsx
 import { TestProviders } from '../../../../../common/mock';
+=======
+import { TestProviders } from '../../../common/mock';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.test.tsx
 import { useShowRelatedAlertsByAncestry } from '../hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../hooks/use_show_related_alerts_by_session';
@@ -23,6 +27,7 @@ import {
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
 } from './test_ids';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.test.tsx
 import { useFetchRelatedAlertsBySession } from '../../../main/hooks/use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsByAncestry } from '../../../main/hooks/use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../../main/hooks/use_fetch_related_alerts_by_same_source_event';
@@ -31,6 +36,16 @@ import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../../shared/c
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+=======
+import { useFetchRelatedAlertsBySession } from '../../document/hooks/use_fetch_related_alerts_by_session';
+import { useFetchRelatedAlertsByAncestry } from '../../document/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../document/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedCases } from '../../document/hooks/use_fetch_related_cases';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../shared/components/test_ids';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.test.tsx
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 jest.mock('react-router-dom', () => {
@@ -43,6 +58,7 @@ jest.mock('../hooks/use_show_related_alerts_by_session');
 jest.mock('../hooks/use_show_related_attacks');
 jest.mock('../hooks/use_show_related_cases');
 jest.mock('../hooks/use_show_suppressed_alerts');
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.test.tsx
 jest.mock('../../../main/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../../../main/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../../../main/hooks/use_fetch_related_alerts_by_same_source_event');
@@ -50,6 +66,15 @@ jest.mock('../../../main/hooks/use_fetch_related_cases');
 jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+=======
+jest.mock('../../document/hooks/use_fetch_related_alerts_by_session');
+jest.mock('../../document/hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../document/hooks/use_fetch_related_alerts_by_same_source_event');
+jest.mock('../../document/hooks/use_fetch_related_cases');
+jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.test.tsx
 
 const mockHit: DataTableRecord = {
   id: 'test-id',
@@ -62,8 +87,15 @@ const mockOnShowAlert = jest.fn();
 
 const renderCorrelationsDetailsView = ({
   isRulePreview = false,
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.test.tsx
 }: {
   isRulePreview?: boolean;
+=======
+  hidePreviewLink = true,
+}: {
+  isRulePreview?: boolean;
+  hidePreviewLink?: boolean;
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.test.tsx
 } = {}) =>
   render(
     <TestProviders>
@@ -72,7 +104,11 @@ const renderCorrelationsDetailsView = ({
         scopeId="test-scope"
         isRulePreview={isRulePreview}
         onShowAlert={mockOnShowAlert}
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.test.tsx
         useLegacyExpandableFlyout={false}
+=======
+        hidePreviewLink={hidePreviewLink}
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.test.tsx
       />
     </TestProviders>
   );
@@ -236,4 +272,25 @@ describe('CorrelationsDetailsView', () => {
       queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
     ).not.toBeInTheDocument();
   });
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/correlations/components/correlations_details_view.test.tsx
+=======
+
+  it('passes hidePreviewLink=false down to source and session sections', () => {
+    mockAllShowHooksFalse();
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
+    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 1,
+    });
+
+    // Should render without errors when hidePreviewLink is false
+    const { getByTestId } = renderCorrelationsDetailsView({ hidePreviewLink: false });
+
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+  });
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/correlations/components/correlations_details_view.test.tsx
 });

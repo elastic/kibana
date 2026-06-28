@@ -42,7 +42,11 @@ import {
 } from '../../document_details/preview/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
+<<<<<<< HEAD
 import { EntityPanelKeyByType, GenericEntityPanelKey } from '../../entity_details/shared/constants';
+=======
+import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
+>>>>>>> 9.4
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -88,6 +92,7 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
   const { scopeId } = props;
 
+<<<<<<< HEAD
   const wrapperRef = useRef<HTMLDivElement>(null);
   const height = useFlyoutBodyAvailableHeight(wrapperRef);
 
@@ -119,6 +124,13 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
     };
   }, [cps?.cpsManager]);
 
+=======
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
+
+>>>>>>> 9.4
   const toasts = useToasts();
 
   const { dataView, status } = useDataView(PageScope.default);

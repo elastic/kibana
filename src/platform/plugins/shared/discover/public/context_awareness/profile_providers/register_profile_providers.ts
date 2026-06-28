@@ -125,7 +125,10 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createChangePointDataSourceProfileProvider(),
   createDeprecationLogsDataSourceProfileProvider(),
   createMetricsDataSourceProfileProvider(),
+<<<<<<< HEAD
   createSparklineDataSourceProfileProvider(providerServices),
+=======
+>>>>>>> 9.4
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
 ];

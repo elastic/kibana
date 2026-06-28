@@ -6,8 +6,12 @@
  */
 import React, { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+<<<<<<< HEAD
 import type { LensMetricConfig } from '@kbn/lens-embeddable-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+=======
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
+>>>>>>> 9.4
 import { METRICS_TOOLTIP, KPI_CHART_HEIGHT } from '../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../lens';
 

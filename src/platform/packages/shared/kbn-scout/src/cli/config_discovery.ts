@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
@@ -183,7 +184,11 @@ const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
   log: ToolingLog,
+<<<<<<< HEAD
   isSelective: boolean
+=======
+  selectiveTesting: boolean
+>>>>>>> 9.4
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
@@ -192,7 +197,11 @@ const handleNonFlattenedOutput = (
     const { plugins: savedPluginCount, packages: savedPackageCount } =
       countModulesByType(filteredForCiModules);
 
+<<<<<<< HEAD
     const runScope = isSelective ? 'selective' : 'full suite';
+=======
+    const runScope = selectiveTesting ? 'selective' : 'full suite';
+>>>>>>> 9.4
     log.info(
       `Scout configs saved for CI (${runScope}): ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) written to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );
@@ -213,6 +222,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
+<<<<<<< HEAD
   const testingScopePath = flagsReader.string('testing-scope');
 
   // Read the resolved scope produced upstream by `scout resolve-testing-scope`.
@@ -253,6 +263,40 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
     modulesForTargetTags = modulesAfterMark.filter((m) => m.isAffected === true);
     log.info(
       `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterMark.length})`
+=======
+  const selectiveTesting = flagsReader.boolean('selective-testing');
+  const affectedModulesPath = flagsReader.string('affected-modules');
+
+  if (selectiveTesting && !affectedModulesPath) {
+    throw createFailError(
+      '--selective-testing requires --affected-modules (JSON array of @kbn/ IDs from list_affected).'
+    );
+  }
+
+  // Build initial module discovery info
+  const modulesWithTests = buildModuleDiscoveryInfo();
+
+  // --affected-modules: keep every Scout module that passes target/CI filters; set isAffected
+  // per module so CI step labels can use an "affected " prefix where the PR touched that @kbn/ ID.
+  const modulesAfterAffectedMark = affectedModulesPath
+    ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
+    : modulesWithTests;
+
+  // --selective-testing: narrow to affected module groups only.
+  const limitDiscoveryToAffectedModules = selectiveTesting;
+
+  const modulesForTargetTags = limitDiscoveryToAffectedModules
+    ? modulesAfterAffectedMark.filter((m) => m.isAffected === true)
+    : modulesAfterAffectedMark;
+
+  if (limitDiscoveryToAffectedModules) {
+    log.info(
+      `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterAffectedMark.length})`
+    );
+  } else {
+    log.info(
+      `Full suite run: all ${modulesAfterAffectedMark.length} discovered module(s) will be included (selective testing is disabled)`
+>>>>>>> 9.4
     );
   }
 
@@ -269,7 +313,16 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   if (flatten) {
     handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
+<<<<<<< HEAD
     handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log, isSelective);
+=======
+    handleNonFlattenedOutput(
+      filteredModulesWithExcludedConfigs,
+      flagsReader,
+      log,
+      selectiveTesting
+    );
+>>>>>>> 9.4
   }
 };
 
@@ -291,6 +344,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
  * - Flattened: Groups configs by deployment mode (stateful/serverless), group, and run mode
  *
+<<<<<<< HEAD
  * Selective testing (PR pipelines):
  * - The selective-testing decision (full / tests-only / dependency-tree) is made
  *   upstream by `scout resolve-testing-scope`, which writes a `testing_scope.json`
@@ -300,6 +354,12 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  *   - kind: 'dependency-tree'  -> filter to modules in scope.affectedModules
  *   In all cases, scope.affectedModules is used to mark each module's `isAffected`
  *   flag so CI step labels can carry an "affected " prefix.
+=======
+ * Affected modules:
+ * - With --affected-modules, all modules are still considered; isAffected flags drive the
+ *   "affected " Buildkite step prefix. With --selective-testing, only affected module groups
+ *   are emitted; those steps keep the same prefix.
+>>>>>>> 9.4
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
@@ -317,12 +377,22 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               - 'local-stateful-only': @local-stateful-* tags only
                               - 'mki': @cloud-serverless-* tags
                               - 'ech': @cloud-stateful-* tags
+<<<<<<< HEAD
     --testing-scope <file>    Path to a 'testing_scope.json' file produced upstream
                               by 'scout resolve-testing-scope'. Drives both filtering
                               (per kind: full / tests-only / dependency-tree) and
                               isAffected marking (from scope.affectedModules).
                               When omitted, the command runs in full-suite mode
                               with no isAffected marking.
+=======
+    --affected-modules <file>  Path to a JSON file of affected @kbn/ module IDs (list_affected).
+                              All Scout modules still go through discovery; each module is marked
+                              isAffected so CI can prefix steps with "affected " when the PR
+                              touches that module. Combine with --selective-testing to emit only
+                              affected module groups.
+    --selective-testing       Requires --affected-modules.
+                              Limits output / Scout CI steps to affected modules; labels unchanged.
+>>>>>>> 9.4
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -345,16 +415,30 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
+<<<<<<< HEAD
   `,
   flags: {
     string: ['target', 'testing-scope'],
     boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
+=======
+
+    # Affected-module labels on every Scout group (full CI matrix)
+    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --save
+
+    # Only affected module groups (selective testing for PRs)
+    node scripts/scout discover-playwright-configs --affected-modules .scout/affected_modules.json --selective-testing --save
+  `,
+  flags: {
+    string: ['target', 'affected-modules'],
+    boolean: ['save', 'validate', 'flatten', 'include-custom-servers', 'selective-testing'],
+>>>>>>> 9.4
     default: {
       target: 'all',
       save: false,
       validate: false,
       flatten: false,
       'include-custom-servers': false,
+      'selective-testing': false,
     },
   },
   run: ({ flagsReader, log }) => {

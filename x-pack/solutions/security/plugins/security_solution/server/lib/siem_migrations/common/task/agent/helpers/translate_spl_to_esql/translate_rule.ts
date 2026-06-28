@@ -55,6 +55,7 @@ export const getTranslateSplToEsql: NodeHelperCreator<
       index_pattern: input.indexPattern,
       task_description: input.taskDescription,
       index_knowledge_base: input.knowledgeBase,
+<<<<<<< HEAD
       field_mapping_instructions: hasIndexContext
         ? `You MUST map SPL field names to the correct Elasticsearch field names using the provided index mapping and sample values.
 Carefully analyze the sample values to understand the semantic meaning of each field and match SPL fields to the most appropriate Elasticsearch fields.
@@ -75,6 +76,8 @@ This is a best-effort mapping that may be corrected in a later step.`,
         : `- Attempt to map SPL field names to ECS equivalents using your knowledge of Elastic Common Schema conventions.
 - If you are unsure about a mapping, use the most common ECS field that matches the semantic meaning of the SPL field.
 - These mappings are best-effort and may be corrected in a subsequent step.`,
+=======
+>>>>>>> 9.4
     });
     const response = await esqlKnowledgeBase.translate(prompt);
 

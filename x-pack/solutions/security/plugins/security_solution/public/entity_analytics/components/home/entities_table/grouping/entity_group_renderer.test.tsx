@@ -11,7 +11,11 @@ import type { RawBucket } from '@kbn/grouping';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+<<<<<<< HEAD
 import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
+=======
+import { ENTITY_GROUPING_OPTIONS } from '../constants';
+>>>>>>> 9.4
 import { TestProviders } from '../../../../../common/mock';
 
 const mockOpenRightPanel = jest.fn();
@@ -71,6 +75,7 @@ describe('createGroupPanelRenderer', () => {
   describe('RESOLUTION group', () => {
     it('renders target entity name from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'target-entity-id',
           {
@@ -80,6 +85,9 @@ describe('createGroupPanelRenderer', () => {
             individualRiskScore: null,
           },
         ],
+=======
+        ['target-entity-id', { name: 'bernicehuel', type: EntityType.user, riskScore: null }],
+>>>>>>> 9.4
       ]);
       const bucket = createMockBucket({ key: 'target-entity-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -92,10 +100,14 @@ describe('createGroupPanelRenderer', () => {
 
     it('renders entity id subtitle when metadata has target name', () => {
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'user:james@example.com',
           { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
         ],
+=======
+        ['user:james@example.com', { name: 'james-hue', type: EntityType.user, riskScore: null }],
+>>>>>>> 9.4
       ]);
       const bucket = createMockBucket({
         key: 'user:james@example.com',
@@ -139,6 +151,7 @@ describe('createGroupPanelRenderer', () => {
 
     it('renders expand button when metadata has name and type', () => {
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'target-id',
           {
@@ -148,6 +161,9 @@ describe('createGroupPanelRenderer', () => {
             individualRiskScore: null,
           },
         ],
+=======
+        ['target-id', { name: 'test-entity', type: EntityType.user, riskScore: null }],
+>>>>>>> 9.4
       ]);
       const bucket = createMockBucket({ key: 'target-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -173,6 +189,7 @@ describe('createGroupPanelRenderer', () => {
 
     it('updates from entity ID to target name when metadata arrives after grouping data', () => {
       const bucket = createMockBucket({ key: 'target-id' });
+<<<<<<< HEAD
 
       // Phase 1: grouping data arrived, metadata still loading — shows entity ID
       const rendererBefore = createGroupPanelRenderer(emptyMetadata);
@@ -193,12 +210,30 @@ describe('createGroupPanelRenderer', () => {
             individualRiskScore: null,
           },
         ],
+=======
+
+      // Phase 1: grouping data arrived, metadata still loading — shows entity ID
+      const rendererBefore = createGroupPanelRenderer(emptyMetadata);
+      const { rerender } = render(
+        <>{rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>
+      );
+      expect(screen.getByText('target-id')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+
+      // Phase 2: metadata arrived — new renderer shows target name + flyout button
+      const metadata: TargetMetadataMap = new Map([
+        ['target-id', { name: 'alice-target', type: EntityType.user, riskScore: 85.0 }],
+>>>>>>> 9.4
       ]);
       const rendererAfter = createGroupPanelRenderer(metadata);
       rerender(<>{rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>);
       expect(screen.getByText('alice-target')).toBeInTheDocument();
       expect(screen.queryByText('target-id')).not.toBeInTheDocument();
+<<<<<<< HEAD
       expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
+=======
+      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+>>>>>>> 9.4
     });
   });
 
@@ -235,10 +270,14 @@ describe('createGroupStatsRenderer', () => {
   describe('RESOLUTION group', () => {
     it('returns entities count + risk score stats (2 items)', () => {
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'target-id',
           { name: 'test', type: EntityType.user, riskScore: 85.42, individualRiskScore: null },
         ],
+=======
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: 85.42 }],
+>>>>>>> 9.4
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 4 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -251,10 +290,14 @@ describe('createGroupStatsRenderer', () => {
 
     it('risk score badge shows value from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'target-id',
           { name: 'test', type: EntityType.user, riskScore: 73.1829, individualRiskScore: null },
         ],
+=======
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: 73.1829 }],
+>>>>>>> 9.4
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -281,10 +324,14 @@ describe('createGroupStatsRenderer', () => {
 
     it('risk score badge shows N/A when both metadata and bucket score are null', () => {
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'target-id',
           { name: 'test', type: EntityType.user, riskScore: null, individualRiskScore: null },
         ],
+=======
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: null }],
+>>>>>>> 9.4
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 1 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -318,15 +365,20 @@ describe('createGroupStatsRenderer', () => {
 
       // Phase 2: metadata arrived — shows actual risk score
       const metadata: TargetMetadataMap = new Map([
+<<<<<<< HEAD
         [
           'target-id',
           { name: 'test', type: EntityType.user, riskScore: 92.5, individualRiskScore: null },
         ],
+=======
+        ['target-id', { name: 'test', type: EntityType.user, riskScore: 92.5 }],
+>>>>>>> 9.4
       ]);
       const rendererAfter = createGroupStatsRenderer(metadata);
       const statsAfter = rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
       rerender(<TestProviders>{statsAfter[1].component}</TestProviders>);
       expect(screen.getByText('92.50')).toBeInTheDocument();
+<<<<<<< HEAD
     });
 
     it('solo entity falls back to individual risk score when group score is null', () => {
@@ -393,6 +445,8 @@ describe('createGroupStatsRenderer', () => {
 
       expect(screen.getByText('90.00')).toBeInTheDocument();
       expect(screen.queryByText('10.00')).not.toBeInTheDocument();
+=======
+>>>>>>> 9.4
     });
   });
 

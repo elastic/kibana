@@ -324,7 +324,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           end: timeRange.to,
           entityIds: entityIdsForApi,
           pinnedIds: pinnedEuids,
+<<<<<<< HEAD
           projectRouting,
+=======
+>>>>>>> 9.4
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },

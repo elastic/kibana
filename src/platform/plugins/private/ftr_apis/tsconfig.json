@@ -16,6 +16,9 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/task-manager-plugin",
+<<<<<<< HEAD
     "@kbn/response-ops-scheduling-types"
+=======
+>>>>>>> 9.4
   ]
 }

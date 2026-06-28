@@ -11,6 +11,11 @@ import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleVersionSpecifier } from '../../rule_versions/rule_version_specifier';
 import type { BasicRuleInfo } from '../../basic_rule_info';
+<<<<<<< HEAD
+=======
+import type { PrebuiltRuleAssetsFilter } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
+import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+>>>>>>> 9.4
 import type { FetchLatestAssetsOptions } from './methods/fetch_latest_assets';
 import { fetchLatestAssets } from './methods/fetch_latest_assets';
 import { fetchLatestVersions } from './methods/fetch_latest_versions';

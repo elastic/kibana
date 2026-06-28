@@ -41,8 +41,13 @@ steps:
     key: build_scout_tests
     timeout_in_minutes: 30
     env:
+<<<<<<< HEAD
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+=======
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
+>>>>>>> 9.4
       UIAM_DOCKER_IMAGE: $UIAM_IMAGE
       SERVERLESS_TESTS_ONLY: 'true'
     retry:

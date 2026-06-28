@@ -89,7 +89,12 @@ export const getFilteredLinks = async (
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,
+<<<<<<< HEAD
     launchPadLinks,
     managementFilteredLinks,
+=======
+    managementFilteredLinks,
+    launchPadLinks,
+>>>>>>> 9.4
   ]);
 };

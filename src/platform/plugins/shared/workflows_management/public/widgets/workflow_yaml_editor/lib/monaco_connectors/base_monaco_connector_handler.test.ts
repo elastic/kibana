@@ -316,6 +316,7 @@ describe('BaseMonacoConnectorHandler', () => {
       expect(handler.exposedGetConnectorStabilityFromCache('elasticsearch.search')).toBe('beta');
     });
 
+<<<<<<< HEAD
     it('should return stability from connectors map when static list is empty', () => {
       (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
       (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
@@ -342,6 +343,11 @@ describe('BaseMonacoConnectorHandler', () => {
 
     it('should return undefined when connector cache is empty', () => {
       expect(handler.exposedGetConnectorStabilityFromCache('slack.postMessage')).toBeUndefined();
+=======
+    it('should return empty string for undefined stability', () => {
+      const result = handler.exposedGetStabilityNote(undefined);
+      expect(result).toBe('');
+>>>>>>> 9.4
     });
   });
 

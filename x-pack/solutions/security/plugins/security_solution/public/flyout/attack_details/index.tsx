@@ -22,8 +22,12 @@ import { useTabs } from './hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
+<<<<<<< HEAD
 import { AttackHeaderActions } from './components/header_actions';
 import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
+=======
+import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
+>>>>>>> 9.4
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
 export { ATTACK_PREVIEW_BANNER } from './context';
@@ -61,11 +65,15 @@ export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = me
   return (
     <>
       <RemoteDocumentCallout hit={hit} />
+<<<<<<< HEAD
       <FlyoutNavigation
         flyoutIsExpandable={true}
         expandDetails={expandDetails}
         actions={<AttackHeaderActions />}
       />
+=======
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+>>>>>>> 9.4
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

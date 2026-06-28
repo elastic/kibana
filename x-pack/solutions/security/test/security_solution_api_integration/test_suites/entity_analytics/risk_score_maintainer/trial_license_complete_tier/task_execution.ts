@@ -41,7 +41,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
+<<<<<<< HEAD
   describe('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
+=======
+  // Failing: See https://github.com/elastic/kibana/issues/264305
+  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
+>>>>>>> 9.4
     this.tags(['esGate']);
 
     context('with maintainer test logs data', () => {
@@ -103,10 +108,13 @@ export default ({ getService }: FtrProviderContext): void => {
           riskScore: 40,
         });
 
+<<<<<<< HEAD
         // Install the entity store and run initial scoring synchronously.
         // installAndRunMaintainer with 'async' uses the sync run_now route for
         // the initial scoring pass, then starts the maintainer so it's in
         // "started" state for the stop/start lifecycle test below.
+=======
+>>>>>>> 9.4
         await maintainerScenario.installAndRunMaintainer({
           dataViewPattern: testLogsIndex,
           runMode: 'async',
@@ -121,13 +129,34 @@ export default ({ getService }: FtrProviderContext): void => {
         const preRestartScores = await readRiskScores(es);
         const preRestartCount = preRestartScores.length;
 
+        // Wait for the maintainer to be fully idle before stopping it.
+        // Stopping while taskStatus is still running can cause a Task Manager
+        // version conflict and wedge the task document in serverless runs.
+        await retry.waitForWithTimeout('maintainer to finish first run', 30_000, async () => {
+          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
+          const maintainer = response.body.maintainers.find(
+            (m: { id: string; runs: number; taskStatus: string }) => m.id === 'risk-score'
+          );
+          return (
+            maintainer !== undefined &&
+            maintainer.runs >= 1 &&
+            maintainer.taskStatus.toLowerCase() !== 'running'
+          );
+        });
+
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
+<<<<<<< HEAD
         // Exercise the real Task Manager scheduler path. startMaintainer uses
         // bulkEnable with runSoon=false, so TM won't auto-run the task.
         // waitForMaintainerRun triggers runSoon once the task is idle to kick
         // off the run, then waits for completion and settles.
         await waitForMaintainerRun({ retry, routes: maintainerRoutes });
+=======
+        // Restart only re-enables scheduling, so use a sync trigger here to
+        // verify the maintainer can resume deterministically after restart.
+        await maintainerRoutes.runMaintainerSync('risk-score');
+>>>>>>> 9.4
 
         await waitForRiskScoresToBePresent({ es, log, scoreCount: preRestartCount + 1 });
         const postRestartScores = await readRiskScores(es);

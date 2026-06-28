@@ -20,9 +20,12 @@ import { ProtectionUpdatesNoteResponse } from '../model/schema/common.gen';
 
 export const CreateUpdateProtectionUpdatesNoteRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The package policy ID to create or update the protection updates note for.
      */
+=======
+>>>>>>> 9.4
     package_policy_id: z.string(),
   })
 );
@@ -35,9 +38,12 @@ export type CreateUpdateProtectionUpdatesNoteRequestParamsInput = z.input<
 
 export const CreateUpdateProtectionUpdatesNoteRequestBody = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The note content.
      */
+=======
+>>>>>>> 9.4
     note: z.string().optional(),
   })
 );
@@ -57,9 +63,12 @@ export type CreateUpdateProtectionUpdatesNoteResponse = z.infer<
 
 export const GetProtectionUpdatesNoteRequestParams = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The package policy ID to retrieve the protection updates note for.
      */
+=======
+>>>>>>> 9.4
     package_policy_id: z.string(),
   })
 );

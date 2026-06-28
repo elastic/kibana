@@ -9,8 +9,13 @@ import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/index.test.tsx
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+=======
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/index.test.tsx
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
@@ -222,7 +227,17 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findDashboardsService,
     } as unknown as DashboardStart;
 
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/index.test.tsx
     const data = dataPluginMock.createStartContract();
+=======
+    const data: DataPublicPluginStart = {
+      query: {
+        filterManager: {
+          setFilters: jest.fn(),
+        },
+      },
+    } as unknown as DataPublicPluginStart;
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/index.test.tsx
 
     const unifiedSearch: UnifiedSearchPublicPluginStart = {
       ui: { SearchBar: jest.fn() },
@@ -233,7 +248,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       chrome,
       addAttachment: mockAddAttachment,
       canWriteDashboards: true,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/index.test.tsx
       data,
+=======
+      filterManager: data.query.filterManager,
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/index.test.tsx
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,
@@ -305,6 +324,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       })
     );
   });
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/index.test.tsx
 
   it('registers safely when dashboardAppClientApi$ emits synchronously on subscribe', () => {
     const dashboardAppClientApi$ = new BehaviorSubject<DashboardApi | undefined>(
@@ -354,6 +374,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   });
 
   describe('dashboard app integration - origin sync', () => {
+=======
+  describe('onAttachmentMount - origin sync', () => {
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/index.test.tsx
     it('updates origin when new dashboard is saved', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();

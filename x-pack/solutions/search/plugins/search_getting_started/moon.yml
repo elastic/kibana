@@ -41,8 +41,13 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/doc-links'
   - '@kbn/cloud'
+<<<<<<< HEAD
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-server'
+=======
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/deeplinks-search'
+>>>>>>> 9.4
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'

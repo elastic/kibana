@@ -11,15 +11,24 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+<<<<<<< HEAD
 import { WatchlistConfigClient } from '../watchlist_config';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
+=======
+import { getRequestSavedObjectClient } from '../../shared/utils';
+import { WatchlistConfigClient } from '../watchlist_config';
+>>>>>>> 9.4
 import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
 
 export const installPrebuiltWatchlistsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+<<<<<<< HEAD
   logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
   hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
+=======
+  logger: Logger
+>>>>>>> 9.4
 ) => {
   router.versioned
     .post({
@@ -43,20 +52,29 @@ export const installPrebuiltWatchlistsRoute = (
           const secSol = await context.securitySolution;
           const core = await context.core;
           const namespace = secSol.getSpaceId();
+<<<<<<< HEAD
           const soClient = getWatchlistSavedObjectClient(core);
           const esClient = core.elasticsearch.client.asCurrentUser;
+=======
+          const soClient = getRequestSavedObjectClient(core);
+>>>>>>> 9.4
 
           const watchlistClient = new WatchlistConfigClient({
             namespace,
             soClient,
+<<<<<<< HEAD
             esClient,
             internalEsClient: core.elasticsearch.client.asInternalUser,
+=======
+            esClient: core.elasticsearch.client.asCurrentUser,
+>>>>>>> 9.4
             logger,
           });
 
           logger.debug(
             `[WATCHLIST INSTALL ROUTE]Installing prebuilt watchlists for namespace: ${namespace} from watchlist install route`
           );
+<<<<<<< HEAD
           await ensurePrebuiltWatchlists({
             watchlistClient,
             soClient,
@@ -66,6 +84,9 @@ export const installPrebuiltWatchlistsRoute = (
             getStartServices,
             hasEncryptionKey,
           });
+=======
+          await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
+>>>>>>> 9.4
 
           return response.ok({
             body: { acknowledged: true },

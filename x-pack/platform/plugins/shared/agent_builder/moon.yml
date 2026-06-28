@@ -129,6 +129,7 @@ dependsOn:
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
   - '@kbn/core-user-profile-browser'
+<<<<<<< HEAD
   - '@kbn/security-plugin-types-public'
   - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
@@ -142,6 +143,8 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/user-profile-components'
   - '@kbn/telemetry'
+=======
+>>>>>>> 9.4
 tags:
   - plugin
   - prod

@@ -145,8 +145,12 @@ export const treemapConfigSchemaNoESQL = schema.object(
      */
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+<<<<<<< HEAD
         partitionConfigPrimaryMetricOptionsSchema,
         'treemapMetric'
+=======
+        partitionConfigPrimaryMetricOptionsSchema
+>>>>>>> 9.4
       ),
       {
         minSize: 1,
@@ -159,10 +163,14 @@ export const treemapConfigSchemaNoESQL = schema.object(
      */
     group_by: schema.maybe(
       schema.arrayOf(
+<<<<<<< HEAD
         mergeAllBucketsWithChartDimensionSchema(
           partitionConfigBreakdownByOptionsSchema,
           'treemapGroupBy'
         ),
+=======
+        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+>>>>>>> 9.4
         {
           minSize: 1,
           maxSize: 100,

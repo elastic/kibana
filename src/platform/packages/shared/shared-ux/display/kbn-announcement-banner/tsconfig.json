@@ -2,12 +2,15 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+<<<<<<<< HEAD:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner/tsconfig.json
     "types": [
       "jest",
       "react",
       "@testing-library/jest-dom",
       "@kbn/ambient-ui-types",
     ]
+========
+>>>>>>>> 9.4:src/platform/packages/private/dashboard/dashboard-navigation-options-components/tsconfig.json
   },
   "include": [
     "**/*.ts",
@@ -18,7 +21,11 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+<<<<<<<< HEAD:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner/tsconfig.json
     "@kbn/test-jest-helpers",
     "@kbn/css-utils",
+========
+    "@kbn/dashboard-navigation-options-schema"
+>>>>>>>> 9.4:src/platform/packages/private/dashboard/dashboard-navigation-options-components/tsconfig.json
   ]
 }

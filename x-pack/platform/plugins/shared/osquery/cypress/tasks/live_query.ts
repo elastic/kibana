@@ -179,7 +179,11 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
     cy.get('[aria-label="Details"]').click();
   });
   cy.contains('View history');
+<<<<<<< HEAD
   addToCaseFromRowKebab(caseId);
+=======
+  addToCase(caseId);
+>>>>>>> 9.4
 };
 
 const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/;
@@ -197,9 +201,13 @@ export const checkActionItemsInResults = ({
   timeline?: boolean;
 }) => {
   checkResults();
+<<<<<<< HEAD
   cy.get(`${ADD_TO_CASE_HEADER_BUTTON}, ${ADD_TO_CASE_ROW_KEBAB}`).should(
     cases ? 'exist' : 'not.exist'
   );
+=======
+  cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
+>>>>>>> 9.4
 };
 
 export const takeOsqueryActionWithParams = () => {

@@ -23,9 +23,15 @@ import type {
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 
 type EmbeddableId =
+<<<<<<< HEAD
   | typeof APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE
   | typeof APM_ALERTING_LATENCY_CHART_EMBEDDABLE
   | typeof APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE;
+=======
+  | 'apm_alerting_failed_transactions_chart'
+  | 'apm_alerting_latency_chart'
+  | 'apm_alerting_throughput_chart';
+>>>>>>> 9.4
 
 export type APMTransactionDurationSLOResponse = GetSLOResponse & {
   indicator: APMTransactionDurationIndicator;

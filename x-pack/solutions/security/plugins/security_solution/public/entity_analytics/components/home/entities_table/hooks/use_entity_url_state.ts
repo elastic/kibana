@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+<<<<<<< HEAD
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
@@ -13,6 +14,14 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../../common/store/inputs';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
+=======
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef } from 'react';
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { CriteriaWithPagination } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import deepEqual from 'fast-deep-equal';
+import { useKibana } from '../../../../../common/lib/kibana';
+>>>>>>> 9.4
 import { useUrlQuery } from './use_url_query';
 import { usePageSize } from './use_page_size';
 import { useBaseEsQuery } from './use_base_es_query';
@@ -83,6 +92,7 @@ export const useEntityURLState = ({
       query: { filterManager },
     },
   } = useKibana().services;
+<<<<<<< HEAD
   const dispatch = useDispatch();
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -169,6 +179,30 @@ export const useEntityURLState = ({
       }
       skipNextUrlToFilterManager.current = true;
       setUrlQuery({ filters: filterManager.getAppFilters() });
+=======
+
+  // Track current URL filters in a render-phase ref so the subscription below
+  // can detect whether a filterManager update was triggered by us (URL → filterManager)
+  // or by the user (e.g. removing a filter pill).
+  const urlFiltersRef = useRef<Filter[]>([]);
+  urlFiltersRef.current = urlQuery.filters || [];
+
+  // URL state → filterManager: keeps filter pills visible in the filter bar.
+  useEffect(() => {
+    filterManager.setAppFilters(urlQuery.filters || []);
+  }, [filterManager, urlQuery.filters]);
+
+  // filterManager → URL state: syncs removals made via the filter bar back to URL state.
+  // The deepEqual guard prevents a circular update when setAppFilters above causes
+  // filterManager to emit, since at that point urlFiltersRef already reflects the
+  // new URL state.
+  useEffect(() => {
+    const subscription = filterManager.getUpdates$().subscribe(() => {
+      const appFilters = filterManager.getAppFilters();
+      if (!deepEqual(appFilters, urlFiltersRef.current)) {
+        setUrlQuery({ filters: appFilters });
+      }
+>>>>>>> 9.4
     });
     return () => subscription.unsubscribe();
   }, [filterManager, setUrlQuery]);

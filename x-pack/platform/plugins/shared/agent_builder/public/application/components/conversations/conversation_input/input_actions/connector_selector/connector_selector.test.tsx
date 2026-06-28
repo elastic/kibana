@@ -18,8 +18,13 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
+<<<<<<< HEAD
 jest.mock('../../../../../hooks/chat/use_connector_selection', () => ({
   useConnectorSelection: jest.fn(),
+=======
+jest.mock('../../../../../context/send_message/send_message_context', () => ({
+  useSendMessage: jest.fn(),
+>>>>>>> 9.4
 }));
 
 jest.mock('../../../../../hooks/chat/use_default_connector', () => ({
@@ -45,19 +50,28 @@ jest.mock('../input_popover_button', () => ({
     disabled,
     children,
     onClick,
+<<<<<<< HEAD
     'aria-label': ariaLabel,
+=======
+>>>>>>> 9.4
   }: {
     disabled?: boolean;
     children: React.ReactNode;
     onClick: () => void;
+<<<<<<< HEAD
     'aria-label'?: string;
+=======
+>>>>>>> 9.4
   }) => (
     <button
       type="button"
       data-test-subj="agentBuilderConnectorSelectorButton"
       disabled={disabled}
       onClick={onClick}
+<<<<<<< HEAD
       aria-label={ariaLabel}
+=======
+>>>>>>> 9.4
     >
       {children}
     </button>
@@ -74,15 +88,23 @@ jest.mock('./connector_icon', () => ({
 
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../../../../../hooks/use_kibana';
+<<<<<<< HEAD
 import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
+=======
+import { useSendMessage } from '../../../../../context/send_message/send_message_context';
+>>>>>>> 9.4
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { ConnectorSelector } from './connector_selector';
 
 const mockUseLoadConnectors = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+<<<<<<< HEAD
 const mockUseConnectorSelection = useConnectorSelection as jest.MockedFunction<
   typeof useConnectorSelection
 >;
+=======
+const mockUseSendMessage = useSendMessage as jest.MockedFunction<typeof useSendMessage>;
+>>>>>>> 9.4
 const mockUseDefaultConnector = useDefaultConnector as jest.MockedFunction<
   typeof useDefaultConnector
 >;
@@ -139,12 +161,23 @@ const setup = ({
 
   const selectConnector = jest.fn();
 
+<<<<<<< HEAD
   mockUseConnectorSelection.mockReturnValue({
     selectedConnector,
     selectConnector,
     defaultConnectorId,
     defaultConnectorOnly,
   });
+=======
+  mockUseSendMessage.mockReturnValue({
+    connectorSelection: {
+      selectedConnector,
+      selectConnector,
+      defaultConnectorId,
+      defaultConnectorOnly,
+    },
+  } as any);
+>>>>>>> 9.4
 
   const utils = render(
     <IntlProvider locale="en">
@@ -154,6 +187,7 @@ const setup = ({
   return {
     ...utils,
     selectConnector,
+<<<<<<< HEAD
     // Helper to re-render with a new connector selection (simulates admin changing a setting).
     updateContext: (next: Partial<RenderOptions>) => {
       mockUseConnectorSelection.mockReturnValue({
@@ -163,6 +197,19 @@ const setup = ({
           'defaultConnectorId' in next ? next.defaultConnectorId : defaultConnectorId,
         defaultConnectorOnly: next.defaultConnectorOnly ?? defaultConnectorOnly,
       });
+=======
+    // Helper to re-render with a new send-message context (simulates admin changing a setting).
+    updateContext: (next: Partial<RenderOptions>) => {
+      mockUseSendMessage.mockReturnValue({
+        connectorSelection: {
+          selectedConnector: next.selectedConnector ?? selectedConnector,
+          selectConnector,
+          defaultConnectorId:
+            'defaultConnectorId' in next ? next.defaultConnectorId : defaultConnectorId,
+          defaultConnectorOnly: next.defaultConnectorOnly ?? defaultConnectorOnly,
+        },
+      } as any);
+>>>>>>> 9.4
       act(() => {
         utils.rerender(
           <IntlProvider locale="en">
@@ -296,6 +343,7 @@ describe('ConnectorSelector sync effect', () => {
       expect(button).not.toBeDisabled();
     });
   });
+<<<<<<< HEAD
 
   it('announces the current connector name in the button aria-label', () => {
     const connectors = [mkConnector('Elastic Managed LLM')];
@@ -312,4 +360,6 @@ describe('ConnectorSelector sync effect', () => {
     const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
     expect(button).toHaveAttribute('aria-label', 'Select connector, LLM');
   });
+=======
+>>>>>>> 9.4
 });

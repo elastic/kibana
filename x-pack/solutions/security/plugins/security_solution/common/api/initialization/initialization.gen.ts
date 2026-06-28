@@ -20,6 +20,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * Identifier for an initialization flow.
  */
 export const InitializationFlowId = lazySchema(() =>
+<<<<<<< HEAD
   z.enum([
     'create-list-indices',
     'security-data-views',
@@ -28,6 +29,9 @@ export const InitializationFlowId = lazySchema(() =>
     'init-ai-prompts',
     'init-detection-rule-monitoring',
   ])
+=======
+  z.enum(['create-list-indices', 'security-data-views'])
+>>>>>>> 9.4
 );
 export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
@@ -70,6 +74,7 @@ export const SecurityDataViewsReadyResult = lazySchema(() =>
   })
 );
 export type SecurityDataViewsReadyResult = z.infer<typeof SecurityDataViewsReadyResult>;
+<<<<<<< HEAD
 
 export const PackageInstallReadyResult = lazySchema(() =>
   z.object({
@@ -94,6 +99,8 @@ export const InstallDetectionEngineRuleMonitoringAssetsReadyResult = lazySchema(
 export type InstallDetectionEngineRuleMonitoringAssetsReadyResult = z.infer<
   typeof InstallDetectionEngineRuleMonitoringAssetsReadyResult
 >;
+=======
+>>>>>>> 9.4
 
 /**
  * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
@@ -106,6 +113,7 @@ export const InitializationFlowsResult = lazySchema(() =>
     'security-data-views': z
       .union([SecurityDataViewsReadyResult, InitializationFlowErrorResult])
       .optional(),
+<<<<<<< HEAD
     'init-prebuilt-rules': z
       .union([PackageInstallReadyResult, InitializationFlowErrorResult])
       .optional(),
@@ -118,6 +126,8 @@ export const InitializationFlowsResult = lazySchema(() =>
     'init-detection-rule-monitoring': z
       .union([InstallDetectionEngineRuleMonitoringAssetsReadyResult, InitializationFlowErrorResult])
       .optional(),
+=======
+>>>>>>> 9.4
   })
 );
 export type InitializationFlowsResult = z.infer<typeof InitializationFlowsResult>;

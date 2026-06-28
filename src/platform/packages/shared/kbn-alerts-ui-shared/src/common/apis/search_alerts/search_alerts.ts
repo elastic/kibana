@@ -21,6 +21,10 @@ import type {
 } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
+<<<<<<< HEAD
+=======
+import { set } from '@kbn/safer-lodash-set';
+>>>>>>> 9.4
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
 export interface SearchAlertsParams {

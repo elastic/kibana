@@ -155,9 +155,15 @@ const createFilterFromRawColumnsESQL = async (
     http: getHttp(),
   });
 
+<<<<<<< HEAD
   // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
   const sourceFieldName = column.meta?.sourceParams?.sourceField;
   const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
+=======
+  // `column.name` can be a custom Lens label;
+  // `column.id` matches the ES|QL column / field used for lookup and filters
+  const fieldName = column.id;
+>>>>>>> 9.4
 
   const field = dataView.getFieldByName(fieldName);
 
@@ -166,11 +172,14 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
+<<<<<<< HEAD
   // Avoid index phrase filter when output column name collides with an index field
   if (column.isComputedColumn === true && column.name === fieldName) {
     return [];
   }
 
+=======
+>>>>>>> 9.4
   // Match phrase or phrases filter based on whether value is an array
   // The advantage of match_phrase is that you get a term query when it's not a text and
   // match phrase if it is a text. So you don't have to worry about the field type.

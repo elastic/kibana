@@ -14,6 +14,7 @@ import {
   generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+<<<<<<< HEAD
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -21,11 +22,16 @@ import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
+=======
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+>>>>>>> 9.4
 import type {
   AgentErrorAction,
   HandoverAction,
   ResearchAgentAction,
   AnswerAgentAction,
+<<<<<<< HEAD
   ToolCallAction,
   ExecuteToolAction,
   ToolCallResult,
@@ -33,10 +39,16 @@ import type {
 import {
   isAgentErrorAction,
   isBackgroundExecutionCompleteAction,
+=======
+} from '../../actions';
+import {
+  isAgentErrorAction,
+>>>>>>> 9.4
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
 } from '../../actions';
+<<<<<<< HEAD
 import type { ToolCallResultTransformer } from '../../utils/tool_summarization';
 import { extractToolReturn } from '../../utils/extract_tool_return';
 import { estimateMessagesTokens } from '../../utils/estimate_conversation_tokens';
@@ -90,6 +102,14 @@ const formatActions = async ({
   compaction?: IntraRoundCompaction;
 }): Promise<BaseMessageLike[]> => {
   const compactionCutoff = compaction ? getCompactionCutoffCycle(actions) : undefined;
+=======
+
+export const formatResearcherActionHistory = ({
+  actions,
+}: {
+  actions: ResearchAgentAction[];
+}): BaseMessageLike[] => {
+>>>>>>> 9.4
   const formatted: BaseMessageLike[] = [];
 
   for (let i = 0; i < actions.length; i++) {
@@ -104,6 +124,7 @@ const formatActions = async ({
       formatted.push(createToolCallMessage(action.tool_calls, action.message));
     }
     if (isExecuteToolAction(action)) {
+<<<<<<< HEAD
       const compactThis =
         compaction !== undefined &&
         compactionCutoff !== undefined &&
@@ -131,6 +152,13 @@ const formatActions = async ({
       if (remainingCycles === 5 || remainingCycles === 1) {
         formatted.push(createCycleLimitSystemMessage(remainingCycles));
       }
+=======
+      formatted.push(
+        ...action.tool_results.map((result) =>
+          createToolResultMessage({ content: result.content, toolCallId: result.toolCallId })
+        )
+      );
+>>>>>>> 9.4
     }
     if (isHandoverAction(action)) {
       // returns a single [AI, user] tuple
@@ -140,13 +168,17 @@ const formatActions = async ({
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
     }
+<<<<<<< HEAD
     if (isBackgroundExecutionCompleteAction(action)) {
       formatted.push(createUserMessage(formatSystemNotice(action.execution)));
     }
+=======
+>>>>>>> 9.4
   }
 
   return formatted;
 };
+<<<<<<< HEAD
 const getCompactionCutoffCycle = (actions: ResearchAgentAction[]): number | undefined => {
   const cycles = actions
     .filter(isExecuteToolAction)
@@ -251,6 +283,8 @@ Finish what you are doing in that budget and proceed to respond to the user befo
 Interrupt your current action if necessary to make sure you finish before termination.
 </system-notice>`);
 };
+=======
+>>>>>>> 9.4
 
 export const formatAnswerActionHistory = ({
   actions,
@@ -265,7 +299,11 @@ export const formatAnswerActionHistory = ({
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
     }
+<<<<<<< HEAD
     // [...] we don't need to format StructuredAnswerAction because it will terminate the execution
+=======
+    // [...] we don't need to format AnswerAction because it will terminate the execution
+>>>>>>> 9.4
   }
 
   return formatted;
@@ -315,7 +353,11 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
       createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: callArgs }),
       createToolResultMessage({
         toolCallId,
+<<<<<<< HEAD
         content: `ERROR: tool_not_found - called a tool which was not available: ${error.message}`,
+=======
+        content: `ERROR: called a tool which was not available - ${error.message}`,
+>>>>>>> 9.4
       }),
     ];
   }
@@ -329,7 +371,11 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
       createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: callArgs }),
       createToolResultMessage({
         toolCallId,
+<<<<<<< HEAD
         content: `ERROR: tool_validation_error - called a tool with invalid parameters - ${error.meta.validationError} ${error.message}`,
+=======
+        content: `ERROR: called a tool which was not available - ${error.meta.validationError} ${error.message}`,
+>>>>>>> 9.4
       }),
     ];
   }
@@ -352,6 +398,7 @@ const isExecutionError = <TCode extends AgentExecutionErrorCode>(
 ): error is AgentBuilderAgentExecutionError<TCode> => {
   return error.meta.errCode === code;
 };
+<<<<<<< HEAD
 
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
   const { status, execution_id: executionId } = execution;
@@ -376,3 +423,5 @@ export const formatSystemNotice = (execution: BackgroundExecutionState): string 
     ],
   });
 };
+=======
+>>>>>>> 9.4

@@ -128,9 +128,15 @@ function convertDataLayerToAPI(
           const onAxis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
           return {
             ...apiOperation,
+<<<<<<< HEAD
             ...(breakdown_by
               ? {}
               : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
+=======
+            color: breakdown_by
+              ? undefined // if there is a breakdown, the color is applied to the breakdown
+              : fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR,
+>>>>>>> 9.4
             ...(onAxis !== 'y' ? { axis: onAxis } : {}),
           };
         })
@@ -173,7 +179,11 @@ function convertDataLayerToAPI(
     const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
+<<<<<<< HEAD
       ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
+=======
+      color: breakdown_by ? undefined : fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR,
+>>>>>>> 9.4
       ...(axis !== 'y' ? { axis } : {}),
     };
   });

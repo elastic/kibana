@@ -25,7 +25,11 @@ Here are some context for you to reference for your task, read it carefully as y
 {splunk_query}
 </splunk_query>
 <index_knowledge_base>
+<<<<<<< HEAD
 The following is the index knowledge base containing mappings, sample documents and any extra knowledge for the target index. This can be used to ensure correct field names and sometimes values that are used when generating the query.
+=======
+The following is the sample documents and more knowledge for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
+>>>>>>> 9.4
 \`\`\`json
 {index_knowledge_base}
 \`\`\`

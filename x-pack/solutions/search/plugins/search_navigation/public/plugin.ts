@@ -73,6 +73,15 @@ export class SearchNavigationPlugin
         })
       );
     }
+<<<<<<< HEAD
+=======
+
+    // Async loads classic nav items on start
+    import('./base_classic_navigation_items').then(({ BaseClassicNavItems }) => {
+      // caches nav items so we don't need to do an async call when needed by other plugins.
+      this.baseClassicNavItems = BaseClassicNavItems;
+    });
+>>>>>>> 9.4
 
     return {
       handleOnAppMount: this.handleOnAppMount.bind(this),

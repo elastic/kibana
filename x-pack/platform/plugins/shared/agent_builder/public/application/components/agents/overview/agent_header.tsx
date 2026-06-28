@@ -20,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+<<<<<<< HEAD
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -29,6 +30,14 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAccessControlModeBadge } from '../list/agent_access_control_mode_badge';
 import { AgentDescription } from './agent_description';
 import { accessSummaryManageButton } from '../access/access_i18n';
+=======
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
+import { css } from '@emotion/react';
+import { labels } from '../../../utils/i18n';
+import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentVisibilityBadge } from '../list/agent_visibility_badge';
+import { AgentDescription } from './agent_description';
+>>>>>>> 9.4
 
 const { agentOverview: overviewLabels } = labels;
 

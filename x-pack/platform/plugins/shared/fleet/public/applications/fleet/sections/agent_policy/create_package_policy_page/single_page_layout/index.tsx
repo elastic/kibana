@@ -601,9 +601,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
             agentPolicies={agentPolicies}
+<<<<<<< HEAD
             onNamespaceCustomizationEnabledChange={(enabled) => {
               namespaceCustomizationEnabledRef.current = enabled;
             }}
+=======
+>>>>>>> 9.4
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}

@@ -6,7 +6,11 @@
  */
 
 import path from 'node:path';
+<<<<<<< HEAD
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
+=======
+import { ArrayFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+>>>>>>> 9.4
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';

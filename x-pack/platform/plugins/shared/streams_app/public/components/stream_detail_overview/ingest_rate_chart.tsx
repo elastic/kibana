@@ -101,7 +101,11 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
 
   const { getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
+<<<<<<< HEAD
     getCanReadFailureStore: () => (isDraft ? false : canReadFailureStore),
+=======
+    getCanReadFailureStore: () => canReadFailureStore,
+>>>>>>> 9.4
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 

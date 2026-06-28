@@ -17,7 +17,11 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
+<<<<<<< HEAD
 SharePoint Online connectors support three Microsoft Entra ID authentication types:
+=======
+SharePoint Online connectors support two authentication methods:
+>>>>>>> 9.4
 
 #### OAuth client credentials (app-only auth)
 
@@ -30,6 +34,7 @@ Client ID
 Client Secret
 :   The client secret generated for your Microsoft Entra application.
 
+<<<<<<< HEAD
 #### OAuth Client Certificate (Microsoft Entra) — app-only auth [sharepoint-online-connector-cert-config]
 
 Token URL
@@ -47,6 +52,8 @@ Private Key
 Passphrase
 :   (Optional) Only required if the private key is encrypted.
 
+=======
+>>>>>>> 9.4
 #### OAuth authorization code (delegated auth)
 
 Authorization URL
@@ -65,12 +72,20 @@ Search
 :   Search for content across SharePoint sites, lists, and drives using the Microsoft Graph Search API.
     - `query` (required): The search query string.
     - `entityTypes` (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `site`.
+<<<<<<< HEAD
     - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (client credentials or certificate) auth; omit when using delegated (authorization code) auth to avoid errors.
+=======
+    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (client credentials) auth; omit when using delegated (authorization code) auth to avoid errors.
+>>>>>>> 9.4
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return.
 
 Get all sites
+<<<<<<< HEAD
 :   List all SharePoint sites. With app-only (client credentials or certificate) auth, returns all sites the app can access. With delegated (authorization code) auth, searches accessible sites — pass a keyword or omit for a wildcard search.
+=======
+:   List all SharePoint sites. With app-only (client credentials) auth, returns all sites the app can access. With delegated (authorization code) auth, searches accessible sites — pass a keyword or omit for a wildcard search.
+>>>>>>> 9.4
     - `search` (optional): Keyword to filter sites by name. Only used with delegated auth; ignored with app-only auth.
 
 Get site
@@ -157,6 +172,7 @@ To use app-only authentication, register an application in Microsoft Entra (form
     - **Client ID**: Found in the **Overview** section (also called Application ID).
     - **Client Secret**: The value you copied in step 15.
 
+<<<<<<< HEAD
 ### OAuth Client Certificate (Microsoft Entra) — recommended for production [sharepoint-online-cert-credentials]
 
 To use certificate-based app-only authentication, register an application in Microsoft Entra:
@@ -190,6 +206,8 @@ To use certificate-based app-only authentication, register an application in Mic
     - **Private Key**: paste the full contents of `private_key.pem` (including the BEGIN/END markers).
     - **Passphrase**: only if you generated an encrypted private key.
 
+=======
+>>>>>>> 9.4
 ### OAuth authorization code (delegated auth)
 
 To use delegated (per-user) authentication, register an application and configure the Authorization Code flow:
@@ -204,7 +222,11 @@ To use delegated (per-user) authentication, register an application and configur
 8. In your app registration, go to **API permissions**.
 9. Select **Add a permission** > **Microsoft Graph** > **Delegated permissions**.
 10. Add the following permissions:
+<<<<<<< HEAD
     - `Sites.Selected` — Read items in selected site collections.
+=======
+    - `Sites.Read.All` — Read items in all site collections.
+>>>>>>> 9.4
     - `Files.Read.All` — Read all files the user can access.
     - `offline_access` — Maintain access through refresh tokens.
 11. In your app registration, go to **Certificates & secrets**.

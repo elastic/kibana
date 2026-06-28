@@ -88,7 +88,10 @@ export class AiopsPlugin
 
     plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
       title: 'Change point detection chart',
+<<<<<<< HEAD
       getSchema: () => changePointChartEmbeddableStateSchema,
+=======
+>>>>>>> 9.4
       getTransforms: () => ({
         transformIn: changePointTransformIn,
         transformOut: changePointTransformOut,
@@ -97,7 +100,10 @@ export class AiopsPlugin
 
     plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
       title: 'Pattern analysis',
+<<<<<<< HEAD
       getSchema: () => patternAnalysisEmbeddableStateSchema,
+=======
+>>>>>>> 9.4
       getTransforms: () => ({
         transformIn: patternAnalysisTransformIn,
         transformOut: patternAnalysisTransformOut,
@@ -106,7 +112,10 @@ export class AiopsPlugin
 
     plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
       title: 'Log rate analysis',
+<<<<<<< HEAD
       getSchema: () => logRateAnalysisEmbeddableStateSchema,
+=======
+>>>>>>> 9.4
       getTransforms: () => ({
         transformIn: logRateTransformIn,
         transformOut: logRateTransformOut,

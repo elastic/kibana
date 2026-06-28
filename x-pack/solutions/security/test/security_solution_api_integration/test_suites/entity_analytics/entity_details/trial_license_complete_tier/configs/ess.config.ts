@@ -21,6 +21,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+<<<<<<< HEAD
+=======
+          'entityDetailsHighlightsEnabled',
+>>>>>>> 9.4
           'disable:entityAnalyticsEntityStoreV2',
         ])}`,
         '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',

@@ -198,6 +198,18 @@ export const registerGetTimeFieldRoute = (
     },
     async (requestHandlerContext, request, response) => {
       const { query } = request.body;
+<<<<<<< HEAD
+=======
+
+      // Query is of the form "from index | where timefield >= ?_tstart".
+      // At this point we just want to extract the timefield if present in the query
+      const timeField = getTimeFieldFromESQLQuery(query);
+      if (timeField) {
+        return response.ok({
+          body: { timeField },
+        });
+      }
+>>>>>>> 9.4
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
 

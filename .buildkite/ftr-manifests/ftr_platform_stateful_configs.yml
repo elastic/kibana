@@ -414,10 +414,19 @@ enabled:
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
+<<<<<<< HEAD:.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml
+=======
+  - x-pack/platform/test/api_integration/apis/lens/config.ts
+>>>>>>> 9.4:.buildkite/ftr_platform_stateful_configs.yml
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
+<<<<<<< HEAD:.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml
+=======
+  - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
+  - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
+>>>>>>> 9.4:.buildkite/ftr_platform_stateful_configs.yml
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts
   - x-pack/platform/test/api_integration/apis/stats/config.ts

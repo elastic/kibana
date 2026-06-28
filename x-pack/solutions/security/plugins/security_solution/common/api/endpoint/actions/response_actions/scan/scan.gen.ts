@@ -26,7 +26,11 @@ export const ScanRouteRequestBody = lazySchema(() =>
     z.object({
       parameters: z.object({
         /**
+<<<<<<< HEAD
          * The folder or file's full path (including the file name).
+=======
+         * The folder or file’s full path (including the file name).
+>>>>>>> 9.4
          */
         path: z.string(),
       }),
@@ -35,9 +39,19 @@ export const ScanRouteRequestBody = lazySchema(() =>
 );
 export type ScanRouteRequestBody = z.infer<typeof ScanRouteRequestBody>;
 
+<<<<<<< HEAD
+=======
+export const ScanRouteResponse = lazySchema(() => z.object({}));
+export type ScanRouteResponse = z.infer<typeof ScanRouteResponse>;
+
+>>>>>>> 9.4
 export const EndpointScanActionRequestBody = lazySchema(() => ScanRouteRequestBody);
 export type EndpointScanActionRequestBody = z.infer<typeof EndpointScanActionRequestBody>;
 export type EndpointScanActionRequestBodyInput = z.input<typeof EndpointScanActionRequestBody>;
 
+<<<<<<< HEAD
 export const EndpointScanActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
+=======
+export const EndpointScanActionResponse = lazySchema(() => ScanRouteResponse);
+>>>>>>> 9.4
 export type EndpointScanActionResponse = z.infer<typeof EndpointScanActionResponse>;

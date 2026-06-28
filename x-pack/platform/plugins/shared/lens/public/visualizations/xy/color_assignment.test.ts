@@ -425,6 +425,7 @@ describe('color_assignment', () => {
       expect(assignments[KbnPalette.ElasticLineOptimized]).toBeDefined();
       expect(assignments[KbnPalette.Default]).toBeUndefined();
     });
+<<<<<<< HEAD
   });
 
   describe('annotation layer defaults', () => {
@@ -484,5 +485,7 @@ describe('color_assignment', () => {
 
       expect(assigned.color).toEqual('#2B394F1A');
     });
+=======
+>>>>>>> 9.4
   });
 });

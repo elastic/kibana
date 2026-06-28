@@ -6,7 +6,11 @@
  */
 
 import expect from 'expect';
+<<<<<<< HEAD
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
+=======
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+>>>>>>> 9.4
 import { REVIEW_RULE_DEPRECATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -14,7 +18,10 @@ import {
   createRuleAssetSavedObject,
   createDeprecatedPrebuiltRuleAssetSavedObjects,
   deleteAllPrebuiltRuleAssets,
+<<<<<<< HEAD
   getCustomQueryRuleParams,
+=======
+>>>>>>> 9.4
   installPrebuiltRules,
   reviewRuleDeprecation,
 } from '../../../../utils';
@@ -151,6 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = await reviewRuleDeprecation(es, supertest);
         expect(response.rules).toEqual([]);
       });
+<<<<<<< HEAD
 
       it('ignores installed custom rules whose rule_id matches a deprecated asset', async () => {
         await createRule(
@@ -166,6 +174,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = await reviewRuleDeprecation(es, supertest);
         expect(response.rules).toEqual([]);
       });
+=======
+>>>>>>> 9.4
     });
 
     describe('With ids filter', () => {
@@ -206,6 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules).toEqual([]);
       });
 
+<<<<<<< HEAD
       it('ignores a custom rule looked up by SO id whose rule_id matches a deprecated asset', async () => {
         const customRule = await createRule(
           supertest,
@@ -221,6 +232,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules).toEqual([]);
       });
 
+=======
+>>>>>>> 9.4
       it('returns 400 when the filtered id does not exist', async () => {
         const response = await reviewRuleDeprecation(
           es,

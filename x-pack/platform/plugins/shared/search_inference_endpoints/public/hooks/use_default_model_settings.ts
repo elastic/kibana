@@ -12,6 +12,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
+import { DEFAULT_MODEL_SAVE_SUCCESS, DEFAULT_MODEL_SAVE_ERROR } from '../../common/translations';
 import { useKibana } from './use_kibana';
 
 export interface DefaultModelSettingsState {
@@ -56,16 +57,28 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   const settingsClient = services.settings.client;
   const notifications = services.notifications;
 
+<<<<<<< HEAD
   const getPersistedState = useCallback((): PersistedDefaultModelState => {
+=======
+  const getSavedState = useCallback((): DefaultModelSettingsState => {
+>>>>>>> 9.4
     const defaultModelId = settingsClient.get<string>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
       NO_DEFAULT_MODEL
     );
+<<<<<<< HEAD
     const defaultOnly = settingsClient.get<boolean>(
       GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
       false
     );
     return { defaultModelId, defaultOnly };
+=======
+    const disallowOtherModels = settingsClient.get<boolean>(
+      GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+      false
+    );
+    return { defaultModelId, disallowOtherModels };
+>>>>>>> 9.4
   }, [settingsClient]);
 
   const [savedState, setSavedState] = useState<DefaultModelSettingsState>(() =>
@@ -93,7 +106,11 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       }
     });
     return () => subscription.unsubscribe();
+<<<<<<< HEAD
   }, [settingsClient, getPersistedState]);
+=======
+  }, [settingsClient, getSavedState]);
+>>>>>>> 9.4
 
   const isDirty = useMemo(
     () =>
@@ -141,12 +158,19 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
 
   const save = useCallback(async () => {
     try {
+<<<<<<< HEAD
       const persisted = toPersisted(state);
       const savedPersisted = toPersisted(savedState);
       if (persisted.defaultModelId !== savedPersisted.defaultModelId) {
         await settingsClient.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, persisted.defaultModelId);
       }
       if (persisted.defaultOnly !== savedPersisted.defaultOnly) {
+=======
+      if (state.defaultModelId !== savedState.defaultModelId) {
+        await settingsClient.set(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, state.defaultModelId);
+      }
+      if (state.disallowOtherModels !== savedState.disallowOtherModels) {
+>>>>>>> 9.4
         await settingsClient.set(
           GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
           persisted.defaultOnly
@@ -155,6 +179,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       const newSaved = derive(getPersistedState());
       setSavedState(newSaved);
       setState(newSaved);
+<<<<<<< HEAD
       if (newSaved.enableAi) {
         lastEnabledRef.current = newSaved;
       }
@@ -168,11 +193,21 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
         title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveError', {
           defaultMessage: 'Failed to save default model settings',
         }),
+=======
+      notifications.toasts.addSuccess({ title: DEFAULT_MODEL_SAVE_SUCCESS });
+    } catch (e) {
+      notifications.toasts.addDanger({
+        title: DEFAULT_MODEL_SAVE_ERROR,
+>>>>>>> 9.4
         text: (e as Error)?.message ?? 'Unknown error',
       });
       throw e instanceof Error ? e : new Error(String(e));
     }
+<<<<<<< HEAD
   }, [state, savedState, settingsClient, getPersistedState, notifications]);
+=======
+  }, [state, savedState, settingsClient, getSavedState, notifications]);
+>>>>>>> 9.4
 
   const reset = useCallback(() => {
     setState(savedState);

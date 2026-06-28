@@ -23,6 +23,7 @@ export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
   'service.name',
 ] as const;
 
+<<<<<<< HEAD
 /**
  * Closed enum of every relationship-type identifier the entity store stores under
  * `entity.relationships.<key>`. Also consumed by maintainers (e.g. the relationship
@@ -30,6 +31,9 @@ export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
  * to without re-stating the schema.
  */
 export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+=======
+const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+>>>>>>> 9.4
   'administers',
   'communicates_with',
   'depends_on',
@@ -40,8 +44,11 @@ export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
   'supervises',
 ] as const;
 
+<<<<<<< HEAD
 export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];
 
+=======
+>>>>>>> 9.4
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts

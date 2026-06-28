@@ -134,7 +134,11 @@ describe('SecuritySideNav', () => {
             position: 'top',
           },
         ],
+<<<<<<< HEAD
         categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
+=======
+        categories: getNavCategories(false),
+>>>>>>> 9.4
         tracker: track,
       })
     );
@@ -197,15 +201,28 @@ describe('SecuritySideNav', () => {
     );
   });
 
+<<<<<<< HEAD
   it('should render launchpad item in footer', () => {
     mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
+=======
+  it('should render launchpad item', () => {
+    mockUseNavLinks.mockReturnValue([
+      { id: SecurityPageName.launchpad, title: 'Launchpad', sideNavIcon: 'rocket' },
+    ]);
+>>>>>>> 9.4
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expect.arrayContaining([
           expect.objectContaining({
+<<<<<<< HEAD
             id: SecurityGroupName.launchpad,
             position: 'bottom',
+=======
+            id: SecurityPageName.launchpad,
+            label: 'Launchpad',
+            position: 'top',
+>>>>>>> 9.4
           }),
         ]),
       })
@@ -339,7 +356,11 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
+<<<<<<< HEAD
           categories: getNavCategories(AIChatExperience.Classic, true, false, false, false),
+=======
+          categories: getNavCategories(true),
+>>>>>>> 9.4
         })
       );
     });
@@ -349,7 +370,11 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
+<<<<<<< HEAD
           categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
+=======
+          categories: getNavCategories(false),
+>>>>>>> 9.4
         })
       );
     });
@@ -357,6 +382,7 @@ describe('SecuritySideNav', () => {
 
   describe('isNewEAHomePageEnabled feature flag', () => {
     it('should call getNavCategories with true when feature flag is enabled', () => {
+<<<<<<< HEAD
       mockUseIsExperimentalFeatureEnabled.mockImplementation(
         (feature: string) => feature === 'entityAnalyticsNewHomePageEnabled'
       );
@@ -364,11 +390,19 @@ describe('SecuritySideNav', () => {
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
           categories: getNavCategories(AIChatExperience.Classic, false, true, false, false),
+=======
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, true),
+>>>>>>> 9.4
         })
       );
     });
 
     it('should call getNavCategories with false when feature flag is disabled', () => {
+<<<<<<< HEAD
       mockUseIsExperimentalFeatureEnabled.mockImplementation(() => false);
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
@@ -523,8 +557,73 @@ describe('SecuritySideNav', () => {
               href: '/test-basepath/s/my-space/app/workflows',
             }),
           ]),
+=======
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, false),
+>>>>>>> 9.4
         })
       );
     });
+  });
+
+  it('should place administration item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.administration,
+            position: 'bottom',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should not include administration item in body', () => {
+    mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
+    renderNav();
+    const calls = mockSolutionSideNav.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const items = lastCall[0].items;
+    const administrationItemsInBody = items.filter(
+      (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
+    );
+    expect(administrationItemsInBody).toHaveLength(0);
+  });
+
+  it('should select launchpad when landing page is selected', () => {
+    mockUseRouteSpy.mockReturnValue([{ pageName: SecurityPageName.landing }]);
+    const landingNavLink: NavigationLink = {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+      description: 'Get started description',
+    };
+    mockUseNavLinks.mockReturnValue([landingNavLink, alertsNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: 'securityGroup:launchpad',
+      })
+    );
+  });
+
+  it('should maintain top position for most items', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({
+            id: SecurityPageName.alerts,
+            position: 'top',
+          }),
+        ],
+      })
+    );
   });
 });

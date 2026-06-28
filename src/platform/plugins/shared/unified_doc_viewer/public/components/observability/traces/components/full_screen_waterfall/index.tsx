@@ -19,7 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+<<<<<<< HEAD
 import React from 'react';
+=======
+import React, { useEffect } from 'react';
+>>>>>>> 9.4
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -85,6 +89,42 @@ export const FullScreenWaterfall = ({
     skipNextReport: skipNextEventReport,
   });
 
+<<<<<<< HEAD
+=======
+  /*
+   * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
+   * rendered inside nested flyouts.
+   *
+   * EuiDataGrid popovers use EuiPortal, which inserts content at the document root. When nested
+   * flyouts unmount, Emotion's style cleanup can target portals that have already been removed
+   * from the DOM, resulting in a white screen crash.
+   *
+   * By injecting a plain <style> element into document.head, we bypass Emotion entirely,
+   * avoiding the cleanup race condition while still ensuring the popover renders
+   * above the flyout layers.
+   *
+   * TODO: Remove this workaround once EUI provides a proper fix for popover z-index handling
+   * inside nested flyouts (see: https://github.com/elastic/eui/issues/8801).
+   */
+
+  useEffect(() => {
+    const style = document.createElement('style');
+
+    style.id = 'flyout-datagrid-popover-z-index-fix';
+    style.textContent = `
+      .euiDataGridRowCell__popover {
+        z-index: ${euiTheme.levels.menu} !important;
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    return () => {
+      style.remove();
+    };
+  }, [euiTheme.levels.menu]);
+
+>>>>>>> 9.4
   const traceWaterfallTitleId = useGeneratedHtmlId({
     prefix: 'traceWaterfallTitle',
   });
@@ -151,11 +191,14 @@ export const FullScreenWaterfall = ({
             scrollStrategy="parent"
             onNodeClick={onNodeClick}
             onErrorClick={onErrorClick}
+<<<<<<< HEAD
             ebt={{
               row: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ROW },
               errorBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
               serviceBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
             }}
+=======
+>>>>>>> 9.4
           />
         </div>
       </EuiFlyoutBody>

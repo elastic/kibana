@@ -14,7 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+<<<<<<< HEAD
 import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
+=======
+import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
+>>>>>>> 9.4
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/main/header';
@@ -138,20 +142,49 @@ export const AlertFlyoutHeader = ({
     };
   }, [servicesPromise, storePromise]);
 
+<<<<<<< HEAD
   if (!services || !store) {
     return null;
+=======
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
+
+  const metadataCallout = isMissingMetadata ? (
+    <>
+      <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+      <EuiSpacer size="s" />
+    </>
+  ) : null;
+  const remoteDocumentCallout = (
+    <RemoteDocumentCallout hit={hit}>
+      <EuiSpacer size="s" />
+    </RemoteDocumentCallout>
+  );
+
+  if (!services || !store) {
+    return (
+      <>
+        {metadataCallout}
+        {remoteDocumentCallout}
+      </>
+    );
+>>>>>>> 9.4
   }
 
   const isMissingMetadata = !hit.raw._id || !hit.raw._index;
 
   return (
     <>
+<<<<<<< HEAD
       {isMissingMetadata ? (
         <>
           <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
           <EuiSpacer size="s" />
         </>
       ) : null}
+=======
+      {metadataCallout}
+      {remoteDocumentCallout}
+>>>>>>> 9.4
       {flyoutProviders({
         services,
         store,

@@ -303,6 +303,10 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+<<<<<<< HEAD
+=======
+        - '.entities.v2.latest.security_*'
+>>>>>>> 9.4
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -396,6 +400,10 @@ t3_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+<<<<<<< HEAD
+=======
+        - '.entities.v2.latest.security_*'
+>>>>>>> 9.4
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -498,6 +506,10 @@ threat_intelligence_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+<<<<<<< HEAD
+=======
+        - '.entities.v2.latest.security_*'
+>>>>>>> 9.4
         - 'entities-latest-*'
         - '.ml-anomalies-*'
       privileges:
@@ -581,6 +593,10 @@ rule_author:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+<<<<<<< HEAD
+=======
+        - '.entities.v2.latest.security_*'
+>>>>>>> 9.4
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -909,6 +925,10 @@ endpoint_operations_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+<<<<<<< HEAD
+=======
+        - '.entities.v2.latest.security_*'
+>>>>>>> 9.4
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -1010,6 +1030,10 @@ endpoint_policy_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+<<<<<<< HEAD
+=======
+        - '.entities.v2.latest.security_*'
+>>>>>>> 9.4
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*

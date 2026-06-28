@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+<<<<<<< HEAD
 import {
   SavedQueryId,
   SavedQueryDescriptionOrUndefined,
@@ -99,4 +100,10 @@ export const FindSavedQueryDetailResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const FindSavedQueryResponse = lazySchema(() => z.object({}));
+export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
+
+export const FindSavedQueryDetailResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type FindSavedQueryDetailResponse = z.infer<typeof FindSavedQueryDetailResponse>;

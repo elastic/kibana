@@ -18,8 +18,13 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import type { IdentityFields } from '../../shared/utils';
+<<<<<<< HEAD
 import { PrevalenceDetailsView } from '../../../../flyout_v2/document/tools/prevalence/components/prevalence_details_view';
 import type { PrevalenceDetailsRow } from '../../../../flyout_v2/document/tools/prevalence/utils/get_columns';
+=======
+import { PrevalenceDetailsView } from '../../../../flyout_v2/prevalence/components/prevalence_details_view';
+import type { PrevalenceDetailsRow } from '../../../../flyout_v2/prevalence/utils/get_columns';
+>>>>>>> 9.4
 import {
   alertCountColumn,
   documentCountColumn,

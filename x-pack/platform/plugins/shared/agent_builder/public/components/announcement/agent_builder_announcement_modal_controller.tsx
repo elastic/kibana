@@ -6,19 +6,26 @@
  */
 
 import React, { useMemo, useState } from 'react';
+<<<<<<< HEAD
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+=======
+>>>>>>> 9.4
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import type {
   AnalyticsServiceStart,
   ApplicationStart,
   HttpStart,
+<<<<<<< HEAD
   I18nStart,
   IUiSettingsClient,
   NotificationsStart,
   ThemeServiceStart,
+=======
+  IUiSettingsClient,
+>>>>>>> 9.4
 } from '@kbn/core/public';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import { AIChatExperience, canUserChangeSpaceChatExperience } from '@kbn/ai-assistant-common';
@@ -26,7 +33,10 @@ import { useGlobalUiSetting, useKibana } from '@kbn/kibana-react-plugin/public';
 import { AI_CHAT_EXPERIENCE_TYPE, HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AgentBuilderAnnouncementModal } from '@kbn/agent-builder-browser';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
+<<<<<<< HEAD
 import { toMountPoint } from '@kbn/react-kibana-mount';
+=======
+>>>>>>> 9.4
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useAgentBuilderAnnouncementModalSeenState } from './use_agent_builder_announcement_modal_seen';
 import {
@@ -34,6 +44,7 @@ import {
   useAiAssistantPriorUsage,
 } from './use_ai_assistant_prior_usage';
 
+<<<<<<< HEAD
 interface ShowToastParams {
   notifications: NotificationsStart;
   i18nService: I18nStart;
@@ -131,14 +142,19 @@ function showCtaToast({
   });
 }
 
+=======
+>>>>>>> 9.4
 export function AgentBuilderAnnouncementModalController() {
   const { services } = useKibana<{
     spaces?: SpacesPluginStart;
     analytics: AnalyticsServiceStart;
     application: ApplicationStart;
+<<<<<<< HEAD
     i18n: I18nStart;
     notifications: NotificationsStart;
     theme: ThemeServiceStart;
+=======
+>>>>>>> 9.4
     userProfile: UserProfileServiceStart;
     http: HttpStart;
     settings: { client: IUiSettingsClient; globalClient: IUiSettingsClient };
@@ -193,6 +209,7 @@ export function AgentBuilderAnnouncementModalController() {
           source: 'agent_builder_nav_control',
           ...telemetryContext,
         });
+<<<<<<< HEAD
         const genAiSettingsUrl = services.application.getUrlForApp('management', {
           path: '/ai/genAiSettings',
         });
@@ -207,11 +224,17 @@ export function AgentBuilderAnnouncementModalController() {
         setIsDismissed(true);
       }}
       onRevert={async () => {
+=======
+        setIsDismissed(true);
+      }}
+      onRevert={() => {
+>>>>>>> 9.4
         void markSeen().catch(() => {});
         services.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
           source: 'agent_builder_nav_control',
           ...telemetryContext,
         });
+<<<<<<< HEAD
         try {
           await services.settings.client.set(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic);
           const genAiSettingsUrl = services.application.getUrlForApp('management', {
@@ -227,6 +250,9 @@ export function AgentBuilderAnnouncementModalController() {
         } catch (_err) {
           // silent
         }
+=======
+        services.application.navigateToApp('management', { path: '/ai/genAiSettings' });
+>>>>>>> 9.4
         setIsDismissed(true);
       }}
     />

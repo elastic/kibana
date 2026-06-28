@@ -42,7 +42,10 @@ export interface WatchlistFormProps {
   isEditMode: boolean;
   isNameTooLong: boolean;
   isDescriptionTooLong: boolean;
+<<<<<<< HEAD
   isRiskModifierInvalid: boolean;
+=======
+>>>>>>> 9.4
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
@@ -67,7 +70,10 @@ export const WatchlistForm = ({
   isEditMode,
   isNameTooLong,
   isDescriptionTooLong,
+<<<<<<< HEAD
   isRiskModifierInvalid,
+=======
+>>>>>>> 9.4
   onFieldChange,
   onSourceValidationChange,
 }: WatchlistFormProps) => {

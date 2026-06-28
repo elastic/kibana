@@ -18,7 +18,11 @@ const createPrivilegedEntity = (
 ): LeadEntity => ({
   record: {
     entity: {
+<<<<<<< HEAD
       id,
+=======
+      id: `${type}:${name}`,
+>>>>>>> 9.4
       name,
       type,
       attributes: { watchlists: [PRIVILEGED_USER_WATCHLIST_ID] },
@@ -35,7 +39,11 @@ const createNonPrivilegedEntity = (
   id: string = `${type}:${name}`
 ): LeadEntity => ({
   record: {
+<<<<<<< HEAD
     entity: { id, name, type, attributes: { watchlists: [] } },
+=======
+    entity: { id: `${type}:${name}`, name, type, attributes: { watchlists: [] } },
+>>>>>>> 9.4
   } as never,
   id,
   type,

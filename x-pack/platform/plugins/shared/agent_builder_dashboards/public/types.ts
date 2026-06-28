@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/types.ts
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+=======
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/types.ts
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

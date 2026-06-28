@@ -24,12 +24,15 @@ import {
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+<<<<<<< HEAD
 import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import type {
   AgentExecution,
   ConversationAgentExecution,
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
+=======
+>>>>>>> 9.4
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';

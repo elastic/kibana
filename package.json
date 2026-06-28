@@ -11,8 +11,13 @@
     "dashboarding"
   ],
   "private": true,
+<<<<<<< HEAD
   "version": "9.5.0",
   "branch": "main",
+=======
+  "version": "9.4.0",
+  "branch": "9.4",
+>>>>>>> 9.4
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
@@ -74,7 +79,11 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
+<<<<<<< HEAD
     "node": "24.14.1",
+=======
+    "node": "22.22.2",
+>>>>>>> 9.4
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -82,6 +91,7 @@
     "**/@emotion/sheet": "npm:@elastic/emotion-sheet@1.4.1",
     "**/@hapi/mimos/mime-db": "1.53.0",
     "**/@hello-pangea/dnd": "18.0.1",
+    "**/@hono/node-server": "1.19.14",
     "**/@langchain/core": "1.1.31",
     "**/@langchain/google-common": "2.1.24",
     "**/@types/node": "24.10.13",
@@ -95,6 +105,7 @@
     "**/fast-xml-parser": "5.5.7",
     "**/flatted": "3.4.2",
     "**/hoist-non-react-statics": "3.3.2",
+    "**/hono": "4.12.14",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
     "**/pixelmatch": "5.3.0",
     "**/qs": "6.15.2",
@@ -131,6 +142,7 @@
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
+<<<<<<< HEAD
     "@elastic/apm-rum": "5.17.4",
     "@elastic/apm-rum-core": "5.25.2",
     "@elastic/apm-rum-react": "2.0.10",
@@ -143,6 +155,20 @@
     "@elastic/esql": "4.4.0",
     "@elastic/eui": "116.3.1",
     "@elastic/eui-theme-borealis": "8.0.0",
+=======
+    "@elastic/apm-rum": "5.17.3",
+    "@elastic/apm-rum-core": "5.25.1",
+    "@elastic/apm-rum-react": "2.0.9",
+    "@elastic/charts": "71.5.0",
+    "@elastic/datemath": "5.0.3",
+    "@elastic/ebt": "1.4.1",
+    "@elastic/ecs": "9.3.0",
+    "@elastic/elasticsearch": "9.3.4",
+    "@elastic/ems-client": "8.7.0",
+    "@elastic/esql": "1.8.0",
+    "@elastic/eui": "114.0.0",
+    "@elastic/eui-theme-borealis": "7.0.0",
+>>>>>>> 9.4
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
     "@elastic/micro-jq": "1.9.0",
@@ -173,7 +199,11 @@
     "@hapi/boom": "10.0.1",
     "@hapi/cookie": "12.0.1",
     "@hapi/h2o2": "10.0.4",
+<<<<<<< HEAD
     "@hapi/hapi": "21.4.9",
+=======
+    "@hapi/hapi": "21.4.8",
+>>>>>>> 9.4
     "@hapi/hoek": "11.0.7",
     "@hapi/inert": "7.1.1",
     "@hapi/wreck": "18.1.2",
@@ -193,10 +223,13 @@
     "@kbn/agent-builder-platform-plugin": "link:x-pack/platform/plugins/shared/agent_builder_platform",
     "@kbn/agent-builder-plugin": "link:x-pack/platform/plugins/shared/agent_builder",
     "@kbn/agent-builder-server": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-server",
+<<<<<<< HEAD
     "@kbn/agent-builder-tools-base": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base",
     "@kbn/agent-builder-workflow-gen": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen",
     "@kbn/agent-builder-workflows-plugin": "link:x-pack/platform/plugins/shared/agent_builder_workflows",
     "@kbn/agent-context-layer-plugin": "link:x-pack/platform/plugins/shared/agent_context_layer",
+=======
+>>>>>>> 9.4
     "@kbn/ai-assistant": "link:x-pack/platform/packages/shared/kbn-ai-assistant",
     "@kbn/ai-assistant-common": "link:x-pack/platform/packages/shared/ai-assistant/common",
     "@kbn/ai-assistant-connector-selector-action": "link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action",
@@ -1375,7 +1408,11 @@
     "archiver": "7.0.1",
     "async": "3.2.6",
     "aws4": "1.13.2",
+<<<<<<< HEAD
     "axios": "1.16.1",
+=======
+    "axios": "1.15.0",
+>>>>>>> 9.4
     "base64-js": "1.5.1",
     "bitmap-sdf": "1.0.3",
     "blurhash": "2.0.5",
@@ -1456,11 +1493,20 @@
     "jszip": "3.10.1",
     "just-bash": "3.0.1",
     "kea": "2.6.0",
+<<<<<<< HEAD
     "langsmith": "0.7.1",
     "launchdarkly-js-client-sdk": "3.9.1",
     "liquidjs": "10.26.0",
     "lodash": "4.18.1",
     "lru-cache": "11.3.6",
+=======
+    "langchain": "1.2.30",
+    "langsmith": "0.5.7",
+    "launchdarkly-js-client-sdk": "3.9.0",
+    "liquidjs": "10.25.6",
+    "lodash": "4.17.23",
+    "lru-cache": "11.2.6",
+>>>>>>> 9.4
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
@@ -1566,7 +1612,11 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
+<<<<<<< HEAD
     "undici": "7.24.4",
+=======
+    "undici": "6.24.1",
+>>>>>>> 9.4
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
@@ -2166,6 +2216,7 @@
     "oboe": "2.1.7",
     "openapi-types": "12.1.3",
     "oxlint": "1.56.0",
+    "patch-package": "8.0.1",
     "peggy": "4.2.0",
     "picomatch": "4.0.4",
     "pirates": "4.0.7",
@@ -2220,7 +2271,11 @@
     "webpack": "5.96.1",
     "webpack-bundle-analyzer": "4.10.2",
     "webpack-cli": "5.1.4",
+<<<<<<< HEAD
     "webpack-dev-server": "5.2.5",
+=======
+    "webpack-dev-server": "5.2.3",
+>>>>>>> 9.4
     "webpack-merge": "6.0.1",
     "webpack-sources": "3.2.3",
     "whatwg-fetch": "3.6.20",

@@ -93,6 +93,7 @@ const serviceMapDagreLayoutFallbackEventType: TelemetryEvent = {
   },
 };
 
+<<<<<<< HEAD
 const serviceMapAddedToDashboardEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD,
   schema: {
@@ -155,6 +156,8 @@ const metricsCalloutLoadedEventType: TelemetryEvent = {
   },
 };
 
+=======
+>>>>>>> 9.4
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   sloOverviewFlyoutViewedEventType,
@@ -162,7 +165,10 @@ export const apmTelemetryEventBasedTypes = [
   sloOverviewFlyoutStatusFilteredEventType,
   sloInfoShownEventType,
   serviceMapDagreLayoutFallbackEventType,
+<<<<<<< HEAD
   serviceMapAddedToDashboardEventType,
   metricsCalloutDateRangeSelectedEventType,
   metricsCalloutLoadedEventType,
+=======
+>>>>>>> 9.4
 ];

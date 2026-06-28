@@ -29,16 +29,28 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
 import { css } from '@emotion/react';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
+=======
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { css } from '@emotion/react';
+import * as translations from '../../../common/translations';
+import { useRegisteredFeatures } from '../../hooks/use_registered_features';
+import { getProviderKeyForCreator } from '../../utils/eis_utils';
+>>>>>>> 9.4
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { useConnectors } from '../../hooks/use_connectors';
 import type { EndpointDeprecationInfo } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
+<<<<<<< HEAD
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
 import { ResetDefaultsModal } from './reset_defaults_modal';
 
@@ -46,6 +58,33 @@ const COLLAPSED_COUNT = 5;
 
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
+=======
+import { useConnectors } from '../../hooks/use_connectors';
+
+const COLLAPSED_COUNT = 5;
+
+const getConnectorIcon = (connector: InferenceConnector): string => {
+  let key: string | undefined;
+  switch (connector.type) {
+    case InferenceConnectorType.OpenAI:
+      key = connector.config?.apiProvider === 'Azure OpenAI' ? 'azureopenai' : 'openai';
+      break;
+    case InferenceConnectorType.Bedrock:
+      key = 'amazonbedrock';
+      break;
+    case InferenceConnectorType.Gemini:
+      key = 'googlevertexai';
+      break;
+    case InferenceConnectorType.Inference:
+      key =
+        getProviderKeyForCreator(connector.config?.modelCreator) ??
+        connector.config?.service ??
+        connector.config?.provider;
+      break;
+  }
+  return SERVICE_PROVIDERS[key as ServiceProviderKeys]?.icon ?? 'compute';
+};
+>>>>>>> 9.4
 
 interface SubFeatureCardProps {
   featureId: string;
@@ -54,11 +93,14 @@ interface SubFeatureCardProps {
   effectiveRecommendedEndpoints: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+<<<<<<< HEAD
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
   globalDefaultId: string;
   canManage?: boolean;
+=======
+>>>>>>> 9.4
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -68,11 +110,14 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   effectiveRecommendedEndpoints,
   onEndpointsChange,
   invalidEndpointIds,
+<<<<<<< HEAD
   deprecatedEndpointsMap,
   hasSavedObject,
   isFeatureDirty,
   globalDefaultId,
   canManage = true,
+=======
+>>>>>>> 9.4
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -276,6 +321,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             </EuiText>
             <EuiSpacer size="s" />
 
+<<<<<<< HEAD
             {useRecommendedDefaults ? (
               <RecommendedEndpointsList
                 featureId={featureId}
@@ -350,6 +396,91 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         </EuiPanel>
                                       </EuiFlexItem>
                                     )}
+=======
+            <EuiDragDropContext onDragEnd={handleDragEnd}>
+              <div ref={listRef}>
+                <EuiSplitPanel.Outer hasBorder>
+                  <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
+                    {visibleEndpoints.map((endpointId, index) => (
+                      <EuiDraggable
+                        key={endpointId}
+                        index={index}
+                        draggableId={endpointId}
+                        customDragHandle
+                        hasInteractiveChildren
+                      >
+                        {(provided) => {
+                          const { icon = 'compute', label = endpointId } =
+                            endpointDisplayMap.get(endpointId) ?? {};
+                          const isInvalid = invalidEndpointIds.has(endpointId);
+                          return (
+                            <div>
+                              <EuiSplitPanel.Inner
+                                paddingSize="s"
+                                data-test-subj={`endpoint-row-${endpointId}`}
+                              >
+                                <EuiFlexGroup alignItems="center" gutterSize="s">
+                                  <EuiFlexItem grow={false}>
+                                    <EuiPanel
+                                      color="transparent"
+                                      paddingSize="none"
+                                      {...provided.dragHandleProps}
+                                      aria-label={i18n.translate(
+                                        'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                        { defaultMessage: 'Drag to reorder' }
+                                      )}
+                                    >
+                                      <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
+                                    </EuiPanel>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
+                                    {isInvalid ? (
+                                      <EuiIconTip
+                                        type="warning"
+                                        size="m"
+                                        color="warning"
+                                        content={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
+                                          {
+                                            defaultMessage:
+                                              'This inference endpoint is no longer available',
+                                          }
+                                        )}
+                                        aria-label={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable.ariaLabel',
+                                          {
+                                            defaultMessage:
+                                              'Inference endpoint {label} is no longer available',
+                                            values: { label },
+                                          }
+                                        )}
+                                      />
+                                    ) : (
+                                      <EuiIcon type={icon} size="m" aria-hidden />
+                                    )}
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow
+                                    css={css`
+                                      min-width: 0;
+                                    `}
+                                  >
+                                    <EuiToolTip title={label} content={endpointId} position="top">
+                                      <EuiText
+                                        size="s"
+                                        tabIndex={0}
+                                        css={css`
+                                          overflow: hidden;
+                                          text-overflow: ellipsis;
+                                          white-space: nowrap;
+                                        `}
+                                      >
+                                        <span>{label}</span>
+                                      </EuiText>
+                                    </EuiToolTip>
+                                  </EuiFlexItem>
+                                  {index === 0 && (
+>>>>>>> 9.4
                                     <EuiFlexItem grow={false}>
                                       {isInvalid ? (
                                         <EuiIconTip

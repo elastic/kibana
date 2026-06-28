@@ -8,9 +8,15 @@
 import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiSpacer } from '@elastic/eui';
+<<<<<<< HEAD
 import { NotesRemoteCallout } from '../../../../flyout_v2/shared/tools/notes/components/notes_remote_callout';
 import { NotesDetailsContent } from '../../../../flyout_v2/shared/tools/notes/components/notes_details_content';
 import { useTimelineConfig } from '../../../../flyout_v2/shared/tools/notes/hooks/use_timeline_config';
+=======
+import { NotesRemoteCallout } from '../../../../flyout_v2/notes/components/notes_remote_callout';
+import { NotesDetailsContent } from '../../../../flyout_v2/notes/components/notes_details_content';
+import { useTimelineConfig } from '../../../../flyout_v2/notes/hooks/use_timeline_config';
+>>>>>>> 9.4
 import { useAttackDetailsContext } from '../../context';
 import { useWhichFlyout } from '../../../document_details/shared/hooks/use_which_flyout';
 import { Flyouts } from '../../../document_details/shared/constants/flyouts';

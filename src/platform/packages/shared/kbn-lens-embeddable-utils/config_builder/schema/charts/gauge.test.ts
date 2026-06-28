@@ -274,6 +274,7 @@ describe('Gauge Schema', () => {
     } satisfies GaugeInput;
 
     expect(() => gaugeConfigSchema.validate(input)).toThrow();
+<<<<<<< HEAD
   });
 
   it('throws on reference-based operations for min, max, and goal', () => {
@@ -307,5 +308,7 @@ describe('Gauge Schema', () => {
         ).toThrow();
       }
     }
+=======
+>>>>>>> 9.4
   });
 });

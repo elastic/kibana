@@ -9,11 +9,15 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+<<<<<<< HEAD
 import type {
   LensLegendConfig,
   LensSeriesLayer,
   LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
+=======
+import type { LensSeriesLayer, LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
+>>>>>>> 9.4
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';

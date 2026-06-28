@@ -60,13 +60,22 @@ export const ContextMenuActions = React.memo<Props>(
         {button.children}
       </EuiButton>
     ) : (
+<<<<<<< HEAD
       <EuiToolTip
         content={
+=======
+      <EuiButtonIcon
+        isDisabled={props.isManaged}
+        iconType="boxesVertical"
+        onClick={handleToggleMenu}
+        aria-label={
+>>>>>>> 9.4
           ariaLabel ??
           i18n.translate('xpack.fleet.genericActionsMenuText', {
             defaultMessage: 'Actions',
           })
         }
+<<<<<<< HEAD
         disableScreenReaderOutput
       >
         <EuiButtonIcon
@@ -82,13 +91,20 @@ export const ContextMenuActions = React.memo<Props>(
           data-test-subj="agentActionsBtn"
         />
       </EuiToolTip>
+=======
+        data-test-subj="agentActionsBtn"
+      />
+>>>>>>> 9.4
     );
 
     return (
       <EuiPopover
+<<<<<<< HEAD
         aria-label={i18n.translate('xpack.fleet.contextMenuActions.popoverAriaLabel', {
           defaultMessage: 'Actions menu',
         })}
+=======
+>>>>>>> 9.4
         anchorPosition="downRight"
         panelPaddingSize="none"
         button={

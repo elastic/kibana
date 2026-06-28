@@ -311,11 +311,15 @@ describe('createRuleAttachmentDefinition', () => {
     it('handler navigates to rule creation when not on a rule form page', () => {
       (window as { location: unknown }).location = { pathname: '/app/security/overview' };
       const application = makeApplication(true);
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule/rule_attachment.test.ts
       const definition = createRuleAttachmentDefinition({
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
       });
+=======
+      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule_attachment.test.ts
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -329,11 +333,15 @@ describe('createRuleAttachmentDefinition', () => {
     it('handler opens sidebar conversation when navigating to rule creation', () => {
       (window as { location: unknown }).location = { pathname: '/app/security/overview' };
       const application = makeApplication(true);
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule/rule_attachment.test.ts
       const definition = createRuleAttachmentDefinition({
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
       });
+=======
+      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule_attachment.test.ts
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -347,11 +355,15 @@ describe('createRuleAttachmentDefinition', () => {
         pathname: '/app/security/rules/create',
       };
       const application = makeApplication(true);
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule/rule_attachment.test.ts
       const definition = createRuleAttachmentDefinition({
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
       });
+=======
+      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule_attachment.test.ts
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -365,11 +377,15 @@ describe('createRuleAttachmentDefinition', () => {
         pathname: '/app/security/rules/create',
       };
       const application = makeApplication(true);
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule/rule_attachment.test.ts
       const definition = createRuleAttachmentDefinition({
         application,
         aiRuleCreation,
         uiSettings: makeUiSettings(),
       });
+=======
+      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule_attachment.test.ts
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 

@@ -9,10 +9,18 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
+<<<<<<< HEAD
 import { validator } from '../utils/validator';
 import type { HeatmapConfig } from '../../schema/charts/heatmap';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
+=======
+import { heatmapConfigSchema } from '../../schema/charts/heatmap';
+import type { HeatmapConfig } from '../../schema/charts/heatmap';
+import { AUTO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import { validateConverter } from '../validate';
+>>>>>>> 9.4
 import * as dslMocks from './dsl.mocks';
 import * as esqlMocks from './esql.mocks';
 import * as esqlApiMocks from './lens_api_config.mock';
@@ -23,6 +31,7 @@ function toAPI(attributes: Parameters<LensConfigBuilder['toAPIFormat']>[0]): Hea
 }
 
 describe('Heatmap', () => {
+<<<<<<< HEAD
   describe('state transform validation', () => {
     describe('DSL', () => {
       it('should convert a simple heatmap', () => {
@@ -130,6 +139,45 @@ describe('Heatmap', () => {
     it('should include axis.y for an ESQL heatmap with yAccessor', () => {
       const apiOutput = toAPI(esqlMocks.withXAndYAxes);
       expect(apiOutput.axis).toHaveProperty('y');
+=======
+  describe('DSL', () => {
+    it('should convert a simple heatmap', () => {
+      validateConverter(dslMocks.simple, heatmapConfigSchema);
+    });
+
+    it('should convert a heatmap with x and y axes', () => {
+      validateConverter(dslMocks.withXAndYAxes, heatmapConfigSchema);
+    });
+
+    it('should convert a heatmap with dynamic colors', () => {
+      validateConverter(dslMocks.withDynamicColors, heatmapConfigSchema);
+    });
+
+    it('should convert a heatmap with sort predicates', () => {
+      validateConverter(dslMocks.withSortPredicates, heatmapConfigSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(dslMocks.defaultColorByValueAttributes, heatmapConfigSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(dslMocks.selectorColorByValueAttributes, heatmapConfigSchema);
+    });
+  });
+
+  describe('ESQL', () => {
+    it('should convert a simple heatmap', () => {
+      validateConverter(esqlMocks.simple, heatmapConfigSchema);
+    });
+
+    it('should convert a heatmap with x and y axes', () => {
+      validateConverter(esqlMocks.withXAndYAxes, heatmapConfigSchema);
+    });
+
+    it('should convert a heatmap with sort predicates', () => {
+      validateConverter(esqlMocks.withSortPredicates, heatmapConfigSchema);
+>>>>>>> 9.4
     });
   });
 

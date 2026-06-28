@@ -10,11 +10,14 @@
 import type { ScoutPage } from '@kbn/scout';
 import type { Waterfall } from './waterfall';
 import { createWaterfall } from './waterfall';
+<<<<<<< HEAD
 
 // Table rows are populated by async API calls after navigation. On slow
 // environments (cloud CI) this can exceed the default 10s actionTimeout,
 // so we use the navigationTimeout budget instead.
 const TABLE_LOAD_TIMEOUT = 20000;
+=======
+>>>>>>> 9.4
 
 export interface ApmPage {
   readonly waterfall: Waterfall;

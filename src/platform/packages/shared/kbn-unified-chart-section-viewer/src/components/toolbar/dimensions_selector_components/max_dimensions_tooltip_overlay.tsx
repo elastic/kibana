@@ -36,7 +36,11 @@ export const MaxDimensionsTooltipOverlay = () => {
         `,
       }}
     >
+<<<<<<< HEAD
       <div tabIndex={0} />
+=======
+      <div />
+>>>>>>> 9.4
     </EuiToolTip>
   );
 };

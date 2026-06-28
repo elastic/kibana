@@ -46,8 +46,16 @@ import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
+<<<<<<< HEAD
 import { render, screen, waitFor } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
+=======
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
+import { CELL_CLASS } from '../utils/get_render_cell_value';
+import { defaultTimeColumnWidth } from '../constants';
+>>>>>>> 9.4
 import { useColumns } from '../hooks/use_data_grid_columns';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -583,6 +591,7 @@ describe('UnifiedDataTable', () => {
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
       });
+<<<<<<< HEAD
 
       await userEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
       await waitForEuiPopoverOpen();
@@ -591,6 +600,12 @@ describe('UnifiedDataTable', () => {
       });
       await waitForEuiPopoverClose();
 
+=======
+      await userEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+      await userEvent.click(screen.getByTestId('unifiedDataTableCopyRowsAsText'), {
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
+      });
+>>>>>>> 9.4
       return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0] as string;
     };
 
@@ -619,9 +634,13 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
+<<<<<<< HEAD
 
         await sortByColumn('message');
 
+=======
+        await sortByColumn('message');
+>>>>>>> 9.4
         await waitFor(() => {
           values = getCellValuesByColumn();
 
@@ -707,9 +726,13 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
+<<<<<<< HEAD
 
         await sortByColumn('message');
 
+=======
+        await sortByColumn('message');
+>>>>>>> 9.4
         await waitFor(() => {
           values = getCellValuesByColumn();
 
@@ -779,6 +802,37 @@ describe('UnifiedDataTable', () => {
         await renderDataTable({
           columns: ['message'],
           isPlainRecord: true,
+          rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+        });
+
+        await waitFor(() => {
+          expect(getCellValuesByColumn().message?.[0]).toBe('message_0');
+        });
+
+        await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(hits[0])}`));
+
+        const clipboardTextBeforeSorting = await copySelectedDocsAsText();
+
+        await sortByColumn('message');
+
+        await waitFor(() => {
+          expect(getCellValuesByColumn().message?.[0]).toBe('message_9');
+        });
+
+        const clipboardTextAfterSorting = await copySelectedDocsAsText();
+
+        expect(clipboardTextAfterSorting).toBe(clipboardTextBeforeSorting);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    test(
+      'sorting should preserve the selected documents when copying them to clipboard',
+      async () => {
+        const hits = generateEsHits(dataViewMock, 10);
+        await renderDataTable({
+          isPlainRecord: true,
+          columns: ['message'],
           rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
         });
 

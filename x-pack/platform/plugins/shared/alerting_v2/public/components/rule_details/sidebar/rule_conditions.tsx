@@ -12,8 +12,17 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ItemValueRuleSummary } from '../item_value_rule_summary';
+<<<<<<< HEAD
 import { useRule } from '../rule_context';
 import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
+=======
+import { RecoveryPolicy } from '../recovery_policy';
+import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
+
+export interface RuleConditionsProps {
+  rule: RuleApiResponse;
+}
+>>>>>>> 9.4
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {

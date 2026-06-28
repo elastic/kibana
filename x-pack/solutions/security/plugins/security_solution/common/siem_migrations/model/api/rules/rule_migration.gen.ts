@@ -109,6 +109,7 @@ export type CreateRuleMigrationRulesRequestBodyInput = z.input<
   typeof CreateRuleMigrationRulesRequestBody
 >;
 
+<<<<<<< HEAD
 export const CreateSentinelRuleMigrationRulesRequestParams = lazySchema(() =>
   z.object({
     migration_id: NonEmptyString,
@@ -131,6 +132,8 @@ export type CreateSentinelRuleMigrationRulesRequestBodyInput = z.input<
   typeof CreateSentinelRuleMigrationRulesRequestBody
 >;
 
+=======
+>>>>>>> 9.4
 export const DeleteRuleMigrationRequestParams = lazySchema(() =>
   z.object({
     migration_id: NonEmptyString,

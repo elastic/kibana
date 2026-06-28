@@ -208,9 +208,13 @@ export const ScheduledHistoryRow = lazySchema(() =>
 );
 export type ScheduledHistoryRow = z.infer<typeof ScheduledHistoryRow>;
 
+<<<<<<< HEAD
 export const UnifiedHistoryRow = lazySchema(() =>
   z.discriminatedUnion('sourceType', [LiveHistoryRow, ScheduledHistoryRow])
 );
+=======
+export const UnifiedHistoryRow = lazySchema(() => z.union([LiveHistoryRow, ScheduledHistoryRow]));
+>>>>>>> 9.4
 export type UnifiedHistoryRow = z.infer<typeof UnifiedHistoryRow>;
 
 export const GetUnifiedHistoryResponse = lazySchema(() =>

@@ -32,6 +32,7 @@ describe('parseTargetMetadataHits', () => {
       name: 'alice',
       type: EntityType.user,
       riskScore: 85.5,
+<<<<<<< HEAD
       individualRiskScore: null,
     });
   });
@@ -57,6 +58,8 @@ describe('parseTargetMetadataHits', () => {
       type: EntityType.user,
       riskScore: null,
       individualRiskScore: 67.25,
+=======
+>>>>>>> 9.4
     });
   });
 
@@ -92,13 +95,19 @@ describe('parseTargetMetadataHits', () => {
       name: 'alice',
       type: EntityType.user,
       riskScore: null,
+<<<<<<< HEAD
       individualRiskScore: null,
+=======
+>>>>>>> 9.4
     });
     expect(result.get('host:srv-01')).toEqual({
       name: 'srv-01',
       type: EntityType.host,
       riskScore: 42.0,
+<<<<<<< HEAD
       individualRiskScore: null,
+=======
+>>>>>>> 9.4
     });
   });
 

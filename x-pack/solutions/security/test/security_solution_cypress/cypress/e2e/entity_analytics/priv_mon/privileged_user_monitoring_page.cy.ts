@@ -18,10 +18,15 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'disable:entityAnalyticsEntityStoreV2',
+<<<<<<< HEAD
             'disable:entityAnalyticsWatchlistEnabled',
             'disable:entityAnalyticsNewHomePageEnabled',
           ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+=======
+            'disable:entityAnalyticsNewHomePageEnabled',
+          ])}`,
+>>>>>>> 9.4
         ],
       },
     },

@@ -626,6 +626,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
       )
     ),
     y: schema.arrayOf(
+<<<<<<< HEAD
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         {
           axis: schema.maybe(yMetricOnAxisSchema),
@@ -637,6 +638,16 @@ const xyDataLayerSchemaNoESQL = schema.object(
         },
         'xyY'
       ),
+=======
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
+        axis: schema.maybe(yMetricOnAxisSchema),
+        color: schema.maybe(
+          schema.oneOf([staticColorSchema, autoColorSchema], {
+            defaultValue: AUTO_COLOR,
+          })
+        ),
+      }),
+>>>>>>> 9.4
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
     x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({}, 'xyX')),
@@ -1105,9 +1116,12 @@ export type LayerTypeNoESQL =
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
+<<<<<<< HEAD
 
 export type XYLegendOutsideHorizontal = TypeOf<typeof xyLegendOutsideHorizontalSchema>;
 export type XYLegendOutsideVertical = TypeOf<typeof xyLegendOutsideVerticalSchema>;
 export type XYLegendInside = TypeOf<typeof xyLegendInsideSchema>;
 export type XYLegendStatistic = TypeOf<typeof statisticsSchema>;
 export type XYLegendSize = TypeOf<typeof legendSizeSchema>;
+=======
+>>>>>>> 9.4

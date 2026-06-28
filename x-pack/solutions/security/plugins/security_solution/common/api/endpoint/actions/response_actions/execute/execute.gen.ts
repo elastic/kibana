@@ -25,10 +25,14 @@ export const ExecuteRouteRequestBody = lazySchema(() =>
   BaseActionSchema.merge(
     z.object({
       parameters: z.object({
+<<<<<<< HEAD
         /**
          * The shell command to execute on the endpoint.
          */
         command: z.string().min(1),
+=======
+        command: Command,
+>>>>>>> 9.4
         /**
          * The maximum timeout value in seconds before the command is terminated.
          */
@@ -39,11 +43,21 @@ export const ExecuteRouteRequestBody = lazySchema(() =>
 );
 export type ExecuteRouteRequestBody = z.infer<typeof ExecuteRouteRequestBody>;
 
+<<<<<<< HEAD
+=======
+export const ExecuteRouteResponse = lazySchema(() => z.object({}));
+export type ExecuteRouteResponse = z.infer<typeof ExecuteRouteResponse>;
+
+>>>>>>> 9.4
 export const EndpointExecuteActionRequestBody = lazySchema(() => ExecuteRouteRequestBody);
 export type EndpointExecuteActionRequestBody = z.infer<typeof EndpointExecuteActionRequestBody>;
 export type EndpointExecuteActionRequestBodyInput = z.input<
   typeof EndpointExecuteActionRequestBody
 >;
 
+<<<<<<< HEAD
 export const EndpointExecuteActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
+=======
+export const EndpointExecuteActionResponse = lazySchema(() => ExecuteRouteResponse);
+>>>>>>> 9.4
 export type EndpointExecuteActionResponse = z.infer<typeof EndpointExecuteActionResponse>;

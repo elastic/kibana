@@ -18,6 +18,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { BaseActionSchema, ResponseActionDetails } from '../../../model/schema/common.gen';
 
+<<<<<<< HEAD
 export const UnisolateRouteResponse = lazySchema(() =>
   z.object({
     /**
@@ -27,6 +28,9 @@ export const UnisolateRouteResponse = lazySchema(() =>
     data: ResponseActionDetails.optional(),
   })
 );
+=======
+export const UnisolateRouteResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type UnisolateRouteResponse = z.infer<typeof UnisolateRouteResponse>;
 
 export const EndpointUnisolateActionRequestBody = lazySchema(() => BaseActionSchema);

@@ -18,8 +18,11 @@ import type {
   PublicStepDefinition,
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
+<<<<<<< HEAD
 import { getBaseConnectorType } from './get_base_connector_type';
 import { getConnectorSpecIcon } from './get_connector_spec_icon';
+=======
+>>>>>>> 9.4
 import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -82,6 +85,7 @@ export const StepIcon = React.memo(
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
+<<<<<<< HEAD
           </Suspense>,
           title
         );
@@ -94,6 +98,9 @@ export const StepIcon = React.memo(
             <EuiIcon type={connectorSpecIcon} size="m" {...rest} aria-hidden={true} />
           </Suspense>,
           title
+=======
+          </Suspense>
+>>>>>>> 9.4
         );
       }
 
@@ -102,8 +109,12 @@ export const StepIcon = React.memo(
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
+<<<<<<< HEAD
           </Suspense>,
           title
+=======
+          </Suspense>
+>>>>>>> 9.4
         );
       }
 
@@ -126,6 +137,7 @@ export const StepIcon = React.memo(
             mask-position: center;
             background-color: ${statusColor ?? euiTheme.colors.textParagraph};
           `}
+          title={rest.title}
           onClick={onClick}
           aria-hidden={true}
         />,
@@ -136,6 +148,7 @@ export const StepIcon = React.memo(
     if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return withTooltip(
         <EuiToken
+          title={rest.title}
           iconType={iconType}
           size="s"
           color={
@@ -197,15 +210,22 @@ function getActionTypeIcon(
 // List rows aggregate by base type (e.g. `cases` from `cases.createCase`), but extension steps
 // register full ids (e.g. `cases.createCase`). Fall back to the first registered step whose id
 // starts with `${baseType}.` so the list inherits the extension icon chosen for that family.
+<<<<<<< HEAD
 // Prefer a sibling that has an icon — some family members (e.g. `ai.agent`) intentionally omit
 // one, and returning those here would drop the family back to the plugs fallback.
+=======
+>>>>>>> 9.4
 function findStepDefinitionByBaseType(
   baseType: string,
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
 ): PublicStepDefinition | undefined {
   const prefix = `${baseType}.`;
+<<<<<<< HEAD
   const family = workflowsExtensions
     .getAllStepDefinitions()
     .filter((def) => def.id.startsWith(prefix));
   return family.find((def) => def.icon) ?? family[0];
+=======
+  return workflowsExtensions.getAllStepDefinitions().find((def) => def.id.startsWith(prefix));
+>>>>>>> 9.4
 }

@@ -748,7 +748,11 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
+<<<<<<< HEAD
       await this.toasts.dismissAllWithChecks();
+=======
+      await this.toasts.dismissIfExists();
+>>>>>>> 9.4
       await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {

@@ -197,6 +197,7 @@ const readAllSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
+<<<<<<< HEAD
     const {
       getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,
@@ -206,15 +207,25 @@ const readAllSignificantEventsRoute = createServerRoute({
     } = await getScopedClients({
       request,
     });
+=======
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+>>>>>>> 9.4
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
+<<<<<<< HEAD
     const alertsSource = await resolveAlertsSource({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
     const kiClient = await getKnowledgeIndicatorClient();
+=======
+    const queryClient = await getQueryClient();
+>>>>>>> 9.4
     return readSignificantEventsFromAlertsIndices(
       {
         from,

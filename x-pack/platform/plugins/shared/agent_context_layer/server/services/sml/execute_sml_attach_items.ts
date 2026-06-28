@@ -118,7 +118,11 @@ export const resolveSmlAttachItems = async ({
           attachment: {
             type: convertedAttachment.type,
             data: convertedAttachment.data,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/execute_sml_attach_items.ts
             origin: convertedAttachment.origin ?? smlDoc.origin.uri,
+=======
+            origin: convertedAttachment.origin ?? smlDoc.origin_id,
+>>>>>>> 9.4:x-pack/platform/plugins/shared/agent_builder/server/services/sml/execute_sml_attach_items.ts
             description: convertedAttachment.description ?? `${smlDoc.type}/${smlDoc.title}`,
           },
         };

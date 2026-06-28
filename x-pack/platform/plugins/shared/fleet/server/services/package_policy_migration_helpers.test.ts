@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
@@ -20,6 +21,11 @@ import {
   applyInputLevelMigration,
   applyVarScopeMigration,
 } from './package_policy_migration_helpers';
+=======
+import type { NewPackagePolicyInput } from '../../common/types';
+
+import { findInputForMigration } from './package_policy_migration_helpers';
+>>>>>>> 9.4
 
 describe('findInputForMigration', () => {
   const makeInput = (
@@ -96,6 +102,7 @@ describe('findInputForMigration', () => {
     expect(result).toBeUndefined();
   });
 });
+<<<<<<< HEAD
 
 describe('buildVarRenameMap', () => {
   it('returns an empty object when no vars have migrate_from', () => {
@@ -580,3 +587,5 @@ describe('applyVarScopeMigration', () => {
     });
   });
 });
+=======
+>>>>>>> 9.4

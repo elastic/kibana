@@ -8,7 +8,11 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
+<<<<<<< HEAD
 import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
+=======
+import { DATASET_VAR_NAME } from '../../../common/constants';
+>>>>>>> 9.4
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
 
@@ -918,7 +922,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
           {
+<<<<<<< HEAD
             names: ['logs-otel-traces.otel-test'],
+=======
+            names: ['logs-otel-traces-test'],
+>>>>>>> 9.4
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
@@ -971,11 +979,16 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toMatchObject({
       'package-policy-otel-var-over-compiled': {
         indices: [
+<<<<<<< HEAD
           {
             names: ['traces-zipkinreceiver.otel-ep'],
             privileges: ['auto_configure', 'create_doc'],
           },
           { names: ['logs-zipkinreceiver.otel-ep'], privileges: ['auto_configure', 'create_doc'] },
+=======
+          { names: ['traces-zipkinreceiver-ep'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['logs-zipkinreceiver-ep'], privileges: ['auto_configure', 'create_doc'] },
+>>>>>>> 9.4
         ],
       },
     });
@@ -1023,7 +1036,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toMatchObject({
       'package-policy-otel-dataset-empty-object': {
         indices: expect.arrayContaining([
+<<<<<<< HEAD
           { names: ['logs-otel-traces.otel-test'], privileges: ['auto_configure', 'create_doc'] },
+=======
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+>>>>>>> 9.4
         ]),
       },
     });
@@ -1071,7 +1088,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toMatchObject({
       'package-policy-otel-dataset-array': {
         indices: expect.arrayContaining([
+<<<<<<< HEAD
           { names: ['logs-otel-traces.otel-test'], privileges: ['auto_configure', 'create_doc'] },
+=======
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+>>>>>>> 9.4
         ]),
       },
     });
@@ -1119,7 +1140,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toMatchObject({
       'package-policy-otel-dataset-object': {
         indices: expect.arrayContaining([
+<<<<<<< HEAD
           { names: ['logs-my.custom.otel-test'], privileges: ['auto_configure', 'create_doc'] },
+=======
+          { names: ['logs-my.custom-test'], privileges: ['auto_configure', 'create_doc'] },
+>>>>>>> 9.4
         ]),
       },
     });
@@ -1200,14 +1225,22 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(wsPermissions).toMatchObject({
       'package-policy-otel-dataset-whitespace': {
         indices: expect.arrayContaining([
+<<<<<<< HEAD
           { names: ['logs-otel-traces.otel-test'], privileges: ['auto_configure', 'create_doc'] },
+=======
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+>>>>>>> 9.4
         ]),
       },
     });
     expect(nestedPermissions).toMatchObject({
       'package-policy-otel-dataset-empty-nested': {
         indices: expect.arrayContaining([
+<<<<<<< HEAD
           { names: ['logs-otel-traces.otel-test'], privileges: ['auto_configure', 'create_doc'] },
+=======
+          { names: ['logs-otel-traces-test'], privileges: ['auto_configure', 'create_doc'] },
+>>>>>>> 9.4
         ]),
       },
     });
@@ -1319,7 +1352,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             privileges: ['auto_configure', 'create_doc'],
           },
           {
+<<<<<<< HEAD
             names: ['logs-otel-traces.otel-*'],
+=======
+            names: ['logs-otel-traces-*'],
+>>>>>>> 9.4
             privileges: ['auto_configure', 'create_doc'],
           },
         ],

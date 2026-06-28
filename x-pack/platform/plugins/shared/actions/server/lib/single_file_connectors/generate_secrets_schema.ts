@@ -6,9 +6,14 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+<<<<<<< HEAD
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib/generate_secrets_schema_from_spec';
 import { isEarsExperimentalAuthType } from '@kbn/connector-specs/src/lib/ears_experimental_utils';
 import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib/get_schema_for_auth_type';
+=======
+
+import { generateSecretsSchemaFromSpec, getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
+>>>>>>> 9.4
 import type { ActionTypeSecrets, ValidatorType, ValidatorServices } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
@@ -33,6 +38,7 @@ export const generateSecretsSchema = (
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
+<<<<<<< HEAD
   // Always include EARS in the static schema regardless of feature flags.
   // This lets the customValidator (below) return a readable error message when EARS is
   // disabled, instead of a cryptic Zod union discriminator error.
@@ -47,6 +53,12 @@ export const generateSecretsSchema = (
   const experimentalEarsProvider = hasExperimentalEarsAuthType
     ? String(experimentalEarsAuthType.defaults?.provider ?? 'unknown')
     : 'unknown';
+=======
+  // Always include EARS in the static schema regardless of the feature flag.
+  // This lets the customValidator (below) return a readable error message when EARS is
+  // disabled, instead of a cryptic Zod union discriminator error.
+  const schema = generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled, isEarsEnabled: true });
+>>>>>>> 9.4
 
   const allowedHostsFieldsByAuthType = buildAllowedHostsFieldsByAuthType(authSpec);
 
@@ -62,6 +74,7 @@ export const generateSecretsSchema = (
 
       if (authType === 'ears' && !configurationUtilities.isEarsEnabled()) {
         throw new Error(
+<<<<<<< HEAD
           'EARS OAuth authentication is not enabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.'
         );
       }
@@ -73,6 +86,9 @@ export const generateSecretsSchema = (
       ) {
         throw new Error(
           `EARS OAuth authentication is not enabled for the "${experimentalEarsProvider}" provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.`
+=======
+          'EARS OAuth authentication is not enabled. Enable it via xpack.actions.ears.enabled in kibana.yml.'
+>>>>>>> 9.4
         );
       }
 

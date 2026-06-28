@@ -36,13 +36,17 @@ export const CreatePacksRequestBody = lazySchema(() =>
     policy_ids: PolicyIdsOrUndefined.optional(),
     shards: Shards.optional(),
     queries: ObjectQueries.optional(),
+<<<<<<< HEAD
     schedule_type: ScheduleType.optional(),
     interval: PackInterval.optional(),
     rrule_schedule: RRuleScheduleConfig.optional(),
+=======
+>>>>>>> 9.4
   })
 );
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
 
+<<<<<<< HEAD
 /**
  * The response for creating a pack.
  */
@@ -103,4 +107,7 @@ export const CreatePacksResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const CreatePacksResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;

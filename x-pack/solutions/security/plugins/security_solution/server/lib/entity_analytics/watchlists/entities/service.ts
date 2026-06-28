@@ -16,6 +16,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { IntegrationType } from '../entity_sources/infra';
 import type { CorrelationMap } from './types';
 import { getEntityType } from './utils';
+<<<<<<< HEAD
 
 /** Reduced `_source` shape returned by the paginated entity store scan. */
 interface EntityStoreSyncHit {
@@ -26,6 +27,8 @@ interface EntityStoreSyncHit {
     attributes?: { watchlists?: unknown };
   };
 }
+=======
+>>>>>>> 9.4
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
@@ -180,3 +183,11 @@ const integrationToStoreNamespaceMap: Record<IntegrationType, string> = {
   entityanalytics_okta: 'okta',
   entityanalytics_ad: 'active_directory',
 };
+<<<<<<< HEAD
+=======
+
+const dedup = (entityIdsByType: EntityStoreEntityIdsByType): EntityStoreEntityIdsByType =>
+  Object.fromEntries(
+    Object.entries(entityIdsByType).map(([et, ids]) => [et, Array.from(new Set(ids))])
+  ) as EntityStoreEntityIdsByType;
+>>>>>>> 9.4

@@ -14,7 +14,12 @@
  *   version: 2023-10-31
  */
 
+<<<<<<< HEAD
 import { z, lazySchema } from '@kbn/zod/v4';
+=======
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
+>>>>>>> 9.4
 
 import { SetAlertAssigneesBody } from '../model/set_alert_assignees_body.gen';
 

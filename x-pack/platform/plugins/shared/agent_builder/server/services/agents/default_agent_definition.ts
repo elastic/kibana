@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
 import { agentBuilderDefaultAgentId, AgentAccessControlMode } from '@kbn/agent-builder-common';
+=======
+import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
+>>>>>>> 9.4
 import type { AgentCreateRequest } from '../../../common/agents';
 
 export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
@@ -18,7 +22,11 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
     defaultMessage:
       'The built-in agent for interacting with Elastic. Leverages built in skills, tools, and plugins, customizable as your use cases evolve. Use it for day-to-day work over your Elastic data, configuration, and capabilities (debugging, analysis, retrieval, operations, and more).',
   }),
+<<<<<<< HEAD
   access_control: { access_mode: AgentAccessControlMode.Public },
+=======
+  visibility: AgentVisibility.Public,
+>>>>>>> 9.4
   configuration: {
     // enable built-in skills and default set of tools for the default agent
     enable_elastic_capabilities: true,

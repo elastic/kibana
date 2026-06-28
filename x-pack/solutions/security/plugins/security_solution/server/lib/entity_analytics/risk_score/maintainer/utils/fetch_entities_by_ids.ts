@@ -16,6 +16,18 @@ interface FetchEntitiesByIdsParams {
   errorContext: string;
 }
 
+<<<<<<< HEAD
+=======
+interface NormalizedModifierEntitySource {
+  entity?: {
+    id?: string;
+    attributes?: { watchlists?: unknown };
+    relationships?: { resolution?: { resolved_to?: unknown } };
+  };
+  asset?: RiskScoreModifierEntity['asset'] | null;
+}
+
+>>>>>>> 9.4
 const normalizeWatchlists = (value: unknown): string[] => {
   if (Array.isArray(value)) {
     return value.filter((watchlistId): watchlistId is string => typeof watchlistId === 'string');

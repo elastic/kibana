@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+<<<<<<< HEAD
 import {
   PackName,
   PackDescriptionOrUndefined,
@@ -149,4 +150,10 @@ export const FindPackResponse = lazySchema(() =>
     }),
   })
 );
+=======
+export const FindPacksResponse = lazySchema(() => z.object({}));
+export type FindPacksResponse = z.infer<typeof FindPacksResponse>;
+
+export const FindPackResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type FindPackResponse = z.infer<typeof FindPackResponse>;

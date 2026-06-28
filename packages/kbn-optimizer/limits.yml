@@ -106,8 +106,13 @@ pageLoadAssetSize:
   kibanaUtils: 54084
   kql: 15428
   kubernetesSecurity: 6807
+<<<<<<< HEAD
   lens: 99147
   licenseManagement: 8193
+=======
+  lens: 94679
+  licenseManagement: 8265
+>>>>>>> 9.4
   licensing: 10073
   links: 8620
   lists: 5093
@@ -158,7 +163,11 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 7548
   searchHomepage: 9005
+<<<<<<< HEAD
   searchInferenceEndpoints: 9765
+=======
+  searchInferenceEndpoints: 10345
+>>>>>>> 9.4
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -166,9 +175,15 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
+<<<<<<< HEAD
   securitySolution: 171101
   securitySolutionEss: 42592
   securitySolutionServerless: 57290
+=======
+  securitySolution: 172947
+  securitySolutionEss: 38689
+  securitySolutionServerless: 52082
+>>>>>>> 9.4
   serverless: 7412
   serverlessObservability: 21437
   serverlessSearch: 26287
@@ -213,6 +228,12 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52092
   watcher: 10485
+<<<<<<< HEAD
   workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
+=======
+  workflowsExtensions: 38894
+  workflowsManagement: 35010
+  workplaceAIApp: 14056
+>>>>>>> 9.4

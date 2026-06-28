@@ -130,9 +130,12 @@ export const AgentOverview: React.FC = () => {
         <EuiSpacer size="l" />
         <EuiHorizontalRule margin="none" />
         <EuiSpacer size="l" />
+<<<<<<< HEAD
 
         <AccessSummaryCard agent={agent} onManage={() => setIsAccessFlyoutOpen(true)} />
         <EuiSpacer size="l" />
+=======
+>>>>>>> 9.4
 
         <CapabilitiesSection
           skillsCount={skillsCount}
@@ -177,7 +180,11 @@ export const AgentOverview: React.FC = () => {
           <EditDetailsFlyout
             agent={agent}
             onClose={() => setIsEditFlyoutOpen(false)}
+<<<<<<< HEAD
             canChangeAccessControlMode={canChangeAccessControlMode}
+=======
+            canChangeVisibility={canChangeVisibility}
+>>>>>>> 9.4
             showWorkflowSection={showWorkflowSection}
           />
         )}

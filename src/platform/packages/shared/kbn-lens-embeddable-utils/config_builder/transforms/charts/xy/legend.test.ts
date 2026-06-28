@@ -141,6 +141,7 @@ describe('XY Legend Transforms', () => {
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },
+<<<<<<< HEAD
     {
       title: 'outside right legend includes size',
       state: {
@@ -223,6 +224,8 @@ describe('XY Legend Transforms', () => {
         layout: { type: 'grid', truncate: { max_lines: 1 } },
       },
     },
+=======
+>>>>>>> 9.4
   ];
 
   it.each(cases)('$title (State -> API -> State)', ({ api, state, forbiddenApiPaths }) => {

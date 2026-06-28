@@ -15,7 +15,11 @@ import {
   MITRE_ATTACK_TITLE_TEST_ID,
   REASON_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
+<<<<<<< HEAD
 } from '../../../../flyout_v2/document/main/components/test_ids';
+=======
+} from '../../../../flyout_v2/document/components/test_ids';
+>>>>>>> 9.4
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { DocumentDetailsContext } from '../../shared/context';

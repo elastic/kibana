@@ -44,6 +44,7 @@ export const getInputEffectiveName = (input: { name?: string; type: string }): s
   input.name ?? input.type;
 
 /**
+<<<<<<< HEAD
  * Returns true if the given data stream effectively uses the OTel collector input type.
  *
  * A data stream is considered OTel when any of its `streams[].input` values is either:
@@ -72,6 +73,8 @@ export const dataStreamUsesOtelInput = (
 };
 
 /**
+=======
+>>>>>>> 9.4
  * Builds the composite key used to index input validation results and var definitions.
  * For packages with integrations (multiple policy templates), the key is prefixed with
  * the policy template name to avoid collisions across templates.

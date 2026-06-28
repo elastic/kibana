@@ -674,6 +674,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           };
         }
 
+<<<<<<< HEAD
         // Persist a rich entity attachment only for high-confidence single-row
         // matches. Exact id/name matches are always trusted; the entity.id RLIKE
         // fallback is also trusted when the single resolved row's stripped id
@@ -768,6 +769,8 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
             ]
           : [];
 
+=======
+>>>>>>> 9.4
         try {
           const enrichedResults = await Promise.all(
             values.map((row) =>
@@ -776,7 +779,11 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           );
           success = true;
           entitiesReturned = enrichedResults.length;
+<<<<<<< HEAD
           return { results: [...enrichedResults, ...attachmentSideEffectResults] };
+=======
+          return { results: enrichedResults };
+>>>>>>> 9.4
         } catch (error) {
           logger.debug(
             `Error enriching entity results: ${
@@ -786,6 +793,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           success = true;
           entitiesReturned = values.length;
           return {
+<<<<<<< HEAD
             results: [
               ...values.map((row) => ({
                 tool_result_id: getToolResultId(),
@@ -794,6 +802,13 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
               })),
               ...attachmentSideEffectResults,
             ],
+=======
+            results: values.map((row) => ({
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.esqlResults,
+              data: { query, columns, values: [row] },
+            })),
+>>>>>>> 9.4
           };
         }
       } catch (error) {

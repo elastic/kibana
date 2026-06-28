@@ -211,7 +211,10 @@ export const getHttpInput = ({
                 : {}),
               'monitor.interval': 300,
               meta: { space_id: spaceId ?? 'default' },
+<<<<<<< HEAD:x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/data/test_policy.ts
               ...(kibanaUrl ? { kibanaUrl } : {}),
+=======
+>>>>>>> 9.4:x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts
             },
             target: '',
           },
@@ -318,7 +321,10 @@ export const getHttpInput = ({
             meta: {
               space_id: spaceId ?? 'default',
             },
+<<<<<<< HEAD:x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/data/test_policy.ts
             ...(kibanaUrl ? { kibanaUrl } : {}),
+=======
+>>>>>>> 9.4:x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts
           },
           target: '',
         },

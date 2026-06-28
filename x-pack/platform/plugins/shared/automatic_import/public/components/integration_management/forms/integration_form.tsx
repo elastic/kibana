@@ -23,10 +23,13 @@ import {
   DEFAULT_INTEGRATION_VALUES,
   INTEGRATION_DETAILS_UNTRACKED_FIELDS,
 } from './constants';
+<<<<<<< HEAD
 
 const PackageNamesContext = createContext<Set<string> | undefined>(undefined);
 
 export const usePackageNames = (): Set<string> | undefined => useContext(PackageNamesContext);
+=======
+>>>>>>> 9.4
 
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;

@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import React, { useMemo } from 'react';
 import type { LensYBoundsConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+=======
+import React from 'react';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
+>>>>>>> 9.4
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
@@ -34,8 +39,16 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
+<<<<<<< HEAD
+=======
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+    useTraceMetricsContext();
+  const { abortController, timeRange, esqlVariables } = fetchParams;
+
+>>>>>>> 9.4
   const {
     services,
+<<<<<<< HEAD
     fetchParams,
     discoverFetch$,
     onBrushEnd,
@@ -68,6 +81,14 @@ const ErrorRateChartContent = ({
     ],
     [seriesType, color, unit, breakdownField]
   );
+=======
+    timeRange,
+    unit,
+    color,
+    abortController,
+    variables: esqlVariables,
+  });
+>>>>>>> 9.4
 
   return (
     <Chart

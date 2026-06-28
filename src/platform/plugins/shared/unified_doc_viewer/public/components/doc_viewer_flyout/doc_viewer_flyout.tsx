@@ -306,6 +306,7 @@ export function UnifiedDocViewerFlyout({
                 <EuiHorizontalRule margin="none" />
               </>
             )}
+<<<<<<< HEAD
             <EuiFlyoutBody>
               {renderCustomHeader && (
                 <>
@@ -330,6 +331,23 @@ export function UnifiedDocViewerFlyout({
           </EuiFlyout>
         </EuiPortal>
       </OriginDocTypeContext.Provider>
+=======
+            <UnifiedDocViewer
+              key={actualHit.id}
+              ref={docViewerRef}
+              initialTabId={initialTabId}
+              initialState={initialDocViewerState}
+              onInitialStateChange={onInitialDocViewerStateChange}
+              onUpdateSelectedTabId={onUpdateSelectedTabId}
+              {...docViewRenderProps}
+            />
+          </EuiFlyoutBody>
+          {renderCustomFooter && (
+            <EuiFlyoutFooter>{renderCustomFooter(docViewRenderProps)}</EuiFlyoutFooter>
+          )}
+        </EuiFlyout>
+      </EuiPortal>
+>>>>>>> 9.4
     </FlyoutHistoryKeyContext.Provider>
   );
 }

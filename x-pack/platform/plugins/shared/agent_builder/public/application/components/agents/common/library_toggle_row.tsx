@@ -121,6 +121,7 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             label={name}
             showLabel={false}
             checked={isActive}
+<<<<<<< HEAD
             onChange={(e) => {
               onToggle(e.target.checked);
             }}
@@ -133,6 +134,9 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
                   detail: ebtEntityType,
                 })
               : {})}
+=======
+            onChange={(e) => onToggle(e.target.checked)}
+>>>>>>> 9.4
           />
         )}
       </EuiFlexItem>

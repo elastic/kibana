@@ -29,8 +29,13 @@ export interface VariableItem extends BaseItem {
   offset?: number;
 }
 
+<<<<<<< HEAD
 export interface StepPropertyItem extends BaseItem {
   type: 'step-property';
+=======
+export interface CustomPropertyItem extends BaseItem {
+  type: 'custom-property';
+>>>>>>> 9.4
   /** Stable step instance id from the workflow lookup (used for validation-outcome caching). */
   stepId: string;
   scope: 'config' | 'input';
@@ -148,6 +153,7 @@ interface YamlValidationResultDeprecatedStep extends YamlValidationResultBase {
   owner: 'deprecated-step-validation';
 }
 
+<<<<<<< HEAD
 interface YamlValidationResultEsql extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -157,6 +163,11 @@ interface YamlValidationResultEsql extends YamlValidationResultBase {
 export type StepPropertyValidationResult =
   | YamlValidationResultStepPropertyError
   | YamlValidationResultStepPropertyValid;
+=======
+export type CustomPropertyValidationResult =
+  | YamlValidationResultCustomPropertyError
+  | YamlValidationResultCustomPropertyValid;
+>>>>>>> 9.4
 
 interface YamlValidationResultWorkflowInputsError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
@@ -176,7 +187,10 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'workflow-output-validation',
   'if-condition-validation',
   'deprecated-step-validation',
+<<<<<<< HEAD
   'esql-validation',
+=======
+>>>>>>> 9.4
 ] as const;
 
 export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
@@ -204,8 +218,12 @@ export type YamlValidationResult =
   | YamlValidationResultTriggerConditionError
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError
+<<<<<<< HEAD
   | YamlValidationResultDeprecatedStep
   | YamlValidationResultEsql;
+=======
+  | YamlValidationResultDeprecatedStep;
+>>>>>>> 9.4
 
 export function validationResultFingerprint(r: YamlValidationResult): string {
   return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;

@@ -110,7 +110,11 @@ describe('Config.getScoutTestConfig', () => {
     const expectedConfig = {
       serverless: true,
       http2: false,
+<<<<<<< HEAD
       uiam: true,
+=======
+      uiam: false,
+>>>>>>> 9.4
       projectType: 'es',
       productTier: undefined,
       isCloud: false,

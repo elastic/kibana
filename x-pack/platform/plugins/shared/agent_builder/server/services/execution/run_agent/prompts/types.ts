@@ -9,10 +9,16 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+<<<<<<< HEAD
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
+=======
+import type { ResolvedConfiguration } from '../types';
+import type { ProcessedConversation } from '../utils/prepare_conversation';
+import type { ToolCallResultTransformer } from '../utils/create_result_transformer';
+>>>>>>> 9.4
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 
 export interface PromptFactoryParams {

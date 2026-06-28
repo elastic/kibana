@@ -13,6 +13,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/server/tools/generate/core/operations.test.ts
 import type { PanelContentAttempt } from './resolve_panel';
 import type { ResolvePanelContent } from './operations/panels';
 import {
@@ -20,6 +21,10 @@ import {
   dashboardOperationSchema,
   type DashboardOperation,
 } from './operations';
+=======
+import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
+import { executeDashboardOperations, type DashboardOperation } from './operations';
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.test.ts
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
@@ -84,9 +89,15 @@ describe('executeDashboardOperations', () => {
     panels,
   });
 
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/server/tools/generate/core/operations.test.ts
   const createResolvedPanelContent = (
     panelContent: Pick<AttachmentPanel, 'type' | 'config'>
   ): PanelContentAttempt => ({
+=======
+  const createResolvedVisualization = (
+    visContent: Pick<AttachmentPanel, 'type' | 'config'>
+  ): VisualizationAttempt => ({
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.test.ts
     type: 'success',
     panelContent,
   });

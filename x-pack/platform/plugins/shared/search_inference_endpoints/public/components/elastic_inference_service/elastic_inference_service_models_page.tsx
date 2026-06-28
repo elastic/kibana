@@ -39,7 +39,10 @@ import {
 } from '../../utils/eis_utils';
 import { ModelFamilyFilter } from './model_family_filter';
 import { useKibana } from '../../hooks/use_kibana';
+<<<<<<< HEAD
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
+=======
+>>>>>>> 9.4
 
 export const ElasticInferenceServiceModelsPage = () => {
   const {

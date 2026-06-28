@@ -7,9 +7,23 @@
 
 import React from 'react';
 
+<<<<<<< HEAD
 import { EuiAccordion, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+=======
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonGroup,
+  EuiHorizontalRule,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+>>>>>>> 9.4
 import { hasIcon, IconSelect } from '@kbn/visualization-ui-components';
 import type {
   MetricVisualizationState,
@@ -24,6 +38,7 @@ import {
 } from '@kbn/lens-common';
 
 import { metricIconsSet } from '../../../shared_components/icon_set';
+<<<<<<< HEAD
 import { AppearanceOption, AppearanceOptionGroup, SubtitleOption } from './appearance_option';
 import {
   alignmentOptions,
@@ -32,6 +47,15 @@ import {
   primaryMetricPositionOptions,
 } from './option_configs';
 import { StyleTemplateSelector } from './style_template_selector';
+=======
+
+/** Get default layout config based on primary metric position */
+const getDefaultLayoutConfig = (
+  primaryMetricPosition: PrimaryMetricPosition,
+  { hasMetricIcon, hasSecondaryMetric }: { hasMetricIcon: boolean; hasSecondaryMetric: boolean }
+): MetricLayoutWithDefault => {
+  let config = { ...LENS_METRIC_LAYOUT_BY_POSITION[primaryMetricPosition] };
+>>>>>>> 9.4
 
 const getTemplateAppearanceDefaults = (
   primaryMetricPosition: MetricStyleTemplatePresetId
@@ -132,6 +156,7 @@ export function MetricAppearanceSettings({
         onToggle={setIsDetailsOpen}
         data-test-subj="lens-metric-appearance-details-accordion"
       >
+<<<<<<< HEAD
         <div
           css={css`
             padding-top: 8px;
@@ -272,3 +297,297 @@ export function MetricAppearanceSettings({
     </>
   );
 }
+=======
+        <SubtitleOption
+          value={state.subtitle}
+          onChange={(subtitle) => {
+            setState({
+              ...state,
+              subtitle,
+            });
+          }}
+          isDisabled={disabledStates.subtitle}
+        />
+        <AppearanceOption
+          label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
+            defaultMessage: 'Alignment',
+          })}
+          value={state.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign}
+          options={alignmentOptions}
+          onChange={(id) => {
+            setState({
+              ...state,
+              titlesTextAlign: id,
+            });
+          }}
+          isIconOnly
+          dataTestSubj="lens-metric-appearance-title-and-subtitle-alignment-btn"
+        />
+      </AppearanceOptionGroup>
+      <EuiHorizontalRule margin="m" />
+      <AppearanceOptionGroup
+        title={i18n.translate('xpack.lens.metric.appearancePopover.secondaryMetric.title', {
+          defaultMessage: 'Secondary metric',
+        })}
+      >
+        <AppearanceOption
+          label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
+            defaultMessage: 'Alignment',
+          })}
+          value={state.secondaryAlign ?? LENS_METRIC_STATE_DEFAULTS.secondaryAlign}
+          options={alignmentOptions}
+          onChange={(id) => {
+            setState({
+              ...state,
+              secondaryAlign: id,
+            });
+          }}
+          isDisabled={disabledStates.secondaryAlign}
+          isIconOnly
+          dataTestSubj="lens-metric-appearance-secondary-metric-alignment-btn"
+        />
+      </AppearanceOptionGroup>
+      <EuiHorizontalRule margin="m" />
+      <AppearanceOptionGroup
+        title={i18n.translate('xpack.lens.metric.appearancePopover.other.title', {
+          defaultMessage: 'Other',
+        })}
+      >
+        {/* Duplicate setting from dimension editor */}
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.icon', {
+            defaultMessage: 'Icon decoration',
+          })}
+        >
+          <IconSelect
+            customIconSet={metricIconsSet}
+            value={state?.icon}
+            onChange={(newIcon) => {
+              if (state.icon === newIcon) return;
+
+              // If no icon selected, remove icon and iconAlign properties from the state
+              if (newIcon === 'empty') {
+                const { icon, iconAlign, ...restState } = state;
+                setState({ ...restState });
+                return;
+              }
+
+              // If both icon and iconAlign are set, only update icon
+              if (state.icon && state.iconAlign) {
+                setState({
+                  ...state,
+                  icon: newIcon,
+                });
+                return;
+              }
+
+              // If icon is set but iconAlign is missing, set legacy align
+              // same check as in x-pack/platform/plugins/shared/lens/public/visualizations/metric/to_expression.ts
+              if (state.icon && !state.iconAlign) {
+                setState({
+                  ...state,
+                  icon: newIcon,
+                  iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
+                });
+                return;
+              }
+
+              // If icon is missing, always set iconAlign to the default
+              setState({
+                ...state,
+                icon: newIcon,
+                iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+              });
+            }}
+          />
+        </EuiFormRow>
+        <AppearanceOption
+          label={i18n.translate('xpack.lens.metric.appearancePopover.iconPosition', {
+            defaultMessage: 'Icon position',
+          })}
+          value={state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign}
+          options={iconPositionOptions}
+          onChange={(id) => {
+            setState({
+              ...state,
+              iconAlign: id,
+            });
+          }}
+          isDisabled={disabledStates.iconAlign}
+          dataTestSubj="lens-metric-appearance-other-icon-position-btn"
+        />
+      </AppearanceOptionGroup>
+    </>
+  );
+}
+
+function AppearanceOptionGroup({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <EuiText size="s">
+      <h4>{title}</h4>
+      {children}
+    </EuiText>
+  );
+}
+
+function SubtitleOption({
+  value = '',
+  onChange,
+  isDisabled,
+}: {
+  value?: string;
+  onChange: (subtitle: string) => void;
+  isDisabled: boolean | string;
+}) {
+  const { inputValue, handleInputChange } = useDebouncedValue<string>(
+    { onChange, value },
+    { allowFalsyValue: true }
+  );
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.metric.appearancePopover.subtitle', {
+        defaultMessage: 'Subtitle',
+      })}
+      fullWidth
+      display="columnCompressed"
+      isDisabled={!!isDisabled}
+    >
+      <EuiToolTip display="block" content={isDisabled}>
+        <EuiFieldText
+          compressed
+          disabled={!!isDisabled}
+          data-test-subj="lens-metric-appearance-subtitle-field"
+          value={inputValue}
+          onChange={({ target: { value: newValue } }) => handleInputChange(newValue)}
+        />
+      </EuiToolTip>
+    </EuiFormRow>
+  );
+}
+
+interface AppearanceOptionProps<OptionType extends string> {
+  label: string;
+  value: OptionType;
+  options: Array<EuiButtonGroupOptionProps & { id: OptionType }>;
+  onChange: (id: OptionType) => void;
+  isDisabled?: boolean;
+  isIconOnly?: boolean;
+  dataTestSubj?: string;
+}
+
+function AppearanceOption<OptionType extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  isDisabled = false,
+  isIconOnly = false,
+  dataTestSubj,
+}: AppearanceOptionProps<OptionType>) {
+  const onChangeOption = (clickedOptionId: string) => {
+    // Prevent onChange method call if the option clicked is selected
+    if (value !== clickedOptionId) {
+      onChange(clickedOptionId as OptionType);
+    }
+  };
+
+  return (
+    <EuiFormRow display="columnCompressed" fullWidth label={label}>
+      <EuiButtonGroup
+        isFullWidth
+        legend={label}
+        data-test-subj={dataTestSubj}
+        buttonSize="compressed"
+        options={options}
+        // Don't show selected option if the button group is disabled
+        idSelected={isDisabled ? '' : value}
+        isDisabled={isDisabled}
+        onChange={onChangeOption}
+        isIconOnly={isIconOnly}
+      />
+    </EuiFormRow>
+  );
+}
+
+const alignmentOptions: Array<EuiButtonGroupOptionProps & { id: Alignment }> = [
+  {
+    id: 'left',
+    label: i18n.translate('xpack.lens.shared.left', {
+      defaultMessage: 'Left',
+    }),
+    iconType: 'textAlignLeft',
+  },
+  {
+    id: 'center',
+    label: i18n.translate('xpack.lens.shared.center', {
+      defaultMessage: 'Center',
+    }),
+    iconType: 'textAlignCenter',
+  },
+  {
+    id: 'right',
+    label: i18n.translate('xpack.lens.shared.right', {
+      defaultMessage: 'Right',
+    }),
+    iconType: 'textAlignRight',
+  },
+];
+
+const iconPositionOptions: Array<EuiButtonGroupOptionProps & { id: IconPosition }> = [
+  {
+    id: 'left',
+    label: i18n.translate('xpack.lens.shared.left', {
+      defaultMessage: 'Left',
+    }),
+  },
+  {
+    id: 'right',
+    label: i18n.translate('xpack.lens.shared.right', {
+      defaultMessage: 'Right',
+    }),
+  },
+];
+
+const fontSizeOptions: Array<EuiButtonGroupOptionProps & { id: PrimaryMetricFontSize }> = [
+  {
+    id: 'default',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.default', {
+      defaultMessage: 'Default',
+    }),
+  },
+  {
+    id: 'fit',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.fit', {
+      defaultMessage: 'Fit',
+    }),
+  },
+];
+
+const primaryMetricPositionOptions: Array<
+  EuiButtonGroupOptionProps & {
+    id: PrimaryMetricPosition;
+  }
+> = [
+  {
+    id: 'top',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.top', {
+      defaultMessage: 'Top',
+    }),
+  },
+  {
+    id: 'middle',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.middle', {
+      defaultMessage: 'Middle',
+    }),
+  },
+  {
+    id: 'bottom',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.bottom', {
+      defaultMessage: 'Bottom',
+    }),
+  },
+];
+>>>>>>> 9.4

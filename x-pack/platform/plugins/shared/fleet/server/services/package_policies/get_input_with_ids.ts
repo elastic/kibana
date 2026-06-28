@@ -8,7 +8,10 @@
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '../../types';
 import { getInputId } from '../agent_policies/package_policies_to_agent_inputs';
 import { getInputEffectiveName } from '../../../common/services';
+<<<<<<< HEAD
 import { FLEET_ENDPOINT_PACKAGE } from '../../../common/constants/epm';
+=======
+>>>>>>> 9.4
 
 /**
  * Populate the ids for inputs and streams of a package policy if they are not already set

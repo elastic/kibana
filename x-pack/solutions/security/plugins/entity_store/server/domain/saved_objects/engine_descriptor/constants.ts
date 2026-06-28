@@ -13,10 +13,22 @@ export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updatin
 
 export type EngineLogExtractionState = z.infer<typeof EngineLogExtractionState>;
 export const EngineLogExtractionState = z.object({
+<<<<<<< HEAD
   /** Inclusive lower bound for the next log-slice probe and the fromDateISO for entity recovery. */
   checkpointTimestamp: z.string().nullable().default(null),
   paginationId: z.string().nullable().default(null),
   lastExecutionTimestamp: z.string().nullable().default(null),
+=======
+  paginationTimestamp: z.string().optional(),
+  paginationId: z.string().optional(),
+  lastExecutionTimestamp: z.string().optional(),
+  /** Exclusive lower bound for log-slice scan within the extraction window (`@timestamp`, `_id`). */
+  logsPageCursorStartTimestamp: z.string().optional(),
+  logsPageCursorStartId: z.string().optional(),
+  /** Inclusive upper bound for the current log slice. */
+  logsPageCursorEndTimestamp: z.string().optional(),
+  logsPageCursorEndId: z.string().optional(),
+>>>>>>> 9.4
 });
 
 export type EngineError = z.infer<typeof EngineError>;

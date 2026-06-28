@@ -6,6 +6,10 @@
  */
 
 import path from 'node:path';
+<<<<<<< HEAD
+=======
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+>>>>>>> 9.4
 import { z } from '@kbn/zod/v4';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';

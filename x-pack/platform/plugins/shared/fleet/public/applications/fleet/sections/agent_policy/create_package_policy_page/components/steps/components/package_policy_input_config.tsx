@@ -110,7 +110,10 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
   streamAdvancedVars?: StreamAdvancedVarsConfig;
   sections?: RegistrySection[];
+<<<<<<< HEAD
   isUpgrade?: boolean;
+=======
+>>>>>>> 9.4
 }> = memo(
   ({
     hasInputStreams,
@@ -126,7 +129,10 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     onVarGroupSelectionChange,
     streamAdvancedVars,
     sections,
+<<<<<<< HEAD
     isUpgrade = false,
+=======
+>>>>>>> 9.4
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -282,7 +288,10 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                       errors={inputValidationResults.vars?.[varName]}
                       forceShowErrors={forceShowErrors}
                       isEditPage={isEditPage}
+<<<<<<< HEAD
                       isUpgrade={isUpgrade}
+=======
+>>>>>>> 9.4
                     />
                   </EuiFlexItem>
                 );
@@ -325,14 +334,21 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                       errors={inputValidationResults.vars?.[varName]}
                       forceShowErrors={forceShowErrors}
                       isEditPage={isEditPage}
+<<<<<<< HEAD
                       isUpgrade={isUpgrade}
+=======
+>>>>>>> 9.4
                     />
                   </EuiFlexItem>
                 );
               },
               sections
             )}
+<<<<<<< HEAD
             {allAdvancedVars.length || showConditionField ? (
+=======
+            {allAdvancedVars.length ? (
+>>>>>>> 9.4
               <Fragment>
                 <EuiFlexItem>
                   {/* Wrapper div to prevent button from going full width */}

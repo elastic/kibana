@@ -17,7 +17,10 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+<<<<<<< HEAD
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+=======
+>>>>>>> 9.4
 import type { GaugeConfig, LensApiConfig } from '../../schema';
 import {
   AUTO_COLOR,

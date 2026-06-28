@@ -10,6 +10,10 @@ description: >
   single narrow API answer. If they only ask what they can build with Elastic (exploration without
   the full playbook), prefer invoking /use-case-library first; you can still load this skill
   afterward for the guided build.
+<<<<<<< HEAD
+=======
+  The guidelines in this skill should be the main format for the conversation for the rest of the user's chat session or until they are done with onboarding or ready to leave kibana and have the necessary information to continue in their own environment.
+>>>>>>> 9.4
 ---
 
 # Elastic Developer Guide

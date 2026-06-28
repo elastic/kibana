@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+<<<<<<< HEAD
 # This step only runs Node scripts and `playwright --list` (manifest generation,
 # selective-testing scope resolution, config discovery, run-order planning); it
 # never serves the Kibana UI. The dev-mode shared webpack bundles (monaco,
@@ -15,6 +16,10 @@ source .buildkite/scripts/bootstrap.sh
 if should_enable_fips; then
   export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
+=======
+source .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
+>>>>>>> 9.4
 
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
@@ -115,11 +120,47 @@ else
     SCOUT_DISCOVERY_TARGET="local-stateful-only"
   fi
 
+<<<<<<< HEAD
   echo "--- Discover Playwright Configs and upload to Buildkite artifacts"
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
     --testing-scope "$TESTING_SCOPE_FILE" \
+=======
+  # PR builds: GITHUB_PR_MERGE_BASE is computed by set_git_merge_base() in util.sh.
+  # On-merge builds: falls back to HEAD~1 (parent of the merge commit).
+  if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
+    echo "Merge base (PR): ${GITHUB_PR_MERGE_BASE}"
+  else
+    echo "GITHUB_PR_MERGE_BASE not set — using HEAD~1 as merge base (on-merge build)"
+  fi
+  export AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
+
+  mkdir -p .scout
+  export AFFECTED_MODULES_FILE=".scout/affected_modules.json"
+
+  # Computes affected modules (writes AFFECTED_MODULES_FILE) and checks whether
+  # any critical Scout files were touched.
+  SCOUT_CRITICAL_FILES_TOUCHED=$(ts-node "$(dirname "${0}")/resolve_selective_testing.ts")
+  echo "Critical Scout files touched: ${SCOUT_CRITICAL_FILES_TOUCHED}"
+
+  echo "--- Discover Playwright Configs and upload to Buildkite artifacts (affected modules detected)"
+  SELECTIVE_SCOUT_DISCOVERY_FLAG=()
+  if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] \
+    && ! is_pr_with_label "scout:run-all-tests" \
+    && [[ "$SCOUT_CRITICAL_FILES_TOUCHED" != "true" ]]; then
+    SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
+    echo "Selective testing: enabled (--selective-testing flag will be passed to discover-playwright-configs)"
+  else
+    echo "Selective testing is disabled"
+    echo "Reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, 'scout:run-all-tests' label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no), 'critical files touched'=${SCOUT_CRITICAL_FILES_TOUCHED}"
+  fi
+  node scripts/scout discover-playwright-configs \
+    --include-custom-servers \
+    --target "$SCOUT_DISCOVERY_TARGET" \
+    --affected-modules "$AFFECTED_MODULES_FILE" \
+    "${SELECTIVE_SCOUT_DISCOVERY_FLAG[@]}" \
+>>>>>>> 9.4
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"

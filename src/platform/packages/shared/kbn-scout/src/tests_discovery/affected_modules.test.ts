@@ -138,11 +138,17 @@ describe('affected_modules', () => {
       expect(result.every((m) => m.isAffected === false)).toBe(true);
     });
 
+<<<<<<< HEAD
     it('logs affected and unaffected counts', () => {
       markModulesAffectedStatusFromSet(
         modules,
         new Set(['@kbn/security-solution-plugin']),
         mockLog
+=======
+    it('should log affected and unaffected counts', () => {
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(['@kbn/security-solution-plugin'])
+>>>>>>> 9.4
       );
 
       expect(mockLog.info).toHaveBeenCalledWith(

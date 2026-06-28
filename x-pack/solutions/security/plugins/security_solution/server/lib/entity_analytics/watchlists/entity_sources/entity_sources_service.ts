@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type {
   ElasticsearchClient,
   Logger,
@@ -16,6 +17,12 @@ import { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import type { StartPlugins } from '../../../../plugin';
+=======
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
+>>>>>>> 9.4
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import {
   type IntegrationType,
@@ -58,18 +65,25 @@ const paginatedSearch = async <T>(
     _source: string[] | false;
     sort: Array<Record<string, string>>;
   },
+<<<<<<< HEAD
   mapHit: (hit: { _id?: string; _source?: unknown }) => T | undefined,
   abortSignal?: AbortSignal
+=======
+  mapHit: (hit: { _id?: string; _source?: unknown }) => T | undefined
+>>>>>>> 9.4
 ): Promise<T[]> => {
   const results: T[] = [];
   let searchAfter: SortResults | undefined;
   const pageSize = 1000;
 
   while (true) {
+<<<<<<< HEAD
     if (abortSignal?.aborted) {
       break;
     }
 
+=======
+>>>>>>> 9.4
     const response = await esClient.search({
       ...params,
       size: pageSize,
@@ -120,6 +134,7 @@ export const createEntitySourcesService = ({
     namespace,
   });
 
+<<<<<<< HEAD
   /** Returns a scoped ES client for reading from a given index source*/
   const getSourceEsClient = async (
     source: MonitoringEntitySource
@@ -167,6 +182,10 @@ export const createEntitySourcesService = ({
     sourceId: string,
     abortSignal?: AbortSignal
   ): Promise<StaleEntity[]> =>
+=======
+  /** Finds all entity docs in the watchlist index that belong to a specific source. */
+  const findEntitiesBySource = (meta: WatchlistMeta, sourceId: string): Promise<StaleEntity[]> =>
+>>>>>>> 9.4
     paginatedSearch(
       esClient,
       {
@@ -182,6 +201,7 @@ export const createEntitySourcesService = ({
         _source: false,
         sort: [{ 'entity.id': 'asc' }],
       },
+<<<<<<< HEAD
       (hit) => (hit._id ? { docId: hit._id, sourceId } : undefined),
       abortSignal
     );
@@ -191,6 +211,13 @@ export const createEntitySourcesService = ({
     meta: WatchlistMeta,
     abortSignal?: AbortSignal
   ): Promise<WatchlistsByEuid> => {
+=======
+      (hit) => (hit._id ? { docId: hit._id, sourceId } : undefined)
+    );
+
+  /** Builds a map of euid → current watchlist memberships from the entity store. */
+  const buildWatchlistsByEuid = async (meta: WatchlistMeta): Promise<WatchlistsByEuid> => {
+>>>>>>> 9.4
     // Collect euids from the watchlist index
     const euids = await paginatedSearch<string>(
       esClient,
@@ -200,8 +227,12 @@ export const createEntitySourcesService = ({
         _source: ['entity.id'],
         sort: [{ 'entity.id': 'asc' }],
       },
+<<<<<<< HEAD
       (hit) => (hit._source as { entity?: { id?: string } })?.entity?.id,
       abortSignal
+=======
+      (hit) => (hit._source as { entity?: { id?: string } })?.entity?.id
+>>>>>>> 9.4
     );
 
     if (euids.length === 0) return new Map();
@@ -247,8 +278,12 @@ export const createEntitySourcesService = ({
   const cleanupOrphanedEntities = async (
     meta: WatchlistMeta,
     activeSourceIds: string[] = [],
+<<<<<<< HEAD
     ignoredSourceIds: string[] = [MANUAL_SOURCE_ID],
     abortSignal?: AbortSignal
+=======
+    ignoredSourceIds: string[] = [MANUAL_SOURCE_ID]
+>>>>>>> 9.4
   ) => {
     const aggResponse = await esClient.search({
       index: meta.index,
@@ -271,11 +306,18 @@ export const createEntitySourcesService = ({
       return;
     }
 
+<<<<<<< HEAD
     const watchlistsByEuid = await buildWatchlistsByEuid(meta, abortSignal);
 
     for (const sourceId of orphanedSourceIds) {
       if (isAborted(abortSignal, 'stopping orphaned entity cleanup')) break;
       const staleEntities = await findEntitiesBySource(meta, sourceId, abortSignal);
+=======
+    const watchlistsByEuid = await buildWatchlistsByEuid(meta);
+
+    for (const sourceId of orphanedSourceIds) {
+      const staleEntities = await findEntitiesBySource(meta, sourceId);
+>>>>>>> 9.4
       if (staleEntities.length === 0) {
         // No entities for this orphaned source
       } else {
@@ -298,7 +340,11 @@ export const createEntitySourcesService = ({
     }
   };
 
+<<<<<<< HEAD
   const syncWatchlist = async (watchlistId: string, abortSignal?: AbortSignal) => {
+=======
+  const syncWatchlist = async (watchlistId: string) => {
+>>>>>>> 9.4
     const watchlist = await watchlistClient.get(watchlistId);
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const meta: WatchlistMeta = {
@@ -308,8 +354,12 @@ export const createEntitySourcesService = ({
     };
 
     const { sources } = await descriptorClient.list({});
+<<<<<<< HEAD
 
     await Promise.all(
+=======
+    const entitiesBySource = await Promise.all(
+>>>>>>> 9.4
       sources
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
@@ -363,10 +413,23 @@ export const createEntitySourcesService = ({
         })
     );
 
+<<<<<<< HEAD
     if (isAborted(abortSignal, `after index sync for watchlist ${watchlistId}, skipping cleanup`))
       return;
 
     await cleanupOrphanedEntities(meta, sourceIds, undefined, abortSignal);
+=======
+    const indexSyncService = createIndexSyncService({
+      esClient,
+      crudClient,
+      logger,
+      descriptorClient,
+      watchlist: meta,
+    });
+
+    await indexSyncService.plainIndexSync(entitiesBySource);
+    await cleanupOrphanedEntities(meta, sourceIds);
+>>>>>>> 9.4
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };

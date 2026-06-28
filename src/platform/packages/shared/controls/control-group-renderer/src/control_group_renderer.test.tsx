@@ -11,7 +11,11 @@ import React from 'react';
 
 import {
   registerEmbeddablePublicDefinition,
+<<<<<<< HEAD
   type EmbeddablePublicDefinition,
+=======
+  type EmbeddableFactory,
+>>>>>>> 9.4
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
@@ -65,7 +69,10 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
+<<<<<<< HEAD
     setStubKibanaServices();
+=======
+>>>>>>> 9.4
     registerEmbeddablePublicDefinition('test_control', getTestEmbeddableFactory);
   });
 

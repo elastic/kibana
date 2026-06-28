@@ -6,7 +6,11 @@
  */
 
 import path from 'node:path';
+<<<<<<< HEAD
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
+=======
+import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
+>>>>>>> 9.4
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
@@ -64,13 +68,24 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
+<<<<<<< HEAD
   const {
+=======
+  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
+    logsExtractionConfig;
+
+  return {
+    ...rest,
+    // TODO: Remove the legacy fields once we stop supporting V1.
+    filter,
+>>>>>>> 9.4
     delay,
     timeout,
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
     maxLogsPerPage,
+<<<<<<< HEAD
     maxTimeWindowSize,
     maxLogsPerWindow,
     maxLogsPerWindowCapBehavior,
@@ -89,6 +104,8 @@ function toPublicEngine(
     maxTimeWindowSize,
     maxLogsPerWindow,
     maxLogsPerWindowCapBehavior,
+=======
+>>>>>>> 9.4
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,

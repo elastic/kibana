@@ -21,6 +21,10 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
+<<<<<<< HEAD
+=======
+import { getRequestSavedObjectClient } from '../../../shared/utils';
+>>>>>>> 9.4
 import { createManualEntityService } from '../../../entity_sources/manual/service';
 import { getIndexForWatchlist } from '../../../entities/utils';
 
@@ -61,7 +65,11 @@ export const unassignWatchlistEntitiesRoute = (
             const namespace = secSol.getSpaceId();
 
             const esClient = core.elasticsearch.client.asCurrentUser;
+<<<<<<< HEAD
             const soClient = core.savedObjects.client;
+=======
+            const soClient = getRequestSavedObjectClient(core);
+>>>>>>> 9.4
 
             const watchlistClient = new WatchlistConfigClient({
               esClient,

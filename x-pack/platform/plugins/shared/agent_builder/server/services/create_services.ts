@@ -165,7 +165,10 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       config: this.config,
+<<<<<<< HEAD
       getToolRegistry: tools.getRegistry,
+=======
+>>>>>>> 9.4
       analyticsService,
       trackingService,
     });
@@ -187,7 +190,10 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+<<<<<<< HEAD
       getExecutionService,
+=======
+>>>>>>> 9.4
       searchInferenceEndpoints,
     });
     runner = runnerFactory.getRunner();

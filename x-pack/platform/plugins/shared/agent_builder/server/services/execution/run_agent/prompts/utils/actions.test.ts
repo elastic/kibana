@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import type { AIMessage, ToolMessage, BaseMessageLike } from '@langchain/core/messages';
 import { AgentActionType } from '../../actions';
@@ -28,23 +29,44 @@ const makeToolCallAction = (
 ): ToolCallAction => ({
   type: AgentActionType.ToolCall,
   tool_call_group_id: 'tool_call_group_id',
+=======
+import { isAIMessage } from '@langchain/core/messages';
+import type { AIMessage } from '@langchain/core/messages';
+import { AgentActionType } from '../../actions';
+import type { ResearchAgentAction, ToolCallAction, ExecuteToolAction } from '../../actions';
+import { formatResearcherActionHistory } from './actions';
+
+const makeToolCallAction = (
+  toolCalls: Array<{ toolCallId: string; toolName: string; args?: Record<string, any> }>,
+  message?: string
+): ToolCallAction => ({
+  type: AgentActionType.ToolCall,
+>>>>>>> 9.4
   tool_calls: toolCalls.map((tc) => ({
     toolCallId: tc.toolCallId,
     toolName: tc.toolName,
     args: tc.args ?? {},
   })),
   message,
+<<<<<<< HEAD
   cycle,
 });
 
 const makeExecuteToolAction = (
   results: Array<{ toolCallId: string; content: string; artifact?: { results: ToolResult[] } }>,
   cycle?: number
+=======
+});
+
+const makeExecuteToolAction = (
+  results: Array<{ toolCallId: string; content: string }>
+>>>>>>> 9.4
 ): ExecuteToolAction => ({
   type: AgentActionType.ExecuteTool,
   tool_results: results.map((r) => ({
     toolCallId: r.toolCallId,
     content: r.content,
+<<<<<<< HEAD
     artifact: r.artifact,
   })),
   cycle,
@@ -79,19 +101,34 @@ const makeBackgroundExecutionCompleteAction = (
 
 describe('formatResearcherActionHistory', () => {
   it('creates AIMessage with empty content when no message is set', async () => {
+=======
+  })),
+});
+
+describe('formatResearcherActionHistory', () => {
+  it('creates AIMessage with empty content when no message is set', () => {
+>>>>>>> 9.4
     const actions: ResearchAgentAction[] = [
       makeToolCallAction([{ toolCallId: 'c1', toolName: 'search', args: { q: 'foo' } }]),
       makeExecuteToolAction([{ toolCallId: 'c1', content: 'result' }]),
     ];
 
+<<<<<<< HEAD
     const messages = await formatResearcherActionHistory({ actions, cycleLimit: 100 });
+=======
+    const messages = formatResearcherActionHistory({ actions });
+>>>>>>> 9.4
 
     const aiMsg = messages[0];
     expect(isAIMessage(aiMsg as AIMessage)).toBe(true);
     expect((aiMsg as AIMessage).content).toBe('');
   });
 
+<<<<<<< HEAD
   it('sets AIMessage content to the action message when provided', async () => {
+=======
+  it('sets AIMessage content to the action message when provided', () => {
+>>>>>>> 9.4
     const actions: ResearchAgentAction[] = [
       makeToolCallAction(
         [{ toolCallId: 'c1', toolName: 'search', args: { q: 'foo' } }],
@@ -100,14 +137,22 @@ describe('formatResearcherActionHistory', () => {
       makeExecuteToolAction([{ toolCallId: 'c1', content: 'result' }]),
     ];
 
+<<<<<<< HEAD
     const messages = await formatResearcherActionHistory({ actions, cycleLimit: 100 });
+=======
+    const messages = formatResearcherActionHistory({ actions });
+>>>>>>> 9.4
 
     const aiMsg = messages[0];
     expect(isAIMessage(aiMsg as AIMessage)).toBe(true);
     expect((aiMsg as AIMessage).content).toBe('I need to search for foo');
   });
 
+<<<<<<< HEAD
   it('preserves tool call args in the AIMessage', async () => {
+=======
+  it('preserves tool call args in the AIMessage', () => {
+>>>>>>> 9.4
     const actions: ResearchAgentAction[] = [
       makeToolCallAction([
         { toolCallId: 'c1', toolName: 'search', args: { q: 'foo' } },
@@ -119,13 +164,18 @@ describe('formatResearcherActionHistory', () => {
       ]),
     ];
 
+<<<<<<< HEAD
     const messages = await formatResearcherActionHistory({ actions, cycleLimit: 100 });
+=======
+    const messages = formatResearcherActionHistory({ actions });
+>>>>>>> 9.4
 
     const aiMsg = messages[0] as AIMessage;
     expect(aiMsg.tool_calls).toHaveLength(2);
     expect(aiMsg.tool_calls![0].args).toEqual({ q: 'foo' });
     expect(aiMsg.tool_calls![1].args).toEqual({ id: 42 });
   });
+<<<<<<< HEAD
 
   it('formats BackgroundExecutionCompleteAction as a user message with system notice', async () => {
     const actions: ResearchAgentAction[] = [
@@ -289,4 +339,6 @@ describe('formatSystemNotice', () => {
 
     expect(notice).toContain('<result>No response</result>');
   });
+=======
+>>>>>>> 9.4
 });

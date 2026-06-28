@@ -18,11 +18,67 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const UserName = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
+=======
     user: z
       .object({
         /**
          * The name of the user.
          */
+        name: z.string().optional(),
+      })
+      .optional(),
+    /**
+     * Entity analytics monitoring configuration for the user
+     */
+    entity_analytics_monitoring: z
+      .object({
+        /**
+         * Array of labels associated with the user
+         */
+        labels: z
+          .array(
+            z.object({
+              /**
+               * The field name for the label
+               */
+              field: z.string().optional(),
+              /**
+               * The value of the label
+               */
+              value: z.string().optional(),
+              /**
+               * The source where this label was created (api, csv, or index_sync)
+               */
+              source: z.enum(['api', 'csv', 'index_sync']).optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+  })
+);
+export type UserName = z.infer<typeof UserName>;
+
+export const MonitoringLabel = lazySchema(() =>
+  z.object({
+    field: z.string(),
+    value: z.string(),
+    source: z.string(),
+  })
+);
+export type MonitoringLabel = z.infer<typeof MonitoringLabel>;
+
+export const MonitoredUserUpdateDoc = lazySchema(() =>
+  z.object({
+    id: z.string().optional(),
+>>>>>>> 9.4
+    user: z
+      .object({
+        /**
+         * The name of the user.
+         */
+<<<<<<< HEAD
         name: z.string().max(512).optional(),
       })
       .optional(),
@@ -53,10 +109,26 @@ export const UserName = lazySchema(() =>
           )
           .max(100)
           .optional(),
+=======
+        is_privileged: z.boolean().optional(),
+      })
+      .optional(),
+    labels: z
+      .object({
+        sources: z.array(z.unknown()).optional(),
+        source_ids: z.array(z.string()).optional(),
+        source_integrations: z.array(z.string()).optional(),
+      })
+      .optional(),
+    entity_analytics_monitoring: z
+      .object({
+        labels: z.array(MonitoringLabel).optional(),
+>>>>>>> 9.4
       })
       .optional(),
   })
 );
+<<<<<<< HEAD
 export type UserName = z.infer<typeof UserName>;
 
 export const MonitoringLabel = lazySchema(() =>
@@ -94,6 +166,8 @@ export const MonitoredUserUpdateDoc = lazySchema(() =>
       .optional(),
   })
 );
+=======
+>>>>>>> 9.4
 export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
 
 export const MonitoredUserDoc = lazySchema(() =>

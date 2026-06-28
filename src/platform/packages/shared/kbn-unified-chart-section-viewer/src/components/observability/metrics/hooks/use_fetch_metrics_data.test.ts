@@ -9,12 +9,15 @@
 
 // Stable references for mock functions that must not change across renders
 // (otherwise useAsyncFn recreates executeFetch, causing infinite loops).
+<<<<<<< HEAD
 const mockTrackRequest = jest.fn(
   async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
     const result = await fn();
     return result.data;
   }
 );
+=======
+>>>>>>> 9.4
 const mockTrackMetricsInfo = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
@@ -38,6 +41,7 @@ jest.mock('@kbn/field-utils', () => ({
   getFieldIconType: jest.fn(() => 'number'),
 }));
 jest.mock('../../../../context/ebt_telemetry_context', () => ({
+<<<<<<< HEAD
   useTelemetry: () => ({
     trackMetricsInfo: mockTrackMetricsInfo,
   }),
@@ -60,6 +64,15 @@ import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
+=======
+  useTelemetry: () => ({ trackMetricsInfo: mockTrackMetricsInfo }),
+}));
+
+import { renderHook, waitFor, act } from '@testing-library/react';
+import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
+import { useFetchMetricsData } from './use_fetch_metrics_data';
+import { executeEsqlQuery } from '../utils/execute_esql_query';
+>>>>>>> 9.4
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
@@ -79,10 +92,17 @@ const createMockParsedMetrics = (
 ): ParsedMetricsWithTelemetry => ({
   metricItems: metricNames.map((name) => ({
     metricName: name,
+<<<<<<< HEAD
     indexName: 'metrics-*',
     units: [null],
     metricTypes: ['gauge'],
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+=======
+    dataStream: 'metrics-*',
+    units: [null],
+    metricTypes: ['gauge'],
+    fieldTypes: ['double' as any],
+>>>>>>> 9.4
     dimensionFields: dimensions,
   })),
   allDimensions: dimensions,
@@ -91,6 +111,7 @@ const createMockParsedMetrics = (
     total_number_of_dimensions: dimensions.length,
     metrics_by_type: { gauge: metricNames.length },
     units: { none: metricNames.length },
+<<<<<<< HEAD
     multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
   },
 });
@@ -129,15 +150,38 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-*' },
     dataView: createMockDataView() as unknown as DataView,
+=======
+    multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+  },
+});
+
+const createDefaultParams = (overrides?: Record<string, unknown>) => ({
+  fetchParams: getFetchParamsMock({
+    query: { esql: 'TS metrics-*' },
+    dataView: {
+      getFieldByName: jest.fn(),
+      getIndexPattern: () => 'metrics-*',
+      isTimeBased: () => true,
+    } as any,
+>>>>>>> 9.4
     timeRange: { from: 'now-15m', to: 'now' },
     filters: [],
     esqlVariables: [],
     ...overrides,
   }),
+<<<<<<< HEAD
   services: createMockServices() as unknown as ChartSectionProps['services'],
   isComponentVisible: true,
   selectedDimensionNames: undefined as Dimension[] | undefined,
   profileId: 'test-profile-id',
+=======
+  services: {
+    data: { search: { search: jest.fn() } },
+    uiSettings: {},
+  } as any,
+  isComponentVisible: true,
+  selectedDimensionNames: undefined as Dimension[] | undefined,
+>>>>>>> 9.4
 });
 
 describe('useFetchMetricsData', () => {
@@ -145,8 +189,12 @@ describe('useFetchMetricsData', () => {
     jest.clearAllMocks();
 
     // Restore mock implementations after clearAllMocks resets them.
+<<<<<<< HEAD
     // Without these restorations, getEsqlQuery returns undefined (disabling shouldFetch),
     // trackRequest stops calling fn() (so the fetch never runs), etc.
+=======
+    // Without these restorations, getEsqlQuery returns undefined (disabling shouldFetch).
+>>>>>>> 9.4
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
@@ -157,6 +205,7 @@ describe('useFetchMetricsData', () => {
     );
     hasTransformationalCommand.mockImplementation(() => false);
 
+<<<<<<< HEAD
     mockTrackRequest.mockImplementation(
       async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
         const result = await fn();
@@ -180,6 +229,20 @@ describe('useFetchMetricsData', () => {
       rawResponse: {},
       requestParams: { query: 'TS metrics-* | METRICS_INFO' },
     });
+=======
+    const parsed = createMockParsedMetrics(['system.cpu.utilization'], [hostDimension]);
+
+    mockExecuteEsqlQuery.mockResolvedValue([
+      {
+        metric_name: 'system.cpu.utilization',
+        data_stream: 'metrics-*',
+        unit: null,
+        metric_type: 'gauge',
+        field_type: 'double',
+        dimension_fields: ['host.name'],
+      },
+    ]);
+>>>>>>> 9.4
 
     mockParseMetricsWithTelemetry.mockReturnValue(parsed);
   });
@@ -220,11 +283,15 @@ describe('useFetchMetricsData', () => {
     });
 
     it('returns empty arrays when no data is available', async () => {
+<<<<<<< HEAD
       mockExecuteEsqlQuery.mockResolvedValue({
         documents: [],
         rawResponse: {},
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
+=======
+      mockExecuteEsqlQuery.mockResolvedValue([]);
+>>>>>>> 9.4
       mockParseMetricsWithTelemetry.mockReturnValue({
         metricItems: [],
         allDimensions: [],
@@ -233,7 +300,11 @@ describe('useFetchMetricsData', () => {
           total_number_of_dimensions: 0,
           metrics_by_type: {},
           units: {},
+<<<<<<< HEAD
           multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
+=======
+          multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+>>>>>>> 9.4
         },
       });
 
@@ -345,6 +416,7 @@ describe('useFetchMetricsData', () => {
         if (fetchCallCount === 1) {
           return firstFetchPromise as any;
         }
+<<<<<<< HEAD
         return {
           documents: [
             {
@@ -359,6 +431,18 @@ describe('useFetchMetricsData', () => {
           rawResponse: {},
           requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         };
+=======
+        return [
+          {
+            metric_name: 'system.cpu.utilization',
+            data_stream: 'metrics-*',
+            unit: null,
+            metric_type: 'gauge',
+            field_type: 'double',
+            dimension_fields: ['host.name'],
+          },
+        ];
+>>>>>>> 9.4
       });
 
       const params = createDefaultParams();
@@ -382,6 +466,7 @@ describe('useFetchMetricsData', () => {
       rerender(updatedParams);
 
       // Resolve the first fetch
+<<<<<<< HEAD
       resolveFirstFetch!({
         documents: [
           {
@@ -396,6 +481,18 @@ describe('useFetchMetricsData', () => {
         rawResponse: {},
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
+=======
+      resolveFirstFetch!([
+        {
+          metric_name: 'system.cpu.utilization',
+          data_stream: 'metrics-*',
+          unit: null,
+          metric_type: 'gauge',
+          field_type: 'double',
+          dimension_fields: ['host.name'],
+        },
+      ]);
+>>>>>>> 9.4
 
       // After resolution, activeDimensions should eventually reflect the latest fetch's dimensions
       await waitFor(() => {
@@ -469,12 +566,16 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
+<<<<<<< HEAD
       expect(result.current.error).toBe(fetchError);
+=======
+>>>>>>> 9.4
       expect(result.current.metricItems).toEqual([]);
       expect(result.current.allDimensions).toEqual([]);
       expect(result.current.activeDimensions).toEqual([]);
     });
 
+<<<<<<< HEAD
     it('returns EsqlResponseError when ES|QL responds with HTTP 200 and embedded error', async () => {
       const embeddedError = new EsqlResponseError(
         {
@@ -503,6 +604,8 @@ describe('useFetchMetricsData', () => {
       expect(result.current.metricItems).toEqual([]);
     });
 
+=======
+>>>>>>> 9.4
     it('returns empty arrays and null error in initial state', () => {
       // Delay fetch indefinitely so we can inspect the initial state
       mockExecuteEsqlQuery.mockReturnValue(new Promise(() => {}));
@@ -515,6 +618,7 @@ describe('useFetchMetricsData', () => {
       expect(result.current.allDimensions).toEqual([]);
       expect(result.current.activeDimensions).toEqual([]);
     });
+<<<<<<< HEAD
 
     it('reports landed fetch errors via reportChartSectionError', async () => {
       const fetchError = new Error('boom');
@@ -627,6 +731,8 @@ describe('useFetchMetricsData', () => {
         },
       });
     });
+=======
+>>>>>>> 9.4
   });
 
   describe('refetch on dependency changes', () => {
@@ -676,6 +782,7 @@ describe('useFetchMetricsData', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('appliedDimensions vs selectedDimensions (#264957)', () => {
     const { buildMetricsInfoQuery: buildMetricsInfoQueryMock } = jest.requireMock(
       '@kbn/esql-utils'
@@ -803,6 +910,8 @@ describe('useFetchMetricsData', () => {
     });
   });
 
+=======
+>>>>>>> 9.4
   describe('telemetry', () => {
     it('calls trackMetricsInfo with parsed telemetry when fetch succeeds', async () => {
       const params = createDefaultParams();
@@ -818,6 +927,7 @@ describe('useFetchMetricsData', () => {
         })
       );
     });
+<<<<<<< HEAD
 
     it('forwards profileId to executeEsqlQuery so the request executionContext carries it as meta', async () => {
       const params = createDefaultParams();
@@ -846,5 +956,7 @@ describe('useFetchMetricsData', () => {
 
       expect(mockTrackMetricsInfo).not.toHaveBeenCalled();
     });
+=======
+>>>>>>> 9.4
   });
 });

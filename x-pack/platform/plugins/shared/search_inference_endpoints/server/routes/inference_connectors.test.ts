@@ -52,6 +52,7 @@ const createContext = ({
     }),
   } as unknown as jest.Mocked<RequestHandlerContext>);
 
+<<<<<<< HEAD
 const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegistry =>
   ({
     get: jest.fn(() =>
@@ -59,6 +60,8 @@ const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegis
     ),
   } as unknown as InferenceFeatureRegistry);
 
+=======
+>>>>>>> 9.4
 describe('GET /internal/search_inference_endpoints/connectors', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
@@ -66,10 +69,14 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
   let getConnectorList: jest.Mock;
   let getConnectorById: jest.Mock;
 
+<<<<<<< HEAD
   const registerRoute = (
     settings: SettingsValues = {},
     featureRegistry: InferenceFeatureRegistry = makeFeatureRegistry()
   ) => {
+=======
+  const registerRoute = (settings: SettingsValues = {}) => {
+>>>>>>> 9.4
     mockRouter = new MockRouter({
       context: createContext(settings),
       method: 'get',
@@ -360,6 +367,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [],
+<<<<<<< HEAD
         soEntryFound: false,
       },
     });
@@ -380,6 +388,8 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [defaultConnector],
+=======
+>>>>>>> 9.4
         soEntryFound: false,
       },
     });

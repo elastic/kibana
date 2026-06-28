@@ -148,10 +148,13 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
+<<<<<<< HEAD
       if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
         existing.modelMetadata = ep.metadata;
         existing.modelStatus = getModelStatus(ep.metadata);
       }
+=======
+>>>>>>> 9.4
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
       const modelMetadata = getModelMetadata(ep);

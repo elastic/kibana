@@ -26,6 +26,21 @@ export const getLastAgentId = (): string => {
   }
 };
 
+/**
+ * Reads the last used agent ID directly from localStorage.
+ * Unlike useLastAgentId, this is not a hook and can be called conditionally
+ * or inside callbacks to get the current value at call time.
+ */
+export const getLastAgentId = (): string => {
+  const stored = localStorage.getItem(storageKeys.agentId);
+  if (!stored) return agentBuilderDefaultAgentId;
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return stored;
+  }
+};
+
 export const useLastAgentId = (): string => {
   const spaceId = useActiveSpaceId();
   const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));

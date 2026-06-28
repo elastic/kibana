@@ -48,11 +48,15 @@ import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
+<<<<<<< HEAD
 import {
   buildAttacksOnlyFilter,
   buildAttackTypeFilter,
   buildConnectorIdFilter,
 } from './filtering_configs';
+=======
+import { buildAttacksOnlyFilter, buildConnectorIdFilter } from './filtering_configs';
+>>>>>>> 9.4
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';

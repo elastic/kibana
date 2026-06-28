@@ -167,6 +167,7 @@ export const watchlistEntitySourceType: SavedObjectsType = {
         create: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
       },
     },
+<<<<<<< HEAD
     '3': {
       changes: [],
       schemas: {
@@ -174,6 +175,8 @@ export const watchlistEntitySourceType: SavedObjectsType = {
         create: schema.object(entitySourceSchemaV3, { unknowns: 'ignore' }),
       },
     },
+=======
+>>>>>>> 9.4
   },
 };
 

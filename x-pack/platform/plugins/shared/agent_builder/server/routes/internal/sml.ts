@@ -50,6 +50,58 @@ export function registerInternalSmlRoutes({
 
   router.post(
     {
+<<<<<<< HEAD
+=======
+      path: `${internalApiPath}/sml/_search`,
+      validate: {
+        body: schema.object({
+          query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
+          size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
+          skip_content: schema.maybe(schema.boolean()),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_READ_SECURITY,
+    },
+    wrapHandler(
+      async (ctx, request, response) => {
+        const { sml } = getInternalServices();
+        const { query, size, skip_content: skipContent } = request.body;
+        const esClient = (await ctx.core).elasticsearch.client;
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
+        const { results, total } = await sml.search({
+          query,
+          size,
+          spaceId,
+          esClient,
+          request,
+          skipContent,
+        });
+
+        const body: SmlSearchHttpResponse = {
+          total,
+          results: results.map(({ id, type, origin_id, title, score, content }) => ({
+            id,
+            type,
+            origin_id,
+            title,
+            score,
+            ...(skipContent ? {} : { content }),
+          })),
+        };
+
+        return response.ok({ body });
+      },
+      {
+        featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+      }
+    )
+  );
+
+  router.post(
+    {
+>>>>>>> 9.4
       path: `${internalApiPath}/sml/_attach`,
       validate: {
         body: schema.object({

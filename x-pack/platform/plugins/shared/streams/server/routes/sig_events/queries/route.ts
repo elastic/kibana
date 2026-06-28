@@ -91,20 +91,31 @@ const listQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
+<<<<<<< HEAD
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
     const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+=======
+  async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
+    const { getQueryClient, streamsClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
+>>>>>>> 9.4
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
+<<<<<<< HEAD
     const kiClient = await getKnowledgeIndicatorClient();
     const { [streamName]: queryLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
+=======
+    const queryClient = await getQueryClient();
+    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
+>>>>>>> 9.4
 
     return {
       queries: queryLinks.map((queryLink) => queryLink.query),
@@ -159,11 +170,16 @@ const upsertQueryRoute = createServerRoute({
     }),
     body: upsertStreamQueryRequestSchema,
   }),
+<<<<<<< HEAD
   handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
     const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
+=======
+  handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
+>>>>>>> 9.4
     const {
       path: { name: streamName, queryId },
       body,
@@ -177,8 +193,13 @@ const upsertQueryRoute = createServerRoute({
       stream: definition,
     });
 
+<<<<<<< HEAD
     const kiClient = await getKnowledgeIndicatorClient();
     await kiClient.upsertQuery(definition, {
+=======
+    const queryClient = await getQueryClient();
+    await queryClient.upsert(definition, {
+>>>>>>> 9.4
       id: queryId,
       type: deriveQueryType(body.esql.query),
       title: body.title,
@@ -238,6 +259,7 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string().describe('The identifier of the query to remove.'),
     }),
   }),
+<<<<<<< HEAD
   handler: async ({
     params,
     request,
@@ -250,6 +272,13 @@ const deleteQueryRoute = createServerRoute({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+=======
+  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing } = await getScopedClients({
+      request,
+    });
+    await assertEnterpriseLicense(licensing);
+>>>>>>> 9.4
 
     const {
       path: { queryId, name: streamName },
@@ -257,8 +286,13 @@ const deleteQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
+<<<<<<< HEAD
     const kiClient = await getKnowledgeIndicatorClient();
     const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId]);
+=======
+    const queryClient = await getQueryClient();
+    const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
+>>>>>>> 9.4
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
@@ -337,11 +371,16 @@ const bulkQueriesRoute = createServerRoute({
     logger,
     server,
   }): Promise<BulkUpdateAssetsResponse> => {
+<<<<<<< HEAD
     const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+=======
+    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
+>>>>>>> 9.4
 
     const {
       path: { name: streamName },
@@ -388,6 +427,7 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
+<<<<<<< HEAD
     const kiClient = await getKnowledgeIndicatorClient();
     const deleteIds = new Set(typedOperations.flatMap((op) => (op.delete ? [op.delete.id] : [])));
     const indexQueriesById = new Map(
@@ -402,6 +442,10 @@ const bulkQueriesRoute = createServerRoute({
       ...Array.from(indexQueriesById.values()).filter((q) => !currentIds.has(q.id)),
     ];
     await kiClient.syncQueries(definition, nextQueries, { currentLinks });
+=======
+    const queryClient = await getQueryClient();
+    await queryClient.bulk(definition, operations);
+>>>>>>> 9.4
 
     logger
       .get('significant_events')

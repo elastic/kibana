@@ -8,6 +8,10 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
+<<<<<<< HEAD
+=======
+import { xyConfigSchema } from '../../schema/charts/xy';
+>>>>>>> 9.4
 import type { XYConfig } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
@@ -64,11 +68,16 @@ describe('XY', () => {
     describe('Data only', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should convert a minimal ${type} chart with one data layer`, () => {
+<<<<<<< HEAD
           validator.xy.fromState(setSeriesType(minimalAttributesXY, type));
+=======
+          validateConverter(setSeriesType(minimalAttributesXY, type), xyConfigSchema);
+>>>>>>> 9.4
         });
       }
 
       it(`should convert a full xy chart with one data layer`, () => {
+<<<<<<< HEAD
         validator.xy.fromState(fullBasicXY);
       });
 
@@ -94,31 +103,77 @@ describe('XY', () => {
 
       it('should convert an esql xy with collapse by breakdown', () => {
         validator.xy.fromState(esqlXYWithCollapseByBreakdown);
+=======
+        validateConverter(fullBasicXY, xyConfigSchema);
+      });
+
+      it(`should convert a xy chart with multiple metrics`, () => {
+        validateConverter(multipleMetricsXY, xyConfigSchema);
+      });
+
+      it(`should convert a xy chart with multiple metrics and a breakdown`, () => {
+        validateConverter(breakdownXY, xyConfigSchema);
+      });
+
+      it('should convert a bar chart with 2 layers', () => {
+        validateConverter(barWithTwoLayersAttributes, xyConfigSchema);
+      });
+
+      it('should convert a mixed chart with 3 layers', () => {
+        validateConverter(mixedChartAttributes, xyConfigSchema);
+      });
+
+      it('should convert a chart with formula ref columns and rank_by in the terms bucket operation', () => {
+        validateConverter(
+          xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
+          xyConfigSchema
+        );
+      });
+
+      it('should convert an esql xy with collapse by breakdown', () => {
+        validateConverter(esqlXYWithCollapseByBreakdown, xyConfigSchema);
+>>>>>>> 9.4
       });
     });
 
     describe('Reference lines', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for a reference line with a ${type} chart`, () => {
+<<<<<<< HEAD
           validator.xy.fromState(setSeriesType(referenceLineXY, type));
+=======
+          validateConverter(setSeriesType(referenceLineXY, type), xyConfigSchema);
+>>>>>>> 9.4
         });
       }
 
       it('should work for both horizontal and vertical reference lines', () => {
+<<<<<<< HEAD
         validator.xy.fromState(dualReferenceLineXY);
+=======
+        validateConverter(dualReferenceLineXY, xyConfigSchema);
+>>>>>>> 9.4
       });
     });
 
     describe('Annotations', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
+<<<<<<< HEAD
           validator.xy.fromState(setSeriesType(annotationXY, type));
+=======
+          validateConverter(setSeriesType(annotationXY, type), xyConfigSchema);
+>>>>>>> 9.4
         });
       }
 
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for a by-reference annotation with a ${type} chart`, () => {
+<<<<<<< HEAD
           validator.xy.fromState(setSeriesType(byRefAnnotationXY, type));
+=======
+          validateConverter(setSeriesType(byRefAnnotationXY, type), xyConfigSchema);
+>>>>>>> 9.4
         });
       }
     });
@@ -126,13 +181,24 @@ describe('XY', () => {
     describe('ES|QL panels', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
+<<<<<<< HEAD
           validator.xy.fromState(setSeriesType(esqlChart, type));
+=======
+          validateConverter(setSeriesType(esqlChart, type), xyConfigSchema);
+>>>>>>> 9.4
         });
       }
 
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an ES|QL ${type} chart with breakdown and color mapping`, () => {
+<<<<<<< HEAD
           validator.xy.fromState(setSeriesType(esqlChartWithBreakdownColorMapping, type));
+=======
+          validateConverter(
+            setSeriesType(esqlChartWithBreakdownColorMapping, type),
+            xyConfigSchema
+          );
+>>>>>>> 9.4
         });
       }
 
@@ -192,7 +258,11 @@ describe('XY', () => {
             },
           };
 
+<<<<<<< HEAD
           validator.xy.fromState(esqlChartWithDateColumn);
+=======
+          validateConverter(esqlChartWithDateColumn, xyConfigSchema);
+>>>>>>> 9.4
         });
 
         it('should detect linear scale for ES|QL chart with numeric column', () => {
@@ -250,11 +320,19 @@ describe('XY', () => {
             },
           };
 
+<<<<<<< HEAD
           validator.xy.fromState(esqlChartWithNumericColumn);
         });
 
         it('should default to ordinal scale for form-based chart', () => {
           validator.xy.fromState(minimalAttributesXY);
+=======
+          validateConverter(esqlChartWithNumericColumn, xyConfigSchema);
+        });
+
+        it('should default to ordinal scale for form-based chart', () => {
+          validateConverter(minimalAttributesXY, xyConfigSchema);
+>>>>>>> 9.4
         });
       });
     });
@@ -278,6 +356,7 @@ describe('XY', () => {
     ] as const;
     const anyType = [...universalTypes, ...typesWithBreakdown];
     it.each(universalTypes)('should work for for a minimal %s', (type) => {
+<<<<<<< HEAD
       validator.xy.fromApi({
         type: 'xy',
         title: `${type} Chart`,
@@ -291,6 +370,24 @@ describe('XY', () => {
           },
         ],
       });
+=======
+      validateAPIConverter(
+        {
+          type: 'xy',
+          title: `${type} Chart`,
+          layers: [
+            {
+              ignore_global_filters: false,
+              sampling: 1,
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+              type,
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+          ],
+        },
+        xyConfigSchema
+      );
+>>>>>>> 9.4
     });
 
     it.each(anyType)('should work for ES|QL mode for a minimal %s chart with breakdown', (type) => {
@@ -304,6 +401,7 @@ describe('XY', () => {
               query:
                 'FROM kibana_simple_logs_data | STATS count = count() BY buckets = BUCKET(3 hours, order_date), product',
             },
+<<<<<<< HEAD
             type,
             ignore_global_filters: false,
             sampling: 1,
@@ -313,6 +411,12 @@ describe('XY', () => {
           },
         ],
       });
+=======
+          ],
+        },
+        xyConfigSchema
+      );
+>>>>>>> 9.4
     });
 
     it.each(anyType)(
@@ -327,6 +431,7 @@ describe('XY', () => {
                 type: 'esql',
                 query: 'FROM kibana_sample_data_logs',
               },
+<<<<<<< HEAD
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -336,6 +441,12 @@ describe('XY', () => {
             },
           ],
         });
+=======
+            ],
+          },
+          xyConfigSchema
+        );
+>>>>>>> 9.4
       }
     );
 
@@ -370,9 +481,16 @@ describe('XY', () => {
                   ],
                 },
               },
+<<<<<<< HEAD
             },
           ],
         });
+=======
+            ],
+          },
+          xyConfigSchema
+        );
+>>>>>>> 9.4
       }
     );
     it.each(anyType.map((type) => anyType.map((anotherType) => [type, anotherType])).flat(1))(
@@ -437,12 +555,40 @@ describe('XY', () => {
                   type: 'metric',
                 },
               },
+<<<<<<< HEAD
             },
             {
               data_source: {
                 type: AS_CODE_DATA_VIEW_SPEC_TYPE,
                 index_pattern: 'companyIndex',
                 time_field: '@timestamp',
+=======
+              {
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+                  index_pattern: 'companyIndex',
+                  time_field: '@timestamp',
+                },
+                type: 'reference_lines',
+                ignore_global_filters: false,
+                sampling: 1,
+                thresholds: [
+                  {
+                    operation: 'median',
+                    field: 'price',
+                    label: 'Median Price',
+                    color: { type: 'static', color: 'red' },
+                    text: { visible: true },
+                  },
+                  {
+                    operation: 'average',
+                    field: 'price',
+                    label: 'Average Price',
+                    color: { type: 'static', color: 'blue' },
+                    text: { visible: false },
+                  },
+                ],
+>>>>>>> 9.4
               },
               type: 'reference_lines',
               ignore_global_filters: false,
@@ -471,6 +617,7 @@ describe('XY', () => {
                 type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
                 ref_id: 'metrics-*',
               },
+<<<<<<< HEAD
               events: [
                 {
                   type: 'point',
@@ -523,10 +670,17 @@ describe('XY', () => {
             },
           ],
         });
+=======
+            ],
+          },
+          xyConfigSchema
+        );
+>>>>>>> 9.4
       }
     );
 
     it('should correctly transform no title and inside legend - bug 248611', () => {
+<<<<<<< HEAD
       validator.xy.fromApi(apiXYWithNoYTitleAndInsideLegend);
     });
 
@@ -556,6 +710,40 @@ describe('XY', () => {
           },
         ],
       });
+=======
+      validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyConfigSchema);
+    });
+
+    it('should correctly transform top list layout', () => {
+      validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyConfigSchema);
+    });
+
+    it('should correctly transform with custom position legend - bug 248611', () => {
+      validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyConfigSchema);
+    });
+
+    it('should convert API with by-reference annotation layer', () => {
+      validateAPIConverter(
+        {
+          type: 'xy',
+          title: 'Chart with by-ref annotation',
+          layers: [
+            {
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              type: 'annotation_group',
+              group_id: 'my-library-annotation-group',
+            },
+          ],
+        },
+        xyConfigSchema
+      );
+>>>>>>> 9.4
     });
 
     describe('XY axis scale support (text-based)', () => {
@@ -568,6 +756,7 @@ describe('XY', () => {
               scale: 'temporal',
             },
           },
+<<<<<<< HEAD
           layers: [
             {
               ignore_global_filters: false,
@@ -583,6 +772,10 @@ describe('XY', () => {
             },
           ],
         });
+=======
+          xyConfigSchema
+        );
+>>>>>>> 9.4
       });
 
       it('should convert linear scale correctly for ES|QL layer', () => {
@@ -594,6 +787,7 @@ describe('XY', () => {
               scale: 'linear',
             },
           },
+<<<<<<< HEAD
           layers: [
             {
               ignore_global_filters: false,
@@ -608,6 +802,10 @@ describe('XY', () => {
             },
           ],
         });
+=======
+          xyConfigSchema
+        );
+>>>>>>> 9.4
       });
 
       it('should handle config without axis object', () => {
@@ -622,6 +820,7 @@ describe('XY', () => {
                 type: 'esql',
                 query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
               },
+<<<<<<< HEAD
               type: 'bar',
               y: [{ column: 'count' }],
             },
@@ -637,8 +836,27 @@ describe('XY', () => {
             y: {
               ticks: { visible: true },
               grid: { visible: true },
+=======
+            ],
+          },
+          xyConfigSchema
+        );
+      });
+
+      it('should handle config with axis but no x axis', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Y-Axis Only',
+            axis: {
+              y: {
+                ticks: { visible: true },
+                grid: { visible: true },
+              },
+>>>>>>> 9.4
             },
           },
+<<<<<<< HEAD
           layers: [
             {
               ignore_global_filters: false,
@@ -652,6 +870,10 @@ describe('XY', () => {
             },
           ],
         });
+=======
+          xyConfigSchema
+        );
+>>>>>>> 9.4
       });
     });
   });

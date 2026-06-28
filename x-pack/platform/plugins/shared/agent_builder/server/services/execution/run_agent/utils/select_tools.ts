@@ -23,6 +23,10 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
+<<<<<<< HEAD
+=======
+import { getStoreTools } from '../../runner/store';
+>>>>>>> 9.4
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {

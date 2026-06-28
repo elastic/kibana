@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { filter, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
@@ -17,12 +18,26 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+=======
+import { filter, first, Subject, type Subscription } from 'rxjs';
+import {
+  type AppDeepLinkLocations,
+  type AppMountParameters,
+  type AppUpdater,
+  type CoreSetup,
+  type CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  type Plugin,
+>>>>>>> 9.4
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+<<<<<<< HEAD
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
+=======
+>>>>>>> 9.4
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
@@ -38,8 +53,14 @@ import type {
 import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+<<<<<<< HEAD
 import type { WorkflowsManagementConfig } from '../server/config';
 
+=======
+
+const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
+const VisibleInNotAvailable: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
+>>>>>>> 9.4
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -52,19 +73,29 @@ export class WorkflowsPlugin
   private logger: Logger;
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
+<<<<<<< HEAD
   private cachedTelemetry: WorkflowsBaseTelemetry | null = null;
   private availabilityService: AvailabilityService;
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
   private readonly pluginConfig: WorkflowsManagementConfig;
+=======
+  private availabilityService: AvailabilityService;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
+  private settingsSubscription?: Subscription;
+  private availabilityStatusSubscription?: Subscription;
+>>>>>>> 9.4
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
+<<<<<<< HEAD
     this.pluginConfig = initializerContext.config.get<WorkflowsManagementConfig>();
+=======
+>>>>>>> 9.4
   }
 
   public setup(
@@ -130,13 +161,24 @@ export class WorkflowsPlugin
 
     // Availability service: set license and subscribe to availability for app visibility changes
     this.availabilityService.setLicense$(plugins.licensing.license$);
+<<<<<<< HEAD
 
     this.subscribeAppVisibilityChanges(core);
+=======
+    this.availabilityStatusSubscription = this.availabilityService
+      .getIsAvailable$()
+      .subscribe((isAvailable) => {
+        this.appUpdater$.next(() => ({
+          visibleIn: isAvailable ? VisibleIn : VisibleInNotAvailable,
+        }));
+      });
+>>>>>>> 9.4
 
     return {
       setUnavailableInServerlessTier: (options) => {
         this.availabilityService.setUnavailableInServerlessTier(options.requiredProducts);
       },
+<<<<<<< HEAD
       getTelemetry: async () => {
         if (!this.cachedTelemetry) {
           const { WorkflowsBaseTelemetry } = await import('./common/service/telemetry');
@@ -148,12 +190,18 @@ export class WorkflowsPlugin
         const { queryClient } = await import('./shared/lib/query_client');
         return queryClient;
       },
+=======
+>>>>>>> 9.4
     };
   }
 
   public stop() {
     this.settingsSubscription?.unsubscribe();
+<<<<<<< HEAD
     this.appVisibilitySubscription?.unsubscribe();
+=======
+    this.availabilityStatusSubscription?.unsubscribe();
+>>>>>>> 9.4
     this.availabilityService.stop();
   }
 

@@ -50,9 +50,51 @@ export const DefaultModelSection: React.FC<Props> = ({
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const usageTracker = useUsageTracker();
 
+<<<<<<< HEAD
   const options = useMemo(
     () => getGlobalModelComboOptions(connectors, state.featureSpecificModels),
     [connectors, state.featureSpecificModels]
+=======
+  const custom =
+    connectors
+      ?.filter((c) => !c.isPreconfigured)
+      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
+
+  return [
+    NoDefaultOption,
+    {
+      label: i18n.DEFAULT_MODEL_PRECONFIGURED_GROUP,
+      value: 'preconfigured',
+      options: preconfigured,
+    },
+    {
+      label: i18n.DEFAULT_MODEL_CUSTOM_GROUP,
+      value: 'custom',
+      options: custom,
+    },
+  ];
+};
+
+const getSelectedOptions = (
+  value: string,
+  options: EuiComboBoxOptionOption<string>[]
+): EuiComboBoxOptionOption<string>[] => {
+  const findInOptions = (
+    option: EuiComboBoxOptionOption<string>
+  ): EuiComboBoxOptionOption<string>[] => {
+    if (!option.options && option.value === value) return [option];
+    if (option.options) return option.options.flatMap(findInOptions);
+    return [];
+  };
+  return options.flatMap(findInOptions);
+};
+
+export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) => {
+  const { state, setDefaultModelId, setDisallowOtherModels } = defaultModelSettings;
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
+    state.defaultModelId
+>>>>>>> 9.4
   );
   const selectedOptions = useMemo(
     () => getGlobalModelSelectedOptions(state.defaultModelId, options, state.featureSpecificModels),

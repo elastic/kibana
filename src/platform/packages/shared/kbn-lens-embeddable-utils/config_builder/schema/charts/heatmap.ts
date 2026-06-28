@@ -160,7 +160,10 @@ const heatmapAxesConfigESQLSchemaProps = {
 const heatmapConfigMetricOptionsSchemaProps = {
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, autoColorSchema], {
+<<<<<<< HEAD
       meta: { description: 'Color scale configuration for the heatmap cells.' },
+=======
+>>>>>>> 9.4
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -174,6 +177,7 @@ export const heatmapConfigSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     styling: schema.maybe(heatmapStylingSchema),
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+<<<<<<< HEAD
       heatmapConfigMetricOptionsSchemaProps,
       'heatmapMetric'
     ),
@@ -216,6 +220,32 @@ export const heatmapConfigSchema = objectUnion(
   }
 );
 
+=======
+      heatmapConfigMetricOptionsSchemaProps
+    ),
+  },
+  { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
+);
+
+export const heatmapConfigSchemaESQL = schema.object(
+  {
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigESQLSchemaProps,
+    ...dataSourceEsqlTableSchema,
+    styling: schema.maybe(heatmapStylingSchema),
+    metric: esqlColumnWithFormatSchema.extends(heatmapConfigMetricOptionsSchemaProps),
+  },
+  { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
+);
+
+export const heatmapConfigSchema = objectUnion(
+  [heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL],
+  {
+    meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
+  }
+);
+
+>>>>>>> 9.4
 export type HeatmapConfig = TypeOf<typeof heatmapConfigSchema>;
 export type HeatmapConfigNoESQL = TypeOf<typeof heatmapConfigSchemaNoESQL>;
 export type HeatmapConfigESQL = TypeOf<typeof heatmapConfigSchemaESQL>;

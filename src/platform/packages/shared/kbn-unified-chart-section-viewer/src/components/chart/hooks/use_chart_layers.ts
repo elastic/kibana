@@ -8,10 +8,15 @@
  */
 
 import { useMemo } from 'react';
+<<<<<<< HEAD
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { Dimension, NullableMetricUnit } from '../../../types';
+=======
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { Dimension, ParsedMetricItem } from '../../../types';
+>>>>>>> 9.4
 import {
   createMetricAggregation,
   createTimeBucketAggregation,

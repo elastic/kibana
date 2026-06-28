@@ -83,6 +83,7 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+<<<<<<< HEAD
   public async expectCompletedSearchToast() {
     await this.retry.waitFor(
       'the toast appears indicating that the search session is completed',
@@ -90,6 +91,8 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+=======
+>>>>>>> 9.4
   public async openCompletedSearchFromToast() {
     await this.retry.try(async () => {
       const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
@@ -101,6 +104,7 @@ export class SearchSessionsService extends FtrService {
   }
 
   private async dismissSuccessToast() {
+<<<<<<< HEAD
     await this.retryOnStale(async () => {
       const successToast = await this.getSuccessToast();
       if (!successToast) return;
@@ -125,6 +129,23 @@ export class SearchSessionsService extends FtrService {
       }
       return null;
     });
+=======
+    const successToast = await this.getSuccessToast();
+    if (!successToast) return;
+    const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+    await closeBtn.click();
+  }
+
+  private async getSuccessToast() {
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (text.includes('Background search completed')) {
+        return toast;
+      }
+    }
+    return null;
+>>>>>>> 9.4
   }
 
   public async openFlyoutFromToast() {

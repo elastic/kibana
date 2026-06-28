@@ -100,6 +100,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/logging'
   - '@kbn/management-settings-ids'
+<<<<<<< HEAD
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/std'
   - '@kbn/use-observable'
@@ -117,6 +118,13 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/controls-plugin'
   - '@kbn/controls-schemas'
+=======
+  - '@kbn/std'
+  - '@kbn/use-observable'
+  - '@kbn/cloud-plugin'
+  - '@kbn/std'
+  - '@kbn/kbn-client'
+>>>>>>> 9.4
 tags:
   - plugin
   - prod

@@ -16,7 +16,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+<<<<<<< HEAD
   EuiToolTip,
+=======
+>>>>>>> 9.4
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
@@ -120,6 +123,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
           return (
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
+<<<<<<< HEAD
                 <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
                   <EuiButtonIcon
                     iconType="expand"
@@ -140,6 +144,24 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
                     isLoading={isThisEntityAdding}
                   />
                 </EuiToolTip>
+=======
+                <EuiButtonIcon
+                  iconType="expand"
+                  color="primary"
+                  aria-label={EXPAND_ENTITY_BUTTON}
+                  onClick={() => onEntityNameClick?.(entity)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="plus"
+                  color="primary"
+                  aria-label={ADD_ENTITY_BUTTON}
+                  onClick={() => onAddEntity(entity)}
+                  disabled={disabled || !!addingEntityId}
+                  isLoading={isThisEntityAdding}
+                />
+>>>>>>> 9.4
               </EuiFlexItem>
             </EuiFlexGroup>
           );

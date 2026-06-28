@@ -8,11 +8,20 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+<<<<<<< HEAD
 
 import { validator } from '../utils/validator';
 import type { MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
+=======
+import { metricConfigSchema } from '../../schema/charts/metric';
+import type { MetricConfig } from '../../schema/charts/metric';
+import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
+import { validateAPIConverter, validateConverter } from '../validate';
+>>>>>>> 9.4
 import {
   simpleMetricAttributes,
   breakdownMetricAttributes,
@@ -33,6 +42,7 @@ import {
 describe('Metric', () => {
   describe('state transform validation', () => {
     it('should convert a simple metric', () => {
+<<<<<<< HEAD
       validator.metric.fromState(simpleMetricAttributes);
     });
 
@@ -58,11 +68,31 @@ describe('Metric', () => {
 
     it('should convert a dynamic colors metric', () => {
       validator.metric.fromState(dynamicColorsMetricAttributes);
+=======
+      validateConverter(simpleMetricAttributes, metricConfigSchema);
+    });
+
+    it('should convert a complex metric', () => {
+      validateConverter(complexMetricAttributes, metricConfigSchema);
+    });
+
+    it('should convert a breakdown-by metric', () => {
+      validateConverter(breakdownMetricAttributes, metricConfigSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, metricConfigSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, metricConfigSchema);
+>>>>>>> 9.4
     });
   });
 
   describe('api transform validation', () => {
     it('should convert a simple metric', () => {
+<<<<<<< HEAD
       validator.metric.fromApi(simpleMetricAPIAttributes);
     });
 
@@ -103,6 +133,56 @@ describe('Metric', () => {
       ignore_global_filters: false,
     } satisfies MetricConfig;
 
+=======
+      validateAPIConverter(simpleMetricAPIAttributes, metricConfigSchema);
+    });
+
+    it('should convert a complex metric', () => {
+      validateAPIConverter(complexMetricAPIAttributes, metricConfigSchema);
+    });
+
+    it('should convert a breakdown-by metric', () => {
+      validateAPIConverter(breakdownMetricAPIAttributes, metricConfigSchema);
+    });
+
+    it('should convert a complex ESQL metric chart', () => {
+      validateAPIConverter(complexESQLMetricAPIAttributes, metricConfigSchema);
+    });
+
+    it('should convert a metric with a terms agg ranked by secondary metric', () => {
+      validateAPIConverter(metricAPIWithTermsRankedBySecondary, metricConfigSchema);
+    });
+  });
+
+  it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
+    validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricConfigSchema);
+  });
+
+  it('should convert a dynamic colors metric', () => {
+    validateConverter(dynamicColorsMetricAttributes, metricConfigSchema);
+  });
+
+  describe('color default application', () => {
+    const baseMetric = {
+      type: 'metric',
+      title: 'Color default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'count',
+          empty_as_null: false,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies MetricConfig;
+
+>>>>>>> 9.4
     it('should emit AUTO_COLOR for primary metric when no color is specified', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(baseMetric);

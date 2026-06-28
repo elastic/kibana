@@ -21,7 +21,10 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
   convertUpsertRequestIntoDefinition,
+<<<<<<< HEAD
   deriveQueryType,
+=======
+>>>>>>> 9.4
   getAncestors,
   getParentId,
   LOGS_ROOT_STREAM_NAME,
@@ -29,7 +32,11 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
+<<<<<<< HEAD
 import type { StreamSummary } from '../../../common';
+=======
+import type { QueryClient } from './assets/query/query_client';
+>>>>>>> 9.4
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
@@ -43,8 +50,12 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
+<<<<<<< HEAD
 import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
 import type { KnowledgeIndicatorClient } from './ki';
+=======
+import type { FeatureClient } from './feature';
+>>>>>>> 9.4
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -80,7 +91,12 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
+<<<<<<< HEAD
       getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClient>;
+=======
+      getQueryClient?: () => Promise<QueryClient>;
+      getFeatureClient?: () => Promise<FeatureClient>;
+>>>>>>> 9.4
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -371,8 +387,18 @@ export class StreamsClient {
         }
       );
 
+<<<<<<< HEAD
       const { attachmentClient, storageClient } = this.dependencies;
       await Promise.all([attachmentClient.clean(), storageClient.clean()]);
+=======
+      const { attachmentClient, getQueryClient, storageClient } = this.dependencies;
+      const cleanOps: Array<Promise<unknown>> = [attachmentClient.clean(), storageClient.clean()];
+      if (getQueryClient) {
+        const queryClient = await getQueryClient();
+        cleanOps.push(queryClient.clean());
+      }
+      await Promise.all(cleanOps);
+>>>>>>> 9.4
     }
 
     // Disable in Elasticsearch (parallel calls)
@@ -828,6 +854,37 @@ export class StreamsClient {
     });
   }
 
+  async getPrivilegesPerStream(
+    names: string[]
+  ): Promise<Record<string, { read_failure_store: boolean }>> {
+    if (!this.dependencies.isSecurityEnabled) {
+      // Security disabled - all streams have all privileges
+      const result: Record<string, { read_failure_store: boolean }> = {};
+      names.forEach((name) => {
+        result[name] = { read_failure_store: true };
+      });
+      return result;
+    }
+
+    const privileges = await this.dependencies.esClient.security.hasPrivileges({
+      index: [
+        {
+          names,
+          privileges: ['read_failure_store'],
+        },
+      ],
+    });
+
+    const result: Record<string, { read_failure_store: boolean }> = {};
+    names.forEach((name) => {
+      result[name] = {
+        read_failure_store: privileges.index[name]?.read_failure_store ?? false,
+      };
+    });
+
+    return result;
+  }
+
   /**
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
@@ -1109,6 +1166,7 @@ export class StreamsClient {
       ),
     ];
 
+<<<<<<< HEAD
     if (this.dependencies.getKnowledgeIndicatorClient) {
       const kiClient = await this.dependencies.getKnowledgeIndicatorClient();
       ops.push(
@@ -1117,6 +1175,11 @@ export class StreamsClient {
           queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
         )
       );
+=======
+    if (this.dependencies.getQueryClient) {
+      const queryClient = await this.dependencies.getQueryClient();
+      ops.push(queryClient.syncQueries(definition, queries));
+>>>>>>> 9.4
     }
 
     await Promise.all(ops);

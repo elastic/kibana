@@ -20,8 +20,15 @@ import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
+<<<<<<< HEAD
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
 import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
+=======
+import {
+  getForFeature as getForFeatureFn,
+  getForFeatureWithDefault as getForFeatureWithDefaultFn,
+} from './inference_endpoints';
+>>>>>>> 9.4
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -188,14 +195,20 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
+<<<<<<< HEAD
         getForFeature: async (featureId: string, request: KibanaRequest) => {
           const soClient = core.savedObjects.getScopedClient(request, {
             includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
           });
+=======
+        getForFeature: (featureId: string, request: KibanaRequest) => {
+          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+>>>>>>> 9.4
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
           );
           const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+<<<<<<< HEAD
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
@@ -216,6 +229,16 @@ export class SearchInferenceEndpointsPlugin
             warnings: result.warnings,
             soEntryFound: result.soEntryFound,
           };
+=======
+          return getForFeatureWithDefaultFn({
+            registry: featureRegistry,
+            soClient,
+            uiSettingsClient,
+            getConnectorById,
+            featureId,
+            logger: this.logger,
+          });
+>>>>>>> 9.4
         },
       },
     };

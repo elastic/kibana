@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import type { TracesExperiencePage } from './page_objects';
 
+<<<<<<< HEAD
 /**
  * Waits for the traces data-source profile to have engaged before assertions
  * on profile-driven UI run. Adds a 30s timeout to the visibility check to
@@ -49,4 +50,14 @@ export async function expectTracesExperienceEnabled(
   if (shouldCheckForREDMetricsCharts) {
     await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
   }
+=======
+export async function expectTracesExperienceEnabled(
+  pageObjects: PageObjects & { tracesExperience: TracesExperiencePage }
+) {
+  await pageObjects.discover.waitForDocTableRendered();
+  for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+  }
+  await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+>>>>>>> 9.4
 }

@@ -30,7 +30,11 @@ import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_eng
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
+<<<<<<< HEAD
 import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
+=======
+import { ENTITY_GROUPING_OPTIONS } from '../constants';
+>>>>>>> 9.4
 
 const entitiesStatLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities',
@@ -54,7 +58,11 @@ const ResolutionGroupPanel = ({
   bucket: RawBucket<EntitiesGroupingAggregation>;
   targetMetadata: TargetMetadataMap;
 }) => {
+<<<<<<< HEAD
   const { openFlyout } = useExpandableFlyoutApi();
+=======
+  const { openRightPanel } = useExpandableFlyoutApi();
+>>>>>>> 9.4
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -200,10 +208,14 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
       const entityId = String(bucket.key_as_string ?? bucket.key);
       const metadata = targetMetadata.get(entityId);
+<<<<<<< HEAD
       const groupScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value;
       const isSoloGroup = bucket.doc_count === 1;
       const individualScore = isSoloGroup ? metadata?.individualRiskScore : undefined;
       const riskScore = groupScore ?? individualScore ?? null;
+=======
+      const riskScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value ?? null;
+>>>>>>> 9.4
 
       stats.push({
         title: riskScoreLabel,

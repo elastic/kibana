@@ -246,6 +246,7 @@ function convertAPILegendDisplayOption(
   return { legendDisplay: legend?.visibility === 'visible' ? 'show' : 'hide', ...legendOptions };
 }
 
+<<<<<<< HEAD
 /**
  * Waffle is the only partition chart that supports showing/hiding metric values in the legend.
  * Internally, Lens uses `legendStats` (empty array = hidden, ['value'] = shown).
@@ -274,6 +275,8 @@ function convertLegendStatsToWaffleAPIValues(
   return undefined;
 }
 
+=======
+>>>>>>> 9.4
 function convertAPIStaticColorToLensState(config: PartitionConfig) {
   if (isAPIMosaicChartLayer(config)) {
     return undefined;
@@ -519,10 +522,13 @@ function fromLensStateToSharedPartitionAPI(
     truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: legendSizeCompat.toAPI(layerState.legendSize),
+<<<<<<< HEAD
     position: layerState.legendPosition,
     values: isStateWaffleChart(visualization)
       ? convertLegendStatsToWaffleAPIValues(layerState.legendStats)
       : undefined,
+=======
+>>>>>>> 9.4
   });
 
   return stripUndefined({
@@ -578,7 +584,13 @@ function fromLensStateToAPIMetrics(
       (id) =>
         stripUndefined({
           ...getValueApiColumn(id, layer),
+<<<<<<< HEAD
           color: colorForMetric(id),
+=======
+          color: hasActiveGroupBy
+            ? undefined
+            : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
+>>>>>>> 9.4
         }) as PartitionMetricItem
     );
   }
@@ -590,7 +602,13 @@ function fromLensStateToAPIMetrics(
     (id) =>
       stripUndefined({
         ...operationFromColumn(id, layer),
+<<<<<<< HEAD
         color: colorForMetric(id),
+=======
+        color: hasActiveGroupBy
+          ? undefined
+          : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
+>>>>>>> 9.4
       }) as PartitionMetricItem
   );
 }
@@ -735,6 +753,7 @@ function convertStateCategoryDisplayOption(
   return undefined;
 }
 
+<<<<<<< HEAD
 export function getDonutHoleSize(
   partitionShape: LensPartitionVisualizationState['shape'],
   donutHoleSize?: number
@@ -747,6 +766,8 @@ export function getDonutHoleSize(
   return donutHoleSizeCompat.toAPI(donutHoleSize) ?? 's';
 }
 
+=======
+>>>>>>> 9.4
 function fromLensStateToChartSpecificStylingAPI(
   visualization: LensPartitionVisualizationState
 ): PartitionStyling {

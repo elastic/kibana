@@ -21,10 +21,13 @@ import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
+<<<<<<< HEAD
 import {
   createMaintainerTelemetryClient,
   type InternalMaintainerTelemetryClient,
 } from './maintainer_telemetry_client';
+=======
+>>>>>>> 9.4
 
 const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
@@ -131,9 +134,12 @@ export async function executeMaintainerRun({
 
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+<<<<<<< HEAD
   const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
+=======
+>>>>>>> 9.4
   const crudClient = new CRUDClient({
     logger,
     esClient,
@@ -141,11 +147,14 @@ export async function executeMaintainerRun({
   });
   const taskLogger = logger.get(taskId);
   const abortController = taskAbortController ?? new AbortController();
+<<<<<<< HEAD
   const telemetryClient = createMaintainerTelemetryClient({
     id,
     namespace: maintainerStatus.metadata.namespace,
     analytics,
   });
+=======
+>>>>>>> 9.4
 
   return await wrapTaskRun({
     spanName: 'entityStore.task.entity_maintainer.run',
@@ -164,11 +173,17 @@ export async function executeMaintainerRun({
         run,
         abortController,
         esClient,
+<<<<<<< HEAD
         cpsEsClient,
         crudClient,
         id,
         analytics,
         telemetryClient,
+=======
+        crudClient,
+        id,
+        analytics,
+>>>>>>> 9.4
       }),
   });
 }
@@ -195,11 +210,17 @@ export async function runEntityMaintainerTask({
   run,
   abortController,
   esClient,
+<<<<<<< HEAD
   cpsEsClient,
   crudClient,
   id,
   analytics,
   telemetryClient,
+=======
+  crudClient,
+  id,
+  analytics,
+>>>>>>> 9.4
 }: {
   status: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
@@ -208,6 +229,7 @@ export async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
+<<<<<<< HEAD
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
   id: string;
@@ -221,6 +243,14 @@ export async function runEntityMaintainerTask({
 
   const onAbort = () => {
     aborted = true;
+=======
+  crudClient: EntityUpdateClient;
+  id: string;
+  analytics: TelemetryReporter;
+}): Promise<{ state: EntityMaintainerStatus }> {
+  const namespace = status.metadata.namespace;
+  const onAbort = () => {
+>>>>>>> 9.4
     logger.debug(`Abort signal received, stopping Entity Maintainer`);
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
       id,
@@ -239,9 +269,13 @@ export async function runEntityMaintainerTask({
         logger,
         fakeRequest,
         esClient,
+<<<<<<< HEAD
         cpsEsClient,
         crudClient,
         telemetry: telemetryClient,
+=======
+        crudClient,
+>>>>>>> 9.4
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
         id,
@@ -256,9 +290,13 @@ export async function runEntityMaintainerTask({
       logger,
       fakeRequest,
       esClient,
+<<<<<<< HEAD
       cpsEsClient,
       crudClient,
       telemetry: telemetryClient,
+=======
+      crudClient,
+>>>>>>> 9.4
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
       id,
@@ -267,18 +305,28 @@ export async function runEntityMaintainerTask({
     });
     status.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {
+<<<<<<< HEAD
     caughtError = err;
     status.metadata.lastErrorTimestamp = new Date().toISOString();
     logger.debug(`Run failed - ${(err as Error)?.message}`);
+=======
+    status.metadata.lastErrorTimestamp = new Date().toISOString();
+    logger.debug(`Run failed - ${err?.message}`);
+>>>>>>> 9.4
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
       id,
       namespace,
       type: EntityMaintainerTelemetryEventType.ERROR,
+<<<<<<< HEAD
       errorMessage: (err as Error)?.message?.substring(0, 500), // limit error message length to prevent excessively long strings in telemetry
+=======
+      errorMessage: err?.message?.substring(0, 500), // limit error message length to prevent excessively long strings in telemetry
+>>>>>>> 9.4
     });
   } finally {
     status.metadata.runs++;
     abortController.signal.removeEventListener('abort', onAbort);
+<<<<<<< HEAD
     try {
       telemetryClient.flush({
         durationMs: Date.now() - runStartedAt,
@@ -296,6 +344,8 @@ export async function runEntityMaintainerTask({
         `Failed to flush maintainer telemetry: ${(flushErr as Error)?.message ?? 'unknown'}`
       );
     }
+=======
+>>>>>>> 9.4
   }
 
   return {

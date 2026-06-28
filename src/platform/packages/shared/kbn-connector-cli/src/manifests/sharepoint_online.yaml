@@ -7,7 +7,11 @@ secrets:
   authorizationUrl:
     value: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
   scope:
+<<<<<<< HEAD
     value: "Sites.Selected Files.Read.All offline_access"
+=======
+    value: "Sites.Read.All Files.Read.All offline_access"
+>>>>>>> 9.4
   clientId:
     vault: secret/ent-search-team/workplace-ai-oauth/dev/microsoft
     field: client_id

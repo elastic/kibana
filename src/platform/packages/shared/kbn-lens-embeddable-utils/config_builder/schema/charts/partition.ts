@@ -17,6 +17,7 @@ import { treemapConfigSchema } from './treemap';
 import type { WaffleConfig, WaffleConfigESQL, WaffleConfigNoESQL } from './waffle';
 import { waffleConfigSchema } from './waffle';
 
+<<<<<<< HEAD
 export const partitionConfigSchema = schema.oneOf(
   [mosaicConfigSchema, pieConfigSchema, treemapConfigSchema, waffleConfigSchema],
   {
@@ -28,6 +29,14 @@ export const partitionConfigSchema = schema.oneOf(
     },
   }
 );
+=======
+export const partitionConfigSchema = schema.oneOf([
+  mosaicConfigSchema,
+  pieConfigSchema,
+  treemapConfigSchema,
+  waffleConfigSchema,
+]);
+>>>>>>> 9.4
 
 export type PartitionConfig = PieConfig | MosaicConfig | TreemapConfig | WaffleConfig;
 export type PartitionConfigNoESQL =

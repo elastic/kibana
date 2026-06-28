@@ -25,6 +25,7 @@ export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provid
 const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
 
 /**
+<<<<<<< HEAD
  * Trigger characters Monaco watches in YAML to fire our provider. Each char is
  * documented inline so it's clear why typing it should kick a re-query.
  *   '@'                 — variable reference start (`@step.output.foo`).
@@ -51,6 +52,8 @@ const WORKFLOW_TRIGGER_CHARACTERS: ReadonlyArray<string> = [
 ];
 
 /**
+=======
+>>>>>>> 9.4
  * Step types that are only valid inside loop bodies (foreach / while).
  * The monaco-yaml schema provider suggests them everywhere, so the
  * completion provider must strip them when the cursor is outside a loop.

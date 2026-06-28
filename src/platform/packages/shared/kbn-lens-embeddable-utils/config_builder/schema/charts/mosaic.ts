@@ -120,6 +120,7 @@ export const mosaicConfigSchemaNoESQL = schema.object(
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+<<<<<<< HEAD
       partitionConfigPrimaryMetricOptionsSchema,
       'mosaicMetric'
     ),
@@ -129,6 +130,13 @@ export const mosaicConfigSchemaNoESQL = schema.object(
           partitionConfigBreakdownByOptionsSchema,
           'mosaicGroupBy'
         ),
+=======
+      partitionConfigPrimaryMetricOptionsSchema
+    ),
+    group_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+>>>>>>> 9.4
         {
           minSize: 1,
           maxSize: 100,

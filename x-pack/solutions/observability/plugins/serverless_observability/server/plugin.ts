@@ -80,6 +80,22 @@ export class ServerlessObservabilityPlugin
         this.logger.error(`Error setup serverless project settings: ${error}`);
       });
 
+<<<<<<< HEAD
+=======
+    coreSetup.pricing.registerProductFeatures([
+      {
+        id: 'observability:complete_overview',
+        products: [{ name: 'observability', tier: 'complete' }],
+        description:
+          'Observability Overview Complete - Enables overview of the Observability solution.',
+      },
+      {
+        id: 'observability:workflows',
+        products: [{ name: 'observability', tier: 'complete' }],
+        description: 'Workflows - Enables the Workflows application in the Observability solution.',
+      },
+    ]);
+>>>>>>> 9.4
     return {};
   }
 

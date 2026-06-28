@@ -86,6 +86,7 @@ export const reviewRuleInstallationHandler = async (
       installedRuleVersions.map((version) => [version.rule_id, version])
     );
 
+<<<<<<< HEAD
     const combinedKql = buildPrebuiltRuleInstallationKql({
       filter,
       search,
@@ -99,10 +100,21 @@ export const reviewRuleInstallationHandler = async (
 
     // Run sequentially rather than concurrently to avoid memory spikes on small clusters.
     const rulesResult = await fetchRules({
+=======
+    const rules = await fetchRules({
       ruleAssetsClient,
       logger,
       mlAuthz,
       installedRuleVersionsMap,
+      requestParameters,
+    });
+    const stats = await fetchStats({
+>>>>>>> 9.4
+      ruleAssetsClient,
+      logger,
+      mlAuthz,
+      installedRuleVersionsMap,
+<<<<<<< HEAD
       filter: combinedKql,
       sort,
       page,
@@ -115,6 +127,9 @@ export const reviewRuleInstallationHandler = async (
     const counts = rulesResult.aggregations
       ? expandRawAggregationResult(rulesResult.aggregations, categoryCounts)
       : undefined;
+=======
+    });
+>>>>>>> 9.4
 
     const body: ReviewRuleInstallationResponseBody = {
       page,

@@ -18,10 +18,13 @@ responses:
                   frequency: "30s"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10
+<<<<<<< HEAD
                   maxLogsPerPage: 40000
                   maxTimeWindowSize: "15m"
                   maxLogsPerWindow: 500000
                   maxLogsPerWindowCapBehavior: "defer"
+=======
+>>>>>>> 9.4
                   docsPerSecond: -1
                   indexPattern: ""
                   enrichPolicyExecutionInterval: null
@@ -36,10 +39,13 @@ responses:
                   frequency: "30s"
                   lookbackPeriod: "3h"
                   fieldHistoryLength: 10
+<<<<<<< HEAD
                   maxLogsPerPage: 40000
                   maxTimeWindowSize: "15m"
                   maxLogsPerWindow: 500000
                   maxLogsPerWindowCapBehavior: "defer"
+=======
+>>>>>>> 9.4
                   docsPerSecond: -1
                   indexPattern: ""
                   enrichPolicyExecutionInterval: null

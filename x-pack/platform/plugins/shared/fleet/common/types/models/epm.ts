@@ -590,7 +590,10 @@ export enum RegistryVarsEntryKeys {
   max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
   deprecated = 'deprecated',
+<<<<<<< HEAD
   migrate_from = 'migrate_from',
+=======
+>>>>>>> 9.4
   section = 'section',
 }
 
@@ -619,6 +622,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
   [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
+<<<<<<< HEAD
   // Accepts either the current object form or, for backwards compatibility, the original
   // string-shorthand form that named only the previous variable. The string form is treated
   // as `{ name: <string> }` at read time. New manifests should use the object form.
@@ -644,6 +648,9 @@ export interface RegistryVarsMigrateFrom {
    * has more than one stream; may be omitted when the source input has exactly one stream.
    */
   stream?: string;
+=======
+  [RegistryVarsEntryKeys.section]?: string;
+>>>>>>> 9.4
 }
 
 // Deprecated as part of the removing public references to saved object schemas

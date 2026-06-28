@@ -8,10 +8,19 @@
  */
 
 import {
+<<<<<<< HEAD
   detectFileFormat,
   generateWorkflowId,
   isDynamicWorkflowReference,
   isValidWorkflowId,
+=======
+  buildSuffixedCandidate,
+  detectFileFormat,
+  isDynamicWorkflowReference,
+  isUnsafeWorkflowId,
+  isValidWorkflowId,
+  resolveCollisionId,
+>>>>>>> 9.4
 } from '.';
 
 describe('isValidWorkflowId', () => {
@@ -20,8 +29,13 @@ describe('isValidWorkflowId', () => {
     expect(isValidWorkflowId('internal-bar')).toBe(false);
   });
 
+<<<<<<< HEAD
   it('should accept valid non-reserved IDs', () => {
     expect(isValidWorkflowId('my-workflow')).toBe(true);
+=======
+  it('should accept IDs with hyphens', () => {
+    expect(isValidWorkflowId('my-workflow-v2-beta')).toBe(true);
+>>>>>>> 9.4
   });
 });
 
@@ -29,6 +43,41 @@ describe('generateWorkflowId', () => {
   it('should not generate IDs with reserved workflow prefixes', () => {
     expect(generateWorkflowId('system-foo')).toBe('workflow-system-foo');
     expect(generateWorkflowId('internal-bar')).toBe('workflow-internal-bar');
+  });
+});
+
+describe('isUnsafeWorkflowId', () => {
+  it('should reject __proto__', () => {
+    expect(isUnsafeWorkflowId('__proto__')).toBe(true);
+  });
+
+  it('should reject constructor', () => {
+    expect(isUnsafeWorkflowId('constructor')).toBe(true);
+  });
+
+  it('should reject prototype', () => {
+    expect(isUnsafeWorkflowId('prototype')).toBe(true);
+  });
+
+  it('should reject empty string', () => {
+    expect(isUnsafeWorkflowId('')).toBe(true);
+  });
+
+  it('should reject IDs exceeding max length', () => {
+    expect(isUnsafeWorkflowId('a'.repeat(256))).toBe(true);
+  });
+
+  it('should reject IDs containing path traversal (..)', () => {
+    expect(isUnsafeWorkflowId('..%2fetc%2fpasswd')).toBe(true);
+    expect(isUnsafeWorkflowId('../etc/passwd')).toBe(true);
+  });
+
+  it('should reject IDs containing forward slashes', () => {
+    expect(isUnsafeWorkflowId('path/to/file')).toBe(true);
+  });
+
+  it('should accept a normal legacy ID with uppercase and underscores', () => {
+    expect(isUnsafeWorkflowId('My_Workflow')).toBe(false);
   });
 });
 
@@ -70,5 +119,70 @@ describe('detectFileFormat', () => {
 
   it('should return zip for minimal PK header (exactly 2 bytes)', () => {
     expect(detectFileFormat(new Uint8Array([0x50, 0x4b]))).toBe('zip');
+  });
+});
+
+describe('resolveCollisionId', () => {
+  it('should return baseId when it does not conflict', () => {
+    expect(resolveCollisionId('my-workflow', new Set(), 'fallback')).toBe('my-workflow');
+  });
+
+  it('should append -1 when baseId conflicts', () => {
+    expect(resolveCollisionId('my-workflow', new Set(['my-workflow']), 'fallback')).toBe(
+      'my-workflow-1'
+    );
+  });
+
+  it('should skip taken suffixes and find the first available', () => {
+    const conflicts = new Set(['wf', 'wf-1', 'wf-2']);
+    expect(resolveCollisionId('wf', conflicts, 'fallback')).toBe('wf-3');
+  });
+
+  it('should return fallbackId when all 100 suffixed candidates are taken', () => {
+    const conflicts = new Set(['wf']);
+    for (let i = 1; i <= 100; i++) {
+      conflicts.add(`wf-${i}`);
+    }
+    expect(resolveCollisionId('wf', conflicts, 'my-fallback')).toBe('my-fallback');
+  });
+
+  it('should strip trailing hyphens from truncated base before appending suffix', () => {
+    // A base ending in "-" at the truncation boundary should not produce "--1"
+    const base = `${'a'.repeat(253)}-a`; // 255 chars
+    const result = resolveCollisionId(base, new Set([base]), 'fallback');
+    expect(result).not.toMatch(/--/);
+    expect(result).toMatch(/-1$/);
+  });
+});
+
+describe('buildSuffixedCandidate', () => {
+  it('should append a numeric suffix to the base ID', () => {
+    expect(buildSuffixedCandidate('my-workflow', 1)).toBe('my-workflow-1');
+    expect(buildSuffixedCandidate('my-workflow', 42)).toBe('my-workflow-42');
+    expect(buildSuffixedCandidate('my-workflow', 100)).toBe('my-workflow-100');
+  });
+
+  it('should truncate the base when base + suffix would exceed 255 characters', () => {
+    const base = 'a'.repeat(255);
+    const result = buildSuffixedCandidate(base, 1);
+    expect(result).toBe(`${'a'.repeat(253)}-1`);
+    expect(result.length).toBe(255);
+  });
+
+  it('should strip trailing hyphens after truncation to prevent double hyphens', () => {
+    // 253 "a"s + "-a" = 255 chars. Truncating to 253 yields "aaa...a-",
+    // which must become "aaa...a" + "-1", not "aaa...a-" + "-1" (double hyphen).
+    const base = `${'a'.repeat(253)}-a`;
+    const result = buildSuffixedCandidate(base, 1);
+    expect(result).not.toMatch(/--/);
+    expect(result).toMatch(/-1$/);
+  });
+
+  it('should handle multi-digit suffixes with correct truncation', () => {
+    const base = 'a'.repeat(255);
+    const result = buildSuffixedCandidate(base, 100);
+    // suffix "-100" is 4 chars, so base is truncated to 251
+    expect(result).toBe(`${'a'.repeat(251)}-100`);
+    expect(result.length).toBe(255);
   });
 });

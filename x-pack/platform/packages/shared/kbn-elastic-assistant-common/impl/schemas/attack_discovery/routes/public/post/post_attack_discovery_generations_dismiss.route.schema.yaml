@@ -96,6 +96,7 @@ paths:
                       - failed
                       - started
                       - succeeded
+<<<<<<< HEAD
               examples:
                 PostAttackDiscoveryGenerationsDismissResponse200Example:
                   summary: Successfully dismissed an Attack Discovery generation.
@@ -108,6 +109,17 @@ paths:
                     status: "dismissed"
                     alerts_context_count: 75
                     discoveries: 3
+=======
+              example:
+                execution_uuid: "46b218d5-535d-4329-be56-d0f6af6986b7"
+                connector_id: "chatGpt5_0ChatAzure"
+                loading_message: "AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries."
+                start: "2025-09-29T06:42:08.962Z"
+                end: "2025-09-29T06:42:44.810Z"
+                status: "dismissed"
+                alerts_context_count: 75
+                discoveries: 3
+>>>>>>> 9.4
 
         400:
           description: Bad Request response.
@@ -132,6 +144,7 @@ paths:
                   - status_code
                   - error
                   - message
+<<<<<<< HEAD
               examples:
                 PostAttackDiscoveryGenerationsDismissResponse400Example:
                   summary: Bad Request error returned when the dismiss request is invalid.
@@ -139,3 +152,9 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4

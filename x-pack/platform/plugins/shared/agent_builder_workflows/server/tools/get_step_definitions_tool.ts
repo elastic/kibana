@@ -6,6 +6,10 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_workflows/server/tools/get_step_definitions_tool.ts
+=======
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/server/agent_builder/tools/get_step_definitions_tool.ts
 import type {
   BaseStepDefinition,
   ConnectorContractUnion,
@@ -28,12 +32,18 @@ import {
   getAllConnectors,
   getCachedAllConnectorsMap,
   getDeprecatedStepMetadata,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_workflows/server/tools/get_step_definitions_tool.ts
 } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { workflowTools } from '../../common/constants';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+=======
+} from '../../../common/schema';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+import type { AgentBuilderPluginSetupContract } from '../../types';
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/server/agent_builder/tools/get_step_definitions_tool.ts
 
 interface StepDefinitionForAgent {
   id: string;

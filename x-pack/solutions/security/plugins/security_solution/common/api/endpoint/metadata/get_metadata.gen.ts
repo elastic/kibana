@@ -28,6 +28,7 @@ import { MetadataListResponse } from './list_metadata.gen';
 
 export const GetEndpointMetadataListRequestQuery = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The page number to return.
      */
@@ -51,6 +52,13 @@ export const GetEndpointMetadataListRequestQuery = lazySchema(() =>
     /**
      * The sort order, either `asc` or `desc`.
      */
+=======
+    page: Page.optional(),
+    pageSize: PageSize.optional(),
+    kuery: Kuery.optional(),
+    hostStatuses: HostStatuses,
+    sortField: SortField.optional(),
+>>>>>>> 9.4
     sortDirection: SortDirection.optional(),
   })
 );

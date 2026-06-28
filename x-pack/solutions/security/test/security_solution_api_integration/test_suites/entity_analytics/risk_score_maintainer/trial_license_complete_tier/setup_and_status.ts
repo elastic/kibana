@@ -192,6 +192,10 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtils.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
+<<<<<<< HEAD
+=======
+          maintainerAutoStart: false,
+>>>>>>> 9.4
         });
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -200,7 +204,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(savedObjects[0].id).to.eql(
           getRiskEngineConfigurationSavedObjectId({ namespace: 'default' })
         );
+<<<<<<< HEAD
         expect(savedObjects[0].attributes.pageSize).to.eql(10_000);
+=======
+        expect(savedObjects[0].attributes.pageSize).to.eql(1234);
+>>>>>>> 9.4
         expect(savedObjects[0].attributes.enableResetToZero).to.eql(false);
         expect(savedObjects[0].attributes.excludeAlertStatuses).to.eql(['open']);
         expect(savedObjects[0].attributes.filters).to.eql([
@@ -213,6 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtils.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
+          maintainerAutoStart: false,
         });
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -223,6 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtilsCustomSpace.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
+          maintainerAutoStart: false,
         });
         await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
 

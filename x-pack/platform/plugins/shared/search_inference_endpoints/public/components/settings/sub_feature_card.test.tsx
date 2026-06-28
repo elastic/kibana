@@ -92,6 +92,27 @@ const mockConnectors: InferenceConnector[] = [
     capabilities: {},
     isInferenceEndpoint: false,
     isPreconfigured: false,
+<<<<<<< HEAD
+=======
+  },
+  {
+    connectorId: 'ep-embed',
+    name: 'E5',
+    type: InferenceConnectorType.Inference,
+    config: { service: 'elastic' },
+    capabilities: {},
+    isInferenceEndpoint: true,
+    isPreconfigured: true,
+  },
+  {
+    connectorId: 'ep-beta-tech-preview',
+    name: 'Claude Beta',
+    type: InferenceConnectorType.Inference,
+    config: { service: 'elastic', modelCreator: 'Anthropic' },
+    capabilities: {},
+    isInferenceEndpoint: true,
+    isPreconfigured: true,
+>>>>>>> 9.4
   },
 ];
 
@@ -132,6 +153,7 @@ describe('SubFeatureCard', () => {
     mockUseRegisteredFeatures.mockReturnValue({ features: [], isLoading: false });
   });
 
+<<<<<<< HEAD
   // Default: customized list (toggle OFF) — covers the editable-mode tests below.
   const renderCard = (
     endpointIds: string[],
@@ -144,6 +166,12 @@ describe('SubFeatureCard', () => {
       globalDefaultId: string;
     }>,
     deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = new Map()
+=======
+  const renderCard = (
+    endpointIds: string[],
+    overrides?: Partial<InferenceFeatureConfig>,
+    invalidEndpointIds: Set<string> = new Set()
+>>>>>>> 9.4
   ) =>
     render(
       <Wrapper>
@@ -154,9 +182,12 @@ describe('SubFeatureCard', () => {
           effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
           onEndpointsChange={onEndpointsChange}
           invalidEndpointIds={invalidEndpointIds}
+<<<<<<< HEAD
           deprecatedEndpointsMap={deprecatedEndpointsMap}
           {...defaultGlobalRowProps}
           {...globalRowOverrides}
+=======
+>>>>>>> 9.4
         />
       </Wrapper>
     );
@@ -615,6 +646,56 @@ describe('SubFeatureCard', () => {
 
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
       expect(screen.getByTestId('modelDeprecatedBadge-ep-3')).toBeInTheDocument();
+    });
+  });
+
+  describe('connector icon mapping', () => {
+    it('renders connector name as endpoint label', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [
+          {
+            connectorId: 'bedrock-1',
+            name: 'My Bedrock Model',
+            type: InferenceConnectorType.Bedrock,
+            config: {},
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+        ],
+      });
+
+      renderCard(['bedrock-1']);
+
+      expect(screen.getByText('My Bedrock Model')).toBeInTheDocument();
+    });
+
+    it('falls back to endpoint ID when connector is not in the map', () => {
+      mockUseConnectors.mockReturnValue({ data: [] });
+
+      renderCard(['unknown-ep']);
+
+      expect(screen.getByText('unknown-ep')).toBeInTheDocument();
+    });
+
+    it('renders Azure OpenAI icon for OpenAI connectors with Azure provider', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [
+          {
+            connectorId: 'azure-1',
+            name: 'Azure GPT',
+            type: InferenceConnectorType.OpenAI,
+            config: { apiProvider: 'Azure OpenAI' },
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+        ],
+      });
+
+      renderCard(['azure-1']);
+
+      expect(screen.getByText('Azure GPT')).toBeInTheDocument();
     });
   });
 });

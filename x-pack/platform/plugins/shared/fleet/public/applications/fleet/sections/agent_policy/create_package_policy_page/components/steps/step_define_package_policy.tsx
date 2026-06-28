@@ -32,15 +32,21 @@ import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
+<<<<<<< HEAD
 
 import { PackagePolicyCustomFields } from '../../../../../components/custom_fields';
+=======
+>>>>>>> 9.4
 import type {
   PackageInfo,
   NewPackagePolicy,
   RegistryVarsEntry,
   AgentPolicy,
 } from '../../../../../types';
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9.4
 import { Loading } from '../../../../../components';
 import {
   useGetEpmDatastreams,
@@ -83,8 +89,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
+<<<<<<< HEAD
   onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
   packagePolicyId?: string;
+=======
+>>>>>>> 9.4
 }> = memo(
   ({
     namespacePlaceholder,
@@ -97,8 +106,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
     agentPolicies,
+<<<<<<< HEAD
     onNamespaceCustomizationEnabledChange,
     packagePolicyId,
+=======
+>>>>>>> 9.4
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -224,6 +236,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Output is also disabled when any parent agent policy is managed (e.g. Elastic Cloud Agent Policy).
     const isOutputDisabled = isManaged || agentPolicies?.some((p) => p.is_managed) === true;
 
+<<<<<<< HEAD
     const {
       showToggle: showNamespaceCustomizationToggle,
       currentNamespace,
@@ -242,6 +255,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       packagePolicyId,
     });
 
+=======
+>>>>>>> 9.4
     return validationResults ? (
       <>
         {isManaged && (

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+=======
+import React, { useCallback } from 'react';
+import { EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
+>>>>>>> 9.4
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -31,7 +38,10 @@ export const useDeprecatedRulesTableCallout = () => {
   const [isDismissed, dismiss] = useTimedDismissal(DISMISSAL_STORAGE_KEY);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const {
+<<<<<<< HEAD
     telemetry,
+=======
+>>>>>>> 9.4
     docLinks: {
       links: {
         securitySolution: { manageDetectionRules },

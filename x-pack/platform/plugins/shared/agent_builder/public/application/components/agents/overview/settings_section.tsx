@@ -85,6 +85,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+<<<<<<< HEAD
             {...(canEditAgent
               ? getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.pageContent,
@@ -92,6 +93,8 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
                 })
               : {})}
+=======
+>>>>>>> 9.4
             footer={
               !currentInstructions && canEditAgent ? (
                 <EuiButtonEmpty
@@ -135,6 +138,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.agentSettingsCardSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+<<<<<<< HEAD
             {...(canEditAgent
               ? getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.pageContent,
@@ -142,6 +146,8 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
                 })
               : {})}
+=======
+>>>>>>> 9.4
             css={css`
               height: 100%;
               .euiCard__content p {

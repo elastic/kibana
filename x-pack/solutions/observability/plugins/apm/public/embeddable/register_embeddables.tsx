@@ -21,25 +21,41 @@ import {
 export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>) {
   const coreSetup = deps.coreSetup as CoreSetup<ApmPluginStartDeps, ApmPluginStart>;
   const pluginsSetup = deps.pluginsSetup;
+<<<<<<< HEAD
+=======
+  const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+>>>>>>> 9.4
   const registerEmbeddablePublicDefinition =
     pluginsSetup.embeddable.registerEmbeddablePublicDefinition;
 
   registerEmbeddablePublicDefinition(APM_ALERTING_LATENCY_CHART_EMBEDDABLE, async () => {
+<<<<<<< HEAD
     const [{ getApmAlertingLatencyChartEmbeddableFactory }, [coreStart, pluginsStart]] =
       await Promise.all([
         import('./alerting/alerting_latency_chart/react_embeddable_factory'),
         coreSetup.getStartServices(),
       ]);
+=======
+    const { getApmAlertingLatencyChartEmbeddableFactory } = await import(
+      './alerting/alerting_latency_chart/react_embeddable_factory'
+    );
+>>>>>>> 9.4
 
     return getApmAlertingLatencyChartEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });
 
   registerEmbeddablePublicDefinition(APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE, async () => {
+<<<<<<< HEAD
     const [{ getApmAlertingThroughputChartEmbeddableFactory }, [coreStart, pluginsStart]] =
       await Promise.all([
         import('./alerting/alerting_throughput_chart/react_embeddable_factory'),
         coreSetup.getStartServices(),
       ]);
+=======
+    const { getApmAlertingThroughputChartEmbeddableFactory } = await import(
+      './alerting/alerting_throughput_chart/react_embeddable_factory'
+    );
+>>>>>>> 9.4
 
     return getApmAlertingThroughputChartEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });
@@ -47,6 +63,7 @@ export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pl
   registerEmbeddablePublicDefinition(
     APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
     async () => {
+<<<<<<< HEAD
       const [
         { getApmAlertingFailedTransactionsChartEmbeddableFactory },
         [coreStart, pluginsStart],
@@ -54,6 +71,11 @@ export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pl
         import('./alerting/alerting_failed_transactions_chart/react_embeddable_factory'),
         coreSetup.getStartServices(),
       ]);
+=======
+      const { getApmAlertingFailedTransactionsChartEmbeddableFactory } = await import(
+        './alerting/alerting_failed_transactions_chart/react_embeddable_factory'
+      );
+>>>>>>> 9.4
 
       return getApmAlertingFailedTransactionsChartEmbeddableFactory({
         ...deps,
@@ -62,6 +84,7 @@ export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pl
       });
     }
   );
+<<<<<<< HEAD
 
   registerEmbeddablePublicDefinition(APM_SERVICE_MAP_EMBEDDABLE, async () => {
     const [{ getServiceMapEmbeddableFactory }, [coreStart, pluginsStart]] = await Promise.all([
@@ -83,4 +106,6 @@ export function registerEmbeddables(deps: Omit<EmbeddableDeps, 'coreStart' | 'pl
       return createAddServiceMapPanelAction({ ...deps, coreStart, pluginsStart });
     }
   );
+=======
+>>>>>>> 9.4
 }

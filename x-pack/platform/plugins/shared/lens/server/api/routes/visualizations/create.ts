@@ -89,7 +89,11 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 
         try {
           const { references, ...data } = getLensRequestConfig(builder, req.body);
+<<<<<<< HEAD
           const options: LensCreateIn['options'] = { references };
+=======
+          const options: LensCreateIn['options'] = { ...req.query, references };
+>>>>>>> 9.4
           const { result } = await client.create(data, options);
           const responseItem = getLensResponseItem(builder, result.item);
 

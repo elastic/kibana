@@ -26,6 +26,7 @@ import {
 export const GetTimelinesRequestQuery = lazySchema(() =>
   z.object({
     /**
+<<<<<<< HEAD
      * If `true`, only Timelines that the current user has marked as favorite are returned.
      */
     only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
@@ -36,6 +37,12 @@ export const GetTimelinesRequestQuery = lazySchema(() =>
     /**
      * Field used to sort the list (`title`, `description`, `updated`, or `created`).
      */
+=======
+     * If true, only timelines that are marked as favorites by the user are returned.
+     */
+    only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
+    timeline_type: TimelineType.nullable().optional(),
+>>>>>>> 9.4
     sort_field: SortFieldTimeline.optional(),
     /**
      * Whether to sort the results `ascending` or `descending`
@@ -53,9 +60,12 @@ export const GetTimelinesRequestQuery = lazySchema(() =>
      * Allows to search for timelines by their title
      */
     search: z.string().nullable().optional(),
+<<<<<<< HEAD
     /**
      * Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
      */
+=======
+>>>>>>> 9.4
     status: TimelineStatus.nullable().optional(),
   })
 );

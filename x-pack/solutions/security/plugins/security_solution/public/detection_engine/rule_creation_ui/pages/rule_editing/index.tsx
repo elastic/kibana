@@ -84,7 +84,11 @@ import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
+<<<<<<< HEAD
   const { application, triggersActionsUi, telemetry, aiRuleCreation } = useKibana().services;
+=======
+  const { application, triggersActionsUi, cps, telemetry, aiRuleCreation } = useKibana().services;
+>>>>>>> 9.4
   const { navigateToApp } = application;
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();

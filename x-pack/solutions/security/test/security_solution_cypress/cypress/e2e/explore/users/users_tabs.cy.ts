@@ -24,14 +24,21 @@ import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
 describe(
   'Users stats and tables',
   {
+<<<<<<< HEAD
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+=======
+    tags: ['@ess', '@serverless'],
+>>>>>>> 9.4
     env: {
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'disable:entityAnalyticsEntityStoreV2',
           ])}`,
+<<<<<<< HEAD
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+=======
+>>>>>>> 9.4
         ],
       },
     },

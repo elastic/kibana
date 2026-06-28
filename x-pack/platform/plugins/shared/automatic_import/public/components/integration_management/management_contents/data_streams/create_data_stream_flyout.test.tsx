@@ -51,8 +51,17 @@ const mockGetInstalledPackages = jest.fn(
 );
 const mockGetAllIntegrations = jest.fn((): Promise<unknown[]> => Promise.resolve([]));
 jest.mock('../../../../common/lib/api', () => ({
+<<<<<<< HEAD
   getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
   getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
+=======
+  getInstalledPackages: jest.fn(() =>
+    Promise.resolve({
+      items: [],
+    })
+  ),
+  getAllIntegrations: jest.fn(() => Promise.resolve([])),
+>>>>>>> 9.4
 }));
 
 const mockReportAnalyzeLogsTriggered = jest.fn();

@@ -13,7 +13,12 @@ import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { RequestHandlerContext } from '@kbn/core/server';
+<<<<<<< HEAD
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+=======
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+>>>>>>> 9.4
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { DashboardCreateResponseBody } from '../create';
@@ -54,6 +59,7 @@ export async function update(
     serverTiming
   );
 
+<<<<<<< HEAD
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
@@ -75,6 +81,36 @@ export async function update(
   } catch (e) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw e;
+=======
+  let isCreateRequest = false;
+  try {
+    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+  } catch (resolveError) {
+    if (resolveError.isBoom && resolveError.output.statusCode === 404) {
+      isCreateRequest = true;
+    } else {
+      throw resolveError;
+    }
+  }
+
+  // Validate id at handler level for create requests
+  if (isCreateRequest) {
+    asCodeIdSchema.validate(id);
+  }
+
+  const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
+    DASHBOARD_SAVED_OBJECT_TYPE,
+    id,
+    soAttributes,
+    {
+      references: soReferences,
+      upsert: soAttributes,
+      /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+      mergeAttributes: false,
+>>>>>>> 9.4
     }
     isNewDocument = true;
   }

@@ -452,6 +452,7 @@ describe('FlyoutRiskSummary', () => {
     );
   });
 
+<<<<<<< HEAD
   it('falls back to prefetchedResolutionRisk when the inner risk-index lookup returns no data', () => {
     mockUseResolutionGroup.mockReturnValue({
       data: {
@@ -514,6 +515,8 @@ describe('FlyoutRiskSummary', () => {
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
   });
 
+=======
+>>>>>>> 9.4
   it('does not render resolution risk score block for standalone entities', () => {
     mockUseResolutionGroup.mockReturnValue({
       data: {

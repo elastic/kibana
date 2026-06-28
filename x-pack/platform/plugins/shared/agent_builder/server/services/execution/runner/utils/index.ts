@@ -13,7 +13,10 @@ export {
 export { createToolEventEmitter, createAgentEventEmitter } from './events';
 export { createAttachmentsService } from './attachments';
 export { createSkillsService } from './skills';
+<<<<<<< HEAD
 export { createFilesystemServices } from './filesystem';
+=======
+>>>>>>> 9.4
 export { createToolManager } from './tool_manager';
 export { createToolProvider } from './tools';
 export { createPromptManager } from './prompts';

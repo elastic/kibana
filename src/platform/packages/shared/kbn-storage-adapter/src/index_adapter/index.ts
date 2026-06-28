@@ -182,8 +182,11 @@ export class StorageIndexAdapter<
 
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
+<<<<<<< HEAD
   private serverlessCheck: Promise<boolean | undefined> | undefined;
   private isServerless: boolean | undefined;
+=======
+>>>>>>> 9.4
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -227,11 +230,32 @@ export class StorageIndexAdapter<
   private async createOrUpdateIndexTemplate(): Promise<void> {
     const version = getSchemaVersion(this.storage);
 
+<<<<<<< HEAD
     const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
       _meta: { version },
       dynamic: 'strict',
       properties: {
         ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+=======
+    const template: IndicesPutIndexTemplateIndexTemplateMapping = {
+      settings: {
+        auto_expand_replicas: '0-1',
+        number_of_shards: 1,
+      },
+      mappings: {
+        _meta: {
+          version,
+        },
+        dynamic: 'strict',
+        properties: {
+          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+        },
+      },
+      aliases: {
+        [getAliasName(this.storage.name)]: {
+          is_write_index: true,
+        },
+>>>>>>> 9.4
       },
     };
 

@@ -17,6 +17,11 @@ import type {
   MathIndexPatternColumn,
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
+<<<<<<< HEAD
+=======
+import type { LensAttributes } from '../../types';
+import type { LensApiConfig } from '../../schema';
+>>>>>>> 9.4
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 import type { XYConfig } from '../../schema';
@@ -1073,7 +1078,11 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
   version: LENS_ITEM_LATEST_VERSION,
 };
 
+<<<<<<< HEAD
 export const apiXYWithNoYTitleAndInsideLegend: XYConfig = {
+=======
+export const apiXYWithNoYTitleAndInsideLegend: LensApiConfig = {
+>>>>>>> 9.4
   title: '',
   type: 'xy',
   legend: {
@@ -1151,7 +1160,11 @@ export const apiXYWithNoYTitleAndInsideLegend: XYConfig = {
   },
 };
 
+<<<<<<< HEAD
 export const apiXYWithTopListWithTruncationLegend: XYConfig = {
+=======
+export const apiXYWithTopListWithTruncationLegend: LensApiConfig = {
+>>>>>>> 9.4
   title: '',
   type: 'xy',
   legend: {
@@ -1231,7 +1244,11 @@ export const apiXYWithTopListWithTruncationLegend: XYConfig = {
   },
 };
 
+<<<<<<< HEAD
 export const apiXYWithNoTitleAndCustomOutsideLegend: XYConfig = {
+=======
+export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiConfig = {
+>>>>>>> 9.4
   title: '',
   type: 'xy',
   legend: {

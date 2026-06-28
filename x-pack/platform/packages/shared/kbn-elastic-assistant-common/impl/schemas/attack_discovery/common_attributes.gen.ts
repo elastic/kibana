@@ -283,6 +283,7 @@ export const FindAttackDiscoveryAlertsParams = lazySchema(() =>
      */
     search: z.string().optional(),
     /**
+<<<<<<< HEAD
      * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries. Mutually exclusive with `includeAllAuthors`.
      */
     shared: z.boolean().optional(),
@@ -291,6 +292,12 @@ export const FindAttackDiscoveryAlertsParams = lazySchema(() =>
      */
     includeAllAuthors: z.boolean().optional(),
     /**
+=======
+     * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
+     */
+    shared: z.boolean().optional(),
+    /**
+>>>>>>> 9.4
      * Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
      */
     scheduled: z.boolean().optional(),

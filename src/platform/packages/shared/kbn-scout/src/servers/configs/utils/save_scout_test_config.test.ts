@@ -36,7 +36,11 @@ const testServersConfig = {
   },
   serverless: true,
   http2: false,
+<<<<<<< HEAD
   uiam: true,
+=======
+  uiam: false,
+>>>>>>> 9.4
   projectType: 'oblt' as ServerlessProjectType,
   productTier: 'complete' as const,
   isCloud: true,

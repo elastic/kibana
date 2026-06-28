@@ -19,6 +19,7 @@ export const DELAY_MODE = {
 } as const;
 
 export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
+<<<<<<< HEAD
 
 // ---------------------------------------------------------------------------
 // RuleQuery — composed/standalone query schema matching the API.
@@ -43,6 +44,8 @@ export type RuleQuery = ComposedQuery | StandaloneQuery;
 // ---------------------------------------------------------------------------
 // Shared sub-types
 // ---------------------------------------------------------------------------
+=======
+>>>>>>> 9.4
 
 export interface RuleMetadata {
   name: string;

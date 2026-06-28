@@ -86,9 +86,12 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+<<<<<<< HEAD
   `${internalNamespaces.streams}.significant-events.discovery.investigator`,
   `${internalNamespaces.streams}.significant-events.discovery.judge`,
   `${internalNamespaces.streams}.investigation`,
+=======
+>>>>>>> 9.4
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -149,7 +152,10 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // O11Y
   'observability.rca',
   'observability.investigation',
+<<<<<<< HEAD
   'observability.service-map',
+=======
+>>>>>>> 9.4
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

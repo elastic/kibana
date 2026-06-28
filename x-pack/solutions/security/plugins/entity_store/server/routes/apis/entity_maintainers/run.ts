@@ -37,8 +37,13 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
+<<<<<<< HEAD
             params: buildStrictRouteValidationWithZod(maintainerIdParamsSchema),
             query: buildStrictRouteValidationWithZod(runMaintainerQuerySchema),
+=======
+            params: buildRouteValidationWithZod(maintainerIdParamsSchema),
+            query: buildRouteValidationWithZod(runMaintainerQuerySchema),
+>>>>>>> 9.4
           },
         },
       },

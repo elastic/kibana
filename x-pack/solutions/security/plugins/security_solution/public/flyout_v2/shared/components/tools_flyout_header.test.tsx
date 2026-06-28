@@ -12,8 +12,13 @@ import { ToolsFlyoutHeader } from './tools_flyout_header';
 import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
 
 jest.mock('./tools_flyout_title', () => ({
+<<<<<<< HEAD
   ToolsFlyoutTitle: ({ label }: { label: string }) => (
     <div data-test-subj="mockToolsFlyoutTitle">{label}</div>
+=======
+  ToolsFlyoutTitle: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mockToolsFlyoutTitle">{String(hit.id)}</div>
+>>>>>>> 9.4
   ),
 }));
 
@@ -31,7 +36,11 @@ const sourceProps = {
 };
 
 describe('<ToolsFlyoutHeader />', () => {
+<<<<<<< HEAD
   it('renders the header container', () => {
+=======
+  it('should render the header container', () => {
+>>>>>>> 9.4
     const { getByTestId } = renderHeader();
     expect(getByTestId(TOOLS_FLYOUT_HEADER_TEST_ID)).toBeInTheDocument();
   });
@@ -41,6 +50,7 @@ describe('<ToolsFlyoutHeader />', () => {
     expect(getByText('Session view')).toBeInTheDocument();
   });
 
+<<<<<<< HEAD
   it('renders ToolsFlyoutTitle when onTitleClick, label and iconType are provided', () => {
     const { getByTestId } = renderHeader(sourceProps);
     expect(getByTestId('mockToolsFlyoutTitle')).toBeInTheDocument();
@@ -58,6 +68,11 @@ describe('<ToolsFlyoutHeader />', () => {
       badge: <div data-test-subj="mockBadge" />,
     });
     expect(getByTestId('mockBadge')).toBeInTheDocument();
+=======
+  it('should render ToolsFlyoutTitle', () => {
+    const { getByTestId } = renderHeader();
+    expect(getByTestId('mockToolsFlyoutTitle')).toBeInTheDocument();
+>>>>>>> 9.4
   });
 
   it('renders timestamp when provided', () => {

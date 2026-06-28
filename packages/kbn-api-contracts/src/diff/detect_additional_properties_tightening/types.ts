@@ -7,11 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<<< HEAD:packages/kbn-api-contracts/src/diff/detect_additional_properties_tightening/types.ts
 import type { OasdiffEntry } from '../parse_oasdiff';
 
 export interface DetectionResult {
   entries: OasdiffEntry[];
   warnings: string[];
+========
+export class InvalidRouteParamsException extends Error {
+  constructor(
+    message: string,
+    public readonly patched: { path: Record<string, any>; query: Record<string, any> }
+  ) {
+    super(message);
+    this.name = 'InvalidRouteParamsException';
+  }
+>>>>>>>> 9.4:src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts
 }
 
 export interface ComponentTightening {

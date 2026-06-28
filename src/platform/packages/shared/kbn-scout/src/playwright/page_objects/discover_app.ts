@@ -468,10 +468,13 @@ export class DiscoverApp {
     return this.page.testSubj.locator('split-button-notification-indicator');
   }
 
+<<<<<<< HEAD
   getColumnHeader(name: string): Locator {
     return this.dataGrid.getColumnHeader(name);
   }
 
+=======
+>>>>>>> 9.4
   public readonly controls = {
     getControlFrame: (controlId: string): Locator =>
       this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),

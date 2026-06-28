@@ -62,7 +62,11 @@ const parseEntityBuckets = (agg: unknown, target: Map<string, AlertSummary>): vo
   }
 };
 
+<<<<<<< HEAD
 /** Maximum entity buckets requested per ES aggregation call. */
+=======
+/** Maximum entity name buckets requested per ES aggregation call. */
+>>>>>>> 9.4
 const ENTITY_BUCKET_LIMIT = 500;
 
 export const fetchAlertSummariesForEntities = async (
@@ -124,7 +128,22 @@ export const fetchAlertSummariesForEntities = async (
           must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
         },
       },
+<<<<<<< HEAD
       aggs,
+=======
+      aggs: Object.fromEntries(
+        Object.keys(namesByType).map((type) => [
+          `by_${type}`,
+          {
+            terms: {
+              field: `${type}.name`,
+              size: Math.min(namesByType[type].length, ENTITY_BUCKET_LIMIT),
+            },
+            aggs: alertSubAggs(),
+          },
+        ])
+      ),
+>>>>>>> 9.4
     });
 
     for (const type of euidsByType.keys()) {

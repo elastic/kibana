@@ -621,6 +621,7 @@ describe('getNormalizedDataStreams', () => {
           },
         ],
       });
+<<<<<<< HEAD
 
     // dynamic_signal_types: true — same createDefaultDatasetName behaviour as non-dynamic
     expect(makePkg('otlpreceiver', true)[0].dataset).toEqual('nginx.otlpreceiver');
@@ -671,6 +672,16 @@ describe('getPolicyTemplateDataStreamPaths', () => {
     expect(
       getPolicyTemplateDataStreamPaths(packageInfo, { name: 'sqs', input: 'otelcol' } as any)
     ).toEqual(['aws_cloudwatch.sqs']);
+=======
+
+    // dynamic_signal_types: true — same createDefaultDatasetName behaviour as non-dynamic
+    expect(makePkg('otlpreceiver', true)[0].dataset).toEqual('nginx.otlpreceiver');
+    expect(makePkg('otlpreceiver', true)[0].path).toEqual('nginx.otlpreceiver');
+
+    // dynamic_signal_types: false / absent — same behaviour
+    expect(makePkg('mysqlreceiver', false)[0].dataset).toEqual('nginx.mysqlreceiver');
+    expect(makePkg('mysqlreceiver')[0].dataset).toEqual('nginx.mysqlreceiver');
+>>>>>>> 9.4
   });
 });
 

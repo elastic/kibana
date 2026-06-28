@@ -8,9 +8,22 @@
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+<<<<<<< HEAD
 import { ToolsFlyoutTitle } from './tools_flyout_title';
 import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
 
+=======
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { Timestamp } from '../../document/components/timestamp';
+import { DocumentSeverity } from '../../document/components/severity';
+import type { CellActionRenderer } from './cell_actions';
+import { noopCellActionRenderer } from './cell_actions';
+import { ToolsFlyoutTitle } from './tools_flyout_title';
+import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
+
+const noop = () => {};
+
+>>>>>>> 9.4
 export interface ToolsFlyoutHeaderProps {
   /**
    * Title for the tools flyout (e.g. "Correlations", "Risk score", "Insights").
@@ -45,9 +58,13 @@ export interface ToolsFlyoutHeaderProps {
  * source context on the right (expand button, label, badge, timestamp).
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
+<<<<<<< HEAD
   ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
     const showSourceContext = !!onTitleClick && !!label && !!iconType;
 
+=======
+  ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
+>>>>>>> 9.4
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -61,6 +78,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
+<<<<<<< HEAD
         {showSourceContext && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">
@@ -80,6 +98,29 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
+=======
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+                <EuiFlexItem grow={false}>
+                  <ToolsFlyoutTitle
+                    hit={hit}
+                    renderCellActions={renderCellActions}
+                    onAlertUpdated={onAlertUpdated}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DocumentSeverity hit={hit} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Timestamp hit={hit} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+>>>>>>> 9.4
       </EuiFlexGroup>
     );
   }

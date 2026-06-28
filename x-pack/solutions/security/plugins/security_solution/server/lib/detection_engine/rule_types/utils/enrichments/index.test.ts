@@ -359,6 +359,12 @@ describe('enrichEvents', () => {
       });
 
       expect(enrichedEvents).toEqual(events);
+<<<<<<< HEAD
+=======
+      expect(ruleExecutionLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('entityStoreCrudClient')
+      );
+>>>>>>> 9.4
     });
 
     it('return the same events, if entity store index is not available', async () => {

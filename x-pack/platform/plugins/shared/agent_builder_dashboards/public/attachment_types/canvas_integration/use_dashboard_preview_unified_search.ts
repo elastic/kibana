@@ -14,11 +14,16 @@ import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type { DashboardState } from '@kbn/dashboard-plugin/server';
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
 import { DEFAULT_TIME_RANGE } from '@kbn/agent-builder-dashboards-common';
+=======
+import { DEFAULT_TIME_RANGE } from '@kbn/dashboard-agent-common';
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
 
 interface UseDashboardPreviewUnifiedSearchParams {
   dashboardApi: DashboardApi | undefined;
   dashboardState: DashboardState;
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   data: DataPublicPluginStart;
 }
 
@@ -27,18 +32,31 @@ const DEFAULT_EMPTY_QUERY: Query = { query: '', language: 'kuery' };
 const normalizeQuery = (nextQuery: Query | undefined): Query => {
   if (!nextQuery) {
     return DEFAULT_EMPTY_QUERY;
+=======
+  filterManager: DataPublicPluginStart['query']['filterManager'];
+}
+
+const normalizeQuery = (nextQuery: Query | undefined) => {
+  if (!nextQuery) {
+    return undefined;
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   }
 
   if (typeof nextQuery.query !== 'string') {
     return nextQuery;
   }
 
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   return nextQuery.query.trim() === '' ? DEFAULT_EMPTY_QUERY : nextQuery;
+=======
+  return nextQuery.query.trim() === '' ? undefined : nextQuery;
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
 };
 
 export const useDashboardPreviewUnifiedSearch = ({
   dashboardApi,
   dashboardState,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   data,
 }: UseDashboardPreviewUnifiedSearchParams) => {
   const { filterManager } = data.query;
@@ -48,6 +66,16 @@ export const useDashboardPreviewUnifiedSearch = ({
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
   );
   const [query, setQuery] = useState<Query>(normalizeQuery(toStoredQuery(dashboardState.query)));
+=======
+  filterManager,
+}: UseDashboardPreviewUnifiedSearchParams) => {
+  const [timeRange, setTimeRange] = useState<TimeRange>(
+    dashboardState.time_range ?? DEFAULT_TIME_RANGE
+  );
+  const [query, setQuery] = useState<Query | undefined>(
+    normalizeQuery(toStoredQuery(dashboardState.query))
+  );
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
   const [dataViews, setDataViews] = useState<DataView[]>([]);
 
@@ -113,6 +141,7 @@ export const useDashboardPreviewUnifiedSearch = ({
     };
   }, [filterManager]);
 
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   useEffect(() => {
     const timefilterSubscription = timefilter.getTimeUpdate$().subscribe(() => {
       const nextTimeRange = timefilter.getTime();
@@ -126,6 +155,8 @@ export const useDashboardPreviewUnifiedSearch = ({
     };
   }, [timefilter]);
 
+=======
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
   const onRefresh = useCallback(() => {
     dashboardApi?.forceRefresh();
   }, [dashboardApi]);
@@ -157,11 +188,19 @@ export const useDashboardPreviewUnifiedSearch = ({
       onQuerySubmit,
       onFiltersUpdated,
       onRefresh,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
       useDefaultBehaviors: false,
       disableQueryLanguageSwitcher: true,
       isDisabled: !dashboardApi,
       dataTestSubj: 'dashboardCanvasSearchBar',
       appName: 'agentBuilderDashboards',
+=======
+      useDefaultBehaviors: true,
+      disableQueryLanguageSwitcher: true,
+      isDisabled: !dashboardApi,
+      dataTestSubj: 'dashboardCanvasSearchBar',
+      appName: 'dashboardAgent',
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
       isAutoRefreshDisabled: true,
       showQueryInput: true,
       showDatePicker: true,
@@ -169,8 +208,11 @@ export const useDashboardPreviewUnifiedSearch = ({
       showQueryMenu: false,
       screenTitle: dashboardState.title,
       displayStyle: 'inPage' as const,
+<<<<<<< HEAD:x-pack/platform/plugins/shared/agent_builder_dashboards/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
       disableSubscribingToGlobalDataServices: true,
       enableDateRangePicker: true,
+=======
+>>>>>>> 9.4:x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/canvas_integration/use_dashboard_preview_unified_search.ts
     }),
     [
       dashboardApi,

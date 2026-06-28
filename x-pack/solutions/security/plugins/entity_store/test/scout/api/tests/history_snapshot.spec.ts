@@ -140,11 +140,19 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         expect(historyHit).toBeDefined();
         const historyEntity = historyHit!._source!.entity as Record<string, unknown>;
         const historyBehaviors = historyEntity.behaviors as Record<string, unknown> | undefined;
+<<<<<<< HEAD
         expect(normalizeKeywordList(historyBehaviors?.rule_names).sort()).toStrictEqual(
           [...expectedBehavior.rule_names].sort()
         );
         expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids).sort()).toStrictEqual(
           [...expectedBehavior.anomaly_job_ids].sort()
+=======
+        expect(normalizeKeywordList(historyBehaviors?.rule_names)).toStrictEqual(
+          expectedBehavior.rule_names
+        );
+        expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids)).toStrictEqual(
+          expectedBehavior.anomaly_job_ids
+>>>>>>> 9.4
         );
 
         const latestHit = latestHits.find(

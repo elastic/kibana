@@ -13,7 +13,10 @@ import { EuiProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AgentBuilderAnnouncementModal } from './agent_builder_announcement_modal';
 import * as i18n from './translations';
+<<<<<<< HEAD
 import { AGENT_BUILDER_LEARN_MORE_URL } from './announcement_urls';
+=======
+>>>>>>> 9.4
 
 const defaultProps = {
   variant: '1b' as const,
@@ -74,6 +77,7 @@ describe('AgentBuilderAnnouncementModal', () => {
 
     expect(screen.getByText(i18n.FEATURE_TAKES_ACTION_TITLE)).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
+<<<<<<< HEAD
     expect(screen.getByText(i18n.NOTE_REPLACES_LEGACY_AGENTS)).toBeInTheDocument();
     expect(screen.getByText(i18n.NOTE_HISTORY_UNTOUCHED)).toBeInTheDocument();
     expect(screen.getByText(i18n.NOTE_REVERT_IN_SETTINGS)).toBeInTheDocument();
@@ -81,6 +85,9 @@ describe('AgentBuilderAnnouncementModal', () => {
       'href',
       AGENT_BUILDER_LEARN_MORE_URL
     );
+=======
+    expect(screen.getByText(i18n.NOTE_REVERT_IN_SETTINGS)).toBeInTheDocument();
+>>>>>>> 9.4
     expect(screen.getByTestId('agentBuilderAnnouncementRevertButton')).toBeInTheDocument();
   });
 
@@ -89,6 +96,7 @@ describe('AgentBuilderAnnouncementModal', () => {
 
     expect(screen.queryByText(i18n.FEATURE_TAKES_ACTION_TITLE)).not.toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
+<<<<<<< HEAD
     expect(screen.getByText(i18n.NOTE_REPLACES_LEGACY_AGENTS)).toBeInTheDocument();
     expect(screen.getByText(i18n.NOTE_HISTORY_UNTOUCHED)).toBeInTheDocument();
     expect(screen.getByText(i18n.NOTE_CONTACT_ADMIN)).toBeInTheDocument();
@@ -96,6 +104,9 @@ describe('AgentBuilderAnnouncementModal', () => {
       'href',
       AGENT_BUILDER_LEARN_MORE_URL
     );
+=======
+    expect(screen.getByText(i18n.NOTE_CONTACT_ADMIN)).toBeInTheDocument();
+>>>>>>> 9.4
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
   });
 

@@ -40,7 +40,10 @@ export function defineRoutes({
   defineInferenceConnectorsRoute({
     logger,
     router,
+<<<<<<< HEAD
     featureRegistry,
+=======
+>>>>>>> 9.4
     getForFeature,
     getConnectorList,
     getConnectorById,

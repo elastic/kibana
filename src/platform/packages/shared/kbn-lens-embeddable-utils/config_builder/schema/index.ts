@@ -38,6 +38,7 @@ import {
   tagcloudConfigSchemaESQL,
   tagcloudConfigSchemaNoESQL,
 } from './charts/tagcloud';
+<<<<<<< HEAD
 import type {
   XYConfig,
   XYConfigESQL,
@@ -48,6 +49,9 @@ import type {
   XYLegendStatistic,
   XYLegendSize,
 } from './charts/xy';
+=======
+import type { XYConfig, XYConfigESQL, XYConfigNoESQL } from './charts/xy';
+>>>>>>> 9.4
 import { xyConfigSchema, xyConfigSchemaESQL, xyConfigSchemaNoESQL } from './charts/xy';
 import type {
   RegionMapConfig,
@@ -118,6 +122,7 @@ export const _lensApiConfigSchema: any = objectUnion(
     ...treemapConfigSchema.getUnionTypes(),
     ...waffleConfigSchema.getUnionTypes(),
   ],
+<<<<<<< HEAD
   {
     meta: {
       id: 'lensApiConfig',
@@ -126,6 +131,9 @@ export const _lensApiConfigSchema: any = objectUnion(
         'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
     },
   }
+=======
+  { meta: { id: 'lensApiConfig', title: 'Visualizations' } }
+>>>>>>> 9.4
 );
 
 export type LensApiConfig =
@@ -255,6 +263,7 @@ export type LensApiAllOperations =
   | LensApiBucketOperations
   | LensApiStaticValueOperation;
 
+<<<<<<< HEAD
 /**
  * Supported chart types in the Lens API
  *
@@ -269,6 +278,8 @@ export type LensApiConfigByType = {
   [K in LensApiConfig['type']]: Extract<LensApiConfig, { type: K }>;
 };
 
+=======
+>>>>>>> 9.4
 export {
   // Combined schemas
   metricConfigSchema,
@@ -349,10 +360,13 @@ export type {
   TreemapConfigNoESQL,
   WaffleConfigNoESQL,
   MosaicConfigNoESQL,
+<<<<<<< HEAD
   // XY Legend types
   XYLegendOutsideHorizontal,
   XYLegendOutsideVertical,
   XYLegendInside,
   XYLegendStatistic,
   XYLegendSize,
+=======
+>>>>>>> 9.4
 };

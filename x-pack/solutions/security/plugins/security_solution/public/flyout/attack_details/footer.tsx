@@ -79,10 +79,13 @@ export const PanelFooter = () => {
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="AttackDetailsTakeActionPanel"
+<<<<<<< HEAD
               aria-label={i18n.translate(
                 'xpack.securitySolution.flyout.attackDetails.footer.takeActionPopoverAriaLabel',
                 { defaultMessage: 'Take action' }
               )}
+=======
+>>>>>>> 9.4
               button={takeActionButton}
               isOpen={isPopoverOpen}
               closePopover={closePopover}
@@ -94,6 +97,10 @@ export const PanelFooter = () => {
                 attack={attack}
                 onActionSuccess={onActionSuccess}
                 closePopover={closePopover}
+<<<<<<< HEAD
+=======
+                size="s"
+>>>>>>> 9.4
                 telemetrySource="attacks_page_flyout_take_action"
                 showAiAssistantAction={false}
                 isRemoteDocument={isRemoteDocument}

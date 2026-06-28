@@ -55,6 +55,7 @@ export type FindEndpointListItemsRequestQueryInput = z.input<
 
 export const FindEndpointListItemsResponse = lazySchema(() =>
   z.object({
+<<<<<<< HEAD
     /**
      * The list of endpoint exception list items.
      */
@@ -74,6 +75,12 @@ export const FindEndpointListItemsResponse = lazySchema(() =>
     /**
      * The point-in-time ID for pagination.
      */
+=======
+    data: z.array(EndpointListItem),
+    page: z.number().int().min(0),
+    per_page: z.number().int().min(0),
+    total: z.number().int().min(0),
+>>>>>>> 9.4
     pit: z.string().optional(),
   })
 );

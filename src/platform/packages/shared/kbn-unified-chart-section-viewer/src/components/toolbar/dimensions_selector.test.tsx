@@ -544,7 +544,11 @@ describe('DimensionsSelector', () => {
       dimensionFields: Dimension[]
     ): ParsedMetricItem => ({
       metricName,
+<<<<<<< HEAD
       indexName: 'metrics-test',
+=======
+      dataStream: 'metrics-test',
+>>>>>>> 9.4
       units: [],
       metricTypes: [],
       fieldTypes: [],

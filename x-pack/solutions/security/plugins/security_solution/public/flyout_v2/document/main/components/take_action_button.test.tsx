@@ -514,16 +514,23 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
     });
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/take_action_button.test.tsx
     it('should show the explore item for a remote alert in Discover', () => {
       mockUseIsInSecurityApp.mockReturnValue(false);
       const exploreItem = { name: 'Explore in Alerts', onClick: jest.fn() };
       mockUseExploreActions.mockReturnValue({ exploreActionItems: [exploreItem] });
 
       const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+=======
+    it('should show no items for a remote document when not in Security app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, queryByText } = renderTakeActionButton({
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/take_action_button.test.tsx
         ...defaultProps,
         hit: remoteAlertHit,
       });
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/take_action_button.test.tsx
       expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).not.toBeDisabled();
       fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
       expect(getByText('Explore in Alerts')).toBeInTheDocument();
@@ -546,6 +553,12 @@ describe('<TakeActionButton />', () => {
       expect(getByText('Explore in Timeline')).toBeInTheDocument();
       expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
       expect(queryByText('Add to case')).not.toBeInTheDocument();
+=======
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+      expect(queryByText('Explore in Alerts')).not.toBeInTheDocument();
+>>>>>>> 9.4:x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/components/take_action_button.test.tsx
     });
 
     it('should show the full menu for a local alert (regression guard)', () => {

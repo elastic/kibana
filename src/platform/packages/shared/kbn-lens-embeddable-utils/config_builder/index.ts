@@ -37,7 +37,10 @@ export type {
   LensBaseLayer,
   LensXYConfigBase,
   LensBreakdownConfig,
+<<<<<<< HEAD
   LensLegendConfig,
+=======
+>>>>>>> 9.4
   LensYBoundsConfig,
 } from './types';
 

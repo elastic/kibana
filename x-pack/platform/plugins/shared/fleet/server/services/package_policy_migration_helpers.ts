@@ -282,6 +282,7 @@ export function applyStreamLevelMigration(
       ) as InputsOverride;
       update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
     }
+<<<<<<< HEAD
   }
 }
 
@@ -360,6 +361,8 @@ export function applyVarScopeMigration(
         originalStream.vars[varDef.name] = { ...oldEntry };
       }
     }
+=======
+>>>>>>> 9.4
   }
 }
 

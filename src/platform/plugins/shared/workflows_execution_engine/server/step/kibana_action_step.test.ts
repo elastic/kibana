@@ -1225,6 +1225,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(result.error!.type).toBe('StepSizeLimitExceeded');
     });
   });
+<<<<<<< HEAD
 
   describe('JSON-body path integration', () => {
     it('propagates x-kibana-workflow-execution-id header on the JSON-body path', async () => {
@@ -1287,4 +1288,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(result.output).toEqual({ id: 'case-1', title: 'Helper Test' });
     });
   });
+=======
+>>>>>>> 9.4
 });

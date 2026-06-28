@@ -11,12 +11,21 @@ import type { SelectionDetails, SelectionOption } from '@kbn/workflows/types/v1'
 import {
   cacheSearchOptions,
   clearCache,
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
   getCachedSearchOption,
   getCachedStepPropertyValidationOutcome,
   getStepPropertyValidationOutcomeCacheKey,
   setCachedStepPropertyValidationOutcome,
 } from './step_property_selection_cache';
 import type { StepPropertyItem } from '../../features/validate_workflow_yaml/model/types';
+=======
+  getCachedCustomPropertyValidationOutcome,
+  getCachedSearchOption,
+  getCustomPropertyValidationOutcomeCacheKey,
+  setCachedCustomPropertyValidationOutcome,
+} from './custom_property_selection_cache';
+import type { CustomPropertyItem } from '../../features/validate_workflow_yaml/model/types';
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
 
 describe('step_property_selection_cache', () => {
   const mockOption1: SelectionOption = {
@@ -51,7 +60,11 @@ describe('step_property_selection_cache', () => {
     jest.clearAllMocks();
   });
 
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
   function makeItem(overrides: Partial<StepPropertyItem> = {}): StepPropertyItem {
+=======
+  function makeItem(overrides: Partial<CustomPropertyItem> = {}): CustomPropertyItem {
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
     return {
       id: 'item-1',
       stepId: 'step-a',
@@ -61,7 +74,11 @@ describe('step_property_selection_cache', () => {
       endColumn: 1,
       yamlPath: ['x'],
       key: 'x',
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       selectionHandler: {} as StepPropertyItem['selectionHandler'],
+=======
+      selectionHandler: {} as CustomPropertyItem['selectionHandler'],
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
       context: {
         stepType: 'step.type',
         scope: 'config',
@@ -72,12 +89,20 @@ describe('step_property_selection_cache', () => {
       propertyKey: 'proxy.id',
       stepType: 'step.type',
       scope: 'config',
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       type: 'step-property',
+=======
+      type: 'custom-property',
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
       ...overrides,
     };
   }
 
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
   describe('getStepPropertyValidationOutcomeCacheKey', () => {
+=======
+  describe('getCustomPropertyValidationOutcomeCacheKey', () => {
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
     it('should include step id, context fields, and serialized value', () => {
       const item = makeItem({
         stepId: 's1',
@@ -89,7 +114,11 @@ describe('step_property_selection_cache', () => {
           values: { config: { a: 1 }, input: {} },
         },
       });
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       const key = getStepPropertyValidationOutcomeCacheKey(item);
+=======
+      const key = getCustomPropertyValidationOutcomeCacheKey(item);
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
       expect(key).toContain('s1');
       expect(key).toContain('t');
       expect(key).toContain('input');
@@ -99,38 +128,67 @@ describe('step_property_selection_cache', () => {
     });
 
     it('should produce different keys for different property values', () => {
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       const a = getStepPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'a' }));
       const b = getStepPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'b' }));
+=======
+      const a = getCustomPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'a' }));
+      const b = getCustomPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'b' }));
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
       expect(a).not.toBe(b);
     });
   });
 
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
   describe('getCachedStepPropertyValidationOutcome and setCachedStepPropertyValidationOutcome', () => {
     it('should store and retrieve validation outcome', () => {
       const key = 'k1';
       setCachedStepPropertyValidationOutcome(key, mockOption1, mockDetails);
       expect(getCachedStepPropertyValidationOutcome(key)).toEqual({
+=======
+  describe('getCachedCustomPropertyValidationOutcome and setCachedCustomPropertyValidationOutcome', () => {
+    it('should store and retrieve validation outcome', () => {
+      const key = 'k1';
+      setCachedCustomPropertyValidationOutcome(key, mockOption1, mockDetails);
+      expect(getCachedCustomPropertyValidationOutcome(key)).toEqual({
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
         resolvedOption: mockOption1,
         details: mockDetails,
       });
     });
 
     it('should return null for missing key', () => {
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       expect(getCachedStepPropertyValidationOutcome('missing')).toBeNull();
+=======
+      expect(getCachedCustomPropertyValidationOutcome('missing')).toBeNull();
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
     });
 
     it('should expire after TTL', () => {
       const key = 'k-exp';
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       setCachedStepPropertyValidationOutcome(key, null, mockDetails);
       jest.advanceTimersByTime(30 * 1000 + 1);
       expect(getCachedStepPropertyValidationOutcome(key)).toBeNull();
+=======
+      setCachedCustomPropertyValidationOutcome(key, null, mockDetails);
+      jest.advanceTimersByTime(30 * 1000 + 1);
+      expect(getCachedCustomPropertyValidationOutcome(key)).toBeNull();
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
     });
 
     it('should return outcome within TTL', () => {
       const key = 'k-ok';
+<<<<<<< HEAD:src/platform/plugins/shared/workflows_management/public/shared/lib/step_property_selection_cache.test.ts
       setCachedStepPropertyValidationOutcome(key, mockOption1, mockDetails);
       jest.advanceTimersByTime(30 * 1000 - 1);
       expect(getCachedStepPropertyValidationOutcome(key)?.resolvedOption).toEqual(mockOption1);
+=======
+      setCachedCustomPropertyValidationOutcome(key, mockOption1, mockDetails);
+      jest.advanceTimersByTime(30 * 1000 - 1);
+      expect(getCachedCustomPropertyValidationOutcome(key)?.resolvedOption).toEqual(mockOption1);
+>>>>>>> 9.4:src/platform/plugins/shared/workflows_management/public/shared/lib/custom_property_selection_cache.test.ts
     });
   });
 

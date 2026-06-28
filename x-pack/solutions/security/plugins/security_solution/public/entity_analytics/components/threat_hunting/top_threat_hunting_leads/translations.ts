@@ -32,6 +32,7 @@ export const OPTIONS = i18n.translate(
   { defaultMessage: 'Options' }
 );
 
+<<<<<<< HEAD
 export const COLLAPSE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.collapse',
   { defaultMessage: 'Collapse' }
@@ -42,6 +43,8 @@ export const EXPAND = i18n.translate(
   { defaultMessage: 'Expand' }
 );
 
+=======
+>>>>>>> 9.4
 export const AUTO_GENERATE_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoGenerate',
   { defaultMessage: 'Auto-generate every 24 hours' }
@@ -202,6 +205,7 @@ export const CONNECTOR_LABEL = i18n.translate(
 export const OPTIONS_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.optionsLabel',
   { defaultMessage: 'Options' }
+<<<<<<< HEAD
 );
 
 export const OPEN_GENAI_SETTINGS = i18n.translate(
@@ -215,6 +219,8 @@ export const NO_CONNECTOR_DESCRIPTION = i18n.translate(
     defaultMessage:
       'Enable AI Agent as your default chat experience to start generating threat hunting leads from your entity data',
   }
+=======
+>>>>>>> 9.4
 );
 
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(

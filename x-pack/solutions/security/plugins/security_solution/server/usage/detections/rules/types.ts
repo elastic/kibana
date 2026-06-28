@@ -118,7 +118,10 @@ export interface RuleAdoption {
   detection_rule_status: EventLogStatusMetric;
   elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
   elastic_detection_rule_customization_status: RuleCustomizationCounts;
+<<<<<<< HEAD
   elastic_detection_rule_deprecated_status: DeprecatedRulesSummary;
+=======
+>>>>>>> 9.4
   ai_created_rules: AiCreatedRulesUsage;
   spaces_usage: SpacesUsage;
 }

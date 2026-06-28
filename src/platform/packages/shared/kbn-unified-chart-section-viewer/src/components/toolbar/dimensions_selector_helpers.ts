@@ -43,7 +43,10 @@ export const buildDimensionOption = ({
     disabled: isDisabled,
     key: dimension.name,
     dimension,
+<<<<<<< HEAD
     'data-test-subj': `dimensionSelectorOption-${dimension.name}`,
+=======
+>>>>>>> 9.4
   };
   if (appendNode) {
     option.append = appendNode;

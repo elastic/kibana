@@ -12,6 +12,7 @@ describe('getEntityIcon', () => {
     expect(getEntityIcon('user')).toBe('user');
   });
 
+<<<<<<< HEAD
   it('returns "storage" for host entity type', () => {
     expect(getEntityIcon('host')).toBe('storage');
   });
@@ -26,5 +27,17 @@ describe('getEntityIcon', () => {
 
   it('returns "globe" as fallback icon for unknown entity type', () => {
     expect(getEntityIcon('unknown')).toBe('globe');
+=======
+  it('returns "desktop" for host entity type', () => {
+    expect(getEntityIcon('host')).toBe('desktop');
+  });
+
+  it('returns "gear" for service entity type', () => {
+    expect(getEntityIcon('service')).toBe('gear');
+  });
+
+  it('returns fallback icon for unknown entity type', () => {
+    expect(getEntityIcon('unknown')).toBe('questionInCircle');
+>>>>>>> 9.4
   });
 });

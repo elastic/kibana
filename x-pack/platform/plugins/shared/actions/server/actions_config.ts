@@ -80,7 +80,10 @@ export interface ActionsConfigurationUtilities {
   getMaxEmailBodyLength: () => number;
   getEarsUrl: () => string | undefined;
   isEarsEnabled: () => boolean;
+<<<<<<< HEAD
   isEarsExperimentalEnabled: () => boolean;
+=======
+>>>>>>> 9.4
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -308,8 +311,13 @@ export function getActionsConfigurationUtilities(
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
+<<<<<<< HEAD
     getEarsUrl: () => config.auth.ears?.url,
     isEarsEnabled: () => config.auth.ears?.enabled ?? false,
     isEarsExperimentalEnabled: () => config.auth.ears?.enableExperimental ?? false,
+=======
+    getEarsUrl: () => config.ears?.url,
+    isEarsEnabled: () => config.ears?.enabled ?? false,
+>>>>>>> 9.4
   };
 }

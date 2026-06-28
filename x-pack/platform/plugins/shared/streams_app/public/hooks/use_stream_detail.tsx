@@ -128,11 +128,15 @@ export function StreamDetailContextProvider({
           return response as Streams.all.GetResponse;
         });
     },
+<<<<<<< HEAD
     [streamsRepositoryClient, name, canManageInUi],
     {
       shouldSuppressFetchErrorToast: (err: Error) =>
         isHttpFetchError(err) && err.body?.statusCode === 404,
     }
+=======
+    [streamsRepositoryClient, name, canManageInUi]
+>>>>>>> 9.4
   );
 
   const {

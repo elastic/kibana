@@ -17,8 +17,16 @@ export { createRiskScoreModule } from './risk_score_module';
 export { createTemporalStateModule } from './temporal_state_module';
 export { createBehavioralAnalysisModule } from './behavioral_analysis_module';
 export {
+<<<<<<< HEAD
   extractIsPrivileged,
   groupEntitiesByType,
   makeObservation,
   matchesPrivilegedWatchlist,
+=======
+  entityToKey,
+  extractIsPrivileged,
+  getEntityId,
+  groupEntitiesByType,
+  makeObservation,
+>>>>>>> 9.4
 } from './utils';

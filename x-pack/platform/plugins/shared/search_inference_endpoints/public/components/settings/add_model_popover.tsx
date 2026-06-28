@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
 import type { EuiSelectableOption } from '@elastic/eui';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
@@ -34,6 +35,19 @@ const getConnectorTaskType = (connector: InferenceConnector): string => {
   }
   return '';
 };
+=======
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+import { getModelId } from '../../utils/get_model_id';
+import {
+  isEisEndpoint,
+  getModelName,
+  getModelCreator,
+  getProviderKeyForCreator,
+} from '../../utils/eis_utils';
+>>>>>>> 9.4
 
 interface AddModelPopoverProps {
   existingEndpointIds: string[];
@@ -69,12 +83,31 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       return acc;
     }, new Map());
 
+<<<<<<< HEAD
     return available.map((connector) => {
       const count = nameToCount.get(connector.name) ?? 1;
       const label = count > 1 ? `${connector.name} (${connector.connectorId})` : connector.name;
       const status = getModelStatus(connector.metadata);
       const isDeprecated =
         status === EisModelStatus.Deprecated || status === EisModelStatus.DeprecatedEOL;
+=======
+    return available.map((endpoint) => {
+      const modelId = getModelId(endpoint) ?? endpoint.inference_id;
+      const count = modelToCount.get(modelId) ?? 1;
+      let icon: string;
+      let baseName: string;
+      if (isEisEndpoint(endpoint)) {
+        const creator = getModelCreator(endpoint);
+        const providerKey = getProviderKeyForCreator(creator);
+        icon = (providerKey && SERVICE_PROVIDERS[providerKey]?.icon) ?? 'compute';
+        baseName = getModelName(endpoint);
+      } else {
+        const provider = SERVICE_PROVIDERS[endpoint.service as ServiceProviderKeys];
+        icon = provider?.icon ?? 'compute';
+        baseName = modelId;
+      }
+      const label = count > 1 ? `${baseName} (${endpoint.inference_id})` : baseName;
+>>>>>>> 9.4
       return {
         label,
         key: connector.connectorId,

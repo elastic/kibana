@@ -79,6 +79,7 @@ export function useFetchMetricsData({
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
+<<<<<<< HEAD
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
@@ -106,6 +107,18 @@ export function useFetchMetricsData({
           };
         }
       );
+=======
+      const result = await executeEsqlQuery<MetricsESQLResponse>({
+        esqlQuery: metricsInfoQuery,
+        search: services.data.search.search,
+        signal,
+        dataView: fetchParams.dataView,
+        timeRange: fetchParams.timeRange,
+        filters: fetchParams.filters ?? [],
+        variables: fetchParams.esqlVariables,
+        uiSettings: services.uiSettings,
+      });
+>>>>>>> 9.4
 
       const getFieldType = (name: string) => {
         const field = fetchParams.dataView?.getFieldByName(name);
@@ -127,7 +140,11 @@ export function useFetchMetricsData({
 
       return {
         ...sortedMetrics,
+<<<<<<< HEAD
         activeDimensions: appliedDimensions ?? [],
+=======
+        activeDimensions: selectedDimensionNames ?? [],
+>>>>>>> 9.4
       };
     },
     [
@@ -140,8 +157,12 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
+<<<<<<< HEAD
       appliedDimensions,
       profileId,
+=======
+      selectedDimensionNames,
+>>>>>>> 9.4
     ]
   );
 

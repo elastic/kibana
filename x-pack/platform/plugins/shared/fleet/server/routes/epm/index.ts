@@ -1107,8 +1107,13 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .post({
       path: EPM_API_ROUTES.BULK_NAMESPACE_CUSTOMIZATION_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
+<<<<<<< HEAD
       summary: `Bulk enable/disable namespace-level customization for packages`,
       description: `Enable or disable namespace-level index template customization for a list of packages in one call. Use this for IaC-style declarative flows.`,
+=======
+      summary: `Get Bulk uninstall packages details`,
+      description: `Get the status and results of a bulk package uninstall operation.`,
+>>>>>>> 9.4
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
@@ -1117,6 +1122,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       {
         version: API_VERSIONS.public.v1,
         options: {
+<<<<<<< HEAD
           oasOperationObject: () => ({
             requestBody: {
               content: {
@@ -1208,6 +1214,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       {
         version: API_VERSIONS.public.v1,
         options: {
+=======
+>>>>>>> 9.4
           oasOperationObject: () =>
             path.join(__dirname, 'examples/get_bulk_operation_details.yaml'),
         },
@@ -1643,8 +1651,13 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .delete({
       path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
       security: INSTALL_PACKAGES_SECURITY,
+<<<<<<< HEAD
       summary: `Delete assets for a package`,
       description: `Delete datastream assets for a specific package, by data stream name.`,
+=======
+      summary: `Delete assets for an input package`,
+      description: `Delete datastream assets for a specific input package, by data stream name.`,
+>>>>>>> 9.4
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },

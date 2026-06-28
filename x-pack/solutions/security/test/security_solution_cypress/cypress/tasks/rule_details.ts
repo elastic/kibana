@@ -143,7 +143,11 @@ export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
 };
 
+<<<<<<< HEAD
 export const navigateToEndpointExceptions = () => {
+=======
+export const goToEndpointExceptions = () => {
+>>>>>>> 9.4
   cy.visit(ENDPOINT_EXCEPTIONS_URL);
 };
 

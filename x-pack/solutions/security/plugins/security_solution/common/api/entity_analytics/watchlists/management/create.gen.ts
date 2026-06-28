@@ -30,11 +30,19 @@ export const CreateWatchlistRequestBody = lazySchema(() =>
     /**
      * Unique name for the watchlist
      */
+<<<<<<< HEAD
     name: z.string().max(256),
     /**
      * Description of the watchlist
      */
     description: z.string().max(1000).optional(),
+=======
+    name: z.string(),
+    /**
+     * Description of the watchlist
+     */
+    description: z.string().optional(),
+>>>>>>> 9.4
     /**
      * Risk score modifier associated with the watchlist
      */
@@ -51,28 +59,49 @@ export const CreateWatchlistRequestBody = lazySchema(() =>
         z
           .object({
             type: EntitySourceType,
+<<<<<<< HEAD
             name: z.string().max(256),
             indexPattern: z.string().max(1000).optional(),
             /**
              * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
              */
             integrationName: z.string().max(256).optional(),
+=======
+            name: z.string(),
+            indexPattern: z.string().optional(),
+            /**
+             * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+             */
+            integrationName: z.string().optional(),
+>>>>>>> 9.4
             enabled: z.boolean().optional(),
             /**
              * Field used to query the entity store for index-type sources
              */
+<<<<<<< HEAD
             identifierField: z.string().max(256).optional(),
             /**
              * KQL query used to filter data from the provided index patterns
              */
             queryRule: z.string().max(4096).optional(),
             matchers: z.array(Matcher).max(100).optional(),
+=======
+            identifierField: z.string().optional(),
+            /**
+             * KQL query used to filter data from the provided index patterns
+             */
+            queryRule: z.string().optional(),
+            matchers: z.array(Matcher).optional(),
+>>>>>>> 9.4
             filter: Filter.optional(),
             range: DateRange.optional(),
           })
           .strict()
       )
+<<<<<<< HEAD
       .max(100)
+=======
+>>>>>>> 9.4
       .optional(),
   })
 );

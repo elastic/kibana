@@ -19,6 +19,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 /**
  * The response for getting live query results.
  */
+<<<<<<< HEAD
 export const GetLiveQueryResultsResponse = lazySchema(() =>
   z.object({
     data: z
@@ -45,4 +46,7 @@ export const GetLiveQueryResultsResponse = lazySchema(() =>
       .optional(),
   })
 );
+=======
+export const GetLiveQueryResultsResponse = lazySchema(() => z.object({}));
+>>>>>>> 9.4
 export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;

@@ -200,8 +200,20 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
             filteredTotal={exportFilters?.filteredTotal}
             total={exportFilters?.total ?? row.docs}
           />
+<<<<<<< HEAD
         )}
       </>
+=======
+        }
+        isOpen={isOpen}
+        closePopover={close}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        aria-label={kebabLabel}
+      >
+        <EuiContextMenuPanel size="s" items={menuItems} />
+      </EuiPopover>
+>>>>>>> 9.4
     );
   }
 );

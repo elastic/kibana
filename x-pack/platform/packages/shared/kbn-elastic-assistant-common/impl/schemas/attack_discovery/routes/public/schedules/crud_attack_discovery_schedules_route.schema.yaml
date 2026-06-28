@@ -11,7 +11,11 @@ components:
       description: Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
     AttackDiscoveryGenericError:
       type: object
+<<<<<<< HEAD
       description: Error response for Attack discovery schedule operations when the request is rejected. Uses `status_code` (snake_case), `error`, and `message` to match the implementation.
+=======
+      description: Generic error response for Attack Discovery schedule operations
+>>>>>>> 9.4
       properties:
         status_code:
           type: number
@@ -25,6 +29,7 @@ components:
           type: string
           description: Human-readable error message describing what went wrong
           example: "Invalid request parameters."
+<<<<<<< HEAD
 
     BulkActionAttackDiscoverySchedulesRequestBody:
       type: object
@@ -82,6 +87,8 @@ components:
         total:
           type: number
           description: The total number of schedules matched by the bulk action.
+=======
+>>>>>>> 9.4
 
 paths:
   /api/attack_discovery/schedules:
@@ -194,6 +201,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
+<<<<<<< HEAD
               examples:
                 CreateAttackDiscoverySchedulesResponse400Example:
                   summary: Bad Request error returned when the create schedule payload is invalid.
@@ -201,6 +209,12 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4
 
   /api/attack_discovery/schedules/{id}:
     get:
@@ -265,6 +279,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
+<<<<<<< HEAD
               examples:
                 GetAttackDiscoverySchedulesResponse400Example:
                   summary: Bad Request error returned when the get-schedule request is invalid.
@@ -272,6 +287,12 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4
     put:
       x-codegen-enabled: true
       x-codeSamples:
@@ -372,6 +393,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
+<<<<<<< HEAD
               examples:
                 UpdateAttackDiscoverySchedulesResponse400Example:
                   summary: Bad Request error returned when the update schedule payload is invalid.
@@ -379,6 +401,12 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4
     delete:
       x-codegen-enabled: true
       x-codeSamples:
@@ -425,6 +453,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
+<<<<<<< HEAD
               examples:
                 DeleteAttackDiscoverySchedulesResponse400Example:
                   summary: Bad Request error returned when the delete schedule request is invalid.
@@ -432,6 +461,12 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4
 
   /api/attack_discovery/schedules/{id}/_enable:
     post:
@@ -480,6 +515,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
+<<<<<<< HEAD
               examples:
                 EnableAttackDiscoverySchedulesResponse400Example:
                   summary: Bad Request error returned when the enable schedule request is invalid.
@@ -487,6 +523,12 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4
 
   /api/attack_discovery/schedules/{id}/_disable:
     post:
@@ -535,6 +577,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryGenericError'
+<<<<<<< HEAD
               examples:
                 DisableAttackDiscoverySchedulesResponse400Example:
                   summary: Bad Request error returned when the disable schedule request is invalid.
@@ -692,3 +735,9 @@ paths:
                     status_code: 400
                     error: "Bad Request"
                     message: "Invalid request parameters."
+=======
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
+>>>>>>> 9.4
