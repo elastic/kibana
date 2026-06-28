@@ -60,8 +60,12 @@ import {
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
+  type ExternalResumeFormPageParams,
   type ExternalResumeWorkflowExecutionParams,
+  type ExternalResumeWorkflowExecutionWithInputParams,
+  getExternalResumeFormPage,
   resumeWorkflowExecutionExternally,
+  resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
@@ -887,6 +891,16 @@ export class WorkflowsManagementApi {
     params: ExternalResumeWorkflowExecutionParams
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     return resumeWorkflowExecutionExternally(this.workflowsService, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyWithInput(
+    params: ExternalResumeWorkflowExecutionWithInputParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyWithInput(this.workflowsService, params);
+  }
+
+  public async getExternalResumeFormPage(params: ExternalResumeFormPageParams): Promise<string> {
+    return getExternalResumeFormPage(this.workflowsService, params);
   }
 
   /**

@@ -102,6 +102,8 @@ describe('Execution Routes', () => {
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
       resumeWorkflowExecutionExternally: jest.fn(),
+      resumeWorkflowExecutionExternallyWithInput: jest.fn(),
+      getExternalResumeFormPage: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
     };
     mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: false });
@@ -780,6 +782,71 @@ describe('Execution Routes', () => {
       });
       expect(typeof result.body).toBe('string');
       expect(result.body).toContain('Unable to submit response');
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/resume/external/form (external_resume_form)', () => {
+    const path = '/api/workflows/executions/{executionId}/resume/external/form';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should return the HTML form page', async () => {
+      mockApi.getExternalResumeFormPage.mockResolvedValue('<html>form</html>');
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { apiKey: 'encoded-api-key' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getExternalResumeFormPage).toHaveBeenCalledWith({
+        apiKey: 'encoded-api-key',
+        executionId: 'ex-1',
+        spaceId: 'default',
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+        body: '<html>form</html>',
+      });
+    });
+  });
+
+  describe('POST /api/workflows/executions/{executionId}/resume/external (external_resume_input)', () => {
+    const path = '/api/workflows/executions/{executionId}/resume/external';
+
+    it('should register the route handler', () => {
+      expect(handler('POST', path)).toBeDefined();
+    });
+
+    it('should resume via API key with input and return HTML', async () => {
+      mockApi.resumeWorkflowExecutionExternallyWithInput.mockResolvedValue({
+        resumedBy: 'api_key:api-key-id',
+      });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { apiKey: 'encoded-api-key' },
+        body: { severity: 'high' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternallyWithInput).toHaveBeenCalledWith({
+        apiKey: 'encoded-api-key',
+        executionId: 'ex-1',
+        spaceId: 'default',
+        input: { severity: 'high' },
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      });
+      expect(typeof result.body).toBe('string');
+      expect(result.body).toContain('Thank you');
     });
   });
 

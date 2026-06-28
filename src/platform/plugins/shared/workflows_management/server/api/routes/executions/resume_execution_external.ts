@@ -9,31 +9,83 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import type { KibanaResponseFactory } from '@kbn/core/server';
 import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
-import { ExternalResumeError } from '../../external_resume/external_resume_error';
-import { parseApprovedQueryParam } from '../../external_resume/external_resume_service';
 import {
-  renderExternalResumeErrorPage,
-  renderExternalResumeSuccessPage,
-} from '../../external_resume/render_external_resume_page';
+  EXTERNAL_RESUME_SECURITY,
+  handleExternalResumeError,
+  htmlSuccess,
+} from './external_resume_route_helpers';
+import { parseApprovedQueryParam } from '../../external_resume/external_resume_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-const EXTERNAL_RESUME_SECURITY = {
-  authc: {
-    enabled: false,
-    reason: 'External resume uses a short-lived API key token instead of a Kibana session.',
-  },
-  authz: {
-    enabled: false,
-    reason: 'External resume authorizes by matching the API key metadata to the execution.',
-  },
-} as const;
+export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
 
-export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
+  router.versioned
+    .post({
+      path: EXTERNAL_RESUME_API_PATH,
+      access: 'public',
+      security: EXTERNAL_RESUME_SECURITY,
+      summary: 'Submit external input for a paused workflow execution',
+      description:
+        'Resume a paused waitForInput step using an external resume API key and submitted form data. Returns an HTML confirmation page.',
+      options: {
+        tags: [OAS_TAG],
+        availability: AVAILABILITY,
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSION,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, '../examples/resume_execution_external_post.yaml'),
+        },
+        validate: {
+          request: {
+            params: executionIdParamSchema,
+            query: schema.object({
+              apiKey: schema.string({
+                meta: { description: 'External resume API key credential.' },
+              }),
+            }),
+            body: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+      },
+      withAvailabilityCheck(async (context, request, response) => {
+        try {
+          const { executionId } = request.params;
+          const { apiKey } = request.query;
+          const spaceId = spaces.getSpaceId(request);
+          const { resumedBy } = await api.resumeWorkflowExecutionExternallyWithInput({
+            apiKey,
+            executionId,
+            spaceId,
+            input: request.body as Record<string, unknown>,
+          });
+
+          audit.logExecutionResumed(request, {
+            executionId,
+            resumedBy,
+          });
+
+          return htmlSuccess(response);
+        } catch (error) {
+          audit.logExecutionResumed(request, {
+            executionId: request.params.executionId,
+            error,
+          });
+          return handleExternalResumeError(response, error);
+        }
+      })
+    );
+}
+
+export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies) {
   const { router, api, spaces, audit } = deps;
 
   router.versioned
@@ -41,9 +93,9 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
       path: EXTERNAL_RESUME_API_PATH,
       access: 'public',
       security: EXTERNAL_RESUME_SECURITY,
-      summary: 'Resume a workflow execution from an external link',
+      summary: 'Resume a workflow execution from an external approval link',
       description:
-        'Resume a paused workflow execution using an external resume API key. Returns an HTML confirmation page.',
+        'Resume a paused waitForApproval step using an external resume API key. Returns an HTML confirmation page.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -89,7 +141,7 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
             resumedBy,
           });
 
-          return htmlOk(response, renderExternalResumeSuccessPage());
+          return htmlSuccess(response);
         } catch (error) {
           audit.logExecutionResumed(request, {
             executionId: request.params.executionId,
@@ -99,36 +151,4 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
         }
       })
     );
-}
-
-function htmlOk(response: KibanaResponseFactory, body: string) {
-  return response.ok({
-    body,
-    headers: {
-      'content-type': 'text/html; charset=utf-8',
-    },
-  });
-}
-
-function handleExternalResumeError(response: KibanaResponseFactory, error: unknown) {
-  if (error instanceof ExternalResumeError) {
-    return htmlError(response, error.statusCode, error.message);
-  }
-
-  const message =
-    error instanceof Error
-      ? error.message
-      : 'An unexpected error occurred while resuming the workflow.';
-  return htmlError(response, 500, message);
-}
-
-function htmlError(response: KibanaResponseFactory, statusCode: number, message: string) {
-  return response.custom({
-    statusCode,
-    bypassErrorFormat: true,
-    body: renderExternalResumeErrorPage(message),
-    headers: {
-      'content-type': 'text/html; charset=utf-8',
-    },
-  });
 }
