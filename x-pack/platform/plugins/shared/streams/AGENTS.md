@@ -61,4 +61,4 @@ Never abbreviate "significant" in identifiers, file names, or folder names:
 
 ## Keeping this file current
 
-Update this file when you make a change that would mislead an agent reading it: cross-package ownership changes, new "never" rules, pipeline restructuring, or naming convention updates. Do not update it for type field additions or directory reorganisations within a package — those are discoverable from the code.
+Update this file when you make a change that would mislead an agent reading it: cross-package ownership changes, pipeline restructuring, addition or removal of concepts relevant to the pipeline, or naming convention updates. Do not update it for type field additions or directory reorganisations within a package — those are discoverable from the code.
