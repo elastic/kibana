@@ -18,6 +18,7 @@ import type {
   PreparedAction,
 } from '../handler';
 import { ackHandler } from './ack';
+import { activateHandler } from './activate';
 import { assignHandler } from './assign';
 import { deactivateHandler } from './deactivate';
 import { snoozeHandler } from './snooze';
@@ -44,11 +45,12 @@ export type ActionHandlersRegistry = {
  * callers reach the registry exclusively through the invocation
  * helpers below — they cannot swap or hijack handlers at runtime.
  *
- * Typed as `Partial<…>` for the duration of the multi-step migration:
- * `activate` is still served by the orchestrator's in-class switch
- * (Step 6 moves it). Once every action_type has a handler we tighten
- * this to {@link ActionHandlersRegistry} and the missing-handler
- * defensive throw in {@link resolveHandlerOrThrow} becomes unreachable.
+ * Every `AlertEpisodeActionType` now has a registered handler. The
+ * registry is kept typed as `Partial<…>` only for one more step
+ * because the orchestrator still has the lifecycle switch wired by
+ * hand; Step 7 tightens this to {@link ActionHandlersRegistry} and the
+ * missing-handler defensive throw in {@link resolveHandlerOrThrow}
+ * becomes unreachable.
  */
 const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {
   [ALERT_EPISODE_ACTION_TYPE.ACK]: ackHandler,
@@ -58,6 +60,7 @@ const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {
   [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: snoozeHandler,
   [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeHandler,
   [ALERT_EPISODE_ACTION_TYPE.DEACTIVATE]: deactivateHandler,
+  [ALERT_EPISODE_ACTION_TYPE.ACTIVATE]: activateHandler,
 };
 
 /**
