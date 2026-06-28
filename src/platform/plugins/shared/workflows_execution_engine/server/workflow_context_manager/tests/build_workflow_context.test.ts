@@ -156,6 +156,24 @@ describe('buildWorkflowContext', () => {
 
       expect(context.execution.usage).toBeUndefined();
     });
+
+    it('should expose context.hitl.externalFormLink from persisted execution context', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {
+          hitl: {
+            externalFormLink:
+              'http://localhost:5601/api/workflows/executions/ex-1/resume/external/form?apiKey=abc',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.context?.hitl?.externalFormLink).toBe(
+        'http://localhost:5601/api/workflows/executions/ex-1/resume/external/form?apiKey=abc'
+      );
+    });
   });
 
   describe('input default values', () => {

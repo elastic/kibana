@@ -17,6 +17,7 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import { HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY } from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -948,7 +949,23 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
   ])
 );
 
+export const WorkflowHitlTemplateContextSchema = z.object({
+  [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: z
+    .string()
+    .optional()
+    .describe('External waitForInput form URL, available while the step is waiting'),
+});
+
+export const WorkflowTemplatePersistedContextSchema = z.object({
+  hitl: WorkflowHitlTemplateContextSchema.optional(),
+});
+
 export const WorkflowContextSchema = z.object({
+  /**
+   * Persisted execution-context values exposed to templates as `context.*`
+   * (for example `context.hitl.externalFormLink` during external waitForInput).
+   */
+  context: WorkflowTemplatePersistedContextSchema.optional(),
   /**
    * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
    * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
