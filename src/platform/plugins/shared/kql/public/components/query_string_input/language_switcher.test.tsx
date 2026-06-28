@@ -33,7 +33,7 @@ describe('LanguageSwitcher', () => {
     expect(
       screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
     ).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Documentation/i })).toHaveAttribute(
       'href',
       startMock.docLinks.links.query.luceneQuerySyntax
     );
@@ -45,7 +45,7 @@ describe('LanguageSwitcher', () => {
     expect(
       screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
     ).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Documentation/i })).toHaveAttribute(
       'href',
       startMock.docLinks.links.query.kueryQuerySyntax
     );
@@ -103,7 +103,7 @@ describe('LanguageSwitcher', () => {
     expect(
       screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
     ).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Documentation/i })).toHaveAttribute(
       'href',
       startMock.docLinks.links.query.luceneQuerySyntax
     );
