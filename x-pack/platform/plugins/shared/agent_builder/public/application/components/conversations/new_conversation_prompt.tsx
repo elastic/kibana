@@ -10,6 +10,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationInput } from './conversation_input/conversation_input';
+import { StagedAttachmentSystemMessages } from './staged_attachment_system_messages';
 import {
   conversationElementPaddingStyles,
   conversationElementWidthStyles,
@@ -52,6 +53,9 @@ export const NewConversationPrompt: React.FC<{}> = () => {
             })}
           </h2>
         </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={conversationElementWidthStyles}>
+        <StagedAttachmentSystemMessages />
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}

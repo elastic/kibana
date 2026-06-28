@@ -23,6 +23,7 @@ import { useConversationId } from '../../../application/context/conversation/use
 import { useOptionalConversationSpineContext } from '../conversation_spine_context';
 import { formatSpineDisplayLabel } from '../hooks/use_spine_display_label';
 import { formatSpineIdentifier } from '../hooks/use_spine_identifier';
+import { getSpineConversationId } from '../provisional_spine_conversation_id';
 import { getSpineTypeConfig, getBadgeStylesForVariant, PROMOTABLE_SPINE_TYPES } from '../spine_type_config';
 import type { SpineBadgeVariant, SpineType } from '../types';
 
@@ -192,9 +193,8 @@ export const ActiveSpineRelationshipBadge: React.FC = () => {
   }
 
   const type = spineContext.spineState?.record.type ?? spineContext.promotedSpineType;
-  const identifier =
-    spineContext.spineState?.record.identifier ??
-    (conversationId ? formatSpineIdentifier(conversationId) : '000');
+  const identifier = spineContext.spineState?.record.identifier ??
+    formatSpineIdentifier(getSpineConversationId(conversationId));
 
   return (
     <div
