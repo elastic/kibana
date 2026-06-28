@@ -75,7 +75,6 @@ const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
  * return.
  */
 export const deactivateHandler: ActionHandler<DeactivateAlertActionBody, unknown> = {
-  actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   prepare: (item, { alertActionDoc }) => {
     const { alertEvent } = item;
     assertEpisodeIsDeactivatable(alertEvent);

@@ -286,8 +286,6 @@ const assertActiveOrRecovering = (
  * contained.
  */
 export const activateHandler: ActionHandler<ActivateAlertActionBody, ActivateContextByEpisodeId> = {
-  actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-
   loadContext: async (items, { queryService, spaceId }: HandlerServices) => {
     const episodeIds = collectEpisodeIds(items);
     if (episodeIds.length === 0) {

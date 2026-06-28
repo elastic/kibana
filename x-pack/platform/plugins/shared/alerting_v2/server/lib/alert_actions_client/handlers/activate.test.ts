@@ -100,10 +100,6 @@ const buildContextMap = (
 ): Map<string, ActivateContextEntry> => new Map(entries);
 
 describe('activateHandler', () => {
-  it('declares the activate action_type as its discriminant', () => {
-    expect(activateHandler.actionType).toBe(ALERT_EPISODE_ACTION_TYPE.ACTIVATE);
-  });
-
   it('exposes a loadContext implementation — activate needs I/O preload', () => {
     expect(typeof activateHandler.loadContext).toBe('function');
   });

@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  type AlertEpisodeActionType,
-  type CreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import type {
+  ActionHandler,
   HandlerItem,
   HandlerPrepareContext,
   HandlerServices,
@@ -20,54 +17,18 @@ import type {
 } from '../handler';
 import type { AlertEventRecord } from '../types';
 import {
+  ACTION_HANDLERS,
   type ActionHandlersRegistry,
-  getActionHandlers,
   loadContextPerHandler,
   prepareWithHandler,
 } from '.';
 
 /**
- * Tests run against the canonical handler registry (via
- * `getActionHandlers()`) so the cast inside the invocation helpers is
- * exercised as it is in production. Each test starts with a wiped
- * registry and registers only the handlers it needs — the `beforeEach`
- * keeps state from leaking between cases, and the `afterAll` makes
- * sure the file doesn't pollute neighbouring suites.
+ * The invocation helpers take the registry as a parameter, so tests
+ * build their own inline registries instead of mutating the canonical
+ * one. No `wipeRegistry`, no `afterEach` teardown — the production
+ * registry exported from `./index.ts` is never touched here.
  */
-const wipeRegistry = (): void => {
-  const registry = getActionHandlers();
-  for (const key of Object.keys(registry) as AlertEpisodeActionType[]) {
-    delete registry[key];
-  }
-};
-
-/**
- * Snapshot of the production registry taken at module-load time —
- * *before* the file-level `beforeEach(wipeRegistry)` ever runs. The
- * exhaustiveness suite below uses this to assert that every
- * `AlertEpisodeActionType` value has a registered handler in
- * production. Capturing it here means we don't have to bypass the
- * wipe (which would make the per-test isolation pattern leaky).
- */
-const productionRegistrySnapshot = { ...getActionHandlers() } as ActionHandlersRegistry;
-
-beforeEach(wipeRegistry);
-afterAll(wipeRegistry);
-
-/**
- * Per-action typed registration shim. Callers pass a fully-narrowed
- * handler (typed against the per-action registry slot
- * `ActionHandlersRegistry[T]`); we merge it into the live registry
- * via `Object.assign`, which sidesteps the correlated-indexed-write
- * type check TS still cannot do — the production
- * `resolveHandlerOrThrow` carries the matching documentation for why
- * this is sound.
- */
-const registerForTest = <T extends AlertEpisodeActionType>(
-  handler: ActionHandlersRegistry[T]
-): void => {
-  Object.assign(getActionHandlers(), { [handler.actionType]: handler });
-};
 
 // Minimal stand-ins — the invocation helpers never inspect these
 // shapes, so casting through `unknown` keeps the test wiring small
@@ -105,91 +66,133 @@ const makeServices = (): HandlerServices => {
   return { spaceId: 'default', queryService };
 };
 
-describe('production handler registry', () => {
+/**
+ * Builds a test registry whose every slot points at `defaultHandler`
+ * (so every `action_type` resolves to something), then overrides the
+ * specific slots a given test cares about. Defaulting all slots keeps
+ * the mapped-type's exhaustiveness invariant satisfied without each
+ * test spelling out every action_type.
+ *
+ * The single cast bridges the variance gap: `ActionHandler` is
+ * contravariant in `TBody` (the *sound* reason the wide `defaultHandler`
+ * fits every narrow slot); method-shorthand on `prepare` /
+ * `loadContext` means TS itself checks bivariantly — same conclusion,
+ * looser rule. Either way, TS can't follow the wide-handler-fits-every-
+ * narrow-slot reasoning across `Object.fromEntries`, hence the cast.
+ */
+const buildTestRegistry = (
+  overrides: Partial<ActionHandlersRegistry>,
+  defaultHandler: ActionHandler<CreateAlertActionBody, unknown> = {
+    prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+  }
+): ActionHandlersRegistry => {
+  const base = Object.fromEntries(
+    Object.values(ALERT_EPISODE_ACTION_TYPE).map((actionType) => [actionType, defaultHandler])
+  ) as ActionHandlersRegistry;
+  return { ...base, ...overrides };
+};
+
+describe('production handler registry (ACTION_HANDLERS)', () => {
   it('has a registered handler for every AlertEpisodeActionType value', () => {
     // The mapped type for `ActionHandlersRegistry` already enforces
     // exhaustiveness at compile time, but the runtime assertion
-    // protects against accidental `delete`/mutation of the canonical
-    // registry — and gives a much friendlier failure when somebody
-    // adds a new action_type and forgets to register the handler.
+    // protects against accidental shape regression of the canonical
+    // export and gives a much friendlier failure when somebody adds a
+    // new action_type and forgets to register a handler.
     const declaredActionTypes = Object.values(ALERT_EPISODE_ACTION_TYPE).sort();
-    const registeredActionTypes = Object.keys(productionRegistrySnapshot).sort();
+    const registeredActionTypes = Object.keys(ACTION_HANDLERS).sort();
 
     expect(registeredActionTypes).toEqual(declaredActionTypes);
   });
 
-  it.each(Object.values(ALERT_EPISODE_ACTION_TYPE))(
-    'registers a handler whose actionType matches its registry slot for %s',
-    (actionType) => {
-      // Belt-and-braces against copy/paste mistakes inside the
-      // one-line audit handlers — e.g. `handlers/ack.ts` accidentally
-      // calling `createAuditOnlyHandler(UNACK)`. The registry's
-      // mapped type would not catch that on its own because both
-      // sides of the slot resolve to `ActionHandler<…, unknown>`.
-      const handler = productionRegistrySnapshot[actionType];
-      expect(handler.actionType).toBe(actionType);
-    }
-  );
+  /**
+   * Behavioural coverage for the audit-only singleton. The orchestrator
+   * tests cover ack/tag/snooze/etc. end-to-end, but the singleton
+   * itself is the production behaviour for six action types and
+   * deserves an isolated pin so any future tweak to its contract
+   * surfaces here first.
+   */
+  describe('audit-only slots', () => {
+    const AUDIT_ONLY_ACTION_TYPES = [
+      ALERT_EPISODE_ACTION_TYPE.ACK,
+      ALERT_EPISODE_ACTION_TYPE.UNACK,
+      ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+      ALERT_EPISODE_ACTION_TYPE.TAG,
+      ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+      ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+    ] as const;
+
+    it('shares one singleton across every audit-only slot', () => {
+      // Identity check: the design relies on one prepare-function
+      // serving six slots. Anyone replacing one slot with a bespoke
+      // handler in the future should do so deliberately — this test
+      // makes that intent visible.
+      const singletons = AUDIT_ONLY_ACTION_TYPES.map((type) => ACTION_HANDLERS[type]);
+      for (const handler of singletons) {
+        expect(handler).toBe(singletons[0]);
+      }
+    });
+
+    it('returns only the precomputed audit doc — no synthetic rule event', () => {
+      const alertActionDoc = fakeAuditDoc;
+      const prepared = ACTION_HANDLERS[ALERT_EPISODE_ACTION_TYPE.ACK].prepare(makeAckItem(), {
+        alertActionDoc,
+        userProfileUid: 'user-1',
+        context: undefined,
+      });
+
+      expect(prepared).toEqual({ alertActionDoc });
+    });
+
+    it('declares no loadContext — audit-only actions never preload', () => {
+      // Every audit-only slot is the same reference, so checking one
+      // proves the contract for all six.
+      expect(ACTION_HANDLERS[ALERT_EPISODE_ACTION_TYPE.ACK].loadContext).toBeUndefined();
+    });
+  });
 });
 
 describe('prepareWithHandler', () => {
-  it("delegates to the handler registered for the item's action_type and returns its `PreparedAction`", async () => {
-    // Two distinct handlers registered in the same test prove the
-    // helper routes by the discriminant rather than picking whichever
-    // is present first.
+  it("delegates to the handler registered for the item's action_type and returns its `PreparedAction`", () => {
+    // Two distinct handlers in the same registry prove the helper
+    // routes by the discriminant rather than picking whichever is
+    // present first.
     const ackPrepared: PreparedAction = { alertActionDoc: fakeAuditDoc };
     const unsnoozePrepared: PreparedAction = { alertActionDoc: fakeAuditDoc };
 
     const ackPrepare = jest.fn().mockReturnValue(ackPrepared);
     const unsnoozePrepare = jest.fn().mockReturnValue(unsnoozePrepared);
 
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
-      prepare: ackPrepare,
-    });
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-      prepare: unsnoozePrepare,
+    const registry = buildTestRegistry({
+      [ALERT_EPISODE_ACTION_TYPE.ACK]: { prepare: ackPrepare },
+      [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: { prepare: unsnoozePrepare },
     });
 
     const ackItem = makeAckItem();
     const unsnoozeItem = makeUnsnoozeItem();
     const ctx = makeContext();
 
-    expect(prepareWithHandler(ackItem, ctx)).toBe(ackPrepared);
-    expect(prepareWithHandler(unsnoozeItem, ctx)).toBe(unsnoozePrepared);
+    expect(prepareWithHandler(ackItem, ctx, registry)).toBe(ackPrepared);
+    expect(prepareWithHandler(unsnoozeItem, ctx, registry)).toBe(unsnoozePrepared);
 
     expect(ackPrepare).toHaveBeenCalledTimes(1);
     expect(unsnoozePrepare).toHaveBeenCalledTimes(1);
   });
 
-  it('forwards the item and prepare context unchanged to the handler', async () => {
+  it('forwards the item and prepare context unchanged to the handler', () => {
     // The handler must see exactly what the orchestrator passed; the
     // helper has no business mutating either argument.
     const prepare = jest.fn().mockReturnValue({ alertActionDoc: fakeAuditDoc });
-    registerForTest({ actionType: ALERT_EPISODE_ACTION_TYPE.ACK, prepare });
+    const registry = buildTestRegistry({
+      [ALERT_EPISODE_ACTION_TYPE.ACK]: { prepare },
+    });
 
     const item = makeAckItem();
     const ctx = makeContext();
 
-    prepareWithHandler(item, ctx);
+    prepareWithHandler(item, ctx, registry);
 
     expect(prepare).toHaveBeenCalledWith(item, ctx);
-  });
-
-  it('throws a recognisable error when no handler is registered for the action_type', async () => {
-    // The canonical registry is exhaustive at the type level, so this
-    // branch is unreachable from production code. It stays reachable
-    // from tests (which wipe the registry between cases) and that's
-    // exactly where we want the recognisable message: a forgotten
-    // `registerForTest(...)` should fail with the action_type in the
-    // error rather than a downstream `undefined is not a function`.
-    const item = makeAckItem();
-    const ctx = makeContext();
-
-    expect(() => prepareWithHandler(item, ctx)).toThrow(
-      /No handler registered for action_type "ack"/
-    );
   });
 });
 
@@ -201,15 +204,15 @@ describe('loadContextPerHandler', () => {
     const ackLoad = jest.fn().mockResolvedValue(ackContext);
     const unsnoozeLoad = jest.fn().mockResolvedValue(unsnoozeContext);
 
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
-      prepare: () => ({ alertActionDoc: fakeAuditDoc }),
-      loadContext: ackLoad,
-    });
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-      prepare: () => ({ alertActionDoc: fakeAuditDoc }),
-      loadContext: unsnoozeLoad,
+    const registry = buildTestRegistry({
+      [ALERT_EPISODE_ACTION_TYPE.ACK]: {
+        prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+        loadContext: ackLoad,
+      },
+      [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: {
+        prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+        loadContext: unsnoozeLoad,
+      },
     });
 
     const ackItems = [makeAckItem()];
@@ -221,7 +224,8 @@ describe('loadContextPerHandler', () => {
         [ALERT_EPISODE_ACTION_TYPE.ACK]: ackItems,
         [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeItems,
       },
-      services
+      services,
+      registry
     );
 
     expect(result).toEqual({
@@ -233,18 +237,20 @@ describe('loadContextPerHandler', () => {
   });
 
   it('returns `undefined` for handlers that do not define `loadContext` (no-preload signal)', async () => {
-    // The "no preload" handler is a first-class case — the
-    // orchestrator passes that `undefined` straight through to
-    // `prepare` as `ctx.context`. A missing entry in the result map
-    // would force the orchestrator to special-case it.
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
-      prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+    // The "no preload" handler is a first-class case — the orchestrator
+    // passes that `undefined` straight through to `prepare` as
+    // `ctx.context`. A missing entry in the result map would force the
+    // orchestrator to special-case it.
+    const registry = buildTestRegistry({
+      [ALERT_EPISODE_ACTION_TYPE.ACK]: {
+        prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+      },
     });
 
     const result = await loadContextPerHandler(
       { [ALERT_EPISODE_ACTION_TYPE.ACK]: [makeAckItem()] },
-      makeServices()
+      makeServices(),
+      registry
     );
 
     expect(result).toHaveProperty(ALERT_EPISODE_ACTION_TYPE.ACK);
@@ -258,25 +264,17 @@ describe('loadContextPerHandler', () => {
     // with a zero-length items list — which is also a useful invariant
     // for handler authors to rely on.
     const ackLoad = jest.fn().mockResolvedValue('ack-context');
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
-      prepare: () => ({ alertActionDoc: fakeAuditDoc }),
-      loadContext: ackLoad,
+    const registry = buildTestRegistry({
+      [ALERT_EPISODE_ACTION_TYPE.ACK]: {
+        prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+        loadContext: ackLoad,
+      },
     });
 
-    const result = await loadContextPerHandler({}, makeServices());
+    const result = await loadContextPerHandler({}, makeServices(), registry);
 
     expect(result).toEqual({});
     expect(ackLoad).not.toHaveBeenCalled();
-  });
-
-  it('throws when an action_type appears in the input but is not registered', async () => {
-    // Same defensive throw as `prepareWithHandler` — keeps the
-    // helpers consistent so handler-author mistakes surface in a
-    // single recognisable shape.
-    await expect(
-      loadContextPerHandler({ [ALERT_EPISODE_ACTION_TYPE.ACK]: [makeAckItem()] }, makeServices())
-    ).rejects.toThrow(/No handler registered for action_type "ack"/);
   });
 
   it('runs all handlers in parallel rather than sequentially', async () => {
@@ -290,16 +288,15 @@ describe('loadContextPerHandler', () => {
 
     const unsnoozeLoad = jest.fn().mockResolvedValue('unsnooze-context');
 
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
-      prepare: () => ({ alertActionDoc: fakeAuditDoc }),
-      loadContext: ackLoad,
-    });
-
-    registerForTest({
-      actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-      prepare: () => ({ alertActionDoc: fakeAuditDoc }),
-      loadContext: unsnoozeLoad,
+    const registry = buildTestRegistry({
+      [ALERT_EPISODE_ACTION_TYPE.ACK]: {
+        prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+        loadContext: ackLoad,
+      },
+      [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: {
+        prepare: () => ({ alertActionDoc: fakeAuditDoc }),
+        loadContext: unsnoozeLoad,
+      },
     });
 
     const pending = loadContextPerHandler(
@@ -307,7 +304,8 @@ describe('loadContextPerHandler', () => {
         [ALERT_EPISODE_ACTION_TYPE.ACK]: [makeAckItem()],
         [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: [makeUnsnoozeItem()],
       },
-      makeServices()
+      makeServices(),
+      registry
     );
 
     // Yield twice so both `loadContext` calls have a chance to

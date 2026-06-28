@@ -61,10 +61,6 @@ const buildItem = (alertEvent: AlertEventRecord) => ({
 });
 
 describe('deactivateHandler', () => {
-  it('declares the deactivate action_type as its discriminant', () => {
-    expect(deactivateHandler.actionType).toBe(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE);
-  });
-
   it('does not preload context — every input is already on the alertEvent', () => {
     expect(deactivateHandler.loadContext).toBeUndefined();
   });

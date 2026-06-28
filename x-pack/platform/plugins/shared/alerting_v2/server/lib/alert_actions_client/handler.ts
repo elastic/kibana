@@ -82,8 +82,6 @@ export interface ActionHandler<
   TBody extends CreateAlertActionBody = CreateAlertActionBody,
   TCtx = void
 > {
-  readonly actionType: TBody['action_type'];
-
   /**
    * Optional preload. The orchestrator calls this once per handler per
    * request with every item routed to that handler — single-action

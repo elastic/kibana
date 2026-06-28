@@ -34,7 +34,7 @@ import {
 } from './context_loaders/load_latest_alert_events';
 import type { AlertEventRecord } from './types';
 import type { HandlerItem, PreparedAction } from './handler';
-import { loadContextPerHandler, prepareWithHandler } from './handlers';
+import { ACTION_HANDLERS, loadContextPerHandler, prepareWithHandler } from './handlers';
 
 type ResolvedItem = HandlerItem<CreateAlertActionBody>;
 type ContextByActionType = Partial<Record<AlertEpisodeActionType, unknown>>;
@@ -100,7 +100,8 @@ export class AlertActionsClient {
 
     return prepareWithHandler(
       { action, alertEvent },
-      { alertActionDoc, userProfileUid, context: contextByType[action.action_type] }
+      { alertActionDoc, userProfileUid, context: contextByType[action.action_type] },
+      ACTION_HANDLERS
     );
   }
 
@@ -144,10 +145,14 @@ export class AlertActionsClient {
    */
   private async loadHandlerContexts(items: readonly ResolvedItem[]): Promise<ContextByActionType> {
     const itemsByType = groupItemsByActionType(items);
-    return loadContextPerHandler(itemsByType, {
-      queryService: this.queryService,
-      spaceId: this.spaceId,
-    });
+    return loadContextPerHandler(
+      itemsByType,
+      {
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+      },
+      ACTION_HANDLERS
+    );
   }
 
   /**

@@ -17,14 +17,8 @@ import type {
   HandlerServices,
   PreparedAction,
 } from '../handler';
-import { ackHandler } from './ack';
 import { activateHandler } from './activate';
-import { assignHandler } from './assign';
 import { deactivateHandler } from './deactivate';
-import { snoozeHandler } from './snooze';
-import { tagHandler } from './tag';
-import { unackHandler } from './unack';
-import { unsnoozeHandler } from './unsnooze';
 
 /**
  * Exhaustive map from `action_type` to its handler. The mapped type
@@ -40,99 +34,77 @@ export type ActionHandlersRegistry = {
 };
 
 /**
- * Canonical handler registry. Module-private on purpose: the only
- * production registration site is this declaration, and external
- * callers reach the registry exclusively through the invocation
- * helpers below — they cannot swap or hijack handlers at runtime.
+ * The audit-only handler: returns the orchestrator-built audit doc
+ * verbatim, has no preload, applies no preconditions. Most non-lifecycle
+ * action types (ack/unack/assign/tag/snooze/unsnooze) are
+ * behaviourally identical to one another, so the registry points every
+ * one of those slots at this single shared singleton instead of paying
+ * for a per-action file.
  *
- * Typed as the **exhaustive** {@link ActionHandlersRegistry}: a TS
- * compile error fires the moment a new `AlertEpisodeActionType` value
- * is introduced without a matching handler. The "missing handler"
- * defensive throw in {@link resolveHandlerOrThrow} is consequently
- * unreachable at the type level — it stays only as a belt-and-braces
- * guard against runtime mutation (tests use {@link getActionHandlers}
- * to wipe + repopulate the registry between cases).
+ * The singleton is typed against the widest action body
+ * (`CreateAlertActionBody`). The *sound* reason this assigns into
+ * every narrower slot is contravariance: `ActionHandler` uses `TBody`
+ * only in input positions of `prepare` / `loadContext`, so a
+ * wide-input handler is structurally a supertype of every narrow-input
+ * one. The compiler doesn't actually need that argument here —
+ * `prepare` and `loadContext` are method-shorthand declarations, which
+ * TS checks bivariantly even under `--strictFunctionTypes` (a strictly
+ * more permissive rule). Contravariance is what keeps the design
+ * sound; bivariance is just what makes the assignments compile
+ * without any per-slot factory, allowlist, or cast.
  */
-const ACTION_HANDLERS: ActionHandlersRegistry = {
-  [ALERT_EPISODE_ACTION_TYPE.ACK]: ackHandler,
-  [ALERT_EPISODE_ACTION_TYPE.UNACK]: unackHandler,
-  [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: assignHandler,
-  [ALERT_EPISODE_ACTION_TYPE.TAG]: tagHandler,
-  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: snoozeHandler,
-  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeHandler,
+const auditOnlyHandler: ActionHandler<CreateAlertActionBody, unknown> = {
+  prepare: (_item, { alertActionDoc }) => ({ alertActionDoc }),
+};
+
+/**
+ * Canonical handler registry. Exported as a `Readonly` view so callers
+ * cannot rebind individual slots; the production orchestrator passes
+ * this into the invocation helpers below, and tests pass their own
+ * inline registries instead of mutating the canonical one — the
+ * helpers take the registry as a parameter on purpose so the two never
+ * share state.
+ *
+ * Typed as the **exhaustive** {@link ActionHandlersRegistry}: adding a
+ * new `AlertEpisodeActionType` value without a matching slot is a TS
+ * compile error at this declaration.
+ */
+export const ACTION_HANDLERS: Readonly<ActionHandlersRegistry> = {
+  [ALERT_EPISODE_ACTION_TYPE.ACK]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNACK]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.TAG]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: auditOnlyHandler,
   [ALERT_EPISODE_ACTION_TYPE.DEACTIVATE]: deactivateHandler,
   [ALERT_EPISODE_ACTION_TYPE.ACTIVATE]: activateHandler,
 };
 
 /**
- * Read accessor for {@link ACTION_HANDLERS}. Returns the live registry
- * reference rather than a copy so callers can use the result for
- * exhaustiveness checks (e.g. "every `AlertEpisodeActionType` has an
- * entry") without paying for a per-call clone. Production code should
- * not mutate the returned object — production registration happens
- * only at the declaration site above. The test suite uses the live
- * reference to set up isolated scenarios and restores it via
- * `afterEach`/`afterAll`.
- */
-export const getActionHandlers = (): Partial<ActionHandlersRegistry> => ACTION_HANDLERS;
-
-/**
- * Single resolution point. Lives behind a function so the invocation
- * helpers below stay one-liners and the "no handler registered" error
- * message is produced in exactly one place — easier to grep, easier to
- * change once the registry is exhaustive.
- *
- * The cast bridges a TS variance gap (see the long-form note next to
- * each invocation helper below): the runtime invariant guarantees the
- * handler accepts the actual item shape, but TS cannot follow that
- * correlation across the indexed access.
- *
- * The `undefined` branch on the lookup is unreachable,
- * but the runtime check stays as defence against test setups that wipe
- * the registry via {@link getActionHandlers} — failing loud at lookup
- * beats silently invoking `undefined` further down the call stack.
- */
-const resolveHandlerOrThrow = (
-  actionType: AlertEpisodeActionType
-): ActionHandler<CreateAlertActionBody, unknown> => {
-  const handler = ACTION_HANDLERS[actionType] as
-    | ActionHandler<CreateAlertActionBody, unknown>
-    | undefined;
-
-  if (!handler) {
-    throw new Error(`No handler registered for action_type "${actionType}"`);
-  }
-
-  return handler;
-};
-
-/**
- * Calls the handler registered for `item.action.action_type`. The cast
- * inside {@link resolveHandlerOrThrow} is sound because the registry is
- * a mapped type keyed by that exact discriminant — `ACTION_HANDLERS[t]`
- * IS the handler for actions of type `t`. TS just can't follow the
- * correlation across the index access, so we assert it in this single,
- * well-tested place.
- *
- * Why we don't "fix" the cast: `ActionHandler` is contravariant in
- * `TBody` through its `action` input — a narrower handler (e.g.
- * `ActionHandler<AckAlertActionBody>`) is NOT structurally assignable
- * to `ActionHandler<CreateAlertActionBody>`. The cast bridges that with
- * a runtime invariant the compiler can't see: `item.action.action_type`
- * IS the discriminant we just used to look up `handler`, so the
- * handler's `prepare` only ever touches fields that exist on the
- * runtime value.
+ * Calls the handler that `handlers` registers for
+ * `item.action.action_type`. The cast on the lookup is sound because
+ * the registry is a mapped type keyed by that exact discriminant —
+ * `handlers[t]` IS the handler for actions of type `t`. TS just can't
+ * follow the correlation across the indexed access, so we assert it
+ * here in one place.
  */
 export const prepareWithHandler = (
   item: HandlerItem<CreateAlertActionBody>,
-  ctx: HandlerPrepareContext<unknown>
-): PreparedAction => resolveHandlerOrThrow(item.action.action_type).prepare(item, ctx);
+  ctx: HandlerPrepareContext<unknown>,
+  handlers: Readonly<ActionHandlersRegistry>
+): PreparedAction => {
+  const handler = handlers[item.action.action_type] as ActionHandler<
+    CreateAlertActionBody,
+    unknown
+  >;
+  return handler.prepare(item, ctx);
+};
 
 /**
  * Runs every handler's `loadContext` (those that define one) in
- * parallel, one call per `action_type` present in the input. Returns a
- * map of `action_type` -> opaque context, consumed only via
- * {@link prepareWithHandler}.
+ * parallel, one call per `action_type` present in `itemsByType`.
+ * Returns a sparse map of `action_type` -> opaque context, consumed
+ * only via {@link prepareWithHandler}.
  *
  * Handlers without a `loadContext` produce an `undefined` entry —
  * that's the canonical "this handler has no preload" signal the
@@ -143,7 +115,8 @@ export const prepareWithHandler = (
  */
 export const loadContextPerHandler = async (
   itemsByType: Partial<Record<AlertEpisodeActionType, Array<HandlerItem<CreateAlertActionBody>>>>,
-  services: HandlerServices
+  services: HandlerServices,
+  handlers: Readonly<ActionHandlersRegistry>
 ): Promise<Partial<Record<AlertEpisodeActionType, unknown>>> => {
   const entries = Object.entries(itemsByType) as Array<
     [AlertEpisodeActionType, Array<HandlerItem<CreateAlertActionBody>>]
@@ -151,7 +124,7 @@ export const loadContextPerHandler = async (
 
   const loaded = await Promise.all(
     entries.map(async ([type, items]) => {
-      const handler = resolveHandlerOrThrow(type);
+      const handler = handlers[type] as ActionHandler<CreateAlertActionBody, unknown>;
       return [type, await handler.loadContext?.(items, services)] as const;
     })
   );
