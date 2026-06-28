@@ -30,7 +30,7 @@ import { test } from '../fixtures';
 test.describe('My feature', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   test('shows the main table', async ({ page }) => {
