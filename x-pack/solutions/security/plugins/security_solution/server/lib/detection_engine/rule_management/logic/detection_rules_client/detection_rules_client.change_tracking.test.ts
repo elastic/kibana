@@ -257,7 +257,11 @@ describe('DetectionRulesClient change tracking', () => {
       rulesClient.resolve.mockResolvedValue(liveRule);
       rulesClient.getHistory.mockResolvedValue({ total: 1, items: [historyItem] });
 
-      await detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID });
+      await detectionRulesClient.restoreRuleFromHistory({
+        ruleId: RULE_ID,
+        changeId: CHANGE_ID,
+        currentRuleRevision: 0,
+      });
 
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({

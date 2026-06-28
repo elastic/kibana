@@ -42,9 +42,9 @@ export type RestoreRuleFromHistoryRequestParamsInput = z.input<
 export const RestoreRuleFromHistoryRequestBody = lazySchema(() =>
   z.object({
     /**
-      * The caller's known current revision of the rule. When provided the server
-checks this value against the rule's actual revision and returns 409 if they
-differ, preventing a restore that would silently overwrite a concurrent update.
+      * The caller's known current revision of the rule for concurrency control.
+The value is required to restore a rule. To restore a deleted rule the revision
+has to be omitted.
 
       */
     revision: RuleRevision.optional(),

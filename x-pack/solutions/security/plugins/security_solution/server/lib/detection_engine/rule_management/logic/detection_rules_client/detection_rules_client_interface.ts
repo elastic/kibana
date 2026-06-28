@@ -114,5 +114,9 @@ export interface GetHistoryForRuleArgs {
 export interface RestoreRuleFromHistoryArgs {
   ruleId: RuleObjectId;
   changeId: string;
-  ruleRevision?: number;
+  /**
+   * Current rule's revision for concurrency control.
+   * It has to be omitted for restoring a deleted rule.
+   */
+  currentRuleRevision?: number;
 }

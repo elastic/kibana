@@ -57,7 +57,7 @@ export const restoreRuleFromHistoryRoute = (router: SecuritySolutionPluginRouter
           const result = await detectionRulesClient.restoreRuleFromHistory({
             ruleId,
             changeId,
-            ruleRevision: revision,
+            currentRuleRevision: revision,
           });
 
           return response.ok({ body: result });

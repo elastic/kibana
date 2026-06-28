@@ -92,7 +92,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: liveAlertingRule.revision,
+      currentRuleRevision: liveAlertingRule.revision,
     });
 
     expect(rulesClient.update).toHaveBeenCalledWith(
@@ -132,7 +132,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: customizedPrebuiltLiveRule.revision,
+      currentRuleRevision: customizedPrebuiltLiveRule.revision,
     });
 
     expect(rulesClient.update).toHaveBeenCalledWith(
@@ -170,7 +170,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: purePrebuiltLiveRule.revision,
+      currentRuleRevision: purePrebuiltLiveRule.revision,
     });
 
     expect(rulesClient.update).toHaveBeenCalledWith(
@@ -214,7 +214,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       detectionRulesClient.restoreRuleFromHistory({
         ruleId: RULE_ID,
         changeId: CHANGE_ID,
-        ruleRevision: liveAlertingRule.revision + 1,
+        currentRuleRevision: liveAlertingRule.revision + 1,
       })
     ).rejects.toMatchObject({ statusCode: 409 });
 
@@ -242,7 +242,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       detectionRulesClient.restoreRuleFromHistory({
         ruleId: RULE_ID,
         changeId: CHANGE_ID,
-        ruleRevision: 1,
+        currentRuleRevision: 1,
       })
     ).rejects.toMatchObject({ statusCode: 409 });
 
@@ -275,7 +275,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       detectionRulesClient.restoreRuleFromHistory({
         ruleId: RULE_ID,
         changeId: CHANGE_ID,
-        ruleRevision: liveAlertingRule.revision,
+        currentRuleRevision: liveAlertingRule.revision,
       })
     ).rejects.toMatchObject({ statusCode: 404 });
 
@@ -295,7 +295,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: disabledLiveRule.revision,
+      currentRuleRevision: disabledLiveRule.revision,
     });
 
     expect(rulesClient.enableRule).not.toHaveBeenCalled();
@@ -310,7 +310,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: liveAlertingRule.revision,
+      currentRuleRevision: liveAlertingRule.revision,
     });
 
     expect(rulesClient.getHistory).toHaveBeenCalledWith(
@@ -335,7 +335,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       detectionRulesClient.restoreRuleFromHistory({
         ruleId: RULE_ID,
         changeId: CHANGE_ID,
-        ruleRevision: liveAlertingRule.revision,
+        currentRuleRevision: liveAlertingRule.revision,
       })
     ).rejects.toThrow('mocked MLAuth error');
 
@@ -350,7 +350,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     const result = await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: liveAlertingRule.revision,
+      currentRuleRevision: liveAlertingRule.revision,
     });
 
     expect(result.rule).toMatchObject({
@@ -366,7 +366,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     const result = await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: liveAlertingRule.revision,
+      currentRuleRevision: liveAlertingRule.revision,
     });
 
     expect(result.no_change).toBe(true);
@@ -386,7 +386,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       detectionRulesClient.restoreRuleFromHistory({
         ruleId: RULE_ID,
         changeId: CHANGE_ID,
-        ruleRevision: liveAlertingRule.revision,
+        currentRuleRevision: liveAlertingRule.revision,
       })
     ).rejects.toMatchObject({ output: { statusCode: 409 } });
   });
@@ -430,7 +430,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     const result = await detectionRulesClient.restoreRuleFromHistory({
       ruleId: RULE_ID,
       changeId: CHANGE_ID,
-      ruleRevision: liveAlertingRule.revision,
+      currentRuleRevision: liveAlertingRule.revision,
     });
 
     expect(result.no_change).toBeUndefined();

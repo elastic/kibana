@@ -40,7 +40,7 @@ export const restoreRuleFromHistory = async ({
   rulesAuthz,
   ruleId,
   changeId,
-  ruleRevision,
+  currentRuleRevision,
 }: {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
@@ -49,20 +49,20 @@ export const restoreRuleFromHistory = async ({
   rulesAuthz: DetectionRulesAuthz;
   ruleId: RuleObjectId;
   changeId: string;
-  ruleRevision?: number;
+  currentRuleRevision?: number;
 }): Promise<{ rule: RuleResponse; no_change?: true }> => {
   const existingRule = await getRuleById({ rulesClient, id: ruleId });
 
-  if (existingRule == null && ruleRevision != null) {
+  if (existingRule == null && currentRuleRevision != null) {
     throw new ClientError(
-      'Someone has restored this deleted rule already. Please refresh the history if you still want to restore to an earlier revision.',
+      'Someone has restored this deleted rule already. Please provide the latest rule revision.',
       409
     );
   }
 
-  if (existingRule != null && existingRule.revision !== ruleRevision) {
+  if (existingRule != null && existingRule.revision !== currentRuleRevision) {
     throw new RuleConcurrencyError(
-      'Someone has updated the rule already. Please refresh the history if you still want to restore to an earlier revision.',
+      'Someone has updated the rule already. Please provide the latest rule revision.',
       existingRule.revision
     );
   }
