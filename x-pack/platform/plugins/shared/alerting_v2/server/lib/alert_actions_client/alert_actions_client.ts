@@ -27,7 +27,6 @@ import {
   alertEventType,
   buildRuleEventDocument,
   type AlertEpisodeStatus,
-  type AlertEvent,
 } from '../../resources/datastreams/alert_events';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
@@ -46,6 +45,7 @@ import {
   toAlertEventRecords,
 } from './context_loaders/load_latest_alert_events';
 import type { AlertEventRecord } from './types';
+import type { PreparedAction } from './handler';
 
 type DeactivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -56,22 +56,6 @@ type ActivateAlertActionBody = Extract<
   CreateAlertActionBody,
   { action_type: typeof ALERT_EPISODE_ACTION_TYPE.ACTIVATE }
 >;
-
-/**
- * Prepared write payload for one alert action. The audit `.alert-actions` doc
- * is always present; lifecycle actions (`deactivate` / `activate`) additionally
- * carry the synthetic `.rule-events` doc that flips `episode.status` so the UI
- * sees the new state without waiting for the next rule run.
- *
- * Producing this struct is side-effect-free — preconditions are evaluated and
- * docs are built, but nothing is indexed and no domain event is emitted until
- * the caller hands the batch to {@link AlertActionsClient.persistPreparedActions}
- * and then `eventPublisher.emitEpisodeActions`.
- */
-interface PreparedAction {
-  alertActionDoc: AlertAction;
-  ruleEvent?: AlertEvent;
-}
 
 /**
  * The two pieces of data {@link AlertActionsClient.prepareActivateAction}
