@@ -351,13 +351,18 @@ export function ActionsMenu({
     }
   };
 
+  const displayOptionsNoTooltip = useMemo(
+    () => displayOptions.map((o) => ({ ...o, toolTipContent: '' })),
+    [displayOptions]
+  );
+
   return (
     <EuiSelectable
       aria-label={i18n.translate('workflows.actionsMenu.ariaLabel', {
         defaultMessage: 'Actions menu',
       })}
       searchable
-      options={displayOptions}
+      options={displayOptionsNoTooltip}
       onChange={handleChange}
       optionMatcher={optionMatcher}
       searchProps={{

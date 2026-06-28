@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiImage,
+  EuiNotificationBadge,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -297,11 +298,19 @@ function StepDetailPanel({
         <EuiTabs size="s" css={styles.tabs}>
           <EuiTab isSelected={activeTab === 'inputs'} onClick={() => onTabChange('inputs')}>
             <FormattedMessage id="workflows.actionsMenu.preview.inputs" defaultMessage="Inputs" />
-            {inputCount > 0 && <span css={styles.tabCount}>{inputCount}</span>}
+            {inputCount > 0 && (
+              <EuiNotificationBadge color="accent" size="m" css={styles.tabCount}>
+                {inputCount}
+              </EuiNotificationBadge>
+            )}
           </EuiTab>
           <EuiTab isSelected={activeTab === 'outputs'} onClick={() => onTabChange('outputs')}>
             <FormattedMessage id="workflows.actionsMenu.preview.outputs" defaultMessage="Outputs" />
-            {outputCount > 0 && <span css={styles.tabCount}>{outputCount}</span>}
+            {outputCount > 0 && (
+              <EuiNotificationBadge color="accent" size="m" css={styles.tabCount}>
+                {outputCount}
+              </EuiNotificationBadge>
+            )}
           </EuiTab>
         </EuiTabs>
 
@@ -321,13 +330,13 @@ function StepDetailPanel({
                 {idx > 0 && <div css={styles.fieldDivider} />}
                 <div css={styles.fieldRow}>
                   <div css={styles.fieldLabelRow}>
-                    <EuiText size="xs">
-                      <strong>{field.name}</strong>
+                    <EuiText size="xs" css={styles.fieldName}>
+                      {field.name}
                     </EuiText>
                     <span css={styles.typeBadge}>{field.typeName}</span>
                   </div>
                   {field.description && (
-                    <EuiText size="xs" color="subdued">
+                    <EuiText size="xs" color="subdued" css={styles.fieldDescription}>
                       {field.description}
                     </EuiText>
                   )}
@@ -432,18 +441,7 @@ const panelStyles = {
   }),
   tabCount: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       marginInlineStart: euiTheme.size.xs,
-      minWidth: '16px',
-      height: '16px',
-      borderRadius: '8px',
-      backgroundColor: euiTheme.colors.vis.euiColorVis7,
-      color: euiTheme.colors.backgroundBasePlain,
-      fontSize: '10px',
-      fontWeight: 500,
-      padding: '0 4px',
     }),
   // Figma: form-content — bg=white
   fieldList: ({ euiTheme }: UseEuiTheme) =>
@@ -468,7 +466,7 @@ const panelStyles = {
     css({
       display: 'inline-block',
       padding: '2px 6px',
-      borderRadius: '3px',
+      borderRadius: '4px',
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       color: euiTheme.colors.textSubdued,
       fontSize: '10px',
@@ -481,6 +479,15 @@ const panelStyles = {
       flexShrink: 1,
       verticalAlign: 'middle',
     }),
+  fieldName: css({
+    fontWeight: 500,
+  }),
+  fieldDescription: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'block',
+  }),
   fieldDivider: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '1px',
