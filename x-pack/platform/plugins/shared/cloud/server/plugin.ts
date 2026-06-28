@@ -68,9 +68,9 @@ export interface CloudSetup {
    */
   deploymentId?: string;
   /**
-   * The Kibana resource ID within the Cloud deployment. Only available when running on Elastic Cloud.
+   * The Elasticsearch resource ID within the Cloud deployment. Only available when running on Elastic Cloud.
    */
-  kibanaClusterId?: string;
+  elasticsearchClusterId?: string;
   /**
    * The full URL to the elasticsearch cluster.
    */
@@ -413,7 +413,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
-      kibanaClusterId: decodedId?.kibanaClusterId,
+      elasticsearchClusterId: decodedId?.elasticsearchClusterId,
       elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,

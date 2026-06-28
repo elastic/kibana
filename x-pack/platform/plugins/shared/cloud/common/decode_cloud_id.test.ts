@@ -88,13 +88,13 @@ describe('Fleet - decodeCloudId', () => {
     }
   });
 
-  it('exposes the Kibana cluster ID', () => {
+  it('exposes the Elasticsearch cluster ID', () => {
     const decoded = decodeCloudId(
       'staging:dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
       logger
     );
 
-    expect(decoded?.kibanaClusterId).toBe('c6c2ca6d042249af0cc7d7a9e9625743');
+    expect(decoded?.elasticsearchClusterId).toBe('cec6f261a74bf24ce33bb8811b84294f');
   });
 
   it('returns undefined for invalid formats', () => {

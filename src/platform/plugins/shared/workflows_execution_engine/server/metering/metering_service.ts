@@ -139,7 +139,7 @@ export class WorkflowsMeteringService {
       source.provider = cloudSetup?.csp;
       source.region = cloudSetup?.region;
 
-      const clusterId = cloudSetup?.kibanaClusterId;
+      const clusterId = cloudSetup?.elasticsearchClusterId;
       if (clusterId) {
         source.metadata = { cluster_id: clusterId };
       }

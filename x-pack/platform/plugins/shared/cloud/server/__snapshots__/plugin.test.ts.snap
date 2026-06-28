@@ -12,6 +12,7 @@ Object {
   "cloudId": "cloudId",
   "csp": "aws",
   "deploymentId": "deployment-id",
+  "elasticsearchClusterId": undefined,
   "elasticsearchUrl": undefined,
   "instanceSizeMb": undefined,
   "isCloudEnabled": true,
@@ -19,7 +20,6 @@ Object {
   "isElasticStaffOwned": undefined,
   "isInTrial": [Function],
   "isServerlessEnabled": false,
-  "kibanaClusterId": undefined,
   "kibanaUrl": undefined,
   "managedOtlp": Object {
     "url": undefined,

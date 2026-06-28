@@ -56,7 +56,7 @@ export interface UsageSource {
   region?: string;
   /** Optional metadata such as product tier. */
   metadata?: {
-    /** Kibana resource ID from the Cloud ID. */
+    /** Elasticsearch resource ID from the Cloud ID. */
     cluster_id?: string;
     tier?: string;
   };

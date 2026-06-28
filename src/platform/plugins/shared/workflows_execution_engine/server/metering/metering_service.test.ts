@@ -385,18 +385,18 @@ describe('WorkflowsMeteringService', () => {
       expect(record.source.region).toBe('europe-west1');
     });
 
-    it('should include the Kibana cluster ID for ECH deployments', async () => {
+    it('should include the Elasticsearch cluster ID for ECH deployments', async () => {
       const execution = createMockExecution();
       const cloudSetup = createMockCloudSetup({
         serverless: undefined,
         deploymentId: 'deploy-789',
-        kibanaClusterId: 'kibana-cluster-456',
+        elasticsearchClusterId: 'es-cluster-123',
       } as Partial<CloudSetup>);
 
       await meteringService.reportWorkflowExecution(execution, cloudSetup);
 
       const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
-      expect(record.source.metadata).toEqual({ cluster_id: 'kibana-cluster-456' });
+      expect(record.source.metadata).toEqual({ cluster_id: 'es-cluster-123' });
     });
   });
 });

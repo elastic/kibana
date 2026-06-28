@@ -106,7 +106,7 @@ class MeteringServiceImpl implements MeteringService {
       source.provider = this.cloud.csp;
       source.region = this.cloud.region;
 
-      const clusterId = this.cloud.kibanaClusterId;
+      const clusterId = this.cloud.elasticsearchClusterId;
       if (clusterId) {
         source.metadata = { cluster_id: clusterId };
       }
