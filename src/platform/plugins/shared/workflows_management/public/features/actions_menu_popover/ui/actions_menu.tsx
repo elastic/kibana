@@ -158,7 +158,6 @@ export function ActionsMenu({
         css={styles.actionOptionWrapper}
         className="actionOptionWrapper"
         onMouseEnter={() => handleMouseEnter(action)}
-        onMouseLeave={handleMouseLeave}
       >
         <EuiFlexGroup alignItems="center" css={styles.actionOption} gutterSize="none">
           <EuiFlexItem grow={false} css={styles.iconOuter}>
@@ -415,7 +414,7 @@ export function ActionsMenu({
           </div>
 
           {/* Two-column body */}
-          <EuiFlexGroup gutterSize="none" css={styles.body}>
+          <EuiFlexGroup gutterSize="none" css={styles.body} onMouseLeave={handleMouseLeave}>
             {/* Left column — list */}
             <EuiFlexItem css={styles.leftColumn}>
               {currentPath.length > 0 && (
@@ -517,6 +516,10 @@ const componentStyles = {
       '& .euiSelectableListItem': {
         paddingBlock: 0,
         paddingInline: 0,
+        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      },
+      '& .euiSelectableListItem:last-child': {
+        borderBottom: 'none',
       },
       '& .euiSelectableList': {
         flex: 1,
