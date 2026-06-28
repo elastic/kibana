@@ -60,9 +60,10 @@ export function getEmptyESQLResponse(): EsqlQueryResponse {
 
 /**
  * Mocks the batched pre-deactivate ES|QL response. Each input record
- * becomes one row keyed by `episode_id` (which is what
- * `AlertActionsClient.findPreDeactivateAlertEvents` returns its map by).
- * Pass a single-element array for the single-route activate path.
+ * becomes one row keyed by `episode_id` (which is what the activate
+ * handler's `loadContext` returns its map by — see
+ * `handlers/activate.ts`). Pass a single-element array for the
+ * single-route activate path.
  */
 export function getPreDeactivateAlertEventESQLResponse(
   records: Array<{
@@ -115,7 +116,8 @@ export function getPreDeactivateAlertEventESQLResponse(
 /**
  * Mocks the batched lifecycle ES|QL response (one row per episode). Each
  * record yields `{ episode_id, last_action_type }`, matching the shape
- * `AlertActionsClient.findLastEpisodeLifecycleActionTypes` consumes.
+ * the activate handler's `loadContext` consumes (see
+ * `handlers/activate.ts`).
  *
  * For the "no lifecycle action for this episode" case the caller can either
  * pass an empty array or simply omit the episode from the records list —
