@@ -8,15 +8,15 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import { nodeBuilder } from '@kbn/es-query';
 
-const INTERNAL_FIND_RULES_URL = '/internal/alerting/rules/_find';
+const INTERNAL_FIND_MUTED_ALERT_INSTANCES_URL = '/internal/alerting/rules/_find_muted_alerts';
 
-export interface Rule {
+export interface MutedAlertRecord {
   id: string;
   muted_alert_ids: string[];
 }
 
-export interface FindRulesResponse {
-  data: Rule[];
+export interface FindMutedAlertsResponse {
+  data: MutedAlertRecord[];
 }
 
 export interface GetMutedAlertsInstancesByRuleParams {
@@ -31,10 +31,9 @@ export const getMutedAlertsInstancesByRule = async ({
   signal,
 }: GetMutedAlertsInstancesByRuleParams) => {
   const filterNode = nodeBuilder.or(ruleIds.map((id) => nodeBuilder.is('alert.id', `alert:${id}`)));
-  return http.post<FindRulesResponse>(INTERNAL_FIND_RULES_URL, {
+  return http.post<FindMutedAlertsResponse>(INTERNAL_FIND_MUTED_ALERT_INSTANCES_URL, {
     body: JSON.stringify({
       filter: JSON.stringify(filterNode),
-      fields: ['id', 'mutedInstanceIds'],
       page: 1,
       per_page: ruleIds.length,
     }),
