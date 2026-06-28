@@ -76,8 +76,9 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   );
 
   const isKqlSelected = language === 'kuery';
-  const querySyntaxDocs =
-    isKqlSelected ? docLinks.links.query.kueryQuerySyntax : docLinks.links.query.luceneQuerySyntax;
+  const querySyntaxDocs = isKqlSelected
+    ? docLinks.links.query.kueryQuerySyntax
+    : docLinks.links.query.luceneQuerySyntax;
 
   const languageMenuItem = (
     <>
