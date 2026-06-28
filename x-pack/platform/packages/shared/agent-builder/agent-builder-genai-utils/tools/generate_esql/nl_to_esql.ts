@@ -7,7 +7,8 @@
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { TimeRange } from '@kbn/agent-builder-common';
-import type { ScopedModel } from '@kbn/agent-builder-server';
+import { EffortLevels } from '@kbn/agent-builder-common';
+import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
@@ -38,12 +39,19 @@ export interface GenerateEsqlResponse {
   error?: string;
 }
 
-export interface GenerateEsqlDeps {
-  model: ScopedModel;
+/**
+ * Model input for {@link generateEsql}.
+ * Either a `modelProvider` (allowing model selection) or an already-resolved `model` (legacy path).
+ */
+export type GenerateEsqlModelDeps =
+  | { modelProvider: ModelProvider; model?: never }
+  | { model: ScopedModel; modelProvider?: never };
+
+export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   esClient: ElasticsearchClient;
   logger: Logger;
   events?: ToolEventEmitter;
-}
+};
 
 export interface GenerateEsqlOptions {
   /**
@@ -88,6 +96,10 @@ export interface GenerateEsqlOptions {
    * for time range filtering in generated queries.
    */
   disableNamedParams?: boolean;
+  /**
+   * If true, external ES|QL datasets are considered when discovering and resolving the target.
+   */
+  includeDatasets?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -102,10 +114,16 @@ export const generateEsql = async ({
   rowLimit,
   timeRange: inputTimeRange,
   disableNamedParams,
-  model,
+  includeDatasets = false,
+  model: inputModel,
+  modelProvider,
   esClient,
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  // Resolve a single ScopedModel once. When a modelProvider is given, use the low-effort model
+  const model = modelProvider
+    ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
+    : inputModel!;
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
@@ -117,6 +135,7 @@ export const generateEsql = async ({
     docBase,
     documentation,
     esqlCallbacks,
+    includeDatasets,
   });
 
   return withActiveInferenceSpan(
@@ -143,6 +162,7 @@ export const generateEsql = async ({
             nlQuery: nlQueryWithContext,
             esClient,
             limit: 1,
+            includeDatasets,
             model,
             logger,
           });
