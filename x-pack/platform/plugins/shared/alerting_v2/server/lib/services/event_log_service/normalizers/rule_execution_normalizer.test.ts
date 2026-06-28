@@ -39,7 +39,7 @@ describe('normalizeRuleExecution', () => {
     const result = normalizeRuleExecution(HIT_ID, buildRawEvent());
     expect(result).toEqual({
       id: HIT_ID,
-      rule: { id: 'rule-1' },
+      rule: { id: 'rule-1', version: null },
       spaceId: 'default',
       startedAt: '2026-06-23T09:59:50.000Z',
       endedAt: '2026-06-23T10:00:00.000Z',
@@ -48,6 +48,11 @@ describe('normalizeRuleExecution', () => {
       reason: null,
       error: null,
     });
+  });
+
+  it('emits rule.version = null as a placeholder until the executor writes its own provider event', () => {
+    const result = normalizeRuleExecution(HIT_ID, buildRawEvent());
+    expect(result?.rule.version).toBeNull();
   });
 
   it('returns null when the hit id is missing', () => {
@@ -134,11 +139,23 @@ describe('normalizeRuleExecution', () => {
   it.each([
     ['missing task id', { kibana: { server_uuid: 'srv-1' } } as IValidatedEvent],
     [
-      'wrong segment count',
+      'task id has no rule id segment (3 segments only)',
       buildRawEvent({
         kibana: {
           task: {
             id: 'alerting_v2:rule_executor:default',
+            type: 'alerting_v2:rule_executor',
+          },
+          server_uuid: 'srv-1',
+        },
+      }),
+    ],
+    [
+      'task id has a trailing colon — rule id segment is empty',
+      buildRawEvent({
+        kibana: {
+          task: {
+            id: 'alerting_v2:rule_executor:default:',
             type: 'alerting_v2:rule_executor',
           },
           server_uuid: 'srv-1',
@@ -162,6 +179,23 @@ describe('normalizeRuleExecution', () => {
     expect(result).toBeNull();
   });
 
+  it('reconstructs ruleId when it contains colons (e.g. namespaced ids)', () => {
+    const result = normalizeRuleExecution(
+      HIT_ID,
+      buildRawEvent({
+        kibana: {
+          task: {
+            id: 'alerting_v2:rule_executor:default:tenant:rule:42',
+            type: 'alerting_v2:rule_executor',
+          },
+          server_uuid: 'srv-1',
+        },
+      })
+    );
+    expect(result?.spaceId).toBe('default');
+    expect(result?.rule.id).toBe('tenant:rule:42');
+  });
+
   it('returns null when event.start or event.end is missing', () => {
     expect(
       normalizeRuleExecution(
@@ -178,22 +212,62 @@ describe('normalizeRuleExecution', () => {
     ).toBeNull();
   });
 
-  it('returns null when event.outcome is not success/failure', () => {
-    expect(
-      normalizeRuleExecution(
-        HIT_ID,
-        buildRawEvent({
-          event: {
-            provider: 'taskManager',
-            action: 'task-run',
-            outcome: 'unknown',
-            start: '2026-06-23T09:59:50.000Z',
-            end: '2026-06-23T10:00:00.000Z',
-            duration: 1_000_000_000,
-          },
-        })
-      )
-    ).toBeNull();
+  it('passes the ECS unknown outcome through verbatim (in-flight / unclassified runs)', () => {
+    const result = normalizeRuleExecution(
+      HIT_ID,
+      buildRawEvent({
+        event: {
+          provider: 'taskManager',
+          action: 'task-run',
+          outcome: 'unknown',
+          start: '2026-06-23T09:59:50.000Z',
+          end: '2026-06-23T10:00:00.000Z',
+          duration: 1_000_000_000,
+        },
+      })
+    );
+    expect(result?.outcome).toBe('unknown');
+  });
+
+  /**
+   * Forward-compatibility guard: if Task Manager or ECS ever broaden
+   * `event.outcome` beyond the current enum, we want the row to keep
+   * flowing through with a sentinel value rather than vanish from the
+   * user's execution history. The mapping is documented in
+   * `normalizeRuleExecution`'s docstring.
+   */
+  it('maps out-of-enum outcomes to "unknown" instead of dropping the row', () => {
+    const result = normalizeRuleExecution(
+      HIT_ID,
+      buildRawEvent({
+        event: {
+          provider: 'taskManager',
+          action: 'task-run',
+          outcome: 'partial',
+          start: '2026-06-23T09:59:50.000Z',
+          end: '2026-06-23T10:00:00.000Z',
+          duration: 1_000_000_000,
+        },
+      })
+    );
+    expect(result).not.toBeNull();
+    expect(result?.outcome).toBe('unknown');
+  });
+
+  it('maps a missing event.outcome to "unknown" (Task Manager omits the field on some runs)', () => {
+    const result = normalizeRuleExecution(
+      HIT_ID,
+      buildRawEvent({
+        event: {
+          provider: 'taskManager',
+          action: 'task-run',
+          start: '2026-06-23T09:59:50.000Z',
+          end: '2026-06-23T10:00:00.000Z',
+          duration: 1_000_000_000,
+        },
+      })
+    );
+    expect(result?.outcome).toBe('unknown');
   });
 
   it('handles event.duration encoded as a string', () => {

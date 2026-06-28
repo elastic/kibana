@@ -99,13 +99,9 @@ describe('action policy events queries', () => {
       expect(filters.find(hasBoolShould)).toBeUndefined();
     });
 
-    it('matches the nested saved_objects.id terms for policy + rule ids', () => {
+    it('matches policy ids against the action_policy saved-object type only', () => {
       const filters = filtersOf(
-        buildCountActionPolicyEventsQuery({
-          ...baseParams,
-          policyIds: ['p1'],
-          ruleIds: ['r1', 'r2'],
-        })
+        buildCountActionPolicyEventsQuery({ ...baseParams, policyIds: ['p1'] })
       );
       const boolFilter = filters.find(hasBoolShould);
       expect(boolFilter).toBeDefined();
@@ -115,7 +111,83 @@ describe('action policy events queries', () => {
           {
             nested: {
               path: 'kibana.saved_objects',
-              query: { terms: { 'kibana.saved_objects.id': ['p1', 'r1', 'r2'] } },
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_action_policy' } },
+                    { terms: { 'kibana.saved_objects.id': ['p1'] } },
+                  ],
+                },
+              },
+            },
+          },
+        ])
+      );
+    });
+
+    it('matches rule ids against the alerting_rule saved-object type only', () => {
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, ruleIds: ['r1', 'r2'] })
+      );
+      const boolFilter = filters.find(hasBoolShould);
+      const should = (boolFilter?.bool?.should ?? []) as QueryDslQueryContainer[];
+      expect(should).toEqual(
+        expect.arrayContaining([
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_rule' } },
+                    { terms: { 'kibana.saved_objects.id': ['r1', 'r2'] } },
+                  ],
+                },
+              },
+            },
+          },
+        ])
+      );
+    });
+
+    it('keeps policy and rule nested clauses separate so a shared id never crosses types', () => {
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({
+          ...baseParams,
+          policyIds: ['shared-id'],
+          ruleIds: ['shared-id'],
+        })
+      );
+      const should = (filters.find(hasBoolShould)?.bool?.should ?? []) as QueryDslQueryContainer[];
+      // Two type-keyed nested clauses — the shared id is projected onto
+      // each SO type separately, never as a single clause that lets the
+      // id match across types.
+      expect(should).toEqual(
+        expect.arrayContaining([
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_action_policy' } },
+                    { terms: { 'kibana.saved_objects.id': ['shared-id'] } },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_rule' } },
+                    { terms: { 'kibana.saved_objects.id': ['shared-id'] } },
+                  ],
+                },
+              },
             },
           },
         ])

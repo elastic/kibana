@@ -122,6 +122,11 @@ describe('buildRuleExecutionsQuery', () => {
     expect(filters.find(hasTermsOn('event.outcome'))).toBeUndefined();
   });
 
+  it('omits the outcome filter when outcomes is not defined', () => {
+    const filters = filtersOf(buildRuleExecutionsQuery(baseQuery));
+    expect(filters.find(hasTermsOn('event.outcome'))).toBeUndefined();
+  });
+
   it('adds a range filter on event.start when from/to are provided', () => {
     const filters = filtersOf(
       buildRuleExecutionsQuery({

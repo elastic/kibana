@@ -8,6 +8,10 @@
 import type { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import {
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../../../../../common/saved_object_types';
+import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../../../dispatcher/steps/constants';
@@ -132,9 +136,14 @@ const actionFilter = (outcome: PolicyExecutionOutcome | undefined): QueryDslQuer
 
 /**
  * Composes a single `bool.should` clause that matches when an event
- * references *any* of the provided ids — checking both the nested
- * `kibana.saved_objects.id` field and the top-level rule-id spillover
+ * references *any* of the provided ids — checking the nested
+ * `kibana.saved_objects` array and the top-level rule-id spillover
  * (`kibana.alerting_v2.dispatcher.rule_ids`).
+ *
+ * Each event stores both policy *and* rule refs in the same nested array,
+ * so the nested clauses must pin both `kibana.saved_objects.type` *and*
+ * `kibana.saved_objects.id` — otherwise an id that happens to be shared
+ * between a policy and a rule would match the wrong saved-object type.
  *
  * Returns `undefined` when there is nothing to filter on so callers can
  * skip pushing an empty clause.
@@ -143,21 +152,32 @@ const buildIdFilter = (
   policyIds: string[] | undefined,
   ruleIds: string[] | undefined
 ): QueryDslQueryContainer | undefined => {
-  const allIds = [...(policyIds ?? []), ...(ruleIds ?? [])];
-  if (allIds.length === 0) return undefined;
+  const should: QueryDslQueryContainer[] = [];
 
-  const should: QueryDslQueryContainer[] = [
-    {
-      nested: {
-        path: 'kibana.saved_objects',
-        query: { terms: { 'kibana.saved_objects.id': allIds } },
-      },
-    },
-  ];
+  if (policyIds && policyIds.length > 0) {
+    should.push(buildNestedSavedObjectClause(ACTION_POLICY_SAVED_OBJECT_TYPE, policyIds));
+  }
 
   if (ruleIds && ruleIds.length > 0) {
+    should.push(buildNestedSavedObjectClause(RULE_SAVED_OBJECT_TYPE, ruleIds));
     should.push({ terms: { 'kibana.alerting_v2.dispatcher.rule_ids': ruleIds } });
   }
 
+  if (should.length === 0) return undefined;
+
   return { bool: { should, minimum_should_match: 1 } };
 };
+
+const buildNestedSavedObjectClause = (type: string, ids: string[]): QueryDslQueryContainer => ({
+  nested: {
+    path: 'kibana.saved_objects',
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.saved_objects.type': type } },
+          { terms: { 'kibana.saved_objects.id': ids } },
+        ],
+      },
+    },
+  },
+});

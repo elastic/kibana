@@ -148,7 +148,27 @@ describe('EventLogService', () => {
           {
             nested: {
               path: 'kibana.saved_objects',
-              query: { terms: { 'kibana.saved_objects.id': ['p1', 'r1'] } },
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_action_policy' } },
+                    { terms: { 'kibana.saved_objects.id': ['p1'] } },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_rule' } },
+                    { terms: { 'kibana.saved_objects.id': ['r1'] } },
+                  ],
+                },
+              },
             },
           },
           { terms: { 'kibana.alerting_v2.dispatcher.rule_ids': ['r1'] } },

@@ -97,10 +97,14 @@ export type AlertingV2ErrorCode =
 export const ALERTING_V2_LOG_CODES = {
   // ─────────────── Execution history (graceful degradation) ──────────────
   /**
-   * Rule display-name lookup failed while building a `GET /rule_executions`
-   * page. Rows are still returned with `rule.name === null`.
+   * One or more `task-run` hits returned by Elasticsearch on the rule
+   * executions read path failed structural normalization (missing hit id,
+   * malformed `kibana.task.id`, missing `event.start`, unrecognized
+   * `event.outcome`). The upstream filter on `kibana.task.type` is meant
+   * to prevent this. Emission of this code signals that the invariant
+   * has been violated and the read path silently shrank a page.
    */
-  EXECUTION_HISTORY_RULE_NAME_LOOKUP_FAILED: 'EXECUTION_HISTORY_RULE_NAME_LOOKUP_FAILED',
+  EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
   /**
    * Action-policy id resolution failed while building the search filter for
    * the action-policy execution-history search. The search proceeds without

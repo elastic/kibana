@@ -41,12 +41,16 @@ export interface RuleExecutionTimings {
  * task-run document in the event log.
  *
  * Field-level notes:
- *   - `id` is a stable composite of `kibana.task.id` and `event.start`. Two
- *     consecutive runs of the same task have distinct `event.start` values,
- *     so the id is unique per run.
+ *   - `id` is the Elasticsearch document `_id` of the source event-log row.
+ *     The event log assigns it at write time, so it is opaque, stable across
+ *     reads, and unique per run without any composite construction on our
+ *     side.
  *   - `rule.id` is parsed from `kibana.task.id` (which encodes
- *     `{taskType}:{spaceId}:{ruleId}`). The nested shape leaves room for
- *     future fields (name, version) without breaking callers.
+ *     `{taskType}:{spaceId}:{ruleId}`). `rule.version` is reserved and
+ *     always `null` for now: the `task-run` event does not yet carry
+ *     a version. It will be populated once the rule executor writes its
+ *     own provider event with `rule.version` inline. The nested shape
+ *     also leaves room for `rule.name` later, without breaking callers.
  *   - `timings` groups the duration / schedule-delay pair so the unit
  *     (ms) is implicit at the parent level rather than smeared across
  *     suffixes.
@@ -59,7 +63,7 @@ export interface RuleExecutionTimings {
  */
 export interface RuleExecution {
   id: string;
-  rule: { id: string };
+  rule: { id: string; version: number | null };
   spaceId: string;
   startedAt: string;
   endedAt: string;

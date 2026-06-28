@@ -18,7 +18,7 @@ import {
 
 const validView = {
   id: 'doc-1',
-  rule: { id: 'rule-1', name: 'My rule' },
+  rule: { id: 'rule-1', version: null },
   spaceId: 'default',
   startedAt: '2026-06-01T00:00:00.000Z',
   endedAt: '2026-06-01T00:00:01.500Z',
@@ -38,8 +38,13 @@ describe('rule_execution_history_schema', () => {
       expect(ruleExecutionOutcomeSchema.parse('failure')).toBe('failure');
     });
 
-    it('rejects unknown values', () => {
+    it('accepts unknown so we can surface in-flight / unclassified runs', () => {
+      expect(ruleExecutionOutcomeSchema.parse('unknown')).toBe('unknown');
+    });
+
+    it('rejects values outside the ECS outcome enum', () => {
       expect(ruleExecutionOutcomeSchema.safeParse('cancelled').success).toBe(false);
+      expect(ruleExecutionOutcomeSchema.safeParse('partial').success).toBe(false);
       expect(ruleExecutionOutcomeSchema.safeParse('').success).toBe(false);
     });
 
@@ -147,16 +152,23 @@ describe('rule_execution_history_schema', () => {
         expect(getRuleExecutionsQuerySchema.safeParse({ outcome: [] }).success).toBe(false);
       });
 
-      it('rejects unknown outcome values', () => {
+      it('rejects outcome values outside the ECS enum', () => {
         expect(getRuleExecutionsQuerySchema.safeParse({ outcome: ['skipped'] }).success).toBe(
           false
         );
       });
 
+      it('accepts an array spanning the full ECS outcome enum (success | failure | unknown)', () => {
+        const parsed = getRuleExecutionsQuerySchema.parse({
+          outcome: ['success', 'failure', 'unknown'],
+        });
+        expect(parsed.outcome).toEqual(['success', 'failure', 'unknown']);
+      });
+
       it('rejects arrays longer than the number of distinct outcomes', () => {
         expect(
           getRuleExecutionsQuerySchema.safeParse({
-            outcome: ['success', 'failure', 'success'],
+            outcome: ['success', 'failure', 'unknown', 'success'],
           }).success
         ).toBe(false);
       });
@@ -307,13 +319,33 @@ describe('rule_execution_history_schema', () => {
       expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
     });
 
-    it('accepts a nullable rule.name', () => {
-      const row = { ...validView, rule: { id: 'rule-1', name: null } };
-      expect(ruleExecutionViewSchema.parse(row).rule.name).toBeNull();
+    it('strips unknown rule fields like a previously-supported name', () => {
+      const row = {
+        ...validView,
+        rule: { id: 'rule-1', version: null, name: 'My rule' },
+      };
+
+      const parsed = ruleExecutionViewSchema.parse(row);
+      expect(parsed.rule).toEqual({ id: 'rule-1', version: null });
     });
 
     it('requires rule.id', () => {
-      const row = { ...validView, rule: { name: 'My rule' } };
+      const row = { ...validView, rule: { version: null } as unknown as { id: string } };
+      expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
+    });
+
+    it('requires rule.version to be present (may be null until the executor writes it)', () => {
+      const row = { ...validView, rule: { id: 'rule-1' } as { id: string } };
+      expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
+    });
+
+    it('accepts a populated rule.version when the upstream document carries one', () => {
+      const row = { ...validView, rule: { id: 'rule-1', version: 7 } };
+      expect(ruleExecutionViewSchema.parse(row).rule.version).toBe(7);
+    });
+
+    it('rejects a non-integer rule.version', () => {
+      const row = { ...validView, rule: { id: 'rule-1', version: 1.5 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -332,7 +364,12 @@ describe('rule_execution_history_schema', () => {
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('rejects unknown outcomes', () => {
+    it('accepts the unknown outcome (in-flight or unclassified run)', () => {
+      const row = { ...validView, outcome: 'unknown' as const };
+      expect(ruleExecutionViewSchema.parse(row).outcome).toBe('unknown');
+    });
+
+    it('rejects outcomes outside the ECS enum', () => {
       const row = { ...validView, outcome: 'skipped' };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
@@ -401,7 +438,7 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('rejects items that do not conform to the view schema', () => {
-      const badItem = { ...validView, outcome: 'unknown' };
+      const badItem = { ...validView, outcome: 'skipped' };
       expect(
         getRuleExecutionsResponseSchema.safeParse({
           items: [badItem],
