@@ -201,7 +201,7 @@ export const DiscoverAgentBuilderConfig = () => {
   );
 
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder || !dataView) {
       return;
     }
 

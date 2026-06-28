@@ -20,10 +20,7 @@ import {
   AGENTBUILDER_PATH,
 } from '../common/features';
 import { requestAgentWorkspaceNavigation } from './agent_workspace/agent_workspace_navigation';
-import {
-  clearAgentWorkspaceRedirectLeaveHandler,
-  setAgentWorkspaceRedirectLeaveHandler,
-} from './agent_workspace/agent_workspace_app_leave';
+import { clearAgentWorkspaceRedirectLeaveHandler } from './agent_workspace/agent_workspace_app_leave';
 import type { AgentBuilderInternalService } from './services';
 import type { AgentBuilderStartDependencies } from './types';
 
@@ -108,10 +105,6 @@ export const registerApp = ({
       if (isAgentFirstChrome) {
         const inAppPath = `${history.location.pathname}${history.location.search ?? ''}`;
         requestAgentWorkspaceNavigation(inAppPath, history.location.state);
-
-        onAppLeave((handler) => {
-          setAgentWorkspaceRedirectLeaveHandler(handler);
-        });
 
         await coreStart.application.navigateToApp(DISCOVER_APP_ID);
 

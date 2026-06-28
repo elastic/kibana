@@ -16,8 +16,11 @@ import React, {
   useState,
 } from 'react';
 import { useConversationId } from '../../application/context/conversation/use_conversation_id';
+import { useActiveConversationAttachmentCount } from '../../application/hooks/use_active_conversation_attachment_count';
+import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
 import { formatSpineDisplayLabel } from './hooks/use_spine_display_label';
 import { formatSpineIdentifier } from './hooks/use_spine_identifier';
+import { useOpenSpineOnFirstAttachment } from './hooks/use_open_spine_on_first_attachment';
 import {
   getDefaultTabForSpineType,
   isValidTabForSpineType,
@@ -33,10 +36,14 @@ import type {
 interface ConversationSpineContextValue {
   spineState: ConversationSpineState | null;
   isSpineActive: boolean;
+  hasAttachments: boolean;
+  isAttachmentsEmptyOpen: boolean;
   spineDisplayLabel: string | null;
   promotedSpineType: SpineType;
   openSpine: (options?: OpenSpineOptions) => void;
   closeSpine: () => void;
+  openAttachmentsEmptyOverlay: () => void;
+  closeAttachmentsEmptyOverlay: () => void;
   setSpineType: (type: SpineType) => void;
   setActiveTab: (tabId: SpineTabId) => void;
   openAttachmentPreview: (attachment: UnknownAttachment) => void;
@@ -58,27 +65,53 @@ interface ConversationSpineProviderProps {
 
 export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps> = ({ children }) => {
   const conversationId = useConversationId();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const attachmentCount = useActiveConversationAttachmentCount();
+  const hasAttachments = attachmentCount > 0;
+
   const [spineState, setSpineState] = useState<ConversationSpineState | null>(null);
   const [promotedSpineType, setPromotedSpineType] = useState<SpineType>('chat');
+  const [isAttachmentsEmptyOpen, setIsAttachmentsEmptyOpen] = useState(false);
   const prevConversationIdRef = useRef(conversationId);
 
   const closeSpine = useCallback(() => {
     setSpineState(null);
   }, []);
 
+  const closeAttachmentsEmptyOverlay = useCallback(() => {
+    setIsAttachmentsEmptyOpen(false);
+  }, []);
+
+  const openAttachmentsEmptyOverlay = useCallback(() => {
+    closeSpine();
+    setIsAttachmentsEmptyOpen(true);
+  }, [closeSpine]);
+
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
       closeSpine();
+      closeAttachmentsEmptyOverlay();
       setPromotedSpineType('chat');
       prevConversationIdRef.current = conversationId;
     }
-  }, [conversationId, closeSpine]);
+  }, [closeAttachmentsEmptyOverlay, closeSpine, conversationId]);
+
+  const prevHasAttachmentsRef = useRef(hasAttachments);
+  useEffect(() => {
+    if (prevHasAttachmentsRef.current && !hasAttachments) {
+      closeSpine();
+      closeAttachmentsEmptyOverlay();
+    }
+    prevHasAttachmentsRef.current = hasAttachments;
+  }, [closeAttachmentsEmptyOverlay, closeSpine, hasAttachments]);
 
   const openSpine = useCallback(
     (options?: OpenSpineOptions) => {
-      if (!conversationId) {
+      if (!conversationId || !hasAttachments) {
         return;
       }
+
+      closeAttachmentsEmptyOverlay();
 
       const isSidebar = options?.isSidebar ?? false;
       const record = buildSpineRecord(conversationId, promotedSpineType);
@@ -91,7 +124,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
         isSidebar,
       });
     },
-    [conversationId, promotedSpineType]
+    [closeAttachmentsEmptyOverlay, conversationId, hasAttachments, promotedSpineType]
   );
 
   const setSpineType = useCallback(
@@ -162,21 +195,48 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
     });
   }, []);
 
+  const isSpineActive = spineState !== null;
+
+  useOpenSpineOnFirstAttachment({
+    attachmentCount,
+    conversationId,
+    isAgentWorkspaceMount,
+    isSpineActive,
+    openSpine,
+    closeAttachmentsEmptyOverlay,
+  });
+
   const spineDisplayLabel = useMemo(() => {
-    if (!spineState) {
+    if (!hasAttachments) {
       return null;
     }
-    return formatSpineDisplayLabel(spineState.record.type, spineState.record.identifier);
-  }, [spineState]);
+
+    if (spineState) {
+      return formatSpineDisplayLabel(spineState.record.type, spineState.record.identifier);
+    }
+
+    if (conversationId) {
+      return formatSpineDisplayLabel(
+        promotedSpineType,
+        formatSpineIdentifier(conversationId)
+      );
+    }
+
+    return null;
+  }, [conversationId, hasAttachments, promotedSpineType, spineState]);
 
   const value = useMemo(
     () => ({
       spineState,
-      isSpineActive: spineState !== null,
+      isSpineActive,
+      hasAttachments,
+      isAttachmentsEmptyOpen,
       spineDisplayLabel,
       promotedSpineType,
       openSpine,
       closeSpine,
+      openAttachmentsEmptyOverlay,
+      closeAttachmentsEmptyOverlay,
       setSpineType,
       setActiveTab,
       openAttachmentPreview,
@@ -185,10 +245,15 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
     }),
     [
       spineState,
+      isSpineActive,
+      hasAttachments,
+      isAttachmentsEmptyOpen,
       spineDisplayLabel,
       promotedSpineType,
       openSpine,
       closeSpine,
+      openAttachmentsEmptyOverlay,
+      closeAttachmentsEmptyOverlay,
       setSpineType,
       setActiveTab,
       openAttachmentPreview,

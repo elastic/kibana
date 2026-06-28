@@ -6,14 +6,26 @@
  */
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import React, { useCallback } from 'react';
 import type { AttachmentsService } from '../../../services/attachments/attachements_service';
 import { useConversationSpineContext } from '../conversation_spine_context';
-import { getAllTabsForSpineType } from '../spine_type_config';
+import { BASE_SPINE_TABS, getAllTabsForSpineType } from '../spine_type_config';
 import type { SpineTabDefinition, SpineTabId } from '../types';
 import { AttachmentsTab } from './attachments_tab';
 import { PeopleTab } from './people_tab';
 import { SpinePlaceholderTab } from './spine_placeholder_tab';
+
+const tabPromotionEntrance = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
 
 interface SpineTabsProps {
   attachmentsService: AttachmentsService;
@@ -37,6 +49,13 @@ export const SpineTabs: React.FC<SpineTabsProps> = ({ attachmentsService, additi
 
   const { activeTabId, attachmentsView, record } = spineState;
   const configuredTabs = getAllTabsForSpineType(record.type);
+  const typeSpecificTabs = configuredTabs.filter(
+    (tab) => !BASE_SPINE_TABS.some((baseTab) => baseTab.id === tab.id)
+  );
+
+  const typeSpecificTabStyles = css`
+    animation: ${tabPromotionEntrance} 200ms ease-out;
+  `;
 
   const renderTabContent = () => {
     if (activeTabId === 'attachments') {
@@ -81,7 +100,20 @@ export const SpineTabs: React.FC<SpineTabsProps> = ({ attachmentsService, additi
       data-test-subj="agentBuilderConversationSpineTabs"
     >
       <EuiTabs css={{ paddingInline: euiTheme.size.m }}>
-        {configuredTabs.map((tab) => (
+        <React.Fragment key={record.type}>
+          {typeSpecificTabs.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              css={typeSpecificTabStyles}
+              isSelected={activeTabId === tab.id}
+              onClick={() => onTabClick(tab.id)}
+              data-test-subj={`agentBuilderConversationSpineTab-${tab.id}`}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </React.Fragment>
+        {BASE_SPINE_TABS.map((tab) => (
           <EuiTab
             key={tab.id}
             isSelected={activeTabId === tab.id}

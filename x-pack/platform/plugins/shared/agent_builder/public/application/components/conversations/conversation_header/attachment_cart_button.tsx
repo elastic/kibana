@@ -86,6 +86,10 @@ export const AttachmentCartButton: React.FC = () => {
 
   const handleOpenCart = useCallback(() => {
     if (isAgentWorkspaceMount && !isEmbeddedContext && spineContext) {
+      if (!spineContext.hasAttachments) {
+        spineContext.openAttachmentsEmptyOverlay();
+        return;
+      }
       spineContext.openSpine({
         tabId: 'attachments',
         attachmentsView: { mode: 'grid' },
