@@ -83,14 +83,14 @@ describe('classifyStreams', () => {
     intervalHours: 12,
   };
 
-  it('skips unsupported stream types and reports them', () => {
+  it('treats query streams as supported candidates', () => {
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('logs'), makeStream('my-query', { query: true })],
     });
 
-    expect(candidateNames(result)).toEqual(['logs']);
-    expect(result.unsupported).toEqual(['my-query']);
+    expect(candidateNames(result)).toEqual(['logs', 'my-query']);
+    expect(result.unsupported).toEqual([]);
   });
 
   it('excludes streams matching exclude patterns', () => {
