@@ -41,6 +41,8 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import { parseDataJson } from './utils/parse_data_json';
+import { buildEpisodeDotIdInClause, buildEpisodeIdsInClause } from './utils/esql_clauses';
 
 type DeactivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -783,21 +785,6 @@ interface AlertEventRecord {
   episode_status_count?: number | null;
 }
 
-const parseDataJson = (raw: string | null | undefined): Record<string, unknown> => {
-  if (typeof raw !== 'string' || raw.length === 0) {
-    return {};
-  }
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-  } catch {
-    // Malformed JSON — fall through to empty data.
-  }
-  return {};
-};
-
 /**
  * The pre-deactivate ESQL filter restricts to `episode.status` ∈
  * {active, recovering}, so the parsed value should always be one of these
@@ -835,22 +822,4 @@ const collectActivateEpisodeIds = (
     }
   }
   return Array.from(episodeIds);
-};
-
-/** Builds `(episode_id == "e1" OR episode_id == "e2" OR …)` for `.alert-actions`. */
-const buildEpisodeIdsInClause = (episodeIds: readonly string[]) => {
-  let clause = esql.exp`FALSE`;
-  for (const episodeId of episodeIds) {
-    clause = esql.exp`${clause} OR episode_id == ${episodeId}`;
-  }
-  return clause;
-};
-
-/** Builds `(episode.id == "e1" OR episode.id == "e2" OR …)` for `.rule-events`. */
-const buildEpisodeDotIdInClause = (episodeIds: readonly string[]) => {
-  let clause = esql.exp`FALSE`;
-  for (const episodeId of episodeIds) {
-    clause = esql.exp`${clause} OR episode.id == ${episodeId}`;
-  }
-  return clause;
 };
