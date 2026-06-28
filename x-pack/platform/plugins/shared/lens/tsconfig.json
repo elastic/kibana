@@ -122,6 +122,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",
+    "@kbn/managed-content-badge",
     "@kbn/esql-types",
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",

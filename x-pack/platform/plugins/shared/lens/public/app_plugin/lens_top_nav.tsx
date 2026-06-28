@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useI18n } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -20,6 +21,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import type {
   AppMenuConfig,
   AppMenuItemType,
@@ -276,7 +279,7 @@ function getLensTopNavConfig(options: {
       items.push({
         ...exportButtonBase,
         items: exportItems,
-        popoverTestId: 'lnsApp_exportPopoverPanel',
+        popoverTestId: 'exportPopoverPanel',
       });
     } else if (exportItems && exportItems.length === 1) {
       // A single export integration is available: trigger it directly.
@@ -388,10 +391,14 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     share,
+    chrome,
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
+
+  const isClassicChrome =
+    useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle()) === 'classic';
 
   const intl = useI18n();
 
@@ -1305,6 +1312,11 @@ export const LensTopNavMenu = ({
 
   const managed = useLensSelector(selectIsManaged);
 
+  const managedBadgeTooltip = i18n.translate('xpack.lens.managedBadgeTooltip', {
+    defaultMessage:
+      'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
+  });
+
   const badges: AppHeaderBadge[] | undefined = managed
     ? [
         {
@@ -1312,27 +1324,43 @@ export const LensTopNavMenu = ({
             defaultMessage: 'Managed',
           }),
           color: 'primary',
-          tooltip: i18n.translate('xpack.lens.managedBadgeTooltip', {
-            defaultMessage:
-              'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
-          }),
+          tooltip: managedBadgeTooltip,
           'data-test-subj': 'managedContentBadge',
         },
       ]
     : undefined;
 
+  const breadcrumbsBadges = useMemo<ChromeBreadcrumbsBadge[]>(
+    () => (managed ? [getManagedContentBadge(managedBadgeTooltip)] : []),
+    [managed, managedBadgeTooltip]
+  );
+
+  useEffect(() => {
+    if (!isClassicChrome) {
+      return;
+    }
+    chrome.setAppMenu(appMenuConfig);
+    chrome.setBreadcrumbsBadges(breadcrumbsBadges);
+    return () => {
+      chrome.setAppMenu();
+      chrome.setBreadcrumbsBadges([]);
+    };
+  }, [isClassicChrome, chrome, appMenuConfig, breadcrumbsBadges]);
+
   return (
     <>
-      <AppHeader
-        title={
-          title ||
-          i18n.translate('xpack.lens.app.headerTitle', {
-            defaultMessage: 'New visualization',
-          })
-        }
-        menu={appMenuConfig}
-        badges={badges}
-      />
+      {!isClassicChrome && (
+        <AppHeader
+          title={
+            title ||
+            i18n.translate('xpack.lens.app.headerTitle', {
+              defaultMessage: 'New visualization',
+            })
+          }
+          menu={appMenuConfig}
+          badges={badges}
+        />
+      )}
       <AggregateQuerySearchBar
         allowSavingQueries
         savedQuery={savedQuery}
@@ -1362,7 +1390,7 @@ export const LensTopNavMenu = ({
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         showFilterBar={true}
         dataTestSubj="lnsApp_topNav"
-        screenTitle={'lens'}
+        screenTitle="lens"
         appName={LENS_APP_NAME}
         displayStyle="detached"
       />
