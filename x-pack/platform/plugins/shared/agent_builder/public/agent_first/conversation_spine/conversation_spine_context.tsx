@@ -17,10 +17,8 @@ import React, {
 } from 'react';
 import { useConversationId } from '../../application/context/conversation/use_conversation_id';
 import { useActiveConversationAttachmentCount } from '../../application/hooks/use_active_conversation_attachment_count';
-import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
 import { formatSpineDisplayLabel } from './hooks/use_spine_display_label';
 import { formatSpineIdentifier } from './hooks/use_spine_identifier';
-import { useOpenSpineOnFirstAttachment } from './hooks/use_open_spine_on_first_attachment';
 import { getSpineConversationId, PROVISIONAL_SPINE_CONVERSATION_ID } from './provisional_spine_conversation_id';
 import {
   getDefaultTabForSpineType,
@@ -67,7 +65,6 @@ interface ConversationSpineProviderProps {
 export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps> = ({ children }) => {
   const conversationId = useConversationId();
   const spineConversationId = getSpineConversationId(conversationId);
-  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const attachmentCount = useActiveConversationAttachmentCount();
   const hasAttachments = attachmentCount > 0;
 
@@ -222,14 +219,6 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
   }, []);
 
   const isSpineActive = spineState !== null;
-
-  useOpenSpineOnFirstAttachment({
-    attachmentCount,
-    openSpine,
-    closeAttachmentsEmptyOverlay,
-    isAgentWorkspaceMount,
-    isSpineActive,
-  });
 
   const spineDisplayLabel = useMemo(() => {
     if (!hasAttachments) {
