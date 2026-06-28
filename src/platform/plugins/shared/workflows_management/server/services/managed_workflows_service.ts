@@ -212,8 +212,7 @@ export class ManagedWorkflowsService {
     // Enforced enablement is reapplied only when a managed update is installed.
     if (
       existing.definitionHash === definitionHash &&
-      existing.managedVersion === definition.version &&
-      existing.billable === definition.billable
+      existing.managedVersion === definition.version
     ) {
       if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
         return;
