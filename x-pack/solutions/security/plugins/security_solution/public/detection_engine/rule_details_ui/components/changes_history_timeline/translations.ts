@@ -140,10 +140,3 @@ export const RESTORING_LABEL = i18n.translate(
     defaultMessage: 'Restoring...',
   }
 );
-
-export const CURRENT_VERSION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.currentVersionTooltip',
-  {
-    defaultMessage: 'This is the current version',
-  }
-);
