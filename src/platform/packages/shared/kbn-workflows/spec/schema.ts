@@ -236,7 +236,7 @@ export const WaitForApprovalSlackChannelSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional notification template. Use {{context.hitl.externalResumeLink}} for the response link.'
+      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
     ),
 });
 
@@ -250,7 +250,7 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional notification template. Use {{context.hitl.externalResumeLink}} for the response link.'
+      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
     ),
 });
 

@@ -8,7 +8,10 @@
  */
 
 import type { WaitForInputStep } from '@kbn/workflows';
-import { DEFAULT_HITL_INPUT_CHANNEL_MESSAGE } from '@kbn/workflows';
+import {
+  DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
+  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
+} from '@kbn/workflows';
 import { assertConnectorSucceeded } from './hitl_connector_helpers';
 import { hasExternalHitlChannels } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -27,10 +30,10 @@ function buildDefaultInputSlackMessage({
   formUrl: string;
 }): string {
   const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
-  return `${prompt}<${escapeSlackMrkdwnUrl(formUrl)}|Open form>`;
+  return `${prompt}<${escapeSlackMrkdwnUrl(formUrl)}|${DEFAULT_HITL_INPUT_OPEN_FORM_LABEL}>`;
 }
 
-function buildInputSlackApiBlocks({ message }: { message: string }) {
+function buildInputSlackApiBlocksFromMessage(message: string) {
   const blocks: Array<Record<string, unknown>> = [];
 
   if (message.length > 0) {
@@ -43,12 +46,38 @@ function buildInputSlackApiBlocks({ message }: { message: string }) {
   return blocks;
 }
 
-function buildSlackApiBlockkitInput(message: string, target: { channelIds: string[] }) {
+function buildDefaultInputSlackApiBlocks({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}) {
+  const blocks = buildInputSlackApiBlocksFromMessage(stepMessage);
+
+  blocks.push({
+    type: 'actions',
+    elements: [
+      {
+        type: 'button',
+        text: { type: 'plain_text', text: DEFAULT_HITL_INPUT_OPEN_FORM_LABEL, emoji: true },
+        url: formUrl,
+      },
+    ],
+  });
+
+  return blocks;
+}
+
+function buildSlackApiBlockkitInput(
+  blocks: Array<Record<string, unknown>>,
+  target: { channelIds: string[] }
+) {
   return {
     subAction: 'postBlockkit' as const,
     subActionParams: {
       channelIds: target.channelIds,
-      text: JSON.stringify({ blocks: buildInputSlackApiBlocks({ message }) }),
+      text: JSON.stringify({ blocks }),
     },
   };
 }
@@ -119,17 +148,22 @@ export async function sendWaitForInputNotifications({
 
   const slackApiChannelId = channels.slack_api?.channels?.[0];
   if (channels.slack_api?.['connector-id'] && slackApiChannelId) {
-    const message = resolveWaitForInputChannelMessage({
-      channelMessageTemplate: channels.slack_api.message,
-      stepMessage,
-      formUrl,
-      renderTemplate,
-    });
+    const slackApiBlocks =
+      channels.slack_api.message != null
+        ? buildInputSlackApiBlocksFromMessage(
+            resolveWaitForInputChannelMessage({
+              channelMessageTemplate: channels.slack_api.message,
+              stepMessage,
+              formUrl,
+              renderTemplate,
+            })
+          )
+        : buildDefaultInputSlackApiBlocks({ stepMessage, formUrl });
 
     const result = await connectorExecutor.execute({
       connectorType: 'slack_api',
       connectorNameOrId: channels.slack_api['connector-id'],
-      input: buildSlackApiBlockkitInput(message, {
+      input: buildSlackApiBlockkitInput(slackApiBlocks, {
         channelIds: [slackApiChannelId],
       }),
       abortController,

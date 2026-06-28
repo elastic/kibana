@@ -9,7 +9,7 @@
 
 import {
   DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
-  HITL_EXTERNAL_RESUME_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
 } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import {
@@ -132,7 +132,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
         ...existingContext,
         hitl: {
           ...existingHitl,
-          [HITL_EXTERNAL_RESUME_LINK_CONTEXT_KEY]: formUrl,
+          [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: formUrl,
         },
       },
     });

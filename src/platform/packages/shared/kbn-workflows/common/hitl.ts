@@ -9,8 +9,10 @@
 
 export const DEFAULT_WAIT_FOR_INPUT_TIMEOUT = '72h' as const;
 
-/** Workflow context path: `context.hitl.externalResumeLink`. */
-export const HITL_EXTERNAL_RESUME_LINK_CONTEXT_KEY = 'externalResumeLink' as const;
+/** Workflow context path: `context.hitl.externalFormLink`. */
+export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
+
+export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
-  'Respond here: {{context.hitl.externalResumeLink}}' as const;
+  'Respond here: {{context.hitl.externalFormLink}}' as const;
