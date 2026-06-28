@@ -14,6 +14,7 @@ import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/error
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { ExternalResumeError } from './external_resume_error';
 import {
+  buildExternalResumePublicPath,
   getExternalResumeFormPage,
   parseApprovedQueryParam,
   parseExternalResumeApiKeyFromAuthorization,
@@ -317,11 +318,36 @@ describe('getExternalResumeFormPage', () => {
       executionId: 'exec-1',
       spaceId: 'default',
       apiKey: ENCODED_API_KEY,
+      basePath: '',
     });
 
     expect(html).toContain('Submit your response');
     expect(html).toContain('Please respond');
     expect(html).toContain('name="severity"');
+    expect(html).toContain(
+      `action="${buildExternalResumePublicPath({
+        basePath: '',
+        executionId: 'exec-1',
+        apiKey: ENCODED_API_KEY,
+      })}"`
+    );
+  });
+
+  it('includes Kibana basePath in the form action URL', async () => {
+    const html = await getExternalResumeFormPage(workflowsService, {
+      executionId: 'exec-1',
+      spaceId: 'default',
+      apiKey: ENCODED_API_KEY,
+      basePath: '/kbn',
+    });
+
+    expect(html).toContain(
+      `action="${buildExternalResumePublicPath({
+        basePath: '/kbn',
+        executionId: 'exec-1',
+        apiKey: ENCODED_API_KEY,
+      })}"`
+    );
   });
 });
 

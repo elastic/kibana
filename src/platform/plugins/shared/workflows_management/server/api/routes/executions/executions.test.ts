@@ -798,6 +798,7 @@ describe('Execution Routes', () => {
       const request = {
         params: { executionId: 'ex-1' },
         query: { apiKey: 'encoded-api-key' },
+        basePath: '/kbn',
       };
 
       const result = await h(mockContext, request as any, mockResponse as any);
@@ -806,6 +807,7 @@ describe('Execution Routes', () => {
         apiKey: 'encoded-api-key',
         executionId: 'ex-1',
         spaceId: 'default',
+        basePath: '/kbn',
       });
       expect(result).toMatchObject({
         type: 'ok',

@@ -49,6 +49,7 @@ export interface ExternalResumeFormPageParams {
   apiKey: string;
   executionId: string;
   spaceId: string;
+  basePath: string;
 }
 
 interface ApiKeyAuthenticateResponse {
@@ -117,7 +118,7 @@ export async function resumeWorkflowExecutionExternallyWithInput(
 
 export async function getExternalResumeFormPage(
   workflowsService: WorkflowsService,
-  { apiKey, executionId, spaceId }: ExternalResumeFormPageParams
+  { apiKey, executionId, spaceId, basePath }: ExternalResumeFormPageParams
 ): Promise<string> {
   const { stepExecution } = await resolveExternalResumeContext(workflowsService, {
     apiKey,
@@ -135,9 +136,32 @@ export async function getExternalResumeFormPage(
 
   return renderExternalResumeFormPage({
     message,
-    formActionUrl: buildExternalResumeRelativeUrl({ spaceId, executionId, apiKey }),
+    formActionUrl: buildExternalResumePublicPath({ basePath, executionId, apiKey }),
     fieldsHtml: buildExternalResumeFormFieldsHtml(schema),
   });
+}
+
+export function buildExternalResumePublicPath({
+  basePath,
+  executionId,
+  apiKey,
+  approved,
+}: {
+  basePath: string;
+  executionId: string;
+  apiKey?: string;
+  approved?: boolean;
+}): string {
+  const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId);
+  const params = new URLSearchParams();
+  if (apiKey) {
+    params.set('apiKey', apiKey);
+  }
+  if (approved !== undefined) {
+    params.set('approved', String(approved));
+  }
+  const query = params.toString();
+  return query.length > 0 ? `${basePath}${path}?${query}` : `${basePath}${path}`;
 }
 
 export function parseExternalResumeFormSubmission(
@@ -151,30 +175,6 @@ export function parseExternalResumeFormSubmission(
     const message = error instanceof Error ? error.message : 'Invalid form submission';
     throw new ExternalResumeError(message, 400);
   }
-}
-
-function buildExternalResumeRelativeUrl({
-  spaceId,
-  executionId,
-  apiKey,
-  approved,
-}: {
-  spaceId: string;
-  executionId: string;
-  apiKey?: string;
-  approved?: boolean;
-}): string {
-  const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-  const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId);
-  const params = new URLSearchParams();
-  if (apiKey) {
-    params.set('apiKey', apiKey);
-  }
-  if (approved !== undefined) {
-    params.set('approved', String(approved));
-  }
-  const query = params.toString();
-  return query.length > 0 ? `${spacePrefix}${path}?${query}` : `${spacePrefix}${path}`;
 }
 
 async function resolveExternalResumeContext(

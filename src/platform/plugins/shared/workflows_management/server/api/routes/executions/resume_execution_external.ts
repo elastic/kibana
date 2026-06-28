@@ -11,6 +11,8 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import {
+  EXTERNAL_RESUME_POST_ROUTE_OPTIONS,
+  EXTERNAL_RESUME_ROUTE_OPTIONS,
   EXTERNAL_RESUME_SECURITY,
   handleExternalResumeError,
   htmlSuccess,
@@ -20,7 +22,7 @@ import {
   resolveExternalResumeApiKey,
 } from '../../external_resume/external_resume_service';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import { API_VERSION } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -35,10 +37,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
       summary: 'Submit external input for a paused workflow execution',
       description:
         'Resume a paused waitForInput step using an external resume API key and submitted form data. Authenticate with an Authorization: ApiKey header or an apiKey query parameter (header takes precedence). Returns an HTML confirmation page.',
-      options: {
-        tags: [OAS_TAG],
-        availability: AVAILABILITY,
-      },
+      options: EXTERNAL_RESUME_POST_ROUTE_OPTIONS,
     })
     .addVersion(
       {
@@ -107,10 +106,7 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
       summary: 'Resume a workflow execution from an external approval link',
       description:
         'Resume a paused waitForApproval step using an external resume API key. Returns an HTML confirmation page.',
-      options: {
-        tags: [OAS_TAG],
-        availability: AVAILABILITY,
-      },
+      options: EXTERNAL_RESUME_ROUTE_OPTIONS,
     })
     .addVersion(
       {

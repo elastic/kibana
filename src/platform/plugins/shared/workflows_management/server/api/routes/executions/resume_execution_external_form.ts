@@ -11,12 +11,13 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { EXTERNAL_RESUME_FORM_API_PATH } from '@kbn/workflows/server';
 import {
+  EXTERNAL_RESUME_ROUTE_OPTIONS,
   EXTERNAL_RESUME_SECURITY,
   handleExternalResumeError,
   htmlOk,
 } from './external_resume_route_helpers';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import { API_VERSION } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -31,10 +32,7 @@ export function registerExternalResumeFormRoute(deps: RouteDependencies) {
       summary: 'Show the external input form for a paused workflow execution',
       description:
         'Render an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.',
-      options: {
-        tags: [OAS_TAG],
-        availability: AVAILABILITY,
-      },
+      options: EXTERNAL_RESUME_ROUTE_OPTIONS,
     })
     .addVersion(
       {
@@ -62,6 +60,7 @@ export function registerExternalResumeFormRoute(deps: RouteDependencies) {
             apiKey,
             executionId,
             spaceId: spaces.getSpaceId(request),
+            basePath: request.basePath,
           });
 
           return htmlOk(response, body);

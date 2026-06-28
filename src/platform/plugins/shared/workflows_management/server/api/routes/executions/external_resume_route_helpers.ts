@@ -13,6 +13,7 @@ import {
   renderExternalResumeErrorPage,
   renderExternalResumeSuccessPage,
 } from '../../external_resume/render_external_resume_page';
+import { AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 
 export const EXTERNAL_RESUME_SECURITY = {
   authc: {
@@ -23,6 +24,16 @@ export const EXTERNAL_RESUME_SECURITY = {
     enabled: false,
     reason: 'External resume authorizes by matching the API key metadata to the execution.',
   },
+} as const;
+
+export const EXTERNAL_RESUME_ROUTE_OPTIONS = {
+  tags: [OAS_TAG],
+  availability: AVAILABILITY,
+} as const;
+
+export const EXTERNAL_RESUME_POST_ROUTE_OPTIONS = {
+  ...EXTERNAL_RESUME_ROUTE_OPTIONS,
+  xsrfRequired: false,
 } as const;
 
 export function htmlOk(response: KibanaResponseFactory, body: string) {
