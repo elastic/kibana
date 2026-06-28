@@ -9,6 +9,7 @@ This guide covers:
 - ownership registration (setup)
 - client initialization (start)
 - when and where to install
+- scheduled workflows enabled by default
 - space-scoped vs global installs
 - workflow identity (custom id, suffix, the reserved `system-` prefix)
 - lifecycle policies (`lifecycle`, `versionStrategy`, `enablement`)
@@ -146,6 +147,20 @@ After `ready()`: the two instances that were not re-installed (`system-monitor-h
 Orphan reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their create/remove lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
 
 Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
+
+## 3.2) Scheduled workflows enabled by default
+
+Managed workflows can include scheduled triggers and can be installed with `enabled: true` in their YAML. When an enabled scheduled managed workflow is installed, the platform creates or updates the corresponding Task Manager task as part of the managed workflow install path.
+
+Execution identity depends on how the scheduled task was last updated:
+
+- **Initial managed install without a user request**: the scheduled task runs with Kibana system user credentials. This lets plugin-owned workflows that are enabled by default start running even though no end-user request exists during startup reconciliation.
+- **User edit or enable action**: the scheduled task API key is regenerated from that user's request. Future scheduled executions run with the privileges of the user who last edited or enabled the workflow.
+- **Managed version/YAML update**: the workflow document and task schedule can be updated by Kibana, but the existing task credentials are preserved. A user-scoped scheduled workflow does not revert back to Kibana system credentials just because the owning plugin shipped a new managed workflow version.
+
+Plugin authors should only ship a managed workflow as `enabled: true` when running the initial schedule with Kibana system user privileges is intentional and safe. If the workflow should not run with system privileges, ship it disabled and let a user enable it.
+
+Scheduled managed workflows should be installed in a concrete space, for example `spaceId: 'default'` or another real space id. Do not install enabled scheduled managed workflows in the global space (`'*'`).
 
 ## 4) Space-scoped vs global installs
 
@@ -533,5 +548,6 @@ Because there is a **single persisted document** for a global workflow, any edit
 9. Pick lifecycle policy intentionally (`static`/`dynamic`, `auto`/`on_adopt`, `enforced`/`restorable`).
 10. Use `yamlTemplate` only when install-time values are required.
 11. Bump `version` on the definition whenever you change the `yaml` or `yamlTemplate`.
-12. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
-13. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+12. For `enabled: true` scheduled workflows, confirm that initial Kibana system user execution is acceptable until a user edits or enables the workflow.
+13. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
+14. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
