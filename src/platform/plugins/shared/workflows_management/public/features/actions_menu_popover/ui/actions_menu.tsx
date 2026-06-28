@@ -497,8 +497,9 @@ const componentStyles = {
   backRow: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
-      paddingTop: euiTheme.size.s,
-      paddingInline: euiTheme.size.s,
+      padding: `6px 12px 6px 8px`,
+      borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
   rightColumn: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -526,14 +527,15 @@ const componentStyles = {
         height: '100%',
         maxHeight: 'none',
         overflowY: 'auto',
-        paddingTop: '16px',
+        paddingTop: 0,
       },
       '& .euiSelectableList__groupLabel': {
-        padding: `0 12px 2px 16px`,
+        padding: `6px 12px 6px 16px`,
         fontSize: '12.25px',
         fontWeight: 700,
         color: euiTheme.colors.textParagraph,
-        borderBottom: 'none',
+        borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       },
       '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
         marginTop: '24px',

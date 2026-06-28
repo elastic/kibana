@@ -299,7 +299,7 @@ function StepDetailPanel({
           <EuiTab isSelected={activeTab === 'inputs'} onClick={() => onTabChange('inputs')}>
             <FormattedMessage id="workflows.actionsMenu.preview.inputs" defaultMessage="Inputs" />
             {inputCount > 0 && (
-              <EuiNotificationBadge color="accent" size="m" css={styles.tabCount}>
+              <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
                 {inputCount}
               </EuiNotificationBadge>
             )}
@@ -307,7 +307,7 @@ function StepDetailPanel({
           <EuiTab isSelected={activeTab === 'outputs'} onClick={() => onTabChange('outputs')}>
             <FormattedMessage id="workflows.actionsMenu.preview.outputs" defaultMessage="Outputs" />
             {outputCount > 0 && (
-              <EuiNotificationBadge color="accent" size="m" css={styles.tabCount}>
+              <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
                 {outputCount}
               </EuiNotificationBadge>
             )}
@@ -425,16 +425,14 @@ const panelStyles = {
     overflowY: 'auto',
     borderRadius: '8px',
   }),
-  // Figma: Frame 8 tabs+fields — r=16
-  tabsAndFields: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      borderRadius: '16px',
-      overflow: 'hidden',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-    }),
+  // Figma: Frame 8 tabs+fields — r=16, no background on tabs row
+  tabsAndFields: css({
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    borderRadius: '16px',
+    overflow: 'hidden',
+  }),
   tabs: css({
     flexShrink: 0,
   }),
@@ -537,7 +535,7 @@ const defaultPanelStyles = {
     css({
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       gap: '16px',
       flex: 1,
       justifyContent: 'center',
@@ -557,6 +555,7 @@ const defaultPanelStyles = {
       lineHeight: '24px',
       color: euiTheme.colors.textParagraph,
       margin: 0,
+      textAlign: 'center',
     }),
   // Figma: Frame 8 cards container — r=8, pad=[16,16,16,16], transparent bg
   cardsSection: css({
