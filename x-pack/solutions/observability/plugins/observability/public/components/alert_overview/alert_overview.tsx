@@ -32,6 +32,7 @@ import {
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 import { get } from 'lodash';
 import { paths } from '../../../common/locators/paths';
@@ -57,10 +58,13 @@ export const AlertOverview = memo(
     alertStatus?: AlertStatus;
   }) => {
     const {
+      http,
       http: {
         basePath: { prepend },
       },
+      notifications: { toasts },
     } = useKibana().services;
+    const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
     const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
     const dateFormat = useUiSetting<string>('dateFormat');
 
@@ -73,7 +77,7 @@ export const AlertOverview = memo(
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
 
     const linkToRule =
-      pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      authorizedToReadAnyRules && pageId !== RULE_DETAILS_PAGE_ID && ruleId
         ? prepend(paths.observability.ruleDetails(ruleId))
         : null;
 
@@ -164,6 +168,7 @@ export const AlertOverview = memo(
           value: alert.fields[ALERT_RULE_NAME],
           meta: {
             ruleLink:
+              authorizedToReadAnyRules &&
               alert.fields[ALERT_RULE_UUID] &&
               prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
           },
@@ -200,6 +205,7 @@ export const AlertOverview = memo(
       cases,
       navigateToCaseView,
       isLoading,
+      authorizedToReadAnyRules,
     ]);
 
     return (

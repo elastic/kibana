@@ -27,6 +27,7 @@ import {
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import {
   RELATED_ACTIONS_COL,
   RELATED_ALERT_REASON,
@@ -38,6 +39,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
+import { useKibana } from '../../../utils/kibana_react';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import type { GetObservabilityAlertsTableProp } from '../types';
@@ -82,6 +84,11 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     services: { http },
     parentAlert,
   } = props;
+
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
 
   const cellRenderers: AlertCellRenderers = {
     [ALERT_STATUS]: (value) => {
@@ -130,9 +137,15 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       return (
         <CellTooltip
           value={
-            <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
-              {value}
-            </EuiLink>
+            authorizedToReadAnyRules && ruleLink ? (
+              <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
+                {value}
+              </EuiLink>
+            ) : (
+              <EuiText size="s" data-test-subj="o11yCellRenderersRuleName">
+                {value}
+              </EuiText>
+            )
           }
           tooltipContent={ruleCategory}
         />

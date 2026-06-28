@@ -26,6 +26,7 @@ import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule
 import { i18n } from '@kbn/i18n';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import {
   getAlertFlyoutAriaLabel,
   ALERT_FLYOUT_DEFAULT_TITLE,
@@ -57,10 +58,13 @@ export function AlertsFlyout({
   headerAppend,
 }: AlertsFlyoutProps) {
   const {
+    http,
     http: {
       basePath: { prepend },
     },
+    notifications: { toasts },
   } = useKibana().services;
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
 
   const parsedAlert = alert ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
 
@@ -162,7 +166,7 @@ export function AlertsFlyout({
             <EuiText size="s" color="subdued">
               {getAlertSubtitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)}
             </EuiText>
-            {alert?.[ALERT_RULE_UUID] && (
+            {authorizedToReadAnyRules && alert?.[ALERT_RULE_UUID] && (
               <EuiText size="s">
                 <EuiLink
                   data-test-subj="o11yAlertFlyoutRuleLink"
