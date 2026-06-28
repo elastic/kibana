@@ -180,8 +180,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * each (re-)entry pins before it exits) so nested/sibling loops referencing
    * the same source are unpinned independently — a source stays pinned until
    * every loop that pinned it has exited.
+   *
+   * The inner map is keyed by the *referenced* step's `stepId` so re-pinning
+   * the same step (e.g. a `while` condition that references a step produced
+   * inside the loop body, whose latest execution id changes every iteration)
+   * overwrites its previous execution id instead of accumulating one resident
+   * copy per iteration — which would otherwise defeat the eviction memory
+   * protection. Only the current latest execution is ever needed.
    */
-  private readonly pinnedOutputIdsByScope = new Map<string, Set<string>>();
+  private readonly pinnedOutputIdsByScope = new Map<string, Map<string, string>>();
   /**
    * Sizes for evicted outputs that we actually measured. Resume-time
    * deferred outputs land in {@link evictedOutputIds} only — their size is
@@ -639,9 +646,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /** True if any active loop scope has pinned this output. */
   private isPinned(stepExecutionId: string): boolean {
-    for (const ids of this.pinnedOutputIdsByScope.values()) {
-      if (ids.has(stepExecutionId)) {
-        return true;
+    for (const execIdsByStepId of this.pinnedOutputIdsByScope.values()) {
+      for (const execId of execIdsByStepId.values()) {
+        if (execId === stepExecutionId) {
+          return true;
+        }
       }
     }
     return false;
@@ -777,10 +786,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       const latestExec = this.state.getLatestStepExecution(stepId);
       if (latestExec) {
         if (!pinned) {
-          pinned = new Set<string>();
+          pinned = new Map<string, string>();
           this.pinnedOutputIdsByScope.set(foreachStepId, pinned);
         }
-        pinned.add(latestExec.id);
+        // Keyed by stepId: re-pinning a step that ran again this iteration
+        // overwrites its previous execution id, so the scope holds at most one
+        // resident output per referenced step (not one per iteration).
+        pinned.set(stepId, latestExec.id);
       }
     }
   }
