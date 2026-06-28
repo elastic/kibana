@@ -428,10 +428,9 @@ const panelStyles = {
   // Figma: Frame 8 tabs+fields — r=16
   tabsAndFields: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flex: 1,
+      flexShrink: 0,
       display: 'flex',
       flexDirection: 'column',
-      minHeight: 0,
       borderRadius: '16px',
       overflow: 'hidden',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
@@ -446,8 +445,6 @@ const panelStyles = {
   // Figma: form-content — bg=white
   fieldList: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flex: 1,
-      overflowY: 'auto',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
   // Figma: field-inner — pad=[16,16,16,16], gap=4
