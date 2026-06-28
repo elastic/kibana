@@ -8,7 +8,7 @@
   "visibility": "private",
   "description": "Adds Canvas application to Kibana",
   "plugin": {
-    "id": "canvas",
+    "id": "cathrinvas",
     "browser": true,
     "server": true,
     "configPath": [

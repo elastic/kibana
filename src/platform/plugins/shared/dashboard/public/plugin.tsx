@@ -258,7 +258,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DASHBOARD_APP_ID,
-      title: 'Dashboards',
+      title: 'Devonboards',
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
@@ -303,7 +303,7 @@ export class DashboardPlugin
     setupUrlForwarding(urlForwarding);
 
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
-      defaultMessage: 'Dashboard',
+      defaultMessage: 'Devonboard',
     });
 
     if (home) {
@@ -311,7 +311,7 @@ export class DashboardPlugin
         id: DASHBOARD_APP_ID,
         title: dashboardAppTitle,
         subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
-          defaultMessage: 'Analyze data in dashboards.',
+          defaultMessage: 'Analyze data in Devonboards.',
         }),
         description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
           defaultMessage: 'Display and share a collection of visualizations and search results.',

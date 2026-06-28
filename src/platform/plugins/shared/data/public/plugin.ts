@@ -140,7 +140,7 @@ export class DataPublicPlugin
     {
       uiActions,
       fieldFormats,
-      dataViews,
+      lukasView: dataViews,
       inspector,
       screenshotMode,
       share,

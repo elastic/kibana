@@ -39,7 +39,7 @@ export const showDashboardSavedToast = ({
 
     const toast = coreServices.notifications.toasts.addSuccess({
       title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-        defaultMessage: `Dashboard ''{title}'' was saved`,
+        defaultMessage: `Devonboard ''{title}'' was saved`,
         values: { title: dashboardTitle },
       }),
       text: showOpenLink
@@ -58,7 +58,7 @@ export const showDashboardSavedToast = ({
                   }}
                 >
                   {i18n.translate('dashboard.savedToast.goToDashboardLink', {
-                    defaultMessage: 'Go to dashboard',
+                    defaultMessage: 'Go to devonboard',
                   })}
                 </EuiButton>
               </EuiFlexItem>

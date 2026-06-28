@@ -12,7 +12,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {
-    defaultMessage: 'Dashboards',
+    defaultMessage: 'Devonboards',
   });
 
 export const dashboardReadonlyBadge = {
@@ -30,11 +30,11 @@ export const dashboardReadonlyBadge = {
 export const dashboardManagedBadge = {
   getDuplicateButtonAriaLabel: () =>
     i18n.translate('dashboard.managedContentPopoverFooterText', {
-      defaultMessage: 'Click here to duplicate this dashboard',
+      defaultMessage: 'Click here to duplicate this devonboard',
     }),
   getBadgeAriaLabel: () =>
     i18n.translate('dashboard.managedContentBadge.ariaLabel', {
-      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
+      defaultMessage: 'Elastic manages this devonboard. Duplicate it to make changes.',
     }),
 };
 
@@ -82,7 +82,7 @@ export const getQuickCreateButtonGroupLegend = () =>
 
 export const getNewDashboardTitle = () =>
   i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
-    defaultMessage: 'New Dashboard',
+    defaultMessage: 'New Devonboard',
   });
 
 export const getPanelAddedSuccessString = (savedObjectName?: string) =>
@@ -154,7 +154,7 @@ export const shareModalStrings = {
     defaultMessage: 'Failed to update permissions.',
   }),
   draftModeCalloutTitle: i18n.translate('dashboard.share.shareModal.draftModeCallout.title', {
-    defaultMessage: 'Dashboard has unsaved changes',
+    defaultMessage: 'Devonboard has unsaved changes',
   }),
   draftModeSaveButtonLabel: i18n.translate(
     'dashboard.share.shareModal.draftModeCallout.saveButton',
@@ -169,7 +169,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboards',
+    defaultMessage: 'Devonboards',
   });
 
 export const topNavStrings = {
@@ -202,7 +202,7 @@ export const topNavStrings = {
         "You don't have permission to edit this dashboard. Contact the owner to change it.",
     }),
     managedDashboardTooltip: i18n.translate('dashboard.editButtonTooltip.managed', {
-      defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
+      defaultMessage: 'This devonboard is managed by Elastic. Duplicate it to make changes.',
     }),
   },
   quickSave: {
@@ -210,7 +210,7 @@ export const topNavStrings = {
       defaultMessage: 'save',
     }),
     description: i18n.translate('dashboard.topNave.saveConfigDescription', {
-      defaultMessage: 'Quick save your dashboard without any prompts',
+      defaultMessage: 'Quick save your devonboard without any prompts',
     }),
   },
   editModeInteractiveSave: {
@@ -218,7 +218,7 @@ export const topNavStrings = {
       defaultMessage: 'Save as',
     }),
     description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
-      defaultMessage: 'Save as a new dashboard',
+      defaultMessage: 'Save as a new devonboard',
     }),
   },
   resetChanges: {
@@ -226,7 +226,7 @@ export const topNavStrings = {
       defaultMessage: 'Reset changes',
     }),
     description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
-      defaultMessage: 'Reset changes to dashboard',
+      defaultMessage: 'Reset changes to devonboard',
     }),
   },
   switchToViewMode: {
@@ -242,7 +242,7 @@ export const topNavStrings = {
       defaultMessage: 'Export',
     }),
     description: i18n.translate('dashboard.topNave.exportConfigDescription', {
-      defaultMessage: 'Export dashboard',
+      defaultMessage: 'Export devonboard',
     }),
     jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
       defaultMessage: 'Export JSON',
@@ -262,7 +262,7 @@ export const topNavStrings = {
       defaultMessage: 'share',
     }),
     description: i18n.translate('dashboard.topNave.shareConfigDescription', {
-      defaultMessage: 'Share Dashboard',
+      defaultMessage: 'Share Devonboard',
     }),
     tooltipTitle: i18n.translate('dashboard.topNave.shareTooltipTitle', {
       defaultMessage: 'Share',
@@ -285,7 +285,7 @@ export const topNavStrings = {
       defaultMessage: 'settings',
     }),
     description: i18n.translate('dashboard.topNave.settingsConfigDescription', {
-      defaultMessage: 'Open dashboard settings',
+      defaultMessage: 'Open devonboard settings',
     }),
   },
   viewModeInteractiveSave: {
@@ -293,7 +293,7 @@ export const topNavStrings = {
       defaultMessage: 'duplicate',
     }),
     description: i18n.translate('dashboard.topNave.viewModeInteractiveSaveConfigDescription', {
-      defaultMessage: 'Create a copy of your dashboard',
+      defaultMessage: 'Create a copy of your devonboard',
     }),
   },
   add: {
@@ -301,7 +301,7 @@ export const topNavStrings = {
       defaultMessage: 'Add',
     }),
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
-      defaultMessage: 'Add content to your dashboard',
+      defaultMessage: 'Add content to your devonboard',
     }),
   },
   backgroundSearch: {
@@ -339,7 +339,7 @@ export const contentEditorFlyoutStrings = {
       }
     ),
     managedEntity: i18n.translate('dashboard.contentEditorFlyout.readonlyReason.managedEntity', {
-      defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
+      defaultMessage: 'This devonboard is managed by Elastic. Duplicate it to make changes.',
     }),
   },
 };

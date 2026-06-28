@@ -139,7 +139,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
           <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="dashboard.embeddableApi.showSettings.flyout.title"
-              defaultMessage="Dashboard settings"
+              defaultMessage="Devonboard settings"
             />
           </h2>
         </EuiTitle>
@@ -171,7 +171,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               aria-label={i18n.translate(
                 'dashboard.embeddableApi.showSettings.flyout.form.panelTitleInputAriaLabel',
                 {
-                  defaultMessage: 'Change the dashboard title',
+                  defaultMessage: 'Change the devonboard title',
                 }
               )}
               aria-describedby={isTitleDuplicate ? DUPLICATE_TITLE_CALLOUT_ID : undefined}
@@ -195,7 +195,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               aria-label={i18n.translate(
                 'dashboard.embeddableApi.showSettings.flyout.form.panelDescriptionAriaLabel',
                 {
-                  defaultMessage: 'Change the dashboard description',
+                  defaultMessage: 'Change the devonboard description',
                 }
               )}
             />
@@ -205,7 +205,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             helpText={
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowHelpText"
-                defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+                defaultMessage="This changes the time filter to the currently selected time each time this devonboard is loaded."
               />
             }
           >
@@ -216,7 +216,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               label={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowLabel"
-                  defaultMessage="Store time with dashboard"
+                  defaultMessage="Store time with devonboard"
                 />
               }
             />
@@ -226,7 +226,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               helpText={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
-                  defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
+                  defaultMessage="Saves the current cross-project search (CPS) scope with the devonboard. Anyone who opens the devonboard will start with that scope."
                 />
               }
             >
@@ -239,7 +239,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                 label={
                   <FormattedMessage
                     id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
-                    defaultMessage="Store CPS scope with dashboard"
+                    defaultMessage="Store CPS scope with devonboard"
                   />
                 }
               />

@@ -60,7 +60,7 @@ export interface DataPluginSetupDependencies {
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
-  dataViews: DataViewsServerPluginStart;
+  lukasView: DataViewsServerPluginStart;
 }
 
 export class DataServerPlugin
@@ -109,7 +109,7 @@ export class DataServerPlugin
     };
   }
 
-  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
+  public start(core: CoreStart, { fieldFormats, lukasView: dataViews }: DataPluginStartDependencies) {
     const search = this.searchService.start(core, {
       fieldFormats,
       indexPatterns: dataViews,

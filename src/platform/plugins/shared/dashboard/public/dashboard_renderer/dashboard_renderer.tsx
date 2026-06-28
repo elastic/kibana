@@ -197,7 +197,7 @@ export function DashboardRenderer({
           title={
             <h2>
               {i18n.translate('dashboard.dashboardRenderer.loadDashboardErrorTitle', {
-                defaultMessage: 'Unable to load dashboard',
+                defaultMessage: 'Unable to load devonboard',
               })}
             </h2>
           }

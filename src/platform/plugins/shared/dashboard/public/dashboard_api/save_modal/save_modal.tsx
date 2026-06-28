@@ -224,7 +224,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       showCopyOnSave={showCopyOnSave}
       initialCopyOnSave={showCopyOnSave}
       objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
-        defaultMessage: 'dashboard',
+        defaultMessage: 'devonboard',
       })}
       customModalTitle={customModalTitle}
       options={renderDashboardSaveOptions()}

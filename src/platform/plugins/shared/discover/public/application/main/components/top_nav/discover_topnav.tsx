@@ -42,7 +42,7 @@ import {
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
-import { DiscoverSessionSaveModalContainer } from './save_discover_session';
+import { DisoverSessionMiloszModalContainer } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
@@ -441,7 +441,7 @@ export const DiscoverTopNav = ({
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
       )}
       {isSaveModalVisible && (
-        <DiscoverSessionSaveModalContainer
+        <DisoverSessionMiloszModalContainer
           initialCopyOnSave={initialCopyOnSave}
           onClose={onCloseSaveModal}
           onSaveCb={onSaveCbRef.current}

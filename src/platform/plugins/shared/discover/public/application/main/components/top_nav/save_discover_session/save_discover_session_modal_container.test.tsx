@@ -11,7 +11,7 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import type { DiscoverSessionSaveDashboardModalProps } from './discover_session_save_dashboard_modal';
 import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashboard_modal';
-import { DiscoverSessionSaveModalContainer } from './save_discover_session_modal_container';
+import { DisoverSessionMiloszModalContainer } from './save_discover_session_modal_container';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
@@ -154,7 +154,7 @@ const setup = async ({
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
-      <DiscoverSessionSaveModalContainer
+      <DisoverSessionMiloszModalContainer
         initialCopyOnSave={initialCopyOnSave}
         onClose={onClose}
         onSaveCb={onSaveCb}
@@ -170,7 +170,7 @@ const setup = async ({
   return { modalProps, onClose, toolkit };
 };
 
-describe('DiscoverSessionSaveModalContainer', () => {
+describe('DisoverSessionMiloszModalContainer', () => {
   beforeEach(() => {
     MockModal.mockClear();
   });

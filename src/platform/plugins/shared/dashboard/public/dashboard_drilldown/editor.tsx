@@ -123,7 +123,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
         label={i18n.translate(
           'dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard',
           {
-            defaultMessage: 'Choose destination dashboard',
+            defaultMessage: 'Choose destination devonboard',
           }
         )}
         fullWidth

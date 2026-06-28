@@ -14,16 +14,19 @@
     "ui"
   ],
   "plugin": {
-    "id": "data",
+    "id": "lukas",
     "browser": true,
     "server": true,
+    "configPath": [
+      "data"
+    ],
     "requiredPlugins": [
       "expressions",
       "uiActions",
       "share",
       "inspector",
       "fieldFormats",
-      "dataViews",
+      "lukasView",
       "screenshotMode",
       "management"
     ],

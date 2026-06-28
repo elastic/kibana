@@ -13,7 +13,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 export const dashboardListingErrorStrings = {
   getErrorDeletingDashboardToast: () =>
     i18n.translate('dashboard.deleteError.toastDescription', {
-      defaultMessage: 'Error encountered while deleting dashboard',
+      defaultMessage: 'Error encountered while deleting devonboard',
     }),
   getDuplicateTitleWarning: (value: string) =>
     i18n.translate('dashboard.dashboardListingEditErrorTitle.duplicateWarning', {
@@ -26,45 +26,45 @@ export const dashboardListingErrorStrings = {
 
 export const getNewDashboardTitle = () =>
   i18n.translate('dashboard.listing.newDashboardTitle', {
-    defaultMessage: 'New Dashboard',
+    defaultMessage: 'New Devonboard',
   });
 
 export const dashboardListingTableStrings = {
   getEntityName: () =>
     i18n.translate('dashboard.listing.table.entityName', {
-      defaultMessage: 'dashboard',
+      defaultMessage: 'devonboard',
     }),
   getEntityNamePlural: () =>
     i18n.translate('dashboard.listing.table.entityNamePlural', {
-      defaultMessage: 'dashboards',
+      defaultMessage: 'devonboards',
     }),
   getTableListTitle: () =>
     i18n.translate('dashboard.listing.tableListTitle', {
-      defaultMessage: 'Dashboards',
+      defaultMessage: 'Devonboards',
     }),
 };
 
 export const noItemsStrings = {
   getReadonlyTitle: () =>
     i18n.translate('dashboard.listing.readonlyNoItemsTitle', {
-      defaultMessage: 'No dashboards to view',
+      defaultMessage: 'No devonboards to view',
     }),
   getReadonlyBody: () =>
     i18n.translate('dashboard.listing.readonlyNoItemsBody', {
-      defaultMessage: `There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.`,
+      defaultMessage: `There are no available devonboards. To change your permissions to view the devonboards in this space, contact your administrator.`,
     }),
   getReadEditTitle: () =>
     i18n.translate('dashboard.listing.createNewDashboard.title', {
-      defaultMessage: 'Create your first dashboard',
+      defaultMessage: 'Create your first devonboard',
     }),
   getReadEditInProgressTitle: () =>
     i18n.translate('dashboard.listing.createNewDashboard.inProgressTitle', {
-      defaultMessage: 'Dashboard in progress',
+      defaultMessage: 'Devonboard in progress',
     }),
   getReadEditDashboardDescription: () =>
     i18n.translate('dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
       defaultMessage:
-        'Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.',
+        'Analyze all of your Elastic data in one place by creating a devonboard and adding visualizations.',
     }),
   getSampleDataLinkText: () =>
     i18n.translate('dashboard.listing.createNewDashboard.sampleDataInstallLinkText', {
@@ -72,7 +72,7 @@ export const noItemsStrings = {
     }),
   getCreateNewDashboardText: () =>
     i18n.translate('dashboard.listing.createNewDashboard.createButtonLabel', {
-      defaultMessage: `Create a dashboard`,
+      defaultMessage: `Create a devonboard`,
     }),
 };
 
@@ -113,7 +113,7 @@ export const dashboardUnsavedListingStrings = {
 export const resetConfirmStrings = {
   getResetTitle: () =>
     i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
-      defaultMessage: 'Reset dashboard?',
+      defaultMessage: 'Reset devonboard?',
     }),
   getResetSubtitle: (viewMode: ViewMode) =>
     viewMode === 'edit'
@@ -121,11 +121,11 @@ export const resetConfirmStrings = {
           defaultMessage: `All unsaved changes will be lost.`,
         })
       : i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
-          defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
+          defaultMessage: `This devonboard will return to its last saved state.  You might lose changes to filters and queries.`,
         }),
   getResetConfirmButtonText: () =>
     i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Reset dashboard',
+      defaultMessage: 'Reset devonboard',
     }),
 };
 
@@ -155,11 +155,11 @@ export const unsavedChangesConfirmStrings = {
 export const createConfirmStrings = {
   getCreateTitle: () =>
     i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
-      defaultMessage: 'New dashboard already in progress',
+      defaultMessage: 'New devonboard already in progress',
     }),
   getCreateSubtitle: () =>
     i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'Continue editing or start over with a blank dashboard.',
+      defaultMessage: 'Continue editing or start over with a blank devonboard.',
     }),
   getStartOverButtonText: () =>
     i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
