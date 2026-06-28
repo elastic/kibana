@@ -28,12 +28,13 @@ export const createFindRulesSkill = ({
     name: 'find-security-rules',
     basePath: 'skills/security/rules',
     description:
-      'List, count, filter, and rank Security detection rules — by tags (including MITRE), ' +
-      'MITRE technique or tactic ID, severity, enabled state, custom vs prebuilt, or name search. ' +
-      'Use when the user asks to list detection rules, count how many rules match, show rules ' +
-      'tagged with MITRE, find rules for technique T1059, or inventory enabled custom rules. ' +
-      'Read-only; never use ES|QL or platform.core search for rule inventory — use ' +
-      'security.discover_rule_tags and security.find_rules only. Not for creating, editing, or hunting raw events.',
+      'List, count, filter, and rank Security detection rules (read-only inventory). Use for ' +
+      '"list all enabled detection rules tagged with MITRE", "show rules for T1059", ' +
+      '"how many custom rules are enabled", or any list/count/filter over the rule catalog — ' +
+      'by tags (including MITRE), MITRE technique/tactic ID, severity, enabled state, or name. ' +
+      'Prefer this over detection-rule-edit when the user lists or counts rules without a rule ' +
+      'attachment. Tools: security.discover_rule_tags then security.find_rules only — never ES|QL ' +
+      'or platform.core search. Not for creating, editing, or hunting raw events.',
     content: `# Find Detection Rules
 
 ## When to Use

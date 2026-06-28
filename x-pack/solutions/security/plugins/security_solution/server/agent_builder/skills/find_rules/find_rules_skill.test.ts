@@ -58,6 +58,8 @@ describe('findRulesSkill', () => {
     expect(skill.name).toBe('find-security-rules');
     expect(skill.basePath).toBe('skills/security/rules');
     expect(skill.description).toContain('detection rules');
+    expect(skill.description).toMatch(/list all enabled detection rules tagged with MITRE/i);
+    expect(skill.description).toMatch(/detection-rule-edit/);
   });
 
   it('uses an allow-listed built-in skill id', () => {

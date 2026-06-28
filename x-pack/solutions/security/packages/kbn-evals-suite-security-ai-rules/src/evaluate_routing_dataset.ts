@@ -413,9 +413,7 @@ export function filterRoutingExamplesByEnv(examples: RuleRoutingExample[]): Rule
   }
   const filtered = examples.filter((ex) => ids.has(ex.id));
   if (filtered.length === 0) {
-    throw new Error(
-      `EXAMPLE_IDS matched no routing examples. Requested: ${[...ids].join(', ')}`
-    );
+    throw new Error(`EXAMPLE_IDS matched no routing examples. Requested: ${[...ids].join(', ')}`);
   }
   return filtered;
 }

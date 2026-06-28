@@ -246,6 +246,8 @@ describe('filterRoutingExamplesByEnv', () => {
 
   it('returns all examples when EXAMPLE_IDS is unset', () => {
     delete process.env.EXAMPLE_IDS;
-    expect(filterRoutingExamplesByEnv(ruleRoutingExamples)).toHaveLength(ruleRoutingExamples.length);
+    expect(filterRoutingExamplesByEnv(ruleRoutingExamples)).toHaveLength(
+      ruleRoutingExamples.length
+    );
   });
 });

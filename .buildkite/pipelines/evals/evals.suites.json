@@ -125,7 +125,8 @@
       "slackChannel": "#security-detection-engine-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
       "tags": ["security", "ai-rules"],
-      "ciLabels": ["evals:security-ai-rules"]
+      "ciLabels": ["evals:security-ai-rules"],
+      "serverConfigSet": "evals_security_ai_rules"
     },
     {
       "id": "endpoint",

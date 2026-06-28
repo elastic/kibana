@@ -17,14 +17,12 @@ const DATASET_DESCRIPTION =
 evaluate.describe('AI Rule Generation Routing', { tag: tags.serverless.security.complete }, () => {
   let teardown: (() => Promise<void>) | undefined;
 
-  evaluate.beforeAll(async ({ kbnClient, esClient, log, uiSettings }) => {
-    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+  evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
     const seeded = await seedFindRulesFixtures({ kbnClient, esClient, log });
     teardown = seeded.cleanup;
   });
 
-  evaluate.afterAll(async ({ uiSettings }) => {
-    await uiSettings.unset('agentBuilder:experimentalFeatures');
+  evaluate.afterAll(async () => {
     if (teardown) await teardown();
   });
 

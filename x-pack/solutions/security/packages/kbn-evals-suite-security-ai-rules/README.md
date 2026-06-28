@@ -77,11 +77,12 @@ yarn es snapshot
 yarn start --no-base-path
 ```
 
-Make sure `config/kibana.dev.yml` contains:
+Make sure `config/kibana.dev.yml` contains (or use Scout `--serverConfigSet evals_security_ai_rules`):
 
 ```yaml
 xpack.securitySolution.enableExperimental:
   - aiRuleCreationEnabled
+  - dexAiSkillFindRules
 ```
 
 ### 2. Configure an AI connector
