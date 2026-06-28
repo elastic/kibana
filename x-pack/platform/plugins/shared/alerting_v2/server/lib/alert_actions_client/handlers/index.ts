@@ -19,6 +19,7 @@ import type {
 } from '../handler';
 import { ackHandler } from './ack';
 import { assignHandler } from './assign';
+import { deactivateHandler } from './deactivate';
 import { snoozeHandler } from './snooze';
 import { tagHandler } from './tag';
 import { unackHandler } from './unack';
@@ -44,11 +45,10 @@ export type ActionHandlersRegistry = {
  * helpers below — they cannot swap or hijack handlers at runtime.
  *
  * Typed as `Partial<…>` for the duration of the multi-step migration:
- * `deactivate` and `activate` are still served by the orchestrator's
- * in-class switch (Steps 5–6 will move them). Once every action_type
- * has a handler we tighten this to {@link ActionHandlersRegistry} and
- * the missing-handler defensive throw in {@link resolveHandlerOrThrow}
- * becomes unreachable.
+ * `activate` is still served by the orchestrator's in-class switch
+ * (Step 6 moves it). Once every action_type has a handler we tighten
+ * this to {@link ActionHandlersRegistry} and the missing-handler
+ * defensive throw in {@link resolveHandlerOrThrow} becomes unreachable.
  */
 const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {
   [ALERT_EPISODE_ACTION_TYPE.ACK]: ackHandler,
@@ -57,6 +57,7 @@ const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {
   [ALERT_EPISODE_ACTION_TYPE.TAG]: tagHandler,
   [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: snoozeHandler,
   [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeHandler,
+  [ALERT_EPISODE_ACTION_TYPE.DEACTIVATE]: deactivateHandler,
 };
 
 /**

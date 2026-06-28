@@ -48,11 +48,6 @@ import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
 import { prepareWithHandler } from './handlers';
 
-type DeactivateAlertActionBody = Extract<
-  CreateAlertActionBody,
-  { action_type: typeof ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }
->;
-
 type ActivateAlertActionBody = Extract<
   CreateAlertActionBody,
   { action_type: typeof ALERT_EPISODE_ACTION_TYPE.ACTIVATE }
@@ -143,8 +138,6 @@ export class AlertActionsClient {
     const alertActionDoc = this.buildAlertActionDocument({ action, alertEvent, userProfileUid });
 
     switch (action.action_type) {
-      case ALERT_EPISODE_ACTION_TYPE.DEACTIVATE:
-        return this.prepareDeactivateAction({ action, alertEvent, alertActionDoc });
       case ALERT_EPISODE_ACTION_TYPE.ACTIVATE:
         return this.prepareActivateAction({
           action,
@@ -187,72 +180,6 @@ export class AlertActionsClient {
       docs,
       refresh: 'wait_for',
     });
-  }
-
-  /**
-   * Builds the docs that record a user-initiated deactivate:
-   *
-   * 1. A synthetic `.rule-events` document that records the terminal
-   *    transition (`status: recovered`, `episode.status: inactive`), so the
-   *    next read sees the deactivation immediately without waiting for the
-   *    next rule run and without joining to `.alert-actions`.
-   * 2. The `.alert-actions` audit document (unchanged content).
-   *
-   * Before building, the episode's current `episode.status` is validated:
-   * only `active` and `recovering` episodes can be deactivated. `pending` is
-   * not user-visible (below the activation threshold) and `inactive` is
-   * already terminal. Both are rejected with `INVALID_EPISODE_STATE_TRANSITION`
-   * (400). No I/O happens here; persistence is the caller's responsibility
-   * via {@link AlertActionsClient.persistPreparedActions}.
-   */
-  private prepareDeactivateAction(params: {
-    action: DeactivateAlertActionBody;
-    alertEvent: AlertEventRecord;
-    alertActionDoc: AlertAction;
-  }): PreparedAction {
-    const { action, alertEvent, alertActionDoc } = params;
-
-    this.assertEpisodeIsDeactivatable(alertEvent, action.action_type);
-
-    const ruleEvent = buildRuleEventDocument({
-      '@timestamp': new Date().toISOString(),
-      rule: { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 },
-      group_hash: alertEvent.group_hash,
-      data: alertEvent.data_json,
-      status: alertEventStatus.recovered,
-      source: 'internal',
-      type: alertEventType.alert,
-      space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
-      severity: alertEvent.severity ?? undefined,
-    });
-
-    return { alertActionDoc, ruleEvent };
-  }
-
-  private assertEpisodeIsDeactivatable(
-    alertEvent: AlertEventRecord,
-    actionType: typeof ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
-  ): void {
-    const status = alertEvent.episode_status;
-    if (status === alertEpisodeStatus.active || status === alertEpisodeStatus.recovering) {
-      return;
-    }
-
-    throw Boom.badRequest(
-      `Cannot deactivate episode [${alertEvent.episode_id}] with status [${
-        status ?? 'unknown'
-      }]; only 'active' or 'recovering' episodes can be deactivated`,
-      {
-        code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-        details: {
-          group_hash: alertEvent.group_hash,
-          episode_id: alertEvent.episode_id,
-          episode_status: status ?? null,
-          action_type: actionType,
-        },
-      }
-    );
   }
 
   /**
