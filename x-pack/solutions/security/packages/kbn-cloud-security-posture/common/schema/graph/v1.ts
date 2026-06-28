@@ -9,7 +9,25 @@ import { schema } from '@kbn/config-schema';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
-const PINNED_IDS_MAX_SIZE = 1024;
+// maxSize is set to 100 to match Security Solution resolver index pattern limits
+export const INDEX_PATTERNS_MAX_SIZE = 100;
+
+// maxSize is set to 5000 to align with graph events/entities ID batch limits
+const PINNED_IDS_MAX_SIZE = 5000;
+export const ORIGIN_EVENT_IDS_MAX_SIZE = 5000;
+export const ENTITY_IDS_MAX_SIZE = 5000;
+
+// maxSize is set to 100 for esQuery.bool clause arrays from the Kibana query builder
+export const ES_BOOL_CLAUSE_MAX_SIZE = 100;
+
+const indexPatternStringSchema = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    if (!INDEX_PATTERN_REGEX.test(value)) {
+      return `Invalid index pattern: ${value}. Contains illegal characters.`;
+    }
+  },
+});
 
 /**
  * CPS project routing expressions accepted by the Graph API.
@@ -38,36 +56,47 @@ export const graphRequestSchema = schema.object({
     pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
     // Origin event IDs - optional, may be empty when opening from entity flyout
     originEventIds: schema.maybe(
-      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }))
+      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }), {
+        maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
+      })
     ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
     indexPatterns: schema.maybe(
-      schema.arrayOf(
-        schema.string({
-          minLength: 1,
-          validate: (value) => {
-            if (!INDEX_PATTERN_REGEX.test(value)) {
-              return `Invalid index pattern: ${value}. Contains illegal characters.`;
-            }
-          },
-        }),
-        { minSize: 1 }
-      )
+      schema.arrayOf(indexPatternStringSchema, {
+        minSize: 1,
+        maxSize: INDEX_PATTERNS_MAX_SIZE,
+      })
     ),
     esQuery: schema.maybe(
       schema.object({
         bool: schema.object({
-          filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-          must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-          should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-          must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          filter: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
+          must: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
+          should: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
+          must_not: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
         }),
       })
     ),
     // Entity IDs for fetching relationships from entity store (optional, may be empty when opening from events flyout)
-    entityIds: schema.maybe(schema.arrayOf(entityIdSchema)),
+    entityIds: schema.maybe(schema.arrayOf(entityIdSchema, { maxSize: ENTITY_IDS_MAX_SIZE })),
     // CPS project routing applied only to logs/events queries.
     // Alerts and entity-store enrichment are always pinned to the origin project.
     projectRouting: schema.maybe(
@@ -94,6 +123,7 @@ export const entitySchema = schema.object({
   ),
   host: schema.maybe(
     schema.object({
+      // codeql[js/kibana/unbounded-array-in-schema] ES-derived entity detail in response body
       ip: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
@@ -126,6 +156,7 @@ export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';
 
 export const graphResponseSchema = () =>
   schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Server-built graph response from Elasticsearch, not user HTTP input
     nodes: schema.arrayOf(
       schema.oneOf([
         entityNodeDataSchema,
@@ -134,8 +165,12 @@ export const graphResponseSchema = () =>
         relationshipNodeDataSchema,
       ])
     ),
+    // codeql[js/kibana/unbounded-array-in-schema] Server-built graph response from Elasticsearch, not user HTTP input
     edges: schema.arrayOf(edgeDataSchema),
-    messages: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))),
+    messages: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Server-built graph response from Elasticsearch, not user HTTP input
+      schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))
+    ),
   });
 
 export const nodeColorSchema = schema.oneOf([
@@ -181,8 +216,11 @@ export const entityNodeDataSchema = schema.allOf([
     ]),
     tag: schema.maybe(schema.string()),
     count: schema.maybe(schema.number()),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
     ips: schema.maybe(schema.arrayOf(schema.string())),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
@@ -200,11 +238,14 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
     ips: schema.maybe(schema.arrayOf(schema.string())),
     count: schema.maybe(schema.number()),
     uniqueEventsCount: schema.maybe(schema.number()),
     uniqueAlertsCount: schema.maybe(schema.number()),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);

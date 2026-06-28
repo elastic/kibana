@@ -7,3 +7,7 @@ This package provides common code consumed in both the browser, i.e. the
 ## Maintainers
 
 Maintained by the Cloud Security Team
+
+## Route schemas
+
+Route schema conventions for Agents: see [`schema/AGENTS.md`](schema/AGENTS.md).

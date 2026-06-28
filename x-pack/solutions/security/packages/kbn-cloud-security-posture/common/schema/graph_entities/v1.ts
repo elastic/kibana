@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INDEX_PATTERN_REGEX } from '../graph/v1';
+import { INDEX_PATTERN_REGEX, INDEX_PATTERNS_MAX_SIZE } from '../graph/v1';
 
 // ============================================
 // ENTITIES ENDPOINT: /internal/cloud_security_posture/graph/entities
@@ -28,7 +28,9 @@ export const entityItemSchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
+  // codeql[js/kibana/unbounded-array-in-schema] ES-derived entity fields in response body
   ips: schema.maybe(schema.arrayOf(schema.string())),
+  // codeql[js/kibana/unbounded-array-in-schema] ES-derived entity fields in response body
   countryCodes: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -51,7 +53,7 @@ export const entitiesRequestSchema = schema.object({
             }
           },
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: INDEX_PATTERNS_MAX_SIZE }
       )
     ),
   }),
@@ -59,6 +61,7 @@ export const entitiesRequestSchema = schema.object({
 
 export const entitiesResponseSchema = () =>
   schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Server-paginated response; size enforced in handler, not request DoS input
     entities: schema.arrayOf(entityItemSchema),
     totalRecords: schema.number(),
   });

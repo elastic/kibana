@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INDEX_PATTERN_REGEX } from '../graph/v1';
+import { INDEX_PATTERN_REGEX, INDEX_PATTERNS_MAX_SIZE } from '../graph/v1';
 
 // ============================================
 // SHARED AUXILIARY SCHEMAS (not exported)
@@ -30,7 +30,9 @@ export const eventOrAlertItemSchema = schema.object({
   action: schema.maybe(schema.string()),
   actor: schema.maybe(actorOrTargetSchema),
   target: schema.maybe(actorOrTargetSchema),
+  // codeql[js/kibana/unbounded-array-in-schema] ES-derived event fields in response body
   ips: schema.maybe(schema.arrayOf(schema.string())),
+  // codeql[js/kibana/unbounded-array-in-schema] ES-derived event fields in response body
   countryCodes: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -53,7 +55,7 @@ export const eventsRequestSchema = schema.object({
             }
           },
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: INDEX_PATTERNS_MAX_SIZE }
       )
     ),
   }),
@@ -61,6 +63,7 @@ export const eventsRequestSchema = schema.object({
 
 export const eventsResponseSchema = () =>
   schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Server-paginated response; size enforced in handler, not request DoS input
     events: schema.arrayOf(eventOrAlertItemSchema),
     totalRecords: schema.number(),
   });
