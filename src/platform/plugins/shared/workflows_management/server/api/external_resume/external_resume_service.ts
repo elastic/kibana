@@ -8,11 +8,7 @@
  */
 
 import { ExecutionStatus, isHitlWaitStepType } from '@kbn/workflows';
-import type {
-  JsonModelSchemaType,
-  ResumeWorkflowExecutionResponseDto,
-  WorkflowStepExecutionDto,
-} from '@kbn/workflows';
+import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
@@ -21,6 +17,7 @@ import {
   EXTERNAL_RESUME_API_PATH,
   getAuthenticatedExternalResumeApiKeyId,
 } from '@kbn/workflows/server';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { createExternalResumeApiKeyRequest } from './create_external_resume_api_key_request';
 import { ExternalResumeError } from './external_resume_error';
 import {
@@ -400,11 +397,12 @@ export function resolveExternalResumeApiKey({
   authorization,
   queryApiKey,
 }: {
-  authorization?: string;
+  authorization?: string | string[];
   queryApiKey?: string;
 }): string {
-  if (authorization != null && authorization.trim().length > 0) {
-    return parseExternalResumeApiKeyFromAuthorization(authorization);
+  const authorizationHeader = Array.isArray(authorization) ? authorization[0] : authorization;
+  if (authorizationHeader != null && authorizationHeader.trim().length > 0) {
+    return parseExternalResumeApiKeyFromAuthorization(authorizationHeader);
   }
 
   if (typeof queryApiKey === 'string' && queryApiKey.length > 0) {

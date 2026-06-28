@@ -99,7 +99,7 @@ export function buildWorkflowContext(
 }
 
 function getTemplatePersistedContext(
-  executionContext: EsWorkflowExecution['context']
+  executionContext: EsWorkflowExecution['context'] | undefined
 ): WorkflowContext['context'] | undefined {
   if (executionContext == null || typeof executionContext !== 'object') {
     return undefined;

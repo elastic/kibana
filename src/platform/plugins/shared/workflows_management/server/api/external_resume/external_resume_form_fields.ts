@@ -8,8 +8,8 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import type { JsonModelSchemaType } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 
 type FlatFieldSchema = JSONSchema7 & {
   type?: string;
@@ -105,7 +105,7 @@ export function buildExternalResumeFormFieldsHtml(schema: JsonModelSchemaType | 
     return '';
   }
 
-  const required = new Set(schema.required ?? []);
+  const required = new Set<string>(schema.required ?? []);
   const fields = Object.entries(properties)
     .filter(([, propertySchema]) => propertySchema != null && typeof propertySchema === 'object')
     .map(([name, propertySchema]) =>
@@ -173,7 +173,7 @@ export function validateExternalResumeInput(
   input: Record<string, unknown>,
   schema: JsonModelSchemaType | undefined
 ): Record<string, unknown> {
-  const validator = buildFieldsZodValidator(schema as JSONSchema7 | null | undefined);
+  const validator = buildFieldsZodValidator(schema);
   const result = validator.safeParse(input);
   if (!result.success) {
     const firstIssue = result.error.issues[0];
