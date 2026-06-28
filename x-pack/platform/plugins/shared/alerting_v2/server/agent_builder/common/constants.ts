@@ -18,6 +18,7 @@ export const alertingTools = {
  * Tag automatically applied to every Alerting v2 rule created through Agent
  * Builder. Used to measure adoption (telemetry) and to let users filter
  * agent-created rules in the Rules list. It is a regular, user-editable tag:
- * it is added on creation only and can be removed by the user afterwards.
+ * it is (re-)applied whenever Agent Builder creates or edits a rule, so a tag
+ * the user removes is restored the next time the agent touches the rule.
  */
 export const AGENT_BUILDER_RULE_TAG = 'agent-builder';
