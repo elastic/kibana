@@ -8,8 +8,12 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT, ExecutionStatus } from '@kbn/workflows';
-import { isEnterStepTimeoutZone, isWaitForApproval } from '@kbn/workflows/graph';
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
+  ExecutionStatus,
+} from '@kbn/workflows';
+import { isEnterStepTimeoutZone, isWaitForApproval, isWaitForInput } from '@kbn/workflows/graph';
 import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, parseDuration, TimeoutAbortedError } from '../utils';
@@ -29,6 +33,18 @@ function getWaitForApprovalIdleDeadlineMs(
   return new Date(stepExecution.startedAt).getTime() + parseDuration(timeout);
 }
 
+function getWaitForInputIdleDeadlineMs(
+  stepExecutionRuntime: StepExecutionRuntime
+): number | undefined {
+  const { node, stepExecution } = stepExecutionRuntime;
+  if (!isWaitForInput(node) || !stepExecution?.startedAt) {
+    return undefined;
+  }
+
+  const timeout = node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
+  return new Date(stepExecution.startedAt).getTime() + parseDuration(timeout);
+}
+
 function getIdleTimeoutResumeDeadlineMs(
   params: WorkflowExecutionLoopParams,
   workflowExecution: EsWorkflowExecution,
@@ -39,6 +55,11 @@ function getIdleTimeoutResumeDeadlineMs(
   const approvalDeadlineMs = getWaitForApprovalIdleDeadlineMs(stepExecutionRuntime);
   if (approvalDeadlineMs !== undefined) {
     deadlineMs.push(approvalDeadlineMs);
+  }
+
+  const inputDeadlineMs = getWaitForInputIdleDeadlineMs(stepExecutionRuntime);
+  if (inputDeadlineMs !== undefined) {
+    deadlineMs.push(inputDeadlineMs);
   }
 
   const workflowTimeoutStr = params.workflowExecutionGraph.getWorkflowLevelTimeout();

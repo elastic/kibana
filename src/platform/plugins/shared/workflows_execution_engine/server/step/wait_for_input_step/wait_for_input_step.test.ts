@@ -12,7 +12,9 @@ import type { WaitForInputStep } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import { WaitForInputStepSchema } from '@kbn/workflows/spec/schema';
 import { WaitForInputStepImpl } from './wait_for_input_step';
+import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
@@ -23,6 +25,8 @@ describe('WaitForInputStepImpl', () => {
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
+  let mockConnectorExecutor: jest.Mocked<ConnectorExecutor>;
+  let mockDependencies: ContextDependencies;
 
   beforeEach(() => {
     node = {
@@ -58,11 +62,31 @@ describe('WaitForInputStepImpl', () => {
       logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
+    mockConnectorExecutor = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<ConnectorExecutor>;
+
+    mockDependencies = {
+      spaceId: 'default',
+      coreStart: {
+        security: {
+          authc: {
+            apiKeys: {
+              invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+            },
+          },
+        },
+      },
+      cloudSetup: undefined,
+    } as unknown as ContextDependencies;
+
     underTest = new WaitForInputStepImpl(
       node,
       mockStepExecutionRuntime,
       mockWorkflowRuntime,
-      workflowLogger
+      workflowLogger,
+      mockConnectorExecutor,
+      mockDependencies
     );
   });
 
@@ -107,7 +131,9 @@ describe('WaitForInputStepImpl', () => {
         node,
         mockStepExecutionRuntime,
         mockWorkflowRuntime,
-        workflowLogger
+        workflowLogger,
+        mockConnectorExecutor,
+        mockDependencies
       );
       await underTest.run();
 
@@ -126,7 +152,9 @@ describe('WaitForInputStepImpl', () => {
         node,
         mockStepExecutionRuntime,
         mockWorkflowRuntime,
-        workflowLogger
+        workflowLogger,
+        mockConnectorExecutor,
+        mockDependencies
       );
       await underTest.run();
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();

@@ -9,6 +9,7 @@
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import { buildExternalResumeUrl } from '@kbn/workflows/server';
+import { assertConnectorSucceeded } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForApprovalChannels = NonNullable<NonNullable<WaitForApprovalStep['with']>['channels']>;
@@ -18,7 +19,7 @@ export interface WaitForApprovalResumeLinks {
   rejectUrl: string;
 }
 
-export function hasExternalApprovalChannels(
+export function hasExternalHitlChannels(
   channels: WaitForApprovalChannels | undefined
 ): channels is WaitForApprovalChannels {
   if (!channels) {
@@ -31,6 +32,9 @@ export function hasExternalApprovalChannels(
 
   return hasSlack || hasSlackApi;
 }
+
+/** @deprecated Use {@link hasExternalHitlChannels} */
+export const hasExternalApprovalChannels = hasExternalHitlChannels;
 
 export function buildWaitForApprovalResumeLinks({
   kibanaUrl,
@@ -134,18 +138,6 @@ function buildSlackApiBlockkitInput(
       text: JSON.stringify({ blocks: buildSlackApiBlocks(linkParams) }),
     },
   };
-}
-
-function assertConnectorSucceeded(result: {
-  status: string;
-  message?: string;
-  serviceMessage?: string;
-}) {
-  if (result.status === 'ok') {
-    return;
-  }
-
-  throw new Error(result.message ?? result.serviceMessage ?? 'Connector execution failed');
 }
 
 export async function sendWaitForApprovalNotifications({

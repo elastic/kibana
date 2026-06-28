@@ -354,7 +354,9 @@ export class NodesFactory {
           node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.connectorExecutor,
+          this.dependencies
         );
       case 'waitForApproval':
         return new WaitForApprovalStepImpl(
