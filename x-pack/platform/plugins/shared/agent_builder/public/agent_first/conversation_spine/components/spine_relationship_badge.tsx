@@ -19,8 +19,10 @@ import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useIsAgentWorkspaceMount } from '../../../application/hooks/use_navigation';
+import { useConversationId } from '../../../application/context/conversation/use_conversation_id';
 import { useOptionalConversationSpineContext } from '../conversation_spine_context';
 import { formatSpineDisplayLabel } from '../hooks/use_spine_display_label';
+import { formatSpineIdentifier } from '../hooks/use_spine_identifier';
 import { getSpineTypeConfig, getBadgeStylesForVariant, SPINE_TYPE_ORDER } from '../spine_type_config';
 import type { SpineBadgeVariant, SpineType } from '../types';
 
@@ -91,7 +93,7 @@ export const SpineRelationshipBadgeSelector: React.FC<SpineRelationshipBadgeSele
     align-items: center;
     gap: ${euiTheme.size.xs};
     padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-    border-radius: ${euiTheme.border.radius.small};
+    border-radius: 12px;
     font-size: ${euiTheme.font.scale.xs}${euiTheme.font.defaultUnits};
     font-weight: ${euiTheme.font.weight.medium};
     line-height: 1;
@@ -166,13 +168,17 @@ export const SpineRelationshipBadgeSelector: React.FC<SpineRelationshipBadgeSele
 
 export const ActiveSpineRelationshipBadge: React.FC = () => {
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const conversationId = useConversationId();
   const spineContext = useOptionalConversationSpineContext();
 
-  if (!isAgentWorkspaceMount || !spineContext?.isSpineActive || !spineContext.spineState) {
+  if (!isAgentWorkspaceMount || !spineContext) {
     return null;
   }
 
-  const { type, identifier } = spineContext.spineState.record;
+  const type = spineContext.spineState?.record.type ?? spineContext.promotedSpineType;
+  const identifier =
+    spineContext.spineState?.record.identifier ??
+    (conversationId ? formatSpineIdentifier(conversationId) : '000');
 
   return (
     <SpineRelationshipBadgeSelector

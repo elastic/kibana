@@ -12,7 +12,8 @@ import { ConversationTitle } from './conversation_title';
 
 const headerGridStyles = css`
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
 `;
@@ -31,13 +32,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
 }) => {
   return (
     <div css={headerGridStyles}>
-      {/* Left column — intentionally empty, reserved for future actions */}
-      <div />
-
-      {/* Center column — always exactly centered */}
       <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
-
-      {/* Right column — right-aligned within its 1fr column */}
       <div css={rightActionsStyles}>
         <ConversationRightActions onClose={onClose} />
       </div>
