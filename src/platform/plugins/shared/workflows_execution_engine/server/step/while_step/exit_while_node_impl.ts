@@ -51,6 +51,17 @@ export class ExitWhileNodeImpl implements NodeImplementation {
         ...whileAdditionalContext,
       };
 
+      // Re-pin the condition source right before evaluating it. The enter-while
+      // pin can only protect sources that already had an execution at loop
+      // entry; a condition that references a step produced *inside* the loop
+      // body has no execution yet at enter-while, so nothing was pinned for it.
+      // By the time we reach exit-while the inner step has run and its latest
+      // output is resident (rehydrated by prepareForRead), but it is not pinned
+      // — a concurrent flush could evict it in the window between that read and
+      // the synchronous render/evaluate below. Pinning here (additive, cleared
+      // on loop exit by unpinLoopScope) closes that residual TOCTOU gap.
+      this.stepIoService.pinLoopSource(this.node.stepId, this.node.condition);
+
       const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
         this.node.condition,
         context
