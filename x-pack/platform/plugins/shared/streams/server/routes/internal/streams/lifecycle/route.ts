@@ -210,7 +210,7 @@ const lifecycleDslPhaseStatsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({
     params,
