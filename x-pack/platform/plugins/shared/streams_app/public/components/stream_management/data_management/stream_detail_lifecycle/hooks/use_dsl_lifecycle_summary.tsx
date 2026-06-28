@@ -83,13 +83,15 @@ export const useDslLifecycleSummary = ({
   const effectiveLifecycle = definition.effective_lifecycle;
   const isDsl = isDslLifecycle(effectiveLifecycle);
   const isDisabled = isDisabledLifecycle(effectiveLifecycle);
+  const frozenAfter = isDsl ? effectiveLifecycle.dsl.frozen_after : undefined;
 
   // Fetches each phase's storage size and doc count, split by the actual `_tier` allocation, so the
-  // timeline can show hot vs frozen separately. The frozen phase's existence comes from
-  // `frozen_after` on the effective lifecycle (below), not from this fetch.
+  // timeline can show hot vs frozen separately. Only called on stateful when `frozen_after` is
+  // configured - the `_tier` query is not supported on serverless, and without a frozen phase
+  // there is nothing to split.
   const phaseStatsFetch = useStreamsAppFetch(
     ({ signal }) => {
-      if (!isDsl && !isDisabled) {
+      if (isServerless || !frozenAfter) {
         return undefined;
       }
       return streamsRepositoryClient.fetch(
@@ -100,7 +102,7 @@ export const useDslLifecycleSummary = ({
         }
       );
     },
-    [definition.stream.name, isDsl, isDisabled, streamsRepositoryClient],
+    [definition.stream.name, frozenAfter, isServerless, streamsRepositoryClient],
     { withRefresh: true }
   );
 
@@ -110,7 +112,6 @@ export const useDslLifecycleSummary = ({
     }
 
     const retentionPeriod = isDsl ? effectiveLifecycle.dsl.data_retention : undefined;
-    const frozenAfter = isDsl ? effectiveLifecycle.dsl.frozen_after : undefined;
     const phaseStats = phaseStatsFetch.value?.phases;
 
     // Prefer per-phase stats (derived from `_tier`) so each phase reflects only the data actually

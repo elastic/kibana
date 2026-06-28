@@ -53,10 +53,13 @@ const getDslPhaseStats = async (
   name: string,
   dataStreamName: string
 ): Promise<Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>>> => {
-  const [{ aggregations }, { indices: indicesStats = {} }] = await Promise.all([
+  // `ignore_unavailable: true` on the search prevents index_not_found_exception for streams with
+  // no backing indices yet (e.g. freshly created streams with no data), returning empty results.
+  const [searchResponse, statsResponse] = await Promise.all([
     scopedClusterClient.asCurrentUser.search({
       index: name,
       size: 0,
+      ignore_unavailable: true,
       track_total_hits: false,
       aggs: {
         tiers: {
@@ -78,6 +81,8 @@ const getDslPhaseStats = async (
       metric: ['store', 'docs'],
     }),
   ]);
+  const { aggregations } = searchResponse;
+  const indicesStats = statsResponse.indices ?? {};
 
   const tierBuckets =
     (
@@ -93,7 +98,7 @@ const getDslPhaseStats = async (
     if (!phase) {
       continue;
     }
-    for (const indexBucket of tierBucket.indices.buckets) {
+    for (const indexBucket of tierBucket.indices?.buckets ?? []) {
       indexToPhase[indexBucket.key] = phase;
     }
   }
@@ -216,6 +221,7 @@ const lifecycleDslPhaseStatsRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    logger,
   }): Promise<{ phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
@@ -234,7 +240,14 @@ const lifecycleDslPhaseStatsRoute = createServerRoute({
       );
     }
 
-    const phases = await getDslPhaseStats(scopedClusterClient, name, dataStream.name);
+    // Gracefully degrade to empty phases on any unexpected ES error rather than returning a 500.
+    let phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>>;
+    try {
+      phases = await getDslPhaseStats(scopedClusterClient, name, dataStream.name);
+    } catch (error) {
+      logger.warn('Failed to fetch DSL phase stats', { error: error as Error });
+      phases = {};
+    }
     return { phases };
   },
 });

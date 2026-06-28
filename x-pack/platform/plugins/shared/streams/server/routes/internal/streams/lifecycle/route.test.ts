@@ -39,16 +39,22 @@ const route = internalLifecycleRoutes['GET /internal/streams/{name}/lifecycle/_d
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
+const mockWarn = jest.fn();
+
 const callHandler = ({
   name,
   searchResult,
   statsResult,
+  searchError,
 }: {
   name: string;
   searchResult?: unknown;
   statsResult?: IndicesStatsResponse;
+  searchError?: Error;
 }) => {
-  const search = jest.fn().mockResolvedValue(searchResult ?? { aggregations: undefined });
+  const search = searchError
+    ? jest.fn().mockRejectedValue(searchError)
+    : jest.fn().mockResolvedValue(searchResult ?? { aggregations: undefined });
   const stats = jest.fn().mockResolvedValue(statsResult ?? { indices: {} });
 
   const getScopedClients = jest.fn().mockResolvedValue({
@@ -69,7 +75,7 @@ const callHandler = ({
     request: {},
     getScopedClients,
     response: {},
-    logger: { error: jest.fn() },
+    logger: { error: jest.fn(), warn: mockWarn },
     context: {},
     telemetry,
   } as unknown as HandlerParams;
@@ -148,6 +154,16 @@ describe('lifecycle _dsl_phase_stats route', () => {
     });
 
     expect(result).toEqual({ phases: {} });
+  });
+
+  it('returns empty phases and logs a warning when the ES search throws', async () => {
+    const searchError = new Error('search_phase_execution_exception');
+    const result = await callHandler({ name: 'my-stream', searchError });
+
+    expect(result).toEqual({ phases: {} });
+    expect(mockWarn).toHaveBeenCalledWith('Failed to fetch DSL phase stats', {
+      error: searchError,
+    });
   });
 
   it('rejects ILM streams with a 400', async () => {
