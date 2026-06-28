@@ -349,13 +349,20 @@ const createService = () => {
   const crudService = createCrudServiceMock();
   const workflowsExecutionEngine = createExecutionEngineMock();
   const logger = loggerMock.create();
+  const audit = {
+    logWorkflowCreated: jest.fn(),
+    logWorkflowUpdated: jest.fn(),
+    logWorkflowDeleted: jest.fn(),
+  };
   const service = new ManagedWorkflowsService({
     crudService: crudService as unknown as WorkflowCrudService,
     workflowsExecutionEngine,
     logger,
+    audit,
   });
 
   return {
+    audit,
     crudService,
     workflowsExecutionEngine,
     logger,
@@ -401,7 +408,7 @@ describe('ManagedWorkflowsService', () => {
     it('creates a new managed workflow document', async () => {
       const definition = createDefinition();
       mockManagedWorkflowDefinitions = [definition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
@@ -427,6 +434,14 @@ describe('ManagedWorkflowsService', () => {
           definitionHash: definitionHash(definition.yaml),
         })
       );
+      expect(audit.logWorkflowCreated).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'install',
+      });
     });
 
     it('sets document.version to 1 on managed create when versioning is enabled', async () => {
@@ -486,7 +501,7 @@ describe('ManagedWorkflowsService', () => {
     it('bumps document.version from the existing document on managed update when versioning is enabled', async () => {
       const definition = createDefinition({ version: 2 });
       mockManagedWorkflowDefinitions = [definition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
       crudService.isWorkflowVersioningEnabled.mockReturnValue(true);
       mockPrepareReturnsInitialVersion(crudService);
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
@@ -526,6 +541,14 @@ describe('ManagedWorkflowsService', () => {
           ],
         })
       );
+      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'reinstall',
+      });
     });
 
     it('preserves existing version in change history when workflow versioning is disabled on managed update', async () => {
@@ -923,6 +946,40 @@ describe('ManagedWorkflowsService', () => {
     });
   });
 
+  describe('uninstallManagedWorkflow', () => {
+    it('force deletes and audits an existing managed workflow', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          managed: true,
+          managedBy: PLUGIN_ID,
+          originManagedWorkflowId: WORKFLOW_ID,
+        })
+      );
+
+      await service.uninstallManagedWorkflow(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith([WORKFLOW_ID], SPACE_ID, {
+        force: true,
+      });
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        force: true,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'uninstall',
+      });
+    });
+  });
+
   describe('getManagedWorkflowStatus', () => {
     it('returns intact when the installed managed workflow matches the registry', async () => {
       const definition = createDefinition();
@@ -1188,7 +1245,7 @@ describe('ManagedWorkflowsService', () => {
         management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
       });
       mockManagedWorkflowDefinitions = [installedDefinition, orphanDefinition, dynamicDefinition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
 
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
       await service.installManagedWorkflow(
@@ -1228,6 +1285,15 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
         force: true,
+      });
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: 'system-orphan',
+        force: true,
+        managed: true,
+        originalWorkflowId: 'system-orphan',
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'ready_reconciliation',
       });
     });
 
