@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
-import type { ComposeFormValues } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
 import { QuerySummary } from '../query_summary';
 import { EsqlQuerySummarySection } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
@@ -43,7 +43,7 @@ export function AlertConditionStep({
   services,
   isEditing,
 }: AlertConditionStepProps) {
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
