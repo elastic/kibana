@@ -23,12 +23,27 @@ import { useConversationId } from '../../../application/context/conversation/use
 import { useOptionalConversationSpineContext } from '../conversation_spine_context';
 import { formatSpineDisplayLabel } from '../hooks/use_spine_display_label';
 import { formatSpineIdentifier } from '../hooks/use_spine_identifier';
-import { getSpineTypeConfig, getBadgeStylesForVariant, SPINE_TYPE_ORDER } from '../spine_type_config';
+import { getSpineTypeConfig, getBadgeStylesForVariant, PROMOTABLE_SPINE_TYPES } from '../spine_type_config';
 import type { SpineBadgeVariant, SpineType } from '../types';
 
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
+const badgeEntrance = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const typePromotion = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 `;
 
 const labels = {
@@ -56,7 +71,7 @@ export const SpineRelationshipBadge: React.FC<SpineRelationshipBadgeProps> = ({
     <div
       key={type}
       css={css`
-        animation: ${fadeIn} 150ms ease-in-out;
+        animation: ${typePromotion} 150ms ease-in-out;
       `}
     >
       <EuiBadge
@@ -97,7 +112,7 @@ export const SpineRelationshipBadgeSelector: React.FC<SpineRelationshipBadgeSele
     font-size: ${euiTheme.font.scale.xs}${euiTheme.font.defaultUnits};
     font-weight: ${euiTheme.font.weight.medium};
     line-height: 1;
-    animation: ${fadeIn} 150ms ease-in-out;
+    animation: ${typePromotion} 150ms ease-in-out;
 
     .euiIcon {
       color: inherit;
@@ -108,7 +123,7 @@ export const SpineRelationshipBadgeSelector: React.FC<SpineRelationshipBadgeSele
     }
   `;
 
-  const menuItems = SPINE_TYPE_ORDER.map((spineType) => {
+  const menuItems = PROMOTABLE_SPINE_TYPES.map((spineType) => {
     const config = getSpineTypeConfig(spineType);
     const isSelected = spineType === type;
 
@@ -139,6 +154,7 @@ export const SpineRelationshipBadgeSelector: React.FC<SpineRelationshipBadgeSele
 
   const badgeButton = (
     <button
+      key={type}
       type="button"
       css={badgeButtonStyles}
       onClick={() => setIsPopoverOpen((open) => !open)}
@@ -171,7 +187,7 @@ export const ActiveSpineRelationshipBadge: React.FC = () => {
   const conversationId = useConversationId();
   const spineContext = useOptionalConversationSpineContext();
 
-  if (!isAgentWorkspaceMount || !spineContext) {
+  if (!isAgentWorkspaceMount || !spineContext || !spineContext.hasAttachments) {
     return null;
   }
 
@@ -181,10 +197,16 @@ export const ActiveSpineRelationshipBadge: React.FC = () => {
     (conversationId ? formatSpineIdentifier(conversationId) : '000');
 
   return (
-    <SpineRelationshipBadgeSelector
-      type={type}
-      identifier={identifier}
-      onSelectType={spineContext.setSpineType}
-    />
+    <div
+      css={css`
+        animation: ${badgeEntrance} 200ms ease-out;
+      `}
+    >
+      <SpineRelationshipBadgeSelector
+        type={type}
+        identifier={identifier}
+        onSelectType={spineContext.setSpineType}
+      />
+    </div>
   );
 };

@@ -8,17 +8,28 @@
 import React, { useEffect, useReducer } from 'react';
 import { createPortal } from 'react-dom';
 import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import type { AttachmentsService } from '../../services/attachments/attachements_service';
 import { getApplicationWorkspaceMountElement } from '../../agent_workspace/agent_workspace_flyout_defaults';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
-import { useConversationSpineContext } from './conversation_spine_context';
+import { useOptionalConversationSpineContext } from './conversation_spine_context';
 import { GenericConversationSpine } from './generic_conversation_spine';
 
 interface ConversationSpineMountProps {
   attachmentsService: AttachmentsService;
 }
+
+const spineEntrance = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 /**
  * Portals the generic conversation spine into the application workspace column.
@@ -28,11 +39,13 @@ export const ConversationSpineMount: React.FC<ConversationSpineMountProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
-  const { isSpineActive } = useConversationSpineContext();
+  const spineContext = useOptionalConversationSpineContext();
+  const isSpineActive = spineContext?.isSpineActive ?? false;
+  const hasAttachments = spineContext?.hasAttachments ?? false;
   const [, retryMount] = useReducer((count) => count + 1, 0);
 
   useEffect(() => {
-    if (!isAgentWorkspaceMount || !isSpineActive || getApplicationWorkspaceMountElement()) {
+    if (!isAgentWorkspaceMount || !isSpineActive || !hasAttachments || getApplicationWorkspaceMountElement()) {
       return;
     }
 
@@ -41,9 +54,9 @@ export const ConversationSpineMount: React.FC<ConversationSpineMountProps> = ({
     });
 
     return () => window.cancelAnimationFrame(rafId);
-  }, [isAgentWorkspaceMount, isSpineActive]);
+  }, [hasAttachments, isAgentWorkspaceMount, isSpineActive]);
 
-  if (!isAgentWorkspaceMount || !isSpineActive) {
+  if (!isAgentWorkspaceMount || !isSpineActive || !hasAttachments) {
     return null;
   }
 
@@ -60,6 +73,7 @@ export const ConversationSpineMount: React.FC<ConversationSpineMountProps> = ({
     flex-direction: column;
     min-height: 0;
     background: ${euiTheme.colors.backgroundBasePlain};
+    animation: ${spineEntrance} 200ms ease-out;
   `;
 
   return createPortal(

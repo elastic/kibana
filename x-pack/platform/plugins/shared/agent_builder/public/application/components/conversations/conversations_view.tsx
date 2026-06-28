@@ -13,6 +13,7 @@ import { ConversationHeader } from './conversation_header/conversation_header';
 import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
 import { ConversationSpineProvider } from '../../../agent_first/conversation_spine/conversation_spine_context';
+import { AttachmentsEmptyOverlayMount } from '../../../agent_first/conversation_spine/attachments_empty_overlay_mount';
 import { ConversationSpineMount } from '../../../agent_first/conversation_spine/conversation_spine_mount';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
@@ -60,6 +61,7 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
               <Conversation />
             </div>
             <ConversationSpineMount attachmentsService={attachmentsService} />
+            <AttachmentsEmptyOverlayMount />
             <CanvasFlyout attachmentsService={attachmentsService} />
           </div>
         </CanvasProvider>

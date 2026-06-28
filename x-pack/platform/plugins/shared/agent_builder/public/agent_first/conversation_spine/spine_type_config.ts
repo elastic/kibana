@@ -148,6 +148,8 @@ const createSpineTypeConfig = (
 
 export const SPINE_TYPE_ORDER: SpineType[] = ['chat', 'case', 'incident', 'threat_hunt'];
 
+export const PROMOTABLE_SPINE_TYPES: SpineType[] = ['case', 'incident', 'threat_hunt'];
+
 export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
   chat: createSpineTypeConfig('comment', labels.chat, (euiTheme) => ({
     ghostBackground: euiTheme.colors.backgroundBaseSubdued,
@@ -155,7 +157,7 @@ export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
     ghostBorder: euiTheme.colors.borderBaseSubdued,
     solidBackground: euiTheme.colors.backgroundFilledText,
     solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledTextHover,
+    solidHoverBackground: euiTheme.colors.backgroundFilledText,
   }), []),
   case: createSpineTypeConfig('documents', labels.case, (euiTheme) => ({
     ghostBackground: euiTheme.colors.backgroundBaseWarning,
@@ -163,7 +165,7 @@ export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
     ghostBorder: euiTheme.colors.borderBaseWarning,
     solidBackground: euiTheme.colors.backgroundFilledWarning,
     solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledWarningHover,
+    solidHoverBackground: euiTheme.colors.backgroundFilledWarning,
   }), [
     { id: 'overview', name: labels.overview },
     { id: 'evidence', name: labels.evidence },
@@ -176,7 +178,7 @@ export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
     ghostBorder: euiTheme.colors.borderBaseSuccess,
     solidBackground: euiTheme.colors.backgroundFilledSuccess,
     solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledSuccessHover,
+    solidHoverBackground: euiTheme.colors.backgroundFilledSuccess,
   }), [
     { id: 'overview', name: labels.overview },
     { id: 'timeline', name: labels.timeline },
@@ -188,7 +190,7 @@ export const SPINE_TYPE_CONFIG: Record<SpineType, SpineTypeConfig> = {
     ghostBorder: euiTheme.colors.borderBasePrimary,
     solidBackground: euiTheme.colors.backgroundFilledPrimary,
     solidText: euiTheme.colors.textInverse,
-    solidHoverBackground: euiTheme.colors.backgroundFilledPrimaryHover,
+    solidHoverBackground: euiTheme.colors.backgroundFilledPrimary,
   }), [
     { id: 'overview', name: labels.overview },
     { id: 'evidence', name: labels.evidence },
