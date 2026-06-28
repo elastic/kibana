@@ -46,6 +46,7 @@ import {
 } from './context_loaders/load_latest_alert_events';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
+import { prepareWithHandler } from './handlers';
 
 type DeactivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -155,7 +156,10 @@ export class AlertActionsClient {
           },
         });
       default:
-        return { alertActionDoc };
+        return prepareWithHandler(
+          { action, alertEvent },
+          { alertActionDoc, userProfileUid, context: undefined }
+        );
     }
   }
 

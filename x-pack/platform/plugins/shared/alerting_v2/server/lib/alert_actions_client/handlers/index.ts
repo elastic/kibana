@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { type AlertEpisodeActionType, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  type AlertEpisodeActionType,
+  type CreateAlertActionBody,
+} from '@kbn/alerting-v2-schemas';
 import type {
   ActionHandler,
   HandlerItem,
@@ -13,6 +17,12 @@ import type {
   HandlerServices,
   PreparedAction,
 } from '../handler';
+import { ackHandler } from './ack';
+import { assignHandler } from './assign';
+import { snoozeHandler } from './snooze';
+import { tagHandler } from './tag';
+import { unackHandler } from './unack';
+import { unsnoozeHandler } from './unsnooze';
 
 /**
  * Exhaustive map from `action_type` to its handler. The mapped type
@@ -34,13 +44,20 @@ export type ActionHandlersRegistry = {
  * helpers below — they cannot swap or hijack handlers at runtime.
  *
  * Typed as `Partial<…>` for the duration of the multi-step migration:
- * handlers are registered incrementally (audit-only first, then
- * `deactivate`, then `activate`). Once every action_type has a handler
- * we tighten this to {@link ActionHandlersRegistry} and the
- * missing-handler defensive throw in {@link resolveHandlerOrThrow}
+ * `deactivate` and `activate` are still served by the orchestrator's
+ * in-class switch (Steps 5–6 will move them). Once every action_type
+ * has a handler we tighten this to {@link ActionHandlersRegistry} and
+ * the missing-handler defensive throw in {@link resolveHandlerOrThrow}
  * becomes unreachable.
  */
-const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {};
+const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {
+  [ALERT_EPISODE_ACTION_TYPE.ACK]: ackHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNACK]: unackHandler,
+  [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: assignHandler,
+  [ALERT_EPISODE_ACTION_TYPE.TAG]: tagHandler,
+  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: snoozeHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeHandler,
+};
 
 /**
  * Read accessor for {@link ACTION_HANDLERS}. Returns the live registry
