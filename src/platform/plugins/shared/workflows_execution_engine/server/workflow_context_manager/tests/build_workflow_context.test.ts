@@ -157,7 +157,7 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.usage).toBeUndefined();
     });
 
-    it('should expose context.hitl.externalFormLink from persisted execution context', () => {
+    it('should not expose context.hitl links from persisted execution context', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         context: {
@@ -172,12 +172,7 @@ describe('buildWorkflowContext', () => {
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
-      expect(context.context?.hitl?.externalFormLink).toBe(
-        'http://localhost:5601/api/workflows/executions/ex-1/resume/external/form?apiKey=abc'
-      );
-      expect(context.context?.hitl?.externalQueryLink).toBe(
-        'http://localhost:5601/api/workflows/executions/ex-1/resume/external?apiKey=abc'
-      );
+      expect(context.context?.hitl).toBeUndefined();
     });
   });
 

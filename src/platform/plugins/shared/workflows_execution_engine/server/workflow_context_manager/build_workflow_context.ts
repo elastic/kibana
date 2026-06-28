@@ -8,10 +8,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import {
-  HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
-  HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
-} from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
 import {
   applyInputDefaults,
@@ -46,10 +42,7 @@ export function buildInputDefaultRenderContext(
     | Record<string, unknown>
     | undefined;
 
-  const templatePersistedContext = getTemplatePersistedContext(workflowExecution.context);
-
   return {
-    ...(templatePersistedContext ? { context: templatePersistedContext } : {}),
     execution: {
       id: workflowExecution.id,
       isTestRun: !!workflowExecution.isTestRun,
@@ -96,35 +89,4 @@ export function buildWorkflowContext(
     ...renderContext,
     inputs: inputsWithDefaults,
   };
-}
-
-function getTemplatePersistedContext(
-  executionContext: EsWorkflowExecution['context'] | undefined
-): WorkflowContext['context'] | undefined {
-  if (executionContext == null || typeof executionContext !== 'object') {
-    return undefined;
-  }
-
-  const hitl = (executionContext as Record<string, unknown>).hitl;
-  if (hitl == null || typeof hitl !== 'object' || Array.isArray(hitl)) {
-    return undefined;
-  }
-
-  const hitlContext: NonNullable<WorkflowContext['context']>['hitl'] = {};
-
-  const externalFormLink = (hitl as Record<string, unknown>)[HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY];
-  if (typeof externalFormLink === 'string') {
-    hitlContext[HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY] = externalFormLink;
-  }
-
-  const externalQueryLink = (hitl as Record<string, unknown>)[HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY];
-  if (typeof externalQueryLink === 'string') {
-    hitlContext[HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY] = externalQueryLink;
-  }
-
-  if (Object.keys(hitlContext).length === 0) {
-    return undefined;
-  }
-
-  return { hitl: hitlContext };
 }

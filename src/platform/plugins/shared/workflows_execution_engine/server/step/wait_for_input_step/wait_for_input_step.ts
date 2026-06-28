@@ -112,16 +112,21 @@ export class WaitForInputStepImpl implements NodeImplementation {
         apiKey: apiKey.encoded,
       });
 
-      this.setExternalHitlLinksInContext({
-        [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: formUrl,
-        [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: queryLink,
-      });
+      const hitlTemplateContext = {
+        context: {
+          hitl: {
+            [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: formUrl,
+            [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: queryLink,
+          },
+        },
+      };
 
       await sendWaitForInputNotifications({
         channels,
         stepMessage: message,
         formUrl,
-        renderTemplate: (template) => String(ctx.renderValueAccordingToContext(template)),
+        renderTemplate: (template) =>
+          String(ctx.renderValueAccordingToContext(template, hitlTemplateContext)),
         connectorExecutor: this.connectorExecutor,
         abortController: this.stepExecutionRuntime.abortController,
       });
@@ -131,22 +136,6 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
       event: { action: 'hitl:waiting' },
-    });
-  }
-
-  private setExternalHitlLinksInContext(links: Record<string, string>): void {
-    const execution = this.workflowRuntime.getWorkflowExecution();
-    const existingContext = (execution.context as Record<string, unknown> | null | undefined) ?? {};
-    const existingHitl = (existingContext.hitl as Record<string, unknown> | undefined) ?? {};
-
-    this.stepExecutionRuntime.updateWorkflowExecution({
-      context: {
-        ...existingContext,
-        hitl: {
-          ...existingHitl,
-          ...links,
-        },
-      },
     });
   }
 
