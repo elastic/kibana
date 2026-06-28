@@ -28,8 +28,6 @@ import {
   buildRuleEventDocument,
   type AlertEpisodeStatus,
   type AlertEvent,
-  type AlertEventSeverity,
-  type AlertEventStatus,
 } from '../../resources/datastreams/alert_events';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
@@ -41,8 +39,13 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
-import { parseDataJson } from './utils/parse_data_json';
 import { buildEpisodeDotIdInClause, buildEpisodeIdsInClause } from './utils/esql_clauses';
+import {
+  bulkLoadLatestAlertEvents,
+  loadLastAlertEventOrThrow,
+  toAlertEventRecords,
+} from './context_loaders/load_latest_alert_events';
+import type { AlertEventRecord } from './types';
 
 type DeactivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -101,8 +104,10 @@ export class AlertActionsClient {
     const { groupHash, action } = params;
 
     const [userProfileUid, alertEvent] = await Promise.all([
-      this.getUserProfileUid(),
-      this.findLastAlertEventRecordOrThrow({
+      this.userService.getCurrentUserProfileUid(),
+      loadLastAlertEventOrThrow({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
         groupHash,
         episodeId: 'episode_id' in action ? action.episode_id : undefined,
       }),
@@ -225,7 +230,7 @@ export class AlertActionsClient {
       '@timestamp': new Date().toISOString(),
       rule: { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 },
       group_hash: alertEvent.group_hash,
-      data: parseDataJson(alertEvent.data_json),
+      data: alertEvent.data_json,
       status: alertEventStatus.recovered,
       source: 'internal',
       type: alertEventType.alert,
@@ -316,7 +321,7 @@ export class AlertActionsClient {
         version: preDeactivateEvent.rule_version ?? 1,
       },
       group_hash: preDeactivateEvent.group_hash,
-      data: parseDataJson(preDeactivateEvent.data_json),
+      data: preDeactivateEvent.data_json,
       status: preDeactivateEvent.status ?? alertEventStatus.breached,
       source: 'internal',
       type: alertEventType.alert,
@@ -527,7 +532,7 @@ export class AlertActionsClient {
           last_space_id AS space_id
       | KEEP @timestamp, group_hash, episode_id, episode_status, episode_status_count, rule_id, rule_version, space_id, status, data_json, severity`.toRequest();
 
-    const records = queryResponseToRecords<AlertEventRecord>(
+    const records = toAlertEventRecords(
       await this.queryService.executeQuery({ query: query.query })
     );
 
@@ -563,8 +568,12 @@ export class AlertActionsClient {
     // referenced in the batch. Two ES|QL queries, in parallel, regardless of
     // batch size.
     const [userProfileUid, latestEvents] = await Promise.all([
-      this.getUserProfileUid(),
-      this.findLatestAlertEventRecordsForBulk(actions),
+      this.userService.getCurrentUserProfileUid(),
+      bulkLoadLatestAlertEvents({
+        queryService: this.queryService,
+        spaceId: this.spaceId,
+        actions,
+      }),
     ]);
 
     const recordsByGroupHash = groupBy(latestEvents, 'group_hash');
@@ -647,71 +656,6 @@ export class AlertActionsClient {
     return resolved;
   }
 
-  /**
-   * Resolves the latest alert event for every group_hash referenced in a
-   * bulk request, in a single ES|QL round-trip. Returns the same rich
-   * shape as {@link AlertActionsClient.findLastAlertEventRecordOrThrow}
-   * (`episode_status`, `episode_status_count`, `data_json`, `severity`,
-   * `status`, `rule_version`, …) so the lifecycle prep helpers can run
-   * directly on the result without per-item refetches.
-   *
-   * Items targeting a specific `episode_id` whose group's latest event
-   * belongs to a different episode are filtered out by the caller via
-   * `groupRecords.find((r) => r.episode_id === action.episode_id)` —
-   * matching the silent-skip semantics the bulk path has always had for
-   * non-latest-episode targeting.
-   */
-  private async findLatestAlertEventRecordsForBulk(
-    actions: BulkCreateAlertActionItemBody[]
-  ): Promise<AlertEventRecord[]> {
-    if (actions.length === 0) {
-      return [];
-    }
-
-    let whereClause = esql.exp`FALSE`;
-    for (const action of actions) {
-      whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`TRUE`
-      })`;
-    }
-
-    const query = esql`
-      FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-      | WHERE type == "alert" AND space_id == ${this.spaceId} AND (${whereClause})
-      | EVAL data_json = JSON_EXTRACT(_source, "$.data")
-      | DROP _source
-      | STATS
-          last_ts = MAX(@timestamp),
-          last_episode_id = LAST(episode.id, @timestamp),
-          last_episode_status = LAST(episode.status, @timestamp),
-          last_episode_status_count = LAST(episode.status_count, @timestamp),
-          last_data_json = LAST(data_json, @timestamp),
-          last_severity = LAST(severity, @timestamp),
-          last_status = LAST(status, @timestamp),
-          last_rule_id = LAST(rule.id, @timestamp),
-          last_rule_version = LAST(rule.version, @timestamp)
-        BY group_hash, space_id
-      | RENAME last_ts AS @timestamp,
-          last_episode_id AS episode_id,
-          last_episode_status AS episode_status,
-          last_episode_status_count AS episode_status_count,
-          last_data_json AS data_json,
-          last_severity AS severity,
-          last_status AS status,
-          last_rule_id AS rule_id,
-          last_rule_version AS rule_version
-      | KEEP @timestamp, group_hash, episode_id, episode_status, episode_status_count, rule_id, rule_version, space_id, status, data_json, severity
-    `.toRequest();
-
-    return queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.query })
-    );
-  }
-
-  private async getUserProfileUid(): Promise<string | null> {
-    return this.userService.getCurrentUserProfileUid();
-  }
-
   private buildAlertActionDocument(params: {
     action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
@@ -732,57 +676,6 @@ export class AlertActionsClient {
       ...actionData,
     };
   }
-
-  private async findLastAlertEventRecordOrThrow(params: {
-    groupHash: string;
-    episodeId?: string;
-  }): Promise<AlertEventRecord> {
-    const { groupHash, episodeId } = params;
-    const query = esql`
-      FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-      | WHERE type == "alert" AND space_id == ${this.spaceId} AND group_hash == ${groupHash} AND ${
-      episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
-    }
-      | SORT @timestamp DESC
-      | LIMIT 1
-      | EVAL data_json = JSON_EXTRACT(_source, "$.data")
-      | DROP _source
-      | RENAME rule.id AS rule_id, rule.version AS rule_version, episode.id AS episode_id, episode.status AS episode_status
-      | KEEP @timestamp, group_hash, episode_id, episode_status, rule_id, rule_version, space_id, data_json, severity`.toRequest();
-
-    const result = queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.query })
-    );
-
-    if (result.length === 0) {
-      throw Boom.notFound(
-        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`,
-        {
-          code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
-          details: {
-            group_hash: groupHash,
-            ...(episodeId ? { episode_id: episodeId } : {}),
-          },
-        }
-      );
-    }
-
-    return result[0];
-  }
-}
-
-interface AlertEventRecord {
-  '@timestamp': string;
-  group_hash: string;
-  episode_id: string;
-  rule_id: string;
-  space_id: string;
-  rule_version?: number;
-  data_json?: string | null;
-  severity?: AlertEventSeverity | null;
-  episode_status?: AlertEpisodeStatus | null;
-  status?: AlertEventStatus;
-  episode_status_count?: number | null;
 }
 
 /**
