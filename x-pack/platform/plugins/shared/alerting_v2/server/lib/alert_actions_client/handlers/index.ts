@@ -45,14 +45,15 @@ export type ActionHandlersRegistry = {
  * callers reach the registry exclusively through the invocation
  * helpers below — they cannot swap or hijack handlers at runtime.
  *
- * Every `AlertEpisodeActionType` now has a registered handler. The
- * registry is kept typed as `Partial<…>` only for one more step
- * because the orchestrator still has the lifecycle switch wired by
- * hand; Step 7 tightens this to {@link ActionHandlersRegistry} and the
- * missing-handler defensive throw in {@link resolveHandlerOrThrow}
- * becomes unreachable.
+ * Typed as the **exhaustive** {@link ActionHandlersRegistry}: a TS
+ * compile error fires the moment a new `AlertEpisodeActionType` value
+ * is introduced without a matching handler. The "missing handler"
+ * defensive throw in {@link resolveHandlerOrThrow} is consequently
+ * unreachable at the type level — it stays only as a belt-and-braces
+ * guard against runtime mutation (tests use {@link getActionHandlers}
+ * to wipe + repopulate the registry between cases).
  */
-const ACTION_HANDLERS: Partial<ActionHandlersRegistry> = {
+const ACTION_HANDLERS: ActionHandlersRegistry = {
   [ALERT_EPISODE_ACTION_TYPE.ACK]: ackHandler,
   [ALERT_EPISODE_ACTION_TYPE.UNACK]: unackHandler,
   [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: assignHandler,
@@ -85,6 +86,11 @@ export const getActionHandlers = (): Partial<ActionHandlersRegistry> => ACTION_H
  * each invocation helper below): the runtime invariant guarantees the
  * handler accepts the actual item shape, but TS cannot follow that
  * correlation across the indexed access.
+ *
+ * The `undefined` branch on the lookup is unreachable,
+ * but the runtime check stays as defence against test setups that wipe
+ * the registry via {@link getActionHandlers} — failing loud at lookup
+ * beats silently invoking `undefined` further down the call stack.
  */
 const resolveHandlerOrThrow = (
   actionType: AlertEpisodeActionType

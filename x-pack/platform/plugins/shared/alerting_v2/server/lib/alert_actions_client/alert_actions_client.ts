@@ -11,7 +11,7 @@ import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import {
-  ALERT_EPISODE_ACTION_TYPE,
+  type AlertEpisodeActionType,
   type BulkCreateAlertActionItemBody,
   type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
@@ -33,24 +33,11 @@ import {
   loadLastAlertEventOrThrow,
 } from './context_loaders/load_latest_alert_events';
 import type { AlertEventRecord } from './types';
-import type { HandlerItem, HandlerServices, PreparedAction } from './handler';
-import { activateHandler } from './handlers/activate';
-import { prepareWithHandler } from './handlers';
+import type { HandlerItem, PreparedAction } from './handler';
+import { loadContextPerHandler, prepareWithHandler } from './handlers';
 
-type ActivateAlertActionBody = Extract<
-  CreateAlertActionBody,
-  { action_type: typeof ALERT_EPISODE_ACTION_TYPE.ACTIVATE }
->;
-
-/**
- * Per-episode activate context as produced by `activateHandler.loadContext`.
- * Extracted here so the orchestrator can hand it to `prepareWithHandler`
- * for activate items without re-deriving the lookup shape from the
- * handler's TCtx.
- */
-type ActivateContextByEpisodeId = Awaited<
-  ReturnType<NonNullable<typeof activateHandler.loadContext>>
->;
+type ResolvedItem = HandlerItem<CreateAlertActionBody>;
+type ContextByActionType = Partial<Record<AlertEpisodeActionType, unknown>>;
 
 @injectable()
 export class AlertActionsClient {
@@ -80,59 +67,41 @@ export class AlertActionsClient {
       }),
     ]);
 
-    // Lifecycle handlers may declare a `loadContext` that needs I/O
-    // (currently just `activate`, which fetches the last lifecycle audit
-    // doc + the pre-deactivate rule event). Drive the same loader the
-    // bulk path uses — a one-element item list — so single and bulk
-    // routes share one preload definition and `prepareAction` stays
-    // synchronous.
-    const activateContextByEpisodeId = await this.loadActivateContext(
-      action.action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ? [{ action, alertEvent }] : []
-    );
-
-    const prepared = this.prepareAction({
-      action,
-      alertEvent,
-      userProfileUid,
-      activateContextByEpisodeId,
-    });
+    const contextByType = await this.loadHandlerContexts([{ action, alertEvent }]);
+    const prepared = this.prepareAction({ action, alertEvent, userProfileUid, contextByType });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
   /**
-   * Builds the writable payload for a single action. Pure / read-only and
-   * **synchronous** — preconditions are evaluated and the docs are
+   * Builds the writable payload for a single action. Pure / read-only
+   * and **synchronous** — preconditions are evaluated and the docs are
    * constructed, but nothing is indexed and no domain event is emitted.
    * Throws on precondition failure with the same Boom error each route
    * surface relies on.
    *
-   * Shared between {@link AlertActionsClient.createAction} (which lets the
-   * throw bubble back to the route) and
-   * {@link AlertActionsClient.createBulkActions} (which converts expected
-   * Boom 400 / 404 rejections into silent skips so the rest of the batch
-   * still gets persisted). All I/O the prep would have needed has already
-   * happened by the time this is called.
+   * Shared between {@link AlertActionsClient.createAction} (which lets
+   * the throw bubble back to the route) and
+   * {@link AlertActionsClient.createBulkActions} (which converts
+   * expected Boom 400 / 404 rejections into silent skips so the rest of
+   * the batch still gets persisted). All I/O the prep would have needed
+   * has already happened by the time this is called — including any
+   * handler's `loadContext` preload, surfaced through `contextByType`.
    */
   private prepareAction(params: {
     action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
-    activateContextByEpisodeId: ActivateContextByEpisodeId;
+    contextByType: ContextByActionType;
   }): PreparedAction {
-    const { action, alertEvent, userProfileUid, activateContextByEpisodeId } = params;
+    const { action, alertEvent, userProfileUid, contextByType } = params;
     const alertActionDoc = this.buildAlertActionDocument({ action, alertEvent, userProfileUid });
 
-    // Step 7 replaces the per-action `context` branch with the
-    // registry-driven `loadContextPerHandler` so the orchestrator stops
-    // naming individual action types entirely.
-    const context =
-      action.action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE
-        ? activateContextByEpisodeId
-        : undefined;
-
-    return prepareWithHandler({ action, alertEvent }, { alertActionDoc, userProfileUid, context });
+    return prepareWithHandler(
+      { action, alertEvent },
+      { alertActionDoc, userProfileUid, context: contextByType[action.action_type] }
+    );
   }
 
   /**
@@ -162,21 +131,23 @@ export class AlertActionsClient {
   }
 
   /**
-   * Delegates to {@link activateHandler.loadContext}. Centralises the
-   * "build the per-episode context map for activate items" step both
-   * `createAction` and `createBulkActions` need, while keeping the
-   * actual ES|QL work next to the rest of the activate logic. Empty
-   * input short-circuits inside the handler; the orchestrator does not
-   * need to special-case it.
+   * Asks every handler that has a `loadContext` to preload its
+   * per-item context, grouping items by `action_type` so each handler
+   * sees only the inputs it cares about. The result is a sparse map
+   * keyed by `action_type` and consumed by {@link prepareAction} via
+   * `contextByType[action.action_type]` — the orchestrator never names
+   * an individual handler directly.
    *
-   * Step 7 replaces this with a registry-driven `loadContextPerHandler`
-   * call so the orchestrator stops naming `activate` directly.
+   * Handlers without a `loadContext` (the audit-only ones, plus
+   * `deactivate`) get an `undefined` entry, which `prepareWithHandler`
+   * forwards through as `ctx.context: undefined`.
    */
-  private async loadActivateContext(
-    items: ReadonlyArray<HandlerItem<ActivateAlertActionBody>>
-  ): Promise<ActivateContextByEpisodeId> {
-    const services: HandlerServices = { queryService: this.queryService, spaceId: this.spaceId };
-    return activateHandler.loadContext!(items, services);
+  private async loadHandlerContexts(items: readonly ResolvedItem[]): Promise<ContextByActionType> {
+    const itemsByType = groupItemsByActionType(items);
+    return loadContextPerHandler(itemsByType, {
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+    });
   }
 
   /**
@@ -219,29 +190,20 @@ export class AlertActionsClient {
     const recordsByGroupHash = groupBy(latestEvents, 'group_hash');
     const resolvedAlertEvents = this.resolveAlertEventsForActions(actions, recordsByGroupHash);
 
-    // Stage 2: any handler whose `loadContext` needs I/O (currently
-    // just `activate`) gets to preload its per-item context in one
-    // batched call. Pure non-lifecycle batches go through with an
-    // empty map; the handler short-circuits on empty input.
-    const activateContextByEpisodeId = await this.loadActivateContext(
-      collectActivateItems(resolvedAlertEvents)
-    );
+    // Stage 2: registry-driven preload. Each handler's `loadContext`
+    // (if defined) sees only the items routed to it; handlers without
+    // a preload contribute no I/O. Pure audit-only batches issue zero
+    // extra round-trips.
+    const contextByType = await this.loadHandlerContexts(resolvedAlertEvents);
 
-    // Stage 3: synchronous per-action prep. The `try/catch` here is the
-    // *only* place per-item precondition errors are tolerated — Boom 400 /
-    // 404 become silent skips (preserving the bulk UX), anything else
-    // propagates and fails the whole batch loudly.
+    // Stage 3: synchronous per-action prep. The `try/catch` here is
+    // the *only* place per-item precondition errors are tolerated —
+    // Boom 400 / 404 become silent skips (preserving the bulk UX),
+    // anything else propagates and fails the whole batch loudly.
     const prepared: PreparedAction[] = [];
     for (const { action, alertEvent } of resolvedAlertEvents) {
       try {
-        prepared.push(
-          this.prepareAction({
-            action,
-            alertEvent,
-            userProfileUid,
-            activateContextByEpisodeId,
-          })
-        );
+        prepared.push(this.prepareAction({ action, alertEvent, userProfileUid, contextByType }));
       } catch (error) {
         if (
           Boom.isBoom(error) &&
@@ -320,22 +282,19 @@ export class AlertActionsClient {
 }
 
 /**
- * Walks the already-resolved (action, latest alert event) pairs and
- * returns the items whose `action_type` is `activate` — exactly the
- * input the handler's `loadContext` needs. The handler is responsible
- * for deduplicating by `episode_id` (currently via its `collectEpisodeIds`).
+ * Buckets resolved items by `action_type` into the exact shape
+ * `loadContextPerHandler` expects: a sparse record from `action_type` to
+ * the list of items routed to that handler. Empty buckets are simply
+ * absent — handlers without items in this batch are not invoked.
  */
-const collectActivateItems = (
-  resolved: ReadonlyArray<{
-    action: BulkCreateAlertActionItemBody;
-    alertEvent: AlertEventRecord;
-  }>
-): Array<HandlerItem<ActivateAlertActionBody>> => {
-  const items: Array<HandlerItem<ActivateAlertActionBody>> = [];
-  for (const { action, alertEvent } of resolved) {
-    if (action.action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE) {
-      items.push({ action, alertEvent });
-    }
+const groupItemsByActionType = (
+  items: readonly ResolvedItem[]
+): Partial<Record<AlertEpisodeActionType, ResolvedItem[]>> => {
+  const result: Partial<Record<AlertEpisodeActionType, ResolvedItem[]>> = {};
+  for (const item of items) {
+    const bucket = result[item.action.action_type] ?? [];
+    bucket.push(item);
+    result[item.action.action_type] = bucket;
   }
-  return items;
+  return result;
 };
