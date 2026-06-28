@@ -69,7 +69,7 @@ class MeteringServiceImpl implements MeteringService {
         instanceGroupType,
         csp: this.cloud?.csp,
         region: this.cloud?.region,
-        kibanaClusterId: this.cloud?.kibanaClusterId,
+        elasticsearchClusterId: this.cloud?.elasticsearchClusterId,
       })}`;
     });
 

@@ -61,7 +61,7 @@ export class WorkflowsMeteringService {
         instanceGroupType,
         csp: cloudSetup?.csp,
         region: cloudSetup?.region,
-        kibanaClusterId: cloudSetup?.kibanaClusterId,
+        elasticsearchClusterId: cloudSetup?.elasticsearchClusterId,
       })}`;
     });
 
