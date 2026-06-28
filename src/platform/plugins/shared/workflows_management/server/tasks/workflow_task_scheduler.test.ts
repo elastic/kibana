@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { type KibanaRequest, type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type {
   ConcreteTaskInstance,
@@ -222,6 +222,19 @@ describe('WorkflowTaskScheduler', () => {
   });
 
   describe('scheduleWorkflowTask — idempotent conflict handling', () => {
+    it('treats Saved Objects task not found errors as a missing scheduled task', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'task',
+          'workflow:test-workflow:scheduled'
+        )
+      );
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await expect(scheduler.getScheduledWorkflowTask('test-workflow')).resolves.toBeUndefined();
+    });
+
     it('falls back to bulkUpdateSchedules on 409 conflict', async () => {
       const conflictError = new Error('Conflict') as Error & { statusCode: number };
       conflictError.statusCode = 409;
@@ -280,6 +293,50 @@ describe('WorkflowTaskScheduler', () => {
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Recreated scheduled task')
+      );
+    });
+
+    it('recreates skipped tasks without regenerating credentials when preserving execution identity', async () => {
+      const conflictError = new Error('Conflict') as Error & { statusCode: number };
+      conflictError.statusCode = 409;
+      const scheduledAt = new Date('2030-01-01T00:00:00.000Z');
+      const mockTm = makeMockTaskManager();
+      mockTm.schedule
+        .mockRejectedValueOnce(conflictError)
+        .mockResolvedValueOnce(makeTaskInstance('workflow:test-workflow:scheduled'));
+      mockTm.get.mockResolvedValueOnce(
+        makeTaskInstance('workflow:test-workflow:scheduled', { scheduledAt })
+      );
+      mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
+        tasks: [],
+        errors: [],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      const result = await scheduler.scheduleWorkflowTask(
+        'test-workflow',
+        'default',
+        { type: 'scheduled', with: { every: '30s' } },
+        mockRequest,
+        { updateExecutionCredentials: false }
+      );
+
+      expect(result).toBe('workflow:test-workflow:scheduled');
+      expect(mockTm.bulkUpdateSchedules).toHaveBeenCalledWith(
+        ['workflow:test-workflow:scheduled'],
+        expect.objectContaining({ interval: '30s' }),
+        { request: mockRequest }
+      );
+      expect(mockTm.get).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
+      expect(mockTm.schedule).toHaveBeenCalledTimes(2);
+      expect(mockTm.schedule).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          id: 'workflow:test-workflow:scheduled',
+          schedule: expect.objectContaining({ interval: '30s' }),
+          scheduledAt,
+        }),
+        { request: mockRequest }
       );
     });
 

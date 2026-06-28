@@ -10,7 +10,10 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowYaml } from '@kbn/workflows';
 
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+import type {
+  WorkflowTaskScheduleOptions,
+  WorkflowTaskScheduler,
+} from '../tasks/workflow_task_scheduler';
 
 /**
  * Schedules trigger tasks for a newly created workflow.
@@ -25,9 +28,19 @@ export const scheduleWorkflowTriggers = async (params: {
   request: KibanaRequest;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
+  scheduleOptions?: WorkflowTaskScheduleOptions;
 }): Promise<void> => {
-  const { workflowId, definition, enabled, valid, spaceId, request, taskScheduler, logger } =
-    params;
+  const {
+    workflowId,
+    definition,
+    enabled,
+    valid,
+    spaceId,
+    request,
+    taskScheduler,
+    logger,
+    scheduleOptions,
+  } = params;
   if (!taskScheduler || !definition?.triggers || !enabled || !valid) {
     return;
   }
@@ -35,7 +48,7 @@ export const scheduleWorkflowTriggers = async (params: {
   const scheduledTriggers = definition.triggers.filter((t) => t.type === 'scheduled');
   const results = await Promise.allSettled(
     scheduledTriggers.map((trigger) =>
-      taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request)
+      taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request, scheduleOptions)
     )
   );
   results.forEach((result) => {

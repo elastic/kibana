@@ -8,7 +8,9 @@
  */
 
 import { createHash } from 'node:crypto';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, FakeRawRequest, KibanaRequest, Logger } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -33,6 +35,8 @@ import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_hi
 import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
@@ -44,6 +48,8 @@ const computeDefinitionHash = (yaml: string): string => {
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
+  coreStart: CoreStart;
+  taskScheduler: WorkflowTaskScheduler;
   logger: Logger;
 }
 
@@ -199,6 +205,12 @@ export class ManagedWorkflowsService {
         spaceId,
         timestamp: now,
       });
+      await this.scheduleManagedWorkflowTriggers({
+        workflowDocumentId,
+        document: savedDocument,
+        spaceId,
+        updateExecutionCredentials: true,
+      });
       return;
     }
 
@@ -251,6 +263,12 @@ export class ManagedWorkflowsService {
       action: WorkflowChangeHistoryAction.workflowUpdate,
       spaceId,
       timestamp: now,
+    });
+    await this.scheduleManagedWorkflowTriggers({
+      workflowDocumentId,
+      document: savedDocument,
+      spaceId,
+      updateExecutionCredentials: false,
     });
   }
 
@@ -573,6 +591,78 @@ export class ManagedWorkflowsService {
       storedHash: existing?.definitionHash ?? null,
       registryHash,
     };
+  }
+
+  private async scheduleManagedWorkflowTriggers(params: {
+    workflowDocumentId: string;
+    document: WorkflowProperties;
+    spaceId: string;
+    updateExecutionCredentials: boolean;
+  }): Promise<void> {
+    const { workflowDocumentId, document, spaceId, updateExecutionCredentials } = params;
+    const hasScheduledTriggers = document.definition?.triggers?.some(
+      (trigger) => trigger.type === 'scheduled'
+    );
+    const enabled = document.definition?.enabled ?? document.enabled;
+
+    if (!document.valid || !document.definition || !enabled || !hasScheduledTriggers) {
+      await this.deps.taskScheduler.unscheduleWorkflowTasks(workflowDocumentId);
+      return;
+    }
+
+    const existingTask = updateExecutionCredentials
+      ? undefined
+      : await this.deps.taskScheduler.getScheduledWorkflowTask(workflowDocumentId);
+    const request = existingTask?.apiKey
+      ? this.createApiKeyRequest({ apiKey: existingTask.apiKey, spaceId })
+      : await this.createKibanaSystemRequest({
+          workflowDocumentId,
+          spaceId,
+        });
+
+    await scheduleWorkflowTriggers({
+      workflowId: workflowDocumentId,
+      definition: document.definition,
+      enabled,
+      valid: document.valid,
+      spaceId,
+      request,
+      taskScheduler: this.deps.taskScheduler,
+      logger: this.logger,
+      scheduleOptions: { updateExecutionCredentials },
+    });
+  }
+
+  private async createKibanaSystemRequest(params: {
+    workflowDocumentId: string;
+    spaceId: string;
+  }): Promise<KibanaRequest> {
+    const { workflowDocumentId, spaceId } = params;
+    const apiKey =
+      await this.deps.coreStart.elasticsearch.client.asInternalUser.security.createApiKey({
+        name: `Managed workflow scheduled task: ${workflowDocumentId}`,
+        metadata: {
+          managed: true,
+          kibana: {
+            type: 'managed_workflow_scheduled_task',
+            workflowId: workflowDocumentId,
+          },
+        },
+      });
+    const encodedApiKey = Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64');
+    return this.createApiKeyRequest({ apiKey: encodedApiKey, spaceId });
+  }
+
+  private createApiKeyRequest(params: { apiKey: string; spaceId: string }): KibanaRequest {
+    const { apiKey, spaceId } = params;
+    const fakeRawRequest: FakeRawRequest = {
+      headers: {
+        authorization: `ApiKey ${apiKey}`,
+      },
+      spaceId: asSpaceId(spaceId),
+    };
+
+    return kibanaRequestFactory(fakeRawRequest);
   }
 
   private async prepareManagedWorkflowDocument(params: {

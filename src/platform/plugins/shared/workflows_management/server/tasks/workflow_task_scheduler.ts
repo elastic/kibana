@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  calculateNextRunAtFromSchedule,
-  type TaskManagerStartContract,
+import { type KibanaRequest, type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { calculateNextRunAtFromSchedule } from '@kbn/task-manager-plugin/server/lib/get_next_run_at';
 import type { EsWorkflow } from '@kbn/workflows';
 import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
@@ -28,6 +29,10 @@ export interface WorkflowTaskSchedulerParams {
   schedule: { interval: string };
 }
 
+export interface WorkflowTaskScheduleOptions {
+  updateExecutionCredentials?: boolean;
+}
+
 export class WorkflowTaskScheduler {
   constructor(
     private readonly logger: Logger,
@@ -41,14 +46,21 @@ export class WorkflowTaskScheduler {
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: WorkflowTaskScheduleOptions = {}
   ): Promise<string[]> {
     const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
+        const taskId = await this.scheduleWorkflowTask(
+          workflow.id,
+          spaceId,
+          trigger,
+          request,
+          options
+        );
         scheduledTaskIds.push(taskId);
         this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -64,6 +76,16 @@ export class WorkflowTaskScheduler {
     return scheduledTaskIds;
   }
 
+  async getScheduledWorkflowTask(workflowId: string): Promise<ConcreteTaskInstance | undefined> {
+    const taskId = getScheduledWorkflowTaskId(workflowId);
+    return this.taskManager.get(taskId).catch((error) => {
+      if (this.isTaskNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    });
+  }
+
   /**
    * Schedules a single workflow task for a specific trigger.
    * Idempotent: if the task already exists (409 conflict), updates the schedule in place
@@ -74,7 +96,8 @@ export class WorkflowTaskScheduler {
     workflowId: string,
     spaceId: string,
     trigger: WorkflowTrigger,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: WorkflowTaskScheduleOptions = {}
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
     const taskId = `workflow:${workflowId}:${trigger.type}`;
@@ -117,9 +140,10 @@ export class WorkflowTaskScheduler {
       if ((err as { statusCode?: number }).statusCode === VERSION_CONFLICT_STATUS) {
         // Task already exists — update its schedule in place rather than failing.
         // This handles both interval and RRule schedule types.
+        const shouldUpdateExecutionCredentials = options.updateExecutionCredentials ?? true;
         const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule, {
           request,
-          regenerateApiKey: true,
+          ...(shouldUpdateExecutionCredentials ? { regenerateApiKey: true } : {}),
         });
         if (result.errors.length > 0) {
           const firstError = result.errors[0].error;
@@ -135,10 +159,11 @@ export class WorkflowTaskScheduler {
         }
         // Task Manager intentionally skips running tasks when updating schedules, and skipped tasks
         // are not returned in either `tasks` or `errors`. Recreate the deterministic workflow task
-        // so it picks up the latest schedule interval and refreshed execution credentials.
+        // so it picks up the latest schedule interval. When credential updates are disabled, callers
+        // pass a request built from the existing task API key so the execution identity is preserved.
         if (!result.tasks.some((task) => task.id === taskId)) {
           const existingTask = await this.taskManager.get(taskId).catch((error) => {
-            if ((error as { statusCode?: number }).statusCode === NOT_FOUND_STATUS) {
+            if (this.isTaskNotFoundError(error)) {
               return undefined;
             }
             throw error;
@@ -222,10 +247,18 @@ export class WorkflowTaskScheduler {
   async updateWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: WorkflowTaskScheduleOptions = {}
   ): Promise<void> {
     // Schedule tasks idempotently — creates new tasks or updates existing ones in place.
     // No need to unschedule first since scheduleWorkflowTask handles 409 conflicts gracefully.
-    await this.scheduleWorkflowTasks(workflow, spaceId, request);
+    await this.scheduleWorkflowTasks(workflow, spaceId, request, options);
+  }
+
+  private isTaskNotFoundError(error: unknown): boolean {
+    return (
+      (error as { statusCode?: number }).statusCode === NOT_FOUND_STATUS ||
+      (error instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(error))
+    );
   }
 }
