@@ -35,6 +35,7 @@ import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
@@ -124,6 +125,11 @@ export function AlertDetails() {
 
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
+  });
+
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts: services.notifications.toasts,
   });
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
@@ -457,6 +463,13 @@ export function AlertDetails() {
     },
   ];
 
+  // The investigation guide and related dashboards tabs depend on rule data,
+  // which requires rule read. Hide them when the user cannot read any rules.
+  const ruleReadDependentTabIds: TabId[] = ['investigation_guide', 'related_dashboards'];
+  const visibleTabs = authorizedToReadAnyRules
+    ? tabs
+    : tabs.filter((tab) => !ruleReadDependentTabIds.includes(tab.id));
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -513,8 +526,8 @@ export function AlertDetails() {
         <HeaderMenu />
         <EuiTabbedContent
           data-test-subj="alertDetailsTabbedContent"
-          tabs={tabs}
-          selectedTab={tabs.find((tab) => tab.id === activeTabId)}
+          tabs={visibleTabs}
+          selectedTab={visibleTabs.find((tab) => tab.id === activeTabId)}
           onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
         />
       </ObsCasesContext>

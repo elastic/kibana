@@ -27,6 +27,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
@@ -62,7 +63,10 @@ export function HeaderActions({
     cases,
     triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
+    notifications: { toasts },
   } = services;
+
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
@@ -217,23 +221,29 @@ export function HeaderActions({
                   </EuiText>
                 </EuiButtonEmpty>
 
-                <EuiHorizontalRule margin="none" />
+                {authorizedToReadAnyRules && (
+                  <>
+                    <EuiHorizontalRule margin="none" />
 
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="link"
-                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-                  data-test-subj="view-rule-details-button"
-                  href={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
-                  target="_blank"
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
-                      defaultMessage: 'Go to rule details',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="link"
+                      disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                      data-test-subj="view-rule-details-button"
+                      href={
+                        rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''
+                      }
+                      target="_blank"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
+                          defaultMessage: 'Go to rule details',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
+                  </>
+                )}
 
                 <div />
               </EuiFlexGroup>

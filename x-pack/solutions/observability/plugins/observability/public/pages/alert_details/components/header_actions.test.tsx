@@ -26,6 +26,12 @@ import { paths } from '../../../../common/locators/paths';
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
 
+const mockUseGetRuleTypesPermissions = jest.fn(() => ({ authorizedToReadAnyRules: true }));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
+  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+}));
+
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchRuleMock = useFetchRule as jest.Mock;
 const mockCases = casesPluginMock.createStartContract();
@@ -84,6 +90,10 @@ const mockOnUntrackAlert = () => {};
 describe('Header Actions', () => {
   afterAll(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: true });
   });
 
   describe('Header Actions - Enabled', () => {
@@ -246,6 +256,26 @@ describe('Header Actions', () => {
           `http://localhost/wow${paths.observability.ruleDetails(mockRuleId)}`
         );
         expect(queryByTestId('view-rule-details-button')).toHaveProperty('target', '_blank');
+      });
+
+      it('should NOT offer a "Go to rule details" button when unauthorized to read rules', async () => {
+        mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: false });
+        const { queryByTestId, findByTestId } = render(
+          <HeaderActions
+            alert={alertWithGroupsAndTags}
+            alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+            onUntrackAlert={mockOnUntrackAlert}
+            refetch={jest.fn()}
+            // @ts-expect-error partial implementation for testing
+            rule={{
+              id: mockRuleId,
+              name: mockRuleName,
+            }}
+          />
+        );
+
+        fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+        expect(queryByTestId('view-rule-details-button')).not.toBeInTheDocument();
       });
     });
   });

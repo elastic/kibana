@@ -41,6 +41,12 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../utils/kibana_react');
 jest.mock('@kbn/response-ops-rule-form/src/common');
+
+const mockUseGetRuleTypesPermissions = jest.fn(() => ({ authorizedToReadAnyRules: true }));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
+  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+}));
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const ruleType: RuleTypeModel = {
   id: 'logs.alert.document.count',
@@ -232,6 +238,7 @@ describe('Alert details', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: true });
     useParamsMock.mockReturnValue(params);
     useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
     useHistoryMock.mockReturnValue({ replace: jest.fn() });
@@ -263,6 +270,22 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId(MOCK_RULE_TYPE_ID)).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsTabbedContent')).toBeTruthy();
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
+    expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
+  });
+
+  it('should hide the Investigation guide and Related dashboards tabs when unauthorized to read rules', async () => {
+    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: false });
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+    const alertDetails = renderComponent();
+
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+    expect(alertDetails.queryByTestId('investigationGuideTab')).toBeFalsy();
+    expect(alertDetails.queryByTestId('relatedDashboardsTab')).toBeFalsy();
+    // Non-rule-dependent tabs remain visible
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
