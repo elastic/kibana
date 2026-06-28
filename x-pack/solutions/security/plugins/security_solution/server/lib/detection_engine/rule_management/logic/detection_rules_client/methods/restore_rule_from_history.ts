@@ -23,7 +23,12 @@ import { SERVER_APP_ID } from '../../../../../../../common';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
-import { ClientError, validateFieldWritePermissions, validateMlAuth } from '../utils';
+import {
+  ClientError,
+  RuleConcurrencyError,
+  validateFieldWritePermissions,
+  validateMlAuth,
+} from '../utils';
 import { getRuleById } from './get_rule_by_id';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
@@ -35,6 +40,7 @@ export const restoreRuleFromHistory = async ({
   rulesAuthz,
   ruleId,
   changeId,
+  ruleRevision,
 }: {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
@@ -43,8 +49,23 @@ export const restoreRuleFromHistory = async ({
   rulesAuthz: DetectionRulesAuthz;
   ruleId: RuleObjectId;
   changeId: string;
+  ruleRevision?: number;
 }): Promise<{ rule: RuleResponse; no_change?: true }> => {
   const existingRule = await getRuleById({ rulesClient, id: ruleId });
+
+  if (existingRule == null && ruleRevision != null) {
+    throw new ClientError(
+      'Someone has restored this deleted rule already. Please refresh the history if you still want to restore to an earlier revision.',
+      409
+    );
+  }
+
+  if (existingRule != null && existingRule.revision !== ruleRevision) {
+    throw new RuleConcurrencyError(
+      'Someone has updated the rule already. Please refresh the history if you still want to restore to an earlier revision.',
+      existingRule.revision
+    );
+  }
 
   // `from` is intentionally omitted: the event.id term-filter makes the target
   // document the first (and only) hit; ES default of 0 is correct here.

@@ -114,4 +114,5 @@ export interface GetHistoryForRuleArgs {
 export interface RestoreRuleFromHistoryArgs {
   ruleId: RuleObjectId;
   changeId: string;
+  ruleRevision?: number;
 }

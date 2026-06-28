@@ -7,10 +7,8 @@
 
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type {
-  RestoreRuleFromHistoryRequestParams,
-  RestoreRuleFromHistoryResponse,
-} from '../../../../../common/api/detection_engine/rule_management';
+import type { RestoreRuleFromHistoryResponse } from '../../../../../common/api/detection_engine/rule_management';
+import type { RestoreRuleFromHistoryProps } from '../../logic/types';
 import { fetchRestoreRuleRevision } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useUpdateRuleByIdCache } from './use_fetch_rule_by_id_query';
@@ -21,11 +19,7 @@ import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './prebuilt_rules
 import { useInvalidateChangeHistory } from './use_infinite_change_history';
 
 export const useRestoreRuleFromHistoryMutation = (
-  options?: UseMutationOptions<
-    RestoreRuleFromHistoryResponse,
-    Error,
-    RestoreRuleFromHistoryRequestParams
-  >
+  options?: UseMutationOptions<RestoreRuleFromHistoryResponse, Error, RestoreRuleFromHistoryProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
@@ -35,8 +29,8 @@ export const useRestoreRuleFromHistoryMutation = (
   const updateRuleCache = useUpdateRuleByIdCache();
   const invalidateChangeHistory = useInvalidateChangeHistory();
 
-  return useMutation<RestoreRuleFromHistoryResponse, Error, RestoreRuleFromHistoryRequestParams>(
-    (params: RestoreRuleFromHistoryRequestParams) => fetchRestoreRuleRevision(params),
+  return useMutation<RestoreRuleFromHistoryResponse, Error, RestoreRuleFromHistoryProps>(
+    (params: RestoreRuleFromHistoryProps) => fetchRestoreRuleRevision(params),
     {
       ...options,
       onSuccess: (response, ...rest) => {

@@ -13,7 +13,9 @@ import * as i18n from './translations';
 
 interface UseRuleRestoreProps {
   ruleId: string; // RuleObjectId
+  ruleRevision?: number;
   onRestoreSuccess?: () => void;
+  onConflict?: (item: RuleHistoryItem, restoreAnyway: () => void, isDeletedRule: boolean) => void;
 }
 
 interface UseRuleRestoreResult {
@@ -23,16 +25,21 @@ interface UseRuleRestoreResult {
 
 export function useRuleRestoreFromHistory({
   ruleId,
+  ruleRevision,
   onRestoreSuccess,
+  onConflict,
 }: UseRuleRestoreProps): UseRuleRestoreResult {
-  const { addSuccess, addError, addInfo } = useAppToasts();
+  const { addSuccess, addError, addInfo, addWarning } = useAppToasts();
   const [restoringItemId, setRestoringItemId] = useState<string | undefined>(undefined);
   const restoringItemRef = useRef<RuleHistoryItem | undefined>(undefined);
+  const isRestoringAnywayRef = useRef(false);
 
   const { mutate: restoreMutate } = useRestoreRuleFromHistoryMutation({
     onSettled: (response, error) => {
       const restoringItem = restoringItemRef.current;
+      const wasRestoringAnyway = isRestoringAnywayRef.current;
       restoringItemRef.current = undefined;
+      isRestoringAnywayRef.current = false;
       setRestoringItemId(undefined);
 
       if (response?.no_change) {
@@ -54,7 +61,28 @@ export function useRuleRestoreFromHistory({
       }
 
       if (error) {
-        addError(error, { title: i18n.RESTORE_ERROR_TOAST });
+        const isConflict = (error as { response?: { status?: number } }).response?.status === 409;
+
+        if (isConflict && restoringItem && !wasRestoringAnyway && onConflict) {
+          const item = restoringItem;
+          const currentRevision = (error as { body?: { attributes?: { revision?: number } } }).body
+            ?.attributes?.revision;
+
+          onConflict(
+            item,
+            () => {
+              isRestoringAnywayRef.current = true;
+              setRestoringItemId(item.id);
+              restoringItemRef.current = item;
+              restoreMutate({ ruleId, changeId: item.id, revision: currentRevision });
+            },
+            ruleRevision === undefined
+          );
+        } else if (isConflict) {
+          addWarning(i18n.RESTORE_CONFLICT_TOAST);
+        } else {
+          addError(error, { title: i18n.RESTORE_ERROR_TOAST });
+        }
       }
     },
   });
@@ -63,9 +91,9 @@ export function useRuleRestoreFromHistory({
     (item: RuleHistoryItem) => {
       setRestoringItemId(item.id);
       restoringItemRef.current = item;
-      restoreMutate({ ruleId, changeId: item.id });
+      restoreMutate({ ruleId, changeId: item.id, revision: ruleRevision });
     },
-    [restoreMutate, ruleId]
+    [restoreMutate, ruleId, ruleRevision]
   );
 
   return {

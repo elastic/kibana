@@ -86,6 +86,7 @@ import type {
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
   RestoreRuleFromHistoryRequestParamsInput,
+  RestoreRuleFromHistoryRequestBodyInput,
   RestoreRuleFromHistoryResponse,
 } from './detection_engine/rule_management/restore_rule_from_history/restore_rule_from_history_route.gen';
 import type {
@@ -3159,6 +3160,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -4315,6 +4317,7 @@ export interface ResolveTimelineProps {
 }
 export interface RestoreRuleFromHistoryProps {
   params: RestoreRuleFromHistoryRequestParamsInput;
+  body: RestoreRuleFromHistoryRequestBodyInput;
 }
 export interface ReviewRuleInstallationProps {
   body: ReviewRuleInstallationRequestBodyInput;

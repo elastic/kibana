@@ -235,6 +235,7 @@ export const createDetectionRulesClient = ({
     async restoreRuleFromHistory({
       ruleId,
       changeId,
+      ruleRevision,
     }: RestoreRuleFromHistoryArgs): Promise<RestoreRuleFromHistoryResponse> {
       return withSecuritySpan('DetectionRulesClient.restoreRuleFromHistory', async () => {
         return restoreRuleFromHistory({
@@ -245,6 +246,7 @@ export const createDetectionRulesClient = ({
           rulesAuthz,
           ruleId,
           changeId,
+          ruleRevision,
         });
       });
     },

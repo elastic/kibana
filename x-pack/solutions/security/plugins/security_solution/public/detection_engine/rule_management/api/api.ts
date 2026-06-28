@@ -55,7 +55,6 @@ import type {
   ImportRulesResponse,
   BulkManualRuleFillGaps,
   RuleChangesHistoryResponse,
-  RestoreRuleFromHistoryRequestParams,
   RestoreRuleFromHistoryResponse,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
@@ -98,6 +97,7 @@ import type {
   PatchRuleProps,
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
+  RestoreRuleFromHistoryProps,
   RulesSnoozeSettingsBatchResponse,
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
@@ -357,14 +357,18 @@ export const fetchRuleChangeHistoryById = async ({
  * @returns Promise<RestoreRuleResponse>
  */
 export const fetchRestoreRuleRevision = async (
-  params: RestoreRuleFromHistoryRequestParams
+  params: RestoreRuleFromHistoryProps
 ): Promise<RestoreRuleFromHistoryResponse> =>
   KibanaServices.get().http.fetch<RestoreRuleFromHistoryResponse>(
     RULE_RESTORE_FROM_HISTORY_URL.replace('{ruleId}', encodeURIComponent(params.ruleId)).replace(
       '{changeId}',
       encodeURIComponent(params.changeId)
     ),
-    { method: 'POST', version: '1' }
+    {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify({ revision: params.revision }),
+    }
   );
 
 /**

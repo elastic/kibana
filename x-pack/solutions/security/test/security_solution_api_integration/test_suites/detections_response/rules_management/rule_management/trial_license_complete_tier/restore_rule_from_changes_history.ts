@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
         .expect(200);
 
-      await detectionsApi
+      const { body: updatedRule } = await detectionsApi
         .updateRule({
           body: getCustomQueryRuleParams({ rule_id: rule.rule_id, name: 'updated name' }),
         })
@@ -77,7 +77,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = createEntry.id;
 
       const { body } = await detectionsApi
-        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId },
+          body: { revision: updatedRule.revision },
+        })
         .expect(200);
 
       expect(body.rule.name).toBe('original name');
@@ -103,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .readRule({ query: { rule_id: 'prebuilt-restore-customized' } })
         .expect(200);
 
-      await detectionsApi
+      const { body: patchedRule } = await detectionsApi
         .patchRule({ body: { rule_id: 'prebuilt-restore-customized', name: 'customized name' } })
         .expect(200);
 
@@ -119,7 +122,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = installEntry.id;
 
       const { body } = await detectionsApi
-        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId },
+          body: { revision: patchedRule.revision },
+        })
         .expect(200);
 
       expect(body.rule.name).not.toBe('customized name');
@@ -164,7 +170,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = installEntry.id;
 
       const { body } = await detectionsApi
-        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId },
+          body: { revision: rule.revision },
+        })
         .expect(200);
 
       expect(body.rule.version).toBe(1);
@@ -195,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
 
       const { body } = await detectionsApi
-        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId }, body: {} })
         .expect(200);
 
       expect(body.rule.id).toBe(rule.id);
@@ -206,7 +215,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
         .expect(200);
 
-      await detectionsApi
+      const { body: updatedRule } = await detectionsApi
         .updateRule({
           body: getCustomQueryRuleParams({ rule_id: rule.rule_id, name: 'updated name' }),
         })
@@ -228,8 +237,14 @@ export default ({ getService }: FtrProviderContext): void => {
       //   [200, 200] — requests executed serially; both updates succeeded
       //   [200, 409] — true race; both read the same saved-object version, second write conflicted
       const [res1, res2] = await Promise.all([
-        detectionsApi.restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } }),
-        detectionsApi.restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } }),
+        detectionsApi.restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId },
+          body: { revision: updatedRule.revision },
+        }),
+        detectionsApi.restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId },
+          body: { revision: updatedRule.revision },
+        }),
       ]);
 
       const statuses = [res1.status, res2.status];
@@ -244,7 +259,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       await detectionsApi
-        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId: uuidv4() } })
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId: uuidv4() },
+          body: { revision: rule.revision },
+        })
         .expect(404);
     });
 
@@ -262,7 +280,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const changeId = historyBody.items[0].id;
 
       const { body } = await detectionsApi
-        .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId },
+          body: { revision: rule.revision },
+        })
         .expect(200);
 
       expect(body.rule.id).toBe(rule.id);
@@ -275,6 +296,142 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body2.items.length).toBe(1);
       expect(body2.items[0].action).toBe('rule_create');
+    });
+
+    describe('concurrency control', () => {
+      it('returns 409 when trying to restore the rule with outdated revision (revision bump due to edit)', async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
+          .expect(200);
+
+        // capture the stale revision
+        const staleRevision = rule.revision;
+
+        await refreshHistory();
+
+        const { body: historyBody } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        const createEntry = historyBody.items.find(
+          (item: { action: string }) => item.action === 'rule_create'
+        );
+        const changeId = createEntry.id;
+
+        await detectionsApi
+          .updateRule({
+            body: getCustomQueryRuleParams({ rule_id: rule.rule_id, name: 'changed name' }),
+          })
+          .expect(200);
+
+        await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId },
+            body: { revision: staleRevision },
+          })
+          .expect(409);
+      });
+
+      it('returns 409 when trying to restore the rule with outdated revision (revision bump due to restore)', async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
+          .expect(200);
+
+        const { body: updatedRule } = await detectionsApi
+          .updateRule({
+            body: getCustomQueryRuleParams({ rule_id: rule.rule_id, name: 'updated name' }),
+          })
+          .expect(200);
+
+        await refreshHistory();
+
+        const { body: historyBody } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        const createEntry = historyBody.items.find(
+          (item: { action: string }) => item.action === 'rule_create'
+        );
+        const changeId = createEntry.id;
+
+        await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId },
+            body: { revision: updatedRule.revision },
+          })
+          .expect(200);
+
+        await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId },
+            body: { revision: rule.revision },
+          })
+          .expect(409);
+      });
+
+      it('returns 409 when trying to restore the deleted rule and providing the revision  (rule supposed to exist but it is deleted)', async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams() })
+          .expect(200);
+
+        await refreshHistory();
+
+        const { body: historyBody } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        const changeId = historyBody.items[0].id;
+
+        await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+        await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId },
+            body: { revision: rule.revision },
+          })
+          .expect(409);
+      });
+
+      it('returns 409 when trying to restore a rule without providing revision (rule supposed to be deleted but it is not)', async () => {
+        const { body: rule } = await detectionsApi
+          .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
+          .expect(200);
+
+        await detectionsApi
+          .updateRule({
+            body: getCustomQueryRuleParams({ rule_id: rule.rule_id, name: 'updated name' }),
+          })
+          .expect(200);
+
+        await refreshHistory();
+
+        const { body: historyBody } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        const createEntry = historyBody.items.find(
+          (item: { action: string }) => item.action === 'rule_create'
+        );
+        const updateEntry = historyBody.items.find(
+          (item: { action: string }) => item.action === 'rule_update'
+        );
+
+        await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+        await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId: createEntry.id },
+            body: {},
+          })
+          .expect(200);
+
+        await detectionsApi
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId: updateEntry.id },
+            body: {},
+          })
+          .expect(409);
+      });
     });
 
     describe('@skipInServerless RBAC', () => {
@@ -303,7 +460,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const restrictedApis = detectionsApi.withUser({ username: role, password: 'changeme' });
 
         await restrictedApis
-          .restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } })
+          .restoreRuleFromHistory({
+            params: { ruleId: rule.id, changeId },
+            body: { revision: rule.revision },
+          })
           .expect(403);
       });
     });

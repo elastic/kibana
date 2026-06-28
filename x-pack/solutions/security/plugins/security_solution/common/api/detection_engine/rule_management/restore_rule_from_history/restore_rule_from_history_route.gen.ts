@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { RuleObjectId } from '../../model/rule_schema/common_attributes.gen';
+import { RuleObjectId, RuleRevision } from '../../model/rule_schema/common_attributes.gen';
 import { UUID } from '../../../model/primitives.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 
@@ -37,6 +37,22 @@ export type RestoreRuleFromHistoryRequestParams = z.infer<
 >;
 export type RestoreRuleFromHistoryRequestParamsInput = z.input<
   typeof RestoreRuleFromHistoryRequestParams
+>;
+
+export const RestoreRuleFromHistoryRequestBody = lazySchema(() =>
+  z.object({
+    /**
+      * The caller's known current revision of the rule. When provided the server
+checks this value against the rule's actual revision and returns 409 if they
+differ, preventing a restore that would silently overwrite a concurrent update.
+
+      */
+    revision: RuleRevision.optional(),
+  })
+);
+export type RestoreRuleFromHistoryRequestBody = z.infer<typeof RestoreRuleFromHistoryRequestBody>;
+export type RestoreRuleFromHistoryRequestBodyInput = z.input<
+  typeof RestoreRuleFromHistoryRequestBody
 >;
 
 export const RestoreRuleFromHistoryResponse = lazySchema(() =>
