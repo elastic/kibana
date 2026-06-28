@@ -16,6 +16,13 @@ x-codeSamples:
         -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external?apiKey=${ENCODED_API_KEY}" \
         -H "Content-Type: application/json" \
         -d '{"severity":"high"}'
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external" \
+        -H "Authorization: ApiKey ${ENCODED_API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"severity":"high"}'
   - lang: Console
     source: |
       POST kbn://api/workflows/executions/{executionId}/resume/external?apiKey={encodedApiKey}

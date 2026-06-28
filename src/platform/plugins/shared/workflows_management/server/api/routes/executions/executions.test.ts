@@ -822,7 +822,7 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should resume via API key with input and return HTML', async () => {
+    it('should resume via API key query param and return HTML', async () => {
       mockApi.resumeWorkflowExecutionExternallyWithInput.mockResolvedValue({
         resumedBy: 'api_key:api-key-id',
       });
@@ -847,6 +847,28 @@ describe('Execution Routes', () => {
       });
       expect(typeof result.body).toBe('string');
       expect(result.body).toContain('Thank you');
+    });
+
+    it('should resume via Authorization header when provided', async () => {
+      mockApi.resumeWorkflowExecutionExternallyWithInput.mockResolvedValue({
+        resumedBy: 'api_key:api-key-id',
+      });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: {},
+        headers: { authorization: 'ApiKey header-api-key' },
+        body: { severity: 'high' },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternallyWithInput).toHaveBeenCalledWith({
+        apiKey: 'header-api-key',
+        executionId: 'ex-1',
+        spaceId: 'default',
+        input: { severity: 'high' },
+      });
     });
   });
 

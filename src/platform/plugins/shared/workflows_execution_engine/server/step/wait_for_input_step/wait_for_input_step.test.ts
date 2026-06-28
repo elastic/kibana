@@ -189,7 +189,10 @@ describe('WaitForInputStepImpl', () => {
 
     it('should call finishStep with the resumeInput from context', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(resumeInput);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: resumeInput,
+        respondedBy: 'jane.doe',
+      });
     });
 
     it('should not call setInput on resume run', async () => {
@@ -253,7 +256,10 @@ describe('WaitForInputStepImpl', () => {
 
     it('should call finishStep with undefined when resumeInput is absent', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: {},
+        respondedBy: 'unknown',
+      });
     });
 
     it('should not throw when resumeInput is absent', async () => {
@@ -320,7 +326,10 @@ describe('WaitForInputStepImpl', () => {
 
     it('should call finishStep with undefined', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: {},
+        respondedBy: 'unknown',
+      });
     });
 
     it('should not call updateWorkflowExecution when context is null', async () => {

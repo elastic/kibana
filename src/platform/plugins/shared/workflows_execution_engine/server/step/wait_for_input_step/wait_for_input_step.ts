@@ -181,6 +181,10 @@ export class WaitForInputStepImpl implements NodeImplementation {
       workflowRuntime: this.workflowRuntime,
       workflowLogger: this.workflowLogger,
       stepId: this.node.stepId,
+      transformResumeInput: (input, respondedBy) => ({
+        response: input ?? {},
+        respondedBy,
+      }),
     });
   }
 

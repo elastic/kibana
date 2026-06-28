@@ -15,7 +15,10 @@ import {
   handleExternalResumeError,
   htmlSuccess,
 } from './external_resume_route_helpers';
-import { parseApprovedQueryParam } from '../../external_resume/external_resume_service';
+import {
+  parseApprovedQueryParam,
+  resolveExternalResumeApiKey,
+} from '../../external_resume/external_resume_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
@@ -31,7 +34,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
       security: EXTERNAL_RESUME_SECURITY,
       summary: 'Submit external input for a paused workflow execution',
       description:
-        'Resume a paused waitForInput step using an external resume API key and submitted form data. Returns an HTML confirmation page.',
+        'Resume a paused waitForInput step using an external resume API key and submitted form data. Authenticate with an Authorization: ApiKey header or an apiKey query parameter (header takes precedence). Returns an HTML confirmation page.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -48,9 +51,14 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
           request: {
             params: executionIdParamSchema,
             query: schema.object({
-              apiKey: schema.string({
-                meta: { description: 'External resume API key credential.' },
-              }),
+              apiKey: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'External resume API key credential. Used when Authorization header is not provided.',
+                  },
+                })
+              ),
             }),
             body: schema.object({}, { unknowns: 'allow' }),
           },
@@ -59,7 +67,10 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { apiKey } = request.query;
+          const apiKey = resolveExternalResumeApiKey({
+            authorization: request.headers?.authorization,
+            queryApiKey: request.query.apiKey,
+          });
           const spaceId = spaces.getSpaceId(request);
           const { resumedBy } = await api.resumeWorkflowExecutionExternallyWithInput({
             apiKey,

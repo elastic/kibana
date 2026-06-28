@@ -246,7 +246,10 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     description: 'Pause execution until external input is provided (human-in-the-loop)',
     category: StepCategory.FlowControl,
     inputSchema: WaitForInputStepInputSchema,
-    outputSchema: z.unknown(),
+    outputSchema: z.object({
+      response: z.record(z.string(), z.unknown()),
+      respondedBy: z.string(),
+    }),
     documentation: {
       examples: [
         `- name: wait_for_approval

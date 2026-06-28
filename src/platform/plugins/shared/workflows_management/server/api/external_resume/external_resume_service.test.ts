@@ -16,6 +16,8 @@ import { ExternalResumeError } from './external_resume_error';
 import {
   getExternalResumeFormPage,
   parseApprovedQueryParam,
+  parseExternalResumeApiKeyFromAuthorization,
+  resolveExternalResumeApiKey,
   resumeWorkflowExecutionExternally,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume_service';
@@ -320,6 +322,49 @@ describe('getExternalResumeFormPage', () => {
     expect(html).toContain('Submit your response');
     expect(html).toContain('Please respond');
     expect(html).toContain('name="severity"');
+  });
+});
+
+describe('resolveExternalResumeApiKey', () => {
+  it('prefers the Authorization header when present', () => {
+    expect(
+      resolveExternalResumeApiKey({
+        authorization: 'ApiKey header-key',
+        queryApiKey: 'query-key',
+      })
+    ).toBe('header-key');
+  });
+
+  it('falls back to the apiKey query parameter', () => {
+    expect(
+      resolveExternalResumeApiKey({
+        queryApiKey: 'query-key',
+      })
+    ).toBe('query-key');
+  });
+
+  it('rejects requests with no credential', () => {
+    expect(() => resolveExternalResumeApiKey({})).toThrow(
+      new ExternalResumeError(
+        'External resume API key must be provided via Authorization header or apiKey query parameter',
+        401
+      )
+    );
+  });
+});
+
+describe('parseExternalResumeApiKeyFromAuthorization', () => {
+  it('extracts the encoded API key credential', () => {
+    expect(parseExternalResumeApiKeyFromAuthorization('ApiKey abc123')).toBe('abc123');
+  });
+
+  it('rejects missing or invalid Authorization headers', () => {
+    expect(() => parseExternalResumeApiKeyFromAuthorization(undefined)).toThrow(
+      new ExternalResumeError('Missing or invalid Authorization header', 401)
+    );
+    expect(() => parseExternalResumeApiKeyFromAuthorization('Bearer token')).toThrow(
+      new ExternalResumeError('Missing or invalid Authorization header', 401)
+    );
   });
 });
 

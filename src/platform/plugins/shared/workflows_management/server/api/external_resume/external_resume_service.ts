@@ -161,16 +161,20 @@ function buildExternalResumeRelativeUrl({
 }: {
   spaceId: string;
   executionId: string;
-  apiKey: string;
+  apiKey?: string;
   approved?: boolean;
 }): string {
   const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId);
-  const params = new URLSearchParams({ apiKey });
+  const params = new URLSearchParams();
+  if (apiKey) {
+    params.set('apiKey', apiKey);
+  }
   if (approved !== undefined) {
     params.set('approved', String(approved));
   }
-  return `${spacePrefix}${path}?${params.toString()}`;
+  const query = params.toString();
+  return query.length > 0 ? `${spacePrefix}${path}?${query}` : `${spacePrefix}${path}`;
 }
 
 async function resolveExternalResumeContext(
@@ -327,4 +331,41 @@ export function parseApprovedQueryParam(value: unknown): boolean {
   }
 
   throw new ExternalResumeError('approved query parameter must be true or false', 400);
+}
+
+export function parseExternalResumeApiKeyFromAuthorization(
+  authorization: string | undefined
+): string {
+  const prefix = 'ApiKey ';
+  if (authorization == null || !authorization.startsWith(prefix)) {
+    throw new ExternalResumeError('Missing or invalid Authorization header', 401);
+  }
+
+  const apiKey = authorization.slice(prefix.length).trim();
+  if (apiKey.length === 0) {
+    throw new ExternalResumeError('Missing or invalid Authorization header', 401);
+  }
+
+  return apiKey;
+}
+
+export function resolveExternalResumeApiKey({
+  authorization,
+  queryApiKey,
+}: {
+  authorization?: string;
+  queryApiKey?: string;
+}): string {
+  if (authorization != null && authorization.trim().length > 0) {
+    return parseExternalResumeApiKeyFromAuthorization(authorization);
+  }
+
+  if (typeof queryApiKey === 'string' && queryApiKey.length > 0) {
+    return queryApiKey;
+  }
+
+  throw new ExternalResumeError(
+    'External resume API key must be provided via Authorization header or apiKey query parameter',
+    401
+  );
 }

@@ -34,12 +34,20 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     if (jsonSchema) {
       try {
         const zodSchema = fromJSONSchema(jsonSchema);
-        if (zodSchema) return zodSchema as z.ZodSchema;
+        if (zodSchema) {
+          return z.object({
+            response: zodSchema as z.ZodSchema,
+            respondedBy: z.string(),
+          });
+        }
       } catch {
         // fall through to permissive fallback
       }
     }
-    return waitForInputFallbackSchema;
+    return z.object({
+      response: waitForInputFallbackSchema,
+      respondedBy: z.string(),
+    });
   }
 
   if (node.stepType === 'waitForApproval') {
