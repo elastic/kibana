@@ -21,7 +21,7 @@ The Orchestrator sequences three child workflows in order:
 2. **Discovery Workflow** — an AI investigator agent correlates unhandled Detections into logical incidents. Writes **Discovery** documents (with generated title, summary, root cause) to `.significant_events-discoveries`.
 3. **Triage Workflow** — an AI judge agent assesses unreviewed Discoveries, assigns a status (`promoted` / `acknowledged` / `demoted` / `resolved`), and writes the final **Significant Event** to `.significant_events-events`.
 
-Each entity written by a workflow carries a `workflow_execution_id` field for traceability back to the run that created it.
+Each Detection, Discovery, and Significant Event document carries a `workflow_execution_id` field for traceability back to the run that created it.
 
 Workflow clients live in `server/lib/workflows/`. Workflow YAML definitions live in `@kbn/workflows` (`managed/definitions/sig_events/`), not in this plugin. Schemas for all entities live in `@kbn/streams-schema`. LLM logic lives in `@kbn/streams-ai`.
 
