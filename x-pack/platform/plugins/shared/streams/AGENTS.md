@@ -31,9 +31,11 @@ Workflow clients live in `server/lib/workflows/`. Workflow YAML definitions live
 |---|---|---|
 | New domain type, schema, or Zod validator | `kbn-streams-schema` | `src/sig_events/<entity>/`, `src/queries/`, or `src/feature.ts` |
 | New API request/response shape | `kbn-streams-schema` | `src/api/significant_events/` |
-| New LLM prompt, agent tool, or inference workflow | `kbn-streams-ai` | `src/significant_events/`, `src/features/`, or `src/knowledge_indicators/` |
+| New LLM prompt or agent tool | `kbn-streams-ai` | `src/significant_events/`, `src/features/`, or `src/knowledge_indicators/` |
+| New managed workflow YAML definition (Detection/Discovery/Triage steps) | `@kbn/workflows` | `managed/definitions/sig_events/` |
 | New internal HTTP route | `streams` plugin | `server/routes/internal/sig_events/<entity>/route.ts` |
 | New public/versioned HTTP route | `streams` plugin | `server/routes/sig_events/<path>/route.ts` |
+| New workflow execution client | `streams` plugin | `server/lib/workflows/` |
 | New server-side client or service | `streams` plugin | `server/lib/sig_events/<entity>/` |
 | Knowledge Indicator read/write logic | `streams` plugin | `server/lib/streams/ki/knowledge_indicator_client/` |
 | Any UI component, hook, or service | `streams_app` plugin | Follow existing structure |
@@ -43,6 +45,7 @@ Workflow clients live in `server/lib/workflows/`. Workflow YAML definitions live
 - Add domain types directly to `streams` or `streams_app` — they belong in `kbn-streams-schema`.
 - Add LLM/inference logic to `streams` — it belongs in `kbn-streams-ai`.
 - Add UI components to `streams` — all UI lives in `streams_app`.
+- Add managed workflow YAML definitions to `streams` or `kbn-streams-ai` — they belong in `@kbn/workflows`.
 - Place new routes under the public path without a deliberate API contract — use `internal/` first.
 
 ## Naming conventions
