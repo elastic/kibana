@@ -131,8 +131,9 @@ describe('WorkflowManagementAuditLog', () => {
       expect(systemLog).toHaveBeenCalledWith(
         expect.objectContaining({
           message:
-            'System updated managed workflow [id=managed-doc] [originalWorkflowId=registry-id] ' +
-            '[ownerPlugin=ownerPlugin] [space=default] [reason=reinstall]',
+            'System updated workflow [id=managed-doc] [managed=true] ' +
+            '[originalWorkflowId=registry-id] [ownerPlugin=ownerPlugin] [space=default] ' +
+            '[reason=reinstall]',
         })
       );
       expect(systemLog.mock.calls[0][0]).not.toHaveProperty('labels');

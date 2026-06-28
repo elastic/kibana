@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuditLogger, SecurityServiceStart } from '@kbn/core-security-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 import type { WorkflowsService } from '../../workflows_management_service';
 
@@ -55,6 +55,7 @@ const getManagedWorkflowMessageSuffix = (fields?: WorkflowAuditFields): string =
   }
 
   return [
+    'managed=true',
     fields.originalWorkflowId ? `originalWorkflowId=${fields.originalWorkflowId}` : undefined,
     fields.ownerPlugin ? `ownerPlugin=${fields.ownerPlugin}` : undefined,
     fields.spaceId ? `space=${fields.spaceId}` : undefined,
@@ -119,20 +120,8 @@ export class WorkflowManagementAuditLog {
       });
   }
 
-  private asScopedUser(request: KibanaRequest): AuditLogger | undefined {
-    return this.security?.audit.asScoped(request);
-  }
-
-  private asSystemUser(): AuditLogger | undefined {
-    return this.security?.audit.withoutRequest;
-  }
-
   private getActor(request?: KibanaRequest): 'User' | 'System' {
     return request ? 'User' : 'System';
-  }
-
-  private getWorkflowLabel(params: WorkflowAuditFields): 'workflow' | 'managed workflow' {
-    return params.managed === true ? 'managed workflow' : 'workflow';
   }
 
   private log(request: KibanaRequest | undefined, event: AuditEvent): void {
@@ -140,7 +129,9 @@ export class WorkflowManagementAuditLog {
       if (!this.security) {
         return;
       }
-      const auditLogger = request ? this.asScopedUser(request) : this.asSystemUser();
+      const auditLogger = request
+        ? this.security?.audit.asScoped(request)
+        : this.security?.audit.withoutRequest;
       auditLogger?.log(event);
     } catch {
       // Best-effort only: never let audit affect the HTTP response.
@@ -153,10 +144,9 @@ export class WorkflowManagementAuditLog {
   ): void {
     const { id, viaBulkImport } = params;
     const actor = this.getActor(request);
-    const workflowLabel = this.getWorkflowLabel(params);
     const message = viaBulkImport
-      ? `${actor} created ${workflowLabel} via bulk import [id=${id}]`
-      : `${actor} created ${workflowLabel} [id=${id}]`;
+      ? `${actor} created workflow via bulk import [id=${id}]`
+      : `${actor} created workflow [id=${id}]`;
     const action = viaBulkImport
       ? WorkflowManagementAuditActions.BULK_CREATE
       : WorkflowManagementAuditActions.CREATE;
@@ -169,10 +159,9 @@ export class WorkflowManagementAuditLog {
     options: WorkflowAuditFields & { bulkOperation?: boolean } = {}
   ): void {
     const actor = this.getActor(request);
-    const workflowLabel = this.getWorkflowLabel(options);
     const message = options.bulkOperation
-      ? `${actor} failed bulk ${workflowLabel} create`
-      : `${actor} failed to create a ${workflowLabel}`;
+      ? `${actor} failed bulk workflow create`
+      : `${actor} failed to create a workflow`;
     const action = options.bulkOperation
       ? WorkflowManagementAuditActions.BULK_CREATE
       : WorkflowManagementAuditActions.CREATE;
@@ -216,11 +205,10 @@ export class WorkflowManagementAuditLog {
   logWorkflowUpdated(request: KibanaRequest | undefined, params: WorkflowAuditParams): void {
     const { id, error } = params;
     const actor = this.getActor(request);
-    const workflowLabel = this.getWorkflowLabel(params);
     const message =
       error !== undefined
-        ? `${actor} failed to update ${workflowLabel} [id=${id}]`
-        : `${actor} updated ${workflowLabel} [id=${id}]`;
+        ? `${actor} failed to update workflow [id=${id}]`
+        : `${actor} updated workflow [id=${id}]`;
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.UPDATE, 'change', message, error, params)
@@ -233,17 +221,16 @@ export class WorkflowManagementAuditLog {
   ): void {
     const { id, viaBulkDelete, force, error } = params;
     const actor = this.getActor(request);
-    const workflowLabel = this.getWorkflowLabel(params);
     const forceTag = force ? ' (force)' : '';
     let message: string;
     if (error !== undefined) {
       message = viaBulkDelete
-        ? `${actor} failed to delete ${workflowLabel} via bulk delete [id=${id}]${forceTag}`
-        : `${actor} failed to delete ${workflowLabel} [id=${id}]${forceTag}`;
+        ? `${actor} failed to delete workflow via bulk delete [id=${id}]${forceTag}`
+        : `${actor} failed to delete workflow [id=${id}]${forceTag}`;
     } else {
       message = viaBulkDelete
-        ? `${actor} deleted ${workflowLabel} via bulk delete [id=${id}]${forceTag}`
-        : `${actor} deleted ${workflowLabel} [id=${id}]${forceTag}`;
+        ? `${actor} deleted workflow via bulk delete [id=${id}]${forceTag}`
+        : `${actor} deleted workflow [id=${id}]${forceTag}`;
     }
     const action = viaBulkDelete
       ? WorkflowManagementAuditActions.BULK_DELETE
@@ -267,26 +254,24 @@ export class WorkflowManagementAuditLog {
     const forceTag = params.force ? ' (force)' : '';
     for (const id of params.successfulIds) {
       const workflow = params.workflows?.find((candidate) => candidate.id === id);
-      const workflowLabel = this.getWorkflowLabel(workflow ?? {});
       this.log(
         request,
         createEvent(
           WorkflowManagementAuditActions.BULK_DELETE,
           'deletion',
-          `${actor} deleted ${workflowLabel} via bulk delete [id=${id}]${forceTag}`,
+          `${actor} deleted workflow via bulk delete [id=${id}]${forceTag}`,
           undefined,
           workflow
         )
       );
     }
     for (const f of params.failures) {
-      const workflowLabel = this.getWorkflowLabel(f);
       this.log(
         request,
         createEvent(
           WorkflowManagementAuditActions.BULK_DELETE,
           'deletion',
-          `${actor} failed to delete ${workflowLabel} via bulk delete [id=${f.id}]${forceTag}`,
+          `${actor} failed to delete workflow via bulk delete [id=${f.id}]${forceTag}`,
           f.error,
           f
         )
@@ -300,14 +285,13 @@ export class WorkflowManagementAuditLog {
     options: WorkflowAuditFields & { force?: boolean } = {}
   ): void {
     const actor = this.getActor(request);
-    const workflowLabel = this.getWorkflowLabel(options);
     const forceTag = options.force ? ' (force)' : '';
     this.log(
       request,
       createEvent(
         WorkflowManagementAuditActions.BULK_DELETE,
         'deletion',
-        `${actor} failed bulk ${workflowLabel} delete${forceTag}`,
+        `${actor} failed bulk workflow delete${forceTag}`,
         error,
         options
       )
