@@ -2,17 +2,28 @@
 
 ## Pipeline overview
 
-Significant Events surfaces meaningful occurrences in stream data. The pipeline flows in one direction:
+Significant Events surfaces meaningful occurrences in stream data. The pipeline is split into two halves, each driven by a managed workflow:
 
-**Feature extraction** → **Query generation** → **Rule backing** → **Detection** → **Discovery** → **Significant Event**
+**KI Onboarding Workflow** (triggered per stream via `POST /internal/streams/{name}/onboarding/_execute`):
 
-- **Features** are patterns extracted from stream data (log patterns, error clusters, entity types). They are stored as Knowledge Indicators of `type: 'feature'` in `.significant_events-knowledge_indicators`.
+**Feature extraction** → **Query generation** → **Rule backing**
+
+- **Features** are patterns extracted from stream data (log patterns, error clusters, entity types). Stored as Knowledge Indicators of `type: 'feature'` in `.significant_events-knowledge_indicators`.
 - **Queries** are ES|QL queries generated from Features by an LLM task. Stored as Knowledge Indicators of `type: 'query'`. Non-STATS queries with `severity_score >= 60` are eligible for automatic Kibana rule creation.
-- **Detections** are raw alert signals produced when a backed rule fires.
-- **Discoveries** are AI-grouped analyses of one or more Detections, capturing root cause, impact, and recommendations.
-- **Significant Events** are the user-facing artifacts created from processed Discoveries.
 
-Schemas for all entities live in `@kbn/streams-schema` (`src/sig_events/`, `src/queries/`, `src/feature.ts`). LLM logic lives in `@kbn/streams-ai`.
+**Orchestrator Workflow** (triggered via `POST /internal/streams/significant_events/discovery/_execute`):
+
+**Detection** → **Discovery** → **Significant Event**
+
+The Orchestrator sequences three child workflows in order:
+
+1. **Detection Workflow** — runs an Elasticsearch `change_point` aggregation over alert firing patterns per backed rule to identify statistically significant changes. Writes **Detection** documents to `.significant_events-detections`.
+2. **Discovery Workflow** — an AI investigator agent correlates unhandled Detections into logical incidents. Writes **Discovery** documents (with generated title, summary, root cause) to `.significant_events-discoveries`.
+3. **Triage Workflow** — an AI judge agent assesses unreviewed Discoveries, assigns a status (`promoted` / `acknowledged` / `demoted` / `resolved`), and writes the final **Significant Event** to `.significant_events-events`.
+
+Each entity written by a workflow carries a `workflow_execution_id` field for traceability back to the run that created it.
+
+Workflow clients live in `server/lib/workflows/`. Workflow YAML definitions live in `@kbn/workflows` (`managed/definitions/sig_events/`), not in this plugin. Schemas for all entities live in `@kbn/streams-schema`. LLM logic lives in `@kbn/streams-ai`.
 
 ## Where to put things
 
