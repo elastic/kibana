@@ -7,7 +7,7 @@ Significant Events surfaces meaningful occurrences in stream data. The pipeline 
 **Feature extraction** → **Query generation** → **Rule backing** → **Detection** → **Discovery** → **Significant Event**
 
 - **Features** are patterns extracted from stream data (log patterns, error clusters, entity types). They are stored as Knowledge Indicators of `type: 'feature'` in `.significant_events-knowledge_indicators`.
-- **Queries** are ES|QL queries generated from Features by an LLM task. Stored as Knowledge Indicators of `type: 'query'`. Queries with `severity_score >= 60` are eligible for automatic Kibana rule creation.
+- **Queries** are ES|QL queries generated from Features by an LLM task. Stored as Knowledge Indicators of `type: 'query'`. Non-STATS queries with `severity_score >= 60` are eligible for automatic Kibana rule creation.
 - **Detections** are raw alert signals produced when a backed rule fires.
 - **Discoveries** are AI-grouped analyses of one or more Detections, capturing root cause, impact, and recommendations.
 - **Significant Events** are the user-facing artifacts created from processed Discoveries.
