@@ -28,11 +28,14 @@ export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
 
 export {
   EXTERNAL_RESUME_API_PATH,
+  EXTERNAL_RESUME_FORM_API_PATH,
   WORKFLOW_EXTERNAL_RESUME_APPLICATION,
   WORKFLOW_EXTERNAL_RESUME_ROLE,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
 } from './external_resume/constants';
 export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
+export { buildExternalResumeFormUrl } from './external_resume/build_external_resume_form_url';
 export {
   createExternalResumeApiKey,
   invalidateExternalResumeApiKey,

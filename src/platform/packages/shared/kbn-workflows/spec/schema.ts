@@ -227,25 +227,17 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
-export const WaitForInputStepInputSchema = z
-  .object({
-    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
-    schema: JsonModelSchema.optional().describe(
-      'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
-    ),
-  })
-  .optional();
-export const WaitForInputStepSchema = BaseStepSchema.extend({
-  type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
-  with: WaitForInputStepInputSchema,
-});
-export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
-
 export const WaitForApprovalSlackChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
     .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
+  message: z
+    .string()
+    .optional()
+    .describe(
+      'Optional notification template. Use {{context.hitl.externalResumeLink}} for the response link.'
+    ),
 });
 
 export const WaitForApprovalSlackApiChannelSchema = z.object({
@@ -254,6 +246,12 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .describe('Slack channel ids to post approval actions to'),
+  message: z
+    .string()
+    .optional()
+    .describe(
+      'Optional notification template. Use {{context.hitl.externalResumeLink}} for the response link.'
+    ),
 });
 
 export const WaitForApprovalChannelsSchema = z
@@ -262,7 +260,24 @@ export const WaitForApprovalChannelsSchema = z
     slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
   })
   .optional()
-  .describe('Optional external notification channels for approve/reject links');
+  .describe('Optional external notification channels for HITL response links');
+
+export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
+
+export const WaitForInputStepInputSchema = z
+  .object({
+    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    schema: JsonModelSchema.optional().describe(
+      'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
+    ),
+    channels: HitlExternalChannelsSchema,
+  })
+  .optional();
+export const WaitForInputStepSchema = BaseStepSchema.extend({
+  type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
+  with: WaitForInputStepInputSchema,
+}).merge(TimeoutPropSchema);
+export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
   .object({

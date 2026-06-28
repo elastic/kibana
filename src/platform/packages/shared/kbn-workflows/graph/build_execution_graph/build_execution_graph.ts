@@ -179,8 +179,8 @@ function visitTypedAbstractStep(
     return visitLoopContinueStep(currentStep as LoopContinueStep, context);
   }
 
-  // HITL wait steps are not wrapped in enter-timeout-zone nodes. waitForApproval
-  // schedules its approval deadline via handleExecutionDelay; waitForInput has no step timeout.
+  // HITL wait steps are not wrapped in enter-timeout-zone nodes. waitForApproval and
+  // waitForInput schedule their idle deadlines via handleExecutionDelay.
   const hitlWaitGraph = tryVisitHitlWaitStep(currentStep, context);
   if (hitlWaitGraph) {
     return hitlWaitGraph;

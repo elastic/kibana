@@ -10,8 +10,12 @@
 export const EXTERNAL_RESUME_API_PATH =
   '/api/workflows/executions/{executionId}/resume/external' as const;
 
+export const EXTERNAL_RESUME_FORM_API_PATH =
+  '/api/workflows/executions/{executionId}/resume/external/form' as const;
+
 export const WORKFLOW_EXTERNAL_RESUME_ROLE = 'workflow_external_resume' as const;
 
 export const WORKFLOW_EXTERNAL_RESUME_APPLICATION = 'kibana-workflows' as const;
 
 export { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
+export { DEFAULT_WAIT_FOR_INPUT_TIMEOUT } from '../../common/hitl';
