@@ -41,6 +41,16 @@ const wipeRegistry = (): void => {
   }
 };
 
+/**
+ * Snapshot of the production registry taken at module-load time —
+ * *before* the file-level `beforeEach(wipeRegistry)` ever runs. The
+ * exhaustiveness suite below uses this to assert that every
+ * `AlertEpisodeActionType` value has a registered handler in
+ * production. Capturing it here means we don't have to bypass the
+ * wipe (which would make the per-test isolation pattern leaky).
+ */
+const productionRegistrySnapshot = { ...getActionHandlers() } as ActionHandlersRegistry;
+
 beforeEach(wipeRegistry);
 afterAll(wipeRegistry);
 
@@ -95,6 +105,33 @@ const makeServices = (): HandlerServices => {
   return { spaceId: 'default', queryService };
 };
 
+describe('production handler registry', () => {
+  it('has a registered handler for every AlertEpisodeActionType value', () => {
+    // The mapped type for `ActionHandlersRegistry` already enforces
+    // exhaustiveness at compile time, but the runtime assertion
+    // protects against accidental `delete`/mutation of the canonical
+    // registry — and gives a much friendlier failure when somebody
+    // adds a new action_type and forgets to register the handler.
+    const declaredActionTypes = Object.values(ALERT_EPISODE_ACTION_TYPE).sort();
+    const registeredActionTypes = Object.keys(productionRegistrySnapshot).sort();
+
+    expect(registeredActionTypes).toEqual(declaredActionTypes);
+  });
+
+  it.each(Object.values(ALERT_EPISODE_ACTION_TYPE))(
+    'registers a handler whose actionType matches its registry slot for %s',
+    (actionType) => {
+      // Belt-and-braces against copy/paste mistakes inside the
+      // one-line audit handlers — e.g. `handlers/ack.ts` accidentally
+      // calling `createAuditOnlyHandler(UNACK)`. The registry's
+      // mapped type would not catch that on its own because both
+      // sides of the slot resolve to `ActionHandler<…, unknown>`.
+      const handler = productionRegistrySnapshot[actionType];
+      expect(handler.actionType).toBe(actionType);
+    }
+  );
+});
+
 describe('prepareWithHandler', () => {
   it("delegates to the handler registered for the item's action_type and returns its `PreparedAction`", async () => {
     // Two distinct handlers registered in the same test prove the
@@ -141,10 +178,12 @@ describe('prepareWithHandler', () => {
   });
 
   it('throws a recognisable error when no handler is registered for the action_type', async () => {
-    // While the registry is `Partial<…>` during the multi-step
-    // migration this branch is reachable in tests and during early
-    // wiring; the error message must mention the action_type so a
-    // missing registration is debuggable at a glance.
+    // The canonical registry is exhaustive at the type level, so this
+    // branch is unreachable from production code. It stays reachable
+    // from tests (which wipe the registry between cases) and that's
+    // exactly where we want the recognisable message: a forgotten
+    // `registerForTest(...)` should fail with the action_type in the
+    // error rather than a downstream `undefined is not a function`.
     const item = makeAckItem();
     const ctx = makeContext();
 
