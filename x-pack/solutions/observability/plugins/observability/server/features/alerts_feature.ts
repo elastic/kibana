@@ -32,7 +32,7 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
           rule: { mute_alerts: OBS_ALERTING_FEATURES },
         },
         api: ['rac'],
-        ui: ['show'],
+        ui: ['show', 'write'],
       },
       read: {
         app: [],

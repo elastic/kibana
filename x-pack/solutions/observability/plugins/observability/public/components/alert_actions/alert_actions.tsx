@@ -21,6 +21,7 @@ import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { useKibana } from '../../utils/kibana_react';
+import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -46,6 +47,8 @@ export function AlertActions(
     },
     cases,
   } = services;
+
+  const canModifyAlerts = useCanModifyAlerts();
   const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
@@ -114,6 +117,7 @@ export function AlertActions(
           {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
+          canModifyAlerts={canModifyAlerts}
           resolveRulePagePath={(ruleId, currentPageId) =>
             currentPageId !== RULE_DETAILS_PAGE_ID
               ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
@@ -121,7 +125,7 @@ export function AlertActions(
           }
         />
       ),
-      [closeActionsPopover, props]
+      [closeActionsPopover, props, canModifyAlerts]
     ),
   ];
 
