@@ -113,11 +113,16 @@ export const useDslLifecycleSummary = ({
     const frozenAfter = isDsl ? effectiveLifecycle.dsl.frozen_after : undefined;
     const phaseStats = phaseStatsFetch.value?.phases;
 
-    // Prefer per-phase stats (derived from `_tier`) so each phase reflects only the
-    // data actually allocated to it. Fall back to the whole-stream stats when per-phase data isn't
-    // available yet (e.g. while the request is in flight).
-    const hotSizeInBytes = phaseStats?.hot?.size_in_bytes ?? stats?.sizeBytes;
-    const hotDocsCount = phaseStats?.hot?.docs_count ?? stats?.totalDocs;
+    // Prefer per-phase stats (derived from `_tier`) so each phase reflects only the data actually
+    // allocated to it. The whole-stream fallback (`stats`) is only used while per-phase data isn't
+    // available yet (i.e. the request is still in flight, `phaseStats === undefined`). It must be
+    // all-or-nothing: once `phaseStats` has resolved, an absent `hot` entry means hot genuinely
+    // holds no data (e.g. after all backing indices rolled into frozen), so it resolves to `0`.
+    // Falling back to the whole-stream total there would double-count the frozen bytes/docs across
+    // both the hot and frozen bars.
+    const hasPhaseStats = phaseStats !== undefined;
+    const hotSizeInBytes = hasPhaseStats ? phaseStats.hot?.size_in_bytes ?? 0 : stats?.sizeBytes;
+    const hotDocsCount = hasPhaseStats ? phaseStats.hot?.docs_count ?? 0 : stats?.totalDocs;
     const frozenSizeInBytes = phaseStats?.frozen?.size_in_bytes;
     const frozenDocsCount = phaseStats?.frozen?.docs_count;
 
