@@ -7,7 +7,11 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import type { PollHandlerContext, StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { ACTION_DETAILS_ROUTE, GET_FILE_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ACTION_DETAILS_ROUTE,
+  CANCEL_ROUTE,
+  GET_FILE_ROUTE,
+} from '../../../../common/endpoint/constants';
 import {
   getEndpointFileInputSchema,
   GetEndpointFileStepId,
@@ -359,5 +363,43 @@ describe('getEndpointFileStepDefinition', () => {
     const result = await getEndpointFileStepDefinition.poll(context);
 
     expect(result).toEqual({ error: expect.any(ExecutionError) });
+  });
+
+  it('cancels the response action when the workflow is canceled', async () => {
+    const context = createMockContext(
+      {
+        endpoint_id: 'endpoint-1',
+        file_path: '/tmp/malware.bin',
+      },
+      {
+        action_id: 'action-1',
+        endpoint_id: 'endpoint-1',
+      }
+    );
+
+    await getEndpointFileStepDefinition.onCancel!(context);
+
+    expect(context.contextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'POST',
+      path: CANCEL_ROUTE,
+      body: {
+        endpoint_ids: ['endpoint-1'],
+        agent_type: 'endpoint',
+        parameters: {
+          id: 'action-1',
+        },
+      },
+    });
+  });
+
+  it('does not cancel when the workflow is canceled before durable state is seeded', async () => {
+    const context = createMockContext({
+      endpoint_id: 'endpoint-1',
+      file_path: '/tmp/malware.bin',
+    });
+
+    await getEndpointFileStepDefinition.onCancel!(context);
+
+    expect(context.contextManager.callKibanaApi).not.toHaveBeenCalled();
   });
 });

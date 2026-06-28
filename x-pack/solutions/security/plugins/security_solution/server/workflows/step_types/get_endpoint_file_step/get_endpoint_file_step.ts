@@ -8,7 +8,11 @@
 import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
-import { ACTION_DETAILS_ROUTE, GET_FILE_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ACTION_DETAILS_ROUTE,
+  CANCEL_ROUTE,
+  GET_FILE_ROUTE,
+} from '../../../../common/endpoint/constants';
 import type {
   ActionDetailsApiResponse,
   ResponseActionApiResponse,
@@ -25,9 +29,10 @@ const getEndpointFileStateSchema = z.object({
   endpoint_id: getEndpointFileInputSchema.shape.endpoint_id,
 });
 
+// Endpoint hosts can be offline for hours, so keep polling for up to 24 hours.
+// maxWaitMs caps each sleep, not the total polling duration.
 const MAX_POLL_INTERVAL_MS = 5 * 60_000;
-const MAX_POLL_DURATION_MS = 24 * 60 * 60_000;
-const MAX_POLL_ATTEMPTS = Math.ceil(MAX_POLL_DURATION_MS / MAX_POLL_INTERVAL_MS);
+const MAX_POLL_ATTEMPTS = 288;
 
 const pollPolicy = {
   strategy: 'exponential',
@@ -40,13 +45,6 @@ const pollPolicy = {
 const pollCeilings = {
   maxAttempts: MAX_POLL_ATTEMPTS,
   maxWaitMs: MAX_POLL_INTERVAL_MS,
-};
-
-const toArray = (value: string | string[] | undefined): string[] | undefined => {
-  if (!value) {
-    return undefined;
-  }
-  return Array.isArray(value) ? value : [value];
 };
 
 const getActionDetailsPath = (actionId: string): string =>
@@ -90,8 +88,8 @@ export const getEndpointFileStepDefinition = createPollServerStepDefinition({
           parameters: {
             path: filePath,
           },
-          alert_ids: toArray(alertIds),
-          case_ids: toArray(caseIds),
+          alert_ids: alertIds ? (Array.isArray(alertIds) ? alertIds : [alertIds]) : undefined,
+          case_ids: caseIds ? (Array.isArray(caseIds) ? caseIds : [caseIds]) : undefined,
           comment: context.input.comment,
         },
       });
@@ -207,6 +205,25 @@ export const getEndpointFileStepDefinition = createPollServerStepDefinition({
     } catch (error) {
       return { error: toExecutionError(error) };
     }
+  },
+  onCancel: async (context) => {
+    const state = 'state' in context ? context.state : undefined;
+
+    if (!state) {
+      return;
+    }
+
+    await context.contextManager.callKibanaApi({
+      method: 'POST',
+      path: CANCEL_ROUTE,
+      body: {
+        endpoint_ids: [state.endpoint_id],
+        agent_type: 'endpoint',
+        parameters: {
+          id: state.action_id,
+        },
+      },
+    });
   },
   policy: pollPolicy,
   ceilings: pollCeilings,
