@@ -240,5 +240,35 @@ describe('getWorkflowExecution', () => {
       expect(result?.stepExecutions).toHaveLength(2);
       expect(result?.concurrencyGroupKey).toBe('streams-ki-onboarding-my-stream');
     });
+
+    it('should include workflow document version when present on the execution', async () => {
+      mockEsClient.get.mockResolvedValue({
+        _source: { ...baseExecutionDoc, version: 7 },
+      } as any);
+      mockEsClient.mget.mockResolvedValue({ docs: [] } as any);
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        esClient: mockEsClient,
+        logger: mockLogger,
+      });
+
+      expect(result?.version).toBe(7);
+    });
+
+    it('should omit workflow document version when absent on legacy executions', async () => {
+      mockEsClient.get.mockResolvedValue({
+        _source: baseExecutionDoc,
+      } as any);
+      mockEsClient.mget.mockResolvedValue({ docs: [] } as any);
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        esClient: mockEsClient,
+        logger: mockLogger,
+      });
+
+      expect(result?.version).toBeUndefined();
+    });
   });
 });
