@@ -138,13 +138,14 @@ interface StreamQuery {
   expires_at?: string;           // ISO datetime
 }
 
-type QueryLink = StreamQuery & {
+interface QueryLink {
+  query: StreamQuery;            // The query definition is NESTED, not flattened onto QueryLink
   stream_name: string;
   rule_backed: boolean;          // true once a Kibana rule has been created
   rule_id: string;               // Deterministic rule ID
   updated_at?: string;
   expires_at?: string;
-};
+}
 
 interface QueryFeature {
   id: string;                    // Feature ID
