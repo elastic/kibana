@@ -495,5 +495,6 @@ describe('getWorkflowContextSchema - HITL template context', () => {
     const contextSchema = getWorkflowContextSchema(workflow);
 
     expect(getSchemaAtPath(contextSchema, 'context.hitl.externalFormLink').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalQueryLink').schema).toBeDefined();
   });
 });

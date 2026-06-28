@@ -20,6 +20,7 @@ import {
   parseExternalResumeApiKeyFromAuthorization,
   resolveExternalResumeApiKey,
   resumeWorkflowExecutionExternally,
+  resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume_service';
 import type { WorkflowsService } from '../workflows_management_service';
@@ -252,19 +253,55 @@ describe('resumeWorkflowExecutionExternallyWithInput', () => {
     expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
   });
 
-  it('rejects approval resume on a waitForInput step', async () => {
+  it('rejects waitForInput GET resume when required schema fields are missing', async () => {
+    workflowsService.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        {
+          workflowRunId: 'exec-1',
+          stepId: 'request-input',
+          stepType: 'waitForInput',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          input: {
+            externalResumeApiKeyId: 'api-key-id',
+            schema: {
+              type: 'object',
+              properties: {
+                severity: { type: 'string' },
+              },
+              required: ['severity'],
+            },
+          },
+        } as unknown as WorkflowStepExecutionDto,
+      ],
+    } as unknown as WorkflowExecutionDto);
+
     await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
+      resumeWorkflowExecutionExternallyViaGet(workflowsService, {
         executionId: 'exec-1',
         spaceId: 'default',
         apiKey: ENCODED_API_KEY,
+        query: { apiKey: ENCODED_API_KEY, approved: 'true' },
       })
-    ).rejects.toEqual(
-      new ExternalResumeError(
-        'This workflow step requires the external input form instead of an approval link',
-        400
-      )
+    ).rejects.toThrow(ExternalResumeError);
+  });
+
+  it('resumes a waiting waitForInput step via GET query params', async () => {
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      spaceId: 'default',
+      apiKey: ENCODED_API_KEY,
+      query: { apiKey: ENCODED_API_KEY, severity: 'high' },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'api_key:api-key-id' }
     );
   });
 });

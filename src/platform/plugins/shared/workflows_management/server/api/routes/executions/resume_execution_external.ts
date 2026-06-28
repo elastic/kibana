@@ -17,10 +17,7 @@ import {
   handleExternalResumeError,
   htmlSuccess,
 } from './external_resume_route_helpers';
-import {
-  parseApprovedQueryParam,
-  resolveExternalResumeApiKey,
-} from '../../external_resume/external_resume_service';
+import { resolveExternalResumeApiKey } from '../../external_resume/external_resume_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
@@ -103,9 +100,9 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
       path: EXTERNAL_RESUME_API_PATH,
       access: 'public',
       security: EXTERNAL_RESUME_SECURITY,
-      summary: 'Resume a workflow execution from an external approval link',
+      summary: 'Resume a workflow execution from an external link',
       description:
-        'Resume a paused waitForApproval step using an external resume API key. Returns an HTML confirmation page.',
+        'Resume a paused waitForApproval step (approved query param) or waitForInput step (schema fields as query params). Returns an HTML confirmation page.',
       options: EXTERNAL_RESUME_ROUTE_OPTIONS,
     })
     .addVersion(
@@ -118,29 +115,40 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
         validate: {
           request: {
             params: executionIdParamSchema,
-            query: schema.object({
-              apiKey: schema.string({
-                meta: { description: 'External resume API key credential.' },
-              }),
-              approved: schema.oneOf(
-                [schema.boolean(), schema.literal('true'), schema.literal('false')],
-                {
-                  meta: { description: 'Whether the external actor approved the workflow pause.' },
-                }
-              ),
-            }),
+            query: schema.object(
+              {
+                apiKey: schema.string({
+                  meta: { description: 'External resume API key credential.' },
+                }),
+                approved: schema.maybe(
+                  schema.oneOf(
+                    [schema.boolean(), schema.literal('true'), schema.literal('false')],
+                    {
+                      meta: {
+                        description:
+                          'Required for waitForApproval. Whether the external actor approved the workflow pause.',
+                      },
+                    }
+                  )
+                ),
+              },
+              { unknowns: 'allow' }
+            ),
           },
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { apiKey, approved } = request.query;
-          const { resumedBy } = await api.resumeWorkflowExecutionExternally({
+          const apiKey = resolveExternalResumeApiKey({
+            authorization: request.headers?.authorization,
+            queryApiKey: request.query.apiKey,
+          });
+          const { resumedBy } = await api.resumeWorkflowExecutionExternallyViaGet({
             apiKey,
-            approved: parseApprovedQueryParam(approved),
             executionId,
             spaceId: spaces.getSpaceId(request),
+            query: request.query as Record<string, unknown>,
           });
 
           audit.logExecutionResumed(request, {

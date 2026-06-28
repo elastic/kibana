@@ -164,6 +164,8 @@ describe('buildWorkflowContext', () => {
           hitl: {
             externalFormLink:
               'http://localhost:5601/api/workflows/executions/ex-1/resume/external/form?apiKey=abc',
+            externalQueryLink:
+              'http://localhost:5601/api/workflows/executions/ex-1/resume/external?apiKey=abc',
           },
         },
       };
@@ -172,6 +174,9 @@ describe('buildWorkflowContext', () => {
 
       expect(context.context?.hitl?.externalFormLink).toBe(
         'http://localhost:5601/api/workflows/executions/ex-1/resume/external/form?apiKey=abc'
+      );
+      expect(context.context?.hitl?.externalQueryLink).toBe(
+        'http://localhost:5601/api/workflows/executions/ex-1/resume/external?apiKey=abc'
       );
     });
   });

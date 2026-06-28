@@ -12,6 +12,9 @@ export const DEFAULT_WAIT_FOR_INPUT_TIMEOUT = '72h' as const;
 /** Workflow context path: `context.hitl.externalFormLink`. */
 export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
 
+/** Workflow context path: `context.hitl.externalQueryLink`. */
+export const HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY = 'externalQueryLink' as const;
+
 export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =

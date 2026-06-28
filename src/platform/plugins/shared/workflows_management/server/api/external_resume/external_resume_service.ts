@@ -38,6 +38,13 @@ export interface ExternalResumeWorkflowExecutionParams {
   spaceId: string;
 }
 
+export interface ExternalResumeViaGetParams {
+  apiKey: string;
+  executionId: string;
+  spaceId: string;
+  query: Record<string, unknown>;
+}
+
 export interface ExternalResumeWorkflowExecutionWithInputParams {
   apiKey: string;
   executionId: string;
@@ -69,24 +76,52 @@ export async function resumeWorkflowExecutionExternally(
   workflowsService: WorkflowsService,
   { apiKey, approved, executionId, spaceId }: ExternalResumeWorkflowExecutionParams
 ): Promise<ResumeWorkflowExecutionResponseDto> {
+  return resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+    apiKey,
+    executionId,
+    spaceId,
+    query: { apiKey, approved },
+  });
+}
+
+export async function resumeWorkflowExecutionExternallyViaGet(
+  workflowsService: WorkflowsService,
+  { apiKey, executionId, spaceId, query }: ExternalResumeViaGetParams
+): Promise<ResumeWorkflowExecutionResponseDto> {
   const { authenticatedApiKeyId, stepExecution } = await resolveExternalResumeContext(
     workflowsService,
     { apiKey, executionId, spaceId }
   );
 
-  if (stepExecution.stepType !== 'waitForApproval') {
-    throw new ExternalResumeError(
-      'This workflow step requires the external input form instead of an approval link',
-      400
-    );
+  if (stepExecution.stepType === 'waitForApproval') {
+    if (!Object.hasOwn(query, 'approved')) {
+      throw new ExternalResumeError('approved query parameter is required', 400);
+    }
+
+    return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
+      authenticatedApiKeyId,
+      executionId,
+      spaceId,
+      input: { approved: parseApprovedQueryParam(query.approved) },
+    });
   }
 
-  return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
-    authenticatedApiKeyId,
-    executionId,
-    spaceId,
-    input: { approved },
-  });
+  if (stepExecution.stepType === 'waitForInput') {
+    const schema = getStepInputSchema(stepExecution.input);
+    const validatedInput = parseExternalResumeFormSubmission(
+      getExternalResumeInputFromQuery(query),
+      schema
+    );
+
+    return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
+      authenticatedApiKeyId,
+      executionId,
+      spaceId,
+      input: validatedInput,
+    });
+  }
+
+  throw new ExternalResumeError('This workflow step does not support external resume', 400);
 }
 
 export async function resumeWorkflowExecutionExternallyWithInput(
@@ -319,6 +354,18 @@ function getStepInputSchema(input: unknown): JsonModelSchemaType | undefined {
     return schema as JsonModelSchemaType;
   }
   return undefined;
+}
+
+function getExternalResumeInputFromQuery(query: Record<string, unknown>): Record<string, unknown> {
+  const input: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(query)) {
+    if (key !== 'apiKey') {
+      input[key] = Array.isArray(value) ? value[0] : value;
+    }
+  }
+
+  return input;
 }
 
 export function parseApprovedQueryParam(value: unknown): boolean {

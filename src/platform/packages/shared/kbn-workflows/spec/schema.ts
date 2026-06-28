@@ -17,7 +17,10 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY } from '../common/hitl';
+import {
+  HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+} from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -954,6 +957,12 @@ export const WorkflowHitlTemplateContextSchema = z.object({
     .string()
     .optional()
     .describe('External waitForInput form URL, available while the step is waiting'),
+  [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: z
+    .string()
+    .optional()
+    .describe(
+      'External GET resume URL with apiKey set. Append `&<field>=<value>` per with.schema.'
+    ),
 });
 
 export const WorkflowTemplatePersistedContextSchema = z.object({

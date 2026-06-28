@@ -10,10 +10,12 @@
 import {
   DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
 } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import {
   buildExternalResumeFormUrl,
+  buildExternalResumeUrl,
   createExternalResumeApiKey,
   ExecutionError,
 } from '@kbn/workflows/server';
@@ -96,14 +98,24 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
       stepInput.externalResumeApiKeyId = apiKey.id;
 
+      const kibanaUrl = getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup);
       const formUrl = buildExternalResumeFormUrl({
-        kibanaUrl: getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup),
+        kibanaUrl,
+        spaceId,
+        executionId: execution.id,
+        apiKey: apiKey.encoded,
+      });
+      const queryLink = buildExternalResumeUrl({
+        kibanaUrl,
         spaceId,
         executionId: execution.id,
         apiKey: apiKey.encoded,
       });
 
-      this.setExternalResumeLinkInContext(formUrl);
+      this.setExternalHitlLinksInContext({
+        [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: formUrl,
+        [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: queryLink,
+      });
 
       await sendWaitForInputNotifications({
         channels,
@@ -122,7 +134,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
     });
   }
 
-  private setExternalResumeLinkInContext(formUrl: string): void {
+  private setExternalHitlLinksInContext(links: Record<string, string>): void {
     const execution = this.workflowRuntime.getWorkflowExecution();
     const existingContext = (execution.context as Record<string, unknown> | null | undefined) ?? {};
     const existingHitl = (existingContext.hitl as Record<string, unknown> | undefined) ?? {};
@@ -132,7 +144,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
         ...existingContext,
         hitl: {
           ...existingHitl,
-          [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: formUrl,
+          ...links,
         },
       },
     });
