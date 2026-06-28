@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
+import { pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
 import type { ManagedFilter } from '../lib/workflow_filters';
@@ -104,6 +105,7 @@ export class WorkflowRepository {
         ...(managedBy !== undefined ? { managedBy } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
         ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...pickWorkflowDocumentVersion(source),
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -271,6 +273,7 @@ export class WorkflowRepository {
       'managedBy',
       'originManagedWorkflowId',
       'managedVersion',
+      'version',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -346,6 +349,7 @@ export class WorkflowRepository {
         ...(typeof source.managedVersion === 'number'
           ? { managedVersion: source.managedVersion }
           : {}),
+        ...pickWorkflowDocumentVersion(source),
       }));
     } finally {
       try {
