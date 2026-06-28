@@ -51,6 +51,7 @@ import {
   registerScrollToInlineAttachmentHandler,
 } from '../../../agent_first/attachment_link_bridge';
 import { scrollToInlineAttachment } from '../../../agent_first/scroll_to_inline_attachment';
+import { StagedAttachmentSystemMessages } from './staged_attachment_system_messages';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -198,6 +199,7 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
+              <StagedAttachmentSystemMessages />
               <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
             </EuiFlexItem>
           </EuiFlexGroup>

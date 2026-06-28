@@ -10,7 +10,6 @@ import type { OpenSpineOptions } from '../types';
 
 interface UseOpenSpineOnFirstAttachmentParams {
   attachmentCount: number;
-  conversationId: string | undefined;
   isAgentWorkspaceMount: boolean;
   isSpineActive: boolean;
   openSpine: (options?: OpenSpineOptions) => void;
@@ -19,24 +18,15 @@ interface UseOpenSpineOnFirstAttachmentParams {
 
 export const useOpenSpineOnFirstAttachment = ({
   attachmentCount,
-  conversationId,
   isAgentWorkspaceMount,
   isSpineActive,
   openSpine,
   closeAttachmentsEmptyOverlay,
 }: UseOpenSpineOnFirstAttachmentParams): void => {
   const prevAttachmentCountRef = useRef<number | null>(null);
-  const prevConversationIdRef = useRef(conversationId);
 
   useEffect(() => {
-    if (prevConversationIdRef.current !== conversationId) {
-      prevAttachmentCountRef.current = null;
-      prevConversationIdRef.current = conversationId;
-    }
-  }, [conversationId]);
-
-  useEffect(() => {
-    if (!isAgentWorkspaceMount || !conversationId) {
+    if (!isAgentWorkspaceMount) {
       prevAttachmentCountRef.current = attachmentCount;
       return;
     }
@@ -60,7 +50,6 @@ export const useOpenSpineOnFirstAttachment = ({
   }, [
     attachmentCount,
     closeAttachmentsEmptyOverlay,
-    conversationId,
     isAgentWorkspaceMount,
     isSpineActive,
     openSpine,

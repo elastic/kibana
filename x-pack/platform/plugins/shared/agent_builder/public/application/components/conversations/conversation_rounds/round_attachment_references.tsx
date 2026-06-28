@@ -30,6 +30,8 @@ export interface RoundAttachmentReferencesProps {
   fallbackAttachments?: Attachment[];
   actorFilter?: AttachmentRefActor[];
   justifyContent?: EuiFlexGroupProps['justifyContent'];
+  /** When true, hidden attachments (e.g. screen context) still render system confirmation lines. */
+  includeHidden?: boolean;
 }
 
 interface ResolvedReference {
@@ -91,6 +93,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   fallbackAttachments,
   actorFilter,
   justifyContent = 'flexStart',
+  includeHidden = false,
 }) => {
   const resolvedReferences = useMemo((): ResolvedReference[] => {
     const fallbackVersioned = fallbackAttachments?.length
@@ -121,7 +124,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
 
     const attachmentMap = new Map<string, VersionedAttachment>();
     for (const attachment of effectiveAttachments) {
-      if (attachment.hidden) {
+      if (attachment.hidden && !includeHidden) {
         continue;
       }
       attachmentMap.set(attachment.id, attachment);
@@ -161,7 +164,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     }
 
     return resolved;
-  }, [attachmentRefs, conversationAttachments, fallbackAttachments, actorFilter]);
+  }, [attachmentRefs, conversationAttachments, fallbackAttachments, actorFilter, includeHidden]);
 
   if (resolvedReferences.length === 0) {
     return null;
