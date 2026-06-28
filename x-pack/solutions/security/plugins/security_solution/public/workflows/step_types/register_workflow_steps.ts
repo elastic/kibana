@@ -53,4 +53,10 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./assign_alert_step/assign_alert_step').then((m) => m.assignAlertStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_endpoint_file_step/get_endpoint_file_step').then(
+      (m) => m.getEndpointFileStepDefinition
+    )
+  );
 };
