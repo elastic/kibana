@@ -89,7 +89,6 @@ export interface EmailConfig {
   service: string;
   clientId?: string;
   tenantId?: string;
-  allowHtml?: boolean;
 }
 
 export interface EmailSecrets {

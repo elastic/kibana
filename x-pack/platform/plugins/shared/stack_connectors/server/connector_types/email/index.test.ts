@@ -158,39 +158,6 @@ describe('config validation', () => {
     });
   });
 
-  test('config validation succeeds when HTML is explicitly allowed for non-Elastic Cloud service', () => {
-    const config: Record<string, unknown> = {
-      service: 'gmail',
-      from: 'bob@example.com',
-      hasAuth: true,
-      allowHtml: true,
-    };
-    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
-      ...config,
-      host: null,
-      port: null,
-      secure: null,
-      clientId: null,
-      tenantId: null,
-      oauthTokenUrl: null,
-    });
-  });
-
-  test('config validation fails when HTML is allowed for elastic_cloud service', () => {
-    const config: Record<string, unknown> = {
-      service: 'elastic_cloud',
-      from: 'bob@example.com',
-      hasAuth: true,
-      allowHtml: true,
-    };
-
-    expect(() => {
-      validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [allowHtml]: cannot be true when [service] is \\"elastic_cloud\\""`
-    );
-  });
-
   test('config validation fails when config is not valid', () => {
     const baseConfig: Record<string, unknown> = {
       from: 'bob@example.com',
@@ -1197,15 +1164,12 @@ describe('execute()', () => {
     `);
   });
 
-  test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
+  test('ensure parameters are as expected with HTML message with source NOTIFICATION', async () => {
     sendEmailMock.mockReset();
 
     const executorOptionsWithHTML = {
       ...executorOptions,
-      source: {
-        type: ActionExecutionSourceType.NOTIFICATION,
-        source: { requesterId: 'notifications', connectorId: actionId },
-      },
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',
@@ -1257,59 +1221,6 @@ describe('execute()', () => {
     `);
   });
 
-  test('ensure parameters are as expected with HTML message from serialized notifications source', async () => {
-    sendEmailMock.mockReset();
-
-    const executorOptionsWithHTML = {
-      ...executorOptions,
-      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
-      params: {
-        ...executorOptions.params,
-        messageHTML: '<html><body><span>My HTML message</span></body></html>',
-      },
-    };
-
-    const result = await connectorType.executor(executorOptionsWithHTML);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-id",
-        "data": undefined,
-        "status": "ok",
-      }
-    `);
-    expect(sendEmailMock).toHaveBeenCalledTimes(1);
-  });
-
-  test('ensure parameters are as expected with HTML message when connector allows HTML', async () => {
-    sendEmailMock.mockReset();
-
-    const executorOptionsWithHTML = {
-      ...executorOptions,
-      config: {
-        ...executorOptions.config,
-        allowHtml: true,
-      },
-      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
-      params: {
-        ...executorOptions.params,
-        messageHTML: '<html><body><span>My HTML message</span></body></html>',
-      },
-    };
-
-    const result = await connectorType.executor(executorOptionsWithHTML);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-id",
-        "data": undefined,
-        "status": "ok",
-      }
-    `);
-    expect(sendEmailMock).toHaveBeenCalledTimes(1);
-    expect(sendEmailMock.mock.calls[0][1].content.messageHTML).toBe(
-      '<html><body><span>My HTML message</span></body></html>'
-    );
-  });
-
   test('ensure error when using HTML message with no source', async () => {
     sendEmailMock.mockReset();
 
@@ -1325,7 +1236,7 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "HTML email can only be sent when the connector is configured to allow HTML",
+        "message": "HTML email can only be sent via notifications",
         "status": "error",
       }
     `);
@@ -1347,7 +1258,7 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "HTML email can only be sent when the connector is configured to allow HTML",
+        "message": "HTML email can only be sent via notifications",
         "status": "error",
       }
     `);
@@ -1358,10 +1269,7 @@ describe('execute()', () => {
 
     const executorOptionsWithHTML = {
       ...executorOptions,
-      source: {
-        type: ActionExecutionSourceType.SAVED_OBJECT,
-        source: { type: 'alert', id: 'rule-id' },
-      },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
       params: {
         ...executorOptions.params,
         messageHTML: '<html><body><span>My HTML message</span></body></html>',
@@ -1372,57 +1280,7 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "HTML email can only be sent when the connector is configured to allow HTML",
-        "status": "error",
-      }
-    `);
-  });
-
-  test('ensure error when using HTML message with source BACKGROUND_TASK', async () => {
-    sendEmailMock.mockReset();
-
-    const executorOptionsWithHTML = {
-      ...executorOptions,
-      source: {
-        type: ActionExecutionSourceType.BACKGROUND_TASK,
-        source: { taskId: 'task-id', taskType: 'background-task' },
-      },
-      params: {
-        ...executorOptions.params,
-        messageHTML: '<html><body><span>My HTML message</span></body></html>',
-      },
-    };
-
-    const result = await connectorType.executor(executorOptionsWithHTML);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-id",
-        "message": "HTML email can only be sent when the connector is configured to allow HTML",
-        "status": "error",
-      }
-    `);
-  });
-
-  test('ensure error when using HTML message with workflows notification source by default', async () => {
-    sendEmailMock.mockReset();
-
-    const executorOptionsWithHTML = {
-      ...executorOptions,
-      source: {
-        type: ActionExecutionSourceType.NOTIFICATION,
-        source: { requesterId: 'workflows', connectorId: actionId },
-      },
-      params: {
-        ...executorOptions.params,
-        messageHTML: '<html><body><span>My HTML message</span></body></html>',
-      },
-    };
-
-    const result = await connectorType.executor(executorOptionsWithHTML);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-id",
-        "message": "HTML email can only be sent when the connector is configured to allow HTML",
+        "message": "HTML email can only be sent via notifications",
         "status": "error",
       }
     `);
@@ -1561,10 +1419,7 @@ describe('execute()', () => {
 
     const executorOptionsWithHTML = {
       ...executorOptions,
-      source: {
-        type: ActionExecutionSourceType.SAVED_OBJECT,
-        source: { type: 'alert', id: 'rule-id' },
-      },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
       params: {
         ...executorOptions.params,
         attachments: [
@@ -2157,10 +2012,7 @@ describe('execute()', () => {
         messageHTML: LongString,
       },
       configurationUtilities: mockedActionsConfig,
-      config: {
-        ...config,
-        allowHtml: true,
-      },
+      config,
       secrets,
     };
 
@@ -2188,10 +2040,7 @@ describe('execute()', () => {
         messageHTML: LongString,
       },
       configurationUtilities: mockedActionsConfig,
-      config: {
-        ...config,
-        allowHtml: true,
-      },
+      config,
       secrets,
     };
 
