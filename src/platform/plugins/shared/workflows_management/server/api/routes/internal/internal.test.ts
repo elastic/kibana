@@ -141,7 +141,7 @@ describe('Internal Routes', () => {
     const routeDependencies: RouteDependencies = {
       router: mockRouter,
       api: mockApi,
-      service: mockWorkflowsService,
+      workflowsService: mockWorkflowsService,
       logger,
       spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
       audit: { logWorkflowAccessed: jest.fn() },
