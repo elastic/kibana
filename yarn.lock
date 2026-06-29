@@ -2406,10 +2406,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-1.9.0.tgz#a0adec77326c8e4aa948000c9c883afea1708e35"
   integrity sha512-r5Lfs8Y1bcVfzPGze2H1LohgpP5NyneIxFmcJ2V00/CCSUtG3o+bw9IS3xaZ3dC1ewgXa3YRweEPYG8fG2LiBg==
 
-"@elastic/monaco-esql@3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.4.0.tgz#8dd058f333ab92847c91101f90b114e0c2e691c9"
-  integrity sha512-jJaGDdOVru4aVG4NydXdHaNOyU73eeCBaaSm34CQJO7Ae2GeXJuQTu2DcKFAEWRCprn6eLPOS+UcUqGzunC/gg==
+"@elastic/monaco-esql@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.5.0.tgz#fb291596f96968c8144393da7bf8870567170e38"
+  integrity sha512-+itmhlzswEGSveIjhlDpm01NiiavuDaI7HjiyA1hG2JE3Ovs7gsMRRQsXH3yprAlWGFBlofrL0kNb8mWZrKqkw==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -5417,6 +5417,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-navigation-utils@link:src/core/packages/chrome/navigation-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-browser@link:src/core/packages/chrome/browser":
   version "0.0.0"
   uid ""
@@ -5434,6 +5438,10 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-navigation-customization@link:src/core/packages/chrome/navigation-customization":
   version "0.0.0"
   uid ""
 
@@ -8042,6 +8050,10 @@
   uid ""
 
 "@kbn/moon@link:packages/kbn-moon":
+  version "0.0.0"
+  uid ""
+
+"@kbn/navigation-customization-components@link:src/platform/packages/shared/navigation-customization-components":
   version "0.0.0"
   uid ""
 
@@ -16741,19 +16753,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@12.10.2":
-  version "12.10.2"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.10.2.tgz#40f6d71944f674f0ffbb83c660f9473018adbe61"
-  integrity sha512-CgIi6HwlcHXwlkTpr0fxLv/0sRVNZ8IdwKLzzeCscaYBwpvfcH1QFOCeaTCuEn1FQEs/B8CjnTSjhs8udgmBgQ==
+"@xyflow/react@12.11.0":
+  version "12.11.0"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.11.0.tgz#7dca326d0e3e8def2988e6089d3c267fe8511242"
+  integrity sha512-na4IO33FSs2OS72hASgZDmTYwFAkef7Z74uBUVrong3ARmQQHfnRUVaCFn1kTt5LbS6pK03TbYjCPGLjLFfziA==
   dependencies:
-    "@xyflow/system" "0.0.76"
+    "@xyflow/system" "0.0.77"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.76":
-  version "0.0.76"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.76.tgz#57da5e4d230cdbec56548a6d5eec115f22858259"
-  integrity sha512-hvwvnRS1B3REwVDlWexsq7YQaPZeG3/mKo1jv38UmnpWmxihp14bW6VtEOuHEwJX2FvzFw8k77LyKSk/wiZVNA==
+"@xyflow/system@0.0.77":
+  version "0.0.77"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.77.tgz#e6ebc3f3ee0af8cca8352b4a63b414d921435001"
+  integrity sha512-qCDCMCQAAgUu8yHnhloHG9F5mwPX5E+Wl8McpYIOPSSXfzFJJoZcwOcsDiAjitVKIg2de1WmJbCHfpcvxprsgg==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
