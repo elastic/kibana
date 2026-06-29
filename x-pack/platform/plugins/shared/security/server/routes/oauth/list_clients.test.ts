@@ -87,11 +87,7 @@ describe('List OAuth Clients route', () => {
       kibanaResponseFactory
     );
 
-    expect(oauthMock.listClients).toHaveBeenCalledWith(
-      expect.anything(),
-      undefined,
-      PROJECT_ID
-    );
+    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), undefined, PROJECT_ID);
   });
 
   it('returns 404 when OAuth is not available', async () => {
