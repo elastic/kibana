@@ -17,5 +17,6 @@
     "@kbn/config-schema",
     "@kbn/utility-types",
     "@kbn/es-query-server",
+    "@kbn/as-code-shared-schemas",
   ]
 }
