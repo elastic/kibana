@@ -170,7 +170,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="documents" />
+                          <EuiIcon color="primary" size="l" type="documents" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon size="m" type="sortRight" aria-hidden={true} />
