@@ -10,8 +10,9 @@
 import moment from 'moment';
 
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT } from '../constants';
-import type { TimeRangeBoundsOption } from '../types';
-import { PARSER_DELIMITERS, buildDelimiterPattern } from './parse_text';
+import type { TimePrecision, TimeRangeBoundsOption } from '../types';
+import { applyTimePrecision } from '../format';
+import { PARSER_DELIMITERS, buildDelimiterPattern, textToTimeRange } from './parse_text';
 
 /**
  * Simplifies a dateMath value string into a compact shorthand suitable for
@@ -46,12 +47,15 @@ const getDelimiterPatterns = (extraDelimiter?: string): RegExp[] => {
 };
 
 /**
- * Formats an ISO 8601 date string into a human-readable display format.
- * Returns `null` if the string is not a valid ISO date.
+ * Formats an ISO 8601 date string into a human-readable display format at the
+ * requested sub-minute precision. Returns `null` if the string is not a valid
+ * ISO date.
  */
-const prettifyAbsoluteDate = (bound: string): string | null => {
+const prettifyAbsoluteDate = (bound: string, precision: TimePrecision = 'ms'): string | null => {
   const parsed = moment(bound, moment.ISO_8601, true);
-  return parsed.isValid() ? parsed.format(DEFAULT_DATE_FORMAT) : null;
+  return parsed.isValid()
+    ? parsed.format(applyTimePrecision(DEFAULT_DATE_FORMAT, precision))
+    : null;
 };
 
 /**
@@ -86,11 +90,18 @@ export interface PrettifyValueOptions {
   extraDelimiter?: string;
   /** Presets to match against — if the value's bounds match a preset, its label is used. */
   presets?: TimeRangeBoundsOption[];
+  /** Controls sub-minute precision shown when prettifying absolute timestamps. */
+  timePrecision?: TimePrecision;
 }
 
 /**
  * Tries to match a split `{start, end}` pair against a preset.
- * Returns the preset label if found, `null` otherwise.
+ * Returns the preset label only when it is natural language (e.g. "Last 7 days",
+ * "Today") and therefore safe to show in the editable input. Display-form labels
+ * (e.g. `"Feb 3 → Feb 10"`) must not leak into the input; we gate on
+ * `isNaturalLanguage` rather than `!isInvalid` because moment's forgiving parser
+ * "validates" display labels by matching a fragment, so they are prettified from
+ * their bounds instead.
  */
 const matchPresetBounds = (
   start: string,
@@ -98,7 +109,9 @@ const matchPresetBounds = (
   presets: TimeRangeBoundsOption[]
 ): string | null => {
   const match = presets.find((p) => p.start === start && p.end === end);
-  return match?.label ?? null;
+  if (!match?.label) return null;
+
+  return textToTimeRange(match.label).isNaturalLanguage ? match.label : null;
 };
 
 /**
@@ -112,7 +125,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   const trimmed = value.trim();
   if (!trimmed) return value;
 
-  const { extraDelimiter, presets = [] } = options ?? {};
+  const { extraDelimiter, presets = [], timePrecision } = options ?? {};
   const patterns = getDelimiterPatterns(extraDelimiter);
 
   // Try splitting on delimiters
@@ -134,8 +147,8 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
 
       // Both bounds are "now" (with or without rounding) — format any absolute dates
       if (!prettyStart && !prettyEnd) {
-        const absStart = prettifyAbsoluteDate(start);
-        const absEnd = prettifyAbsoluteDate(end);
+        const absStart = prettifyAbsoluteDate(start, timePrecision);
+        const absEnd = prettifyAbsoluteDate(end, timePrecision);
         if (!absStart && !absEnd) return trimmed;
         const delim = DATE_RANGE_INPUT_DELIMITER;
         return `${absStart ?? start} ${delim} ${absEnd ?? end}`;
@@ -151,8 +164,8 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
       if (prettyStart && prettyEnd) return `${prettyStart} ${delim} ${prettyEnd}`;
 
       // One side is a relative offset, other is absolute/now-rounding → prettify what we can
-      return `${prettyStart ?? prettifyAbsoluteDate(start) ?? start} ${delim} ${
-        prettyEnd ?? prettifyAbsoluteDate(end) ?? end
+      return `${prettyStart ?? prettifyAbsoluteDate(start, timePrecision) ?? start} ${delim} ${
+        prettyEnd ?? prettifyAbsoluteDate(end, timePrecision) ?? end
       }`;
     }
   }
@@ -163,7 +176,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   if (prettySingle) return prettySingle;
 
   // Try formatting as an absolute ISO date
-  const prettyAbsolute = prettifyAbsoluteDate(trimmed);
+  const prettyAbsolute = prettifyAbsoluteDate(trimmed, timePrecision);
   if (prettyAbsolute) return prettyAbsolute;
 
   // Natural language or anything else — pass through unchanged

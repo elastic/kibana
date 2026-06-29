@@ -190,15 +190,15 @@ export function DateRangePickerProvider({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
+  const timePrecision = settings.timePrecision ?? 's';
   const [text, setText] = useState<string>(() =>
-    prettifyValue(value ?? defaultValue ?? '', { presets })
+    prettifyValue(value ?? defaultValue ?? '', { presets, timePrecision })
   );
   const timeRange: TimeRange = useMemo(
     () =>
       textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
     [text, presets, dateFormat, settings.roundRelativeTime]
   );
-  const timePrecision = settings.timePrecision ?? 's';
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { timePrecision }),
     [timeRange, timePrecision]
@@ -217,9 +217,9 @@ export function DateRangePickerProvider({
 
   useEffect(() => {
     if (typeof value === 'string' && !isEditingRef.current) {
-      setText(prettifyValue(value, { presets }));
+      setText(prettifyValue(value, { presets, timePrecision }));
     }
-  }, [value, presets]);
+  }, [value, presets, timePrecision]);
 
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
@@ -238,7 +238,7 @@ export function DateRangePickerProvider({
       }
       if (!editing) {
         if (typeof value === 'string') {
-          setText(prettifyValue(value, { presets }));
+          setText(prettifyValue(value, { presets, timePrecision }));
         } else if (lastValidText.current) {
           setText(lastValidText.current);
         }
@@ -246,7 +246,7 @@ export function DateRangePickerProvider({
       }
       setIsEditing(editing);
     },
-    [text, value, presets]
+    [text, value, presets, timePrecision]
   );
 
   const hasAutoRefresh = !!onRefresh;
