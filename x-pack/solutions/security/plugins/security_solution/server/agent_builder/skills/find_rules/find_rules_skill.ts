@@ -126,6 +126,14 @@ In a multi-turn conversation, do not infer tag values from rule results — rule
 
 When the user refines a previous query — phrases like "which of them are network", "now show the Windows ones", "filter by endpoint" — make a fresh \`security.discover_rule_tags\` call to get current tag values, then call \`security.find_rules\` with the matching tags and any carry-over filters (e.g. severity). Do not filter the in-memory results from the previous response.
 
+## Multi-Turn Severity Changes
+
+When the user asks for a **different severity** than the previous turn (e.g. turn 1 was critical-only, turn 2 asks for medium-only), you **must** call \`security.discover_rule_tags\` and \`security.find_rules\` again with the new \`severity\` filter. **Never** answer from the prior turn's rule table or counts — severity changes always require a fresh inventory query.
+
+Example:
+- Turn 1: "List critical rules" -> \`security.find_rules({ severity: ["critical"], perPage: 10 })\`
+- Turn 2: "Now list medium severity rules" -> \`security.discover_rule_tags({})\` then \`security.find_rules({ severity: ["medium"], perPage: 10 })\` (do not reuse turn-1 results)
+
 ## Tag Discovery
 
 Tag values are environment-specific. Even widely-used names like "MITRE" may be spelled, cased, or absent differently in this space.

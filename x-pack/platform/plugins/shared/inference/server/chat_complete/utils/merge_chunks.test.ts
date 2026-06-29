@@ -418,7 +418,36 @@ describe('mergeChunks', () => {
     });
   });
 
-  it('throws an error when a tool call has no toolCallId and no previous chunk set it for that index', async () => {
+  it('merges a single-chunk tool call when toolCallId is empty but index is present (Gemini/EIS)', () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: {
+              name: '',
+              arguments: '{ "verdict": "Y", "explanation": "ok" }',
+            },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(message.tool_calls).toEqual([
+      {
+        toolCallId: '',
+        function: {
+          name: '',
+          arguments: '{ "verdict": "Y", "explanation": "ok" }',
+        },
+      },
+    ]);
+  });
+
+  it('throws an error when a tool call has no toolCallId and no index', () => {
     expect(() => {
       mergeChunks([
         {
@@ -430,12 +459,11 @@ describe('mergeChunks', () => {
                 name: 'myFunction',
                 arguments: '{ "foo": "bar" }',
               },
-              index: 0,
-              toolCallId: '', // Empty toolCallId without a previous chunk setting it
+              toolCallId: '',
             },
           ],
         },
       ]);
-    }).toThrow('Tool call key is missing for index 0');
+    }).toThrow('Tool call key is missing');
   });
 });

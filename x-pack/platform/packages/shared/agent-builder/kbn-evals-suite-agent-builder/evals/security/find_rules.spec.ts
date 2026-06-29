@@ -650,6 +650,8 @@ evaluate.describe(
         const mentionedMediumRulesInConversation = countMentionedMediumRules(conversationText);
         const hasGroundedMediumAnswer =
           mentionedMediumRulesInConversation >= 2 ||
+          (mentionedMediumRulesInConversation >= 1 &&
+            mentionsMediumSeverity(conversationText)) ||
           (mediumRulesInTurn2 >= 1 && mentionsMediumSeverity(turn2ResponseText)) ||
           (turn2FindRulesCalls.length > 0 && mentionsMediumSeverity(conversationText));
 
