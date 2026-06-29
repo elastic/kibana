@@ -399,6 +399,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       changesContext: {
         action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
         metadata: changeTracking?.metadata,
+        refresh: changeTracking?.refresh,
       },
     });
   } catch (e) {

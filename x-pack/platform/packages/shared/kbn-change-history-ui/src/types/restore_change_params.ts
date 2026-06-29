@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-
-/** Renders the footer chrome below the preview panel (validation, diff nav, etc.). */
-export type ChangeHistoryPreviewFooterRenderFn = (props: {
+/** Parameters for restoring a historical change through the domain adapter. */
+export interface RestoreChangeParams {
   objectId: string;
-  selectedChangeId?: string;
-}) => ReactNode;
+  changeId: string;
+  signal?: AbortSignal;
+}
