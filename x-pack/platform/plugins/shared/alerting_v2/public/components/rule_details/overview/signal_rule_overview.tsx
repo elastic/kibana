@@ -71,12 +71,13 @@ export const SignalRuleOverview: React.FC = () => {
     return resolveGteLte(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  const { buckets, interval, lastFiringMs, isLoading, isError, refetch } = useFetchSignalFirings({
-    ruleId: rule.id,
-    gteMs,
-    lteMs,
-    data,
-  });
+  const { buckets, interval, lastFiringMs, isLoading, isHistogramError, isSummaryError, refetch } =
+    useFetchSignalFirings({
+      ruleId: rule.id,
+      gteMs,
+      lteMs,
+      data,
+    });
 
   const handleRefresh = useCallback(() => {
     setRefreshTick((n) => n + 1);
@@ -153,7 +154,7 @@ export const SignalRuleOverview: React.FC = () => {
         </EuiFlexGroup>
       );
     }
-    if (isError) {
+    if (isSummaryError) {
       return (
         <EuiText size="s" color="danger" data-test-subj="signalOverviewKpiError">
           {i18n.translate('xpack.alertingV2.signalOverview.kpiErrorBody', {
@@ -182,7 +183,7 @@ export const SignalRuleOverview: React.FC = () => {
         </EuiFlexGroup>
       );
     }
-    if (isError) {
+    if (isHistogramError) {
       return (
         <EuiEmptyPrompt
           color="danger"

@@ -41,7 +41,8 @@ export interface UseFetchSignalFiringsResult {
   /** Exact epoch ms of the most recent firing, or `null` when there are none. */
   lastFiringMs: number | null;
   isLoading: boolean;
-  isError: boolean;
+  isHistogramError: boolean;
+  isSummaryError: boolean;
   refetch: () => void;
 }
 
@@ -109,7 +110,8 @@ export const useFetchSignalFirings = ({
     interval,
     lastFiringMs: summaryQuery.data ?? null,
     isLoading: enabled && (histogramQuery.isLoading || summaryQuery.isLoading),
-    isError: histogramQuery.isError,
+    isHistogramError: histogramQuery.isError,
+    isSummaryError: summaryQuery.isError,
     refetch: () => {
       histogramQuery.refetch();
       summaryQuery.refetch();
