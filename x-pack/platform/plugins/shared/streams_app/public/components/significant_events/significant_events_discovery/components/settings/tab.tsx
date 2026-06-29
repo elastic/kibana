@@ -38,6 +38,7 @@ import {
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import {
@@ -48,6 +49,16 @@ import {
 export function SettingsTab() {
   const { core } = useKibana();
   const modelSettingsUrl = useModelSettingsUrl();
+
+  // Saving these settings hits two routes with different privileges: the streams
+  // settings route (requires the streams `manage` privilege) and core's UI
+  // settings routes used by `core.settings.client`/`globalClient` (require
+  // `advancedSettings.save`). Gate the whole form on both so the user never
+  // triggers a partial save that 403s halfway through.
+  const { ui: streamsUiPrivileges } = useStreamsPrivileges();
+  const canManageStreams = streamsUiPrivileges.manage;
+  const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
+  const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(
@@ -147,6 +158,31 @@ export function SettingsTab() {
 
   return (
     <>
+      {!canEditSettings && (
+        <>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.noPermissionCalloutTitle',
+              { defaultMessage: 'You need additional privileges to edit these settings' }
+            )}
+            color="warning"
+            iconType="lock"
+            data-test-subj="streams-settings-no-permission-callout"
+            announceOnMount={false}
+          >
+            <p>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.noPermissionCalloutDescription',
+                {
+                  defaultMessage:
+                    'Editing these settings requires both the Streams "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
@@ -237,6 +273,7 @@ export function SettingsTab() {
                     onChange={(e) => setIndexPatterns(e.target.value)}
                     placeholder={DEFAULT_INDEX_PATTERNS}
                     rows={2}
+                    disabled={!canEditSettings}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -336,6 +373,7 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
+                    disabled={!canEditSettings}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -364,7 +402,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={!continuousExtraction.draft.enabled}
+                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -389,7 +427,7 @@ export function SettingsTab() {
                         excludedStreamPatterns: e.target.value,
                       }))
                     }
-                    disabled={!continuousExtraction.draft.enabled}
+                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
                       { defaultMessage: 'logs.debug.*' }
@@ -421,6 +459,7 @@ export function SettingsTab() {
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
+                isDisabled={!canEditSettings}
                 onClick={() => {
                   const defaultYaml = configToAnnotatedYaml(
                     DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
@@ -450,6 +489,7 @@ export function SettingsTab() {
           <EuiSpacer size="m" />
           <SignificantEventsTuningConfigEditor
             value={draftConfigYaml}
+            isReadOnly={!canEditSettings}
             onChange={(yaml, parsed) => {
               setDraftConfigYaml(yaml);
               setParsedTuningConfig(parsed);
@@ -485,7 +525,9 @@ export function SettingsTab() {
                     size="s"
                     onClick={handleSave}
                     isLoading={isSaving}
-                    isDisabled={hasTuningConfigChanges && parsedTuningConfig === null}
+                    isDisabled={
+                      !canEditSettings || (hasTuningConfigChanges && parsedTuningConfig === null)
+                    }
                   >
                     {i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',

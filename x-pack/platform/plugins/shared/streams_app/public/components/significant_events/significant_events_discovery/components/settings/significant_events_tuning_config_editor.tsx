@@ -78,9 +78,14 @@ function parseSimpleYaml(input: string): Record<string, unknown> {
 export interface SignificantEventsTuningConfigEditorProps {
   value: string;
   onChange: (yaml: string, parsed: SignificantEventsTuningConfig | null) => void;
+  isReadOnly?: boolean;
 }
 
-export function SignificantEventsTuningConfigEditor({ value, onChange }: SignificantEventsTuningConfigEditorProps) {
+export function SignificantEventsTuningConfigEditor({
+  value,
+  onChange,
+  isReadOnly = false,
+}: SignificantEventsTuningConfigEditorProps) {
   const handleChange = useCallback(
     (yaml: string) => {
       let parsed: SignificantEventsTuningConfig | null = null;
@@ -119,6 +124,7 @@ export function SignificantEventsTuningConfigEditor({ value, onChange }: Signifi
         onChange={handleChange}
         height={350}
         options={{
+          readOnly: isReadOnly,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           wordWrap: 'off',
