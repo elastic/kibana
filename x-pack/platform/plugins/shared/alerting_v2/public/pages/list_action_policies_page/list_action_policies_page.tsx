@@ -306,18 +306,19 @@ export const ListActionPoliciesPage = () => {
             popoverButtonTitle={`+${overflowCount}`}
             dataTestPrefix="actionPolicyTags"
             renderItem={(tag) => (
-              <EuiBadge
-                key={tag}
-                color="hollow"
-                title={tag}
-                css={{
-                  maxWidth: 150,
-                  minWidth: 0,
-                  '.euiBadge__text': { minWidth: 0 },
-                }}
-              >
-                {tag}
-              </EuiBadge>
+              <EuiToolTip key={tag} content={tag} position="top">
+                <EuiBadge
+                  color="hollow"
+                  title=""
+                  css={{
+                    maxWidth: 150,
+                    minWidth: 0,
+                    '.euiBadge__text': { minWidth: 0 },
+                  }}
+                >
+                  {tag}
+                </EuiBadge>
+              </EuiToolTip>
             )}
           />
         );
