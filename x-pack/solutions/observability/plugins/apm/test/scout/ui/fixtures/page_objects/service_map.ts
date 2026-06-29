@@ -29,8 +29,6 @@ export class ServiceMapPage {
   public serviceMapPopover: Locator;
   public serviceMapPopoverContent: Locator;
   public serviceMapPopoverTitle: Locator;
-  public serviceMapServiceDetailsButton: Locator;
-  public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
   public serviceMapOptionsPanel: Locator;
@@ -74,10 +72,6 @@ export class ServiceMapPage {
     this.serviceMapFlyoutContent = page.testSubj.locator('serviceFlyoutOverview');
     this.serviceMapFlyoutTitle = page.testSubj.locator('serviceFlyoutTitleLink');
     this.serviceMapFlyoutActions = page.testSubj.locator('serviceFlyoutActionsButton');
-    this.serviceMapServiceDetailsButton = page.testSubj.locator(
-      'apmServiceContentsServiceDetailsButton'
-    );
-    this.serviceMapFocusMapButton = page.testSubj.locator('apmServiceContentsFocusMapButton');
     this.serviceMapDependencyDetailsButton = page.testSubj.locator(
       'apmDependencyContentsDependencyDetailsButton'
     );
