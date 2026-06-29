@@ -81,6 +81,10 @@ export interface NavigationProps {
    */
   navTopControls?: ReactNode;
   /**
+   * (optional) Item rendered before primary menu items (e.g. agent-first Agents toggle).
+   */
+  primaryMenuLeading?: ReactNode;
+  /**
    * (optional) Chrome controls rendered at the bottom of the side nav footer,
    * after solution footer items and before the collapse button.
    */
@@ -103,6 +107,7 @@ export const Navigation = ({
   sidePanelFooter,
   navTopControls,
   navFooterControls,
+  primaryMenuLeading,
   ...rest
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
@@ -172,6 +177,7 @@ export const Navigation = ({
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (
             <>
+              {primaryMenuLeading}
               {visibleMenuItems.map((item, index) => {
                 const { sections, ...itemProps } = item;
                 const isFirstItem = index === 0;

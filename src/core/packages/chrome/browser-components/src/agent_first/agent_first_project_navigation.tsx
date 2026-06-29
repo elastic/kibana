@@ -8,21 +8,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
-import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-side-navigation/types';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useAgentWorkspaceOpen, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 import type { ChromeNavigationProps } from '../project/sidenav/navigation/navigation';
 import { useNavigationItems } from '../project/sidenav/navigation/navigation';
-import { AGENT_FIRST_AGENTS_TOGGLE_ID } from './agent_first_nav_constants';
-
-const agentsToggleLabel = i18n.translate('core.ui.chrome.agentFirstNav.agentsToggle', {
-  defaultMessage: 'Agents',
-});
+import { AgentFirstAgentsNavItem } from './agent_first_agents_nav_item';
 
 export const AgentFirstProjectNavigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
@@ -37,38 +31,30 @@ export const AgentFirstProjectNavigation = (props: ChromeNavigationProps) => {
       return null;
     }
 
+    return state.navItems;
+  }, [state]);
+
+  const toggleAgentsWorkspace = useCallback(() => {
+    if (agentWorkspaceOpen) {
+      chrome.agentWorkspace.close();
+    } else {
+      chrome.agentWorkspace.open();
+    }
+  }, [agentWorkspaceOpen, chrome]);
+
+  const primaryMenuLeading = useMemo(() => {
     if (!showAgentsToggle) {
-      return state.navItems;
+      return undefined;
     }
 
-    const agentsToggleItem: MenuItem = {
-      id: AGENT_FIRST_AGENTS_TOGGLE_ID,
-      label: agentsToggleLabel,
-      iconType: 'productAgent',
-      isHighlighted: agentWorkspaceOpen,
-      'data-test-subj': 'agentFirstNavAgentsToggle',
-    };
-
-    return {
-      ...state.navItems,
-      primaryItems: [agentsToggleItem, ...state.navItems.primaryItems],
-    };
-  }, [agentWorkspaceOpen, showAgentsToggle, state]);
-
-  const handleItemClick = useCallback(
-    (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
-      if (item.id !== AGENT_FIRST_AGENTS_TOGGLE_ID) {
-        return;
-      }
-
-      if (agentWorkspaceOpen) {
-        chrome.agentWorkspace.close();
-      } else {
-        chrome.agentWorkspace.open();
-      }
-    },
-    [agentWorkspaceOpen, chrome]
-  );
+    return (
+      <AgentFirstAgentsNavItem
+        isActive={agentWorkspaceOpen}
+        isCollapsed={props.isCollapsed}
+        onClick={toggleAgentsWorkspace}
+      />
+    );
+  }, [agentWorkspaceOpen, props.isCollapsed, showAgentsToggle, toggleAgentsWorkspace]);
 
   if (!state || !navItems) {
     return null;
@@ -89,7 +75,7 @@ export const AgentFirstProjectNavigation = (props: ChromeNavigationProps) => {
         showTopSeparator={showTopSeparator}
         navTopControls={props.navTopControls}
         navFooterControls={props.navFooterControls}
-        onItemClick={handleItemClick}
+        primaryMenuLeading={primaryMenuLeading}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
