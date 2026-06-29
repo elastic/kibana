@@ -38751,7 +38751,6 @@
     "xpack.securitySolution.attackDiscovery.schedule.enableSchedulesSuccess": "{succeeded, plural, one {# attack discovery schedule} other {#件の攻撃検出スケジュール}}が正常に有効化されました。",
     "xpack.securitySolution.attackDiscovery.schedule.fetchScheduleRuleTypeFailDescription": "Attack Discoveryスケジュールルールタイプの取得に失敗しました",
     "xpack.securitySolution.attackDiscovery.schedule.fetchSchedulesFailDescription": "{failed, plural, one {attack discovery schedule} other {Attack Discoveryスケジュール}}を取得できませんでした",
-    "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdHelpText": "このコネクターはこのスケジュールにのみ適用されます。",
     "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdLabel": "コネクター",
     "xpack.securitySolution.attackDiscovery.schedule.fieldIntervalLabel": "次の間隔で実行",
     "xpack.securitySolution.attackDiscovery.schedule.fieldNameLabel": "名前",

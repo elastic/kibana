@@ -43,6 +43,10 @@ export const WorkflowExecutionsTracking = lazySchema(() =>
      * Alert retrieval workflow executions (one per workflow invoked)
      */
     alertRetrieval: z.array(WorkflowExecutionReference).nullable().optional(),
+    /**
+     * Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
+     */
+    gate: z.array(WorkflowExecutionReference).nullable().optional(),
     generation: WorkflowExecutionReference.nullable().optional(),
     validation: WorkflowExecutionReference.nullable().optional(),
   })
@@ -74,6 +78,10 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
         successful_generations: z.number().optional(),
       })
       .optional(),
+    /**
+     * Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
+     */
+    conversation_id: z.string().optional(),
     /**
      * The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
      */

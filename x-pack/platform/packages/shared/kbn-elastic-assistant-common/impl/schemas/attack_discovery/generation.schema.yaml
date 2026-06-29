@@ -30,6 +30,9 @@ components:
             successful_generations:
               type: number
               description: The number of successful generations for the same connector id, for the current user
+        conversation_id:
+          type: string
+          description: Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
         discoveries:
           type: number
           description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
@@ -130,6 +133,12 @@ components:
             $ref: '#/components/schemas/WorkflowExecutionReference'
           nullable: true
           description: Alert retrieval workflow executions (one per workflow invoked)
+        gate:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+          description: Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
         generation:
           $ref: '#/components/schemas/WorkflowExecutionReference'
           nullable: true

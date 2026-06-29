@@ -38757,7 +38757,6 @@
     "xpack.securitySolution.attackDiscovery.schedule.enableSchedulesSuccess": "启用 {succeeded, plural, one {# attack discovery schedule} other {# 条攻击发现日程}}成功。",
     "xpack.securitySolution.attackDiscovery.schedule.fetchScheduleRuleTypeFailDescription": "无法获取攻击发现日程的规则类型",
     "xpack.securitySolution.attackDiscovery.schedule.fetchSchedulesFailDescription": "获取{failed, plural, one {攻击发现日程} other {攻击发现日程}}失败",
-    "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdHelpText": "该连接器仅适用于此日程。",
     "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdLabel": "连接器",
     "xpack.securitySolution.attackDiscovery.schedule.fieldIntervalLabel": "运行间隔",
     "xpack.securitySolution.attackDiscovery.schedule.fieldNameLabel": "名称",

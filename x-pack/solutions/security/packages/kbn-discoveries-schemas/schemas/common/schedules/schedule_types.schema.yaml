@@ -34,25 +34,46 @@ components:
 
     WorkflowConfig:
       type: object
-      description: Workflow configuration for alert retrieval and validation
+      description: >-
+        Composite workflow configuration for alert retrieval and validation. Three independent
+        retrieval toggles (skill_enabled, default_retrieval_enabled, alert_retrieval_workflows_enabled)
+        compose the alert set; at least one must be enabled.
       properties:
+        alert_retrieval_mode:
+          type: string
+          description: >-
+            Query mode for the built-in default alert retrieval workflow. Only meaningful when
+            default_retrieval_enabled is true.
+          enum:
+            - custom_query
+            - esql
+          default: custom_query
         alert_retrieval_workflow_ids:
           type: array
-          description: Array of user-created alert retrieval workflow IDs to execute
+          description: >-
+            Array of user-created alert retrieval workflow IDs to execute. Only meaningful when
+            alert_retrieval_workflows_enabled is true.
           items:
             type: string
           default: []
-        alert_retrieval_mode:
-          type: string
-          description: Controls how the built-in default alert retrieval workflow operates
-          enum:
-            - custom_only
-            - esql
-            - custom_query
-          default: custom_query
+        alert_retrieval_workflows_enabled:
+          type: boolean
+          description: Toggle 3 - whether the user-created alert retrieval workflows run.
+          default: false
+        default_retrieval_enabled:
+          type: boolean
+          description: Toggle 2 - whether the built-in default alert retrieval workflow runs.
+          default: false
         esql_query:
           type: string
-          description: ES|QL query for alert retrieval (required when alert_retrieval_mode is 'esql')
+          description: >-
+            ES|QL query for alert retrieval (required when default_retrieval_enabled is true and
+            alert_retrieval_mode is 'esql').
+        skill_enabled:
+          type: boolean
+          description: >-
+            Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
+          default: true
         validation_workflow_id:
           type: string
           description: ID of the validation workflow to use (or 'default' for built-in)
