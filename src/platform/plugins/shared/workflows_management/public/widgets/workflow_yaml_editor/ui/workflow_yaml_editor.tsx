@@ -784,8 +784,8 @@ export const WorkflowYAMLEditor = ({
     <div css={editorWrapperCss} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
-        anchorPosition="upCenter"
-        offset={32}
+        anchorPosition="downCenter"
+        offset={8}
         button={actionsMenuPanelProps.Button}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}

@@ -229,7 +229,18 @@ const editorStyleMap = {
       right: euiThemeContext.euiTheme.size.m,
       zIndex: 10,
     }),
-  hiddenButtonCss: css({ display: 'none' }),
+  hiddenButtonCss: css({
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    visibility: 'hidden',
+    width: 0,
+    height: 0,
+    overflow: 'hidden',
+    padding: 0,
+    border: 'none',
+  }),
 };
 
 export const useWorkflowEditorStyles = () => {
