@@ -44,7 +44,7 @@ describe('EnterTryBlockNodeImpl', () => {
 
     mockWorkflowRuntime = {
       navigateToNode: jest.fn(),
-      getWorkflowExecution: jest.fn(),
+      getWorkflowErrorSerialized: jest.fn(),
       setWorkflowError: jest.fn(),
     } as any;
 
@@ -79,12 +79,13 @@ describe('EnterTryBlockNodeImpl', () => {
   });
 
   describe('catchError', () => {
-    const mockWorkflowError = new Error('Workflow execution error');
+    const mockWorkflowError = {
+      type: 'Error',
+      message: 'Workflow execution error',
+    };
 
     beforeEach(() => {
-      mockWorkflowRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
-        error: mockWorkflowError,
-      });
+      mockWorkflowRuntime.getWorkflowErrorSerialized = jest.fn().mockReturnValue(mockWorkflowError);
     });
 
     describe('when fallback has not been executed yet', () => {

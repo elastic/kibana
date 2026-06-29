@@ -13,6 +13,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { MockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
@@ -41,6 +44,7 @@ export interface MockWorkflowRuntime {
   resume: jest.Mock;
   getWorkflowExecutionStatus: jest.Mock;
   getWorkflowExecution: jest.Mock;
+  executionCursor: MockWorkflowExecutionCursor;
 }
 
 export const createMockWorkflowRuntime = (): MockWorkflowRuntime => ({
@@ -51,6 +55,7 @@ export const createMockWorkflowRuntime = (): MockWorkflowRuntime => ({
     isTestRun: false,
     status: ExecutionStatus.COMPLETED,
   }),
+  executionCursor: createMockWorkflowExecutionCursor(),
 });
 
 export interface MockWorkflowExecutionRepository {

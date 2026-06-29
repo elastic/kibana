@@ -113,6 +113,11 @@ export class StepExecutionRuntime {
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
   }
 
+  public get error(): ExecutionError | undefined {
+    const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
+    return errorInStep ? new ExecutionError(errorInStep) : undefined;
+  }
+
   public stepExecutionExists(): boolean {
     return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
@@ -150,7 +155,7 @@ export class StepExecutionRuntime {
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
-      scopeStack: this.workflowExecution.scopeStack,
+      scopeStack: this.stackFrames,
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
@@ -224,7 +229,6 @@ export class StepExecutionRuntime {
    */
   public failStep(error: Error, partialOutput?: unknown): void {
     const executionError = ExecutionError.fromError(error);
-    const serializedError = executionError.toSerializableObject();
 
     this.workflowExecutionState.setLastFailedStepContext({
       stepId: this.node.stepId,
@@ -239,18 +243,15 @@ export class StepExecutionRuntime {
       : undefined;
 
     const usage = this.recordTokenUsage(partialOutput);
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
+      error: executionError.toSerializableObject(),
       finishedAt,
-      error: serializedError,
+      error: executionError.toSerializableObject(),
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
@@ -333,7 +334,7 @@ export class StepExecutionRuntime {
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
-      scopeStack: this.workflowExecution.scopeStack,
+      scopeStack: this.stackFrames,
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
       status: waitingStatus,

@@ -63,6 +63,7 @@ export async function runWorkflow({
     workflowExecutionRepository,
     esClient,
     telemetryClient,
+    workflowExecutionCursor,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
@@ -136,6 +137,7 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       stepIoService,

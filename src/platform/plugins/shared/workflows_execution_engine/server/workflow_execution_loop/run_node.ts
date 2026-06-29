@@ -51,7 +51,8 @@ async function runOnCancelIfNeeded(
  *
  * This function orchestrates the execution of a workflow node by:
  * 1. Creating a context manager for the current step
- * 2. Checking in-memory workflow state to skip execution if already cancelled
+ * 2. Checking the execution cursor and in-memory workflow state to skip execution when
+ *    the driver is stopped (`stop()`) or the workflow is no longer RUNNING
  * 3. Creating and running the node implementation
  * 4. Running monitoring in parallel to handle cancellation, timeouts, and other control flow
  * 5. Managing error handling and state persistence
@@ -62,6 +63,7 @@ async function runOnCancelIfNeeded(
  *
  * @param params - The workflow execution loop parameters containing:
  *   - workflowRuntime: Runtime instance managing workflow state and navigation
+ *   - workflowExecutionCursor: Current node and execution-loop gate (`isExecuting`, `start` / `stop`)
  *   - workflowExecutionGraph: The workflow graph definition
  *   - workflowExecutionState: Current execution state
  *   - nodesFactory: Factory for creating node implementations
@@ -74,11 +76,16 @@ async function runOnCancelIfNeeded(
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const node = params.workflowRuntime.getCurrentNode();
+  const { workflowExecutionCursor, stepExecutionRuntimeFactory } = params;
+  const node = workflowExecutionCursor.currentNode;
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
 
   if (!node) {
+    return;
+  }
+
+  if (!workflowExecutionCursor.isExecuting) {
     return;
   }
 
@@ -93,10 +100,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   }
 
   try {
-    params.workflowRuntime.exitScope();
-    stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+    stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId: node.id,
-      stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+      stackFrames: workflowExecutionCursor.currentStackFrames,
     });
 
     // Build the node implementation before the cancel short-circuit so cancellable nodes
@@ -109,6 +115,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
         params.workflowExecutionState,
         stepExecutionRuntime,
         params.workflowLogger,
+        workflowExecutionCursor,
         stepExecutionRuntime.abortController
       );
     }
@@ -170,12 +177,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
 
-    params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(
-      error instanceof Error ? error : new Error(String(error))
-    );
+    workflowExecutionCursor.captureError(error);
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
@@ -185,10 +189,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       await catchError(params, stepExecutionRuntime);
       catchErrorSpan?.end();
     }
-
-    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
-    await params.workflowRuntime.saveState(); // Ensure state is updated after each step
-    saveStateSpan?.end();
 
     // Note: predecessor outputs that `prepareForRead` rehydrated for this
     // step are released by the *next* step's `prepareForRead` (deferred

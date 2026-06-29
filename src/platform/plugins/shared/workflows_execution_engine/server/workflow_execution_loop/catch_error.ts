@@ -59,6 +59,19 @@ export async function catchError(
   params: WorkflowExecutionLoopParams,
   failedStepExecutionRuntime: StepExecutionRuntime
 ) {
+  const { workflowExecutionCursor, workflowLogger, stepExecutionRuntimeFactory, nodesFactory } =
+    params;
+
+  // Workflow-level timeout is finalized in EnterWorkflowTimeoutZoneNodeImpl.monitor()
+  // (TIMED_OUT on the workflow, cursor error cleared). run_node still invokes catch_error
+  // in finally; without this guard we would re-capture the timed-out step's error and run
+  // generic error bubbling (navigateToNode + commitPendingNavigation), which wrongly clears
+  // scopeStack and can override the timeout outcome. Interrupted steps are FAILED today;
+  // CANCELLED is the better fit and will likely replace FAILED for those steps later.
+  if (params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.TIMED_OUT) {
+    return;
+  }
+
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
     // The loop continues while:
@@ -66,85 +79,79 @@ export async function catchError(
     // 2. There are items in the execution stack
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
-
-    if (!params.workflowExecutionState.getWorkflowExecution().error) {
-      return;
-    }
-
-    if (failedStepExecutionRuntime.stepExecutionExists()) {
+    if (failedStepExecutionRuntime.stepExecutionExists() && failedStepExecutionRuntime.error) {
+      workflowExecutionCursor.captureError(failedStepExecutionRuntime.error);
+    } else if (failedStepExecutionRuntime.stepExecutionExists()) {
       const stepExecution = failedStepExecutionRuntime.stepExecution;
       // A step may already be COMPLETED if workflow.output/workflow.fail finished
       // it successfully before setting the workflow-level error (e.g., status: 'failed')
-      if (stepExecution?.status !== ExecutionStatus.COMPLETED) {
-        const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
+      if (workflowExecutionCursor.error && stepExecution?.status !== ExecutionStatus.COMPLETED) {
         failedStepExecutionRuntime.failStep(
-          workflowError
-            ? new ExecutionError(workflowError)
+          workflowExecutionCursor.error
+            ? ExecutionError.fromError(workflowExecutionCursor.error)
             : new Error('Step failed with unknown error')
         );
       }
     }
+
+    if (!workflowExecutionCursor.error) {
+      return;
+    }
+
     let workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-      params.workflowExecutionState.getWorkflowExecution().scopeStack
+      workflowExecutionCursor.currentStackFrames
     );
-    while (
-      params.workflowExecutionState.getWorkflowExecution().error &&
-      !workflowScopeStack.isEmpty()
-    ) {
+    while (workflowExecutionCursor.error && !workflowScopeStack.isEmpty()) {
       const scopeEntry = workflowScopeStack.getCurrentScope();
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
-      const currentNodeId = params.workflowExecutionState.getWorkflowExecution().currentNodeId;
+      const currentNode = workflowExecutionCursor.currentNode;
 
-      if (!currentNodeId) {
+      if (!currentNode) {
         throw new Error('No current node ID in workflow execution state. This should not happen.');
       }
 
-      params.workflowExecutionState.updateWorkflowExecution({
-        currentNodeId: scopeEntry.nodeId,
-        scopeStack: newWorkflowScopeStack.stackFrames,
-      });
-      params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
+      workflowExecutionCursor.navigateToNode(scopeEntry.nodeId);
 
-      const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+      const stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
         nodeId: scopeEntry.nodeId,
         stackFrames: newWorkflowScopeStack.stackFrames,
       });
-      const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);
+      const stepImplementation = nodesFactory.create(stepExecutionRuntime);
 
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
-        const failedContext = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-          nodeId: currentNodeId,
+        const failedContext = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: currentNode.id,
           stackFrames: workflowScopeStack.stackFrames,
         });
 
         try {
           await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
-          params.workflowExecutionState.updateWorkflowExecution({
-            error,
-          });
+          workflowExecutionCursor.captureError(error);
         }
       }
 
+      workflowExecutionCursor.commitPendingNavigation();
+
       workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-        params.workflowExecutionState.getWorkflowExecution().scopeStack
+        workflowExecutionCursor.currentStackFrames
       );
 
-      const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
-
-      if (workflowError) {
+      if (workflowExecutionCursor.error) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          stepExecutionRuntime.failStep(new ExecutionError(workflowError));
+          stepExecutionRuntime.failStep(ExecutionError.fromError(workflowExecutionCursor.error));
         }
       }
     }
   } catch (error) {
-    params.workflowExecutionState.updateWorkflowExecution({
-      error,
-    });
-    params.workflowLogger.logError(
+    workflowExecutionCursor.captureError(error);
+    workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
+  }
+
+  if (workflowExecutionCursor.error) {
+    workflowExecutionCursor.stop();
   }
 }

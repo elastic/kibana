@@ -55,6 +55,7 @@ export async function resumeWorkflow({
     esClient,
     workflowTaskManager,
     workflowExecutionRepository,
+    workflowExecutionCursor,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
@@ -78,6 +79,7 @@ export async function resumeWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       stepIoService,
