@@ -15,6 +15,7 @@ import path from 'path';
 import type { ElasticsearchConfig } from './read_kibana_config';
 
 const OTEL_DEMO_REPO_URL = 'https://github.com/open-telemetry/opentelemetry-demo.git';
+const OTEL_DEMO_REPOSITORY = 'open-telemetry/opentelemetry-demo';
 const SCS_REPO_URL = 'https://github.com/elastic/semantic-code-search.git';
 
 // Cached outside the Kibana repo so it persists across branches and is never committed.
@@ -25,6 +26,7 @@ interface SeedCodeSearchOptions {
   elasticsearch: ElasticsearchConfig;
   kibanaCredentials: { username: string; password: string };
   kibanaUrl: string;
+  version: string;
   log: ToolingLog;
 }
 
@@ -73,6 +75,25 @@ async function ensureScs(log: ToolingLog): Promise<[string, ...string[]]> {
   return ['node', SCS_BIN];
 }
 
+/**
+ * Returns a local path to the OTel demo repo checked out at the given tag.
+ * Cached per-version under SCS_CACHE_DIR so repeated runs skip the clone.
+ */
+async function ensureOtelDemoAtVersion(version: string, log: ToolingLog): Promise<string> {
+  const repoDir = path.join(SCS_CACHE_DIR, 'repos', `opentelemetry-demo-${version}`);
+  if (fs.existsSync(repoDir)) {
+    log.info(`Using cached OTel demo source at ${repoDir}`);
+    return repoDir;
+  }
+  log.info(`Cloning OTel demo at tag v${version} to ${repoDir} ...`);
+  await execa(
+    'git',
+    ['clone', '--depth', '1', '--branch', `v${version}`, OTEL_DEMO_REPO_URL, repoDir],
+    { stdio: 'inherit' }
+  );
+  return repoDir;
+}
+
 async function chunksIndexHasDocs(esHosts: string, username: string, password: string) {
   try {
     const res = await fetch(
@@ -95,9 +116,13 @@ export async function seedCodeSearch({
   elasticsearch,
   kibanaCredentials,
   kibanaUrl,
+  version,
   log,
 }: SeedCodeSearchOptions) {
-  const scsBin = await ensureScs(log);
+  const [scsBin, repoDir] = await Promise.all([
+    ensureScs(log),
+    ensureOtelDemoAtVersion(version, log),
+  ]);
   const [exe, ...prefixArgs] = scsBin;
 
   // scs reads ES credentials from environment variables
@@ -110,26 +135,35 @@ export async function seedCodeSearch({
     SCS_ELASTICSEARCH_INFERENCE_ID: '.elser-2-elasticsearch',
   };
 
-  // First run: full clean index. Subsequent runs: incremental (only changed files).
+  // First run: full clean index. Subsequent runs: no-op (local clone is pinned to a tag,
+  // so there's nothing to pull — the indexed source already matches the deployed version).
   const alreadyIndexed = await chunksIndexHasDocs(
     elasticsearch.hosts,
     elasticsearch.username,
     elasticsearch.password
   );
-  const indexArgs = alreadyIndexed
-    ? ['index', OTEL_DEMO_REPO_URL, '--pull']
-    : ['index', OTEL_DEMO_REPO_URL, '--clean'];
 
   if (alreadyIndexed) {
-    log.info('Existing code index found — running incremental update (--pull).');
-  } else {
-    log.info('No existing code index — running full index (--clean). May take several minutes.');
+    log.info('Existing code index found — skipping re-index (source is pinned to a tag).');
+    return;
   }
 
-  await execa(exe, [...prefixArgs, ...indexArgs], {
-    stdio: 'inherit',
-    env,
-  });
+  log.info(
+    `No existing code index — indexing OTel demo v${version} (--clean). May take several minutes.`
+  );
+
+  await execa(
+    exe,
+    [
+      ...prefixArgs,
+      'index',
+      repoDir,
+      '--clean',
+      '--repository',
+      OTEL_DEMO_REPOSITORY,
+    ],
+    { stdio: 'inherit', env }
+  );
 
   log.info('Code indexing complete. Installing agentic interfaces into Kibana ...');
 
