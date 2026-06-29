@@ -20,8 +20,6 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
-const CONVERT_TO_LENS_ACTION = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
-
 // FLAKY: https://github.com/elastic/kibana/issues/179307
 // These tests were historically skipped in stateful FTR (describe.skip).
 // Using test.fixme() until stability is confirmed in Scout.
@@ -62,7 +60,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'My TSVB to Lens viz 1');
+      await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'My TSVB to Lens viz 1');
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');
@@ -110,7 +108,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, visTitle);
+      await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, visTitle);
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');

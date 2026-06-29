@@ -39,6 +39,8 @@ export const TSVB_DASHBOARDS = {
   DASHBOARD_2: 'Convert to Lens - Dashboard - TSVB - 2',
 };
 
+export const CONVERT_TO_LENS_ACTION = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
+
 export const ESQL_CONVERSION_DASHBOARD_TEST_ID =
   'dashboardListingTitleLink-ES|QL-Conversion-Dashboard';
 export const INLINE_METRIC_PANEL_ID = 'fb4626b8-d8ce-42d3-913a-081af94cfb51';
