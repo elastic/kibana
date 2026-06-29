@@ -121,6 +121,10 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/dashboard-plugin'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-application-browser-mocks'
 tags:
   - plugin
   - prod
