@@ -34,11 +34,18 @@ const CATEGORY_RULES: ReadonlyArray<{
   category: ErrorCategory;
   test: (lower: string) => boolean;
 }> = [
-  { category: 'timeout', test: (l) => includesAny(l, ['timeout', 'timed out']) },
+  {
+    category: 'timeout',
+    test: (l) => includesAny(l, ['timeout', 'timed out', 'budget exceeded']),
+  },
   {
     category: 'rate_limit',
     test: (l) => includesAny(l, ['429', 'rate limit', 'too many requests']),
   },
+  // Interrupted runs (server restart/crash/shutdown mid-execution) — checked before
+  // the generic `workflow_error` catch-all so "prior run was interrupted" is not
+  // bucketed as a generic workflow error.
+  { category: 'interrupted', test: (l) => l.includes('interrupted') },
   {
     category: 'network_error',
     test: (l) =>
