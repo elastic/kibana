@@ -974,6 +974,8 @@
       "@kbn/dashboard-plugin/*": ["src/platform/plugins/shared/dashboard/*"],
       "@kbn/dashboards-selector": ["src/platform/packages/shared/dashboards/dashboards-selector"],
       "@kbn/dashboards-selector/*": ["src/platform/packages/shared/dashboards/dashboards-selector/*"],
+      "@kbn/data-fabric-plugin": ["x-pack/solutions/observability/plugins/data_fabric"],
+      "@kbn/data-fabric-plugin/*": ["x-pack/solutions/observability/plugins/data_fabric/*"],
       "@kbn/data-forge": ["x-pack/platform/packages/shared/kbn-data-forge"],
       "@kbn/data-forge/*": ["x-pack/platform/packages/shared/kbn-data-forge/*"],
       "@kbn/data-grid-in-table-search": ["src/platform/packages/shared/kbn-data-grid-in-table-search"],

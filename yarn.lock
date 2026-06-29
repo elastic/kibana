@@ -6433,6 +6433,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-fabric-plugin@link:x-pack/solutions/observability/plugins/data_fabric":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""

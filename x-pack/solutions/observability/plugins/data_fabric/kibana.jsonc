@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-fabric-plugin",
+  "owner": ["@elastic/obs-exploration-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Data Fabric — a visual pipeline map showing shippers, transformations, and destinations.",
+  "plugin": {
+    "id": "dataFabric",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "dataFabric"],
+    "requiredPlugins": [
+      "observabilityShared"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": ["common"]
+  }
+}
