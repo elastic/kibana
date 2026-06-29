@@ -160,10 +160,8 @@ export const PresentationPanelTitle = ({
               // styles necessary for applying ellipsis and showing the info icon if description is present
               css={css`
                 overflow: hidden;
-                // The panel title is rendered at the regular text size. Reset the
-                // heading's font and margin so a global h2 style (for example one
-                // injected by a browser extension) cannot override the panel title
-                // size; this emotion-generated class outranks a bare h2 type selector.
+                // The panel title is a heading, but rendered at the regular text size. Reset the
+                // heading's font and margin so a global h2 style cannot override the panel title size
                 font: inherit;
                 margin: 0;
               `}
