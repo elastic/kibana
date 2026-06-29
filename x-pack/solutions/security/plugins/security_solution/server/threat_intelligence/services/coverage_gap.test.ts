@@ -176,6 +176,7 @@ describe('coverageGap', () => {
       esClient,
       savedObjectsClient,
       loggingSystemMock.create().get(),
+      'default',
       { time_range: TIME_RANGE, max_techniques: 10 }
     );
 
@@ -225,6 +226,7 @@ describe('coverageGap', () => {
       esClient,
       savedObjectsClient,
       loggingSystemMock.create().get(),
+      'default',
       { time_range: TIME_RANGE, max_techniques: 10 }
     );
 
@@ -254,6 +256,7 @@ describe('coverageGap', () => {
       esClient,
       savedObjectsClient,
       loggingSystemMock.create().get(),
+      'default',
       { time_range: TIME_RANGE, max_techniques: 10 }
     );
 

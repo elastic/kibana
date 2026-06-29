@@ -14,6 +14,7 @@ import {
   type SeverityLevel,
   type SourceType,
 } from '../../../common/threat_intelligence/hub';
+import { buildSpaceFilterTerms } from '../lib/space_filter';
 import {
   buildTechniqueCountsFromBehaviorsWithSeverityAgg,
   buildTechniqueCountsFromTtpsWithSeverityAgg,
@@ -263,6 +264,7 @@ export const coverageGap = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
+  spaceId: string,
   params: CoverageGapParams
 ): Promise<CoverageGapResult> => {
   const {
@@ -274,6 +276,7 @@ export const coverageGap = async (
   } = params;
 
   const filters: Array<Record<string, unknown>> = [
+    buildSpaceFilterTerms(spaceId),
     { range: { '@timestamp': { gte: timeRange.from, lte: timeRange.to } } },
   ];
   if (tags?.length) filters.push({ terms: { tags } });

@@ -166,8 +166,14 @@ export const registerSubscriptionRoutes = ({
       async (context, request, response) => {
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
-          const result = await deleteSubscription(esClient, request.body.subscription_id);
+          const result = await deleteSubscription(esClient, request.body.subscription_id, spaceId);
+          if (result.status === 'not_found') {
+            return response.notFound({
+              body: { message: `Subscription not found in the current space` },
+            });
+          }
           return response.ok({ body: result });
         } catch (err) {
           logger.warn(`delete_subscription failed: ${(err as Error).message}`);

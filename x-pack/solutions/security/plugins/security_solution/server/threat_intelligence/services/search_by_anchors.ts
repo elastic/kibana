@@ -153,12 +153,15 @@ const SOURCE_FIELDS = [
  */
 const fetchSourceAnchors = async (
   esClient: ElasticsearchClient,
+  spaceId: string,
   sourceReportId: string
 ): Promise<AnchorSet | null> => {
   const response = await esClient.search<StoredReportSource>({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size: 1,
-    query: { term: { _id: sourceReportId } },
+    query: {
+      bool: { filter: [buildSpaceFilterTerms(spaceId), { term: { _id: sourceReportId } }] },
+    },
     _source: [...SOURCE_FIELDS],
   });
 
@@ -337,7 +340,7 @@ export const searchByAnchors = async (
   let anchors = params.anchors;
 
   if (sourceReportId && !anchors) {
-    const fetched = await fetchSourceAnchors(esClient, sourceReportId);
+    const fetched = await fetchSourceAnchors(esClient, spaceId, sourceReportId);
     if (!fetched) {
       logger.warn(`search_by_anchors: source report "${sourceReportId}" not found`);
       return emptyResult(null, 0, 0, 0, 0);

@@ -436,6 +436,13 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (experimentalFeatures.iocIndicatorSyncEnabled) {
+      if (!experimentalFeatures.threatIntelligenceSkillEnabled) {
+        this.logger.warn(
+          'iocIndicatorSyncEnabled is on but threatIntelligenceSkillEnabled is off — ' +
+            'the IOC sync task depends on indices bootstrapped by the skill flag; ' +
+            'the task will fail until threatIntelligenceSkillEnabled is also enabled.'
+        );
+      }
       if (plugins.taskManager) {
         registerIocIndicatorSyncTask({
           taskManager: plugins.taskManager,

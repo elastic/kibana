@@ -217,8 +217,23 @@ export type DeleteSubscriptionResult =
 
 export const deleteSubscription = async (
   esClient: ElasticsearchClient,
-  subscriptionId: string
+  subscriptionId: string,
+  spaceId: string
 ): Promise<DeleteSubscriptionResult> => {
+  // Read-before-delete: verify the subscription belongs to the caller's space
+  // before allowing deletion, preventing cross-space deletes.
+  const getResult = await esClient.get<{ space_id?: string }>(
+    { index: THREAT_INTEL_SUBSCRIPTIONS_INDEX, id: subscriptionId },
+    { ignore: [404] }
+  );
+  if (!getResult.found) {
+    return { status: 'not_found', subscription_id: subscriptionId };
+  }
+  const docSpaceId = getResult._source?.space_id;
+  if (docSpaceId !== spaceId && docSpaceId !== GLOBAL_SPACE_ID) {
+    return { status: 'not_found', subscription_id: subscriptionId };
+  }
+
   try {
     await esClient.delete({
       index: THREAT_INTEL_SUBSCRIPTIONS_INDEX,

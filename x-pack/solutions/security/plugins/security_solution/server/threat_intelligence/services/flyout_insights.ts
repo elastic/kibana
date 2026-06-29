@@ -109,19 +109,23 @@ const fetchReportById = async (
   reportId: string
 ): Promise<FlyoutInsightsRelatedReport | undefined> => {
   try {
-    const response = await esClient.get<ReportSource>(
-      {
-        index: THREAT_REPORTS_INDEX_PATTERN,
-        id: reportId,
+    const response = await esClient.search<ReportSource>({
+      index: THREAT_REPORTS_INDEX_PATTERN,
+      size: 1,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [buildSpaceFilterTerms(spaceId), { term: { _id: reportId } }],
+        },
       },
-      { ignore: [404] }
-    );
+    });
 
-    if (!response.found || !response._id) {
+    const hit = response.hits.hits[0];
+    if (!hit?._id) {
       return undefined;
     }
 
-    return mapReportHit({ _id: response._id, _source: response._source }, 'ioc_reference');
+    return mapReportHit({ _id: hit._id, _source: hit._source }, 'ioc_reference');
   } catch {
     return undefined;
   }

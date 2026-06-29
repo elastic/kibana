@@ -164,12 +164,15 @@ const BM25_QUERY_FIELDS = ['content.title_bm25^2', 'content.body_text_bm25'] as 
  */
 const fetchSourceVertexQueries = async (
   esClient: ElasticsearchClient,
+  spaceId: string,
   sourceReportId: string
 ): Promise<DiamondVertexQueries | null> => {
   const response = await esClient.search<StoredDiamondSource>({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size: 1,
-    query: { term: { _id: sourceReportId } },
+    query: {
+      bool: { filter: [buildSpaceFilterTerms(spaceId), { term: { _id: sourceReportId } }] },
+    },
     _source: [
       'extracted.diamond.adversary.summary',
       'extracted.diamond.adversary.signal',
@@ -222,11 +225,12 @@ const isInferenceUnavailableError = (err: unknown): boolean => {
 const resolveVertexQueries = async (
   esClient: ElasticsearchClient,
   logger: Logger,
+  spaceId: string,
   params: Pick<SearchByDiamondParams, 'vertex_queries' | 'source_report_id'>
 ): Promise<DiamondVertexQueries | null> => {
   if (params.vertex_queries) return params.vertex_queries;
   if (!params.source_report_id) return null;
-  const fetched = await fetchSourceVertexQueries(esClient, params.source_report_id);
+  const fetched = await fetchSourceVertexQueries(esClient, spaceId, params.source_report_id);
   if (!fetched) {
     logger.warn(`search_by_diamond: source report "${params.source_report_id}" not found`);
   }
@@ -537,7 +541,7 @@ export const searchByDiamond = async (
   const { source_report_id: sourceReportId } = params;
   const size = Math.min(params.size ?? DEFAULT_SIZE, MAX_SIZE);
 
-  const resolvedQueries = await resolveVertexQueries(esClient, logger, params);
+  const resolvedQueries = await resolveVertexQueries(esClient, logger, spaceId, params);
 
   if (!resolvedQueries) {
     return emptyResult([]);

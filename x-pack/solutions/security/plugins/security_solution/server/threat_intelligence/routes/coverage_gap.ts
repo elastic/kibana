@@ -16,6 +16,7 @@ import {
 } from '../../../common/threat_intelligence/hub';
 import { buildCoverageGapUiHints, withUiHints } from '../../../common/threat_intelligence/hub';
 import { coverageGap } from '../services';
+import { resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
 
 const coverageGapBodySchema = schema.object({
@@ -50,7 +51,11 @@ const coverageGapBodySchema = schema.object({
  * ATT&CK techniques in the threat-reports data stream against Detection
  * Engine rules (enabled and disabled) to recommend enable vs create.
  */
-export const registerCoverageGapRoute = ({ router, logger }: RouteRegistrationDeps): void => {
+export const registerCoverageGapRoute = ({
+  router,
+  logger,
+  getSpacesService,
+}: RouteRegistrationDeps): void => {
   router.versioned
     .post({
       path: COVERAGE_GAP_API_PATH,
@@ -70,8 +75,9 @@ export const registerCoverageGapRoute = ({ router, logger }: RouteRegistrationDe
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const savedObjectsClient = core.savedObjects.client;
+        const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
-          const result = await coverageGap(esClient, savedObjectsClient, logger, {
+          const result = await coverageGap(esClient, savedObjectsClient, logger, spaceId, {
             time_range: request.body.time_range,
             tags: request.body.tags,
             source_types: request.body.source_types as SourceType[] | undefined,

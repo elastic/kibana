@@ -14,6 +14,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { CostTraceBuilder } from '../routes/lib/cost_tracker';
+import { buildSpaceFilterTerms } from '../lib/space_filter';
 import {
   DIAMOND_CONNECTOR_SETTING_KEY,
   TRIAGE_CONNECTOR_SETTING_KEY,
@@ -228,12 +229,15 @@ const fetchCandidateMeta = async (
  */
 const fetchSourceBodyText = async (
   esClient: ElasticsearchClient,
+  spaceId: string,
   reportId: string
 ): Promise<string | undefined> => {
   const response = await esClient.search<{ content?: { body_text?: string } }>({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size: 1,
-    query: { term: { _id: reportId } },
+    query: {
+      bool: { filter: [buildSpaceFilterTerms(spaceId), { term: { _id: reportId } }] },
+    },
     _source: ['content.body_text'],
   });
   return response.hits.hits[0]?._source?.content?.body_text ?? undefined;
@@ -257,12 +261,15 @@ interface StoredQueryDiamondSource {
  */
 const fetchQueryDiamond = async (
   esClient: ElasticsearchClient,
+  spaceId: string,
   reportId: string
 ): Promise<QueryDiamond | null> => {
   const response = await esClient.search<StoredQueryDiamondSource>({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size: 1,
-    query: { term: { _id: reportId } },
+    query: {
+      bool: { filter: [buildSpaceFilterTerms(spaceId), { term: { _id: reportId } }] },
+    },
     _source: [
       'extracted.diamond.adversary.signal',
       'extracted.diamond.adversary.summary',
@@ -503,7 +510,7 @@ export const correlateThreat = async ({
   if (input.mode === 'report_id') {
     // Fetch the stored diamond first, then do parallel kNN retrieval.
     // Splitting avoids conflating extract+search into one stage from the UI's perspective.
-    queryDiamond = (await fetchQueryDiamond(esClient, input.report_id)) ?? {
+    queryDiamond = (await fetchQueryDiamond(esClient, spaceId, input.report_id)) ?? {
       adversary: { signal: 'NONE', summary: '' },
       capability: { signal: 'NONE', summary: '' },
       infrastructure: { signal: 'NONE', summary: '' },
@@ -689,7 +696,7 @@ export const correlateThreat = async ({
   const caseText =
     input.mode === 'raw_text'
       ? input.text
-      : (await fetchSourceBodyText(esClient, input.report_id)) ??
+      : (await fetchSourceBodyText(esClient, spaceId, input.report_id)) ??
         buildCaseContextFromDiamond(queryDiamond);
 
   if (!synthesisModel) throw new Error('correlateThreat: synthesisModel required for depth full');
