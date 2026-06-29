@@ -19,4 +19,5 @@ export interface InstallationAPI {
   ): Promise<InstallationStatusResponse | SecurityLabsInstallStatusResponse>;
   install(params: ProductDocInstallParams): Promise<PerformInstallResponse>;
   uninstall(params: ProductDocInstallParams): Promise<UninstallResponse>;
+  getDefaultInferenceId(): Promise<string>;
 }

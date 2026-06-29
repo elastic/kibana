@@ -17,12 +17,14 @@ import type {
   UninstallResponse,
   SecurityLabsInstallStatusResponse,
   OpenAPISpecInstallStatusResponse,
+  DefaultInferenceIdResponse,
 } from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
+  GET_DEFAULT_INFERENCE_ID_API_PATH,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
 
@@ -45,6 +47,37 @@ export const registerInstallationRoutes = ({
   router: IRouter;
   getServices: () => InternalServices;
 }) => {
+  router.get(
+    {
+      path: GET_DEFAULT_INFERENCE_ID_API_PATH,
+      validate: false,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+      const result = await esClient.inference.get({});
+      const endpointIds = new Set((result.endpoints ?? []).map((e) => e.inference_id));
+
+      let inferenceId: string;
+      if (endpointIds.has(defaultInferenceEndpoints.JINAv5)) {
+        inferenceId = defaultInferenceEndpoints.JINAv5;
+      } else if (endpointIds.has(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)) {
+        inferenceId = defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
+      } else {
+        inferenceId = defaultInferenceEndpoints.ELSER;
+      }
+
+      return res.ok<DefaultInferenceIdResponse>({ body: { inferenceId } });
+    }
+  );
+
   router.get(
     {
       path: INSTALLATION_STATUS_API_PATH,

@@ -23,11 +23,11 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
   useUninstallProductDoc,
+  useDefaultInferenceId,
   REACT_QUERY_KEYS,
   type ProductDocBasePluginStart,
 } from '@kbn/product-doc-base-plugin/public';
@@ -51,11 +51,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const queryClient = useQueryClient();
 
+  const { inferenceId, isLoading: isInferenceIdLoading } = useDefaultInferenceId(productDocBase);
+
   const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
 
   const statusQueries = useQueries({
     queries: docsConfig.map((doc) => {
-      const inferenceId = defaultInferenceEndpoints.ELSER;
       const resourceType = doc.resourceType;
       return {
         // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
@@ -74,7 +75,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
     }),
   });
 
-  const isLoading = statusQueries.some((q) => q.isLoading);
+  const isLoading = isInferenceIdLoading || statusQueries.some((q) => q.isLoading);
 
   const refetch = useCallback(() => {
     // Invalidate all doc status queries (for all rows) so they refresh together.
@@ -92,7 +93,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: doc.name,
         status,
         resourceType: doc.resourceType,
-        inferenceId: defaultInferenceEndpoints.ELSER,
+        inferenceId,
         ...(updateAvailable ? { updateAvailable } : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
@@ -100,12 +101,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
       };
     });
-  }, [docsConfig, statusQueries]);
+  }, [docsConfig, statusQueries, inferenceId]);
 
   const getErrorSuggestion = useCallback(
-    (failureReason: string, inferenceId: string): string | null => {
+    (failureReason: string, endpointId: string): string | null => {
       if (failureReason.includes('model_deployment_timeout_exception')) {
-        return i18n.getModelDeploymentTimeoutSuggestion(inferenceId);
+        return i18n.getModelDeploymentTimeoutSuggestion(endpointId);
       }
       return null;
     },
@@ -309,10 +310,10 @@ const DocumentationRowActions: React.FC<{
 
   const installVars = useMemo(
     () => ({
-      inferenceId: defaultInferenceEndpoints.ELSER,
+      inferenceId: item.inferenceId,
       resourceType: item.resourceType,
     }),
-    [item.resourceType]
+    [item.inferenceId, item.resourceType]
   );
 
   const isItemInstalling = item.status === 'installing' || installMutation.isLoading;

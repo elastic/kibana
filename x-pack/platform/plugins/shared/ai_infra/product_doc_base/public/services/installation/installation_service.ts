@@ -14,12 +14,14 @@ import type {
   PerformUpdateResponse,
   UninstallResponse,
   ProductDocInstallParams,
+  DefaultInferenceIdResponse,
 } from '../../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
+  GET_DEFAULT_INFERENCE_ID_API_PATH,
 } from '../../../common/http_api/installation';
 
 export class InstallationService {
@@ -71,6 +73,13 @@ export class InstallationService {
     });
 
     return response;
+  }
+
+  async getDefaultInferenceId(): Promise<string> {
+    const response = await this.http.get<DefaultInferenceIdResponse>(
+      GET_DEFAULT_INFERENCE_ID_API_PATH
+    );
+    return response.inferenceId;
   }
 
   /**
