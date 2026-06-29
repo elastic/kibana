@@ -18,7 +18,7 @@ import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
 export type { ApiKeyType } from '../config';
 
 export interface ApiKeySOFields {
-  apiKey: string;
+  apiKey?: string;
   uiamApiKey?: string;
   userScope: TaskUserScope;
 }

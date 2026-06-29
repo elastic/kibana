@@ -12,13 +12,21 @@ import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 
-import { createApiKey, hasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
+import {
+  createApiKey,
+  hasApiKey,
+  getApiKeyFromRequest,
+  shouldCloneApiKeyFromRequest,
+} from '../lib/api_key_utils';
 
 jest.mock('../lib/api_key_utils');
 const createApiKeyMock = createApiKey as jest.MockedFunction<typeof createApiKey>;
 const hasApiKeyMock = hasApiKey as jest.MockedFunction<typeof hasApiKey>;
 const getApiKeyFromRequestMock = getApiKeyFromRequest as jest.MockedFunction<
   typeof getApiKeyFromRequest
+>;
+const shouldCloneApiKeyFromRequestMock = shouldCloneApiKeyFromRequest as jest.MockedFunction<
+  typeof shouldCloneApiKeyFromRequest
 >;
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
@@ -39,6 +47,9 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
 describe('EsAndUiamApiKeyStrategy', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // `clearAllMocks` does not reset implementations, so re-establish the default
+    // (non-clone) behavior; individual tests opt into cloning explicitly.
+    shouldCloneApiKeyFromRequestMock.mockReturnValue(false);
   });
 
   const createStrategy = (typeToUse: ApiKeyType = ApiKeyType.UIAM) => {
@@ -216,9 +227,68 @@ describe('EsAndUiamApiKeyStrategy', () => {
 
       expect(strategy.getApiKeyIdsForInvalidation(task)).toEqual([{ apiKeyId: 'es-key-id' }]);
     });
+
+    test('returns only the UIAM target for a cloned UIAM task (no ES apiKey persisted)', () => {
+      const { strategy } = createStrategy();
+      const task = mockTaskInstance({
+        uiamApiKey: 'essu_uiam-key',
+        userScope: {
+          // Cloned UIAM tasks reuse the UIAM key id for apiKeyId; it must not be emitted
+          // as a bare ES invalidation target (ES-native invalidate cannot revoke a UIAM key).
+          apiKeyId: 'uiam-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
+      });
+
+      expect(strategy.getApiKeyIdsForInvalidation(task)).toEqual([
+        { apiKeyId: 'uiam-key-id', uiamApiKey: 'essu_uiam-key' },
+      ]);
+    });
   });
 
   describe('grantApiKeys', () => {
+    test('grants a single fresh UIAM key (no ES clone) when cloning a UIAM request', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_uiam-credential' },
+      });
+
+      // Cloning a UIAM request: skip the ES clone path entirely and mint one fresh UIAM key.
+      shouldCloneApiKeyFromRequestMock.mockReturnValue(true);
+      hasApiKeyMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+      });
+
+      mockUiam.grant.mockResolvedValueOnce({
+        id: 'fresh-uiam-id',
+        name: 'test',
+        api_key: 'essu_fresh-secret',
+      });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, {
+        cloneApiKey: true,
+      });
+
+      const fields = result.get('task-1');
+      // No ES API key is created/cloned for a cloned UIAM request.
+      expect(createApiKeyMock).not.toHaveBeenCalled();
+      expect(mockUiam.grant).toHaveBeenCalledTimes(1);
+      expect(fields?.apiKey).toBeUndefined();
+      expect(fields?.uiamApiKey).toBe('essu_fresh-secret');
+      expect(fields?.userScope.apiKeyId).toBe('fresh-uiam-id');
+      expect(fields?.userScope.uiamApiKeyId).toBe('fresh-uiam-id');
+      // The cloned key is Task-Manager-owned (not the caller's), so it is invalidatable.
+      expect(fields?.userScope.apiKeyCreatedByUser).toBe(false);
+      // The granted UIAM key is the one used to build the fake request for execution.
+      expect(
+        strategy.getApiKeyForFakeRequest(mockTaskInstance(fields as Partial<ConcreteTaskInstance>))
+      ).toBe('essu_fresh-secret');
+    });
+
     test('grants both ES and UIAM keys when request has UIAM credential', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       const request = httpServerMock.createKibanaRequest({
