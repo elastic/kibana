@@ -73,7 +73,7 @@ export const OneDrive: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.oneDrive.auth.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize",
+                    "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/my-tenant/oauth2/v2.0/authorize",
                 }
               ),
             },
@@ -83,7 +83,7 @@ export const OneDrive: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.oneDrive.auth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: (login.microsoftonline.com/redacted),
+                    "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/my-tenant/oauth2/v2.0/token",
                 }
               ),
             },
