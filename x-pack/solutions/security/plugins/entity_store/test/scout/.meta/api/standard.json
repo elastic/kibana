@@ -1,5 +1,5 @@
 {
-  "sha1": "f82e9be6655824c25b2ae995f0af6c587ea1a28b",
+  "sha1": "57f0eff2816ba74c1f2351bd61e1afc02e829dad",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -222,6 +222,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
         "line": 564,
+        "column": 12
+      }
+    },
+    {
+      "id": "b766b9bba0d643a-bda631ea8a8353f",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should succeed when a data stream used as remote index pattern has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 673,
         "column": 12
       }
     },
@@ -2110,6 +2126,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
         "line": 1143,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-588fb43f1b015c5",
+      "title": "Entity Store Main logs extraction Should succeed when a data stream matched by the data view has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 1222,
         "column": 10
       }
     },
