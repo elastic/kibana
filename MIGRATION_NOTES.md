@@ -6,10 +6,8 @@ Branch: `migrate-to-typescript-6`. Plan lives in `~/.cursor/plans/kibana_typescr
 
 - **`typescript@6.0.3`** is the only TypeScript installed; the canary alias and scaffolding are gone.
 - **`@typescript-eslint/*@8.60.0`** (was 8.46.3 which capped at `<6.0.0`).
-- `ignoreDeprecations: "6.0"` lives in `tsconfig.base.json` and the generated `tsconfig.base.type_check.json` to silence the soft-deprecation diagnostics for `baseUrl` and `moduleResolution: "node"`. Must be removed before bumping to TS 7.0 — both options are hard-removed there.
+- `baseUrl` and `ignoreDeprecations: "6.0"` have been **removed** from `tsconfig.base.json`. The `paths` map is now fully relative (`./`-prefixed), including the hand-maintained `node_modules/*` and `typings/*` overrides — TS6 requires a leading `./` once `baseUrl` is unset (TS5090). The generated `tsconfig.base.type_check.json` inherits the removal verbatim.
 - Open blockers for TS 7.0:
-  - **A3**: `moduleResolution: "node"` → `"bundler"` flip (~121 errors on a server-internal probe; split into 4 prep PRs documented below).
-  - **`baseUrl` removal** (gated by A3 + path normalization in `tsconfig.base.json`).
   - Legacy decorators (alerting_v2 only meaningful user — freeze is the recommended stance).
 
 ## Commits on top of main
