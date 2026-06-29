@@ -17,7 +17,6 @@ import {
 } from '../fixtures';
 import {
   bulkUpdateMonitors,
-  deleteMonitors,
   enableSynthetics,
   getMonitor,
   listMonitors,
@@ -113,101 +112,89 @@ apiTest.describe(
 
     apiTest('partially patches a single monitor with a public location', async ({ apiClient }) => {
       const monitor = await createUiMonitor(apiClient, { enabled: true });
-      try {
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          uniform([monitor.config_id], { enabled: false })
-        );
 
-        expect(res.body.result).toStrictEqual([{ id: monitor.config_id, updated: true }]);
-        expect(res.body.errors).toBeUndefined();
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        uniform([monitor.config_id], { enabled: false })
+      );
 
-        const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id);
-        expect((refreshed as { enabled: boolean }).enabled).toBe(false);
-        // Untouched AAD-bound fields must round-trip unchanged.
-        expect((refreshed as { name: string }).name).toBe(monitor.name);
-        expect((refreshed as { tags: string[] }).tags).toStrictEqual(monitor.tags);
-        expect((refreshed as { schedule: unknown }).schedule).toStrictEqual(monitor.schedule);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-      }
+      expect(res.body.result).toStrictEqual([{ id: monitor.config_id, updated: true }]);
+      expect(res.body.errors).toBeUndefined();
+
+      const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+      expect((refreshed as { enabled: boolean }).enabled).toBe(false);
+      // Untouched AAD-bound fields must round-trip unchanged.
+      expect((refreshed as { name: string }).name).toBe(monitor.name);
+      expect((refreshed as { tags: string[] }).tags).toStrictEqual(monitor.tags);
+      expect((refreshed as { schedule: unknown }).schedule).toStrictEqual(monitor.schedule);
     });
 
     apiTest('partially patches a monitor with a private location', async ({ apiClient }) => {
       const monitor = await createUiMonitor(apiClient, {
         locations: [privateLocation],
       });
-      try {
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          uniform([monitor.config_id], { enabled: false })
-        );
 
-        expect(res.body.result).toStrictEqual([{ id: monitor.config_id, updated: true }]);
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        uniform([monitor.config_id], { enabled: false })
+      );
 
-        const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id);
-        expect((refreshed as { enabled: boolean }).enabled).toBe(false);
-        expect((refreshed as { locations: Array<{ id: string }> }).locations[0].id).toBe(
-          privateLocation.id
-        );
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-      }
+      expect(res.body.result).toStrictEqual([{ id: monitor.config_id, updated: true }]);
+
+      const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+      expect((refreshed as { enabled: boolean }).enabled).toBe(false);
+      expect((refreshed as { locations: Array<{ id: string }> }).locations[0].id).toBe(
+        privateLocation.id
+      );
     });
 
     apiTest('patches multiple monitors in one request', async ({ apiClient }) => {
       const m1 = await createUiMonitor(apiClient);
       const m2 = await createUiMonitor(apiClient);
-      try {
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          uniform([m1.config_id, m2.config_id], { tags: ['bulk-patched'] })
-        );
 
-        expect(res.body.result).toStrictEqual([
-          { id: m1.config_id, updated: true },
-          { id: m2.config_id, updated: true },
-        ]);
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        uniform([m1.config_id, m2.config_id], { tags: ['bulk-patched'] })
+      );
 
-        const refreshedA = await getMonitor(apiClient, editorHeaders, m1.config_id);
-        const refreshedB = await getMonitor(apiClient, editorHeaders, m2.config_id);
-        expect((refreshedA.body as { tags: string[] }).tags).toStrictEqual(['bulk-patched']);
-        expect((refreshedB.body as { tags: string[] }).tags).toStrictEqual(['bulk-patched']);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [m1.config_id, m2.config_id]);
-      }
+      expect(res.body.result).toStrictEqual([
+        { id: m1.config_id, updated: true },
+        { id: m2.config_id, updated: true },
+      ]);
+
+      const refreshedA = await getMonitor(apiClient, editorHeaders, m1.config_id);
+      const refreshedB = await getMonitor(apiClient, editorHeaders, m2.config_id);
+      expect((refreshedA.body as { tags: string[] }).tags).toStrictEqual(['bulk-patched']);
+      expect((refreshedB.body as { tags: string[] }).tags).toStrictEqual(['bulk-patched']);
     });
 
     apiTest('applies a different patch to each id in one request', async ({ apiClient }) => {
       const m1 = await createUiMonitor(apiClient, { enabled: true, tags: ['t1'] });
       const m2 = await createUiMonitor(apiClient, { enabled: true, tags: ['t2'] });
-      try {
-        const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
-          updates: [
-            { id: m1.config_id, attributes: { enabled: false } },
-            { id: m2.config_id, attributes: { tags: ['only-m2'] } },
-          ],
-        });
 
-        expect(res.body.result).toStrictEqual([
-          { id: m1.config_id, updated: true },
-          { id: m2.config_id, updated: true },
-        ]);
+      const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
+        updates: [
+          { id: m1.config_id, attributes: { enabled: false } },
+          { id: m2.config_id, attributes: { tags: ['only-m2'] } },
+        ],
+      });
 
-        const { body: r1 } = await getMonitor(apiClient, editorHeaders, m1.config_id);
-        const { body: r2 } = await getMonitor(apiClient, editorHeaders, m2.config_id);
-        // m1 got enabled:false, its tags untouched.
-        expect((r1 as { enabled: boolean }).enabled).toBe(false);
-        expect((r1 as { tags: string[] }).tags).toStrictEqual(['t1']);
-        // m2 got new tags, its enabled untouched.
-        expect((r2 as { tags: string[] }).tags).toStrictEqual(['only-m2']);
-        expect((r2 as { enabled: boolean }).enabled).toBe(true);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [m1.config_id, m2.config_id]);
-      }
+      expect(res.body.result).toStrictEqual([
+        { id: m1.config_id, updated: true },
+        { id: m2.config_id, updated: true },
+      ]);
+
+      const { body: r1 } = await getMonitor(apiClient, editorHeaders, m1.config_id);
+      const { body: r2 } = await getMonitor(apiClient, editorHeaders, m2.config_id);
+      // m1 got enabled:false, its tags untouched.
+      expect((r1 as { enabled: boolean }).enabled).toBe(false);
+      expect((r1 as { tags: string[] }).tags).toStrictEqual(['t1']);
+      // m2 got new tags, its enabled untouched.
+      expect((r2 as { tags: string[] }).tags).toStrictEqual(['only-m2']);
+      expect((r2 as { enabled: boolean }).enabled).toBe(true);
     });
 
     // --- AAD regression (decrypt-merge-encrypt safety) -----------------------
@@ -229,37 +216,32 @@ apiTest.describe(
           password: 'aad-test-pass',
           tags: ['aad', 'regression'],
         });
-        try {
-          await bulkUpdateMonitors(
-            apiClient,
-            editorHeaders,
-            uniform([monitor.config_id], { enabled: false })
-          );
 
-          const { body: refreshed } = await getMonitor(
-            apiClient,
-            editorHeaders,
-            monitor.config_id,
-            {
-              internal: true,
-            }
-          );
+        await bulkUpdateMonitors(
+          apiClient,
+          editorHeaders,
+          uniform([monitor.config_id], { enabled: false })
+        );
 
-          const decrypted = refreshed as {
-            enabled: boolean;
-            username: string;
-            password: string;
-            tags: string[];
-            urls: string;
-          };
-          expect(decrypted.enabled).toBe(false);
-          expect(decrypted.username).toBe('aad-test-user');
-          expect(decrypted.password).toBe('aad-test-pass');
-          expect(decrypted.tags).toStrictEqual(['aad', 'regression']);
-          expect(decrypted.urls).toBe(monitor.urls);
-        } finally {
-          await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-        }
+        const { body: refreshed } = await getMonitor(
+          apiClient,
+          editorHeaders,
+          monitor.config_id,
+          { internal: true }
+        );
+
+        const decrypted = refreshed as {
+          enabled: boolean;
+          username: string;
+          password: string;
+          tags: string[];
+          urls: string;
+        };
+        expect(decrypted.enabled).toBe(false);
+        expect(decrypted.username).toBe('aad-test-user');
+        expect(decrypted.password).toBe('aad-test-pass');
+        expect(decrypted.tags).toStrictEqual(['aad', 'regression']);
+        expect(decrypted.urls).toBe(monitor.urls);
       }
     );
 
@@ -270,25 +252,22 @@ apiTest.describe(
       async ({ apiClient }) => {
         const monitor = await createUiMonitor(apiClient);
         const missingId = uuidv4();
-        try {
-          const res = await bulkUpdateMonitors(
-            apiClient,
-            editorHeaders,
-            uniform([monitor.config_id, missingId], { enabled: false })
-          );
 
-          const results = res.body.result as BulkUpdateResult[];
-          expect(results).toHaveLength(2);
+        const res = await bulkUpdateMonitors(
+          apiClient,
+          editorHeaders,
+          uniform([monitor.config_id, missingId], { enabled: false })
+        );
 
-          const updatedEntry = resultFor(results, monitor.config_id);
-          const missingEntry = resultFor(results, missingId);
+        const results = res.body.result as BulkUpdateResult[];
+        expect(results).toHaveLength(2);
 
-          expect(updatedEntry).toStrictEqual({ id: monitor.config_id, updated: true });
-          expect(missingEntry!.updated).toBe(false);
-          expect(missingEntry!.error).toMatch(/not found/i);
-        } finally {
-          await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-        }
+        const updatedEntry = resultFor(results, monitor.config_id);
+        const missingEntry = resultFor(results, missingId);
+
+        expect(updatedEntry).toStrictEqual({ id: monitor.config_id, updated: true });
+        expect(missingEntry!.updated).toBe(false);
+        expect(missingEntry!.error).toMatch(/not found/i);
       }
     );
 
@@ -311,49 +290,42 @@ apiTest.describe(
       const projectMonitorId = await findByJourneyId(apiClient, journeyId);
       expect(projectMonitorId).toBeDefined();
 
-      try {
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          uniform([projectMonitorId!], { enabled: false })
-        );
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        uniform([projectMonitorId!], { enabled: false })
+      );
 
-        const results = res.body.result as BulkUpdateResult[];
-        expect(results).toHaveLength(1);
-        expect(results[0].updated).toBe(false);
-        expect(results[0].error).toMatch(/origin/i);
+      const results = res.body.result as BulkUpdateResult[];
+      expect(results).toHaveLength(1);
+      expect(results[0].updated).toBe(false);
+      expect(results[0].error).toMatch(/origin/i);
 
-        const refreshed = await getMonitor(apiClient, editorHeaders, projectMonitorId!);
-        expect((refreshed.body as { enabled: boolean }).enabled).toBe(true);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [projectMonitorId!]);
-      }
+      const refreshed = await getMonitor(apiClient, editorHeaders, projectMonitorId!);
+      expect((refreshed.body as { enabled: boolean }).enabled).toBe(true);
     });
 
     apiTest(
       'rejects schedules outside the allowed set with a validation error',
       async ({ apiClient }) => {
         const monitor = await createUiMonitor(apiClient);
-        try {
-          const res = await bulkUpdateMonitors(
-            apiClient,
-            editorHeaders,
-            uniform([monitor.config_id], { schedule: { number: '7', unit: 'm' } })
-          );
 
-          const results = res.body.result as BulkUpdateResult[];
-          expect(results).toHaveLength(1);
-          expect(results[0].updated).toBe(false);
-          expect(results[0].error).toMatch(/schedule/i);
+        const res = await bulkUpdateMonitors(
+          apiClient,
+          editorHeaders,
+          uniform([monitor.config_id], { schedule: { number: '7', unit: 'm' } })
+        );
 
-          const refreshed = await getMonitor(apiClient, editorHeaders, monitor.config_id);
-          expect((refreshed.body as { schedule: unknown }).schedule).toStrictEqual({
-            number: '5',
-            unit: 'm',
-          });
-        } finally {
-          await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-        }
+        const results = res.body.result as BulkUpdateResult[];
+        expect(results).toHaveLength(1);
+        expect(results[0].updated).toBe(false);
+        expect(results[0].error).toMatch(/schedule/i);
+
+        const refreshed = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+        expect((refreshed.body as { schedule: unknown }).schedule).toStrictEqual({
+          number: '5',
+          unit: 'm',
+        });
       }
     );
 
@@ -361,24 +333,19 @@ apiTest.describe(
       'rejects a patch with an unknown field and leaves the monitor unchanged',
       async ({ apiClient }) => {
         const monitor = await createUiMonitor(apiClient);
-        try {
-          const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
-            updates: [
-              { id: monitor.config_id, attributes: { enabled: false, notARealField: 'x' } },
-            ],
-          });
 
-          const results = res.body.result as BulkUpdateResult[];
-          expect(results).toHaveLength(1);
-          expect(results[0].updated).toBe(false);
-          expect(results[0].error).toMatch(/invalid monitor key/i);
+        const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
+          updates: [{ id: monitor.config_id, attributes: { enabled: false, notARealField: 'x' } }],
+        });
 
-          // the valid field in the same patch must not be applied either
-          const refreshed = await getMonitor(apiClient, editorHeaders, monitor.config_id);
-          expect((refreshed.body as { enabled: boolean }).enabled).toBe(true);
-        } finally {
-          await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-        }
+        const results = res.body.result as BulkUpdateResult[];
+        expect(results).toHaveLength(1);
+        expect(results[0].updated).toBe(false);
+        expect(results[0].error).toMatch(/invalid monitor key/i);
+
+        // the valid field in the same patch must not be applied either
+        const refreshed = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+        expect((refreshed.body as { enabled: boolean }).enabled).toBe(true);
       }
     );
 
@@ -386,17 +353,14 @@ apiTest.describe(
 
     apiTest('returns 400 when an update has empty attributes', async ({ apiClient }) => {
       const monitor = await createUiMonitor(apiClient);
-      try {
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          { updates: [{ id: monitor.config_id, attributes: {} }] },
-          { statusCode: 400 }
-        );
-        expect((res.body as { message: string }).message).toMatch(/attributes/i);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-      }
+
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        { updates: [{ id: monitor.config_id, attributes: {} }] },
+        { statusCode: 400 }
+      );
+      expect((res.body as { message: string }).message).toMatch(/attributes/i);
     });
 
     apiTest('returns 400 when updates is empty (schema-level rejection)', async ({ apiClient }) => {
@@ -405,22 +369,19 @@ apiTest.describe(
 
     apiTest('returns 400 when an id appears more than once', async ({ apiClient }) => {
       const monitor = await createUiMonitor(apiClient);
-      try {
-        const res = await bulkUpdateMonitors(
-          apiClient,
-          editorHeaders,
-          {
-            updates: [
-              { id: monitor.config_id, attributes: { enabled: false } },
-              { id: monitor.config_id, attributes: { tags: ['dup'] } },
-            ],
-          },
-          { statusCode: 400 }
-        );
-        expect((res.body as { message: string }).message).toMatch(/duplicate/i);
-      } finally {
-        await deleteMonitors(apiClient, editorHeaders, [monitor.config_id]);
-      }
+
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        {
+          updates: [
+            { id: monitor.config_id, attributes: { enabled: false } },
+            { id: monitor.config_id, attributes: { tags: ['dup'] } },
+          ],
+        },
+        { statusCode: 400 }
+      );
+      expect((res.body as { message: string }).message).toMatch(/duplicate/i);
     });
   }
 );
