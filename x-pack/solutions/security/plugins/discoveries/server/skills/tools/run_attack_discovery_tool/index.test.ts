@@ -192,12 +192,13 @@ describe('getRunAttackDiscoveryTool', () => {
     );
   });
 
-  it('auto-detects "provided" retrieval mode when alerts are supplied', async () => {
+  it('disables default retrieval and forwards the alerts when alerts are supplied', async () => {
     await invokeHandler({ alerts: ['Alert 1', 'Alert 2'] });
 
     expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
-        workflowConfig: expect.objectContaining({ alert_retrieval_mode: 'provided' }),
+        alerts: ['Alert 1', 'Alert 2'],
+        workflowConfig: expect.objectContaining({ default_retrieval_enabled: false }),
       })
     );
   });

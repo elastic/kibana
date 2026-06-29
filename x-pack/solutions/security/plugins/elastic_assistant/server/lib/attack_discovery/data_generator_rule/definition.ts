@@ -15,7 +15,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
-import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../schedules/constants';
+import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '@kbn/attack-discovery-schedules-common';
 import { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from './constants';
 import { attackDiscoveryDataGeneratorExecutor } from './executor';
 

@@ -108,6 +108,7 @@
     "@kbn/controls-constants",
     "@kbn/core-spaces-common",
     "@kbn/ai-assistant-common",
+    "@kbn/attack-discovery-schedules-common",
     "@kbn/discoveries"
   ],
   "exclude": [
