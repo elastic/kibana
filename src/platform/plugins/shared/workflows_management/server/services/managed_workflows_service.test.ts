@@ -79,6 +79,7 @@ const createDefinition = (
     id?: string;
     pluginId?: string;
     version?: number;
+    billable?: boolean;
     yaml?: string;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
@@ -86,6 +87,7 @@ const createDefinition = (
   id: overrides.id ?? WORKFLOW_ID,
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: overrides.version ?? 1,
+  billable: overrides.billable ?? false,
   yaml: overrides.yaml ?? workflowYaml(),
   management: {
     ...defaultManagement,
@@ -97,12 +99,14 @@ const createTemplateDefinition = (
   overrides: {
     id?: string;
     pluginId?: string;
+    billable?: boolean;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
 ): TemplateManagedWorkflowDefinition => ({
   id: overrides.id ?? WORKFLOW_ID,
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: 1,
+  billable: overrides.billable ?? false,
   yamlTemplate: ({ recipient, enabled }) =>
     workflowYaml({ name: `Managed Workflow - ${recipient}`, enabled }),
   management: {
@@ -124,6 +128,7 @@ const createWorkflowSource = (overrides: Partial<WorkflowProperties> = {}): Work
   spaceId: SPACE_ID,
   managed: true,
   managedBy: PLUGIN_ID,
+  billable: false,
   managedVersion: 1,
   definitionHash: 'old-hash',
   managedTemplateValues: null,
@@ -180,6 +185,7 @@ const mockPrepareReturnsInitialVersion = (
           updated_at: now.toISOString(),
           managed: false,
           managedBy: null,
+          billable: null,
           managedVersion: null,
           definitionHash: null,
           managedTemplateValues: null,
@@ -238,6 +244,7 @@ const createCrudServiceMock = () => {
             updated_at: now.toISOString(),
             managed: false,
             managedBy: null,
+            billable: null,
             managedVersion: null,
             definitionHash: null,
             managedTemplateValues: null,
@@ -421,12 +428,25 @@ describe('ManagedWorkflowsService', () => {
         expect.objectContaining({
           managed: true,
           managedBy: PLUGIN_ID,
+          billable: false,
           originManagedWorkflowId: WORKFLOW_ID,
           lifecycle: 'static',
           managedVersion: 1,
           definitionHash: definitionHash(definition.yaml),
         })
       );
+    });
+
+    it('persists billable managed workflow definitions', async () => {
+      const definition = createDefinition({ billable: true });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.billable).toBe(true);
     });
 
     it('sets document.version to 1 on managed create when versioning is enabled', async () => {
