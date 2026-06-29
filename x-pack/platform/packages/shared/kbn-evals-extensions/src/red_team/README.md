@@ -72,9 +72,11 @@ positive inside a genuine refusal.
 
 ```bash
 node scripts/evals ext red-team --suite agent-builder
-node scripts/evals ext red-team --suite agent-builder --module prompt_injection
+node scripts/evals ext red-team --suite agent-builder --module prompt_injection --count 5
+node scripts/evals ext red-team --suite agent-builder --strategy jailbreak_wrapper
 node scripts/evals ext red-team --suite agent-builder --strategy crescendo
 node scripts/evals ext red-team --suite agent-builder --count 20 --difficulty advanced
+node scripts/evals ext red-team --suite agent-builder --templates-only --count 20
 node scripts/evals ext red-team --suite agent-builder --judge bedrock-claude --skip-server
 node scripts/evals ext red-team --suite agent-builder --dry-run
 ```
@@ -94,7 +96,14 @@ In addition to the shared eval flags (`--suite`, `--judge`, `--model`,
 The command boots the eval stack via the shared `ensureEvalStack` helper (unless
 `--skip-server`), then spawns the suite's dedicated `<suite>-red-team` Playwright
 config (registered in `.buildkite/pipelines/evals/evals.suites.json`). Flags are
-passed to the spec as `RED_TEAM_*` environment variables.
+passed to the spec as `RED_TEAM_*` environment variables. Suites without a
+dedicated config fall back to a Playwright run scoped by `--grep "Red Team"`.
+
+The output is a severity-classified report with a summary table and detailed
+findings per failed attack, written through `writeRedTeamReport`. When run
+through the `evaluate` fixture, per-example evaluator scores are also ingested
+through the evals plugin score-ingestion API with `run.type: 'red-team'`
+metadata.
 
 ## Using it from a suite
 
