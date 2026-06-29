@@ -131,7 +131,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     return {
       min_score: Math.min(...mins),
       // Only set an upper bound when every selected severity has a max (i.e. critical not included)
-      max_score: maxes.length === selectedSeverities.length ? Math.max(...maxes) - 1 : undefined,
+      max_score: maxes.length === selectedSeverities.length ? Math.max(...maxes) : undefined,
     };
   }, [selectedSeverities, severityOptions.length]);
 

@@ -137,7 +137,7 @@ export const getEntityAnomalyOverview = async ({
                 range: {
                   record_score: {
                     gte: minScore || 1,
-                    ...(maxScore !== undefined ? { lte: maxScore } : {}),
+                    ...(maxScore !== undefined ? { lt: maxScore } : {}),
                   },
                 },
               },
