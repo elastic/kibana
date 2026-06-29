@@ -12,6 +12,7 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
@@ -634,6 +635,44 @@ describe('StepExecutionRuntime', () => {
         );
       }
     );
+
+    // Guardrail: errors thrown by custom steps may carry arbitrary, large, or sensitive
+    // payloads (e.g. `KibanaApiCallError` exposes the full parsed HTTP response on `.body`).
+    // `failStep` runs every error through `ExecutionError.fromError(...).toSerializableObject()`,
+    // which keeps only `type` (the error name) and `message`. Combined with `BaseSerializedErrorSchema`
+    // (no `body`/`headers`/`status` field), this ensures such fields are never persisted to ES —
+    // neither on the step execution nor on the workflow execution. The recovered response body
+    // therefore only ever reaches ES through the (capped) `message`, not as a structured field.
+    it('strips non-standard fields (e.g. KibanaApiCallError body/headers/status) before persisting', () => {
+      const error = new KibanaApiCallError({
+        status: 500,
+        headers: { 'x-trace-id': 'trace-secret' },
+        body: { secret: 'do-not-persist', updated: [{ id: 'rule-1' }] },
+        message: 'HTTP 500: {"secret":"do-not-persist"}',
+      });
+
+      underTest.failStep(error);
+
+      const expectedSerializedError = {
+        type: 'KibanaApiCallError',
+        message: 'HTTP 500: {"secret":"do-not-persist"}',
+      };
+
+      // Persisted on the step execution: only type + message, no structured body/headers/status/details.
+      const [persistedStep] = (workflowExecutionState.upsertStep as jest.Mock).mock.calls.at(
+        -1
+      ) as [EsWorkflowStepExecution];
+      expect(persistedStep.error).toEqual(expectedSerializedError);
+      expect(persistedStep.error).not.toHaveProperty('body');
+      expect(persistedStep.error).not.toHaveProperty('headers');
+      expect(persistedStep.error).not.toHaveProperty('status');
+      expect(persistedStep.error).not.toHaveProperty('details');
+
+      // Also guarded at the workflow-execution level.
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        error: expectedSerializedError,
+      });
+    });
 
     it('should extract and accumulate partial token usage from partial output on failure', () => {
       underTest.failStep(new Error('stream interrupted'), {
