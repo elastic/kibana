@@ -240,7 +240,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     return toUser(this.props.query.query);
   };
 
-  private fetchIndexPatterns = debounce(async () => {
+  private fetchIndexPatterns = () => {
     const [objectPatterns = [], stringPatterns = []] = partition<
       QueryStringInputProps['indexPatterns'][number],
       DataView
@@ -251,29 +251,42 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
         Object.hasOwn(indexPattern, 'title')
       );
     });
-    const idOrTitlePatterns = stringPatterns.map((sp) =>
+    const idOrTitlePatterns: DataViewByIdOrTitle[] = stringPatterns.map((sp) =>
       typeof sp === 'string' ? { type: 'title', value: sp } : sp
-    ) as DataViewByIdOrTitle[];
-
-    // abort the previous fetch to avoid overriding with outdated data
-    // issue https://github.com/elastic/kibana/issues/80831
-    if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
-    this.fetchIndexPatternsAbortController = new AbortController();
-    const currentAbortController = this.fetchIndexPatternsAbortController;
-
-    const objectPatternsFromStrings = await fetchIndexPatterns(
-      this.props.deps.data.dataViews,
-      idOrTitlePatterns
     );
 
-    if (!currentAbortController.signal.aborted) {
-      this.setState({
-        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
-      });
-
+    if (idOrTitlePatterns.length === 0) {
+      this.setState({ indexPatterns: objectPatterns });
       this.updateSuggestions();
+      return;
     }
-  }, 200);
+
+    this.fetchIndexPatternsDebounced(objectPatterns, idOrTitlePatterns);
+  };
+
+  private fetchIndexPatternsDebounced = debounce(
+    async (objectPatterns: DataView[], idOrTitlePatterns: DataViewByIdOrTitle[]) => {
+      // abort the previous fetch to avoid overriding with outdated data
+      // issue https://github.com/elastic/kibana/issues/80831
+      if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
+      this.fetchIndexPatternsAbortController = new AbortController();
+      const currentAbortController = this.fetchIndexPatternsAbortController;
+
+      const objectPatternsFromStrings = await fetchIndexPatterns(
+        this.props.deps.data.dataViews,
+        idOrTitlePatterns
+      );
+
+      if (!currentAbortController.signal.aborted) {
+        this.setState({
+          indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+        });
+
+        this.updateSuggestions();
+      }
+    },
+    200
+  );
 
   private getSuggestions = async () => {
     if (!this.inputRef) {
@@ -749,7 +762,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
+    if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
+    if (this.fetchIndexPatternsDebounced.cancel) this.fetchIndexPatternsDebounced.cancel();
     if (this.props.onChangeQueryInputFocus) {
       this.props.onChangeQueryInputFocus(false);
     }
@@ -981,7 +996,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   };
 
   private assignQueryInputDivRef = (node: HTMLDivElement | null) => {
-    this.setState({ queryBarInputDiv: node });
+    if (this.state.queryBarInputDiv !== node) {
+      this.setState({ queryBarInputDiv: node });
+    }
   };
 
   private onFocusWithin = () => {

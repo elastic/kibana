@@ -367,6 +367,25 @@ describe('QueryStringInput', () => {
     });
   });
 
+  it('Should not refetch when index patterns are already full objects', async () => {
+    mockFetchIndexPatterns.mockClear();
+
+    render(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPattern],
+        disableAutoFocus: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue(kqlQuery.query)).toBeInTheDocument();
+    });
+
+    expect(mockFetchIndexPatterns).not.toHaveBeenCalled();
+  });
+
   it('Should accept index pattern strings and fetch the full object', async () => {
     const patternStrings = ['logstash-*'];
     mockFetchIndexPatterns.mockClear();
