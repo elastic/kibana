@@ -129,6 +129,53 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
     }
   );
 
+  evaluate(
+    'smoke tests: trace-based groundedness',
+    async ({ executorClient, agentBuilderClient, evaluatorClient, evaluationConnector }) => {
+      const result = await executorClient.runExperiment(
+        {
+          datasets: [
+            {
+              name: 'smoke tests: trace-based groundedness',
+              description:
+                'Scores a real Agent Builder trace via the evals evaluator execution API',
+              examples: [
+                {
+                  input: {
+                    question: 'What is the current status of the payment service?',
+                  } as { question: string },
+                  metadata: { expectGrounded: true },
+                },
+              ],
+            },
+          ],
+          task: async (example) => {
+            const { question } = example.input! as { question: string };
+            const response = await agentBuilderClient.converse({
+              agentId: 'elastic-ai-agent',
+              input: question,
+            });
+            return { response: response.message, traceId: response.traceId };
+          },
+        },
+        [
+          evaluatorClient.toEvaluator('groundedness', {
+            connectorId: 'azure-gpt4_1',
+          }),
+        ]
+      );
+
+      const run = result[0].evaluationRuns[0];
+      const metadata = run.result?.metadata as
+        | { evidence_source?: string; analysis?: Array<{ evidence?: { tool_id?: string } }> }
+        | undefined;
+
+      expect(run.result?.label).toBeDefined();
+      expect(metadata?.evidence_source).toBe('trace');
+      expect(metadata?.analysis?.some((item) => Boolean(item.evidence?.tool_id))).toBe(true);
+    }
+  );
+
   evaluate.describe('smoke tests: es-snapshot-loader', () => {
     let replayResult: LoadResult;
 

@@ -1,0 +1,70 @@
+openapi: 3.0.0
+info:
+  title: Execute Evaluator API endpoint
+  version: '1'
+paths:
+  /internal/evals/evaluators/{evaluatorName}/_evaluate:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ExecuteEvaluator
+      description: Executes an evaluator with trace or direct context input
+      summary: Execute evaluator
+      tags:
+        - Evals API
+      parameters:
+        - name: evaluatorName
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector_id:
+                  type: string
+                trace_id:
+                  type: string
+                context:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  evaluator:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      version:
+                        type: string
+                      kind:
+                        type: string
+                        enum:
+                          - llm
+                          - code
+                    required:
+                      - name
+                      - version
+                      - kind
+                  score:
+                    type: number
+                    nullable: true
+                  label:
+                    type: string
+                  explanation:
+                    type: string
+                  metadata:
+                    type: object
+                    additionalProperties: true
+                required:
+                  - evaluator
