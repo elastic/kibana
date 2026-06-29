@@ -6,20 +6,124 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import type { AlertingApp, AlertingNavigation } from '../fixtures/page_objects/alerting_navigation';
-import {
-  ACTION_POLICIES_READ_ROLE,
-  ALERTS_READ_ROLE,
-  ALL_ROLE,
-  EXECUTION_HISTORY_READ_ROLE,
-  NO_ACCESS_ROLE,
-  READ_ROLE,
-  RULES_READ_ROLE,
-} from './management_required_privileges.roles';
 
 const ALL_APPS: readonly AlertingApp[] = ['rules', 'alerts', 'actionPolicies', 'executionHistory'];
+
+const NO_ES_PRIVILEGES: KibanaRole['elasticsearch'] = {
+  cluster: [],
+  indices: [],
+};
+
+/** Full access to every alerting_v2 management feature. */
+const ALL_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_rules: ['all'],
+        alerting_v2_alerts: ['all'],
+        alerting_v2_action_policies: ['all'],
+        alerting_v2_execution_history: ['all'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/** Read-only access to every alerting_v2 management feature. */
+const READ_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_rules: ['read'],
+        alerting_v2_alerts: ['read'],
+        alerting_v2_action_policies: ['read'],
+        alerting_v2_execution_history: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/** No alerting_v2 access at all; every management page must be gated. */
+const NO_ACCESS_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/** Read-only access scoped to a single alerting_v2 feature. */
+const RULES_READ_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_rules: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+const ALERTS_READ_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_alerts: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+const ACTION_POLICIES_READ_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+const EXECUTION_HISTORY_READ_ROLE: KibanaRole = {
+  elasticsearch: NO_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_execution_history: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
 
 /**
  * Visits every management page and asserts that the `allowed` pages render their
