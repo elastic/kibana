@@ -10,6 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
+import { CreateMonitorQueryParams } from '../add_monitor';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorAttributes,
@@ -317,25 +318,29 @@ export class AddEditMonitorAPI {
     newMonitorId: string;
     normalizedMonitor: SyntheticsMonitor;
   }) {
-    const { request } = this.routeContext;
-
-    const { preserve_namespace: preserveNamespace } = request.query as Record<
-      string,
-      { preserve_namespace?: boolean }
-    >;
     return {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
         normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
       [ConfigKey.CONFIG_ID]: newMonitorId,
-      [ConfigKey.NAMESPACE]: preserveNamespace
-        ? normalizedMonitor[ConfigKey.NAMESPACE]
-        : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
+      [ConfigKey.NAMESPACE]: this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
     };
   }
 
   getMonitorNamespace(configuredNamespace: string) {
-    const { spaceId } = this.routeContext;
+    const { request, spaceId } = this.routeContext;
+
+    const { preserve_namespace: preserveNamespace, internal } =
+      request.query as CreateMonitorQueryParams;
+
+    if (preserveNamespace || !internal) {
+      const { error } = isValidNamespace(configuredNamespace);
+      if (error) {
+        throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
+      }
+      return configuredNamespace;
+    }
+
     const kibanaNamespace = formatKibanaNamespace(spaceId);
     const namespace =
       configuredNamespace === DEFAULT_NAMESPACE_STRING ? kibanaNamespace : configuredNamespace;
