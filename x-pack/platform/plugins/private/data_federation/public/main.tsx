@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageSection,
@@ -578,7 +577,6 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
                   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiSelect
-                        compressed
                         data-test-subj="dataSetsSetsDataSourceFilter"
                         aria-label={mainTranslations.filters.dataSource}
                         options={dataSourceFilterOptions}
@@ -588,6 +586,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButton
+                        fill
                         color="primary"
                         data-test-subj="dataSetsSetsCreateButton"
                         iconType="plusInCircle"
@@ -658,6 +657,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
                   ) : undefined,
                 toolsRight: (
                   <EuiButton
+                    fill
                     color="primary"
                     data-test-subj="dataSetsCreateButton"
                     iconType="plusInCircle"
@@ -711,27 +711,18 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
   return (
     <>
       <EuiPageSection paddingSize="m">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <p>{mainTranslations.pageDescription}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href="https://ela.st/esql-data-federation" target="_blank" external={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="documentation" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{mainTranslations.docsLink}</EuiFlexItem>
-              </EuiFlexGroup>
+        <EuiTitle size="l">
+          <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>
+            {mainTranslations.pageDescription}{' '}
+            <EuiLink href="https://ela.st/esql-data-federation" target="_blank">
+              {mainTranslations.docsLink}
             </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </p>
+        </EuiText>
         <EuiSpacer size="l" />
         <EuiTabbedContent
           tabs={tabs}

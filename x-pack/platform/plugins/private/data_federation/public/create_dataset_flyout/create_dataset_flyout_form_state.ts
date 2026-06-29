@@ -140,6 +140,10 @@ export const validateMaxFieldSize = (value: string): true | string => {
  * Maps flyout form values to settings for the API payload.
  *
  * The form uses empty strings for "unset"; the API uses omitted fields.
+ * Fields are filtered to only the subset valid for the chosen format so that
+ * leftover values from a previously-selected format don't leak into the payload.
+ * Automatic (format = '') allows all fields since the user is explicitly opting
+ * into format detection and may know the files have CSV/NDJSON/Parquet structure.
  */
 export const buildDatasetSettingsFromFormValues = (
   settings: CreateDatasetSettingsFormValues
@@ -149,42 +153,56 @@ export const buildDatasetSettingsFromFormValues = (
   if (settings.format) applied.format = settings.format;
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;
 
-  const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
-  if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
+  const { format } = settings;
+  const isAuto = !format;
+  const isCsvTsv = format === 'csv' || format === 'tsv';
+  const isNdjson = format === 'ndjson';
+  const isParquet = format === 'parquet';
 
-  if (settings.delimiter) applied.delimiter = settings.delimiter;
-  if (settings.mode) applied.mode = settings.mode;
+  if (isAuto || isCsvTsv) {
+    if (settings.delimiter) applied.delimiter = settings.delimiter;
+    if (settings.mode) applied.mode = settings.mode;
 
-  const headerRow = parseBooleanFormValue(settings.header_row);
-  if (headerRow !== undefined) applied.header_row = headerRow;
+    const headerRow = parseBooleanFormValue(settings.header_row);
+    if (headerRow !== undefined) applied.header_row = headerRow;
 
-  if (settings.null_value) applied.null_value = settings.null_value;
-  if (settings.encoding) applied.encoding = settings.encoding;
-  if (settings.error_mode) applied.error_mode = settings.error_mode;
+    if (settings.null_value) applied.null_value = settings.null_value;
+    if (settings.encoding) applied.encoding = settings.encoding;
+    if (settings.error_mode) applied.error_mode = settings.error_mode;
 
-  const maxErrors = parseNonNegativeInteger(settings.max_errors);
-  if (maxErrors !== undefined) applied.max_errors = maxErrors;
+    const maxErrors = parseNonNegativeInteger(settings.max_errors);
+    if (maxErrors !== undefined) applied.max_errors = maxErrors;
 
-  const maxErrorRatio = parseRatio(settings.max_error_ratio);
-  if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+    const maxErrorRatio = parseRatio(settings.max_error_ratio);
+    if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
 
-  if (settings.quote) applied.quote = settings.quote;
-  if (settings.escape) applied.escape = settings.escape;
-  if (settings.comment) applied.comment = settings.comment;
-  if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
-  if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
-  if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
+    if (settings.quote) applied.quote = settings.quote;
+    if (settings.escape) applied.escape = settings.escape;
+    if (settings.comment) applied.comment = settings.comment;
+    if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
+    if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
+    if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
 
-  const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
-  if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
+    const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
+    if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
+  }
 
-  if (settings.segment_size) applied.segment_size = settings.segment_size;
+  if (isAuto || isCsvTsv || isNdjson) {
+    const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
+    if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
+  }
 
-  const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
-  if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
+  if (isAuto || isNdjson) {
+    if (settings.segment_size) applied.segment_size = settings.segment_size;
+  }
 
-  const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
-  if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
+  if (isAuto || isParquet) {
+    const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
+    if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
+
+    const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
+    if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
+  }
 
   return Object.keys(applied).length > 0 ? applied : undefined;
 };

@@ -17,7 +17,7 @@ export const mainTranslations = {
   }),
 
   docsLink: i18n.translate('xpack.dataFederation.docsLink', {
-    defaultMessage: 'Documentation',
+    defaultMessage: 'Learn more',
   }),
 
   columns: {

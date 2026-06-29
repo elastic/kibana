@@ -104,5 +104,53 @@ describe('create_dataset_flyout_form_state', () => {
         })
       ).toEqual({ format: 'csv', delimiter: ',', header_row: true });
     });
+
+    it('excludes CSV-only fields when format is parquet', () => {
+      const result = buildDatasetSettingsFromFormValues({
+        ...empty(),
+        format: 'parquet',
+        delimiter: ',',
+        mode: 'quoted',
+        header_row: 'true',
+        encoding: 'UTF-8',
+        error_mode: 'skip_row',
+        max_errors: '5',
+        schema_sample_size: '100',
+        segment_size: '10mb',
+        optimized_reader: 'true',
+      });
+      expect(result).toEqual({ format: 'parquet', optimized_reader: true });
+    });
+
+    it('excludes CSV-only fields when format is ndjson', () => {
+      const result = buildDatasetSettingsFromFormValues({
+        ...empty(),
+        format: 'ndjson',
+        delimiter: ',',
+        mode: 'quoted',
+        optimized_reader: 'true',
+        late_materialization: 'true',
+        schema_sample_size: '50',
+        segment_size: '5mb',
+      });
+      expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50, segment_size: '5mb' });
+    });
+
+    it('includes all fields when format is automatic (empty)', () => {
+      const result = buildDatasetSettingsFromFormValues({
+        ...empty(),
+        format: '',
+        delimiter: ',',
+        schema_sample_size: '10',
+        segment_size: '5mb',
+        optimized_reader: 'true',
+      });
+      expect(result).toEqual({
+        delimiter: ',',
+        schema_sample_size: 10,
+        segment_size: '5mb',
+        optimized_reader: true,
+      });
+    });
   });
 });
