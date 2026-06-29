@@ -33,7 +33,7 @@ export const removeAllArtifacts = () => {
   }
 };
 
-export const removeAllArtifactsPromise = () =>
+export const removeAllArtifactsPromise = (): Cypress.Promise<number> =>
   Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
     (result) => result.filter(Boolean).length
   );
