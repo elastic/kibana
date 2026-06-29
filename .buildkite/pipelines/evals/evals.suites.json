@@ -27,7 +27,8 @@
       ],
       "ciLabels": [
         "evals:agent-builder"
-      ]
+      ],
+      "serverConfigSet": "evals_security_ai_rules"
     },
     {
       "id": "esql-generation",
@@ -284,7 +285,7 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step/playwright.config.ts",
       "tags": ["security", "multi-step"],
       "ciLabels": ["evals:security-multi-step"],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_security_ai_rules"
     }
   ]
 }
