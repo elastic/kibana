@@ -8,7 +8,6 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -42,7 +41,13 @@ export function registerUpdateRoute(
       validate: {
         request: {
           params: schema.object({
-            id: asCodeIdSchema,
+            // Can not validate id at route level
+            // existing links panels may have invalid "as code" ids
+            id: schema.string({
+              meta: {
+                description: 'The unique ID of the links library item to be created or updated',
+              },
+            }),
           }),
           body: updateRequestBodySchema,
         },

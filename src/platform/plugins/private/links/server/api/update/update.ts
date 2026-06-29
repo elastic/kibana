@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
+
 import { LINKS_LIBRARY_TYPE } from '../../../common';
+import { transformIn } from '../../../common/api/transforms';
 import type { StoredLinksState } from '../../links_saved_object';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from './types';
-import { transformIn } from '../../../common/api/transforms';
 
 export async function update(
   requestCtx: RequestHandlerContext,
@@ -22,6 +24,30 @@ export async function update(
   const { core } = await requestCtx.resolve(['core']);
 
   const { state: soState, references } = transformIn(updateBody);
+
+  // Determine whether the library item already exists.
+  let isNewLibraryItem = false;
+  try {
+    await core.savedObjects.client.get<StoredLinksState>(LINKS_LIBRARY_TYPE, id);
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    isNewLibraryItem = true;
+  }
+
+  // Create path
+  if (isNewLibraryItem) {
+    asCodeIdSchema.validate(id);
+    const savedObject = await core.savedObjects.client.create<StoredLinksState>(
+      LINKS_LIBRARY_TYPE,
+      soState,
+      { references }
+    );
+    return getLinksCRUResponseBody(savedObject);
+  }
+
+  // Update path (existing library item)
   const savedObject = await core.savedObjects.client.update<StoredLinksState>(
     LINKS_LIBRARY_TYPE,
     id,
@@ -33,6 +59,5 @@ export async function update(
       mergeAttributes: false,
     }
   );
-
   return getLinksCRUResponseBody(savedObject);
 }
