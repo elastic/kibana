@@ -22,30 +22,72 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
-import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
+import type { Agent } from '../../types';
 import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
+import type { AgentlessEnrollmentFlyoutProps, AgentlessEnrollmentSelectedInput } from './types';
+
+// re-export the flyout contract types so external consumers can import them from this module
+export type {
+  AgentlessEnrollmentConnector,
+  AgentlessEnrollmentSelectedInput,
+  AgentlessEnrollmentFlyoutProps,
+} from './types';
 
 const REFRESH_INTERVAL_MS = 30000;
 
+/** Minimal shape needed from the package's policy templates to resolve a title. */
+interface IntegrationTitleSource {
+  name: string;
+  inputs?: Array<{ type: string; title?: string }>;
+}
+
+/**
+ * Resolves the integration title shown in the enrollment copy. When a single input
+ * is selected, prefer that input's title from the package's policy templates
+ * (e.g. "AWS S3"); otherwise fall back to the package title, then the policy name.
+ */
+export const resolveIntegrationTitle = ({
+  packageTitle,
+  policyTemplates,
+  selectedInput,
+  fallbackName,
+}: {
+  packageTitle?: string;
+  policyTemplates?: IntegrationTitleSource[];
+  selectedInput?: AgentlessEnrollmentSelectedInput;
+  fallbackName: string;
+}): string => {
+  if (!packageTitle) {
+    return fallbackName;
+  }
+  if (!selectedInput) {
+    return packageTitle;
+  }
+  const policyTemplate = policyTemplates?.find(
+    (template) => template.name === selectedInput.policyTemplate
+  );
+  const input = policyTemplate?.inputs?.find((i) => i.type === selectedInput.type);
+  return input?.title || packageTitle;
+};
+
 /**
  * This component displays additional status details of an agentless agent enrolled
- * the chosen package policy (and its agent policy).
- * It also displays confirmation that the agentless agent is ingesting data from
- * the chosen package policy.
+ * into the chosen agentless policy (and its agent policy).
+ * It also displays confirmation that the agentless agent is ingesting data.
  */
 export const AgentlessEnrollmentFlyout = ({
   onClose,
-  packagePolicy,
+  policyId,
+  policyName,
+  packageInfo,
+  selectedInput,
   agentPolicy,
-}: {
-  onClose: () => void;
-  packagePolicy: PackagePolicy;
-  agentPolicy?: AgentPolicy;
-}) => {
+  connectors,
+}: AgentlessEnrollmentFlyoutProps) => {
   const core = useStartServices();
   const { notifications } = core;
   const [confirmEnrollmentStatus, setConfirmEnrollmentStatus] = useState<EuiStepStatus>('loading');
@@ -63,12 +105,12 @@ export const AgentlessEnrollmentFlyout = ({
     };
   }, [agentDataInterval]);
 
-  // Fetch agent(s) data for the first associated agent policy
+  // Fetch agent(s) data for the agent policy identified by the `policyId` prop
   // Polls every 30 seconds until agent is found and healthy
   useEffect(() => {
     const fetchAgents = async () => {
       const { data: agentsData, error } = await sendGetAgents({
-        kuery: `${AGENTS_PREFIX}.policy_id: "${packagePolicy.policy_ids[0]}"`,
+        kuery: `${AGENTS_PREFIX}.policy_id: "${policyId}"`,
       });
 
       if (error) {
@@ -93,7 +135,7 @@ export const AgentlessEnrollmentFlyout = ({
     }, REFRESH_INTERVAL_MS);
 
     return () => clearAgentDataPolling();
-  }, [clearAgentDataPolling, notifications.toasts, packagePolicy.policy_ids]);
+  }, [clearAgentDataPolling, notifications.toasts, policyId]);
 
   // Watches agent data and updates step statuses and clears polling when agent is healthy
   useEffect(() => {
@@ -115,41 +157,29 @@ export const AgentlessEnrollmentFlyout = ({
     }
   }, [agentData, clearAgentDataPolling]);
 
-  // Calculate integration title from the base package info and what
-  // is configured on the package policy.
+  // Calculate integration title from the base package info
   const { data: packageInfoData } = useGetPackageInfoByKeyQuery(
-    packagePolicy.package!.name,
-    packagePolicy.package!.version,
+    packageInfo.name,
+    packageInfo.version,
     {
       prerelease: true,
     }
   );
 
-  const integrationTitle = useMemo(() => {
-    if (packageInfoData?.item) {
-      const enabledInputs = packagePolicy.inputs?.filter((input) => input.enabled);
-
-      // If only one input is enabled, find the input name from the package info and
-      // and use that for integration title. Otherwise, use the package name.
-      if (enabledInputs.length === 1 && enabledInputs[0].policy_template) {
-        const policyTemplate = packageInfoData.item.policy_templates?.find(
-          (template) => template.name === enabledInputs[0].policy_template
-        );
-        const input =
-          policyTemplate && 'inputs' in policyTemplate
-            ? policyTemplate.inputs?.find((i) => i.type === enabledInputs[0].type)
-            : null;
-        return input?.title || packageInfoData.item.title;
-      } else {
-        return packageInfoData.item.title;
-      }
-    }
-    return packagePolicy.name;
-  }, [packageInfoData, packagePolicy]);
+  const integrationTitle = useMemo(
+    () =>
+      resolveIntegrationTitle({
+        packageTitle: packageInfoData?.item?.title,
+        policyTemplates: packageInfoData?.item?.policy_templates,
+        selectedInput,
+        fallbackName: policyName,
+      }),
+    [packageInfoData, selectedInput, policyName]
+  );
 
   // Connector integrations don't ingest data until the connector is configured,
   // so the "Confirm incoming data" step is reframed as a connector setup step.
-  const isConnector = packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
+  const isConnector = packageInfo.name === FLEET_CONNECTORS_PACKAGE;
 
   return (
     <EuiFlyout
@@ -160,7 +190,7 @@ export const AgentlessEnrollmentFlyout = ({
     >
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentlessEnrollmentFlyoutTitle">
         <EuiTitle size="m">
-          <h2 id="FleetAgentlessEnrollmentFlyoutTitle">{packagePolicy.name}</h2>
+          <h2 id="FleetAgentlessEnrollmentFlyoutTitle">{policyName}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -197,16 +227,18 @@ export const AgentlessEnrollmentFlyout = ({
                 agentData && confirmEnrollmentStatus === 'complete' ? (
                   isConnector ? (
                     <AgentlessStepConfigureConnector
-                      packagePolicy={packagePolicy}
-                      policyTemplates={packageInfoData?.item.policy_templates}
+                      connectors={connectors}
+                      policyName={policyName}
+                      policyTemplates={packageInfoData?.item?.policy_templates}
                       setStepStatus={setConfirmDataStatus}
                       onClose={onClose}
                     />
                   ) : (
                     <AgentlessStepConfirmData
                       agent={agentData}
-                      packagePolicy={packagePolicy}
-                      policyTemplates={packageInfoData?.item.policy_templates}
+                      packageName={packageInfo.name}
+                      packageVersion={packageInfo.version}
+                      policyTemplates={packageInfoData?.item?.policy_templates}
                       setConfirmDataStatus={setConfirmDataStatus}
                     />
                   )

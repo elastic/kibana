@@ -10,9 +10,18 @@ import { useLocation } from 'react-router-dom';
 
 import { AGENTS_PREFIX } from '../../../../../../../../../common/constants';
 import { sendGetAgents } from '../../../../../../hooks';
+// The flyout imports sendGetAgents directly from the top-level public/hooks barrel,
+// which is a different Jest module instance than the integrations hooks barrel the
+// table uses. Import + mock it separately so we can assert the flyout's own agent lookup.
+import { sendGetAgents as sendGetAgentsFromFlyout } from '../../../../../../../../hooks';
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
+import type { PackagePolicy, PackagePolicyInput } from '../../../../../../types';
 
-import { AgentlessPackagePoliciesTable } from './agentless_table';
+import {
+  AgentlessPackagePoliciesTable,
+  getConnectorsFromPackagePolicy,
+  getSelectedInput,
+} from './agentless_table';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -25,10 +34,18 @@ jest.mock('../../../../../../hooks', () => ({
   sendGetAgents: jest.fn(),
 }));
 
+jest.mock('../../../../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../../../../hooks'),
+  sendGetAgents: jest.fn(),
+}));
+
 const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
 
 describe('AgentlessPackagePoliciesTable', () => {
   const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
+  const mockSendGetAgentsFromFlyout = sendGetAgentsFromFlyout as jest.MockedFunction<
+    typeof sendGetAgentsFromFlyout
+  >;
 
   beforeEach(() => {
     mockUseLocation.mockReturnValue({
@@ -36,6 +53,13 @@ describe('AgentlessPackagePoliciesTable', () => {
       search: '',
       hash: '',
       state: undefined,
+    });
+
+    // The flyout polls for its enrolled agent; return an empty result so it keeps
+    // rendering its header without resolving to a healthy agent.
+    mockSendGetAgentsFromFlyout.mockResolvedValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      error: null,
     });
 
     mockSendGetAgents.mockResolvedValue({
@@ -185,6 +209,31 @@ describe('AgentlessPackagePoliciesTable', () => {
     });
   });
 
+  it('looks up the flyout agent by agent-policy id (policy_ids[0]), not the package-policy id', async () => {
+    // Fixture intentionally has packagePolicy.id ('packagePolicy1') !== policy_ids[0]
+    // ('policy1'), the real-data case. The flyout must query by the agent-policy id.
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '?openEnrollmentFlyout=packagePolicy1',
+      hash: '',
+      state: undefined,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(mockSendGetAgentsFromFlyout).toHaveBeenCalledWith({
+        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+      });
+    });
+    expect(mockSendGetAgentsFromFlyout).not.toHaveBeenCalledWith({
+      kuery: `${AGENTS_PREFIX}.policy_id: "packagePolicy1"`,
+    });
+  });
+
   it('does not open flyout when openEnrollmentFlyout query param does not match any policy', async () => {
     mockUseLocation.mockReturnValue({
       pathname: '/',
@@ -198,5 +247,83 @@ describe('AgentlessPackagePoliciesTable', () => {
       expect(mockSendGetAgents).toHaveBeenCalled();
     });
     expect(result.queryByText('Confirm agentless enrollment')).not.toBeInTheDocument();
+  });
+});
+
+const makeInput = (overrides: Partial<PackagePolicyInput>): PackagePolicyInput => ({
+  type: 'logs',
+  enabled: true,
+  streams: [],
+  ...overrides,
+});
+
+const makePackagePolicy = (inputs: PackagePolicyInput[]): PackagePolicy =>
+  ({ id: 'pp1', name: 'pp', inputs } as PackagePolicy);
+
+describe('getConnectorsFromPackagePolicy', () => {
+  it('returns an empty array when there are no inputs', () => {
+    expect(getConnectorsFromPackagePolicy(makePackagePolicy([]))).toEqual([]);
+  });
+
+  it('maps an enabled input that carries connector vars', () => {
+    const packagePolicy = makePackagePolicy([
+      makeInput({
+        enabled: true,
+        vars: {
+          connector_id: { value: 'connector-1' },
+          connector_name: { value: 'My Connector' },
+        },
+      }),
+    ]);
+    expect(getConnectorsFromPackagePolicy(packagePolicy)).toEqual([
+      { id: 'connector-1', name: 'My Connector' },
+    ]);
+  });
+
+  it('excludes disabled inputs even when they carry connector vars', () => {
+    const packagePolicy = makePackagePolicy([
+      makeInput({
+        enabled: false,
+        vars: { connector_id: { value: 'disabled-connector' } },
+      }),
+    ]);
+    expect(getConnectorsFromPackagePolicy(packagePolicy)).toEqual([]);
+  });
+
+  it('excludes enabled inputs without connector vars', () => {
+    const packagePolicy = makePackagePolicy([
+      makeInput({ enabled: true, vars: { period: { value: '5m' } } }),
+    ]);
+    expect(getConnectorsFromPackagePolicy(packagePolicy)).toEqual([]);
+  });
+});
+
+describe('getSelectedInput', () => {
+  it('returns the single enabled input policy template and type', () => {
+    const packagePolicy = makePackagePolicy([
+      makeInput({ enabled: true, policy_template: 'aws', type: 'aws/s3' }),
+      makeInput({ enabled: false, policy_template: 'gcp', type: 'gcp/metrics' }),
+    ]);
+    expect(getSelectedInput(packagePolicy)).toEqual({ policyTemplate: 'aws', type: 'aws/s3' });
+  });
+
+  it('returns undefined when no input is enabled', () => {
+    const packagePolicy = makePackagePolicy([
+      makeInput({ enabled: false, policy_template: 'aws', type: 'aws/s3' }),
+    ]);
+    expect(getSelectedInput(packagePolicy)).toBeUndefined();
+  });
+
+  it('returns undefined when more than one input is enabled', () => {
+    const packagePolicy = makePackagePolicy([
+      makeInput({ enabled: true, policy_template: 'aws', type: 'aws/s3' }),
+      makeInput({ enabled: true, policy_template: 'gcp', type: 'gcp/metrics' }),
+    ]);
+    expect(getSelectedInput(packagePolicy)).toBeUndefined();
+  });
+
+  it('returns undefined when the single enabled input has no policy template', () => {
+    const packagePolicy = makePackagePolicy([makeInput({ enabled: true, type: 'aws/s3' })]);
+    expect(getSelectedInput(packagePolicy)).toBeUndefined();
   });
 });

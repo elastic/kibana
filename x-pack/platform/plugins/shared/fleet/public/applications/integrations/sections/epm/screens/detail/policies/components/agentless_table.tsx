@@ -39,6 +39,10 @@ import {
   PackagePolicyActionsMenu,
   AgentlessEnrollmentFlyout,
 } from '../../../../../../components';
+import type {
+  AgentlessEnrollmentConnector,
+  AgentlessEnrollmentSelectedInput,
+} from '../../../../../../components';
 
 import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
@@ -50,6 +54,33 @@ const REFRESH_INTERVAL_MS = 30000;
 
 const isConnectorPolicy = (packagePolicy: InMemoryPackagePolicy) =>
   packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
+
+// Adapter: extract connector deep-links from the package policy's enabled inputs.
+// Disabled inputs aren't running, so their connectors shouldn't surface as cards.
+export const getConnectorsFromPackagePolicy = (
+  packagePolicy: PackagePolicy
+): AgentlessEnrollmentConnector[] =>
+  (packagePolicy.inputs ?? [])
+    .filter(
+      (input) =>
+        input.enabled &&
+        (!!input?.vars?.connector_id?.value || !!input?.vars?.connector_name?.value)
+    )
+    .map((input) => ({
+      id: input?.vars?.connector_id?.value,
+      name: input?.vars?.connector_name?.value,
+    }));
+
+// Adapter: identify the single enabled input from the package's policy templates
+export const getSelectedInput = (
+  packagePolicy: PackagePolicy
+): AgentlessEnrollmentSelectedInput | undefined => {
+  const enabledInputs = (packagePolicy.inputs ?? []).filter((input) => input.enabled);
+  if (enabledInputs.length === 1 && enabledInputs[0].policy_template) {
+    return { policyTemplate: enabledInputs[0].policy_template, type: enabledInputs[0].type };
+  }
+  return undefined;
+};
 
 export const AgentlessPackagePoliciesTable = ({
   isLoading,
@@ -192,8 +223,9 @@ export const AgentlessPackagePoliciesTable = ({
     // The agentless save flow sets openEnrollmentFlyout=<packagePolicyId> via
     // appendOnSaveQueryParamsToPath (AgentlessPolicy has no policy_ids, so
     // policy.id is used). Match on packagePolicy.id accordingly.
-    // TODO: decouple this flyout from PackagePolicy — see follow-up issue for
-    // refactoring AgentlessEnrollmentFlyout to accept AgentlessPolicy directly.
+    // TODO: the flyout now takes a decoupled AgentlessEnrollmentFlyoutProps contract;
+    // the remaining work is to source this table from the AgentlessPolicy API and map
+    // AgentlessPolicy -> AgentlessEnrollmentFlyoutProps instead of PackagePolicy.
     const flyoutPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
     if (flyoutPolicyIdFromQuery) {
       const pp = packagePolicies.find((p) => p.packagePolicy.id === flyoutPolicyIdFromQuery);
@@ -444,8 +476,17 @@ export const AgentlessPackagePoliciesTable = ({
             setFlyoutPackagePolicy(undefined);
             setFlyoutAgentPolicy(undefined);
           }}
-          packagePolicy={flyoutPackagePolicy}
+          policyId={flyoutPackagePolicy.policy_ids[0]}
+          policyName={flyoutPackagePolicy.name}
+          // package is always set for agentless policies (createAgentlessPolicy);
+          // optional only on the general PackagePolicy type.
+          packageInfo={{
+            name: flyoutPackagePolicy.package!.name,
+            version: flyoutPackagePolicy.package!.version,
+          }}
+          selectedInput={getSelectedInput(flyoutPackagePolicy)}
           agentPolicy={flyoutAgentPolicy}
+          connectors={getConnectorsFromPackagePolicy(flyoutPackagePolicy)}
         />
       )}
     </>
