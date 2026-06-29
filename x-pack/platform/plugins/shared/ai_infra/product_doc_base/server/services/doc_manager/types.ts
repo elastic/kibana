@@ -209,4 +209,9 @@ export interface DocUpdateAllOptions {
    * inferenceIds to update
    */
   inferenceIds?: string[];
+  /**
+   * If true, wait until each inference ID's update task completes before resolving.
+   * Defaults to `false`.
+   */
+  wait?: boolean;
 }

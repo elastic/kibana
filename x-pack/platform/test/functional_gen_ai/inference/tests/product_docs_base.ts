@@ -79,6 +79,32 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
     return deletedIndices;
   };
 
+  const waitForProductDocOverallStatus = async (
+    inferenceId: string,
+    acceptableStatuses: readonly string[]
+  ) => {
+    await retry.waitForWithTimeout(
+      `product docs [${inferenceId}] overall status in [${acceptableStatuses.join(', ')}]`,
+      600 * 1000,
+      async () => {
+        const { body } = await getProductDocStatus(supertest, inferenceId);
+        if (acceptableStatuses.includes(body.overall)) {
+          return true;
+        }
+        throw new Error(
+          `Expected overall status in [${acceptableStatuses.join(', ')}], got ${JSON.stringify(
+            body,
+            null,
+            2
+          )}`
+        );
+      }
+    );
+  };
+
+  const waitForProductDocIdle = async (inferenceId: string) =>
+    waitForProductDocOverallStatus(inferenceId, ['installed', 'uninstalled', 'error']);
+
   const assertProducDocIndex = async ({
     productName,
     shouldExist,
@@ -189,13 +215,22 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           forceUpdate: false,
+          wait: true,
         })
         .set('kbn-xsrf', 'foo')
         .expect(200);
       const updatedBody = updatedResponse.body;
-      expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
-      // TODO: Restore this assertion once the E5 product docs are available
-      // expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL].installed).to.be(true);
+      const elserUpdateStatus = updatedBody[defaultInferenceEndpoints.ELSER];
+      expect(elserUpdateStatus).to.not.be(undefined);
+      expect(elserUpdateStatus.installed).to.be(true);
+
+      await waitForProductDocIdle(defaultInferenceEndpoints.ELSER);
+      await waitForProductDocIdle(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
+
+      const e5UpdateStatus = updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL];
+      if (e5UpdateStatus !== undefined) {
+        expect(e5UpdateStatus.installed).to.be(true);
+      }
     });
 
     it('updates the product docs the specific inferenceId', async () => {
@@ -206,21 +241,32 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         .send({
           forceUpdate: true,
           inferenceIds: [defaultInferenceEndpoints.ELSER],
+          wait: true,
         })
         .set('kbn-xsrf', 'foo')
         .expect(200);
       const updatedBody = updatedResponse.body;
-      expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+      const elserUpdateStatus = updatedBody[defaultInferenceEndpoints.ELSER];
+      expect(elserUpdateStatus).to.not.be(undefined);
+      expect(elserUpdateStatus.installed).to.be(true);
       expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL]).to.be(undefined);
+
+      await waitForProductDocIdle(defaultInferenceEndpoints.ELSER);
+      await waitForProductDocIdle(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
     });
 
     it('uninstalls the E5 product docs', async () => {
+      await waitForProductDocIdle(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
       const uninstalledResponse = await uninstallProductDoc(
         supertest,
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
       );
 
       expect(uninstalledResponse.status).to.be(200);
+
+      await waitForProductDocOverallStatus(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL, [
+        'uninstalled',
+      ]);
 
       const statusResponse = await getProductDocStatus(
         supertest,
@@ -246,11 +292,13 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
           )}`
         );
       });
-      await assertProducDocIndex({
-        productName: 'kibana',
-        shouldExist: false,
-        optionalInferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
-      });
+      for (const product of products) {
+        await assertProducDocIndex({
+          productName: product,
+          shouldExist: false,
+          optionalInferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+        });
+      }
     });
     it('stills retains the other installed product docs', async () => {
       const statusResponse = await getProductDocStatus(supertest, defaultInferenceEndpoints.ELSER);

@@ -153,7 +153,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { forceUpdate, inferenceIds } = options ?? {};
+    const { forceUpdate, inferenceIds, wait } = options ?? {};
     const idsToUpdate: string[] =
       Array.isArray(inferenceIds) && inferenceIds?.length > 0
         ? inferenceIds
@@ -161,7 +161,9 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
+    await Promise.all(
+      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate, wait }))
+    );
     return {
       inferenceIds: idsToUpdate,
     };
