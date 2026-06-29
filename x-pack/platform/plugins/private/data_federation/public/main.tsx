@@ -592,7 +592,6 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudIn
                         fill
                         color="primary"
                         data-test-subj="dataSetsSetsCreateButton"
-                        iconType="plusInCircle"
                         onClick={() => setDataSetFlyout({ kind: 'create' })}
                         disabled={items.length === 0}
                       >
@@ -663,7 +662,6 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudIn
                     fill
                     color="primary"
                     data-test-subj="dataSetsCreateButton"
-                    iconType="plusInCircle"
                     onClick={() => {
                       setDataSourceFlyout({ kind: 'create' });
                     }}
@@ -721,7 +719,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudIn
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={mainTranslations.technicalPreview} size="s" />
+            <EuiBetaBadge label={mainTranslations.technicalPreview} size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
