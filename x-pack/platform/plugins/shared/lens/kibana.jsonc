@@ -58,6 +58,7 @@
       "charts",
       "esqlDataGrid",
       "esql",
+      "expressionLegacyMetricVis",
     ],
     "extraPublicDirs": ["common/constants"]
   }
