@@ -82,6 +82,7 @@ export const AlertEpisodeTrendChartSection = ({
   const { data: rule } = useFetchRule({ id: episode?.['rule.id'], http });
 
   const metricGroups = useMemo(() => prepareTrendInputs(rule), [rule]);
+  const metricLabels = useMemo(() => metricGroups?.map((g) => g.metricLabel) ?? [], [metricGroups]);
 
   const [selectedMetricLabel, setSelectedMetricLabel] = useState<string | null>(null);
 
@@ -91,6 +92,7 @@ export const AlertEpisodeTrendChartSection = ({
     isError,
   } = useFetchEpisodeTrendQuery({
     episodeId: metricGroups ? episodeId : undefined,
+    metricLabels,
     services: { data, spaces },
   });
 

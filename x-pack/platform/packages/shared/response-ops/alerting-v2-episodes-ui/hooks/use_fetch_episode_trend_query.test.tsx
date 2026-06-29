@@ -33,25 +33,35 @@ describe('useFetchEpisodeTrendQuery', () => {
 
   it('is disabled (does not fetch) when episodeId is undefined', () => {
     const { result } = renderHook(
-      () => useFetchEpisodeTrendQuery({ episodeId: undefined, services: mockServices }),
+      () =>
+        useFetchEpisodeTrendQuery({
+          episodeId: undefined,
+          metricLabels: ['count'],
+          services: mockServices,
+        }),
       { wrapper }
     );
     expect(result.current.fetchStatus).toBe('idle');
     expect(mockRunEsqlAsyncSearch).not.toHaveBeenCalled();
   });
 
-  it('fetches the episode rule-events and maps the response to rows', async () => {
+  it('fetches the episode rule-events and maps the projected metric columns to rows', async () => {
     mockRunEsqlAsyncSearch.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
         { name: 'episode.status', type: 'keyword' },
-        { name: 'extracted_data', type: 'keyword' },
+        { name: 'metric_0', type: 'keyword' },
       ],
-      values: [['2026-06-18T00:00:00.000Z', 'active', '{"count":10}']],
+      values: [['2026-06-18T00:00:00.000Z', 'active', '10']],
     } as Awaited<ReturnType<typeof runEsqlAsyncSearch>>);
 
     const { result } = renderHook(
-      () => useFetchEpisodeTrendQuery({ episodeId: 'ep1', services: mockServices }),
+      () =>
+        useFetchEpisodeTrendQuery({
+          episodeId: 'ep1',
+          metricLabels: ['count'],
+          services: mockServices,
+        }),
       { wrapper }
     );
 
@@ -60,7 +70,7 @@ describe('useFetchEpisodeTrendQuery', () => {
       {
         '@timestamp': '2026-06-18T00:00:00.000Z',
         'episode.status': 'active',
-        extracted_data: '{"count":10}',
+        metrics: { count: 10 },
       },
     ]);
     expect(mockRunEsqlAsyncSearch).toHaveBeenCalledTimes(1);

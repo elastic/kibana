@@ -9,36 +9,24 @@ import { Comparator, type AlertCondition } from '@kbn/alerting-v2-rule-form';
 import type { EpisodeTrendRow } from '../../queries/episode_trend_query';
 import type { TrendSeries, TrendThreshold } from './trend_types';
 
-const toNumberOrNull = (value: unknown): number | null =>
-  typeof value === 'number' && Number.isFinite(value) ? value : null;
-
-const parseEventData = (raw: string | null): Record<string, unknown> => {
-  if (!raw) return {};
-  try {
-    return JSON.parse(raw) as Record<string, unknown>;
-  } catch {
-    return {};
-  }
-};
-
 /**
  * Pivots `.rule-events` rows into one {@link TrendSeries} per requested label,
- * reading each label's value from the event's evaluated `data` row. Events without
+ * reading each label's value from the event's evaluated metrics. Events without
  * a value for a label (e.g. status-only recovery events with empty data) yield a
  * `null` point, so the line breaks where the rule recorded no value.
  */
 export const mapEventDataToSeries = (
-  rows: Array<Pick<EpisodeTrendRow, '@timestamp' | 'extracted_data'>>,
+  rows: Array<Pick<EpisodeTrendRow, '@timestamp' | 'metrics'>>,
   seriesLabels: string[]
 ): TrendSeries[] => {
   const points = rows
-    .map((row) => ({ x: Date.parse(row['@timestamp']), data: parseEventData(row.extracted_data) }))
+    .map((row) => ({ x: Date.parse(row['@timestamp']), metrics: row.metrics }))
     .filter(({ x }) => !Number.isNaN(x));
 
   return seriesLabels.map((label) => ({
     id: label,
     label,
-    points: points.map(({ x, data }) => ({ x, y: toNumberOrNull(data[label]) })),
+    points: points.map(({ x, metrics }) => ({ x, y: metrics[label] ?? null })),
   }));
 };
 

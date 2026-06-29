@@ -6,13 +6,14 @@
  */
 
 import { Comparator } from '@kbn/alerting-v2-rule-form';
+import type { EpisodeTrendRow } from '../../queries/episode_trend_query';
 import { mapEventDataToSeries, deriveTrendThresholds } from './trend_data';
 
 describe('mapEventDataToSeries', () => {
-  it('builds one series per label, reading values from each event data row', () => {
+  it('builds one series per label, reading values from each event metrics', () => {
     const rows = [
-      { '@timestamp': '2026-06-18T00:00:00.000Z', extracted_data: '{"count":10,"error_rate":1.5}' },
-      { '@timestamp': '2026-06-18T01:00:00.000Z', extracted_data: '{"count":20,"error_rate":2.5}' },
+      { '@timestamp': '2026-06-18T00:00:00.000Z', metrics: { count: 10, error_rate: 1.5 } },
+      { '@timestamp': '2026-06-18T01:00:00.000Z', metrics: { count: 20, error_rate: 2.5 } },
     ];
     const series = mapEventDataToSeries(rows, ['count', 'error_rate']);
     expect(series).toHaveLength(2);
@@ -24,10 +25,10 @@ describe('mapEventDataToSeries', () => {
   });
 
   it('yields a null point when the event has no value for the label (e.g. empty data)', () => {
-    const rows = [
-      { '@timestamp': '2026-06-18T00:00:00.000Z', extracted_data: '{"count":10}' },
-      { '@timestamp': '2026-06-18T01:00:00.000Z', extracted_data: '{}' },
-      { '@timestamp': '2026-06-18T02:00:00.000Z', extracted_data: null },
+    const rows: Array<Pick<EpisodeTrendRow, '@timestamp' | 'metrics'>> = [
+      { '@timestamp': '2026-06-18T00:00:00.000Z', metrics: { count: 10 } },
+      { '@timestamp': '2026-06-18T01:00:00.000Z', metrics: { count: null } },
+      { '@timestamp': '2026-06-18T02:00:00.000Z', metrics: {} },
     ];
     const [count] = mapEventDataToSeries(rows, ['count']);
     expect(count.points).toEqual([
@@ -37,17 +38,13 @@ describe('mapEventDataToSeries', () => {
     ]);
   });
 
-  it('coerces non-numeric values to null and skips unparseable timestamps', () => {
+  it('skips rows with unparseable timestamps', () => {
     const rows = [
-      { '@timestamp': 'not-a-date', extracted_data: '{"count":10}' },
-      { '@timestamp': '2026-06-18T01:00:00.000Z', extracted_data: '{"count":"oops"}' },
-      { '@timestamp': '2026-06-18T02:00:00.000Z', extracted_data: 'not-json' },
+      { '@timestamp': 'not-a-date', metrics: { count: 10 } },
+      { '@timestamp': '2026-06-18T01:00:00.000Z', metrics: { count: 20 } },
     ];
     const [count] = mapEventDataToSeries(rows, ['count']);
-    expect(count.points).toEqual([
-      { x: Date.parse('2026-06-18T01:00:00.000Z'), y: null },
-      { x: Date.parse('2026-06-18T02:00:00.000Z'), y: null },
-    ]);
+    expect(count.points).toEqual([{ x: Date.parse('2026-06-18T01:00:00.000Z'), y: 20 }]);
   });
 });
 

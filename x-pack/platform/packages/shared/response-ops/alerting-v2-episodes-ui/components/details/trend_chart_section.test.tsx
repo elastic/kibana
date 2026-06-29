@@ -54,7 +54,7 @@ const trendRows = [
   {
     '@timestamp': '2026-06-18T00:00:00.000Z',
     'episode.status': 'active',
-    extracted_data: '{"count":150,"errors":20,"error_rate":8}',
+    metrics: { count: 150, errors: 20, error_rate: 8 },
   },
 ] as never;
 

@@ -6,38 +6,93 @@
  */
 
 import { ALERT_EVENTS_DATA_STREAM } from '../constants';
-import { buildEpisodeTrendQuery } from './episode_trend_query';
+import { buildEpisodeTrendQuery, parseEpisodeTrendRows } from './episode_trend_query';
 
 const SPACE_ID = 'default';
 
 describe('buildEpisodeTrendQuery', () => {
   it('queries the alert events data stream with _source metadata', () => {
-    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1').print('basic');
+    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['count']).print('basic');
     expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);
     expect(queryString).toContain('_source');
   });
 
   it('filters by space, alert type and episode id', () => {
     const episodeId = 'episode-abc';
-    const queryString = buildEpisodeTrendQuery(SPACE_ID, episodeId).print('basic');
+    const queryString = buildEpisodeTrendQuery(SPACE_ID, episodeId, ['count']).print('basic');
     expect(queryString).toContain('space_id');
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain('episode.id');
     expect(queryString).toContain(episodeId);
   });
 
-  it('extracts the evaluated data row via JSON_EXTRACT', () => {
-    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1').print('basic');
-    expect(queryString.toUpperCase()).toContain('JSON_EXTRACT');
-    expect(queryString).toContain('extracted_data');
+  it('projects one bracket-notation JSON_EXTRACT column per requested metric, reading from data', () => {
+    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['count', 'error_rate']).print(
+      'basic'
+    );
+    expect(queryString).toContain(`metric_0 = JSON_EXTRACT(_source, "data['count']")`);
+    expect(queryString).toContain(`metric_1 = JSON_EXTRACT(_source, "data['error_rate']")`);
   });
 
-  it('keeps the timestamp, status and data columns, sorted oldest first', () => {
-    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1').print('basic');
+  it('reads labels with special characters as a single key', () => {
+    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['host.name']).print('basic');
+    expect(queryString).toContain(`metric_0 = JSON_EXTRACT(_source, "data['host.name']")`);
+  });
+
+  it('keeps the timestamp, status and metric columns, sorted oldest first', () => {
+    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['count']).print('basic');
     expect(queryString).toContain('@timestamp');
     expect(queryString).toContain('episode.status');
+    expect(queryString).toContain('metric_0');
     expect(queryString.toUpperCase()).toContain('SORT');
     expect(queryString.toUpperCase()).toContain('ASC');
     expect(queryString.toUpperCase()).toContain('KEEP');
+  });
+
+  it('builds a valid query when there are no metric labels', () => {
+    const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', []).print('basic');
+    expect(queryString.toUpperCase()).not.toContain('JSON_EXTRACT');
+    expect(queryString).toContain('@timestamp');
+    expect(queryString).toContain('episode.status');
+  });
+});
+
+describe('parseEpisodeTrendRows', () => {
+  it('keys each event metric by label and coerces values to numbers', () => {
+    const rows = parseEpisodeTrendRows(
+      [
+        {
+          '@timestamp': '2026-06-18T00:00:00.000Z',
+          'episode.status': 'active',
+          metric_0: '10',
+          metric_1: '1.5',
+        },
+      ],
+      ['count', 'error_rate']
+    );
+
+    expect(rows).toEqual([
+      {
+        '@timestamp': '2026-06-18T00:00:00.000Z',
+        'episode.status': 'active',
+        metrics: { count: 10, error_rate: 1.5 },
+      },
+    ]);
+  });
+
+  it('maps missing or non-numeric extracted values to null', () => {
+    const [row] = parseEpisodeTrendRows(
+      [
+        {
+          '@timestamp': '2026-06-18T00:00:00.000Z',
+          'episode.status': 'recovered',
+          metric_0: null,
+          metric_1: 'oops',
+        },
+      ],
+      ['count', 'error_rate']
+    );
+
+    expect(row.metrics).toEqual({ count: null, error_rate: null });
   });
 });
