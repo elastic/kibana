@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { stringOrStringArraySchema } from '../../../../../../schemas';
 import { ruleResponseInternalSchema } from '../../../../response/schemas/v1';
 import {
   MAX_PER_PAGE,
@@ -31,7 +30,14 @@ export const findRulesInternalRequestBodySchema = schema.object({
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   }),
-  search_fields: schema.maybe(stringOrStringArraySchema()),
+  search_fields: schema.maybe(
+    schema.oneOf([
+      schema.arrayOf(schema.string({ maxLength: MAX_FIELD_NAME_LENGTH }), {
+        maxSize: MAX_ARRAY_FIELDS,
+      }),
+      schema.string({ maxLength: MAX_FIELD_NAME_LENGTH }),
+    ])
+  ),
   sort_field: schema.maybe(schema.string({ maxLength: MAX_FIELD_NAME_LENGTH })),
   sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(
