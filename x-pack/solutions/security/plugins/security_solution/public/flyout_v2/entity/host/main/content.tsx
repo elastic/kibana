@@ -112,22 +112,22 @@ export const Content = ({
         )}
       {entityStoreEntityId && (
         <>
+          {/* TODO: pass `openDetailsPanel` back in once index.tsx handles the GRAPH_VIEW tab (currently a no-op) */}
           <VisualizationsSection
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule margin="m" />
         </>
       )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
+          {/* TODO: pass `openDetailsPanel` back in once index.tsx handles the RESOLUTION_GROUP tab (currently a no-op) */}
           <ResolutionSection
             entityId={entityStoreEntityId}
             entityType={EntityType.host}
             scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule />
         </>
