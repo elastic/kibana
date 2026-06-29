@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { Discovery } from '@kbn/streams-schema';
 import { evidenceCollectionEvaluator } from './evidence_collection';
 
-const evaluate = (discoveries: unknown) =>
+const evaluate = (discoveries: Partial<Discovery>[]) =>
   evidenceCollectionEvaluator.evaluate({
     input: {},
-    output: { discoveries, steps: [] } as never,
+    output: { discoveries: discoveries as Discovery[], steps: [] },
     expected: {} as never,
     metadata: null,
   });
@@ -21,9 +22,12 @@ describe('evidenceCollectionEvaluator', () => {
   });
 
   it('scores 1 when every rule has attributed evidence', async () => {
-    const discoveries = [
+    const discoveries: Partial<Discovery>[] = [
       {
-        detections: [{ rule_uuid: 'r1' }, { rule_uuid: 'r2' }],
+        detections: [
+          { kind: 'detection', rule_uuid: 'r1' },
+          { kind: 'detection', rule_uuid: 'r2' },
+        ],
         evidences: [{ rule_uuid: 'r1' }, { rule_uuid: 'r2' }],
       },
     ];
@@ -31,11 +35,11 @@ describe('evidenceCollectionEvaluator', () => {
   });
 
   it('gives partial credit when a rule has no evidence', async () => {
-    const discoveries = [
+    const discoveries: Partial<Discovery>[] = [
       {
         detections: [
-          { rule_uuid: 'r1', rule_name: 'A' },
-          { rule_uuid: 'r2', rule_name: 'B' },
+          { kind: 'detection', rule_uuid: 'r1', rule_name: 'A' },
+          { kind: 'detection', rule_uuid: 'r2', rule_name: 'B' },
         ],
         evidences: [{ rule_uuid: 'r1' }],
       },
@@ -44,7 +48,9 @@ describe('evidenceCollectionEvaluator', () => {
   });
 
   it('scores 0 when a discovery emits detections but no evidence', async () => {
-    const discoveries = [{ detections: [{ rule_uuid: 'r1' }], evidences: [] }];
+    const discoveries: Partial<Discovery>[] = [
+      { detections: [{ kind: 'detection', rule_uuid: 'r1' }], evidences: [] },
+    ];
     expect((await evaluate(discoveries)).score).toBe(0);
   });
 });

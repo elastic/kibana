@@ -8,7 +8,8 @@
 import { SIGEVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Detection } from '@kbn/streams-schema';
+import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
+import type { Detection, Discovery } from '@kbn/streams-schema';
 
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -32,11 +33,28 @@ import {
   snapshotSourceKey,
 } from '../../src/datasets';
 import type { DiscoveryInvestigatorScenario } from '../../src/datasets';
-import { createInvestigatorEvaluators } from '../../src/evaluators/discovery';
+import {
+  createInvestigatorEvaluators,
+  createContinuationEvaluators,
+} from '../../src/evaluators/discovery';
 import { parseDiscoveries } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildInvestigatorInput } from '../../src/evaluators/discovery/investigator/build_agent_input';
+import {
+  toContinuationCandidate,
+  mergeContinuationCandidates,
+} from '../../src/evaluators/discovery/investigator/continuation/continuation_candidate';
+import type { ContinuationCycle } from '../../src/evaluators/discovery/investigator/continuation/continuation_stability';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
+
+/** Standard trace-based cost/latency evaluators (tokens, tool calls, latency). */
+const traceCostEvaluators = (t: DefaultEvaluators['traceBasedEvaluators']): Evaluator[] => [
+  t.inputTokens,
+  t.outputTokens,
+  t.cachedTokens,
+  t.toolCalls,
+  t.latency,
+];
 
 evaluate.describe(
   'Significant Events Discovery',
@@ -46,8 +64,7 @@ evaluate.describe(
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
-      // The discovery agents gate availability on the significant-events UI setting; enable it
-      // before any converse call (agent availability is cached per space).
+      // Agent availability is gated on this UI setting (cached per space); enable before any converse.
       await kbnClient.uiSettings.update({ 'observability:streamsEnableSignificantEvents': true });
       log.info('Enabled significant events UI setting');
 
@@ -242,9 +259,8 @@ evaluate.describe(
                       lastReplayedSnapshotKey = snapshotKey;
                     }
 
-                    // Replay the captured knowledge indicators (features + queries) into the LIVE KI
-                    // data stream so the real search_knowledge_indicators tool resolves them when we
-                    // invoke the agent over /converse.
+                    // Replay captured KIs into the live KI stream so search_knowledge_indicators
+                    // resolves them over /converse.
                     await replayKnowledgeIndicatorsSnapshot(
                       esClient,
                       log,
@@ -252,28 +268,24 @@ evaluate.describe(
                       snapshotSource.gcs
                     );
 
-                    // Build the investigator's user message (same shape as the production batch).
+                    // Same message shape as the production batch.
                     const agentInput = buildInvestigatorInput({
                       episodeSuffix: Date.now().toString(36).slice(-8),
                       detections,
                       continuationCandidates: input.continuation_candidates ?? [],
                     });
 
-                    // Invoke the REAL investigator agent (its instructions, tools, runtime).
                     const converseResult = await agentBuilderClient.converse({
                       agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
                       input: agentInput,
                     });
 
                     return {
-                      // The agent returns its result as JSON in the final message (no emit tool /
-                      // structured_output on the public converse API); parse it for the evaluators.
+                      // Agent returns JSON in the final message (no emit tool on converse); parse it.
                       discoveries: parseDiscoveries(converseResult.message),
-                      // Raw converse steps — the trajectory and grounding evaluators read tool calls.
+                      // Raw steps — trajectory/grounding evaluators read tool calls from these.
                       steps: converseResult.steps,
-                      // The agent runs inline (local execution), so its gen_ai spans nest under the
-                      // eval's trace — tag with that id, like the inferenceClient-based evals. This
-                      // keeps trace metrics correlatable against the default cluster (no TRACING_ES_URL).
+                      // Agent runs inline, so its gen_ai spans nest under the eval's trace.
                       traceId: getCurrentTraceId(),
                     };
                   },
@@ -282,11 +294,186 @@ evaluate.describe(
                   ...createInvestigatorEvaluators(esClient, {
                     criteriaFn: evaluators.criteria.bind(evaluators),
                   }),
-                  evaluators.traceBasedEvaluators.inputTokens,
-                  evaluators.traceBasedEvaluators.outputTokens,
-                  evaluators.traceBasedEvaluators.cachedTokens,
-                  evaluators.traceBasedEvaluators.toolCalls,
-                  evaluators.traceBasedEvaluators.latency,
+                  ...traceCostEvaluators(evaluators.traceBasedEvaluators),
+                ]
+              );
+            }
+          );
+
+          // Continuation over time — does a re-arriving incident fold into ONE slug? We grade three
+          // matchers per scenario: rule-UUID re-detection (same rule re-fires) plus the declared
+          // `semantic` and `cascade` chains (different rules, same episode). One experiment example
+          // per (scenario × path); each chain is ground truth, so slug reuse is the correct answer
+          // and minting a new slug is the defect ("slug proliferation is a defect").
+          evaluate(
+            'Discovery investigator — continuation over time',
+            async ({
+              executorClient,
+              evaluators,
+              esClient,
+              agentBuilderClient,
+              apiServices,
+              log,
+            }) => {
+              // One run per (scenario × path): rule-uuid re-fires the anchor; semantic/cascade resolve
+              // the declared ordered rule_name chain to detections. Keep runs with ≥2 cycles (one
+              // establishing + one gradable follow-up).
+              const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
+                if (detections.length === 0) return [];
+                const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
+
+                const plans: Array<{ path: string; sequence: Detection[] }> = [
+                  { path: 'rule-uuid', sequence: [detections[0], detections[0]] },
+                  ...Object.entries(scenario.continuationChains ?? {}).map(([path, ruleNames]) => ({
+                    path,
+                    sequence: ruleNames
+                      .map((name) => byRuleName.get(name))
+                      .filter((d): d is Detection => Boolean(d)),
+                  })),
+                ].filter((plan) => plan.sequence.length >= 2);
+
+                return plans.map((plan) => ({
+                  id: `${scenario.input.scenario_id}__${plan.path}`,
+                  scenario,
+                  sequence: plan.sequence,
+                  snapshotKey,
+                }));
+              });
+
+              if (runs.length === 0) {
+                log.info(`No gradable continuation runs for dataset "${dataset.id}" — skipping`);
+                evaluate.skip();
+                return;
+              }
+
+              const runById = new Map(runs.map((run) => [run.id, run]));
+              let lastReplayedSnapshotKey: string | undefined;
+
+              await executorClient.runExperiment(
+                {
+                  datasets: [
+                    {
+                      name: `sigevents: Discovery investigator continuation (${dataset.id})`,
+                      description: `[${dataset.id}] investigator folds a re-arriving incident into one slug across rule-UUID re-detection and the declared semantic/cascade chains`,
+                      examples: runs.map((run) => ({
+                        id: run.id,
+                        input: {
+                          ...run.scenario.input,
+                          snapshot_source: run.scenario.snapshot_source,
+                          continuation_run: run.id,
+                        },
+                        output: {},
+                        metadata: {
+                          ...run.scenario.metadata,
+                          test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                        },
+                      })),
+                    },
+                  ],
+                  concurrency: 1,
+                  trustUpstreamDataset: TRUST_UPSTREAM,
+                  task: async ({
+                    input,
+                  }: {
+                    input: DiscoveryInvestigatorScenario['input'] & { continuation_run: string };
+                  }) => {
+                    const run = runById.get(input.continuation_run);
+                    if (!run) {
+                      throw new Error(`No continuation run "${input.continuation_run}"`);
+                    }
+
+                    const snapshotSource = snapshotSources.get(input.scenario_id);
+                    if (!snapshotSource) {
+                      throw new Error(
+                        `No snapshot source found for scenario "${input.scenario_id}"`
+                      );
+                    }
+
+                    if (run.snapshotKey !== lastReplayedSnapshotKey) {
+                      await cleanSignificantEventsDataStreams(esClient, log);
+                      for (const name of SIGEVENTS_WIRED_ROOTS) {
+                        await esClient.indices.deleteDataStream({ name }).catch(() => {});
+                        await esClient.indices
+                          .delete({ index: name, ignore_unavailable: true })
+                          .catch(() => {});
+                      }
+
+                      await ensureStreamsEnabled({ esClient, apiServices, log });
+                      const stats = await replayIntoManagedStream(
+                        esClient,
+                        log,
+                        snapshotSource.snapshotName,
+                        snapshotSource.gcs
+                      );
+                      if (stats.created === 0) {
+                        throw new Error(
+                          `No documents indexed after replaying snapshot "${snapshotSource.snapshotName}"`
+                        );
+                      }
+
+                      await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+                      lastReplayedSnapshotKey = run.snapshotKey;
+                    }
+
+                    await replayKnowledgeIndicatorsSnapshot(
+                      esClient,
+                      log,
+                      snapshotSource.snapshotName,
+                      snapshotSource.gcs
+                    );
+
+                    const cycles: ContinuationCycle[] = [];
+                    let continuationCandidates: Array<Partial<Discovery>> = [];
+
+                    // Feed one detection per cycle, oldest first, threading prior discoveries back as
+                    // candidates. A fresh detection_id per firing simulates re-arrival (and lets the
+                    // rule-uuid path re-fire the same rule); a unique episode suffix per cycle makes any
+                    // wrongly-minted slug observable.
+                    for (let i = 0; i < run.sequence.length; i++) {
+                      const base = run.sequence[i];
+                      const detection: Detection = {
+                        ...base,
+                        detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
+                      };
+                      const agentInput = buildInvestigatorInput({
+                        episodeSuffix: `${Date.now().toString(36).slice(-6)}${i}`,
+                        detections: [detection],
+                        continuationCandidates,
+                      });
+
+                      const converseResult = await agentBuilderClient.converse({
+                        agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
+                        input: agentInput,
+                      });
+
+                      const discoveries = parseDiscoveries(converseResult.message);
+                      const producedSlugs = discoveries
+                        .map((discovery) => discovery.discovery_slug)
+                        .filter((slug): slug is string => Boolean(slug));
+
+                      cycles.push({ ruleName: detection.rule_name, producedSlugs });
+
+                      // Thread produced discoveries into the next cycle's candidates, latest per slug.
+                      const produced = discoveries.map((discovery, idx) =>
+                        toContinuationCandidate({
+                          discovery,
+                          discoveryId: `${discovery.discovery_slug ?? 'unknown'}-cycle-${i}-${idx}`,
+                        })
+                      );
+                      continuationCandidates = mergeContinuationCandidates([
+                        ...continuationCandidates,
+                        ...produced,
+                      ]);
+                    }
+
+                    return { cycles, traceId: getCurrentTraceId() };
+                  },
+                },
+                [
+                  // Task returns a slug trajectory (not discoveries/steps), so only the continuation
+                  // check applies; trace-based evaluators aggregate cost across all cycles.
+                  ...createContinuationEvaluators(),
+                  ...traceCostEvaluators(evaluators.traceBasedEvaluators),
                 ]
               );
             }

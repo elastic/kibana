@@ -7,12 +7,7 @@
 
 import type { ConverseStep } from '@kbn/evals';
 
-/**
- * Fully-qualified Agent Builder tool ids the discovery agents call. Canonical source:
- * `@kbn/agent-builder-common` (`platformCoreTools.executeEsql`,
- * `platformStreamsSigEventsTools.searchKnowledgeIndicators`). Duplicated here as plain
- * strings so this eval suite doesn't take a dependency on the agent-builder package.
- */
+/** Discovery agent tool ids, duplicated as strings to avoid a dependency on @kbn/agent-builder-common. */
 export const TOOL_ID_EXECUTE_ESQL = 'platform.core.execute_esql';
 export const TOOL_ID_KI_SEARCH = 'platform.streams.sig_events.ki_search';
 
@@ -50,11 +45,7 @@ export interface EsqlGroundingSummary {
   callsWithRows: number;
 }
 
-/**
- * Coarse grounding signal: how many `execute_esql` calls the agent ran and how many returned rows.
- * Used as a floor check ("did the agent ground its analysis in real data") — tool presence/coverage
- * is handled separately by the trajectory evaluator.
- */
+/** `execute_esql` call count and how many returned rows. */
 export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSummary {
   let calls = 0;
   let callsWithRows = 0;

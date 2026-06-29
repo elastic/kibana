@@ -6,15 +6,12 @@
  */
 
 import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
-import { createScenarioCriteriaLlmEvaluator } from '../scenario_criteria/evaluators';
+import {
+  createScenarioCriteriaLlmEvaluator,
+  type CreateScenarioCriteriaLlmEvaluatorOptions,
+} from '../../scenario_criteria/evaluators';
 
-/**
- * Calibration rubrics shared by the investigator and judge (both emit `criticality` + `confidence`).
- * Static, qualitative criteria — same pattern as the ki_feature_extraction `confidence_calibration`
- * evaluator — so each runs as its own tracked signal rather than being folded into scenario_criteria.
- * Grounded in the agents' `criticality`/`confidence` instructions.
- */
-
+/** Static calibration criteria, shared by the investigator and judge, run as their own tracked signals. */
 const CRITICALITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'criticality_reflects_user_impact',
@@ -41,7 +38,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'no_ki_caps_confidence',
-    text: 'Findings with no KI match or no confirmed evidence should not claim high confidence (kept at or below ~65 without KI backing).',
+    text: 'Failure findings with no KI match and no confirmed failure evidence should not claim high confidence (kept at or below ~65 without KI backing). Exception: refuted discoveries — where queries returned healthy rows (`row_count > 0`, no error signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 65–75 range without KI backing and are exempt from this cap.',
     score: 1,
   },
   {
@@ -51,36 +48,32 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
 ];
 
-interface CalibrationEvaluatorOptions<TExample extends Example, TOutput extends TaskOutput> {
-  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
-  /** Strip bulky fields (e.g. `steps`) before sending the output to the LLM judge. */
-  transformOutput?: (output: TOutput) => TOutput;
-}
-
+/** LLM evaluator: scores whether `criticality` is justified by signal strength and confirmed impact. */
 export const createCriticalityCalibrationEvaluator = <
   TExample extends Example,
   TOutput extends TaskOutput
 >({
   criteriaFn,
   transformOutput,
-}: CalibrationEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
+}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
   createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
     name: 'criticality_calibration',
-    criteriaFn: (c) => criteriaFn(c) as Evaluator<TExample, TOutput>,
+    criteriaFn,
     criteria: CRITICALITY_CALIBRATION_CRITERIA,
     transformOutput,
   });
 
+/** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
 export const createConfidenceCalibrationEvaluator = <
   TExample extends Example,
   TOutput extends TaskOutput
 >({
   criteriaFn,
   transformOutput,
-}: CalibrationEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
+}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
   createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
     name: 'confidence_calibration',
-    criteriaFn: (c) => criteriaFn(c) as Evaluator<TExample, TOutput>,
+    criteriaFn,
     criteria: CONFIDENCE_CALIBRATION_CRITERIA,
     transformOutput,
   });

@@ -8,16 +8,26 @@
 import type { ConverseStep, EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { Discovery, SigEvent } from '@kbn/streams-schema';
 
-export interface InvestigatorOutput {
-  discoveries: Discovery[];
-  /** Raw converse steps — the trajectory and grounding evaluators read tool calls from these. */
-  steps: ConverseStep[];
+/** Fields every discovery agent output carries: the converse trail and trace id. */
+export interface AgentOutputBase {
+  steps?: ConverseStep[];
   traceId?: string | null;
+}
+
+/** Common per-scenario expectations shared by every discovery example's `output`. */
+export interface ExpectedBase {
+  /** Tool ids the agent is expected to call; defaults to the discovery tool set when omitted. */
+  expectedTools?: string[];
+  criteria?: EvaluationCriterion[];
+}
+
+export interface InvestigatorAgentOutput extends AgentOutputBase {
+  discoveries: Discovery[];
 }
 
 export interface InvestigatorEvaluationExample {
   input: Record<string, unknown>;
-  output: {
+  output: ExpectedBase & {
     expected_kind?: string;
     expected_min_evidence_count?: number;
     /**
@@ -25,42 +35,27 @@ export interface InvestigatorEvaluationExample {
      * derives its expected groups from these discoveries' `detections[].rule_name`s.
      */
     expected_discoveries?: Array<Partial<Discovery>>;
-    /** Tool ids the agent is expected to call; defaults to the discovery tool set when omitted. */
-    expectedTools?: string[];
-    criteria?: EvaluationCriterion[];
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
 
-export type InvestigatorEvaluator = Evaluator<InvestigatorEvaluationExample, InvestigatorOutput>;
+export type InvestigatorEvaluator = Evaluator<
+  InvestigatorEvaluationExample,
+  InvestigatorAgentOutput
+>;
 
-// ---------------------------------------------------------------------------
-// Judge evaluator types
-// ---------------------------------------------------------------------------
-
-export interface JudgeOutput {
+export interface JudgeAgentOutput extends AgentOutputBase {
   significantEvents: SigEvent[];
-  /** Raw converse steps — the trajectory and grounding evaluators read tool calls from these. */
-  steps: ConverseStep[];
   inputDiscoveries: Discovery[];
-  traceId?: string | null;
 }
 
 export interface JudgeEvaluationExample {
   input: Record<string, unknown>;
-  output: {
+  output: ExpectedBase & {
     expected_status?: string;
     expect_assessment_note?: boolean;
-    /** Tool ids the agent is expected to call; defaults to the discovery tool set when omitted. */
-    expectedTools?: string[];
-    criteria?: EvaluationCriterion[];
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
 
-export type JudgeEvaluator = Evaluator<JudgeEvaluationExample, JudgeOutput>;
-
-export interface ScenarioCriteriaConfig {
-  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
-  criteria?: EvaluationCriterion[];
-}
+export type JudgeEvaluator = Evaluator<JudgeEvaluationExample, JudgeAgentOutput>;
