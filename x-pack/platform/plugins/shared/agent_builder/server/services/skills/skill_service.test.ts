@@ -7,8 +7,12 @@
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import { createSkillNotFoundError } from '@kbn/agent-builder-common';
 import { createSkillService } from './skill_service';
+
+const mockPersistedSkillNotFoundError = () =>
+  jest
+    .requireActual<typeof import('@kbn/agent-builder-common')>('@kbn/agent-builder-common')
+    .createSkillNotFoundError({ skillId: 'missing' });
 
 jest.mock('@kbn/agent-builder-server/skills', () => {
   const actual = jest.requireActual('@kbn/agent-builder-server/skills');
@@ -26,21 +30,18 @@ jest.mock('../execution/runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
 
-jest.mock('./persisted/client', () => {
-  const { createSkillNotFoundError } = jest.requireActual('@kbn/agent-builder-common');
-  return {
-    createClient: jest.fn(() => ({
-      has: jest.fn().mockResolvedValue(false),
-      get: jest.fn().mockRejectedValue(createSkillNotFoundError({ skillId: 'missing' })),
-      list: jest.fn().mockResolvedValue([]),
-      create: jest.fn(),
-      bulkCreate: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      deleteByPluginId: jest.fn(),
-    })),
-  };
-});
+jest.mock('./persisted/client', () => ({
+  createClient: jest.fn(() => ({
+    has: jest.fn().mockResolvedValue(false),
+    get: jest.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
+    list: jest.fn().mockResolvedValue([]),
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteByPluginId: jest.fn(),
+  })),
+}));
 
 jest.mock('../../utils/spaces', () => ({
   getCurrentSpaceId: jest.fn().mockReturnValue('default'),
@@ -141,7 +142,7 @@ describe('createSkillService', () => {
       const { createClient: mockCreateClient } = jest.requireMock('./persisted/client/client');
       mockCreateClient.mockReturnValue({
         has: jest.fn().mockResolvedValue(false),
-        get: jest.fn().mockRejectedValue(createSkillNotFoundError({ skillId: 'missing' })),
+        get: jest.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
         list: jest.fn().mockResolvedValue([]),
         create: jest.fn(),
         update: jest.fn(),
@@ -171,43 +172,6 @@ describe('createSkillService', () => {
 
       const registry = await getRegistry({ request: {} as any });
       expect(await registry.has('builtin-1')).toBe(true);
-    });
-  });
-
-  describe('start().unregisterSkill', () => {
-    const createStartedService = () => {
-      const mockToolRegistry = createMockToolRegistry();
-      const service = createSkillService();
-      const { registerSkill } = service.setup();
-      const skill = createMockSkillDefinition({ id: 'builtin-1' });
-      registerSkill(skill);
-
-      const { unregisterSkill, getRegistry } = service.start({
-        elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-        uiSettings: {
-          asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
-        } as any,
-        savedObjects: { getScopedClient: jest.fn().mockReturnValue({ get: jest.fn() }) } as any,
-      });
-
-      return { unregisterSkill, getRegistry };
-    };
-
-    it('removes a registered skill and returns true', async () => {
-      const { unregisterSkill, getRegistry } = createStartedService();
-
-      expect(await unregisterSkill('builtin-1')).toBe(true);
-
-      const registry = await getRegistry({ request: {} as any });
-      expect(await registry.has('builtin-1')).toBe(false);
-    });
-
-    it('returns false when the skill was not registered', async () => {
-      const { unregisterSkill } = createStartedService();
-
-      expect(await unregisterSkill('missing-skill')).toBe(false);
     });
   });
 });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_traces_skill';
 export { graphCreationSkill } from './graph_creation_skill';
 export { visualizationCreationSkill } from './visualization_creation_skill';
 export { skillAuthoringSkill } from './skill_authoring';
-export { registerSkills, registerTracingSkill, unregisterTracingSkill } from './register_skills';
+export { registerSkills } from './register_skills';

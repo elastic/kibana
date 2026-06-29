@@ -13,6 +13,7 @@ export const agentBuilderTracesSkill = defineSkillType({
   id: 'agent-builder-traces',
   name: 'agent-builder-traces',
   basePath: 'skills/platform/agent-builder',
+  experimental: true,
   description:
     'Answer questions about Agent Builder OTel (OpenTelemetry) traces and activity: token usage, ' +
     'model and provider breakdowns, conversation and agent latency, tool-call volume, and error ' +

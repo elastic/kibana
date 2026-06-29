@@ -17,7 +17,10 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
@@ -48,14 +51,6 @@ export interface SkillServiceStart {
    * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
-
-  /**
-   * Unregister a dynamically registered built-in skill after plugin start.
-   *
-   * Returns false when the skill was not registered. Only affects future
-   * `getRegistry()` calls.
-   */
-  unregisterSkill(skillId: string): Promise<boolean>;
 }
 
 export interface SkillService {
@@ -81,8 +76,8 @@ class SkillServiceImpl implements SkillService {
   private readonly skillFullPaths: Set<string> = new Set();
 
   /**
-   * Promise chain used to serialize dynamic registration / unregistration
-   * so that the async validate-then-mutate sequence is atomic.
+   * Promise chain used to serialize dynamic registration so that the async
+   * validate-then-mutate sequence is atomic.
    */
   private mutationQueue: Promise<unknown> = Promise.resolve();
 
@@ -136,15 +131,19 @@ class SkillServiceImpl implements SkillService {
         });
         const toolRegistry = await getToolRegistry({ request });
         const soClient = savedObjects.getScopedClient(request);
-        const experimentalFeaturesEnabled = await uiSettings
-          .asScopedToClient(soClient)
-          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+        const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+        const [experimentalFeaturesEnabled, tracingEnabled] = await Promise.all([
+          uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
+          uiSettingsClient.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
+        ]);
+        const tracingFeaturesEnabled = tracingEnabled && experimentalFeaturesEnabled;
 
         return createSkillRegistry({
           builtinProvider,
           persistedProvider,
           toolRegistry,
           experimentalFeaturesEnabled,
+          tracingFeaturesEnabled,
         });
       },
       registerSkill: (skill) => {
@@ -163,20 +162,6 @@ class SkillServiceImpl implements SkillService {
           }
           this.skillFullPaths.add(fullPath);
           this.skills.set(skill.id, skill);
-        });
-        this.mutationQueue = op.catch(() => {});
-        return op;
-      },
-      unregisterSkill: (skillId) => {
-        const op = this.mutationQueue.then(async () => {
-          const skill = this.skills.get(skillId);
-          if (!skill) {
-            return false;
-          }
-
-          this.skills.delete(skillId);
-          this.skillFullPaths.delete(getSkillEntryPath({ skill }));
-          return true;
         });
         this.mutationQueue = op.catch(() => {});
         return op;

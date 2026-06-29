@@ -797,4 +797,40 @@ describe('createSkillRegistry', () => {
       expect(await registryOn.get('normal-skill')).toEqual(normalSkill);
     });
   });
+
+  describe('tracing features filtering', () => {
+    const tracesSkill = createMockInternalSkillDefinition({
+      id: 'agent-builder-traces',
+      name: 'agent-builder-traces',
+      experimental: true,
+      readonly: true,
+    });
+
+    it('hides the traces skill when tracing features are disabled', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([tracesSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: true,
+        tracingFeaturesEnabled: false,
+      });
+
+      expect(await registry.has('agent-builder-traces')).toBe(false);
+      expect(await registry.get('agent-builder-traces')).toBeUndefined();
+      expect(await registry.list()).toEqual([]);
+    });
+
+    it('shows the traces skill when tracing and experimental features are enabled', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([tracesSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: true,
+        tracingFeaturesEnabled: true,
+      });
+
+      expect(await registry.has('agent-builder-traces')).toBe(true);
+      expect(await registry.get('agent-builder-traces')).toEqual(tracesSkill);
+    });
+  });
 });

@@ -31,9 +31,7 @@ export interface PluginStartDependencies {
 
 export interface AgentBuilderPlatformTracingFeaturesStart {
   /**
-   * Syncs tracing platform features (overview dashboard and traces skill).
-   * When `spaceId` is provided, only the dashboard for that space is synced.
-   * The traces skill is registered globally when `enabled` is true.
+   * Syncs the tracing features for a space.
    */
   sync: (options: { enabled: boolean; spaceId?: string }) => Promise<void>;
 }

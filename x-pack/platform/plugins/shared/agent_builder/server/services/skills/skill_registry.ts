@@ -61,14 +61,23 @@ export const createSkillRegistry = ({
   persistedProvider,
   toolRegistry,
   experimentalFeaturesEnabled,
+  tracingFeaturesEnabled = true,
 }: {
   builtinProvider: ReadonlySkillProvider;
   persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
   experimentalFeaturesEnabled: boolean;
+  tracingFeaturesEnabled?: boolean;
 }): SkillRegistry => {
-  const isVisible = (skill: InternalSkillDefinition): boolean =>
-    !skill.experimental || experimentalFeaturesEnabled;
+  const isVisible = (skill: InternalSkillDefinition): boolean => {
+    if (skill.experimental && !experimentalFeaturesEnabled) {
+      return false;
+    }
+    if (skill.id === 'agent-builder-traces' && !tracingFeaturesEnabled) {
+      return false;
+    }
+    return true;
+  };
 
   return {
     async has(skillId) {

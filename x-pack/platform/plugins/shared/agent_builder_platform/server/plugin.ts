@@ -76,14 +76,13 @@ export class AgentBuilderPlatformPlugin
     return {};
   }
 
-  start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
+  start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
     void (async () => {
       try {
         const tracingFeaturesEnabled = await getTracingFeaturesEnabled(coreStart);
 
         await syncTracingPlatformFeatures({
           coreStart,
-          agentBuilder: startDeps.agentBuilder,
           logger: this.logger,
           enabled: tracingFeaturesEnabled,
         });
@@ -99,7 +98,6 @@ export class AgentBuilderPlatformPlugin
         sync: ({ enabled, spaceId }) =>
           syncTracingPlatformFeatures({
             coreStart,
-            agentBuilder: startDeps.agentBuilder,
             logger: this.logger,
             enabled,
             spaceId,

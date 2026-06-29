@@ -81,11 +81,6 @@ export interface SkillsStart {
    * Only affects future conversations (existing ones snapshot skills at creation time).
    */
   register: (skill: SkillDefinition) => Promise<void>;
-  /**
-   * Unregister a dynamically registered built-in skill after plugin start.
-   * Returns false when the skill was not registered.
-   */
-  unregister: (skillId: string) => Promise<boolean>;
 }
 
 export interface AgentsSetup {
