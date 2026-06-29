@@ -151,7 +151,7 @@ async function restoreRuleState({
     data: newAlertingRule,
     changeTracking: {
       action: SecurityRuleChangeTrackingAction.ruleRestore,
-      metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
+      metadata: { restoredFromChangeId: changeId, restoredFromRevision: snapshotRule.revision },
       refresh: 'wait_for',
     },
   });
@@ -203,7 +203,7 @@ async function restoreDeletedRule({
     options: { id: ruleId, initialRevision: snapshotRule.revision + 1 },
     changeTracking: {
       action: SecurityRuleChangeTrackingAction.ruleRestore,
-      metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
+      metadata: { restoredFromChangeId: changeId, restoredFromRevision: snapshotRule.revision },
       refresh: 'wait_for',
     },
   });

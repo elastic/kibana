@@ -39,7 +39,7 @@ export const CUSTOM_RULE_RESTORE_SUCCESS_TOAST = (revision: number): string =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleChangesHistory.customRuleRestoreSuccessToast',
     {
-      defaultMessage: 'Rule restored to revision {revision}',
+      defaultMessage: 'Rule restored from revision {revision}',
       values: { revision },
     }
   );
@@ -48,7 +48,7 @@ export const PREBUILT_RULE_RESTORE_SUCCESS_TOAST = (version: number, revision: n
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleChangesHistory.prebuiltRuleRestoreSuccessToast',
     {
-      defaultMessage: 'Rule restored to version {version} and revision {revision}',
+      defaultMessage: 'Rule restored from revision {revision} with version {version}',
       values: { version, revision },
     }
   );

@@ -121,7 +121,7 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
             <>
               {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
               {i18n.ACTION_LABEL_RESTORED_FROM_HISTORY(
-                item.metadata?.restored_to_revision as number | undefined
+                item.metadata?.restored_from_revision as number | undefined
               )}
             </>
           }
