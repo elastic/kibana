@@ -156,6 +156,23 @@ describe('MicrosoftTeams', () => {
       expect(scope).toContain('ChannelMessage.Read.All');
       expect(scope).toContain('offline_access');
     });
+
+    it('app-only (client credentials) auth types default the Graph .default scope', () => {
+      // The scope field is hidden for these app-only types, so it must be defaulted —
+      // Microsoft's client-credentials grant rejects an empty scope (AADSTS900144).
+      const appOnlyTypes = (MicrosoftTeams.auth?.types as Array<string | AuthTypeDef>).filter(
+        (t): t is AuthTypeDef =>
+          typeof t === 'object' &&
+          (t.type === 'oauth_client_credentials' ||
+            t.type === 'oauth_client_credentials_private_key_jwt')
+      );
+      expect(appOnlyTypes).toHaveLength(2);
+      appOnlyTypes.forEach((t) => {
+        expect((t.defaults as { scope?: string }).scope).toBe(
+          'https://graph.microsoft.com/.default'
+        );
+      });
+    });
   });
 
   describe('listJoinedTeams action', () => {

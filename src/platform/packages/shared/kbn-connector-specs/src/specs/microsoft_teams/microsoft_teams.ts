@@ -137,6 +137,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       {
         type: 'oauth_client_credentials_private_key_jwt',
         defaults: {
+          scope: 'https://graph.microsoft.com/.default',
           algorithm: 'PS256',
           certificateBinding: 'x5t#S256',
         },
