@@ -20,3 +20,10 @@ export {
 } from './constants';
 
 export type { ConnectorInfo } from './types';
+
+export { buildDeterministicChartSummary } from './chart_description/build_deterministic_chart_summary';
+export type {
+  BuildDeterministicChartSummaryParams,
+  ChartDescriptionPoint,
+  ChartDescriptionSeries,
+} from './chart_description/types';

@@ -10,7 +10,7 @@ import type { ConnectorInfo } from '../../../common';
 import type { Feedback } from '../../components/ai_insight/feedback_buttons';
 import { ObservabilityAgentBuilderTelemetryEventType } from '../telemetry_event_type';
 
-export type InsightType = 'log' | 'alert' | 'error';
+export type InsightType = 'log' | 'alert' | 'error' | 'chart';
 
 export type { ConnectorInfo };
 
@@ -34,7 +34,7 @@ export interface InsightFailedEvent {
 const insightTypeSchema = {
   type: 'keyword' as const,
   _meta: {
-    description: 'Type of AI insight: log, alert, or error',
+    description: 'Type of AI insight: log, alert, error, or chart',
   },
 };
 

@@ -7,12 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import { ChartDescriptionButton } from '@kbn/observability-agent-builder-plugin/public';
+import React, { useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { asAbsoluteDateTime, getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
@@ -30,6 +31,14 @@ import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select'
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { toChartDescriptionSeries } from '../helper/to_chart_description_series';
+
+const latencyChartTitle = i18n.translate('xpack.apm.serviceOverview.latencyChartTitle', {
+  defaultMessage: 'Latency',
+});
+
+const formatLatencyChartTimestamp = (timestamp: number) => asAbsoluteDateTime(timestamp, 'minutes');
 
 interface Props {
   height?: number;
@@ -86,6 +95,8 @@ export function LatencyChart({ height, kuery }: Props) {
     comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
 
+  const chartDescriptionSeries = useMemo(() => toChartDescriptionSeries(timeseries), [timeseries]);
+
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
@@ -120,11 +131,7 @@ export function LatencyChart({ height, kuery }: Props) {
             <EuiFlexGroup alignItems="center" wrap>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
-                  <h2>
-                    {i18n.translate('xpack.apm.serviceOverview.latencyChartTitle', {
-                      defaultMessage: 'Latency',
-                    })}
-                  </h2>
+                  <h2>{latencyChartTitle}</h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -143,6 +150,19 @@ export function LatencyChart({ height, kuery }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <ChartDescriptionButton
+                  chartTitle={latencyChartTitle}
+                  series={chartDescriptionSeries}
+                  start={start}
+                  end={end}
+                  timestampFormatter={formatLatencyChartTimestamp}
+                  valueFormatter={getResponseTimeTickFormatter(latencyFormatter)}
+                  isLoading={isPending(latencyChartsStatus)}
+                  hasError={latencyChartsStatus === FETCH_STATUS.FAILURE}
+                  dataTestSubj="apmLatencyChartDescriptionButton"
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <OpenAnomalies
                   dataTestSubj="apmLatencyChartOpenAnomalies"
