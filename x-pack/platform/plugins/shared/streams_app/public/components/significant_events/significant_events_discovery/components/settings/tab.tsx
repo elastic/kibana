@@ -91,7 +91,8 @@ export function SettingsTab() {
   }, []);
 
   const [draftConfigYaml, setDraftConfigYaml] = useState<string>(savedConfigYaml);
-  const [parsedTuningConfig, setParsedTuningConfig] = useState<SignificantEventsTuningConfig | null>(null);
+  const [parsedTuningConfig, setParsedTuningConfig] =
+    useState<SignificantEventsTuningConfig | null>(null);
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
   const [isSaving, setIsSaving] = useState(false);
