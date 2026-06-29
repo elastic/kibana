@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   DatasourceMap,
   DatasourcePublicAPI,
+  FormBasedPrivateState,
   FramePublicAPI,
   LensDocument,
   Visualization,
@@ -113,6 +114,11 @@ export const ChartSwitch = memo(function ChartSwitch({
     const getPersistedVisualizationTypeId = (lId: string) =>
       getPersistedLayerVisualizationTypeId(persistedDoc, visualizationMap, lId);
 
+    // SAFE_TYPE_BOUNDARY: the editor frame stores datasource state opaquely
+    // (`DatasourceState['state']` is `unknown`); `applyVizTypeDatasourceDefaults`
+    // re-checks `datasourceId === formBased` before touching it.
+    const selectionDatasourceState = selection.datasourceState as FormBasedPrivateState | undefined;
+
     switchToSuggestion(
       dispatchLens,
       {
@@ -120,14 +126,16 @@ export const ChartSwitch = memo(function ChartSwitch({
         visualizationState: newVisualizationState,
         // A cross-visualization switch carries new datasource state; reconcile
         // it with the target visualization type's defaults.
-        datasourceState: applyVizTypeDatasourceDefaults({
-          kind: 'typeSwitch',
-          datasourceId: selection.datasourceId,
-          datasourceState: selection.datasourceState,
-          persistedDoc,
-          targetVisualizationTypeId,
-          getPersistedVisualizationTypeId,
-        }),
+        datasourceState: selectionDatasourceState
+          ? applyVizTypeDatasourceDefaults({
+              kind: 'typeSwitch',
+              datasourceId: selection.datasourceId,
+              datasourceState: selectionDatasourceState,
+              persistedDoc,
+              targetVisualizationTypeId,
+              getPersistedVisualizationTypeId,
+            })
+          : selection.datasourceState,
       },
       { clearStagedPreview: true }
     );
@@ -135,26 +143,30 @@ export const ChartSwitch = memo(function ChartSwitch({
     // A same-visualization subtype switch (e.g. XY bar -> line) reuses the
     // existing datasource state, so the defaults are reconciled through a
     // follow-up datasource update.
-    if (selection.sameDatasources && !selection.datasourceState) {
-      const currentState = activeDatasourceId
-        ? datasourceStates[activeDatasourceId]?.state
-        : undefined;
-      const nextState = applyVizTypeDatasourceDefaults({
-        kind: 'typeSwitch',
-        datasourceId: activeDatasourceId ?? undefined,
-        datasourceState: currentState,
-        persistedDoc,
-        targetVisualizationTypeId,
-        getPersistedVisualizationTypeId,
-      });
-      if (currentState && nextState !== currentState) {
-        dispatchLens(
-          updateDatasourceState({
-            datasourceId: activeDatasourceId!,
-            newDatasourceState: nextState,
-            clearStagedPreview: true,
-          })
-        );
+    if (selection.sameDatasources && !selection.datasourceState && activeDatasourceId) {
+      // SAFE_TYPE_BOUNDARY: see above; the redux datasource state is opaque and
+      // re-validated inside `applyVizTypeDatasourceDefaults`.
+      const currentState = datasourceStates[activeDatasourceId]?.state as
+        | FormBasedPrivateState
+        | undefined;
+      if (currentState) {
+        const nextState = applyVizTypeDatasourceDefaults({
+          kind: 'typeSwitch',
+          datasourceId: activeDatasourceId,
+          datasourceState: currentState,
+          persistedDoc,
+          targetVisualizationTypeId,
+          getPersistedVisualizationTypeId,
+        });
+        if (nextState !== currentState) {
+          dispatchLens(
+            updateDatasourceState({
+              datasourceId: activeDatasourceId,
+              newDatasourceState: nextState,
+              clearStagedPreview: true,
+            })
+          );
+        }
       }
     }
 
@@ -414,10 +426,10 @@ export const getPersistedLayerVisualizationTypeId = (
   const persistedVisualization = persistedVisualizationId
     ? visualizationMap[persistedVisualizationId]
     : undefined;
-  if (!persistedVisualization) {
+  if (!persistedDoc || !persistedVisualization) {
     return undefined;
   }
-  return getVisualizationTypeId(persistedVisualization, persistedDoc!.state.visualization, layerId);
+  return getVisualizationTypeId(persistedVisualization, persistedDoc.state.visualization, layerId);
 };
 
 const findSubtypeId = (visType: VisualizationType, subtypeId?: string) => {

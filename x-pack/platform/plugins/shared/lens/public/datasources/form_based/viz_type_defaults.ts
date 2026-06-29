@@ -18,8 +18,8 @@ import {
 interface BaseContext {
   /** Datasource that owns the state being adjusted. */
   datasourceId?: string;
-  /** Datasource state to adjust. */
-  datasourceState: unknown;
+  /** Form-based datasource state to adjust. */
+  datasourceState: FormBasedPrivateState;
   /** Visualization type id (subtype where applicable) being switched to. */
   targetVisualizationTypeId: string | undefined;
 }
@@ -30,8 +30,8 @@ interface BaseContext {
  */
 export interface SuggestionDropContext extends BaseContext {
   kind: 'suggestion';
-  /** Datasource state before the drop, used to detect newly created columns. */
-  previousDatasourceState: unknown;
+  /** Form-based state before the drop, used to detect newly created columns. */
+  previousDatasourceState: FormBasedPrivateState | undefined;
 }
 
 /**
@@ -57,25 +57,25 @@ export type VizTypeDefaultsContext = SuggestionDropContext | TypeSwitchContext;
  * visualization-type default means extending this function rather than touching
  * each call site. Non form-based datasources are returned untouched.
  */
-export function applyVizTypeDatasourceDefaults(context: VizTypeDefaultsContext): unknown {
+export function applyVizTypeDatasourceDefaults(
+  context: VizTypeDefaultsContext
+): FormBasedPrivateState {
   const { datasourceId, datasourceState, targetVisualizationTypeId } = context;
 
-  if (datasourceId !== LENS_DATASOURCE_ID.FORM_BASED || !datasourceState) {
+  if (datasourceId !== LENS_DATASOURCE_ID.FORM_BASED) {
     return datasourceState;
   }
 
-  const state = datasourceState as FormBasedPrivateState;
-
   if (context.kind === 'suggestion') {
     return applyEmptyRowsDefaultsToSuggestionState(
-      state,
-      context.previousDatasourceState as FormBasedPrivateState | undefined,
+      datasourceState,
+      context.previousDatasourceState,
       targetVisualizationTypeId
     );
   }
 
   return applyEmptyRowsDefaultsOnTypeSwitch(
-    state,
+    datasourceState,
     context.persistedDoc,
     targetVisualizationTypeId,
     context.getPersistedVisualizationTypeId

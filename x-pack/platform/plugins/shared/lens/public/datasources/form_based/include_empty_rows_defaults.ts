@@ -18,12 +18,18 @@ import {
   type FormBasedLayer,
   type GenericIndexPatternColumn,
   type LensDocument,
+  type RangeIndexPatternColumn,
 } from '@kbn/lens-common';
 
-const BUCKET_OPERATIONS_WITH_EMPTY_ROWS: ReadonlySet<string> = new Set<string>([
-  'date_histogram',
-  'range',
-]);
+/** Bucket columns whose `params.includeEmptyRows` this module reconciles. */
+type EmptyRowsBucketColumn = DateHistogramIndexPatternColumn | RangeIndexPatternColumn;
+
+const EMPTY_ROWS_OPERATION_TYPES = ['date_histogram', 'range'] as const;
+const BUCKET_OPERATIONS_WITH_EMPTY_ROWS: ReadonlySet<string> = new Set(EMPTY_ROWS_OPERATION_TYPES);
+
+const isEmptyRowsBucketColumn = (
+  column: GenericIndexPatternColumn
+): column is EmptyRowsBucketColumn => BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(column.operationType);
 
 /** Default `buildColumn` applies when `includeEmptyRows` is omitted. */
 const DEFAULT_INCLUDE_EMPTY_ROWS = true;
@@ -32,8 +38,8 @@ function normalizeIncludeEmptyRows(value: boolean | undefined): boolean {
   return value ?? DEFAULT_INCLUDE_EMPTY_ROWS;
 }
 
-function getIncludeEmptyRows(column: GenericIndexPatternColumn): boolean | undefined {
-  return (column as { params?: { includeEmptyRows?: boolean } }).params?.includeEmptyRows;
+function getIncludeEmptyRows(column: EmptyRowsBucketColumn): boolean | undefined {
+  return column.params?.includeEmptyRows;
 }
 
 /**
@@ -83,15 +89,14 @@ export function getColumnParamsForNewBucket(
   return { includeEmptyRows: getDefaultIncludeEmptyRows(activeVisualizationTypeId) };
 }
 
-function withIncludeEmptyRows(
-  column: GenericIndexPatternColumn,
+function withIncludeEmptyRows<TColumn extends EmptyRowsBucketColumn>(
+  column: TColumn,
   value: boolean
-): GenericIndexPatternColumn {
-  const columnParams = (column as { params?: Record<string, unknown> }).params;
+): TColumn {
   return {
     ...column,
-    params: { ...(columnParams ?? {}), includeEmptyRows: value },
-  } as unknown as GenericIndexPatternColumn;
+    params: { ...column.params, includeEmptyRows: value },
+  };
 }
 
 /**
@@ -120,10 +125,14 @@ function mapBucketColumns(
 
     for (const columnId of Object.keys(layer.columns)) {
       const column = layer.columns[columnId];
-      const nextValue = BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(column.operationType)
+      const nextValue = isEmptyRowsBucketColumn(column)
         ? decide(layerId, columnId, column)
         : undefined;
-      if (nextValue !== undefined && nextValue !== getIncludeEmptyRows(column)) {
+      if (
+        nextValue !== undefined &&
+        isEmptyRowsBucketColumn(column) &&
+        nextValue !== getIncludeEmptyRows(column)
+      ) {
         nextColumns[columnId] = withIncludeEmptyRows(column, nextValue);
         layerChanged = true;
       } else {
@@ -168,6 +177,10 @@ export function applyEmptyRowsDefaultsToSuggestionState(
 function getPersistedFormBasedLayers(
   persistedDoc: LensDocument | undefined
 ): FormBasedPersistedState['layers'] | undefined {
+  // SAFE_TYPE_BOUNDARY: `LensDocument.state.datasourceStates` is the persisted
+  // saved object payload, typed `Record<string, unknown>`. Keyed by the
+  // form-based datasource id it is the form-based persisted state; only its
+  // typed `layers` are read below.
   const formBased = persistedDoc?.state?.datasourceStates?.[LENS_DATASOURCE_ID.FORM_BASED] as
     | FormBasedPersistedState
     | undefined;
@@ -175,8 +188,8 @@ function getPersistedFormBasedLayers(
 }
 
 /**
- * Applies the target visualization type's `includeEmptyRows` default to every
- * bucket column when switching chart type (or XY series type).
+ * Applies the target visualization type's `includeEmptyRows` default to bucket
+ * columns when switching chart type (or XY series type).
  *
  * The opinionated default always wins, overriding any value carried over from
  * the previous type. The single exception is switching a layer back to its
@@ -195,7 +208,7 @@ export function applyEmptyRowsDefaultsOnTypeSwitch(
   const targetDefault = getDefaultIncludeEmptyRows(targetVisualizationTypeId);
   const persistedLayers = getPersistedFormBasedLayers(persistedDoc);
 
-  return mapBucketColumns(suggestionState, (layerId, columnId, column) => {
+  return mapBucketColumns(suggestionState, (layerId, columnId) => {
     const persistedColumn = persistedLayers?.[layerId]?.columns?.[columnId];
     const restoresSavedType =
       persistedColumn !== undefined &&
@@ -203,10 +216,11 @@ export function applyEmptyRowsDefaultsOnTypeSwitch(
       getPersistedVisualizationTypeId?.(layerId) === targetVisualizationTypeId;
 
     if (
+      persistedColumn !== undefined &&
       restoresSavedType &&
-      BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(persistedColumn!.operationType)
+      isEmptyRowsBucketColumn(persistedColumn)
     ) {
-      return normalizeIncludeEmptyRows(getIncludeEmptyRows(persistedColumn!));
+      return normalizeIncludeEmptyRows(getIncludeEmptyRows(persistedColumn));
     }
     return targetDefault;
   });

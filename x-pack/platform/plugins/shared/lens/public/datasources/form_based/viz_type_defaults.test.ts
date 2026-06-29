@@ -66,16 +66,18 @@ describe('applyVizTypeDatasourceDefaults', () => {
     expect(result).toBe(datasourceState);
   });
 
-  it('returns falsy datasource state untouched', () => {
+  it('returns the datasource state untouched when no datasource id is provided', () => {
+    const datasourceState = makeState({ first: { col1: { operationType: 'date_histogram' } } });
+
     const result = applyVizTypeDatasourceDefaults({
       kind: 'suggestion',
-      datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
-      datasourceState: undefined,
+      datasourceId: undefined,
+      datasourceState,
       previousDatasourceState: undefined,
       targetVisualizationTypeId: SeriesTypes.BAR,
     });
 
-    expect(result).toBeUndefined();
+    expect(result).toBe(datasourceState);
   });
 
   describe("kind: 'suggestion'", () => {
@@ -98,7 +100,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         datasourceState,
         previousDatasourceState,
         targetVisualizationTypeId: SeriesTypes.BAR,
-      }) as FormBasedPrivateState;
+      });
 
       expect(getIncludeEmptyRows(result, 'first', 'existing')).toBe(true);
       expect(getIncludeEmptyRows(result, 'first', 'added')).toBe(false);
@@ -133,7 +135,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         datasourceState,
         targetVisualizationTypeId: SeriesTypes.BAR,
         persistedDoc: undefined,
-      }) as FormBasedPrivateState;
+      });
 
       expect(getIncludeEmptyRows(result, 'first', 'col1')).toBe(false);
     });
@@ -167,7 +169,7 @@ describe('applyVizTypeDatasourceDefaults', () => {
         targetVisualizationTypeId: LENS_DATATABLE_ID,
         persistedDoc,
         getPersistedVisualizationTypeId: () => LENS_DATATABLE_ID,
-      }) as FormBasedPrivateState;
+      });
 
       expect(getIncludeEmptyRows(result, 'first', 'col1')).toBe(true);
     });

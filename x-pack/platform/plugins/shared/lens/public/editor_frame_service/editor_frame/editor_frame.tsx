@@ -14,6 +14,7 @@ import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
+  FormBasedPrivateState,
   FramePublicAPI,
   Suggestion,
   UserMessagesGetter,
@@ -114,23 +115,33 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiCounterEvents('drop_onto_workspace');
-        const targetVisualization = suggestion.datasourceId
+        const { datasourceId: suggestionDatasourceId } = suggestion;
+        const targetVisualization = suggestionDatasourceId
           ? visualizationMap[suggestion.visualizationId]
           : undefined;
-        const adjustedSuggestion = targetVisualization
-          ? {
-              ...suggestion,
-              datasourceState: applyVizTypeDatasourceDefaults({
-                kind: 'suggestion',
-                datasourceId: suggestion.datasourceId,
-                datasourceState: suggestion.datasourceState,
-                previousDatasourceState: datasourceStates[suggestion.datasourceId!]?.state,
-                targetVisualizationTypeId: targetVisualization.getVisualizationTypeId(
-                  suggestion.visualizationState
-                ),
-              }),
-            }
-          : suggestion;
+        // SAFE_TYPE_BOUNDARY: suggestions and the redux store carry datasource
+        // state opaquely (`unknown`); `applyVizTypeDatasourceDefaults` re-checks
+        // `datasourceId === formBased` before touching it.
+        const suggestionDatasourceState = suggestion.datasourceState as
+          | FormBasedPrivateState
+          | undefined;
+        const adjustedSuggestion =
+          targetVisualization && suggestionDatasourceId && suggestionDatasourceState
+            ? {
+                ...suggestion,
+                datasourceState: applyVizTypeDatasourceDefaults({
+                  kind: 'suggestion',
+                  datasourceId: suggestionDatasourceId,
+                  datasourceState: suggestionDatasourceState,
+                  previousDatasourceState: datasourceStates[suggestionDatasourceId]?.state as
+                    | FormBasedPrivateState
+                    | undefined,
+                  targetVisualizationTypeId: targetVisualization.getVisualizationTypeId(
+                    suggestion.visualizationState
+                  ),
+                }),
+              }
+            : suggestion;
         switchToSuggestion(dispatchLens, adjustedSuggestion, { clearStagedPreview: true });
       }
     },
