@@ -22,6 +22,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
+  ExperimentalFeatures,
   HooksServiceStart,
   ModelProvider,
   RunAgentReturn,
@@ -33,6 +34,10 @@ import type {
   SubAgentExecutor,
   WritableToolResultStore,
 } from '@kbn/agent-builder-server';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type {
   ConversationStateManager,
   PromptManager,
@@ -41,7 +46,6 @@ import type {
   ToolManager,
   WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
@@ -61,7 +65,8 @@ import {
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runInternalTool, runTool } from './run_tool';
 import { runAgent } from './run_agent';
-import { createStore } from './store';
+import { createResultStore } from './store/volumes/tool_results/tool_result_store';
+import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 
@@ -101,11 +106,12 @@ export interface CreateScopedRunnerDeps {
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
-  filestore: IFileStore;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
+  /** Experimental features enabled for this runner context. */
+  experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
   agentConfiguration?: AgentConfiguration;
 }
@@ -121,10 +127,10 @@ export type CreateRunnerDeps = Omit<
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
-  | 'filestore'
   | 'toolManager'
   | 'subAgentExecutor'
   | 'executionMode'
+  | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
@@ -215,7 +221,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
   }): Promise<ScopedRunner> => {
-    const { resultStore, filestore, skillsStore } = createStore({ conversation });
+    const resultStore = createResultStore({ conversation });
+    const skillsStore = createSkillsStore({ skills: [] });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -231,6 +238,25 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
+    const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
+      runnerDeps.savedObjects.getScopedClient(request)
+    );
+    const [experimentalEnabled, bashEnabled] = await Promise.all([
+      uiSettingsClient
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+        .catch(() => false),
+      uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+    ]);
+    const experimentalFeatures: ExperimentalFeatures = {
+      skills: true,
+      subagents: experimentalEnabled,
+      todos: experimentalEnabled,
+      datasets: experimentalEnabled,
+      // forcefully disabled until the UI is implemented
+      askUserQuestion: false, // isExperimentalEnabled,
+      bash: bashEnabled,
+    };
+
     const allDeps = {
       ...runnerDeps,
       modelProvider,
@@ -243,10 +269,10 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       todoStateManager,
       stateManager,
       promptManager,
-      filestore,
       toolManager,
       executionMode,
       subAgentExecutor,
+      experimentalFeatures,
     };
     return createScopedRunner(allDeps);
   };
