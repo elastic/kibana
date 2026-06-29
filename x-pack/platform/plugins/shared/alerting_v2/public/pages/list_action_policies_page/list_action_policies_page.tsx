@@ -244,6 +244,7 @@ export const ListActionPoliciesPage = () => {
   const columns: Array<EuiBasicTableColumn<ActionPolicyResponse>> = [
     {
       field: 'name',
+      minWidth: '100px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.actionPoliciesList.column.name"
@@ -379,7 +380,7 @@ export const ListActionPoliciesPage = () => {
           defaultMessage="Notify"
         />
       ),
-      width: '120px',
+      width: '50px',
       render: (_snoozedUntil: string | undefined, policy: ActionPolicyResponse) => {
         if (!policy.enabled) {
           return null;
@@ -531,6 +532,7 @@ export const ListActionPoliciesPage = () => {
             loading={isFetching}
             pagination={pagination}
             responsiveBreakpoint={false}
+            scrollableInline={true}
             css={css`
               .euiTableHeaderMobile .euiCheckbox {
                 display: none;
