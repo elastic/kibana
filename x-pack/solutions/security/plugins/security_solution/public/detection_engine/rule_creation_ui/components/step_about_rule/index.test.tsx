@@ -89,7 +89,6 @@ export const stepDefineStepMLRule: DefineStepRule = {
 };
 
 describe('StepAboutRuleComponent', () => {
-  const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
@@ -198,7 +197,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if description is not present', async () => {
-    render(<TestComp />, { wrapper: TestProviders });
+    const { user } = setup(<TestComp />);
 
     await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
@@ -213,9 +212,8 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if threat match rule and threat_indicator_path is not present', async () => {
-    render(
-      <TestComp defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule} />,
-      { wrapper: TestProviders }
+    const { user } = setup(
+      <TestComp defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule} />
     );
 
     await user.clear(
@@ -230,7 +228,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
-    render(<TestComp />, { wrapper: TestProviders });
+    const { user } = setup(<TestComp />);
 
     await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
@@ -251,7 +249,7 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if no "name" is present', async () => {
-    render(<TestComp />, { wrapper: TestProviders });
+    const { user } = setup(<TestComp />);
 
     await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
@@ -268,7 +266,7 @@ describe('StepAboutRuleComponent', () => {
   it('is valid if both "name" and "description" are present', async () => {
     const handleSubmit = jest.fn();
 
-    render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
+    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
     await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
@@ -297,7 +295,7 @@ describe('StepAboutRuleComponent', () => {
   it('it allows user to set the risk score as a number (and not a string)', async () => {
     const handleSubmit = jest.fn();
 
-    render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
+    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
     await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
@@ -336,7 +334,7 @@ describe('StepAboutRuleComponent', () => {
   it('does not modify the provided risk score until the user changes the severity', async () => {
     const handleSubmit = jest.fn();
 
-    render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
+    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
     await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
@@ -409,6 +407,13 @@ describe('StepAboutRuleComponent', () => {
     expect(useFetchIndex).toHaveBeenLastCalledWith(stepDefineStepMLRule.index);
   });
 });
+
+function setup(ui: React.ReactElement) {
+  return {
+    user: userEvent.setup({ delay: null, pointerEventsCheck: 0 }),
+    ...render(ui, { wrapper: TestProviders }),
+  };
+}
 
 function submitForm(): Promise<void> {
   return act(async () => {
