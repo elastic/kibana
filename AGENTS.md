@@ -84,6 +84,9 @@ Follow existing patterns in the target area first; below are common defaults.
 - Avoid inline styles unless consistent with the file’s conventions.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
+### Schema validation
+- When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to avoid the CodeQL DoS findings `js/kibana/unbounded-string-in-schema` and `js/kibana/unbounded-array-in-schema`.
+
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
