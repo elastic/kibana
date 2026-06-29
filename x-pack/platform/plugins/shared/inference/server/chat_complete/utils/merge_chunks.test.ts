@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChatCompletionEventType } from '@kbn/inference-common';
+import { ChatCompletionEventType, type ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { mergeChunks } from './merge_chunks';
 
 describe('mergeChunks', () => {
@@ -460,7 +460,7 @@ describe('mergeChunks', () => {
                 arguments: '{ "foo": "bar" }',
               },
               toolCallId: '',
-            },
+            } as ChatCompletionChunkToolCall,
           ],
         },
       ]);
