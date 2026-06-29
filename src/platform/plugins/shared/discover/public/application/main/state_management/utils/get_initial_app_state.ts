@@ -217,9 +217,6 @@ function getDefaultAppState({
   if (persistedTab?.hideTable !== undefined) {
     defaultState.hideTable = persistedTab.hideTable;
   }
-  if (persistedTab?.hideSidebar !== undefined) {
-    defaultState.hideSidebar = persistedTab.hideSidebar;
-  }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;
   }

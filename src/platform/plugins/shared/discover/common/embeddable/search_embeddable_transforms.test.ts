@@ -79,7 +79,6 @@ describe('searchEmbeddableTransforms', () => {
           grid: { columns: { '@timestamp': { width: 200 } } },
           hideChart: false,
           hideTable: false,
-          hideSidebar: false,
           isTextBasedQuery: false,
           kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
@@ -98,7 +97,6 @@ describe('searchEmbeddableTransforms', () => {
                 grid: { columns: { '@timestamp': { width: 200 } } },
                 hideChart: false,
                 hideTable: false,
-                hideSidebar: false,
                 isTextBasedQuery: false,
                 kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({

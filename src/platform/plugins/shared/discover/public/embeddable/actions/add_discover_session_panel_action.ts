@@ -67,7 +67,6 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
       grid: {},
       hideChart: false,
       hideTable: false,
-      hideSidebar: false,
       serializedSearchSource: {},
     };
     const valueInput: DiscoverSessionByValueInput = {

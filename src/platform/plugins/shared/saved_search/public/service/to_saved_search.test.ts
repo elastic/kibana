@@ -33,7 +33,6 @@ describe('toSavedSearch', () => {
           grid: {},
           hideChart: false,
           hideTable: false,
-          hideSidebar: false,
           isTextBasedQuery: false,
         },
       },
@@ -46,7 +45,6 @@ describe('toSavedSearch', () => {
       grid: {},
       hideChart: false,
       hideTable: false,
-      hideSidebar: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -76,7 +74,6 @@ describe('toSavedSearch', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
-        "hideSidebar": false,
         "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
@@ -134,7 +131,6 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
-              "hideSidebar": false,
               "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
@@ -174,7 +170,6 @@ describe('toSavedSearch', () => {
           grid: {},
           hideChart: false,
           hideTable: false,
-          hideSidebar: false,
           isTextBasedQuery: false,
         },
       },
@@ -187,7 +182,6 @@ describe('toSavedSearch', () => {
       grid: {},
       hideChart: false,
       hideTable: false,
-      hideSidebar: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -218,7 +212,6 @@ describe('toSavedSearch', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
-        "hideSidebar": false,
         "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
@@ -277,7 +270,6 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
-              "hideSidebar": false,
               "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {

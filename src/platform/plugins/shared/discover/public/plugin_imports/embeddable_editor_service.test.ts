@@ -79,7 +79,6 @@ describe('EmbeddableEditorService', () => {
     grid: {},
     hideChart: false,
     hideTable: false,
-    hideSidebar: false,
     isTextBasedQuery: false,
     kibanaSavedObjectMeta: {
       searchSourceJSON: '{}',

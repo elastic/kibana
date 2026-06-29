@@ -86,7 +86,6 @@ export const saveDiscoverSession = async (
         grid: tab.grid,
         hideChart: tab.hideChart,
         hideTable: tab.hideTable,
-        hideSidebar: tab.hideSidebar,
         isTextBasedQuery: tab.isTextBasedQuery,
         usesAdHocDataView: tab.usesAdHocDataView,
         kibanaSavedObjectMeta: {
