@@ -281,15 +281,22 @@ async function runIntegration(
             const valid = targetEuids.filter((id) => write.validTargetIds!.has(id));
             if (valid.length > 0) filteredRels[relType] = valid;
           }
-          return Object.keys(filteredRels).length > 0 ? [{ ...r, relationships: filteredRels }] : [];
+          return Object.keys(filteredRels).length > 0
+            ? [{ ...r, relationships: filteredRels }]
+            : [];
         })
       : records;
-    const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, metadataRecords, {
-      scanId: metadataContext.scanId,
-      lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-      entitySource: config.id,
-      observedAt: metadataContext.observedAt,
-    });
+    const metadata = await writeRelationshipMetadatas(
+      entityMetadataClient,
+      logger,
+      metadataRecords,
+      {
+        scanId: metadataContext.scanId,
+        lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+        entitySource: config.id,
+        observedAt: metadataContext.observedAt,
+      }
+    );
     // When truncated, the final loop pass incremented `iterations` before
     // breaking without fetching a page — clamp to actual pages completed.
     const completedIterations = truncated ? MAX_ITERATIONS : iterations;

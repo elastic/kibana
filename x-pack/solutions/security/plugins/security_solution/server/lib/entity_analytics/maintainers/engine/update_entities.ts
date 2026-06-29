@@ -228,7 +228,14 @@ export const writeEntityIds = async (
   }
 
   if (objects.length === 0)
-    return { updated: 0, notFound: 0, errors: 0, droppedTargets, relationshipTypeApplied: {}, validTargetIds };
+    return {
+      updated: 0,
+      notFound: 0,
+      errors: 0,
+      droppedTargets,
+      relationshipTypeApplied: {},
+      validTargetIds,
+    };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);
   const responseErrors = await crudClient.bulkUpdateEntity({ objects, force: true });
