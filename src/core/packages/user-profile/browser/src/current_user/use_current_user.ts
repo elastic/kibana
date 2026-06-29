@@ -24,8 +24,11 @@ import type {
  * The profile `dataPath` requested by the hook. It intentionally matches the paths the security
  * plugin prefetches at start (`avatar,userSettings`) so the underlying API client cache (keyed by
  * the exact `dataPath` string) is reused instead of issuing a second request.
+ *
+ * Exported so the security plugin can use the same constant for its prefetch, keeping both
+ * cache keys identical and preventing a redundant network round-trip.
  */
-const CURRENT_USER_DATA_PATH = 'avatar,userSettings';
+export const CURRENT_USER_DATA_PATH = 'avatar,userSettings';
 
 export interface UseCurrentUserResult {
   /** The curated current user, or `null` while loading or if authentication failed. */
@@ -81,9 +84,8 @@ export function useCurrentUser(
 
   const authState = useAsync(() => authc.getCurrentUser(), [authc]);
 
-  // Re-run the profile fetch whenever the profile data changes (the API client clears its cache on
-  // update), so profile-derived fields (avatar, userSettings) stay reactive.
-  const profileUpdate = useObservable(userProfile.getUserProfile$());
+  const profileUpdate = useObservable(userProfile.dataUpdates$);
+
   const profileState = useAsync(async () => {
     try {
       return await userProfile.getCurrent({ dataPath: CURRENT_USER_DATA_PATH });

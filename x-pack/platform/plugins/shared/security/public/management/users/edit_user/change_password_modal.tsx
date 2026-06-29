@@ -103,8 +103,9 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
   onCancel,
 }) => {
   const { services } = useKibana();
-  const { user, isLoading } = useCurrentUser();
-  const isCurrentUser = user?.username === username;
+  const { rawAuthQuery } = useCurrentUser({ includeRawQuerySource: true });
+  const isCurrentUser = rawAuthQuery.state?.username === username;
+  const isLoading = rawAuthQuery.isLoading;
   const isSystemUser = username === 'kibana' || username === 'kibana_system';
 
   const [form, { onBlur, ...eventHandlers }] = useForm({

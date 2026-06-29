@@ -60,6 +60,7 @@ const createUserProfile = (
     getCurrent,
     getUserProfile$: () => of(null),
     getEnabled$: () => of(false),
+    dataUpdates$: of({}),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),

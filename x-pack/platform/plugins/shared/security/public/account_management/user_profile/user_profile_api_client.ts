@@ -9,6 +9,7 @@ import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, skipWhile, Subject, switchMap } from 'rxjs';
 
+import { CURRENT_USER_DATA_PATH } from '@kbn/core-user-profile-browser';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   UserProfileAPIClient as UserProfileAPIClientType,
@@ -20,10 +21,8 @@ import type { UserProfileData } from '@kbn/user-profile-components';
 
 import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
-const DEFAULT_DATA_PATHS = 'avatar,userSettings';
-
 export class UserProfileAPIClient implements UserProfileAPIClientType {
-  private readonly _cache = new Map<string, Promise<GetUserProfileResponse<any>>>();
+  private readonly _cache = new Map<string, Promise<GetUserProfileResponse>>();
 
   private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
@@ -53,7 +52,7 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   public start() {
-    this.getCurrent({ dataPath: DEFAULT_DATA_PATHS }).catch(() => {});
+    this.getCurrent({ dataPath: CURRENT_USER_DATA_PATH }).catch(() => {});
   }
 
   /**

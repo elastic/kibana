@@ -22,6 +22,7 @@ export {
   CurrentUserContext,
   CurrentUserProvider,
   useCurrentUser,
+  CURRENT_USER_DATA_PATH,
 } from './src/current_user';
 export type {
   CurrentUserServices,

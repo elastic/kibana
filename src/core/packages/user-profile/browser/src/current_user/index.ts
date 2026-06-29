@@ -12,7 +12,7 @@ export { CurrentUserContext } from './current_user_context';
 export type { CurrentUserServices } from './current_user_context';
 export { CurrentUserProvider } from './current_user_provider';
 export type { CurrentUserProviderProps } from './current_user_provider';
-export { useCurrentUser } from './use_current_user';
+export { useCurrentUser, CURRENT_USER_DATA_PATH } from './use_current_user';
 export type {
   UseCurrentUserOptions,
   UseCurrentUserResult,
