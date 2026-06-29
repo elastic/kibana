@@ -61,7 +61,11 @@ export const VisualizationsSection = memo(
               // header link + arrow only shown when navigation is wired up (onShowGraph set)
               showIcon={!isPreviewMode && openDetailsPanel != null}
               disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
-              onShowGraph={isPreviewMode ? undefined : handleOpenGraphViewTab}
+              onShowGraph={
+                isPreviewMode || scopeId === TableId.rulePreview
+                  ? undefined
+                  : handleOpenGraphViewTab
+              }
             />
           </ExpandableSection>
         )}
