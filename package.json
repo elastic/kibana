@@ -588,6 +588,7 @@
     "@kbn/data-view-validation": "link:src/platform/packages/shared/kbn-data-view-validation",
     "@kbn/data-views-as-code-plugin": "link:src/platform/plugins/shared/data_views_as_code",
     "@kbn/data-views-plugin": "link:src/platform/plugins/shared/data_views",
+    "@kbn/data-views-types": "link:src/platform/packages/shared/kbn-data-views-types",
     "@kbn/data-visualizer-plugin": "link:x-pack/platform/plugins/private/data_visualizer",
     "@kbn/data-visualizer-server-schemas": "link:x-pack/platform/packages/shared/ml/data-visualizer-server-schemas",
     "@kbn/dataset-quality-plugin": "link:x-pack/platform/plugins/shared/dataset_quality",

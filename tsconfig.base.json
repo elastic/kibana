@@ -1016,6 +1016,8 @@
       "@kbn/data-views-as-code-plugin/*": ["src/platform/plugins/shared/data_views_as_code/*"],
       "@kbn/data-views-plugin": ["src/platform/plugins/shared/data_views"],
       "@kbn/data-views-plugin/*": ["src/platform/plugins/shared/data_views/*"],
+      "@kbn/data-views-types": ["src/platform/packages/shared/kbn-data-views-types"],
+      "@kbn/data-views-types/*": ["src/platform/packages/shared/kbn-data-views-types/*"],
       "@kbn/data-visualizer-plugin": ["x-pack/platform/plugins/private/data_visualizer"],
       "@kbn/data-visualizer-plugin/*": ["x-pack/platform/plugins/private/data_visualizer/*"],
       "@kbn/data-visualizer-server-schemas": ["x-pack/platform/packages/shared/ml/data-visualizer-server-schemas"],
