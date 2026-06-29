@@ -33,6 +33,7 @@ export const AGENT_FIRST_BODY_ATTR = 'data-agent-first-chrome';
 const AGENT_WORKSPACE_ACTIVE_ATTR = 'data-agent-workspace-active';
 
 const NAV_SIDE_PANEL_CLASS = 'kbnChromeNav-sidePanel';
+const AGENTS_NAV_TOGGLE_TEST_SUBJ = 'agentFirstNavAgentsToggle';
 
 export const AGENT_FIRST_LAYOUT_OVERRIDES: Pick<
   LayoutConfig,
@@ -361,6 +362,52 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutNavigation [data-menu-item] .kbnChromeNav-iconWrapper::before,
     ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item] .kbnChromeNav-iconWrapper::before {
       border-radius: ${controlRadius} !important;
+    }
+
+    /*
+     * Primary nav active state: gray text tray (not primary blue). Agents toggle keeps AI accent tile.
+     */
+    ${scope} .kbnChromeLayoutNavigation
+      [data-menu-item][data-highlighted='true']:not([data-test-subj='${AGENTS_NAV_TOGGLE_TEST_SUBJ}']),
+    ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item][data-highlighted='true'] {
+      --menu-item-text-color: ${components.buttons.textColorText} !important;
+      color: ${components.buttons.textColorText} !important;
+    }
+
+    ${scope} .kbnChromeLayoutNavigation
+      [data-menu-item][data-highlighted='true']:not([data-test-subj='${AGENTS_NAV_TOGGLE_TEST_SUBJ}'])
+      .kbnChromeNav-iconWrapper,
+    ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item][data-highlighted='true'] .kbnChromeNav-iconWrapper {
+      background-color: ${colors.backgroundBasePlain} !important;
+    }
+
+    ${scope} .kbnChromeLayoutNavigation
+      [data-menu-item][data-highlighted='true']:not([data-test-subj='${AGENTS_NAV_TOGGLE_TEST_SUBJ}'):hover
+      .kbnChromeNav-iconWrapper::before,
+    ${scope} .kbnChromeLayoutNavigation
+      [data-menu-item][data-highlighted='true']:not([data-test-subj='${AGENTS_NAV_TOGGLE_TEST_SUBJ}'):active
+      .kbnChromeNav-iconWrapper::before,
+    ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item][data-highlighted='true']:hover
+      .kbnChromeNav-iconWrapper::before,
+    ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item][data-highlighted='true']:active
+      .kbnChromeNav-iconWrapper::before {
+      background-color: ${components.buttons.backgroundTextHover} !important;
+    }
+
+    ${scope} .kbnChromeLayoutNavigation
+      [data-menu-item][data-highlighted='true']:not([data-test-subj='${AGENTS_NAV_TOGGLE_TEST_SUBJ}'):active
+      .kbnChromeNav-iconWrapper::before,
+    ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item][data-highlighted='true']:active
+      .kbnChromeNav-iconWrapper::before {
+      background-color: ${components.buttons.backgroundTextActive} !important;
+    }
+
+    ${scope} .kbnChromeLayoutNavigation
+      [data-menu-item][data-highlighted='true']:not([data-test-subj='${AGENTS_NAV_TOGGLE_TEST_SUBJ}'):focus-visible
+      .kbnChromeNav-iconWrapper,
+    ${scope} .${NAV_SIDE_PANEL_CLASS} [data-menu-item][data-highlighted='true']:focus-visible
+      .kbnChromeNav-iconWrapper {
+      border-color: ${colors.textParagraph} !important;
     }
 
     ${scope} ${panelSelectors} ${controlSelectors} {

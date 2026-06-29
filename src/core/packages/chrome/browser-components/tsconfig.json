@@ -44,6 +44,7 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-label-formatter",
+    "@kbn/shared-ux-ai-components",
     "@kbn/test-jest-helpers",
     "@kbn/use-observable",
     "@kbn/shared-ux-utility",

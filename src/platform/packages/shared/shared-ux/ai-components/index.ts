@@ -14,3 +14,7 @@ export { AiButtonIcon, type AiButtonIconProps } from './ai_button/src/ai_button_
 export { AiIcon, type AiIconProps } from './ai_icon/src/ai_icon';
 
 export type { AiButtonIconType, AiButtonVariant } from './ai_button/src/types';
+export {
+  useAiButtonGradientStyles,
+  type AiButtonGradientOptions,
+} from './gradient_styles/use_ai_gradient_styles';
