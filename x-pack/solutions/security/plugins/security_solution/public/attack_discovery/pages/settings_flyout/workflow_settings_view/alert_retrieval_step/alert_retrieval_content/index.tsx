@@ -7,7 +7,15 @@
 
 import type { AggregateQuery } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { ESQLLangEditor, type DataErrorsControl } from '@kbn/esql/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -25,7 +33,13 @@ import {
 } from '../../../workflow_configuration';
 import type { QueryMode } from '../../../workflow_configuration';
 import { EditWithAi } from '../../../workflow_configuration/edit_with_ai';
-import { ESQL } from '../../../workflow_configuration/translations';
+import {
+  ALERT_RETRIEVAL_WORKFLOWS_TOGGLE_LABEL,
+  ESQL,
+  SKILL_RETRIEVAL_TOGGLE_LABEL,
+  SKILL_RETRIEVAL_TOGGLE_TOOLTIP,
+} from '../../../workflow_configuration/translations';
+import { AlertRetrievalWorkflowsInfo } from './alert_retrieval_workflows_info';
 import type { AlertsSelectionSettings } from '../../../types';
 import type { WorkflowConfiguration } from '../../../workflow_configuration/types';
 import type { UseFetchDefaultEsqlQueryResult } from '../../../workflow_configuration/hooks/use_fetch_default_esql_query';
@@ -80,34 +94,73 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
     [workflowConfiguration.esqlQuery]
   );
 
-  const handleDefaultToggle = useCallback(
-    (enabled: boolean) => {
-      const newMode = enabled ? 'custom_query' : 'custom_only';
-
-      telemetry.reportEvent(AttackDiscoveryEventTypes.AlertRetrievalModeChanged, {
-        mode: newMode,
-      });
+  const applyEsqlMode = useCallback(async () => {
+    if (workflowConfiguration.esqlQuery == null) {
+      const defaultQuery = await fetchDefaultEsqlQueryResult.fetchDefaultEsqlQuery();
 
       onWorkflowConfigurationChange({
         ...workflowConfiguration,
-        alertRetrievalMode: newMode,
+        alertRetrievalMode: 'esql',
+        ...(defaultQuery != null ? { esqlQuery: defaultQuery } : {}),
+      });
+    } else {
+      onWorkflowConfigurationChange({
+        ...workflowConfiguration,
+        alertRetrievalMode: 'esql',
+      });
+    }
+  }, [fetchDefaultEsqlQueryResult, onWorkflowConfigurationChange, workflowConfiguration]);
+
+  const handleSkillToggle = useCallback(
+    (e: EuiSwitchEvent) => {
+      onWorkflowConfigurationChange({
+        ...workflowConfiguration,
+        skillEnabled: e.target.checked,
       });
     },
-    [onWorkflowConfigurationChange, telemetry, workflowConfiguration]
+    [onWorkflowConfigurationChange, workflowConfiguration]
+  );
+
+  const handleDefaultRetrievalToggle = useCallback(
+    async (enabled: boolean) => {
+      if (
+        enabled &&
+        workflowConfiguration.alertRetrievalMode === 'esql' &&
+        workflowConfiguration.esqlQuery == null
+      ) {
+        const defaultQuery = await fetchDefaultEsqlQueryResult.fetchDefaultEsqlQuery();
+
+        onWorkflowConfigurationChange({
+          ...workflowConfiguration,
+          defaultRetrievalEnabled: true,
+          ...(defaultQuery != null ? { esqlQuery: defaultQuery } : {}),
+        });
+      } else {
+        onWorkflowConfigurationChange({
+          ...workflowConfiguration,
+          defaultRetrievalEnabled: enabled,
+        });
+      }
+    },
+    [fetchDefaultEsqlQueryResult, onWorkflowConfigurationChange, workflowConfiguration]
+  );
+
+  const handleWorkflowsToggle = useCallback(
+    (e: EuiSwitchEvent) => {
+      onWorkflowConfigurationChange({
+        ...workflowConfiguration,
+        alertRetrievalWorkflowsEnabled: e.target.checked,
+      });
+    },
+    [onWorkflowConfigurationChange, workflowConfiguration]
   );
 
   const handleQueryModeChange = useCallback(
     async (mode: QueryMode) => {
       telemetry.reportEvent(AttackDiscoveryEventTypes.QueryModeChanged, { mode });
 
-      if (mode === 'esql' && workflowConfiguration.esqlQuery == null) {
-        const defaultQuery = await fetchDefaultEsqlQueryResult.fetchDefaultEsqlQuery();
-
-        onWorkflowConfigurationChange({
-          ...workflowConfiguration,
-          alertRetrievalMode: mode,
-          ...(defaultQuery != null ? { esqlQuery: defaultQuery } : {}),
-        });
+      if (mode === 'esql') {
+        await applyEsqlMode();
       } else {
         onWorkflowConfigurationChange({
           ...workflowConfiguration,
@@ -115,7 +168,7 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
         });
       }
     },
-    [fetchDefaultEsqlQueryResult, onWorkflowConfigurationChange, telemetry, workflowConfiguration]
+    [applyEsqlMode, onWorkflowConfigurationChange, telemetry, workflowConfiguration]
   );
 
   const handleEsqlQueryChange = useCallback(
@@ -154,20 +207,38 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
     [workflowConfiguration.esqlQuery]
   );
 
-  const queryMode: QueryMode =
-    workflowConfiguration.alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
-
-  const isDefaultEnabled = workflowConfiguration.alertRetrievalMode !== 'custom_only';
+  const queryMode: QueryMode = workflowConfiguration.alertRetrievalMode;
 
   const { count: matchedAlertsCount } = useMatchedAlertsCount({
     esqlQuery: queryMode === 'esql' ? debouncedEsqlQuery : undefined,
     settings,
-    skip: !isDefaultEnabled,
+    skip: !workflowConfiguration.defaultRetrievalEnabled,
   });
 
   return (
     <>
-      <DefaultAlertRetrievalAccordion isEnabled={isDefaultEnabled} onToggle={handleDefaultToggle}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            checked={workflowConfiguration.skillEnabled}
+            compressed
+            data-test-subj="skillRetrievalToggle"
+            label={SKILL_RETRIEVAL_TOGGLE_LABEL}
+            onChange={handleSkillToggle}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem data-test-subj="skillRetrievalTooltip" grow={false}>
+          <EuiIconTip content={SKILL_RETRIEVAL_TOGGLE_TOOLTIP} position="right" type="info" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <DefaultAlertRetrievalAccordion
+        isEnabled={workflowConfiguration.defaultRetrievalEnabled}
+        onToggle={handleDefaultRetrievalToggle}
+      >
         <QueryModeSelector mode={queryMode} onModeChange={handleQueryModeChange} />
 
         <EuiSpacer size="m" />
@@ -240,12 +311,34 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
 
       <EuiSpacer size="m" />
 
-      <WorkflowConfigurationPanel
-        connectorId={connectorId}
-        isInvalid={alertRetrievalHasError}
-        onChange={onWorkflowConfigurationChange}
-        value={workflowConfiguration}
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            checked={workflowConfiguration.alertRetrievalWorkflowsEnabled}
+            compressed
+            data-test-subj="alertRetrievalWorkflowsToggle"
+            label={ALERT_RETRIEVAL_WORKFLOWS_TOGGLE_LABEL}
+            onChange={handleWorkflowsToggle}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem data-test-subj="alertRetrievalWorkflowsTooltip" grow={false}>
+          <AlertRetrievalWorkflowsInfo fetchDefaultEsqlQueryResult={fetchDefaultEsqlQueryResult} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {workflowConfiguration.alertRetrievalWorkflowsEnabled && (
+        <>
+          <EuiSpacer size="m" />
+
+          <WorkflowConfigurationPanel
+            connectorId={connectorId}
+            isInvalid={alertRetrievalHasError}
+            onChange={onWorkflowConfigurationChange}
+            value={workflowConfiguration}
+          />
+        </>
+      )}
     </>
   );
 };

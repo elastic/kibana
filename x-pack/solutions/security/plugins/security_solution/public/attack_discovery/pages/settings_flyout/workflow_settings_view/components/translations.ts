@@ -8,28 +8,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const GENERATION_SECTION_DESCRIPTION = i18n.translate(
-  'xpack.discoveries.components.generationSectionDescription',
+  'xpack.securitySolution.attackDiscovery.workflowSettingsView.generationSectionDescription',
   {
     defaultMessage: 'Configure how Attack Discovery generates findings from retrieved alerts.',
   }
 );
 
 export const RUN_FROM_WORKFLOW_DESCRIPTION = i18n.translate(
-  'xpack.discoveries.components.runFromWorkflowDescription',
+  'xpack.securitySolution.attackDiscovery.workflowSettingsView.runFromWorkflowDescription',
   {
     defaultMessage: 'You can also run Attack Discovery from a workflow.',
   }
 );
 
 export const VALIDATION_ERRORS_TITLE = i18n.translate(
-  'xpack.discoveries.components.validationErrorsTitle',
+  'xpack.securitySolution.attackDiscovery.workflowSettingsView.validationErrorsTitle',
   {
     defaultMessage: 'Please fix the following issues to continue:',
   }
 );
 
 export const VALIDATION_WARNINGS_TITLE = i18n.translate(
-  'xpack.discoveries.components.validationWarningsTitle',
+  'xpack.securitySolution.attackDiscovery.workflowSettingsView.validationWarningsTitle',
   {
     defaultMessage: 'The following issues may affect execution:',
   }

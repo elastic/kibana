@@ -27,8 +27,11 @@ jest.mock('./alert_retrieval_content', () => ({
 }));
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
-  alertRetrievalWorkflowIds: [],
   alertRetrievalMode: 'custom_query',
+  alertRetrievalWorkflowIds: [],
+  alertRetrievalWorkflowsEnabled: false,
+  defaultRetrievalEnabled: false,
+  skillEnabled: true,
   validationWorkflowId: 'default',
 };
 
@@ -74,9 +77,7 @@ describe('AlertRetrievalStep', () => {
       </TestProviders>
     );
 
-    expect(
-      screen.getByText('Choose how alerts are collected and enriched before generation.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Choose how alerts are collected')).toBeInTheDocument();
   });
 
   it('renders AlertRetrievalContent', () => {

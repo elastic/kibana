@@ -119,9 +119,12 @@ jest.mock('../workflow_configuration', () => ({
     onChange,
   }: {
     onChange: (config: {
-      alertRetrievalWorkflowIds: string[];
       alertRetrievalMode: string;
+      alertRetrievalWorkflowIds: string[];
+      alertRetrievalWorkflowsEnabled: boolean;
+      defaultRetrievalEnabled: boolean;
       esqlQuery?: string;
+      skillEnabled: boolean;
       validationWorkflowId: string;
     }) => void;
   }) => (
@@ -130,9 +133,12 @@ jest.mock('../workflow_configuration', () => ({
         data-test-subj="simulateWorkflowConfigChange"
         onClick={() =>
           onChange({
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: true,
+            defaultRetrievalEnabled: false,
             esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 200',
+            skillEnabled: true,
             validationWorkflowId: 'default',
           })
         }
@@ -140,6 +146,30 @@ jest.mock('../workflow_configuration', () => ({
       />
     </div>
   ),
+  hasAtLeastOneRetrievalToggle: ({
+    alertRetrievalWorkflowsEnabled,
+    defaultRetrievalEnabled,
+    skillEnabled,
+  }: {
+    alertRetrievalWorkflowsEnabled?: boolean;
+    defaultRetrievalEnabled?: boolean;
+    skillEnabled?: boolean;
+  }) => Boolean(skillEnabled || defaultRetrievalEnabled || alertRetrievalWorkflowsEnabled),
+  hasEmptyRequiredRetrievalWorkflows: ({
+    alertRetrievalWorkflowIds,
+    alertRetrievalWorkflowsEnabled,
+    defaultRetrievalEnabled,
+    skillEnabled,
+  }: {
+    alertRetrievalWorkflowIds?: string[];
+    alertRetrievalWorkflowsEnabled?: boolean;
+    defaultRetrievalEnabled?: boolean;
+    skillEnabled?: boolean;
+  }) =>
+    Boolean(alertRetrievalWorkflowsEnabled) &&
+    !skillEnabled &&
+    !defaultRetrievalEnabled &&
+    (alertRetrievalWorkflowIds?.length ?? 0) === 0,
   useFetchDefaultEsqlQuery: jest.fn().mockReturnValue({
     defaultEsqlQuery: undefined,
     fetchDefaultEsqlQuery: jest.fn().mockResolvedValue(undefined),
@@ -151,8 +181,11 @@ jest.mock('../workflow_configuration', () => ({
     isLoading: false,
     updateSettings: jest.fn(),
     workflowConfiguration: {
-      alertRetrievalWorkflowIds: [],
       alertRetrievalMode: 'custom_query',
+      alertRetrievalWorkflowIds: [],
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: false,
+      skillEnabled: true,
       validationWorkflowId: 'default',
     },
   }),
@@ -727,8 +760,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
-          alertRetrievalWorkflowIds: [],
           alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: 'default',
         },
       });
@@ -769,8 +805,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
-          alertRetrievalWorkflowIds: [],
           alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: 'default',
         },
       });
@@ -795,15 +834,18 @@ describe('useSettingsView', () => {
     });
 
     describe('alertRetrievalHasError', () => {
-      it('returns true when default is disabled and no workflow IDs are selected', async () => {
+      it('returns true when all retrieval toggles are disabled', async () => {
         const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: jest.fn(),
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
+            alertRetrievalMode: 'custom_query',
             alertRetrievalWorkflowIds: [],
-            alertRetrievalMode: 'custom_only',
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: false,
+            skillEnabled: false,
             validationWorkflowId: 'default',
           },
         });
@@ -821,15 +863,18 @@ describe('useSettingsView', () => {
         expect(result.current.alertRetrievalHasError).toBe(true);
       });
 
-      it('returns false when default alert retrieval is enabled', async () => {
+      it('returns false when only the skill toggle is enabled', async () => {
         const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: jest.fn(),
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: false,
+            skillEnabled: true,
             validationWorkflowId: 'default',
           },
         });
@@ -847,15 +892,47 @@ describe('useSettingsView', () => {
         expect(result.current.alertRetrievalHasError).toBe(false);
       });
 
-      it('returns false when alert retrieval workflow IDs are selected', async () => {
+      it('returns false when default alert retrieval is enabled', async () => {
         const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: jest.fn(),
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
+            alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: true,
+            skillEnabled: false,
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        rerender();
+
+        expect(result.current.alertRetrievalHasError).toBe(false);
+      });
+
+      it('returns false when alert retrieval workflows are enabled', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalMode: 'custom_query',
             alertRetrievalWorkflowIds: ['workflow-1'],
-            alertRetrievalMode: 'custom_only',
+            alertRetrievalWorkflowsEnabled: true,
+            defaultRetrievalEnabled: false,
+            skillEnabled: false,
             validationWorkflowId: 'default',
           },
         });
@@ -880,8 +957,11 @@ describe('useSettingsView', () => {
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
+            alertRetrievalMode: 'custom_query',
             alertRetrievalWorkflowIds: [],
-            alertRetrievalMode: 'custom_only',
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: false,
+            skillEnabled: false,
             validationWorkflowId: '',
           },
         });
@@ -903,8 +983,11 @@ describe('useSettingsView', () => {
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: false,
+            skillEnabled: true,
             validationWorkflowId: '',
           },
         });
@@ -929,8 +1012,11 @@ describe('useSettingsView', () => {
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: false,
+            skillEnabled: true,
             validationWorkflowId: 'default',
           },
         });
@@ -955,8 +1041,11 @@ describe('useSettingsView', () => {
           isLoading: false,
           updateSettings: jest.fn(),
           workflowConfiguration: {
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: false,
+            defaultRetrievalEnabled: false,
+            skillEnabled: true,
             validationWorkflowId: '',
           },
         });
@@ -977,8 +1066,12 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
+          // Invalid: no alert retrieval method enabled
+          alertRetrievalMode: 'custom_query',
           alertRetrievalWorkflowIds: [],
-          alertRetrievalMode: 'custom_only', // Invalid: no alert retrieval method enabled
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: false,
           validationWorkflowId: 'default',
         },
       });
@@ -1008,8 +1101,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
+          alertRetrievalMode: 'custom_query',
           alertRetrievalWorkflowIds: ['workflow-1'],
-          alertRetrievalMode: 'custom_only',
+          alertRetrievalWorkflowsEnabled: true,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: 'default',
         },
       });
@@ -1032,8 +1128,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
+          alertRetrievalMode: 'custom_query',
           alertRetrievalWorkflowIds: [],
-          alertRetrievalMode: 'custom_only',
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: false,
           validationWorkflowId: 'default',
         },
       });
@@ -1060,8 +1159,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
-          alertRetrievalWorkflowIds: [],
           alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: true,
+          skillEnabled: false,
           validationWorkflowId: 'default',
         },
       });
@@ -1088,8 +1190,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
+          alertRetrievalMode: 'custom_query',
           alertRetrievalWorkflowIds: ['workflow-1'],
-          alertRetrievalMode: 'custom_only',
+          alertRetrievalWorkflowsEnabled: true,
+          defaultRetrievalEnabled: false,
+          skillEnabled: false,
           validationWorkflowId: 'default',
         },
       });
@@ -1133,8 +1238,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
-          alertRetrievalWorkflowIds: [],
           alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true, // Valid retrieval; only validation workflow is missing
           validationWorkflowId: '', // Empty validation workflow
         },
       });
@@ -1161,8 +1269,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
+          alertRetrievalMode: 'custom_query',
           alertRetrievalWorkflowIds: [],
-          alertRetrievalMode: 'custom_only',
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: false,
           validationWorkflowId: '',
         },
       });
@@ -1194,8 +1305,11 @@ describe('useSettingsView', () => {
         isLoading: false,
         updateSettings: jest.fn(),
         workflowConfiguration: {
-          alertRetrievalWorkflowIds: [],
           alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: '',
         },
       });
@@ -1226,8 +1340,11 @@ describe('useSettingsView', () => {
           isLoading: false,
           updateSettings: updateSettingsMock,
           workflowConfiguration: {
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: true,
+            defaultRetrievalEnabled: false,
+            skillEnabled: true,
             validationWorkflowId: 'default',
           },
         });
@@ -1263,8 +1380,11 @@ describe('useSettingsView', () => {
           isLoading: false,
           updateSettings: updateSettingsMock,
           workflowConfiguration: {
-            alertRetrievalWorkflowIds: [],
             alertRetrievalMode: 'custom_query',
+            alertRetrievalWorkflowIds: [],
+            alertRetrievalWorkflowsEnabled: true,
+            defaultRetrievalEnabled: false,
+            skillEnabled: true,
             validationWorkflowId: 'default',
           },
         });
@@ -1306,6 +1426,173 @@ describe('useSettingsView', () => {
             esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 200',
           })
         );
+      });
+    });
+
+    describe('empty alert retrieval workflows (deferred validation)', () => {
+      const emptyWorkflowsConfig = {
+        alertRetrievalMode: 'custom_query',
+        alertRetrievalWorkflowIds: [],
+        alertRetrievalWorkflowsEnabled: true,
+        defaultRetrievalEnabled: false,
+        skillEnabled: false,
+        validationWorkflowId: 'default',
+      };
+
+      const mockEmptyWorkflowsConfig = () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn().mockReturnValue(true),
+          workflowConfiguration: emptyWorkflowsConfig,
+        });
+      };
+
+      const renderWrapper = (props: Parameters<typeof useSettingsView>[0]) => {
+        const Wrapper = () => {
+          const { actionButtons, settingsView } = useSettingsView(props);
+          return (
+            <>
+              {settingsView}
+              {actionButtons}
+            </>
+          );
+        };
+
+        return render(
+          <TestProviders>
+            <Wrapper />
+          </TestProviders>
+        );
+      };
+
+      it('does NOT show the alert retrieval workflows error before a save attempt', () => {
+        mockEmptyWorkflowsConfig();
+
+        renderWrapper({
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+        });
+
+        expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
+      });
+
+      it('keeps the Save and Save and run buttons enabled before a save attempt', () => {
+        mockEmptyWorkflowsConfig();
+
+        renderWrapper({
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+        });
+
+        expect(screen.getByTestId('save')).not.toBeDisabled();
+        expect(screen.getByTestId('saveAndRun')).not.toBeDisabled();
+      });
+
+      it('cancels the save and reveals the error when Save is clicked with no workflow selected', async () => {
+        mockEmptyWorkflowsConfig();
+        const onSettingsSave = jest.fn();
+
+        renderWrapper({
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+          onSettingsSave,
+        });
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('save'));
+        });
+
+        expect(onSettingsSave).not.toHaveBeenCalled();
+
+        const callout = screen.getByTestId('workflowValidationErrorsCallout');
+        expect(callout).toBeInTheDocument();
+        expect(callout).toHaveTextContent('Select at least one alert retrieval workflow');
+      });
+
+      it('cancels the run when Save and run is clicked with no workflow selected', async () => {
+        mockEmptyWorkflowsConfig();
+        const onGenerate = jest.fn();
+        const onSettingsSave = jest.fn();
+
+        renderWrapper({
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+          onGenerate,
+          onSettingsSave,
+        });
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('saveAndRun'));
+        });
+
+        expect(onGenerate).not.toHaveBeenCalled();
+        expect(onSettingsSave).not.toHaveBeenCalled();
+      });
+
+      it('clears the error and allows the save once a workflow source is configured', async () => {
+        mockEmptyWorkflowsConfig();
+        const onSettingsSave = jest.fn();
+
+        renderWrapper({
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+          onSettingsSave,
+        });
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('save'));
+        });
+
+        expect(screen.getByTestId('workflowValidationErrorsCallout')).toBeInTheDocument();
+
+        // Simulate the user configuring a retrieval source (the mocked panel
+        // enables the skill toggle), which removes the misconfiguration.
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('simulateWorkflowConfigChange'));
+        });
+
+        expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('save'));
+        });
+
+        expect(onSettingsSave).toHaveBeenCalled();
+      });
+
+      it('does NOT block the save when the skill toggle is also enabled', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn().mockReturnValue(true),
+          workflowConfiguration: {
+            ...emptyWorkflowsConfig,
+            skillEnabled: true,
+          },
+        });
+        const onSettingsSave = jest.fn();
+
+        renderWrapper({
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+          onSettingsSave,
+        });
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('save'));
+        });
+
+        expect(onSettingsSave).toHaveBeenCalled();
+        expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
       });
     });
   });

@@ -27,7 +27,12 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { parseFilterQuery } from '../parse_filter_query';
 import type { SettingsOverrideOptions } from '../../results/history/types';
 import type { UseFetchDefaultEsqlQueryResult } from '../workflow_configuration';
-import { useFetchDefaultEsqlQuery, useWorkflowConfiguration } from '../workflow_configuration';
+import {
+  hasAtLeastOneRetrievalToggle,
+  hasEmptyRequiredRetrievalWorkflows,
+  useFetchDefaultEsqlQuery,
+  useWorkflowConfiguration,
+} from '../workflow_configuration';
 import { DEFAULT_WORKFLOW_CONFIGURATION } from '../workflow_configuration/constants';
 import { WorkflowSettingsView } from '../workflow_settings_view';
 import * as i18n from './translations';
@@ -152,17 +157,38 @@ export const useSettingsView = ({
     []
   );
 
-  // Per-section validation: no retrieval method enabled
+  // Per-section validation: at least one of the three retrieval toggles must be enabled
   const alertRetrievalHasError = useMemo(() => {
     if (!isWorkflowsEnabled) {
       return false;
     }
 
-    return (
-      workflowConfiguration.alertRetrievalMode === 'custom_only' &&
-      workflowConfiguration.alertRetrievalWorkflowIds.length === 0
-    );
+    return !hasAtLeastOneRetrievalToggle(workflowConfiguration);
   }, [isWorkflowsEnabled, workflowConfiguration]);
+
+  // Deferred validation: the alert retrieval workflows toggle is the sole enabled
+  // retrieval source but no workflow is selected. Unlike `alertRetrievalHasError`,
+  // this must NOT surface immediately (the toggle alone is a valid intermediate
+  // state) and must NOT disable the action buttons; instead, a Save / Save and run
+  // attempt is canceled and the error is revealed.
+  const emptyRetrievalWorkflows = useMemo(
+    () => isWorkflowsEnabled && hasEmptyRequiredRetrievalWorkflows(workflowConfiguration),
+    [isWorkflowsEnabled, workflowConfiguration]
+  );
+
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+
+  // Once the misconfiguration is resolved, reset the attempt flag so the error
+  // only ever reappears after another Save / Save and run attempt.
+  useEffect(() => {
+    if (!emptyRetrievalWorkflows) {
+      setHasAttemptedSave(false);
+    }
+  }, [emptyRetrievalWorkflows]);
+
+  const showEmptyRetrievalWorkflowsError = hasAttemptedSave && emptyRetrievalWorkflows;
+
+  const alertRetrievalSectionHasError = alertRetrievalHasError || showEmptyRetrievalWorkflowsError;
 
   // Per-section validation: no validation workflow selected
   const validationHasError = useMemo(() => {
@@ -188,6 +214,13 @@ export const useSettingsView = ({
       });
     }
 
+    if (showEmptyRetrievalWorkflowsError) {
+      errors.push({
+        level: 'error',
+        message: workflowI18n.NO_ALERT_RETRIEVAL_WORKFLOWS_SELECTED,
+      });
+    }
+
     if (validationHasError) {
       errors.push({
         level: 'error',
@@ -196,18 +229,27 @@ export const useSettingsView = ({
     }
 
     return [...errors, ...healthCheckWarnings];
-  }, [alertRetrievalHasError, healthCheckWarnings, validationHasError]);
+  }, [
+    alertRetrievalHasError,
+    healthCheckWarnings,
+    showEmptyRetrievalWorkflowsError,
+    validationHasError,
+  ]);
 
-  const isWorkflowConfigurationValid = useMemo(() => {
-    return !workflowValidationItems.some((item) => item.level === 'error');
-  }, [workflowValidationItems]);
+  // The action buttons remain enabled for the deferred empty-workflows error
+  // (the attempt is intercepted and canceled instead). Only the immediate,
+  // always-blocking errors disable the buttons.
+  const isWorkflowConfigurationValid = useMemo(
+    () => !alertRetrievalHasError && !validationHasError,
+    [alertRetrievalHasError, validationHasError]
+  );
 
   const settingsView = useMemo(
     () => (
       <>
         {isWorkflowsEnabled ? (
           <WorkflowSettingsView
-            alertRetrievalHasError={alertRetrievalHasError}
+            alertRetrievalHasError={alertRetrievalSectionHasError}
             alertsPreviewStackBy0={alertsPreviewStackBy0}
             alertSummaryStackBy0={alertSummaryStackBy0}
             connectorId={localConnectorId}
@@ -241,7 +283,7 @@ export const useSettingsView = ({
       </>
     ),
     [
-      alertRetrievalHasError,
+      alertRetrievalSectionHasError,
       alertSummaryStackBy0,
       alertsPreviewStackBy0,
       fetchDefaultEsqlQueryResult,
@@ -299,6 +341,13 @@ export const useSettingsView = ({
   }, [draftWorkflowConfiguration]);
 
   const handleSave = useCallback(() => {
+    // Cancel the save and reveal the deferred error when the alert retrieval
+    // workflows toggle is the sole retrieval source but no workflow is selected.
+    if (emptyRetrievalWorkflows) {
+      setHasAttemptedSave(true);
+      return;
+    }
+
     telemetry.reportEvent(
       AttackDiscoveryEventTypes.SettingsSaved,
       getWorkflowConfigTelemetryParams()
@@ -316,6 +365,7 @@ export const useSettingsView = ({
   }, [
     connectorId,
     draftWorkflowConfiguration,
+    emptyRetrievalWorkflows,
     getWorkflowConfigTelemetryParams,
     isWorkflowsEnabled,
     localConnectorId,
@@ -326,6 +376,13 @@ export const useSettingsView = ({
   ]);
 
   const onSaveAndRun = useCallback(() => {
+    // Cancel the run and reveal the deferred error when the alert retrieval
+    // workflows toggle is the sole retrieval source but no workflow is selected.
+    if (emptyRetrievalWorkflows) {
+      setHasAttemptedSave(true);
+      return;
+    }
+
     telemetry.reportEvent(
       AttackDiscoveryEventTypes.SaveAndRunClicked,
       getWorkflowConfigTelemetryParams()
@@ -354,6 +411,7 @@ export const useSettingsView = ({
     });
   }, [
     dataView,
+    emptyRetrievalWorkflows,
     getWorkflowConfigTelemetryParams,
     handleSave,
     localConnectorId,

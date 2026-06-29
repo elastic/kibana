@@ -7,10 +7,75 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SKILL_RETRIEVAL_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.skillRetrievalToggleLabel',
+  {
+    defaultMessage: 'Attack discovery skill retrieves alerts',
+  }
+);
+
+export const SKILL_RETRIEVAL_TOGGLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.skillRetrievalToggleTooltip',
+  {
+    defaultMessage:
+      'When enabled, the Attack Discovery skill retrieves and curates additional relevant alerts on top of any alerts collected by the other retrieval methods.',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsToggleLabel',
+  {
+    defaultMessage: 'Alert retrieval workflows',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_INFO_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsInfoAriaLabel',
+  {
+    defaultMessage: 'More information about alert retrieval workflows',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_POPOVER_HEADLINE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsPopoverHeadline',
+  {
+    defaultMessage: 'Run your own workflows to retrieve and enrich alerts for Attack Discovery',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_POPOVER_DETAIL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsPopoverDetail',
+  {
+    defaultMessage:
+      'The last step in the workflow that produces output returns the alerts: an ES|QL result (its columns and values) is converted to one alert per row, an array of strings is used as-is, and any other object is encoded as JSON.',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_EXAMPLE_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsExampleLabel',
+  {
+    defaultMessage: 'Example workflow',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_COPY_BUTTON = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsCopyButton',
+  {
+    defaultMessage: 'Copy',
+  }
+);
+
+export const ALERT_RETRIEVAL_WORKFLOWS_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalWorkflowsCloseButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
 export const DEFAULT_ALERT_RETRIEVAL_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.defaultAlertRetrievalToggleLabel',
   {
-    defaultMessage: 'Enable default retrieval workflow',
+    defaultMessage: 'ES|QL or custom query',
   }
 );
 
@@ -25,8 +90,7 @@ export const DEFAULT_ALERT_RETRIEVAL_TOGGLE_HELP = i18n.translate(
 export const DEFAULT_ALERT_RETRIEVAL_TOOLTIP = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.defaultAlertRetrievalTooltip',
   {
-    defaultMessage:
-      'The legacy workflow retrieves recent alerts. To customize which alerts are retrieved, use an ES|QL query or custom workflow.',
+    defaultMessage: 'Retrieves alerts with an ES|QL or custom query',
   }
 );
 
@@ -153,6 +217,13 @@ export const NO_ALERT_RETRIEVAL_METHOD_SELECTED = i18n.translate(
   }
 );
 
+export const NO_ALERT_RETRIEVAL_WORKFLOWS_SELECTED = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.noAlertRetrievalWorkflowsSelected',
+  {
+    defaultMessage: 'Select at least one alert retrieval workflow',
+  }
+);
+
 export const NO_VALIDATION_WORKFLOW_SELECTED = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.noValidationWorkflowSelected',
   {
@@ -212,7 +283,7 @@ export const ALERT_RETRIEVAL_SECTION_TITLE = i18n.translate(
 export const ALERT_RETRIEVAL_SECTION_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.alertRetrievalSectionDescription',
   {
-    defaultMessage: 'Choose how alerts are collected and enriched before generation.',
+    defaultMessage: 'Choose how alerts are collected',
   }
 );
 
@@ -277,6 +348,35 @@ export const CANCEL_GENERATION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.cancelGeneration',
   {
     defaultMessage: 'Cancel generation',
+  }
+);
+
+export const RETRIEVAL_MODE_SELECTOR_LEGEND = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.retrievalModeSelectorLegend',
+  {
+    defaultMessage: 'Alert retrieval mode',
+  }
+);
+
+export const RETRIEVAL_MODE_SKILL_OPTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.retrievalModeSkillOption',
+  {
+    defaultMessage: 'Skill',
+  }
+);
+
+export const RETRIEVAL_MODE_ADVANCED_OPTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.retrievalModeAdvancedOption',
+  {
+    defaultMessage: 'Advanced',
+  }
+);
+
+export const SKILL_RETRIEVAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.skillRetrievalDescription',
+  {
+    defaultMessage:
+      'The Attack Discovery skill automatically retrieves and curates the most relevant alerts. Use the advanced options to override retrieval with a custom query, ES|QL, or custom workflows.',
   }
 );
 

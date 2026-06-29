@@ -13,11 +13,17 @@ import type { WorkflowConfiguration } from './types';
 export const WORKFLOW_CONFIG_LOCAL_STORAGE_KEY = 'workflowConfig';
 
 /**
- * Default workflow settings when feature flag is first enabled
+ * Default workflow settings when feature flag is first enabled.
+ *
+ * Toggle 1 (skill) is ON by default; Toggle 2 (default retrieval) and Toggle 3
+ * (alert retrieval workflows) are OFF by default.
  */
 export const DEFAULT_WORKFLOW_CONFIGURATION: WorkflowConfiguration = {
-  alertRetrievalMode: 'custom_query',
+  alertRetrievalMode: 'esql',
   alertRetrievalWorkflowIds: [],
+  alertRetrievalWorkflowsEnabled: false,
+  defaultRetrievalEnabled: false,
+  skillEnabled: true,
   validationWorkflowId: 'default',
 };
 

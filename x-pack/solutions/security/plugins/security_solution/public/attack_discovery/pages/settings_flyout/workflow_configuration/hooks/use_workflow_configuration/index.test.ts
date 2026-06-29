@@ -22,8 +22,11 @@ const mockSetWorkflowSettings = setWorkflowSettings as jest.Mock;
 describe('useWorkflowConfiguration', () => {
   const testSpaceId = 'test-space';
   const testConfig: WorkflowConfiguration = {
+    alertRetrievalMode: 'custom_query',
     alertRetrievalWorkflowIds: ['workflow-1'],
-    alertRetrievalMode: 'custom_only',
+    alertRetrievalWorkflowsEnabled: true,
+    defaultRetrievalEnabled: false,
+    skillEnabled: true,
     validationWorkflowId: 'custom',
   };
 
