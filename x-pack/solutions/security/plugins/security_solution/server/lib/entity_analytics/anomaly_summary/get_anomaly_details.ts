@@ -26,6 +26,7 @@ const mapToAnomalySummaryEntry = (
   hit: EnrichedAnomalyHit,
   jobConfig: JobConfig | undefined
 ): AnomalySummaryEntry => ({
+  recordId: hit._id,
   jobId: hit.jobId,
   jobName: jobConfig?.jobName ?? null,
   threatTactics: jobConfig?.threatTactics,

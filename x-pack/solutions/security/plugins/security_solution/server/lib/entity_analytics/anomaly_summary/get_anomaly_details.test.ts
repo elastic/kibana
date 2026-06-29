@@ -118,6 +118,7 @@ describe('getEntityAnomalies', () => {
 
     expect(result.anomalies).toHaveLength(1);
     expect(result.anomalies[0]).toMatchObject({
+      recordId: 'a1',
       jobId: 'security-job-1',
       detectorIndex: 0,
       detectorFunction: 'rare',
