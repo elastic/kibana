@@ -14,11 +14,15 @@ import { RulesTabContent } from './rules_tab_content';
 
 const mockUseFetchRuleExecutions = jest.fn();
 const mockRefetch = jest.fn();
+const mockUseAlertingRulesCache = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'settings') {
       return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+    }
+    if (token === 'http') {
+      return {};
     }
     return {};
   },
@@ -29,9 +33,13 @@ jest.mock('../../../hooks/use_fetch_rule_executions', () => ({
   useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => ({
+  useAlertingRulesCache: (...args: unknown[]) => mockUseAlertingRulesCache(...args),
+}));
+
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
-  rule: { id: 'rule-1', name: 'My Rule' },
+  rule: { id: 'rule-1', version: null },
   spaceId: 'default',
   startedAt: '2026-05-05T10:00:00.000Z',
   endedAt: '2026-05-05T10:00:01.500Z',
@@ -70,6 +78,13 @@ const renderComponent = () =>
 describe('RulesTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAlertingRulesCache.mockReturnValue({
+      rulesCache: {
+        'rule-1': { id: 'rule-1', metadata: { name: 'My Rule' } },
+      },
+      loading: false,
+      error: undefined,
+    });
   });
 
   it('renders the table and outcome filter', () => {
@@ -131,10 +146,15 @@ describe('RulesTabContent', () => {
     expect(mockOnRuleClick).toHaveBeenCalledWith('rule-1');
   });
 
-  it('shows rule id as plain text when rule name is null', () => {
+  it('shows rule id as plain text when rule is not in cache', () => {
+    mockUseAlertingRulesCache.mockReturnValue({
+      rulesCache: {},
+      loading: false,
+      error: undefined,
+    });
     mockResult({
       data: {
-        items: [buildItem({ rule: { id: 'rule-orphan', name: null } })],
+        items: [buildItem({ rule: { id: 'rule-orphan', version: null } })],
         total: 1,
         page: 1,
         perPage: 10,

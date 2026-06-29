@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { asDuration } from '@kbn/alerts-ui-shared';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import type { RuleExecutionOutcome, RuleExecutionView } from '@kbn/alerting-v2-schemas';
 import { RULE_EXECUTIONS_MAX_RESULT_WINDOW } from '@kbn/alerting-v2-schemas';
 import { useFetchRuleExecutions } from '../../../hooks/use_fetch_rule_executions';
@@ -64,7 +65,8 @@ const MS_TO_US = 1000;
 
 const buildColumns = (
   dateTimeFormat: string,
-  onRuleClick: (ruleId: string) => void
+  onRuleClick: (ruleId: string) => void,
+  rulesCache: Record<string, { metadata: { name: string } }>
 ): Array<EuiBasicTableColumn<RuleExecutionView>> => [
   {
     field: 'startedAt',
@@ -79,19 +81,21 @@ const buildColumns = (
       defaultMessage: 'Rule',
     }),
     width: '15%',
-    render: (item: RuleExecutionView) =>
-      item.rule.name != null ? (
+    render: (item: RuleExecutionView) => {
+      const ruleName = rulesCache[item.rule.id]?.metadata?.name;
+      return ruleName != null ? (
         <EuiButtonEmpty
           size="xs"
           flush="left"
           onClick={() => onRuleClick(item.rule.id)}
           data-test-subj={`ruleExecutionHistoryRuleLink-${item.rule.id}`}
         >
-          {item.rule.name}
+          {ruleName}
         </EuiButtonEmpty>
       ) : (
         item.rule.id
-      ),
+      );
+    },
   },
   {
     name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.duration', {
@@ -146,8 +150,18 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     outcome: toOutcomeParam(outcomeFilter),
   });
 
+  const http = useService(CoreStart('http'));
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
+
+  const items = useMemo(() => data?.items ?? [], [data?.items]);
+
+  const ruleIds = useMemo(() => [...new Set(items.map((item) => item.rule.id))], [items]);
+
+  const { rulesCache } = useAlertingRulesCache({
+    ruleIds,
+    services: { http },
+  });
 
   const onOutcomeChange = useCallback((value: RuleOutcomeFilter) => {
     setOutcomeFilter(value);
@@ -165,11 +179,9 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   );
 
   const columns = useMemo(
-    () => buildColumns(dateTimeFormat, onRuleClick),
-    [dateTimeFormat, onRuleClick]
+    () => buildColumns(dateTimeFormat, onRuleClick, rulesCache),
+    [dateTimeFormat, onRuleClick, rulesCache]
   );
-
-  const items = data?.items ?? [];
   // Prevent pagination from exceeding the API's max result window
   const total = Math.min(data?.total ?? 0, RULE_EXECUTIONS_MAX_RESULT_WINDOW);
   const isFiltered = outcomeFilter !== 'all';

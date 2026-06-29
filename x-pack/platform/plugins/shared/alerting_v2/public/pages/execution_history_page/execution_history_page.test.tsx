@@ -30,6 +30,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'settings') {
       return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
     }
+    if (token === 'http') {
+      return {};
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -41,6 +44,10 @@ jest.mock('../../hooks/use_fetch_execution_history', () => ({
 
 jest.mock('../../hooks/use_fetch_rule_executions', () => ({
   useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => ({
+  useAlertingRulesCache: () => ({ rulesCache: {}, loading: false, error: undefined }),
 }));
 
 const mockUseCountNewExecutionHistoryEvents = jest.fn();
