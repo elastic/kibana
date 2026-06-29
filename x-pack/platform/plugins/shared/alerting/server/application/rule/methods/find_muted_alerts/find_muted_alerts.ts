@@ -98,20 +98,24 @@ export async function findMutedAlerts(
       throw error;
     }
 
+    return { id, name: attributes.name, mutedInstanceIds: attributes.mutedInstanceIds ?? [] };
+  });
+
+  // Log success events only after every returned rule has passed authorization, so a
+  // request that is ultimately denied (a later rule throws) leaves no partial success trail.
+  authorizedData.forEach(({ id, name }) =>
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.FIND_MUTED_ALERTS,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
       })
-    );
-
-    return { id, mutedInstanceIds: attributes.mutedInstanceIds ?? [] };
-  });
+    )
+  );
 
   return {
     page,
     perPage,
     total,
-    data: authorizedData,
+    data: authorizedData.map(({ id, mutedInstanceIds }) => ({ id, mutedInstanceIds })),
   };
 }

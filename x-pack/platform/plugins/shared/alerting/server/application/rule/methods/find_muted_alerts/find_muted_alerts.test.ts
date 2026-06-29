@@ -288,5 +288,47 @@ describe('findMutedAlerts()', () => {
         })
       );
     });
+
+    test('does not log success events for earlier rules when a later rule fails authorization', async () => {
+      mockSavedObjectsFindResponse([
+        { id: '1', attributes: { alertTypeId: 'myType', consumer: 'myApp', name: 'authorized' } },
+        {
+          id: '2',
+          attributes: { alertTypeId: 'otherType', consumer: 'myApp', name: 'unauthorized' },
+        },
+      ]);
+
+      authorization.getAuthorizationFilter.mockResolvedValue({
+        filter: undefined,
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string) => {
+          if (ruleTypeId === 'otherType') {
+            throw new Error('Unauthorized');
+          }
+        },
+      });
+
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+      await expect(rulesClient.findMutedAlerts({ options: {} })).rejects.toThrow('Unauthorized');
+
+      // The earlier, authorized rule must not leave a success trail for a denied request.
+      expect(auditLogger.log).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_find_muted_alerts',
+            outcome: 'success',
+          }),
+        })
+      );
+      // The failing rule still logs a failure event.
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_find_muted_alerts',
+            outcome: 'failure',
+          }),
+          kibana: { saved_object: { id: '2', type: RULE_SAVED_OBJECT_TYPE, name: 'unauthorized' } },
+        })
+      );
+    });
   });
 });
