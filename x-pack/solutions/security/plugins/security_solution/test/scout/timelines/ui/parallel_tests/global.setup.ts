@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-security';
+import { globalSetupHook, SECURITY_ARCHIVES } from '@kbn/scout-security';
 
-globalSetupHook('Global setup', async ({ log }) => {
-  log.debug('[setup] no archive ingestion needed for this area');
+globalSetupHook('Ingest archives to Elasticsearch', async ({ esArchiver, log }) => {
+  log.debug('[setup] loading archives test data (only if indexes do not exist)...');
+  await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.AUDITBEAT);
 });
