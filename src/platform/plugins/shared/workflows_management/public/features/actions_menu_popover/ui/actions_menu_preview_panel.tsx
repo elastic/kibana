@@ -8,6 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,7 +37,7 @@ import {
   isActionOption,
 } from '../types';
 
-type TabId = 'inputs' | 'outputs';
+type TabId = 'inputs' | 'outputs' | 'yaml';
 
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
@@ -92,6 +93,28 @@ export function ActionsMenuPreviewPanel({
 
   const fields = activeTab === 'inputs' ? inputFields : outputFields;
 
+  const yamlSnippet = useMemo(() => {
+    if (!hoveredOption || !isLeaf) return '';
+    const stepId = hoveredOption.id;
+    const required = inputFields.filter((f) => f.required);
+    const lines: string[] = [`- step: ${stepId}`];
+    if (required.length > 0) {
+      lines.push('  inputs:');
+      for (const f of required) {
+        const placeholder =
+          f.typeName === 'STRING'
+            ? '""'
+            : f.typeName === 'BOOLEAN'
+            ? 'false'
+            : f.typeName === 'NUMBER' || f.typeName === 'INTEGER'
+            ? '0'
+            : '{}';
+        lines.push(`    ${f.name}: ${placeholder}`);
+      }
+    }
+    return lines.join('\n');
+  }, [hoveredOption, isLeaf, inputFields]);
+
   if (!hoveredOption) {
     return <DefaultPanel />;
   }
@@ -115,6 +138,7 @@ export function ActionsMenuPreviewPanel({
       inputCount={inputFields.length}
       outputCount={outputFields.length}
       examples={examples}
+      yamlSnippet={yamlSnippet}
       styles={styles}
     />
   );
@@ -261,6 +285,7 @@ function StepDetailPanel({
   inputCount,
   outputCount,
   examples,
+  yamlSnippet,
   styles,
 }: {
   step: ActionOptionData;
@@ -270,6 +295,7 @@ function StepDetailPanel({
   inputCount: number;
   outputCount: number;
   examples: string[];
+  yamlSnippet: string;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
   return (
@@ -312,8 +338,18 @@ function StepDetailPanel({
               </EuiNotificationBadge>
             )}
           </EuiTab>
+          <EuiTab isSelected={activeTab === 'yaml'} onClick={() => onTabChange('yaml')}>
+            <FormattedMessage id="workflows.actionsMenu.preview.yaml" defaultMessage="YAML" />
+          </EuiTab>
         </EuiTabs>
 
+        {activeTab === 'yaml' ? (
+          <div css={styles.fieldList}>
+            <div css={styles.yamlPreview}>
+              <pre css={styles.codeText}>{yamlSnippet || `- step: ${step.id}`}</pre>
+            </div>
+          </div>
+        ) : (
         <div css={styles.fieldList}>
           {fields.length === 0 ? (
             <div css={styles.emptyFields}>
@@ -334,6 +370,14 @@ function StepDetailPanel({
                       {field.name}
                     </EuiText>
                     <span css={styles.typeBadge}>{field.typeName}</span>
+                    {field.required && (
+                      <span css={styles.requiredBadge}>
+                        <FormattedMessage
+                          id="workflows.actionsMenu.preview.required"
+                          defaultMessage="required"
+                        />
+                      </span>
+                    )}
                   </div>
                   {field.description && (
                     <EuiText size="xs" color="subdued" css={styles.fieldDescription}>
@@ -345,6 +389,7 @@ function StepDetailPanel({
             ))
           )}
         </div>
+        )}
       </div>
 
       {examples.length > 0 && (
@@ -365,9 +410,14 @@ function StepDetailPanel({
 
 function PreviewStepRow({ step, onClick }: { step: ActionOptionData; onClick: () => void }) {
   const styles = useMemoCss(previewStepRowStyles);
+  const { euiTheme } = useEuiTheme();
+  const isPink =
+    isActionGroup(step) || isActionOption(step)
+      ? step.iconColor === euiTheme.colors.vis.euiColorVis6
+      : false;
   return (
     <button type="button" css={styles.row} onClick={onClick}>
-      <span css={styles.iconContainer}>
+      <span css={[styles.iconContainer, isPink ? styles.iconContainerPink : styles.iconContainerBlue]}>
         {isActionConnectorGroup(step) || isActionConnectorOption(step) ? (
           <StepIcon
             stepType={getBaseConnectorType(step.connectorType)}
@@ -477,6 +527,16 @@ const panelStyles = {
   fieldName: css({
     fontWeight: 500,
   }),
+  requiredBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: 'auto',
+      flexShrink: 0,
+      fontSize: '10px',
+      fontWeight: 500,
+      lineHeight: '16px',
+      color: euiTheme.colors.textSubdued,
+      letterSpacing: '0.02em',
+    }),
   fieldDescription: css({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -522,6 +582,12 @@ const panelStyles = {
     lineHeight: '19px',
     whiteSpace: 'pre',
   }),
+  yamlPreview: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: '16px',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderRadius: '0 0 16px 16px',
+    }),
 };
 
 const defaultPanelStyles = {
@@ -598,18 +664,24 @@ const previewStepRowStyles = {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       },
     }),
-  iconContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '40px',
-      height: '40px',
-      flexShrink: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: euiTheme.colors.backgroundBasePrimary,
-      borderRadius: '8px',
-      overflow: 'hidden',
-    }),
+  iconContainer: css({
+    width: '40px',
+    height: '40px',
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  }),
+  iconContainerBlue: css({
+    backgroundColor: 'rgba(241, 246, 255)',
+    border: '1px solid rgba(191, 219, 255)',
+  }),
+  iconContainerPink: css({
+    backgroundColor: 'rgba(255, 235, 242)',
+    border: '1px solid rgba(255, 199, 219)',
+  }),
   info: css({
     display: 'flex',
     flexDirection: 'column',

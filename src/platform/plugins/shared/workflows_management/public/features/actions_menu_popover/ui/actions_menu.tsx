@@ -160,7 +160,15 @@ export function ActionsMenu({
         onMouseEnter={() => handleMouseEnter(action)}
       >
         <EuiFlexGroup alignItems="center" css={styles.actionOption} gutterSize="none">
-          <EuiFlexItem grow={false} css={styles.iconOuter}>
+          <EuiFlexItem
+            grow={false}
+            css={[
+              styles.iconOuter,
+              action.iconColor === euiTheme.colors.vis.euiColorVis6
+                ? styles.iconOuterPink
+                : styles.iconOuterBlue,
+            ]}
+          >
             <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
               {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
                 <StepIcon
@@ -568,17 +576,26 @@ const componentStyles = {
     flexDirection: 'column',
     gap: '2px',
   }),
-  iconOuter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '40px',
-      height: '40px',
-      flexShrink: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: euiTheme.colors.backgroundBasePrimary,
-      borderRadius: '8px',
-    }),
+  // Figma: Icon Container — 40x40 r=8
+  iconOuter: css({
+    width: '40px',
+    height: '40px',
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '8px',
+  }),
+  // Figma: fill=rgba(241,246,255) stroke=rgba(191,219,255)
+  iconOuterBlue: css({
+    backgroundColor: 'rgba(241, 246, 255)',
+    border: '1px solid rgba(191, 219, 255)',
+  }),
+  // Figma: fill=rgba(255,235,242,0.6) stroke=rgba(255,199,219)
+  iconOuterPink: css({
+    backgroundColor: 'rgba(255, 235, 242)',
+    border: '1px solid rgba(255, 199, 219)',
+  }),
   groupIconInner: css({
     display: 'flex',
     alignItems: 'center',
