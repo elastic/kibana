@@ -41,7 +41,7 @@ describe('useJourneySteps', () => {
   // and `payload` directly instead.
 
   it('dispatches fetchJourneyAction with undefined remoteName for local monitors', () => {
-    renderHook(() => useJourneySteps('cg-explicit'));
+    renderHook(() => useJourneySteps({ checkGroup: 'cg-explicit' }));
 
     expect(mockDispatch).toHaveBeenCalledTimes(1);
     const dispatched = mockDispatch.mock.calls[0][0];
@@ -52,7 +52,7 @@ describe('useJourneySteps', () => {
   it('forwards the URL remoteName for remote monitors', () => {
     mockUrlParams.mockReturnValue({ remoteName: 'remote-a' });
 
-    renderHook(() => useJourneySteps('cg-explicit'));
+    renderHook(() => useJourneySteps({ checkGroup: 'cg-explicit' }));
 
     expect(mockDispatch).toHaveBeenCalledTimes(1);
     const dispatched = mockDispatch.mock.calls[0][0];
@@ -69,7 +69,7 @@ describe('useJourneySteps', () => {
   });
 
   it('forwards stepsOnly so the server can skip the journey-details lookup', () => {
-    renderHook(() => useJourneySteps('cg-explicit', undefined, undefined, undefined, true));
+    renderHook(() => useJourneySteps({ checkGroup: 'cg-explicit', stepsOnly: true }));
 
     expect(mockDispatch).toHaveBeenCalledTimes(1);
     const dispatched = mockDispatch.mock.calls[0][0];

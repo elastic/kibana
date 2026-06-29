@@ -17,13 +17,21 @@ import {
 } from '../../../state';
 import { useGetUrlParams } from '../../../hooks';
 
-export const useJourneySteps = (
-  checkGroup?: string,
-  lastRefresh?: number,
-  stepIndexArg?: number,
-  timestamp?: string,
-  stepsOnly?: boolean
-) => {
+export interface UseJourneyStepsParams {
+  checkGroup?: string;
+  lastRefresh?: number;
+  stepIndex?: number;
+  timestamp?: string;
+  stepsOnly?: boolean;
+}
+
+export const useJourneySteps = ({
+  checkGroup,
+  lastRefresh,
+  stepIndex: stepIndexArg,
+  timestamp,
+  stepsOnly,
+}: UseJourneyStepsParams = {}) => {
   const { stepIndex: stepIndexUrl, checkGroupId: urlCheckGroup } = useParams<{
     stepIndex: string;
     checkGroupId: string;

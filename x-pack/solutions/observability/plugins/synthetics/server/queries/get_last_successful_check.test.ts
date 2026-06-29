@@ -109,6 +109,7 @@ describe('getLastSuccessfulStep', () => {
           },
         },
         size: 1,
+        track_total_hits: false,
         sort: [
           {
             '@timestamp': {
@@ -164,6 +165,7 @@ describe('getLastSuccessfulStep', () => {
           },
         },
         size: 1,
+        track_total_hits: false,
         sort: [
           {
             '@timestamp': {

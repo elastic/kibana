@@ -37,6 +37,10 @@ export const getLastSuccessfulStepParams = ({
 
   return {
     size: 1,
+    // With size:1 + `@timestamp desc` we only need the latest doc, so skip hit
+    // counting. This lets ES order shards by `@timestamp` and short-circuit once
+    // the first match is found instead of scanning every matching shard.
+    track_total_hits: false,
     sort: [
       {
         '@timestamp': {
@@ -117,7 +121,8 @@ export const getLastSuccessfulCheck = async ({
     ...lastSuccessCheckParams,
   });
 
-  if (result.hits.total.value < 1) {
+  // `track_total_hits: false` omits `hits.total`, so check the returned hits.
+  if (result.hits.hits.length < 1) {
     return null;
   }
 
