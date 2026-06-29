@@ -68,6 +68,29 @@ describe('writeAlertRetrievalSucceededEvent', () => {
     );
   });
 
+  it('forwards conversationId to the event writer when provided', async () => {
+    await writeAlertRetrievalSucceededEvent({
+      ...defaultProps,
+      conversationId: 'conversation-1',
+    });
+
+    expect(mockWriteAttackDiscoveryEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: 'conversation-1',
+      })
+    );
+  });
+
+  it('omits conversationId from the event writer when not provided', async () => {
+    await writeAlertRetrievalSucceededEvent(defaultProps);
+
+    expect(mockWriteAttackDiscoveryEvent).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        conversationId: expect.anything(),
+      })
+    );
+  });
+
   it('logs an error when event writing fails', async () => {
     mockWriteAttackDiscoveryEvent.mockRejectedValueOnce(new Error('fail'));
 

@@ -25,6 +25,7 @@ import {
   extractPipelineAlertData,
   type ExtractionStrategy,
 } from './helpers/extract_pipeline_alert_data';
+import { extractPipelineGateData } from './helpers/extract_pipeline_gate_data';
 import {
   extractPipelineGenerationData,
   type PipelineGenerationData,
@@ -56,6 +57,8 @@ interface WorkflowExecutionTrackingResponse {
 /** snake_case response shape for all workflow execution tracking */
 interface WorkflowExecutionsTrackingResponse {
   alert_retrieval: WorkflowExecutionTrackingResponse[] | null;
+  /** Generation-phase gate (skill) runs, surfaced under the Generation phase. */
+  gate: WorkflowExecutionTrackingResponse[] | null;
   generation: WorkflowExecutionTrackingResponse | null;
   validation: WorkflowExecutionTrackingResponse | null;
 }
@@ -64,6 +67,8 @@ interface WorkflowExecutionsTrackingResponse {
 export interface AlertRetrievalPipelineDataResponse {
   alerts: string[];
   alerts_context_count: number | null;
+  /** Count of custom-workflow alerts that lack a recoverable backing `_id` (C2). */
+  alerts_missing_id_count?: number;
   extraction_strategy: ExtractionStrategy;
   workflow_id: string;
   workflow_run_id: string;
@@ -91,6 +96,11 @@ const toSnakeCaseTracking = (
 ): WorkflowExecutionsTrackingResponse => ({
   alert_retrieval:
     tracking.alertRetrieval?.map((entry) => ({
+      workflow_id: entry.workflowId,
+      workflow_run_id: entry.workflowRunId,
+    })) ?? null,
+  gate:
+    tracking.gate?.map((entry) => ({
       workflow_id: entry.workflowId,
       workflow_run_id: entry.workflowRunId,
     })) ?? null,
@@ -231,6 +241,68 @@ export const registerGetPipelineDataRoute = (
           let alertRetrievalData: AlertRetrievalPipelineDataResponse[] | null =
             nonNullEntries != null && nonNullEntries.length > 0 ? nonNullEntries : null;
 
+          // Step 2b: Extract generation-phase gate (skill) data. The `gate` bucket
+          // holds a SINGLE entry: the gate (skill) decision run. Any net-new alert
+          // re-fetch the gate triggers is folded into that run (see `runGatePhase`)
+          // so each workflow execution is one entry under the Generation phase. For
+          // the completed decision run we surface a gate-aware count (kept + added
+          // ids, B1) so its badge is accurate; the gate emits ids only, so it
+          // carries no raw alerts. Before the decision completes, `extractPipelineGateData`
+          // returns null and we fall back to standard alert extraction. This entry is
+          // keyed by workflow_run_id so the gate sub-step badge/inspect resolve, but it
+          // is kept OUT of the combined alert-retrieval computation (the Alert retrieval phase).
+          const gateEntries =
+            tracking.gate != null
+              ? await Promise.all(
+                  tracking.gate.map(async (entry) => {
+                    const execution = await workflowsManagementApi.getWorkflowExecution(
+                      entry.workflowRunId,
+                      spaceId,
+                      { includeInput: true, includeOutput: true }
+                    );
+
+                    if (execution == null) return null;
+
+                    const gateData = extractPipelineGateData({ execution, logger });
+
+                    if (gateData != null) {
+                      return {
+                        ...gateData,
+                        workflow_id: entry.workflowId,
+                        workflow_run_id: entry.workflowRunId,
+                      };
+                    }
+
+                    try {
+                      const data = extractPipelineAlertData({
+                        apiConfig: FALLBACK_API_CONFIG,
+                        execution,
+                        workflowId: entry.workflowId,
+                        workflowRunId: entry.workflowRunId,
+                      });
+
+                      return {
+                        ...data,
+                        workflow_id: entry.workflowId,
+                        workflow_run_id: entry.workflowRunId,
+                      };
+                    } catch (extractionError) {
+                      logger.warn(
+                        `Failed to extract gate data for workflow ${entry.workflowId}: ${
+                          extractionError instanceof Error
+                            ? extractionError.message
+                            : String(extractionError)
+                        }`
+                      );
+                      return null;
+                    }
+                  })
+                )
+              : null;
+
+          const gateData =
+            gateEntries?.filter((e): e is AlertRetrievalPipelineDataResponse => e !== null) ?? [];
+
           // Step 3: Extract generation data from generation workflow.
           // When alert_retrieval_mode is 'provided', also fetch the generation step's
           // input so Step 2.5 can reconstruct the alert retrieval data from the
@@ -249,19 +321,22 @@ export const registerGetPipelineDataRoute = (
           const isProvidedMode =
             tracking.diagnosticsContext?.config?.alertRetrievalMode === 'provided';
 
-          // When in provided mode, fetch step inputs so we can extract the pre-provided
-          // alerts from the 'generate_discoveries' step's input.alerts field.
+          // Always fetch step inputs so we can extract the actual alerts the
+          // generate step received from the 'generate_discoveries' step's
+          // input.alerts field. These are the REAL events passed to generation —
+          // used both to surface them on the gate (skill) inspect (Step 5b) and to
+          // reconstruct provided-mode alert retrieval (Step 2.5).
           // Note: includeInput controls _step execution_ inputs, not workflow-level input.
           let generationStepAlerts: string[] | null = null;
           const generationData: PipelineGenerationData | null =
             generationTracking != null
               ? await workflowsManagementApi
                   .getWorkflowExecution(generationTracking.workflowRunId, spaceId, {
-                    includeInput: isProvidedMode,
+                    includeInput: true,
                     includeOutput: true,
                   })
                   .then((generationExecution) => {
-                    if (isProvidedMode && generationExecution != null) {
+                    if (generationExecution != null) {
                       // Find the 'generate_discoveries' step execution and extract alerts
                       // from its input. The generation workflow YAML maps
                       // `inputs.additional_alerts` → step `with.alerts`, so the step
@@ -283,9 +358,9 @@ export const registerGetPipelineDataRoute = (
 
                       logger.debug(
                         () =>
-                          `Step 2.5: found generate_discoveries step=${
-                            generateStep != null
-                          }, alertsCount=${Array.isArray(alerts) ? alerts.length : 'N/A'}`
+                          `Found generate_discoveries step=${generateStep != null}, alertsCount=${
+                            Array.isArray(alerts) ? alerts.length : 'N/A'
+                          }`
                       );
                     }
                     return extractPipelineGenerationData({ generationExecution });
@@ -362,14 +437,48 @@ export const registerGetPipelineDataRoute = (
                   })
               : null;
 
-          // Step 5: Compute combined alerts from all retrieval results
+          // Step 5: Compute combined alerts from the Alert-retrieval-phase results
+          // only (gate entries belong to the Generation phase and are excluded so
+          // the "Combined alert retrieval" view stays scoped to alert retrieval).
           const combinedAlerts =
             alertRetrievalData != null && alertRetrievalData.length > 0
               ? computeCombinedAlerts(alertRetrievalData)
               : null;
 
+          // Step 5b: Attach the REAL events passed to generation to the gate
+          // (skill) entry. The gate emits ids only, so on its own it carries no
+          // raw alerts (inspect would be disabled). The authoritative set of
+          // alerts generation actually received is the generate step's
+          // `input.alerts` — the kept candidates passed through as-is (including
+          // alerts from any alert-retrieval workflow) plus any net-new the gate
+          // added. Sourcing inspect from the generate step input guarantees it
+          // always reflects exactly what generation analyzed. The count is set to
+          // match so the badge and inspect agree; until the generate step input is
+          // available the gate-aware (kept + added) count from Step 2b stands.
+          // Cast required because TS control-flow narrows the `let` to `null`
+          // (it cannot see the assignment made inside the `.then` callback above).
+          const generationInputAlerts = generationStepAlerts as string[] | null;
+          const gateDataWithGenerationAlerts: AlertRetrievalPipelineDataResponse[] = gateData.map(
+            (entry) =>
+              entry.extraction_strategy === 'skill' && Array.isArray(generationInputAlerts)
+                ? {
+                    ...entry,
+                    alerts: generationInputAlerts,
+                    alerts_context_count: generationInputAlerts.length,
+                  }
+                : entry
+          );
+
+          // Merge the gate entries into alert_retrieval so the gate sub-step's
+          // badge/inspect (keyed by workflow_run_id) resolve under the Generation
+          // phase, without affecting the combined alert-retrieval computation above.
+          const allRetrievalData: AlertRetrievalPipelineDataResponse[] | null =
+            alertRetrievalData != null || gateDataWithGenerationAlerts.length > 0
+              ? [...(alertRetrievalData ?? []), ...gateDataWithGenerationAlerts]
+              : null;
+
           const responseBody: GetPipelineDataResponse = {
-            alert_retrieval: alertRetrievalData,
+            alert_retrieval: allRetrievalData,
             combined_alerts: combinedAlerts,
             ...(tracking.diagnosticsContext != null
               ? { diagnostics_context: tracking.diagnosticsContext }

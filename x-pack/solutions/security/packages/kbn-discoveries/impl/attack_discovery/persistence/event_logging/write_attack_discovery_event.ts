@@ -38,6 +38,12 @@ export interface WorkflowExecutionTracking {
 
 export interface WorkflowExecutionsTracking {
   alertRetrieval: WorkflowExecutionTracking[] | null;
+  /**
+   * Generation-phase gate (skill) executions, including any net-new alert
+   * re-fetch the skill triggers. Surfaced under the Generation phase in the
+   * monitoring UI rather than Alert retrieval.
+   */
+  gate?: WorkflowExecutionTracking[] | null;
   generation: WorkflowExecutionTracking | null;
   validation: WorkflowExecutionTracking | null;
 }
@@ -105,6 +111,7 @@ export const writeAttackDiscoveryEvent = async ({
   alertsContextCount,
   authenticatedUser,
   connectorId,
+  conversationId,
   dataClient,
   diagnosticsContext,
   duration,
@@ -159,6 +166,12 @@ export const writeAttackDiscoveryEvent = async ({
   authenticatedUser: AuthenticatedUser;
   /** The connector id (event.dataset) for this generation */
   connectorId: string;
+  /**
+   * Identifier of the persisted Agent Builder conversation for skill-based alert
+   * retrieval. Stored in event.reference JSON (no new ES mapping) so the generations
+   * transform can surface it for resumable reporting and conversation linking.
+   */
+  conversationId?: string;
   /** This client is used to wait for an event log refresh */
   dataClient: EventLogRefresher | null;
   /**
@@ -258,6 +271,7 @@ export const writeAttackDiscoveryEvent = async ({
     reason != null && reason.length > MAX_LENGTH ? reason.substring(0, MAX_LENGTH) : reason;
 
   const referenceData = {
+    ...(conversationId != null ? { conversationId } : {}),
     ...(diagnosticsContext != null ? { diagnosticsContext } : {}),
     ...(errorCategory != null ? { errorCategory } : {}),
     ...(failedWorkflowId != null ? { failedWorkflowId } : {}),

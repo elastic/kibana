@@ -17,7 +17,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import moment from 'moment';
 import { uniq } from 'lodash/fp';
-import type { ErrorCategory } from '@kbn/discoveries-schemas';
+import { ERROR_CATEGORIES, type ErrorCategory } from '@kbn/discoveries-schemas';
 import type {
   AttackDiscoverySource,
   DiagnosticsContext,
@@ -280,7 +280,7 @@ const reportGenerationSuccessTelemetry = ({
 }): void => {
   const durationMs = Date.now() - pipelineStartTime.getTime();
   const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ end, start });
-  const usesDefaultRetrieval = workflowConfig.alert_retrieval_mode !== 'custom_only';
+  const usesDefaultRetrieval = workflowConfig.default_retrieval_enabled;
   const usesDefaultValidation =
     workflowConfig.validation_workflow_id === '' ||
     workflowConfig.validation_workflow_id === verifiedWorkflowIds.validate;
@@ -497,6 +497,7 @@ export async function executeGenerationWorkflow({
   logger,
   request,
   scheduleInfo,
+  shouldStopExecution,
   size,
   source,
   sourceMetadata,
@@ -566,10 +567,11 @@ export async function executeGenerationWorkflow({
       spaceId,
     });
 
+    const hasProvidedAlerts = alerts != null && alerts.length > 0;
     const loadingMessage = getWorkflowLoadingMessage({
-      alertsCount:
-        workflowConfig.alert_retrieval_mode === 'provided' ? alerts?.length ?? 0 : size ?? 0,
+      alertsCount: size ?? 0,
       end,
+      ...(hasProvidedAlerts ? { providedAlertsCount: alerts.length } : {}),
       start,
       workflowConfig,
     });
@@ -692,9 +694,28 @@ export async function executeGenerationWorkflow({
       sourceMetadata,
       spaceId,
       start,
+      trigger,
       workflowConfig,
       workflowsManagementApi: workflowsApi,
     });
+
+    // Remove this when the alerting framework adds a way to abort rule execution:
+    // https://github.com/elastic/kibana/issues/219152
+    //
+    // The orchestration above can run longer than the rule task's timeout. Once the
+    // task has been cancelled, the alerting framework silently discards any alerts the
+    // rule executor reports afterwards, so treating this as a success would surface a
+    // misleading "ran successfully" result while persisting nothing to the scheduled
+    // index. Throw so the failure flows through `handleGenerationFailure`, which writes
+    // a terminal generation-failed event (the UI status transform prioritizes `failed`
+    // over the already-written `succeeded`) and propagates the error to fail the rule.
+    if (shouldStopExecution?.() === true) {
+      throw new AttackDiscoveryError({
+        errorCategory: ERROR_CATEGORIES.timeout,
+        message: 'Rule execution cancelled due to timeout',
+        workflowId: generationWorkflowId,
+      });
+    }
 
     if (analytics != null) {
       reportGenerationSuccessTelemetry({

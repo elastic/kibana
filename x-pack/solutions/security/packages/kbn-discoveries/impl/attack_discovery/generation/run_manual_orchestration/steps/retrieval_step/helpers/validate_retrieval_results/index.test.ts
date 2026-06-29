@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { ERROR_CATEGORIES } from '@kbn/discoveries-schemas';
+
 import type { AlertRetrievalResult } from '../../../../../invoke_alert_retrieval_workflow';
+import { AttackDiscoveryError } from '../../../../../../../lib/errors/attack_discovery_error';
 import { validateRetrievalResults } from '.';
 
 const mockLegacyResult: AlertRetrievalResult = {
@@ -30,6 +33,7 @@ describe('validateRetrievalResults', () => {
       validateRetrievalResults({
         customResults: [],
         legacyResult: mockLegacyResult,
+        skillEnabled: false,
       })
     ).not.toThrow();
   });
@@ -46,6 +50,7 @@ describe('validateRetrievalResults', () => {
           },
         ],
         legacyResult: null,
+        skillEnabled: false,
       })
     ).not.toThrow();
   });
@@ -62,18 +67,56 @@ describe('validateRetrievalResults', () => {
           },
         ],
         legacyResult: mockLegacyResult,
+        skillEnabled: false,
       })
     ).not.toThrow();
   });
 
-  it('throws when both legacyResult is null and customResults are empty', () => {
+  it('does not throw when skillEnabled is true even though legacyResult is null and customResults are empty', () => {
     expect(() =>
       validateRetrievalResults({
         customResults: [],
         legacyResult: null,
+        skillEnabled: true,
+      })
+    ).not.toThrow();
+  });
+
+  it('throws when skillEnabled is false and both legacyResult is null and customResults are empty', () => {
+    expect(() =>
+      validateRetrievalResults({
+        customResults: [],
+        legacyResult: null,
+        skillEnabled: false,
       })
     ).toThrow(
       'No alert retrieval results: default retrieval is disabled or failed, and no custom workflows succeeded'
     );
+  });
+
+  it('throws an AttackDiscoveryError so the failure surfaces as a classified, troubleshootable error state', () => {
+    expect(() =>
+      validateRetrievalResults({
+        customResults: [],
+        legacyResult: null,
+        skillEnabled: false,
+      })
+    ).toThrow(AttackDiscoveryError);
+  });
+
+  it('classifies the thrown error as a validation_error', () => {
+    let caught: unknown;
+
+    try {
+      validateRetrievalResults({
+        customResults: [],
+        legacyResult: null,
+        skillEnabled: false,
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect((caught as AttackDiscoveryError).errorCategory).toBe(ERROR_CATEGORIES.validation_error);
   });
 });
