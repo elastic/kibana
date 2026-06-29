@@ -80,14 +80,14 @@ describe('Calculate risk scores with ESQL', () => {
       });
     });
 
-    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
+    it('falls back to exists query on resolution_target_id when targetEntityIds is undefined', () => {
       const query = getResolutionCompositeQuery(
         '.entity_analytics.risk_score.lookup-default',
         1000
       );
 
       expect(query.query).toEqual({
-        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+        exists: { field: 'resolution_target_id' },
       });
     });
   });
