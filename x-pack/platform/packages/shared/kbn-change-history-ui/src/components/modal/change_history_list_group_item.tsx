@@ -15,7 +15,7 @@
 import React, { useCallback } from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import { EuiListGroupItem } from '@elastic/eui';
-import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
 import * as i18n from '../timeline/translations';
 
 export interface ChangeHistoryListGroupItemProps {
@@ -29,7 +29,7 @@ export function ChangeHistoryListGroupItem({
   label,
   listGroupItemProps,
 }: ChangeHistoryListGroupItemProps): JSX.Element {
-  const { openModal } = useChangeHistoryConfig();
+  const { openModal } = useChangeHistoryInternalConfig();
 
   const handleClick = useCallback(() => {
     onClick?.();

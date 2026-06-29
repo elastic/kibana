@@ -56,6 +56,8 @@ export function ChangeHistoryPreviewShell({
         flex: 1 1 auto;
         min-height: 0;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
       `,
       footer: css`
         flex-shrink: 0;

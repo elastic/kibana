@@ -8,8 +8,10 @@
  */
 
 import {
+  getWorkflowYamlFromSnapshot,
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
+  toWorkflowChangeHistorySnapshot,
 } from './map_workflow_history_item';
 import {
   WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
@@ -75,12 +77,15 @@ describe('mapWorkflowHistoryItem', () => {
       isCurrent: true,
     });
 
-    expect(detail.snapshot).toEqual({
-      workflow: {
-        yaml: 'name: current\n',
-      },
-    });
+    expect(detail.snapshot).toEqual(toWorkflowChangeHistorySnapshot('name: current\n'));
+    expect(getWorkflowYamlFromSnapshot(detail.snapshot)).toBe('name: current\n');
     expect(detail.action).toBe(WorkflowChangeHistoryAction.workflowUpdate);
+  });
+
+  it('returns an empty string for invalid workflow snapshots', () => {
+    expect(getWorkflowYamlFromSnapshot(undefined)).toBe('');
+    expect(getWorkflowYamlFromSnapshot({})).toBe('');
+    expect(getWorkflowYamlFromSnapshot({ workflow: { yaml: 42 } })).toBe('');
   });
 
   it('passes through unknown action values', () => {

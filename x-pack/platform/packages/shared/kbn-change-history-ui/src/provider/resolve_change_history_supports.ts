@@ -15,18 +15,16 @@ import type {
 export interface ResolveChangeHistorySupportsOptions {
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
-  isReadOnly?: boolean;
 }
 
 export const resolveChangeHistorySupports = (
   adapter: ChangeHistoryAdapter,
-  { features, permissions, isReadOnly }: ResolveChangeHistorySupportsOptions = {}
+  { features, permissions }: ResolveChangeHistorySupportsOptions = {}
 ): ChangeHistorySupports => {
   const restore =
     features?.restore === true &&
     typeof adapter.restoreChange === 'function' &&
-    permissions?.canRestore !== false &&
-    isReadOnly !== true;
+    permissions?.canRestore !== false;
 
   return { restore };
 };

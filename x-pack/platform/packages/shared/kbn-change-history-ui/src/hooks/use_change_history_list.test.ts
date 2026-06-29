@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChangeHistoryList } from './use_change_history_list';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 
@@ -122,5 +122,69 @@ describe('useChangeHistoryList', () => {
     });
 
     expect(result.current.items[0]?.id).toBe('evt-b');
+  });
+
+  it('refetch reloads the first page', async () => {
+    const listChanges = jest
+      .fn()
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-7',
+            timestamp: '2026-06-16T12:00:00.000Z',
+            actor: { name: 'Alice' },
+            action: 'Updated',
+            isCurrent: true,
+            metadata: { version: 7 },
+          },
+        ],
+        total: 7,
+      })
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 'evt-8',
+            timestamp: '2026-06-16T13:00:00.000Z',
+            actor: { name: 'Alice' },
+            action: 'restore',
+            isCurrent: true,
+            metadata: { version: 8 },
+          },
+          {
+            id: 'evt-7',
+            timestamp: '2026-06-16T12:00:00.000Z',
+            actor: { name: 'Alice' },
+            action: 'Updated',
+            metadata: { version: 7 },
+          },
+        ],
+        total: 8,
+      });
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges,
+      getChange: jest.fn(),
+    };
+
+    const { result } = renderHook(() =>
+      useChangeHistoryList({
+        adapter,
+        objectId: 'workflow-1',
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    expect(listChanges).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(result.current.items[0]?.id).toBe('evt-8');
+    });
+    expect(result.current.total).toBe(8);
   });
 });

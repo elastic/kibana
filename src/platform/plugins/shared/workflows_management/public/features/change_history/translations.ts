@@ -31,31 +31,3 @@ export const VERSION_BADGE = (version: number): string =>
     defaultMessage: 'v{version}',
     values: { version },
   });
-
-export const COMPARE_SETTINGS_ARIA_LABEL = i18n.translate(
-  'workflows.changeHistory.compareSettingsAriaLabel',
-  {
-    defaultMessage: 'Compare settings',
-  }
-);
-
-export const COMPARE_SETTINGS_TITLE = i18n.translate(
-  'workflows.changeHistory.compareSettingsTitle',
-  {
-    defaultMessage: 'Compare to',
-  }
-);
-
-export const COMPARE_TO_PREVIOUS_VERSION = i18n.translate(
-  'workflows.changeHistory.compareToPreviousVersion',
-  {
-    defaultMessage: 'Previous version',
-  }
-);
-
-export const COMPARE_TO_CURRENT_VERSION = i18n.translate(
-  'workflows.changeHistory.compareToCurrentVersion',
-  {
-    defaultMessage: 'Current version',
-  }
-);

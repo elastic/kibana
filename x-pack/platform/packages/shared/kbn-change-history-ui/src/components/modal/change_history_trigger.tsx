@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
-import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
 import * as i18n from '../timeline/translations';
 
 export interface ChangeHistoryTriggerProps {
@@ -20,7 +20,7 @@ export function ChangeHistoryTrigger({
   buttonProps,
   children,
 }: ChangeHistoryTriggerProps): JSX.Element {
-  const { openModal } = useChangeHistoryConfig();
+  const { openModal } = useChangeHistoryInternalConfig();
 
   return (
     <EuiButton

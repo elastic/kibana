@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type {
   ChangeHistoryFeatures,
@@ -15,8 +14,9 @@ import type {
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewFooterRenderFn } from '../types/change_history_preview_footer';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
-import type { ChangeHistoryOnRestoreSuccessArgs } from './change_history_context';
-import { ChangeHistoryContext } from './change_history_context';
+import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import { ChangeHistoryConfigContext } from './change_history_config_context';
+import { ChangeHistoryInternalConfigContext } from './change_history_internal_config_context';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
 import * as i18n from '../components/timeline/translations';
 
@@ -29,8 +29,6 @@ export interface ChangeHistoryProviderProps {
   labels?: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
-  isReadOnly?: boolean;
-  onRestoreSuccess?: (args: ChangeHistoryOnRestoreSuccessArgs) => void;
   children: React.ReactNode;
 }
 
@@ -43,12 +41,12 @@ export const ChangeHistoryProvider = ({
   labels,
   features,
   permissions,
-  isReadOnly,
-  onRestoreSuccess,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
+  const listRefetchRef = useRef<(() => Promise<void> | void) | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
+  const [isListRefreshPending, setIsListRefreshPending] = useState(false);
   const [prevObjectId, setPrevObjectId] = useState(objectId);
 
   if (objectId !== prevObjectId) {
@@ -71,11 +69,20 @@ export const ChangeHistoryProvider = ({
   }, []);
 
   const supports = useMemo(
-    () => resolveChangeHistorySupports(adapter, { features, permissions, isReadOnly }),
-    [adapter, features, isReadOnly, permissions]
+    () => resolveChangeHistorySupports(adapter, { features, permissions }),
+    [adapter, features, permissions]
   );
 
-  const value = useMemo(
+  const registerListRefetch = useCallback((refetch: (() => Promise<void> | void) | undefined) => {
+    listRefetchRef.current = refetch;
+  }, []);
+
+  const refetchList = useCallback(async () => {
+    setSelectedChangeId(undefined);
+    await listRefetchRef.current?.();
+  }, []);
+
+  const configValue = useMemo(
     () => ({
       objectId,
       adapter,
@@ -88,7 +95,27 @@ export const ChangeHistoryProvider = ({
         timelinePanelTitle: labels?.timelinePanelTitle ?? i18n.TIMELINE_PANEL_TITLE,
       },
       supports,
-      onRestoreSuccess,
+    }),
+    [
+      adapter,
+      labels?.modalTitle,
+      labels?.previewBackLabel,
+      labels?.previewTitle,
+      labels?.timelinePanelTitle,
+      objectId,
+      renderBadge,
+      renderPreview,
+      renderPreviewFooter,
+      supports,
+    ]
+  );
+
+  const internalConfigValue = useMemo(
+    () => ({
+      refetchList,
+      registerListRefetch,
+      isListRefreshPending,
+      setListRefreshPending: setIsListRefreshPending,
       isModalOpen,
       openModal,
       closeModal,
@@ -96,24 +123,22 @@ export const ChangeHistoryProvider = ({
       setSelectedChangeId: handleSelectChangeId,
     }),
     [
-      adapter,
       closeModal,
       handleSelectChangeId,
+      isListRefreshPending,
       isModalOpen,
-      labels?.modalTitle,
-      labels?.previewBackLabel,
-      labels?.previewTitle,
-      labels?.timelinePanelTitle,
-      objectId,
-      onRestoreSuccess,
       openModal,
-      renderBadge,
-      renderPreview,
-      renderPreviewFooter,
+      refetchList,
+      registerListRefetch,
       selectedChangeId,
-      supports,
     ]
   );
 
-  return <ChangeHistoryContext.Provider value={value}>{children}</ChangeHistoryContext.Provider>;
+  return (
+    <ChangeHistoryConfigContext.Provider value={configValue}>
+      <ChangeHistoryInternalConfigContext.Provider value={internalConfigValue}>
+        {children}
+      </ChangeHistoryInternalConfigContext.Provider>
+    </ChangeHistoryConfigContext.Provider>
+  );
 };

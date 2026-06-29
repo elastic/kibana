@@ -14,6 +14,7 @@ import {
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
 } from './map_workflow_history_item';
+import { mapWorkflowRestoreHttpError } from './map_workflow_restore_http_error';
 import { INTERNAL_API_VERSION } from '../../../common/lib/api_constants';
 import { WORKFLOW_CHANGE_HISTORY_LIST_PATH } from '../../../common/lib/workflow_change_history/constants';
 import type { WorkflowChangesHistoryResponse } from '../../../common/lib/workflow_change_history/types';
@@ -33,7 +34,14 @@ const clearObjectCache = (
   }
 };
 
-export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHistoryAdapter => {
+export interface CreateWorkflowChangeHistoryAdapterOptions {
+  onWorkflowRestored?: (objectId: string) => Promise<void>;
+}
+
+export const createWorkflowChangeHistoryAdapter = (
+  http: HttpSetup,
+  { onWorkflowRestored }: CreateWorkflowChangeHistoryAdapterOptions = {}
+): ChangeHistoryAdapter => {
   const changeCache = new Map<string, ChangeHistoryDetail>();
 
   return {
@@ -82,6 +90,23 @@ export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHisto
       }
 
       return cached;
+    },
+
+    restoreChange: async ({ objectId, changeId, signal }) => {
+      try {
+        await http.post(
+          `${WORKFLOW_CHANGE_HISTORY_LIST_PATH}/${encodeURIComponent(
+            objectId
+          )}/history/${encodeURIComponent(changeId)}/restore`,
+          {
+            version: INTERNAL_API_VERSION,
+            signal,
+          }
+        );
+        await onWorkflowRestored?.(objectId);
+      } catch (error) {
+        throw mapWorkflowRestoreHttpError(error);
+      }
     },
   };
 };

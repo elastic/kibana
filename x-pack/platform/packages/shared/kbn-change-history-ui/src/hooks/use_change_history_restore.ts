@@ -9,6 +9,7 @@ import { useCallback, useRef, useState } from 'react';
 import type { ChangeHistoryError } from '../types/change_history_error';
 import type { RestoreChangeParams } from '../types/restore_change_params';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
+import { useChangeHistoryInternalConfig } from '../provider/use_change_history_internal_config';
 import { mapChangeHistoryRestoreError } from '../utils/map_change_history_restore_error';
 
 export interface UseChangeHistoryRestoreResult {
@@ -20,7 +21,9 @@ export interface UseChangeHistoryRestoreResult {
 }
 
 export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
-  const { adapter, supports, onRestoreSuccess } = useChangeHistoryConfig();
+  const { adapter, supports } = useChangeHistoryConfig();
+  const { refetchList, setSelectedChangeId, setListRefreshPending } =
+    useChangeHistoryInternalConfig();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
   const abortControllerRef = useRef<AbortController | undefined>();
@@ -41,6 +44,8 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
 
       setIsRestoring(true);
       setError(undefined);
+      setSelectedChangeId(undefined);
+      setListRefreshPending(true);
 
       try {
         await adapter.restoreChange({
@@ -52,10 +57,7 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
           return false;
         }
 
-        onRestoreSuccess?.({
-          objectId: params.objectId,
-          changeId: params.changeId,
-        });
+        await refetchList();
 
         return true;
       } catch (restoreError) {
@@ -66,12 +68,13 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
         setError(mapChangeHistoryRestoreError(restoreError));
         return false;
       } finally {
+        setListRefreshPending(false);
         if (!abortController.signal.aborted) {
           setIsRestoring(false);
         }
       }
     },
-    [adapter, onRestoreSuccess, supports.restore]
+    [adapter, refetchList, setListRefreshPending, setSelectedChangeId, supports.restore]
   );
 
   return {

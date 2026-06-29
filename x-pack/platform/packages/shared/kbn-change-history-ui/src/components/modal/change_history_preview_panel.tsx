@@ -15,11 +15,36 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryPreviewCompare } from '../../hooks/use_change_history_preview_compare';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { getChangeHistoryErrorMessage } from '../../utils/get_change_history_error_message';
 import * as i18n from '../timeline/translations';
+
+const previewPanelStateCss = css`
+  height: 100%;
+  width: 100%;
+`;
+
+const PreviewPanelState = ({
+  children,
+  testSubj,
+}: {
+  children: React.ReactNode;
+  testSubj: string;
+}): JSX.Element => (
+  <EuiFlexGroup
+    direction="column"
+    alignItems="center"
+    justifyContent="center"
+    responsive={false}
+    css={previewPanelStateCss}
+    data-test-subj={testSubj}
+  >
+    {children}
+  </EuiFlexGroup>
+);
 
 export interface ChangeHistoryPreviewPanelProps {
   listItems?: ChangeHistoryListItem[];
@@ -28,12 +53,13 @@ export interface ChangeHistoryPreviewPanelProps {
 export function ChangeHistoryPreviewPanel({
   listItems = [],
 }: ChangeHistoryPreviewPanelProps): JSX.Element {
-  const { adapter, objectId, renderPreview, selectedChangeId } = useChangeHistoryConfig();
+  const { adapter, objectId, renderPreview } = useChangeHistoryConfig();
+  const { selectedChangeId, isListRefreshPending } = useChangeHistoryInternalConfig();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
     objectId,
     changeId: selectedChangeId,
-    enabled: Boolean(selectedChangeId),
+    enabled: Boolean(selectedChangeId) && !isListRefreshPending,
   });
 
   const { currentChange, previousChange, isLoadingCompareContext } = useChangeHistoryPreviewCompare(
@@ -46,16 +72,24 @@ export function ChangeHistoryPreviewPanel({
     }
   );
 
+  if (isListRefreshPending) {
+    return (
+      <PreviewPanelState testSubj="changeHistoryPreviewLoading">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" textAlign="center">
+            {i18n.PREVIEW_LOADING}
+          </EuiText>
+        </EuiFlexItem>
+      </PreviewPanelState>
+    );
+  }
+
   if (!selectedChangeId) {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="center"
-        css={css`
-          height: 100%;
-        `}
-        data-test-subj="changeHistoryPreviewEmpty"
-      >
+      <PreviewPanelState testSubj="changeHistoryPreviewEmpty">
         <EuiFlexItem grow={false}>
           <EuiEmptyPrompt
             iconType="inspect"
@@ -63,27 +97,22 @@ export function ChangeHistoryPreviewPanel({
             titleSize="xs"
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </PreviewPanelState>
     );
   }
 
   if (isLoading) {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="center"
-        css={css`
-          height: 100%;
-        `}
-        data-test-subj="changeHistoryPreviewLoading"
-      >
+      <PreviewPanelState testSubj="changeHistoryPreviewLoading">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="l" />
-          <EuiText size="s" color="subdued">
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" textAlign="center">
             {i18n.PREVIEW_LOADING}
           </EuiText>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </PreviewPanelState>
     );
   }
 
@@ -91,14 +120,7 @@ export function ChangeHistoryPreviewPanel({
     const errorMessage = error ? getChangeHistoryErrorMessage(error) : undefined;
 
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="center"
-        css={css`
-          height: 100%;
-        `}
-        data-test-subj="changeHistoryPreviewError"
-      >
+      <PreviewPanelState testSubj="changeHistoryPreviewError">
         <EuiFlexItem grow={false}>
           <EuiEmptyPrompt
             iconType="alert"
@@ -113,7 +135,7 @@ export function ChangeHistoryPreviewPanel({
             titleSize="xs"
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </PreviewPanelState>
     );
   }
 

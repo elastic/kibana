@@ -10,10 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
 import { ChangeHistoryRestoreButton } from './change_history_restore_button';
 
 export function ChangeHistoryDefaultPreviewFooter(): JSX.Element | null {
-  const { adapter, objectId, selectedChangeId, supports } = useChangeHistoryConfig();
+  const { adapter, objectId, supports } = useChangeHistoryConfig();
+  const { selectedChangeId } = useChangeHistoryInternalConfig();
   const { change, isLoading } = useChangeHistoryDetail({
     adapter,
     objectId,

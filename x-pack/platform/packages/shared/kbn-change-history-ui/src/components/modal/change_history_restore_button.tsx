@@ -45,7 +45,7 @@ export function ChangeHistoryRestoreButton({
       setIsConfirmVisible(false);
       clearError();
     }
-  }, [change.id, clearError, objectId, restoreChange]);
+  }, [change, clearError, objectId, restoreChange]);
 
   if (!supports.restore || change.isCurrent) {
     return null;
@@ -78,7 +78,7 @@ export function ChangeHistoryRestoreButton({
           {error ? (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut color="danger" iconType="alert">
+              <EuiCallOut announceOnMount color="danger" iconType="alert">
                 <p>{error.message}</p>
               </EuiCallOut>
             </>

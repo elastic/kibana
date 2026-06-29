@@ -18,6 +18,7 @@ import { BACK_TO_WORKFLOW } from './translations';
 import {
   useWorkflowChangeHistoryAdapter,
   useWorkflowChangeHistoryEnabled,
+  useWorkflowChangeHistoryRestoreEligibility,
 } from './use_workflow_change_history';
 import { renderWorkflowChangeHistoryBadge } from './workflow_change_history_badge';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
@@ -34,7 +35,8 @@ export const WorkflowChangeHistoryProvider = ({
   children,
 }: WorkflowChangeHistoryProviderProps): JSX.Element => {
   const isEnabled = useWorkflowChangeHistoryEnabled();
-  const adapter = useWorkflowChangeHistoryAdapter();
+  const adapter = useWorkflowChangeHistoryAdapter(workflowId);
+  const canRestore = useWorkflowChangeHistoryRestoreEligibility();
 
   if (!isEnabled) {
     return <>{children}</>;
@@ -50,6 +52,8 @@ export const WorkflowChangeHistoryProvider = ({
         previewBackLabel: BACK_TO_WORKFLOW,
         previewTitle: workflowName,
       }}
+      features={{ restore: true }}
+      permissions={{ canRestore }}
     >
       {children}
       <ChangeHistoryModal />

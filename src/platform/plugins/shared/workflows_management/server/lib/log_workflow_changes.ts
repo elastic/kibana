@@ -15,6 +15,7 @@ import { formatRestoreHistoryComment } from './format_restore_history_comment';
 import { isRetryableChangeHistoryError } from './is_retryable_change_history_error';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+  WorkflowChangeHistoryAction,
   type WorkflowChangeHistoryActionType,
 } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowRestoreMetadata } from '../../common/lib/workflow_change_history/types';
@@ -100,6 +101,7 @@ export const logWorkflowChanges = async ({
   const logOpts = {
     action,
     spaceId,
+    ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: true as const } : {}),
     ...(correlationId ? { correlationId } : {}),
     ...(restoreMetadata
       ? {

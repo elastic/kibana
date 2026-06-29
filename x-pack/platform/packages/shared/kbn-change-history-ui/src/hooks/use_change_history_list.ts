@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
+import type { ListChangeHistoryResult } from '../types/list_change_history_params';
 import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 
 export interface UseChangeHistoryListArgs {
@@ -25,7 +26,7 @@ export interface UseChangeHistoryListResult {
   error?: Error;
   hasMore: boolean;
   loadMore: () => void;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export const useChangeHistoryList = ({
@@ -45,7 +46,10 @@ export const useChangeHistoryList = ({
   const hasMore = items.length < total;
 
   const fetchPage = useCallback(
-    async (nextPageIndex: number, append: boolean) => {
+    async (
+      nextPageIndex: number,
+      append: boolean
+    ): Promise<ListChangeHistoryResult | undefined> => {
       abortControllerRef.current?.abort();
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
@@ -64,19 +68,21 @@ export const useChangeHistoryList = ({
         });
 
         if (abortController.signal.aborted) {
-          return;
+          return undefined;
         }
 
         setTotal(result.total);
         setPageIndex(nextPageIndex);
         setItems((current) => (append ? [...current, ...result.items] : result.items));
         setError(undefined);
+        return result;
       } catch (fetchError) {
         if (abortController.signal.aborted) {
-          return;
+          return undefined;
         }
 
         setError(fetchError instanceof Error ? fetchError : new Error(String(fetchError)));
+        return undefined;
       } finally {
         if (!abortController.signal.aborted) {
           setIsLoading(false);
@@ -87,8 +93,8 @@ export const useChangeHistoryList = ({
     [adapter, objectId, pageSize]
   );
 
-  const refetch = useCallback(() => {
-    void fetchPage(0, false);
+  const refetch = useCallback(async (): Promise<void> => {
+    await fetchPage(0, false);
   }, [fetchPage]);
 
   const loadMore = useCallback(() => {

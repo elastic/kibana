@@ -330,11 +330,18 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
   };
 
   it('indexes a restored workflow document derived from the historical snapshot yaml', async () => {
-    const { service, client } = makeIntegrationService(workflowYamlV1);
+    const { service, client, scopedChangeHistory } = makeIntegrationService(workflowYamlV1);
 
     const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
 
     expect(result.version).toBe(8);
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        action: WorkflowChangeHistoryAction.workflowRestore,
+        refresh: true,
+      })
+    );
     expect(client.index).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'wf-1',

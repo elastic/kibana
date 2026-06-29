@@ -45,18 +45,11 @@ describe('resolveChangeHistorySupports', () => {
     ).toEqual({ restore: false });
   });
 
-  it('disables restore when permissions deny it or the host is read-only', () => {
+  it('disables restore when permissions deny it', () => {
     expect(
       resolveChangeHistorySupports(adapterWithRestore, {
         features: { restore: true },
         permissions: { canRestore: false },
-      })
-    ).toEqual({ restore: false });
-
-    expect(
-      resolveChangeHistorySupports(adapterWithRestore, {
-        features: { restore: true },
-        isReadOnly: true,
       })
     ).toEqual({ restore: false });
   });

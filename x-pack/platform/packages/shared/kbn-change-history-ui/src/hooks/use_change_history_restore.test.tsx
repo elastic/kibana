@@ -6,8 +6,9 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
+import { useChangeHistoryInternalConfig } from '../provider/use_change_history_internal_config';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
 
@@ -18,6 +19,23 @@ const createAdapter = (
   getChange: jest.fn(),
   restoreChange,
 });
+
+const ListRefetchRegistrar = ({
+  refetch,
+  children,
+}: {
+  refetch: jest.Mock;
+  children: React.ReactNode;
+}) => {
+  const { registerListRefetch } = useChangeHistoryInternalConfig();
+
+  useLayoutEffect(() => {
+    registerListRefetch(refetch);
+    return () => registerListRefetch(undefined);
+  }, [refetch, registerListRefetch]);
+
+  return <>{children}</>;
+};
 
 const wrapper =
   (adapter: ChangeHistoryAdapter, features: { restore?: boolean } = { restore: true }) =>
@@ -34,9 +52,9 @@ const wrapper =
     );
 
 describe('useChangeHistoryRestore', () => {
-  it('calls adapter.restoreChange and forwards success to onRestoreSuccess', async () => {
+  it('calls adapter.restoreChange and refetches the history list after success', async () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const onRestoreSuccess = jest.fn();
+    const refetchList = jest.fn().mockResolvedValue(undefined);
     const adapter = createAdapter(restoreChange);
 
     const { result } = renderHook(() => useChangeHistoryRestore(), {
@@ -45,9 +63,9 @@ describe('useChangeHistoryRestore', () => {
           objectId="workflow-1"
           adapter={adapter}
           features={{ restore: true }}
-          onRestoreSuccess={onRestoreSuccess}
           renderPreview={() => null}
         >
+          <ListRefetchRegistrar refetch={refetchList} />
           {children}
         </ChangeHistoryProvider>
       ),
@@ -66,10 +84,7 @@ describe('useChangeHistoryRestore', () => {
       changeId: 'evt-3',
       signal: expect.any(AbortSignal),
     });
-    expect(onRestoreSuccess).toHaveBeenCalledWith({
-      objectId: 'workflow-1',
-      changeId: 'evt-3',
-    });
+    expect(refetchList).toHaveBeenCalled();
   });
 
   it('maps structured restore errors', async () => {

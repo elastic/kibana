@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo } from 'react';
 import { EuiModal, EuiModalBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
@@ -13,6 +13,7 @@ import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_er
 import { ChangeHistoryTimeline } from '../timeline/change_history_timeline';
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
 import { ChangeHistorySidebarPanel } from './change_history_sidebar_panel';
@@ -29,32 +30,42 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
+  const { adapter, objectId, renderBadge, renderPreviewFooter, labels, supports } =
+    useChangeHistoryConfig();
   const {
-    adapter,
-    objectId,
-    renderBadge,
-    renderPreviewFooter,
-    labels,
-    supports,
     isModalOpen,
     closeModal,
     selectedChangeId,
     setSelectedChangeId,
-  } = useChangeHistoryConfig();
+    registerListRefetch,
+    isListRefreshPending,
+  } = useChangeHistoryInternalConfig();
 
-  const { items, total, isLoading, isLoadingMore, error, loadMore } = useChangeHistoryList({
-    adapter,
-    objectId,
-    enabled: isModalOpen,
-  });
+  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList(
+    {
+      adapter,
+      objectId,
+      enabled: isModalOpen,
+    }
+  );
+
+  useLayoutEffect(() => {
+    registerListRefetch(refetch);
+  }, [refetch, registerListRefetch]);
 
   useEffect(() => {
-    if (!isModalOpen || selectedChangeId || isLoading || items.length === 0) {
+    if (
+      !isModalOpen ||
+      selectedChangeId ||
+      isLoading ||
+      isListRefreshPending ||
+      items.length === 0
+    ) {
       return;
     }
 
     setSelectedChangeId(items[0]?.id);
-  }, [isModalOpen, isLoading, items, selectedChangeId, setSelectedChangeId]);
+  }, [isListRefreshPending, isModalOpen, isLoading, items, selectedChangeId, setSelectedChangeId]);
 
   const styles = useMemo(
     () => ({

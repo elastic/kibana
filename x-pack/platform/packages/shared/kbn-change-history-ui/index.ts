@@ -35,7 +35,7 @@ export type {
   ChangeHistoryRestoreButtonProps,
 } from './src/components/modal';
 export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
-export type { ChangeHistoryProviderProps, ChangeHistoryOnRestoreSuccessArgs } from './src/provider';
+export type { ChangeHistoryProviderProps, ChangeHistoryConfigValue } from './src/provider';
 export { useChangeHistoryList, useChangeHistoryDetail, useChangeHistoryRestore } from './src/hooks';
 export type {
   UseChangeHistoryListArgs,
