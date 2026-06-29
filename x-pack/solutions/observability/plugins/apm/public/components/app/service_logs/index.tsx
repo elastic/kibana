@@ -74,18 +74,22 @@ export function ServiceLogs() {
     }
   }, [kuery]);
 
+  // The infrastructure/environment filter must be passed via `documentFilters` rather than
+  // `nonHighlightingFilters`. The saved search embeddable only re-fetches when its search
+  // source emits (e.g. via `setFilters`, which `documentFilters` use); `nonHighlightingFilters`
+  // mutate the search source in place without emitting, so changing the environment would not
+  // refresh the results until an unrelated reload occurred.
+  const logFilters = useMemo(
+    () => [...documentLogFilters, ...internalLogFilters],
+    [documentLogFilters, internalLogFilters]
+  );
+
   if (
     status === FETCH_STATUS.SUCCESS ||
-    (status === FETCH_STATUS.LOADING &&
-      (internalLogFilters.length > 0 || documentLogFilters.length > 0))
+    (status === FETCH_STATUS.LOADING && logFilters.length > 0)
   ) {
     return (
-      <logsShared.LogsOverview
-        documentFilters={documentLogFilters}
-        nonHighlightingFilters={internalLogFilters}
-        timeRange={timeRange}
-        height="60vh"
-      />
+      <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} height="60vh" />
     );
   } else if (status === FETCH_STATUS.FAILURE) {
     return (
