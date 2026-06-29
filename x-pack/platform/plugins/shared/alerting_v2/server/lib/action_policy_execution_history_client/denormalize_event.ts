@@ -6,7 +6,11 @@
  */
 
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import type { PolicyExecutionHistoryItem, PolicyExecutionOutcome, SearchMatchCounts } from '@kbn/alerting-v2-schemas';
+import type {
+  PolicyExecutionHistoryItem,
+  PolicyExecutionOutcome,
+  SearchMatchCounts,
+} from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 
@@ -75,7 +79,11 @@ export function collectIdsFromEvents(events: IValidatedEvent[]): {
  * @param matchingSearchIds search IDs resolved from the search query, or undefined if no search is active
  * @returns an array of relevant rule IDs for the current log event
  */
-export function getRelevantRuleIdsFromLogEvent(policyId: string, allRuleIds: string[], matchingSearchIds?: ResolvedSearchIds): string[] {  
+export function getRelevantRuleIdsFromLogEvent(
+  policyId: string,
+  allRuleIds: string[],
+  matchingSearchIds?: ResolvedSearchIds
+): string[] {
   if (!matchingSearchIds || matchingSearchIds.policyIds.includes(policyId)) {
     return allRuleIds;
   }
@@ -83,11 +91,10 @@ export function getRelevantRuleIdsFromLogEvent(policyId: string, allRuleIds: str
   return allRuleIds.filter((ruleId) => matchingSearchIds.ruleIds.includes(ruleId));
 }
 
-
 export function denormalizeEvent(
   event: IValidatedEvent,
   { policyNames, ruleNames, workflowNames }: NameMaps,
-  matchingSearchIds?: ResolvedSearchIds,
+  matchingSearchIds?: ResolvedSearchIds
 ): PolicyExecutionHistoryItem[] {
   if (!event || (matchingSearchIds && !matchingSearchIds.hasMatches)) {
     return [];

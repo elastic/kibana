@@ -17,7 +17,7 @@ import {
   type RuleResponse,
   type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
-  SearchMatchCounts,
+  type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -30,7 +30,8 @@ import {
 } from '../services/logger_service/logger_service';
 import { ALERTING_V2_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
-import { collectIdsFromEvents, denormalizeEvent, ResolvedSearchIds, type NameMaps } from './denormalize_event';
+import type { ResolvedSearchIds } from './denormalize_event';
+import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
 
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
@@ -82,7 +83,7 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) { }
+  ) {}
 
   public async listExecutionHistory({
     request,
@@ -112,11 +113,8 @@ export class ActionPolicyExecutionHistoryClient {
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
-    const items = result.events.flatMap(
-      (event) => denormalizeEvent(
-        event,
-        nameMaps,
-        searchIsActive ? matchingSearchIds : undefined)
+    const items = result.events.flatMap((event) =>
+      denormalizeEvent(event, nameMaps, searchIsActive ? matchingSearchIds : undefined)
     );
 
     return {

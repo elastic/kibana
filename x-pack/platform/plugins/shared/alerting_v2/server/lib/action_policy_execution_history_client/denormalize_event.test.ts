@@ -23,15 +23,15 @@ const EMPTY_NAME_MAPS: NameMaps = {
 };
 
 const buildEvent = (overrides: Partial<NonNullable<IValidatedEvent>> = {}): IValidatedEvent =>
-({
-  '@timestamp': '2026-05-05T10:00:00.000Z',
-  event: { action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, provider: 'alerting_v2' },
-  kibana: {
-    saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
-    alerting_v2: { dispatcher: {} },
-  },
-  ...overrides,
-} as IValidatedEvent);
+  ({
+    '@timestamp': '2026-05-05T10:00:00.000Z',
+    event: { action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, provider: 'alerting_v2' },
+    kibana: {
+      saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
+      alerting_v2: { dispatcher: {} },
+    },
+    ...overrides,
+  } as IValidatedEvent);
 
 describe('isString', () => {
   it('returns true for strings', () => {
@@ -351,7 +351,14 @@ describe('denormalizeEvent', () => {
           alerting_v2: { dispatcher: {} },
         },
       });
-      expect(denormalizeEvent(event, EMPTY_NAME_MAPS, { policyIds: [], ruleIds: [], hasMatches: false, matches: null })).toEqual([]);
+      expect(
+        denormalizeEvent(event, EMPTY_NAME_MAPS, {
+          policyIds: [],
+          ruleIds: [],
+          hasMatches: false,
+          matches: null,
+        })
+      ).toEqual([]);
     });
 
     it('returns all rule ids if policy is in search matches', () => {
@@ -365,7 +372,12 @@ describe('denormalizeEvent', () => {
           alerting_v2: { dispatcher: {} },
         },
       });
-      const rows = denormalizeEvent(event, EMPTY_NAME_MAPS, { policyIds: ['policy-1'], ruleIds: [], hasMatches: true, matches: null });
+      const rows = denormalizeEvent(event, EMPTY_NAME_MAPS, {
+        policyIds: ['policy-1'],
+        ruleIds: [],
+        hasMatches: true,
+        matches: null,
+      });
       expect(rows.map((r) => r.rule.id)).toEqual(['rule-a', 'rule-b']);
     });
 
@@ -381,8 +393,13 @@ describe('denormalizeEvent', () => {
           alerting_v2: { dispatcher: {} },
         },
       });
-      const rows = denormalizeEvent(event, EMPTY_NAME_MAPS, { policyIds: ['policy-2'], ruleIds: ['rule-a', 'rule-c'], hasMatches: true, matches: null });
+      const rows = denormalizeEvent(event, EMPTY_NAME_MAPS, {
+        policyIds: ['policy-2'],
+        ruleIds: ['rule-a', 'rule-c'],
+        hasMatches: true,
+        matches: null,
+      });
       expect(rows.map((r) => r.rule.id)).toEqual(['rule-a', 'rule-c']);
-    })
+    });
   });
 });
