@@ -5,20 +5,47 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import type { HttpSetup } from '@kbn/core/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { WorkflowExecutionsTracking } from '@kbn/elastic-assistant-common';
-import type { ErrorCategory } from '@kbn/discoveries-schemas';
+import type { HttpSetup } from '@kbn/core/public';
+import { ExecutionStatus } from '@kbn/workflows';
 
-import type { SourceMetadata } from './diagnostic_report/helpers/build_diagnostic_report';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
+import type { AttackDiscoveryPipelineStepType } from '../../../../common/lib/telemetry';
+import { useGetAttackDiscoveryGeneration } from '../../hooks/use_get_attack_discovery_generation';
+import { usePipelineData } from '../../hooks/use_pipeline_data';
+import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_details';
+import { LoadingCallout } from '..';
+import { StepDataModal } from '../step_data_modal';
+import type { AggregatedWorkflowExecution, WorkflowInspectMetadata } from '../types';
+import {
+  getStepDataModalConfig,
+  type StepDataModalConfig,
+} from './helpers/get_step_data_modal_config';
+import { buildEnrichedStepDataModalConfig } from './helpers/build_enriched_step_data_modal_config';
+import type { FailureCategory } from './failure_actions/helpers/classify_error_category';
+import { ConversationLink } from './conversation_link';
+import { ExecutionContent } from './execution_content';
+import { FailureSection } from './failure_section';
+import { RefreshSection } from './refresh_section';
+import { useEffectiveWorkflowTracking } from './use_effective_workflow_tracking';
+import { useEnvironmentContext } from './use_environment_context';
+import type {
+  PerWorkflowAlertRetrieval,
+  SourceMetadata,
+} from './diagnostic_report/helpers/build_diagnostic_report';
+import * as i18n from './translations';
 
-// Forward-ref stub: the real workflow execution details flyout is implemented by
-// the Skills PR (PR8) — see the PR7 commit "Rebalance: hand off loading_callout
-// flyout/modal to PR08". The loading callout (this PR, PR7) references the
-// component, so a prop-compatible no-op is provided here. FF-off safe: the
-// flyout is only rendered on the feature-flag-gated monitoring path
-// (`isFlyoutOpen`), which is never reached when the workflows feature flag is OFF.
 interface WorkflowExecutionDetailsFlyoutProps {
   alertsContextCount?: number | null;
   approximateFutureTime?: Date | null;
@@ -33,7 +60,7 @@ interface WorkflowExecutionDetailsFlyoutProps {
   discoveriesCount?: number | null;
   duplicatesDroppedCount?: number;
   end?: string | null;
-  errorCategory?: ErrorCategory;
+  errorCategory?: FailureCategory;
   eventActions?: string[] | null;
   executionUuid?: string;
   failedWorkflowId?: string;
@@ -56,6 +83,360 @@ interface WorkflowExecutionDetailsFlyoutProps {
   workflowRunId: string | null | undefined;
 }
 
-export const WorkflowExecutionDetailsFlyout: React.FC<WorkflowExecutionDetailsFlyoutProps> =
-  React.memo(() => null);
-WorkflowExecutionDetailsFlyout.displayName = 'WorkflowExecutionDetailsFlyout';
+const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetailsFlyoutProps> = ({
+  alertsContextCount,
+  approximateFutureTime,
+  averageSuccessfulDurationMs,
+  averageSuccessfulDurationNanoseconds,
+  configuredMaxAlerts,
+  connectorActionTypeId,
+  connectorModel,
+  connectorName,
+  dateRangeEnd,
+  dateRangeStart,
+  discoveriesCount,
+  duplicatesDroppedCount,
+  end,
+  errorCategory,
+  eventActions,
+  executionUuid,
+  failedWorkflowId,
+  generatedCount,
+  generationEndTime,
+  generationStatus,
+  hallucinationsFilteredCount,
+  http,
+  loadingMessage,
+  localStorageAttackDiscoveryMaxAlerts,
+  onClose,
+  onRefresh,
+  persistedCount,
+  reason,
+  sourceMetadata,
+  start,
+  successfulGenerations,
+  workflowExecutions,
+  workflowId,
+  workflowRunId,
+}) => {
+  const { spaces, telemetry } = useKibana().services;
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'workflowExecutionDetailsFlyout',
+  });
+
+  const environmentContext = useEnvironmentContext(spaces);
+
+  const [stepDataModalConfig, setStepDataModalConfig] = useState<StepDataModalConfig | null>(null);
+
+  // Fetch the authoritative execution status directly from the Attack Discovery
+  // API. The prop `generationStatus` can be stale (e.g. a schedule execution log
+  // row whose status hasn't been refreshed since the run completed). The live data
+  // from this hook overrides the prop as soon as the first fetch returns.
+  // Polling: 10 s while running (< 10 min elapsed), 30 s after that to handle
+  // runs that will never complete (e.g. server killed mid-execution).
+  const { generation: liveGeneration } = useGetAttackDiscoveryGeneration({
+    executionUuid,
+    http,
+  });
+
+  const effectiveGenerationStatus = liveGeneration?.status ?? generationStatus;
+
+  // Merge prop-provided counts with the (potentially fresher) live generation
+  // values. Kept in a memo so the fallback logic does not inflate the
+  // component's cyclomatic complexity.
+  const loadingCalloutCounts = useMemo(
+    () => ({
+      alertsContextCount: alertsContextCount ?? liveGeneration?.alerts_context_count ?? null,
+      discoveries: discoveriesCount ?? liveGeneration?.discoveries,
+      duplicatesDroppedCount: duplicatesDroppedCount ?? liveGeneration?.duplicates_dropped_count,
+      generatedCount: generatedCount ?? liveGeneration?.generated_count,
+      generationEndTime: generationEndTime ?? liveGeneration?.end,
+      hallucinationsFilteredCount:
+        hallucinationsFilteredCount ?? liveGeneration?.hallucinations_filtered_count,
+      persistedCount: persistedCount ?? liveGeneration?.persisted_count,
+    }),
+    [
+      alertsContextCount,
+      discoveriesCount,
+      duplicatesDroppedCount,
+      generatedCount,
+      generationEndTime,
+      hallucinationsFilteredCount,
+      liveGeneration,
+      persistedCount,
+    ]
+  );
+
+  const {
+    effectiveWorkflowExecutions,
+    effectiveWorkflowId,
+    effectiveWorkflowRunId,
+    isTerminalStatus,
+    pipelineDataRefetchIntervalMs,
+  } = useEffectiveWorkflowTracking({
+    executionUuid,
+    generationStatus: effectiveGenerationStatus,
+    http,
+    workflowExecutions,
+    workflowId,
+    workflowRunId,
+  });
+
+  // In provided mode, the orchestrator workflow ID is null but we can still
+  // fetch pipeline data using the generation workflow run ID as a fallback.
+  const generationWorkflowRunId = effectiveWorkflowId == null ? effectiveWorkflowRunId : undefined;
+
+  // Enable pipeline data fetching as soon as the execution has started so
+  // inspect buttons appear as each step completes (not only after all steps finish).
+  // In provided mode, effectiveWorkflowId may be null — allow fetching if
+  // we have a generationWorkflowRunId fallback.
+  const isPipelineDataEnabled =
+    effectiveGenerationStatus != null &&
+    executionUuid != null &&
+    (effectiveWorkflowId != null || generationWorkflowRunId != null);
+
+  const { data, isLoading } = useWorkflowExecutionDetails({
+    executionUuid,
+    http,
+    stubData: {
+      eventActions,
+      generationStatus: effectiveGenerationStatus,
+    },
+    workflowId: effectiveWorkflowId,
+    workflowExecutions: effectiveWorkflowExecutions,
+    workflowRunId: effectiveWorkflowRunId,
+  });
+
+  const { data: pipelineData, refetch: refetchPipelineData } = usePipelineData({
+    executionId: executionUuid ?? '',
+    generationWorkflowRunId: generationWorkflowRunId ?? undefined,
+    http,
+    isEnabled: isPipelineDataEnabled,
+    refetchIntervalMs: pipelineDataRefetchIntervalMs,
+    workflowId: effectiveWorkflowId ?? '_',
+  });
+
+  // Trigger a final pipeline data fetch when the execution transitions to a
+  // terminal state. The last polling cycle may have run before the validation
+  // step's output was written to ES (validation typically completes within
+  // milliseconds of the success event that stops polling), so without this
+  // final fetch the generation and validation count badges remain empty even
+  // though the server has the data ready.
+  const prevIsTerminalRef = useRef(isTerminalStatus);
+  useEffect(() => {
+    if (!prevIsTerminalRef.current && isTerminalStatus && isPipelineDataEnabled) {
+      refetchPipelineData();
+    }
+    prevIsTerminalRef.current = isTerminalStatus;
+  }, [isPipelineDataEnabled, isTerminalStatus, refetchPipelineData]);
+
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const handleViewData = useCallback(
+    (step: string, metadata?: WorkflowInspectMetadata) => {
+      if (pipelineData == null) {
+        return;
+      }
+
+      const stepTypeMap: Record<string, AttackDiscoveryPipelineStepType> = {
+        combined_retrieval: 'alert_retrieval',
+        generation: 'generation',
+        retrieval: 'alert_retrieval',
+        validation: 'validation',
+      };
+
+      const resolvedKey = step.startsWith('retrieval:') ? 'retrieval' : step;
+      const stepType = stepTypeMap[resolvedKey];
+
+      if (stepType != null) {
+        telemetry.reportEvent(AttackDiscoveryEventTypes.PipelineStepInspected, {
+          step_type: stepType,
+        });
+      }
+
+      const config = getStepDataModalConfig(step, pipelineData, metadata);
+
+      if (config != null) {
+        setStepDataModalConfig(
+          buildEnrichedStepDataModalConfig({ config, metadata, steps: data?.steps })
+        );
+      }
+    },
+    [data?.steps, pipelineData, telemetry]
+  );
+
+  const handleCloseStepDataModal = useCallback(() => {
+    setStepDataModalConfig(null);
+  }, []);
+
+  /** Build per-workflow alert retrieval for the diagnostic report by joining
+   *  pipeline data counts with workflow references from execution tracking. */
+  const perWorkflowAlertRetrieval = useMemo((): PerWorkflowAlertRetrieval[] | undefined => {
+    const alertRetrieval = pipelineData?.alert_retrieval;
+    if (alertRetrieval == null || alertRetrieval.length === 0) {
+      return undefined;
+    }
+
+    const items = alertRetrieval.filter((item) => item.workflow_run_id != null);
+    if (items.length === 0) {
+      return undefined;
+    }
+
+    return items.map((item) => {
+      const itemWorkflowRunId = item.workflow_run_id as string;
+      const ref = effectiveWorkflowExecutions?.alertRetrieval?.find(
+        (r) => r.workflowRunId === itemWorkflowRunId
+      );
+      return {
+        alertsContextCount: item.alerts_context_count,
+        extractionStrategy: item.extraction_strategy,
+        workflowId: ref?.workflowId ?? itemWorkflowRunId,
+        workflowName: ref?.workflowName,
+        workflowRunId: itemWorkflowRunId,
+      };
+    });
+  }, [effectiveWorkflowExecutions?.alertRetrieval, pipelineData?.alert_retrieval]);
+
+  const showRefreshButton = effectiveGenerationStatus === 'succeeded' && onRefresh != null;
+
+  const anyStepFailed =
+    data?.steps?.some((step) => step.status === ExecutionStatus.FAILED) ?? false;
+
+  const showTroubleshootWithAi =
+    anyStepFailed ||
+    effectiveGenerationStatus === 'failed' ||
+    effectiveGenerationStatus === 'canceled' ||
+    effectiveGenerationStatus === 'dismissed';
+
+  // Some failures abort the run before any workflow executes (e.g. the alert
+  // retrieval workflows toggle is enabled but no workflow is selected), so there
+  // is no aggregated execution data to display. Fall back to a minimal failed
+  // execution so the failure/troubleshoot section still renders and the user can
+  // run the troubleshooting skill. The fallback is only used once we are no
+  // longer loading, so post-workflow failures still wait for their real data.
+  const failureAggregatedExecution: AggregatedWorkflowExecution = data ?? {
+    status: ExecutionStatus.FAILED,
+    steps: [],
+    workflowExecutions: effectiveWorkflowExecutions,
+  };
+
+  const showFailureSection = showTroubleshootWithAi && (data != null || !isLoading);
+
+  return (
+    <EuiFlyout
+      aria-labelledby={flyoutTitleId}
+      data-test-subj="workflowExecutionDetailsFlyout"
+      onClose={handleClose}
+      size="m"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={flyoutTitleId}>{i18n.WORKFLOW_EXECUTION_DETAILS}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <LoadingCallout
+          alertsContextCount={loadingCalloutCounts.alertsContextCount}
+          approximateFutureTime={approximateFutureTime ?? null}
+          averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
+          connectorName={connectorName}
+          discoveries={loadingCalloutCounts.discoveries}
+          duplicatesDroppedCount={loadingCalloutCounts.duplicatesDroppedCount}
+          end={end}
+          eventActions={eventActions}
+          executionUuid={executionUuid}
+          generatedCount={loadingCalloutCounts.generatedCount}
+          generationEndTime={loadingCalloutCounts.generationEndTime}
+          hallucinationsFilteredCount={loadingCalloutCounts.hallucinationsFilteredCount}
+          hideActions
+          loadingMessage={loadingMessage}
+          localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+          persistedCount={loadingCalloutCounts.persistedCount}
+          reason={reason}
+          start={start}
+          status={effectiveGenerationStatus}
+          successfulGenerations={successfulGenerations}
+          workflowExecutions={effectiveWorkflowExecutions}
+          workflowId={effectiveWorkflowId ?? undefined}
+          workflowRunId={effectiveWorkflowRunId ?? undefined}
+        />
+
+        <EuiHorizontalRule />
+
+        <ExecutionContent
+          data={data}
+          effectiveWorkflowId={effectiveWorkflowId}
+          effectiveWorkflowRunId={effectiveWorkflowRunId}
+          isLoading={isLoading}
+          onViewData={handleViewData}
+          pipelineData={pipelineData}
+        />
+
+        {liveGeneration?.conversation_id != null && (
+          <>
+            <EuiSpacer size="m" />
+
+            <ConversationLink conversationId={liveGeneration.conversation_id} />
+          </>
+        )}
+
+        {showFailureSection && (
+          <>
+            <EuiSpacer size="m" />
+
+            <FailureSection
+              aggregatedExecution={failureAggregatedExecution}
+              alertsContextCount={alertsContextCount}
+              averageSuccessfulDurationMs={averageSuccessfulDurationMs}
+              configuredMaxAlerts={configuredMaxAlerts}
+              connectorActionTypeId={connectorActionTypeId}
+              connectorModel={connectorModel}
+              connectorName={connectorName}
+              dateRangeEnd={dateRangeEnd}
+              dateRangeStart={dateRangeStart}
+              diagnosticsContext={pipelineData?.diagnostics_context}
+              discoveriesCount={discoveriesCount}
+              duplicatesDroppedCount={duplicatesDroppedCount}
+              environmentContext={environmentContext}
+              errorCategory={errorCategory}
+              executionUuid={executionUuid}
+              failedWorkflowId={failedWorkflowId}
+              failureReason={reason}
+              generatedCount={generatedCount}
+              generationStatus={effectiveGenerationStatus}
+              hallucinationsFilteredCount={hallucinationsFilteredCount}
+              perWorkflowAlertRetrieval={perWorkflowAlertRetrieval}
+              persistedCount={persistedCount}
+              sourceMetadata={sourceMetadata}
+              workflowId={workflowId ?? undefined}
+            />
+          </>
+        )}
+
+        {showRefreshButton && <RefreshSection onClose={handleClose} onRefresh={onRefresh} />}
+      </EuiFlyoutBody>
+
+      {stepDataModalConfig != null && (
+        <StepDataModal
+          dataCount={stepDataModalConfig.dataCount}
+          dataType={stepDataModalConfig.dataType}
+          extractionStrategy={stepDataModalConfig.extractionStrategy}
+          items={stepDataModalConfig.items}
+          onClose={handleCloseStepDataModal}
+          stepName={stepDataModalConfig.stepName}
+          workflowId={stepDataModalConfig.workflowId}
+          workflowName={stepDataModalConfig.workflowName}
+          workflowRunId={stepDataModalConfig.workflowRunId}
+          workflowSummaries={stepDataModalConfig.workflowSummaries}
+        />
+      )}
+    </EuiFlyout>
+  );
+};
+
+WorkflowExecutionDetailsFlyoutComponent.displayName = 'WorkflowExecutionDetailsFlyout';
+
+export const WorkflowExecutionDetailsFlyout = React.memo(WorkflowExecutionDetailsFlyoutComponent);

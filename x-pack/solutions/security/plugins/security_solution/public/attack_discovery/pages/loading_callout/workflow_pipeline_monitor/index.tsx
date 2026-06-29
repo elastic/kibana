@@ -9,6 +9,9 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiSteps,
   EuiText,
@@ -23,6 +26,7 @@ import type { PipelineDataResponse } from '../../hooks/use_pipeline_data';
 import type { StepExecutionWithLink, WorkflowInspectMetadata } from '../types';
 import { useWorkflowEditorLink } from '../../use_workflow_editor_link';
 import { GroupedAlertRetrievalContent } from './grouped_alert_retrieval_content';
+import { GroupedGenerationContent } from './grouped_generation_content';
 import { WorkflowGroupSteps } from './workflow_group_steps';
 import { getCompositeStatus } from './helpers/get_composite_status';
 import {
@@ -190,7 +194,8 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
     );
   }, [onViewData, pipelineData]);
 
-  /** Renders an alerts count badge for an individual alert retrieval workflow */
+  /** Renders an alerts count badge (and, when relevant, a missing-`_id` warning)
+   *  for an individual alert retrieval workflow */
   const renderWorkflowAlertsCountBadge = useCallback(
     (runId?: string): React.ReactNode => {
       const entry = findAlertRetrieval(runId);
@@ -200,15 +205,36 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
       }
 
       const label = getAlertsCountBadgeLabel(entry.alerts_context_count);
+      const missingIdCount = entry.alerts_missing_id_count ?? 0;
+      const hasMissingIdWarning = missingIdCount > 0;
 
-      if (label == null) {
+      if (label == null && !hasMissingIdWarning) {
         return null;
       }
 
       return (
-        <EuiBadge color="hollow" data-test-subj={`alertsCountBadge-${runId ?? 'unknown'}`}>
-          {label}
-        </EuiBadge>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          {label != null && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj={`alertsCountBadge-${runId ?? 'unknown'}`}>
+                {label}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+          {hasMissingIdWarning && (
+            <EuiFlexItem
+              data-test-subj={`missingAlertIdWarning-${runId ?? 'unknown'}`}
+              grow={false}
+            >
+              <EuiIconTip
+                aria-label={i18n.MISSING_ALERT_ID_WARNING(missingIdCount)}
+                color="warning"
+                content={i18n.MISSING_ALERT_ID_WARNING(missingIdCount)}
+                type="warning"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       );
     },
     [findAlertRetrieval]
@@ -392,7 +418,7 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
       ([, groupA], [, groupB]) => getCanonicalOrder(groupA[0]) - getCanonicalOrder(groupB[0])
     );
 
-    const otherStepItems: EuiStepProps[] = sortedPhaseEntries.map(([, phaseSteps]) => {
+    const otherStepItems: EuiStepProps[] = sortedPhaseEntries.map(([phaseKey, phaseSteps]) => {
       const representativeStep = phaseSteps[0];
       const compositeStatus = getCompositeStatus(phaseSteps);
 
@@ -406,28 +432,51 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
           ? ExecutionStatus.RUNNING
           : compositeStatus;
 
+      // The Generation phase can contain more than one workflow: the optional
+      // generation-phase gate (skill) followed by the generation workflow. Render
+      // them as sub-steps under a single "Generation" parent. Use the phase key
+      // (not the first step's id) for the title so the gate's step id does not
+      // override the canonical "Generation" label.
+      const isGenerationPhase = phaseKey === 'generate_discoveries';
+
+      const children = isGenerationPhase ? (
+        <GroupedGenerationContent
+          renderDiscoveryCountBadge={renderDiscoveryCountBadge}
+          renderGenerationInspectButton={(step) =>
+            renderInspectButton(step.stepId, step.pipelinePhase, {
+              workflowId: step.workflowId,
+              workflowName: step.workflowName,
+              workflowRunId: step.workflowRunId,
+            })
+          }
+          renderWorkflowAlertsCountBadge={renderWorkflowAlertsCountBadge}
+          renderWorkflowInspectButton={renderWorkflowInspectButton}
+          subSteps={phaseSteps}
+        />
+      ) : (
+        <WorkflowGroupSteps
+          badge={renderDiscoveryCountBadge(representativeStep)}
+          inspectButton={renderInspectButton(
+            representativeStep.stepId,
+            representativeStep.pipelinePhase,
+            {
+              workflowId: representativeStep.workflowId,
+              workflowName: representativeStep.workflowName,
+              workflowRunId: representativeStep.workflowRunId,
+            }
+          )}
+          steps={phaseSteps}
+        />
+      );
+
       return {
-        children: (
-          <WorkflowGroupSteps
-            badge={renderDiscoveryCountBadge(representativeStep)}
-            inspectButton={renderInspectButton(
-              representativeStep.stepId,
-              representativeStep.pipelinePhase,
-              {
-                workflowId: representativeStep.workflowId,
-                workflowName: representativeStep.workflowName,
-                workflowRunId: representativeStep.workflowRunId,
-              }
-            )}
-            steps={phaseSteps}
-          />
-        ),
+        children,
         status: mapStatusToEuiStatus(effectiveStatus),
         title:
           effectiveStatus === ExecutionStatus.RUNNING ? (
-            <PulsingTitle>{formatStepName(representativeStep.stepId)}</PulsingTitle>
+            <PulsingTitle>{formatStepName(phaseKey)}</PulsingTitle>
           ) : (
-            formatStepName(representativeStep.stepId)
+            formatStepName(phaseKey)
           ),
       } as EuiStepProps;
     });
