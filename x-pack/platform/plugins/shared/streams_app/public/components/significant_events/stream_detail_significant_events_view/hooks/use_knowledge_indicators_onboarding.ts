@@ -9,7 +9,7 @@ import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useRef, useState } from 'react';
 import {
-  SigEventsWorkflowStatus,
+  SignificantEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
@@ -22,19 +22,19 @@ interface Props {
   onComplete: (
     completedState: Extract<
       StreamsKIsOnboardingStatusResult,
-      { status: SigEventsWorkflowStatus.Completed }
+      { status: SignificantEventsWorkflowStatus.Completed }
     >
   ) => void;
   onError: (
     failedState: Extract<
       StreamsKIsOnboardingStatusResult,
-      { status: SigEventsWorkflowStatus.Failed }
+      { status: SignificantEventsWorkflowStatus.Failed }
     >
   ) => void;
 }
 
 export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onError }: Props) {
-  const previousStatusRef = useRef<SigEventsWorkflowStatus | null>(null);
+  const previousStatusRef = useRef<SignificantEventsWorkflowStatus | null>(null);
   const [onboardingState, setOnboardingState] = useState<StreamsKIsOnboardingStatusResult | null>(
     null
   );
@@ -78,8 +78,8 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     // To fix, the workflow engine should expose `cancelRequested` in
     // WorkflowExecutionDto so the server can return BeingCanceled.
     const shouldPreserveBeingCanceled =
-      previousStatusRef.current === SigEventsWorkflowStatus.BeingCanceled &&
-      state.status === SigEventsWorkflowStatus.InProgress;
+      previousStatusRef.current === SignificantEventsWorkflowStatus.BeingCanceled &&
+      state.status === SignificantEventsWorkflowStatus.InProgress;
 
     if (shouldPreserveBeingCanceled) {
       return state;
@@ -97,16 +97,16 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
      */
     if (
       previousStatusRef.current !== null &&
-      previousStatusRef.current !== SigEventsWorkflowStatus.Completed &&
-      state.status === SigEventsWorkflowStatus.Completed
+      previousStatusRef.current !== SignificantEventsWorkflowStatus.Completed &&
+      state.status === SignificantEventsWorkflowStatus.Completed
     ) {
       onComplete(state);
     }
 
     if (
       previousStatusRef.current !== null &&
-      previousStatusRef.current !== SigEventsWorkflowStatus.Failed &&
-      state.status === SigEventsWorkflowStatus.Failed
+      previousStatusRef.current !== SignificantEventsWorkflowStatus.Failed &&
+      state.status === SignificantEventsWorkflowStatus.Failed
     ) {
       onError(state);
     }
@@ -124,13 +124,13 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
   });
 
   const scheduleKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({ status: SigEventsWorkflowStatus.InProgress });
+    setOnboardingState({ status: SignificantEventsWorkflowStatus.InProgress });
     scheduleMutate(streamName);
   }, [scheduleMutate, streamName]);
 
   const cancelKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({ status: SigEventsWorkflowStatus.BeingCanceled });
-    previousStatusRef.current = SigEventsWorkflowStatus.BeingCanceled;
+    setOnboardingState({ status: SignificantEventsWorkflowStatus.BeingCanceled });
+    previousStatusRef.current = SignificantEventsWorkflowStatus.BeingCanceled;
     cancelMutate(streamName);
   }, [cancelMutate, streamName]);
 

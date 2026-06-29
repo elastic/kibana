@@ -22,8 +22,8 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import {
   type Streams,
-  SigEventsWorkflowStatus,
-  type SigEventsWorkflowStatusResult,
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
   type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -99,7 +99,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     (
       completedState: Extract<
         StreamsKIsOnboardingStatusResult,
-        { status: SigEventsWorkflowStatus.Completed }
+        { status: SignificantEventsWorkflowStatus.Completed }
       >
     ) => {
       const { features, queries } = completedState;
@@ -136,8 +136,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const onKnowledgeIndicatorsOnboardingError = useCallback(
     (
       failedState: Extract<
-        SigEventsWorkflowStatusResult,
-        { status: SigEventsWorkflowStatus.Failed }
+        SignificantEventsWorkflowStatusResult,
+        { status: SignificantEventsWorkflowStatus.Failed }
       >
     ) => {
       toasts.addDanger({
@@ -161,7 +161,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   useInterval(
     refetch,
-    knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.InProgress
+    knowledgeIndicatorsOnboardingState?.status === SignificantEventsWorkflowStatus.InProgress
       ? RUNNING_POLL_INTERVAL_MS
       : null
   );
@@ -203,7 +203,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [typeFilterOptions]
   );
   const isKnowledgeIndicatorsGenerationCanceling =
-    knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.BeingCanceled;
+    knowledgeIndicatorsOnboardingState?.status === SignificantEventsWorkflowStatus.BeingCanceled;
   const isGenerateButtonDisabled =
     knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
 

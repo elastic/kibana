@@ -6,7 +6,7 @@
  */
 import type {
   SignificantEventsGetResponse,
-  SigEventsWorkflowStatusResult,
+  SignificantEventsWorkflowStatusResult,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -311,7 +311,7 @@ const significantEventsDiscoveryStatusRoute = createServerRoute({
     workflowClients,
     getSpaceId,
     server,
-  }): Promise<SigEventsWorkflowStatusResult> => {
+  }): Promise<SignificantEventsWorkflowStatusResult> => {
     const { significantEventsDiscoveryClient } = workflowClients;
     if (!significantEventsDiscoveryClient) {
       throw new FeatureNotEnabledError('Significant events discovery is not available');

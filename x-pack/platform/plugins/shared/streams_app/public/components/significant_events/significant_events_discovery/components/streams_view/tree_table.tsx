@@ -24,9 +24,9 @@ import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
   Streams,
-  SigEventsWorkflowStatus,
+  SignificantEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type SigEventsWorkflowStatusResult,
+  type SignificantEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -68,7 +68,7 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, SigEventsWorkflowStatusResult>;
+  streamOnboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
   loading?: boolean;
   searchQuery: Query;
   selection: EuiTableSelectionType<TableRow>;
@@ -372,17 +372,17 @@ export function StreamsTreeTable({
                 }
 
                 switch (onboardingResult.status) {
-                  case SigEventsWorkflowStatus.InProgress:
-                  case SigEventsWorkflowStatus.BeingCanceled:
+                  case SignificantEventsWorkflowStatus.InProgress:
+                  case SignificantEventsWorkflowStatus.BeingCanceled:
                     return <EuiLoadingSpinner size="m" />;
-                  case SigEventsWorkflowStatus.NotStarted:
-                  case SigEventsWorkflowStatus.Canceled:
+                  case SignificantEventsWorkflowStatus.NotStarted:
+                  case SignificantEventsWorkflowStatus.Canceled:
                     return '-';
-                  case SigEventsWorkflowStatus.Completed:
+                  case SignificantEventsWorkflowStatus.Completed:
                     return (
                       <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
-                  case SigEventsWorkflowStatus.Failed:
+                  case SignificantEventsWorkflowStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
@@ -455,7 +455,9 @@ export function StreamsTreeTable({
                       <EuiButtonIcon
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={onboardingResult.status === SigEventsWorkflowStatus.BeingCanceled}
+                        disabled={
+                          onboardingResult.status === SignificantEventsWorkflowStatus.BeingCanceled
+                        }
                         onClick={() => onStopOnboardingActionClick(item.stream.name)}
                       />
                     </EuiToolTip>
