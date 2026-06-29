@@ -7,4 +7,3 @@
 
 export const AI_PANEL_EMBEDDABLE_TYPE = 'ai_panel';
 export const AI_PANEL_APP_NAME = 'AI Panel';
-

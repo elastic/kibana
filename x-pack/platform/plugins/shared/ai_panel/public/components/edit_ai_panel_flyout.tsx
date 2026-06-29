@@ -191,6 +191,7 @@ export const EditAiPanelFlyout = ({
                 defaultMessage:
                   'AI features are not available. Configure an AI connector to enable prompt-based generation.',
               })}
+              announceOnMount
             />
           </>
         )}
@@ -273,6 +274,7 @@ export const EditAiPanelFlyout = ({
                     defaultMessage:
                       'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
                   })}
+                  announceOnMount
                 />
               )}
 

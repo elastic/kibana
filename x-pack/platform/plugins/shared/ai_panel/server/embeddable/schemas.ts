@@ -15,11 +15,7 @@ export const aiPanelStateSchema = schema.object({
   template: schema.maybe(schema.string()),
 });
 
-export const aiPanelEmbeddableSchema = schema.allOf([
-  aiPanelStateSchema,
-  serializedTitlesSchema,
-]);
+export const aiPanelEmbeddableSchema = schema.allOf([aiPanelStateSchema, serializedTitlesSchema]);
 
 export type AiPanelState = TypeOf<typeof aiPanelStateSchema>;
 export type AiPanelEmbeddableState = TypeOf<typeof aiPanelEmbeddableSchema>;
-
