@@ -71,7 +71,12 @@ export const ElasticManagedConnectorsEmptyPrompt: React.FC = () => {
                           <React.Fragment key={connector.serviceType}>
                             {index === Math.floor(connectorExamples.length / 2) && (
                               <EuiFlexItem grow={false}>
-                                <EuiIcon color="primary" size="l" type="documents" aria-hidden={true} />
+                                <EuiIcon
+                                  color="primary"
+                                  size="l"
+                                  type="documents"
+                                  aria-hidden={true}
+                                />
                               </EuiFlexItem>
                             )}
                             <EuiFlexItem grow={false}>

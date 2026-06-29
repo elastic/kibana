@@ -75,7 +75,7 @@ export const DataPanel: React.FC<Props> = ({
             >
               {iconType && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} aria-hidden={true} />
+                  <EuiIcon type={iconType} aria-hidden />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
