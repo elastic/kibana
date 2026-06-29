@@ -84,7 +84,7 @@ The demo code contains error-injection feature flags controlled by \`flagd\` (e.
 
 ## Source Code & Code Search
 
-Repository: \`open-telemetry/opentelemetry-demo\` (tag \`v1.12.0\`). Each service lives under \`src/<service-name>/\` in the repository.
+Repository: \`open-telemetry/opentelemetry-demo\` (tag \`1.12.0\`). Each service lives under \`src/<service-name>/\` in the repository.
 
 The source code is indexed in Semantic Code Search. Use the workflow tools below to investigate code — find log message origins, confirm exact error strings, understand service behaviour, and trace git history. All workflows accept \`repository: "open-telemetry/opentelemetry-demo"\`.
 
