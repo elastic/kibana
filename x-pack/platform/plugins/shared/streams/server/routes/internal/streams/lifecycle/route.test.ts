@@ -45,20 +45,23 @@ const callHandler = ({
   name,
   searchResult,
   statsResult,
+  settingsResult,
   searchError,
 }: {
   name: string;
   searchResult?: unknown;
   statsResult?: IndicesStatsResponse;
+  settingsResult?: Record<string, unknown>;
   searchError?: Error;
 }) => {
   const search = searchError
     ? jest.fn().mockRejectedValue(searchError)
     : jest.fn().mockResolvedValue(searchResult ?? { aggregations: undefined });
   const stats = jest.fn().mockResolvedValue(statsResult ?? { indices: {} });
+  const getSettings = jest.fn().mockResolvedValue(settingsResult ?? {});
 
   const getScopedClients = jest.fn().mockResolvedValue({
-    scopedClusterClient: { asCurrentUser: { search, indices: { stats } } },
+    scopedClusterClient: { asCurrentUser: { search, indices: { stats, getSettings } } },
     streamsClient: {
       getStream: jest.fn().mockResolvedValue({ name }),
       getDataStream: jest.fn().mockResolvedValue({ name }),
@@ -112,13 +115,16 @@ describe('lifecycle _dsl_phase_stats route', () => {
       statsResult: {
         indices: {
           '.ds-hot': {
-            primaries: { store: { total_data_set_size_in_bytes: 100 }, docs: { count: 10 } },
+            total: { store: { total_data_set_size_in_bytes: 100 } },
+            primaries: { docs: { count: 10 } },
           },
           '.ds-frozen-a': {
-            primaries: { store: { total_data_set_size_in_bytes: 200 }, docs: { count: 20 } },
+            total: { store: { total_data_set_size_in_bytes: 200 } },
+            primaries: { docs: { count: 20 } },
           },
           '.ds-frozen-b': {
-            primaries: { store: { total_data_set_size_in_bytes: 300 }, docs: { count: 30 } },
+            total: { store: { total_data_set_size_in_bytes: 300 } },
+            primaries: { docs: { count: 30 } },
           },
         },
       } as unknown as IndicesStatsResponse,
@@ -147,13 +153,80 @@ describe('lifecycle _dsl_phase_stats route', () => {
       statsResult: {
         indices: {
           '.ds-warm': {
-            primaries: { store: { total_data_set_size_in_bytes: 999 }, docs: { count: 9 } },
+            total: { store: { total_data_set_size_in_bytes: 999 } },
+            primaries: { docs: { count: 9 } },
           },
         },
       } as unknown as IndicesStatsResponse,
     });
 
     expect(result).toEqual({ phases: {} });
+  });
+
+  it('attributes an empty backing index to its phase via _tier_preference', async () => {
+    // No `_tier` buckets because the index holds no documents, but its store overhead should still
+    // be attributed to the hot phase via the `_tier_preference` setting (matching ILM behavior).
+    const result = await callHandler({
+      name: 'my-stream',
+      searchResult: { aggregations: { tiers: { buckets: {} } } },
+      statsResult: {
+        indices: {
+          '.ds-empty-hot': {
+            total: { store: { total_data_set_size_in_bytes: 249 } },
+            primaries: { docs: { count: 0 } },
+          },
+        },
+      } as unknown as IndicesStatsResponse,
+      settingsResult: {
+        '.ds-empty-hot': {
+          settings: {
+            index: { routing: { allocation: { include: { _tier_preference: 'data_hot' } } } },
+          },
+        },
+      },
+    });
+
+    expect(result).toEqual({
+      phases: {
+        hot: { size_in_bytes: 249, docs_count: 0 },
+      },
+    });
+  });
+
+  it('prefers the runtime _tier over the _tier_preference setting', async () => {
+    // A frozen searchable-snapshot index keeps a `data_hot,...` preference but is mounted on frozen;
+    // the runtime `_tier` allocation must win over the setting.
+    const result = await callHandler({
+      name: 'my-stream',
+      searchResult: {
+        aggregations: {
+          tiers: { buckets: { data_frozen: { indices: { buckets: [{ key: '.ds-frozen' }] } } } },
+        },
+      },
+      statsResult: {
+        indices: {
+          '.ds-frozen': {
+            total: { store: { total_data_set_size_in_bytes: 500 } },
+            primaries: { docs: { count: 50 } },
+          },
+        },
+      } as unknown as IndicesStatsResponse,
+      settingsResult: {
+        '.ds-frozen': {
+          settings: {
+            index: {
+              routing: { allocation: { include: { _tier_preference: 'data_hot,data_warm' } } },
+            },
+          },
+        },
+      },
+    });
+
+    expect(result).toEqual({
+      phases: {
+        frozen: { size_in_bytes: 500, docs_count: 50 },
+      },
+    });
   });
 
   it('returns empty phases and logs a warning when the ES search throws', async () => {

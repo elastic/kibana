@@ -47,7 +47,30 @@ export interface DslPhaseStat {
   docs_count: number;
 }
 
-// Per-phase storage size and document count for a DSL stream, derived from the `_tier` allocation of each backing index joined with per-index stats.
+// Resolves the phase of a backing index from its `_tier_preference` setting (the first preferred
+// tier that maps to a known phase). Used for indices that the document-level `_tier` aggregation
+// cannot see — e.g. an empty backing index has no documents and therefore no `_tier` bucket, yet it
+// still holds store overhead that should be attributed to its phase (matching ILM, which maps every
+// managed index regardless of doc count).
+const phaseFromTierPreference = (
+  tierPreference: string | undefined
+): PhaseNameWithoutDelete | undefined => {
+  if (!tierPreference) {
+    return undefined;
+  }
+  for (const tier of tierPreference.split(',')) {
+    const phase = TIER_TO_PHASE[tier.trim()];
+    if (phase) {
+      return phase;
+    }
+  }
+  return undefined;
+};
+
+// Per-phase storage size and document count for a DSL stream. Each backing index is attributed to a
+// phase, preferring its runtime `_tier` allocation (authoritative, and the only way to place frozen
+// searchable-snapshot indices) and falling back to the `_tier_preference` setting so that empty
+// indices — which contribute no documents to the `_tier` aggregation — are still counted.
 const getDslPhaseStats = async (
   scopedClusterClient: IScopedClusterClient,
   name: string,
@@ -55,7 +78,7 @@ const getDslPhaseStats = async (
 ): Promise<Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>>> => {
   // `ignore_unavailable: true` on the search prevents index_not_found_exception for streams with
   // no backing indices yet (e.g. freshly created streams with no data), returning empty results.
-  const [searchResponse, statsResponse] = await Promise.all([
+  const [searchResponse, statsResponse, settingsResponse] = await Promise.all([
     scopedClusterClient.asCurrentUser.search({
       index: name,
       size: 0,
@@ -80,6 +103,10 @@ const getDslPhaseStats = async (
       index: dataStreamName,
       metric: ['store', 'docs'],
     }),
+    scopedClusterClient.asCurrentUser.indices.getSettings({
+      index: dataStreamName,
+      filter_path: ['*.settings.index.routing.allocation.include._tier_preference'],
+    }),
   ]);
   const { aggregations } = searchResponse;
   const indicesStats = statsResponse.indices ?? {};
@@ -91,23 +118,33 @@ const getDslPhaseStats = async (
         | undefined
     )?.buckets ?? {};
 
-  // Map each backing index (by actual `_index` value) to a phase derived from its `_tier`.
-  const indexToPhase: Record<string, PhaseNameWithoutDelete> = {};
+  // Authoritative runtime allocation: map each index that actually holds documents to its `_tier`.
+  const indexToTierPhase: Record<string, PhaseNameWithoutDelete> = {};
   for (const [tier, tierBucket] of Object.entries(tierBuckets)) {
     const phase = TIER_TO_PHASE[tier];
     if (!phase) {
       continue;
     }
     for (const indexBucket of tierBucket.indices?.buckets ?? []) {
-      indexToPhase[indexBucket.key] = phase;
+      indexToTierPhase[indexBucket.key] = phase;
     }
   }
 
   const phaseStats: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> = {};
-  for (const [indexName, phase] of Object.entries(indexToPhase)) {
-    const stats = indicesStats[indexName];
+  // Iterate over every backing index from the stats response (includes empty indices). Prefer its
+  // runtime `_tier`, else fall back to the `_tier_preference` setting; skip indices we can't place.
+  for (const [indexName, stats] of Object.entries(indicesStats)) {
+    const tierPreference =
+      settingsResponse[indexName]?.settings?.index?.routing?.allocation?.include?._tier_preference;
+    const phase = indexToTierPhase[indexName] ?? phaseFromTierPreference(tierPreference);
+    if (!phase) {
+      continue;
+    }
     const entry = (phaseStats[phase] ??= { size_in_bytes: 0, docs_count: 0 });
-    entry.size_in_bytes += stats?.primaries?.store?.total_data_set_size_in_bytes ?? 0;
+    // Size uses `total` (primaries + replicas) to match the metric ILM phase stats report (see
+    // `ilmPhases`) and the dataset-quality summary card. Docs use `primaries` to avoid counting the
+    // same document once per replica.
+    entry.size_in_bytes += stats?.total?.store?.total_data_set_size_in_bytes ?? 0;
     entry.docs_count += stats?.primaries?.docs?.count ?? 0;
   }
 

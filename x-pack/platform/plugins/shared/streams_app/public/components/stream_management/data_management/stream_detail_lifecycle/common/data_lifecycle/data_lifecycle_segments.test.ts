@@ -221,6 +221,38 @@ describe('Segment Utilities', () => {
 
       expect(segments[0]).toEqual({ grow: 5, leftValue: '0ms', isDelete: undefined });
     });
+
+    it('should preserve explicit numeric grow values (ILM path)', () => {
+      const phases: SegmentPhase[] = [
+        { grow: 5, min_age: '0d' },
+        { grow: 3, min_age: '30d' },
+        { grow: false, min_age: '60d', isDelete: true },
+      ];
+
+      const segments = buildPhaseTimelineSegments(phases);
+
+      // Explicit grows are untouched (only the DSL `grow: true` case is recomputed).
+      expect(segments[0].grow).toBe(5);
+      expect(segments[1].grow).toBe(3);
+    });
+
+    it('sizes DSL hot/frozen proportionally to their durations when grow is true', () => {
+      // hot spans [0d, 10d) and frozen spans [10d, 30d): frozen is twice as long as hot, so it
+      // should get a larger grow value rather than both rendering at equal width.
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '10d', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+
+      const segments = buildPhaseTimelineSegments(phases);
+
+      const hotGrow = Number(segments[0].grow);
+      const frozenGrow = Number(segments[1].grow);
+      expect(frozenGrow).toBeGreaterThan(hotGrow);
+      // Delete column keeps its fixed (non-grow) sizing.
+      expect(segments[2].isDelete).toBe(true);
+    });
   });
 
   describe('buildDslSegments', () => {
@@ -319,6 +351,26 @@ describe('Segment Utilities', () => {
       // The 10d boundary keeps the downsample step (index 1) rather than being duplicated.
       const tenDayIndex = result.timelineSegments.findIndex((s) => s.leftValue === '10d');
       expect(result.downsamplingSegments[tenDayIndex].stepIndex).toBe(1);
+    });
+
+    it('dedupes a frozen boundary that coincides with a step expressed in a different unit', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0s', label: 'hot' },
+        // frozen at 120s == the 2m downsample step below; they must collapse to one boundary.
+        { grow: true, min_age: '120s', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '1m', fixed_interval: '1h' },
+        { after: '2m', fixed_interval: '1d' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      // Only one boundary at the 2m/120s instant — the downsample step's label is kept.
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0s', '1m', '2m', '30d']);
+      const coincidentIndex = result.timelineSegments.findIndex((s) => s.leftValue === '2m');
+      expect(result.downsamplingSegments[coincidentIndex].stepIndex).toBe(1);
     });
 
     it('inserts the frozen boundary before the downsample steps when it starts earlier', () => {

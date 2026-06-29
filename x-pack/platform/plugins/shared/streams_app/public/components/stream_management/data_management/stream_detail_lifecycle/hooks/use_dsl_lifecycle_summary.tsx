@@ -121,11 +121,15 @@ export const useDslLifecycleSummary = ({
     // holds no data (e.g. after all backing indices rolled into frozen), so it resolves to `0`.
     // Falling back to the whole-stream total there would double-count the frozen bytes/docs across
     // both the hot and frozen bars.
+    // Once per-phase stats have resolved, a phase with no allocated data resolves to `0` rather than
+    // blank, mirroring ILM (where every configured phase always reports a size, defaulting to 0).
+    // The `_tier` aggregation only returns a key for tiers that currently hold data, so an absent
+    // `hot`/`frozen` entry means that phase is genuinely empty — not unknown.
     const hasPhaseStats = phaseStats !== undefined;
     const hotSizeInBytes = hasPhaseStats ? phaseStats.hot?.size_in_bytes ?? 0 : stats?.sizeBytes;
     const hotDocsCount = hasPhaseStats ? phaseStats.hot?.docs_count ?? 0 : stats?.totalDocs;
-    const frozenSizeInBytes = phaseStats?.frozen?.size_in_bytes;
-    const frozenDocsCount = phaseStats?.frozen?.docs_count;
+    const frozenSizeInBytes = hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
+    const frozenDocsCount = hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
 
     return buildLifecyclePhases({
       label: isServerless
@@ -139,7 +143,9 @@ export const useDslLifecycleSummary = ({
       size: hotSizeInBytes !== undefined ? formatBytes(hotSizeInBytes) : undefined,
       retentionPeriod,
       frozenAfter,
-      frozenLabel: 'frozen',
+      frozenLabel: i18n.translate('xpack.streams.streamDetailLifecycle.frozen', {
+        defaultMessage: 'Frozen',
+      }),
       frozenColor: ilmPhases.frozen.color,
       frozenDescription: ilmPhases.frozen.description,
       frozenSize: frozenSizeInBytes !== undefined ? formatBytes(frozenSizeInBytes) : undefined,

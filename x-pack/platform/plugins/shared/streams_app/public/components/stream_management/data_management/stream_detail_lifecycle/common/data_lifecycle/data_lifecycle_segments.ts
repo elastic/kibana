@@ -122,12 +122,45 @@ export const buildPhaseTimelineSegments = (phases: SegmentPhase[]): TimelineSegm
   const nonDeletePhases = phases.filter((phase) => !phase.isDelete);
   const secondMinAge = nonDeletePhases.length > 1 ? nonDeletePhases[1]?.min_age : undefined;
 
+  // When phases carry an explicit numeric `grow` (e.g. ILM, where grow is precomputed) we preserve
+  // it. The DSL path passes `grow: true` for every phase, which would otherwise render hot and
+  // frozen at equal widths regardless of their `[0, frozen_after)` vs `[frozen_after, retention)`
+  // durations. In that case we size the non-delete phases proportionally to their durations, reusing
+  // the same boundary-based logic as `buildDslSegments`.
+  const hasExplicitGrow = nonDeletePhases.some((phase) => typeof phase.grow === 'number');
+  const proportionalGrow = !hasExplicitGrow && nonDeletePhases.length > 1;
+
+  let nonDeleteGrowValues: GrowValue[] | undefined;
+  if (proportionalGrow) {
+    const deletePhase = phases.find((phase) => phase.isDelete);
+    const retentionLabel = deletePhase?.min_age;
+    // Boundaries are each non-delete phase's start (`min_age`), then the retention end if present.
+    const boundaries = [
+      ...nonDeletePhases.map((phase, index) =>
+        index === 0 ? getZeroLabel(secondMinAge ?? phase.min_age) : phase.min_age ?? getZeroLabel()
+      ),
+      ...(retentionLabel ? [retentionLabel] : []),
+    ];
+    nonDeleteGrowValues = calculateGrowValues(
+      boundaries,
+      nonDeletePhases.length,
+      Boolean(retentionLabel)
+    );
+  }
+
+  let nonDeleteCursor = 0;
   return phases.map((phase, index) => {
     const isFirst = index === 0;
     const leftValue = isFirst && secondMinAge ? getZeroLabel(secondMinAge) : phase.min_age;
 
+    let grow = phase.grow;
+    if (!phase.isDelete && nonDeleteGrowValues) {
+      grow = nonDeleteGrowValues[nonDeleteCursor];
+      nonDeleteCursor += 1;
+    }
+
     return {
-      grow: phase.grow,
+      grow,
       leftValue,
       isDelete: phase.isDelete,
     };
@@ -178,26 +211,32 @@ export const buildDslSegments = (
   // Insert phase boundaries into the step boundaries without reordering the steps themselves
   // (step order is preserved intentionally — see the array-order test). Each phase boundary is
   // placed before the first step boundary that starts later in time, and skipped if a boundary at
-  // the same time already exists (a step boundary at that time keeps its `stepIndex`).
-  const innerBoundaries: DslBoundary[] = [...stepBoundaries];
+  // the same instant already exists (a step boundary at that time keeps its `stepIndex`).
+  //
+  // Comparison is by parsed milliseconds, not by raw label, so a phase and a step that resolve to
+  // the same instant in different units (e.g. frozen `120s` vs downsample `2m`) are treated as the
+  // same boundary. Each label is parsed once into a `{ boundary, ms }` pair to avoid re-parsing on
+  // every comparison.
+  const innerBoundaries: Array<{ boundary: DslBoundary; ms: number }> = stepBoundaries.map(
+    (boundary) => ({ boundary, ms: toMillis(boundary.label) ?? 0 })
+  );
   for (const phaseBoundary of phaseBoundaries) {
-    if (innerBoundaries.some((boundary) => boundary.label === phaseBoundary.label)) {
+    const phaseMs = toMillis(phaseBoundary.label) ?? 0;
+    if (innerBoundaries.some((entry) => entry.ms === phaseMs)) {
       continue;
     }
-    const phaseMs = toMillis(phaseBoundary.label) ?? 0;
-    const insertAt = innerBoundaries.findIndex(
-      (boundary) => (toMillis(boundary.label) ?? 0) > phaseMs
-    );
+    const insertAt = innerBoundaries.findIndex((entry) => entry.ms > phaseMs);
+    const entry = { boundary: phaseBoundary, ms: phaseMs };
     if (insertAt === -1) {
-      innerBoundaries.push(phaseBoundary);
+      innerBoundaries.push(entry);
     } else {
-      innerBoundaries.splice(insertAt, 0, phaseBoundary);
+      innerBoundaries.splice(insertAt, 0, entry);
     }
   }
 
   const boundaries: DslBoundary[] = [
     { label: startLabel, stepIndex: startStepIndex },
-    ...innerBoundaries,
+    ...innerBoundaries.map((entry) => entry.boundary),
     ...(retentionLabel ? [{ label: retentionLabel }] : []),
   ];
   const segmentCount = retentionLabel ? boundaries.length - 1 : boundaries.length;
