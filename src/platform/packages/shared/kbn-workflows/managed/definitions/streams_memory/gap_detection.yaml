@@ -5,8 +5,8 @@ description: >
   Audits the sigevents memory knowledge base against 11 required knowledge
   dimensions and writes a structured "_gaps/overview" memory page listing
   what is unknown, ambiguous, or missing. Runs on a weekly schedule.
-  Also scrapes recent investigation workflow results per-investigation and
-  merges reported knowledge gaps into the "_gaps/overview" page.
+  Also scrapes recent investigation workflow results and incorporates any
+  new knowledge gaps into the "_gaps/overview" page.
 enabled: false
 settings:
   timeout: "60m"
@@ -67,7 +67,7 @@ steps:
       method: POST
       path: '/.workflows-executions/_search'
       body:
-        size: 20
+        size: 200
         sort:
           - finishedAt:
               order: desc
@@ -87,13 +87,13 @@ steps:
     on-failure:
       continue: true
 
-  - name: process_investigation_gaps
+  - name: collect_step_outputs
     type: foreach
     foreach: "${{ steps.get_investigation_executions.output.hits.hits }}"
     on-failure:
       continue: true
     steps:
-      - name: get_investigation_output
+      - name: get_rca_output
         type: elasticsearch.request
         with:
           method: POST
@@ -101,7 +101,8 @@ steps:
           body:
             size: 1
             _source:
-              - output
+              - output.structured_output.gaps_found
+              - output.gaps_found
             query:
               bool:
                 must:
@@ -114,43 +115,23 @@ steps:
         on-failure:
           continue: true
 
-      - name: merge_investigation_gaps
-        type: if
-        condition: "${{ steps.get_investigation_output.error == null and steps.get_investigation_output.output.hits.total.value > 0 }}"
-        steps:
-          - name: patch_gaps_page
-            type: ai.agent
-            connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
-            create-conversation: false
-            with:
-              timeout: 120s
-              message: |
-                Call load_skill with path skills/platform/streams/streams-gap-detection to get memory tools.
+  - name: merge_investigation_gaps
+    type: ai.agent
+    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
+    create-conversation: false
+    with:
+      timeout: 120s
+      message: |
+        Call load_skill with path skills/platform/streams/streams-gap-detection to get memory tools.
 
-                Merge new gaps from a completed investigation into the _gaps/overview memory page.
+        Read the current _gaps/overview page using platform_streams_memory_read.
 
-                Investigation output (from {{ foreach.item._source.finishedAt }}):
-                {{ steps.get_investigation_output.output.hits.hits[0]._source.output | json }}
+        The following are structured outputs from recent investigation workflow runs. Each hit may contain a gaps_found array of knowledge gaps encountered during root cause analysis:
 
-                Steps:
-                1. Read _gaps/overview using platform_streams_memory_read.
-                2. Find or create an "## Investigation-discovered gaps" section near the end of the page.
-                3. Add any non-empty gaps from the "gaps_found" field that are not already listed in that section.
-                4. If gaps_found is absent or empty, stop and return changes_made: false.
-                5. If you made changes, write the updated page back using platform_streams_memory_write with categories ["_system/gaps"].
-              schema:
-                type: object
-                properties:
-                  changes_made:
-                    type: boolean
-                    description: Whether any new gaps were written to the _gaps/overview page.
-                  gaps_added:
-                    type: array
-                    items:
-                      type: string
-                    description: The new gap strings that were added.
-                required:
-                  - changes_made
-                  - gaps_added
-            on-failure:
-              continue: true
+        {{ steps.collect_step_outputs.output | json }}
+
+        Incorporate any new, non-duplicate gaps from those investigations into the _gaps/overview page. Weave them into the appropriate existing sections of the report naturally — do not create a separate section for investigation gaps. If there are no new gaps to add, do not modify the page.
+
+        Write the updated page using platform_streams_memory_write with categories ["_system/gaps"].
+    on-failure:
+      continue: true
