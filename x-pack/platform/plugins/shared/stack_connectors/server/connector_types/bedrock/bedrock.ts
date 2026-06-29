@@ -35,6 +35,7 @@ import {
   ConverseStreamActionParamsSchema,
   DashboardActionParamsSchema,
   ConverseResponseSchema,
+  claudeModelSupportsTemperature,
 } from '@kbn/connector-schemas/bedrock';
 import type {
   Config,
@@ -57,7 +58,6 @@ import type {
 } from '@kbn/connector-schemas/bedrock';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
-  claudeModelSupportsTemperature,
   extractRegionId,
   formatBedrockBody,
   parseContent,

@@ -14,8 +14,20 @@ export const getTemperatureIfValid = (
   temperature?: number,
   { connector, modelName }: { connector?: InferenceConnector; modelName?: string } = {}
 ) => {
-  // Escape hatch: if user sets temperature in the connector config, use it by default (including 0).
-  // This should take priority over any automatic model-based exclusions.
+  const model =
+    modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
+
+  const isBedrockBacked =
+    connector?.type === InferenceConnectorType.Bedrock ||
+    (connector?.type === InferenceConnectorType.Inference &&
+      connector?.config?.provider === InferenceEndpointProvider.AmazonBedrock);
+
+  // Claude 4.7+ deprecated temperature — reject it regardless of source (connector config or caller).
+  if (isBedrockBacked && model && !claudeModelSupportsTemperature(model)) {
+    return {};
+  }
+
+  // Escape hatch: if user sets temperature in the connector config, use it (including 0).
   const connectorTemperature = connector?.config?.temperature;
   if (
     typeof connectorTemperature === 'number' &&
@@ -24,9 +36,6 @@ export const getTemperatureIfValid = (
   ) {
     return { temperature: connectorTemperature };
   }
-
-  const model =
-    modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 
   if (
     (connector?.type === InferenceConnectorType.OpenAI ||
@@ -45,25 +54,6 @@ export const getTemperatureIfValid = (
     if (shouldExcludeTemperature) {
       // Some models reject non-default temperature values (or reject the param entirely). Let the
       // provider default apply by omitting the parameter.
-      return {};
-    }
-  }
-
-  // Bedrock connector: Claude 4.7+ deprecated temperature.
-  if (connector?.type === InferenceConnectorType.Bedrock && model) {
-    if (!claudeModelSupportsTemperature(model)) {
-      return {};
-    }
-  }
-
-  // Inference connector backed by Amazon Bedrock (e.g. an ES inference endpoint using the
-  // amazonbedrock provider) — apply the same Claude version check.
-  if (
-    connector?.type === InferenceConnectorType.Inference &&
-    connector?.config?.provider === InferenceEndpointProvider.AmazonBedrock &&
-    model
-  ) {
-    if (!claudeModelSupportsTemperature(model)) {
       return {};
     }
   }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { claudeModelSupportsTemperature } from '@kbn/connector-schemas/bedrock';
 import {
-  claudeModelSupportsTemperature,
   formatBedrockBody,
   ensureMessageFormat,
   parseContent,

@@ -138,7 +138,7 @@ describe('getTemperatureIfValid', () => {
       });
     });
 
-    it('keeps connector-config temperature even for Bedrock Claude 4.7+ models (escape hatch)', () => {
+    it('ignores connector-config temperature for Bedrock Claude 4.7+ models (API rejects it)', () => {
       const connector = {
         type: InferenceConnectorType.Bedrock,
         config: { temperature: 0.5 },
@@ -149,7 +149,7 @@ describe('getTemperatureIfValid', () => {
           connector,
           modelName: 'us.anthropic.claude-opus-4-8-20251101-v1:0',
         })
-      ).toEqual({ temperature: 0.5 });
+      ).toEqual({});
     });
   });
 
