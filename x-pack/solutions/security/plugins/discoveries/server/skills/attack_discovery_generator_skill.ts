@@ -41,8 +41,15 @@ export const ATTACK_DISCOVERY_GENERATOR_SKILL_ID = 'attack-discovery-generator';
 export const ATTACK_DISCOVERY_GENERATOR_SKILL_NAME = 'attack-discovery-generator';
 export const ATTACK_DISCOVERY_GENERATOR_SKILL_BASE_PATH = 'skills/security/attack-discovery';
 
+/**
+ * Registry tool id for searching persisted Attack Discovery alerts. Exposed so the
+ * agent can deduplicate candidate alerts against discoveries that already exist
+ * before delegating to the generation pipeline.
+ */
+export const ATTACK_DISCOVERY_SEARCH_TOOL_ID = 'security.attack_discovery_search';
+
 const SKILL_DESCRIPTION =
-  'Identifies real attack chains in Elastic Security alerts and reports the status of prior generations. In generate mode, the agent gathers and corroborates evidence with whatever tools are available (threat hunting, threat intelligence, entity context, knowledge base), then delegates the canonical generation pipeline to the security.attack-discovery.run inline tool (sync mode, mode preference: provided > esql > custom_only > custom_query with explicit params — never bare invocations with no retrieval params) so anonymization, hallucination detection, validation, and persistence remain inside the audited pipeline. The LLM connector is resolved from the agent execution automatically. Insights JSON is returned inline when the pipeline finishes within the soft deadline; otherwise the agent returns an execution_uuid handoff. In status-only mode, when the user provides an execution_uuid, the agent looks up status without starting a new generation and emits insights JSON if discoveries are ready.';
+  'Identifies real attack chains in Elastic Security alerts and reports the status of prior generations. In generate mode, the agent gathers and corroborates evidence with whatever tools and skills are available (threat hunting, entity analytics, alert analysis, threat intelligence, knowledge base), then delegates the canonical generation pipeline to the security.attack-discovery.run inline tool (sync mode; mode preference: provided > esql > custom_only > custom_query with explicit params — never bare invocations) so anonymization, hallucination detection, validation, and persistence remain inside the audited pipeline. It then renders an analyst Attack Discovery Report — summary statistics, per-chain narrative, best-effort raw-log corroboration, evidence table, and an attack-flow graph — that mirrors the persisted discoveries, alongside the insights JSON. In status-only mode, when given an execution_uuid, it looks up status without starting a new generation and emits the report if discoveries are ready.';
 
 const ANALYST_HEADER = `# Attack Discovery Generation Skill
 
@@ -64,6 +71,19 @@ Use every skill and tool available to you to reach the best possible conclusion.
 The goal is to build a complete, evidence-backed picture before making a determination. A half-investigated chain that "looks bad" is not sufficient. The skill is intentionally non-prescriptive about which tools to call — choose based on what is available at runtime and what the evidence demands.
 
 If you do not yet have a curated alert set, the inline tool \`security.attack-discovery.get_default_esql_query\` returns a programmatically-built, space-specific default ES|QL query — a reasonable starting point you can run, adapt, or replace based on the investigation. Treat it as a convenience, not a recommendation: prefer corroborating with whatever evidence-gathering tools the conversation exposes before relying on a default.`;
+
+const CROSS_SKILL_CORROBORATION = `## Cross-Skill Corroboration
+
+You run inside an Agent Builder conversation that exposes other skills. Before finalizing, **enumerate the skills available** in this conversation and load the ones relevant to corroborating attack chains. At a minimum:
+
+- **Load and use the \`threat-hunting\` skill** to pivot from alert indicators into raw telemetry — process trees, network connections, file modifications, and authentication events that confirm or refute each candidate chain.
+- **Load and use the \`entity-analytics\` skill** to pull host and user context (risk scores, asset criticality, entity profiles, behavioral baselines). High-risk entities or extreme-criticality assets strengthen a chain's credibility; low-risk entities with no prior history may indicate a false positive.
+- **Load and use the \`alert-analysis\` skill** to drill into the individual alerts that compose each candidate chain — which detection rule fired, the alert's reason and key fields, its severity / risk score, and whether it reflects genuine malicious activity or a benign / false-positive trigger. Use it to confirm each chain is built on sound alerts before reporting it.
+- **Load the \`graph-creation\` skill** so you can render an attack-flow graph for each discovery (see Output Requirements).
+
+Do not stop there: use **every** other skill available that can gather supporting evidence (for example detection-rule context, threat intelligence, knowledge bases, or any customer-registered hunting / threat-intel skills). Choose based on what is exposed at runtime and what the evidence demands — the goal is a complete, evidence-backed picture before you finalize the report.
+
+This cross-skill corroboration is **best-effort**: when a relevant skill is not available, skip it gracefully and never delay the audited pipeline waiting on a tool you do not have.`;
 
 const UPFRONT_PIPELINE_PATTERN = `## Upfront Pipeline Pattern
 
@@ -160,54 +180,109 @@ If the user mentions an Attack Discovery \`execution_uuid\` (a UUID returned by 
 
 Branch on the \`status\` field:
 
-- **\`succeeded\`**: The tool result includes \`attack_discoveries\`. Emit the **full** per-discovery markdown report (heading, host/user, Summary, Details, Attack Chain, deep link) and the insights JSON, exactly as in the inline branch of Mode A. Do not abbreviate to a status-only acknowledgement — when the user asks for status and the pipeline succeeded, they expect the full rich discoveries, not a summary line.
+- **\`succeeded\`**: The tool result includes \`attack_discoveries\`. Emit the **full** per-discovery markdown report (heading, host/user, Summary, Details, Attack Chain, deep link) and the insights JSON, exactly as in the inline branch of Mode A. Do not abbreviate to a status-only acknowledgement — when the user asks for status and the pipeline succeeded, they expect the full rich discoveries, not a summary line. After the report, run the **Missed Detection Closure** pass (see below) — beginning with a lightweight raw-log corroboration of the persisted chains, since this status-resume path did not run its own upstream investigation — then pause at the verbatim \`create the rule\` approval gate before any rule is created.
 - **\`running\`**: Tell the user the generation is still in progress. Include the current \`phase\` field (\`alert_retrieval\`, \`generation\`, or \`validation\`) so they understand what stage is active. Offer to check again. Do not poll repeatedly in the same turn.
 - **\`failed\`**: Report the failure. Include the \`error_message\` field if present and the \`phase\` that failed, so the user can decide whether to retry. Do not fabricate insights.
 - **\`not_found\`**: Tell the user no record of that \`execution_uuid\` exists in the event log (it may be invalid, from a different space, or from outside the event-log retention window).
 
 This mode also resumes the slow-path handoff from Mode A — when the user comes back and asks "is it done?" after seeing an in-progress acknowledgement, you are now in Mode B with the previously-returned \`execution_uuid\`.`;
 
+const GROUND_TRUTH_GUIDE = `## Mode C — Ground-truth gate (curate the candidate alert set, return a DECISION)
+
+You are invoked in this mode by the Attack Discovery **generation-phase gate** — an always-on step that runs before the generation pipeline on every non-conversational run. You are given a set of **candidate alerts** that a deterministic retrieval phase already produced, and your job is to ground-truth them and return a **decision**, not data, and not a report.
+
+In this mode you are a **gate / curator**, not a report generator and not a pipeline runner:
+
+- **Input:** the full candidate alert set. Each candidate carries a backing document \`_id\`. You see the complete alert data so you can judge each one on its merits.
+- **Ground-truth, default to KEEP.** Decide which candidates to keep. **Default to keeping every candidate.** Only remove a candidate when you have concrete, justifiable evidence that it is a false positive or not attack-relevant. Favor recall — the downstream generation pipeline performs the attack-chain analysis and false-positive filtering and *cannot* analyze any alert you remove. When in doubt, keep it.
+- **Additional retrieval (mandatory when enabled).** When the run enables the skill's additional retrieval, you MUST retrieve net-new alerts of your own: call \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` for the space-aware baseline query (it selects the backing document \`_id\` via \`METADATA _id\`), run it via \`execute_esql\`, and record the \`_id\` of EVERY alert you retrieve in \`added_alert_ids\` **immediately, before any corroboration** (adapt the query — wider window, different filters — only when the investigation warrants). Corroboration is best-effort CONTEXT only and MUST NOT remove or shrink \`added_alert_ids\`: NEVER drop a self-retrieved alert because a raw-log / threat-hunting / entity pivot came back empty or inconclusive — absence of corroborating telemetry is not evidence of a false positive, and the downstream generation pipeline does the attack-chain analysis and false-positive filtering and cannot see any alert you omit. Apply the same recall-first, default-to-INCLUDE rule to \`added_alert_ids\` that you apply to \`keep_alert_ids\`. When you received no candidate alerts, this retrieval is the ONLY source of alerts for the run, so an empty \`added_alert_ids\` is a failure — broaden the window and retry before giving up. When additional retrieval is NOT enabled, ground-truth ONLY the candidates you were given and add none.
+- **Corroborate (best-effort, BOUNDED multi-skill).** Load the core corroboration skills — \`threat-hunting\` (pivot into raw telemetry), \`entity-analytics\` (host/user risk and asset criticality), and \`alert-analysis\` (drill into the alerts behind each candidate) — and run them against the alerts you are keeping, folding what you learn into \`additional_context\`. Three HARD guardrails keep this inside the gate's timeout and token budget: (a) the output stays DECISION-ONLY / IDS-ONLY (\`keep_alert_ids\` / \`added_alert_ids\` / \`additional_context\` — never a report or raw data); (b) corroboration feeds \`additional_context\` ONLY and is NEVER a reason to drop an alert from \`keep_alert_ids\` or \`added_alert_ids\` — recall wins, and an inconclusive or empty pivot leaves the keep/added sets untouched; and (c) a budget cap — scope corroboration to the kept candidates, summarize findings, never dump raw telemetry, and skip a skill rather than blow the turn (skip gracefully when a skill is unavailable).
+
+### Output contract — a DECISION only (Constraint B: never echo candidate bytes)
+
+Return structured output with these fields and nothing else:
+
+- **\`keep_alert_ids\`**: the backing document \`_id\` values of the candidates you decided to KEEP (a subset of the candidate \`_id\`s). Return **ids only** — do **NOT** re-emit, paraphrase, distill, or echo the candidate alert contents. The orchestration forwards the original kept candidate bytes by \`_id\`; echoing them wastes tokens and risks corrupting the audited data.
+- **\`added_alert_ids\`**: the backing document \`_id\` values of any NET-NEW alerts you retrieved yourself (only when additional retrieval is enabled). Return **ids only** — same contract as \`keep_alert_ids\`; the orchestration re-fetches the full alerts by \`_id\`. Empty when you added none. Never emit full alert content here or anywhere else.
+- **\`additional_context\`**: a concise summary of your corroboration findings (entity risk and asset criticality, telemetry pivots, false-positive triage, threat-intel hits), or empty when you gathered none. This is the same corroboration insight the conversational skill passes to \`provided\` mode.
+
+### Recursion / scope (hard rules)
+
+- Do **NOT** generate attack discoveries, do **NOT** render an Attack Discovery Report, and do **NOT** invoke the \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` tool. The gate only curates; the generation pipeline runs separately and unconditionally **after** you. Calling \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` here would double-invoke the pipeline — never do it.`;
+
 const OUTPUT_REQUIREMENTS = `## Output Requirements
 
 Branch on which mode (and outcome) you are in.
 
+### Step 0 — Hard gate: decide what you actually hold
+
+**Before writing anything, decide what you actually hold. This gate overrides everything below.**
+
+1. Did \`attack-discovery.run\` (Mode A) return an \`attack_discoveries\` array in its result, or did \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` (Mode B) return \`status: succeeded\` **with** a discoveries array? If **no** — you only got an \`execution_uuid\`, or \`status: running\`, or an empty/absent array — then you do **NOT** have discoveries. Go straight to the **In-progress branch** and emit the handoff. **Never** render the Attack Discovery Report in this case, and **never** turn the candidate chains you found during your own corroboration into a report. The chains you identified while investigating are **not** discoveries until the pipeline has validated and persisted them.
+2. If **yes**, the pipeline's \`attack_discoveries\` array is the **complete and only** set of chains you may report. The number of per-discovery sections, the header's **True Positive Attack Chains** count, the \`## Overall Assessment\` rows, and the \`insights[]\` entries must **all equal the length of that array** (\`discovery_count\`). If your independent analysis found **more** (or fewer) candidate chains than the pipeline persisted, **defer to the pipeline** — report only the persisted set. Never inflate the count with chains the pipeline did not return, and never report a chain that is not in \`attack_discoveries\`.
+
 ### Inline-discoveries branches (Mode A fast path; Mode B with \`status: succeeded\`)
 
-When you have \`attack_discoveries\` in hand — either because \`attack-discovery.run\` returned them inline (Mode A fast path) or because \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` returned \`status: succeeded\` (Mode B) — produce a final response that:
+When you have \`attack_discoveries\` in hand — either because \`attack-discovery.run\` returned them inline (Mode A fast path) or because \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` returned \`status: succeeded\` (Mode B) — render a full **Attack Discovery Report** in markdown, then emit the insights JSON beneath it.
 
-1. Acknowledges that discoveries were persisted (mention the \`execution_uuid\`).
-2. Renders a per-discovery markdown report (see the next sub-section) so the chat reads like the Attack Discovery UI.
-3. Emits the insights JSON (using the schema below) inline beneath the markdown report so the agent can keep reasoning about the structured form.
-4. Reasons step-by-step before the JSON. The reasoning and the markdown report are the only output allowed outside of the JSON code block.
-5. Uses the special ${SYNTAX} syntax to reference source data fields **inside the JSON only**. The surrounding markdown report must use plain English (see below).
-6. **LIMIT** \`detailsMarkdown\` to 2750 characters and \`summaryMarkdown\` to 200 characters.
+**The pipeline is the source of truth.** Produce exactly **one report section per discovery the pipeline returned** — same count, same titles, same \`alertIds\`, same \`mitreAttackTactics\`. Do **not** add, split, merge, or drop chains in the report; your stricter analysis informs the *narrative and corroboration*, never the *set* the pipeline returned. The report mirrors the discoveries the audited pipeline returned to you; link to the Attack Discovery UI for the canonical persisted view (the UI reflects the final state after de-duplication, which you cannot compute yourself).
 
-**Full presentation is mandatory.** When you have discoveries, render the per-discovery markdown report in full for **every** discovery — never abbreviate to title + entity badges only. Title, host/user context, **Summary** paragraph, bulleted **Details** timeline, **Attack Chain** tactics, and the deep link must all be present for each discovery. The user came here to see the chain; do not make them ask for the details. This requirement applies equally to status-resume (Mode B with \`status: succeeded\`): when the polled status returns discoveries, present them in the same rich shape — never as a one-line "succeeded" status acknowledgement.
+Reason step-by-step first. The reasoning, the markdown report, and the insights JSON are the only output allowed; the reasoning and report are the only content outside the JSON code block. Use the special ${SYNTAX} syntax to reference source data fields **inside the JSON only** — the surrounding markdown report must use plain English.
 
-#### Per-discovery markdown report
+#### 1. Report header
 
-For each discovery in \`attack_discoveries\`, emit a markdown section that mirrors how the Attack Discovery page renders the chain. Include, in order:
+Open the report with a level-1 heading and a short metadata block:
+
+\`\`\`
+# Attack Discovery Report
+\`\`\`
+
+- **Analysis Period:** the time window you analyzed.
+- **Total Alerts Analysed:** how many alerts you retrieved and curated.
+- **True Positive Attack Chains:** the number of discoveries the audited pipeline **returned to you** — the length of \`attack_discoveries\` / \`discovery_count\` — **never** your own candidate-chain count. This number must equal the number of per-discovery sections you render below. (\`discovery_count\` is the *validated* set the pipeline hands back; the Attack Discovery UI shows the final state after de-duplication against previously-persisted discoveries. Report the pipeline's returned set and link to the UI for the canonical persisted view — do not try to guess which chains were later de-duplicated.)
+- **False Positives Discarded:** the number of candidate alerts/groupings **you** triaged out as likely false positives *before* handing the curated set to the pipeline — your own pre-pipeline triage count, not a pipeline-reported number. State \`0\` if you discarded none.
+- **Verdict:** a one-line overall assessment.
+
+#### 2. Summary Statistics
+
+Add a \`## Summary Statistics\` table with the aggregate picture: unique alert rules triggered, hosts involved, users involved, C2 / attacker IPs identified, severity breakdown, and the true-positive rate.
+
+#### 3. Per-discovery sections (one per returned discovery)
+
+For each discovery in \`attack_discoveries\`, in order, emit a markdown section that mirrors how the Attack Discovery page renders the chain. Include, in order:
 
 - A level-3 heading with the discovery title, e.g. \`### {title}\`.
-- A short context line naming the primary host and user involved on a single line, e.g. \`**Host:** SRVWIN02 — **User:** Administrator\`. Resolve real values from your investigation evidence — do **not** copy raw \`{{ field uuid }}\` tokens into the markdown prose.
-- A **Summary** paragraph paraphrased from \`summaryMarkdown\`. Plain English, no double-brace tokens.
-- A bulleted **Details** timeline paraphrased from \`detailsMarkdown\`. Plain English, no double-brace tokens.
+- A short context line naming the primary host and user involved, e.g. \`**Host:** SRVWIN02 — **User:** Administrator\`. Resolve real values from your investigation evidence — do **not** copy raw \`{{ field uuid }}\` tokens into the markdown prose.
+- A **Narrative** paragraph paraphrased from \`summaryMarkdown\` and \`detailsMarkdown\` that reads like the story of the attack as it played out. Plain English, no double-brace tokens.
+- A **Raw Log Corroboration** checklist: the concrete raw-telemetry evidence you gathered (best-effort, via the \`threat-hunting\` skill / \`platform.core.search\` against \`logs-*\`) that confirms the chain — process trees, C2 connections, lateral-movement commands, authentication events, etc. If you could not corroborate part of the chain against raw logs, **say so explicitly** rather than dropping the chain.
+- An **Evidence Table** with columns such as Time, Host, Process/Source, Command/Action, Parent, and Evidence Type — one row per key event.
 - An **Attack Chain** line listing the MITRE ATT&CK tactics for the chain (the same values that appear in \`mitreAttackTactics\`), comma-separated. Example: \`**Attack Chain:** Initial Access, Execution, Defense Evasion, Impact\`.
+- An **Attack Flow Graph**: use the \`graph-creation\` skill / \`attachments.add\` (type \`graph\`) to build a node-and-edge graph of the chain, then embed the returned token, e.g. \`<render_attachment id="..." />\`. If graph rendering is unavailable, include a short text fallback describing the flow.
 - A deep link to the Attack Discovery page so the user can view the persisted, fully-rendered chain: \`[Open in Attack Discovery](/app/security/attack_discovery)\`.
 
-Then, beneath the markdown sections (one per discovery), emit the insights JSON in a single fenced code block. The JSON **must** retain the \`{{ field uuid }}\` syntax — it is consumed by the Attack Discovery UI and the persistence layer. The markdown report **must not** contain those tokens — paraphrase the real values you saw during corroboration into readable prose so the chat output is human-readable. Both halves are required: the JSON preserves the audited pipeline contract, while the markdown gives the analyst an at-a-glance view that mirrors the Attack Discovery page.
+#### 4. Overall Assessment
+
+Close the report with an \`## Overall Assessment\` table — one row per chain — with the classification (every chain the pipeline returned is a validated true positive), a confidence level, and the immediate action required.
+
+#### 5. Insights JSON
+
+Then, beneath the report, emit the insights JSON in a single fenced code block. The JSON **must** retain the \`{{ field uuid }}\` syntax — it is consumed by the Attack Discovery UI and the persistence layer. The markdown report **must not** contain those tokens — paraphrase the real values you saw during corroboration into readable prose. Both halves are required: the JSON preserves the audited pipeline contract, while the report gives the analyst the rich, evidence-backed view.
+
+**Full presentation is mandatory.** Render the full per-discovery section for **every** discovery — never abbreviate to title + entity badges only. Heading, host/user context, **Narrative**, **Raw Log Corroboration**, **Evidence Table**, **Attack Chain** tactics, **Attack Flow Graph**, and the deep link must all be present for each discovery. This applies equally to status-resume (Mode B with \`status: succeeded\`): when the polled status returns discoveries, present them in the same rich shape — never as a one-line "succeeded" status acknowledgement.
+
+**LIMIT** \`detailsMarkdown\` to 2750 characters and \`summaryMarkdown\` to 200 characters.
 
 If the source returned no discoveries, do not fabricate any. Report that no attack chains met the validation standard and explain what evidence was insufficient.
 
 ### In-progress branch (Mode A slow path; Mode B with \`status: running\`)
 
-\`attack_discoveries\` are not yet available. Do **not** emit the insights JSON — there is nothing to emit. Instead, write a short status response that:
+\`attack_discoveries\` are not yet available — \`attack-discovery.run\` returned only an \`execution_uuid\` (the soft-deadline slow path) or the status is still \`running\`. Do **not** emit the insights JSON or the Attack Discovery Report — there is nothing to render yet. **Do not** present the candidate chains you gathered during corroboration as if they were discoveries: they have not been validated or persisted, and substituting them for the pipeline's output would break the source-of-truth invariant. Instead, write a short status response that:
 
 1. States the generation is in progress.
 2. Includes the \`execution_uuid\`.
 3. If \`phase\` is available (Mode B), names the active phase (alert_retrieval, generation, or validation).
 4. Tells the user discoveries will be persisted automatically and visible at \`/app/security/attack_discovery\`.
-5. Offers to check status again when they ask — you will use \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\`.
+5. Offers to check status again when they ask — you will use \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\`, and only then (once \`status: succeeded\` returns the discoveries array) will you render the full report.
 
 ### Failure branch (Mode B with \`status: failed\` or \`not_found\`)
 
@@ -265,6 +340,45 @@ Your final output must include a JSON value adhering to the following schema, in
 }
 \`\`\``;
 
+const MISSED_DETECTION_CLOSURE = `## Missed Detection Closure (mandatory post-report gap analysis)
+
+After rendering the Attack Discovery Report and emitting the insights JSON, perform a coverage-gap pass. This pass is **mandatory** on every path that renders a report — both the Mode A conversational path and the **Mode B status-resume path** (\`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` returned \`status: succeeded\`). Closing detection gaps is the highest-leverage outcome of the investigation — do not skip it.
+
+On the **Mode B status-resume path you did not run your own upstream investigation** (you only polled status and rendered the persisted discoveries), so begin this pass with a best-effort, lightweight raw-log corroboration of the persisted chains — pivot from each chain's events into raw telemetry (via the \`threat-hunting\` skill / \`platform.core.search\` against \`logs-*\`) to surface malicious actions the curated alert set did not catch. Keep it bounded — do not pull large raw telemetry. On the Mode A path, reuse the corroboration you already gathered during your investigation instead of repeating it.
+
+### Procedure
+
+1. **Map alerts to malicious actions.** For each event in the chain narrative that constitutes a clear malicious action (suspicious process spawn, encoded payload execution, C2 network connection, registry persistence write, lateral movement command, credential dumping pattern, etc.), check whether an alert in the curated set covers it. Correlate by \`process.entity_id\`, \`process.command_line\`, \`event.id\`, and the alert's \`kibana.alert.original_event.*\` fields.
+
+2. **Emit a \`## ⚠️ Missed Detection: <action>\` heading for each gap.** Below each heading, describe (a) what the missed event is, (b) what rule shape would have fired, (c) why the absence is a coverage gap and not just a low-severity finding. Keep each entry to ~3-5 sentences.
+
+3. **Draft a candidate ES|QL detection rule for each gap.** Use this exact block format:
+
+       Proposed Rule
+       Name: <short descriptive name>
+       Severity: <low | medium | high | critical>
+       Risk score: <0-100>
+       ES|QL query:
+       \`\`\`esql
+       FROM <appropriate logs-* index pattern>
+       | WHERE <conditions targeting the missed pattern>
+       | KEEP <relevant fields>
+       \`\`\`
+       MITRE: <tactic, technique id+name>
+       Reasoning: <one paragraph: why this query, why these fields, why this severity, what false-positive risk to expect>
+
+4. **Pause for explicit user approval.** After drafting all proposed rules, ask the user verbatim:
+   > "I can create the proposed rule(s) now via the \`detection-rule-edit\` skill. Reply with **\`create the rule\`** (or specify which rule by name) to persist, or share refinements you'd like first."
+
+5. **ONLY after the user replies with \`create the rule\` (or equivalent unambiguous approval)** invoke the \`detection-rule-edit\` skill by calling \`security.create_detection_rule\` with a natural-language description that captures the rule's name, query, severity, risk score, and MITRE mapping. Render the resulting rule attachment inline so the user sees the persisted rule. If the user refines the rule, re-draft and re-ask for approval — do not persist without explicit confirmation.
+
+### Constraints
+
+- **Never run this pass in Mode C** (the ground-truth gate). Mode C is decision-only: it does not render a report and must not propose or create rules. This closure pass runs only after a report has been rendered (Mode A, or Mode B with \`status: succeeded\`).
+- If the alert set fully covered the chain (no missed detections), state that explicitly: \`No coverage gaps identified — all malicious actions in this chain were caught by the alert set.\` Skip to no rule proposal.
+- Do not invoke \`detection-rule-edit\` speculatively or in the same turn that introduces a proposed rule. Approval is a separate turn.
+- Do not propose rules for events that you cannot back with concrete telemetry — the goal is high-quality gap closure, not noise.`;
+
 const FIELD_SYNTAX_BLOCK = `## Field Syntax
 
 All markdown fields (\`detailsMarkdown\`, \`entitySummaryMarkdown\`, \`summaryMarkdown\`) must use the special double-brace syntax to reference source data:
@@ -280,13 +394,16 @@ The set of valid MITRE ATT&CK tactic values is: ${MITRE_ATTACK_TACTICS.join(', '
 const SKILL_CONTENT = [
   ANALYST_HEADER,
   TOOL_USAGE_GUIDANCE,
+  CROSS_SKILL_CORROBORATION,
   UPFRONT_PIPELINE_PATTERN,
   KEY_PRINCIPLES,
   ANALYSIS_PROCESS,
   RUN_PIPELINE_GUIDE,
   STATUS_GUIDE,
+  GROUND_TRUTH_GUIDE,
   OUTPUT_REQUIREMENTS,
   JSON_OUTPUT_SCHEMA,
+  MISSED_DETECTION_CLOSURE,
   FIELD_SYNTAX_BLOCK,
 ].join('\n\n');
 
@@ -401,6 +518,7 @@ export const createAttackDiscoveryGeneratorSkill = ({
       platformCoreTools.getIndexMapping,
       platformCoreTools.getWorkflowExecutionStatus,
       platformCoreTools.search,
+      ATTACK_DISCOVERY_SEARCH_TOOL_ID,
     ],
     id: ATTACK_DISCOVERY_GENERATOR_SKILL_ID,
     name: ATTACK_DISCOVERY_GENERATOR_SKILL_NAME,

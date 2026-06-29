@@ -171,7 +171,10 @@ describe('getPersistedOutputDiscoveries', () => {
           stepType: 'security.attack-discovery.defaultValidation',
         },
         {
-          output: { duplicates_dropped_count: 1, persisted_discoveries: [mockDiscovery] },
+          output: {
+            duplicates_dropped_count: 1,
+            persisted_discoveries: [mockDiscovery, mockDiscoveryTwo],
+          },
           stepType: 'security.attack-discovery.persistDiscoveries',
         },
       ],
@@ -179,6 +182,35 @@ describe('getPersistedOutputDiscoveries', () => {
 
     const result = getPersistedOutputDiscoveries({ execution });
 
-    expect(result).toEqual([mockDiscovery]);
+    // persisted_discoveries holds existing + new (length 2); one is a pre-existing
+    // duplicate, so the net-new count is 1.
+    expect(result).toHaveLength(1);
+  });
+
+  it('subtracts duplicates_dropped_count so the result reflects only the net-new (stored) discoveries', () => {
+    // Real-world scenario: validateAttackDiscoveries queries back the pre-existing
+    // duplicates PLUS the newly-created discoveries, so `persisted_discoveries`
+    // contains 8 (5 pre-existing + 3 new). The badge must reflect the 3 truly-new
+    // (stored) discoveries, NOT the full re-queried set.
+    const persistedDiscoveries = Array.from({ length: 8 }, (_, idx) => ({
+      ...mockDiscovery,
+      id: `discovery-${idx}`,
+    }));
+
+    const execution = {
+      stepExecutions: [
+        {
+          output: {
+            duplicates_dropped_count: 5,
+            persisted_discoveries: persistedDiscoveries,
+          },
+          stepType: 'security.attack-discovery.persistDiscoveries',
+        },
+      ],
+    } as unknown as WorkflowExecutionDto;
+
+    const result = getPersistedOutputDiscoveries({ execution });
+
+    expect(result).toHaveLength(3);
   });
 });

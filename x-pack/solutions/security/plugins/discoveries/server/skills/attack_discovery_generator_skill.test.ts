@@ -258,6 +258,130 @@ describe('attackDiscoveryGeneratorSkill', () => {
     it('aligns the upfront time budget with the AD soft deadline (~90 seconds)', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('~90 seconds');
     });
+
+    it('introduces the Mode C ground-truth gate section', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Mode C — Ground-truth gate');
+    });
+
+    it('frames Mode C as returning a decision, not data', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('return a **decision**, not data');
+    });
+
+    it('defaults the Mode C gate to keeping every candidate', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Default to keeping every candidate');
+    });
+
+    it('documents the Mode C keep_alert_ids decision field', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('`keep_alert_ids`');
+    });
+
+    it('documents the Mode C added_alert_ids decision field', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('`added_alert_ids`');
+    });
+
+    it('does NOT document the legacy added_alerts (full-string) decision field', () => {
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('`added_alerts`');
+    });
+
+    it('mandates net-new retrieval when additional retrieval is enabled', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        "When the run enables the skill's additional retrieval, you MUST retrieve net-new alerts"
+      );
+    });
+
+    it('records added_alert_ids immediately, before any corroboration', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '**immediately, before any corroboration**'
+      );
+    });
+
+    it('forbids corroboration from removing or shrinking added_alert_ids', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'MUST NOT remove or shrink `added_alert_ids`'
+      );
+    });
+
+    it('applies the recall-first, default-to-INCLUDE rule to added_alert_ids', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'recall-first, default-to-INCLUDE rule to `added_alert_ids`'
+      );
+    });
+
+    it('states corroboration is never a reason to drop an alert (guardrail b)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('NEVER a reason to drop an alert');
+    });
+
+    it('forbids the Mode C gate from echoing candidate alert bytes (Constraint B)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Return **ids only**');
+    });
+
+    it('forbids the Mode C gate from invoking the run tool (recursion break)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'do **NOT** invoke the `security.attack-discovery.run` tool'
+      );
+    });
+
+    it('deepens Mode C corroboration to bounded multi-skill (no longer a single lightweight signal)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('BOUNDED multi-skill');
+    });
+
+    it('loads the threat-hunting skill for the deepened Mode C corroboration', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '`threat-hunting` (pivot into raw telemetry)'
+      );
+    });
+
+    it('loads the entity-analytics skill for the deepened Mode C corroboration', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '`entity-analytics` (host/user risk and asset criticality)'
+      );
+    });
+
+    it('loads the alert-analysis skill for the deepened Mode C corroboration', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '`alert-analysis` (drill into the alerts behind each candidate)'
+      );
+    });
+
+    it('keeps the deepened Mode C corroboration output decision-only / ids-only (guardrail a)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('DECISION-ONLY / IDS-ONLY');
+    });
+
+    it('scopes the deepened Mode C corroboration to the kept candidates (budget guardrail b)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'scope corroboration to the kept candidates'
+      );
+    });
+
+    it('forbids dumping raw telemetry in the deepened Mode C corroboration (budget guardrail b)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('never dump raw telemetry');
+    });
+
+    it('skips a Mode C corroboration skill rather than blowing the turn (budget guardrail b)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'skip a skill rather than blow the turn'
+      );
+    });
+
+    it('applies Missed Detection Closure (B7) on the Mode B status-resume path', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Mode B status-resume path');
+    });
+
+    it('runs a lightweight raw-log corroboration on Mode B before closure (no upstream investigation ran)', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'you did not run your own upstream investigation'
+      );
+    });
+
+    it('drives the Missed Detection Closure pass from the Mode B succeeded branch', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'run the **Missed Detection Closure** pass'
+      );
+    });
+
+    it('still forbids running Missed Detection Closure in the Mode C ground-truth gate', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Never run this pass in Mode C');
+    });
   });
 
   describe('referencedContent', () => {

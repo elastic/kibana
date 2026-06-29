@@ -17,7 +17,14 @@ import { PersistDiscoveriesStepTypeId } from '../../../../../../../../common/ste
  * index. Custom validation workflows may transform discoveries before
  * persisting, so this captures those changes.
  *
- * @returns The persisted discoveries array (possibly empty after dedup), or
+ * `persisted_discoveries` is the set queried back by `validateAttackDiscoveries`,
+ * which re-fetches the pre-existing duplicates ALONGSIDE the newly-created
+ * discoveries. We subtract the persist step's `duplicates_dropped_count` so the
+ * returned length reflects only the discoveries this execution newly stored
+ * (mirrors `getValidationStepDiscoveries`); otherwise the validation badge would
+ * count pre-existing discoveries from earlier runs.
+ *
+ * @returns The net-new persisted discoveries (possibly empty after dedup), or
  * `null` if the persist step is absent or its output lacks a
  * `persisted_discoveries` array.
  */
@@ -35,7 +42,7 @@ export const getPersistedOutputDiscoveries = ({
   );
 
   const persistOutput = persistStep?.output as
-    | { persisted_discoveries?: unknown }
+    | { duplicates_dropped_count?: unknown; persisted_discoveries?: unknown }
     | undefined
     | null;
 
@@ -43,5 +50,14 @@ export const getPersistedOutputDiscoveries = ({
     return null;
   }
 
-  return persistOutput.persisted_discoveries as AttackDiscoveryApiAlert[];
+  const persistedDiscoveries = persistOutput.persisted_discoveries as AttackDiscoveryApiAlert[];
+
+  const duplicatesDroppedCount =
+    typeof persistOutput?.duplicates_dropped_count === 'number'
+      ? persistOutput.duplicates_dropped_count
+      : 0;
+
+  const newCount = Math.max(0, persistedDiscoveries.length - duplicatesDroppedCount);
+
+  return persistedDiscoveries.slice(0, newCount);
 };
