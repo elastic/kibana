@@ -19,10 +19,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { AttachmentGroup } from '@kbn/agent-builder-common/attachments';
+import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
 
-const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentGroupPill.removeAriaLabel', {
-  defaultMessage: 'Remove attachment group',
-});
+const removeAttachmentGroupAriaLabel = i18n.translate(
+  'xpack.agentBuilder.attachmentGroupPill.removeAriaLabel',
+  {
+    defaultMessage: 'Remove attachment group',
+  }
+);
+
+const removePinnedItemsAriaLabel = i18n.translate(
+  'xpack.agentBuilder.attachmentGroupPill.removePinnedItemsAriaLabel',
+  {
+    defaultMessage: 'Remove pinned items',
+  }
+);
 
 const DEFAULT_ICON = 'layers';
 
@@ -33,7 +44,11 @@ export interface AttachmentGroupPillProps {
 
 export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group, onRemove }) => {
   const { euiTheme } = useEuiTheme();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const [isHovered, setIsHovered] = useState(false);
+  const removeAriaLabel = isAgentWorkspaceMount
+    ? removePinnedItemsAriaLabel
+    : removeAttachmentGroupAriaLabel;
 
   const iconContainerStyles = css`
     display: flex;

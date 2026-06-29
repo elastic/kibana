@@ -35,7 +35,7 @@ export interface SpineTypeConfig {
 
 const labels = {
   attachments: i18n.translate('xpack.agentBuilder.conversationSpine.tabs.attachments', {
-    defaultMessage: 'Attachments',
+    defaultMessage: 'Pinned Items',
   }),
   people: i18n.translate('xpack.agentBuilder.conversationSpine.tabs.people', {
     defaultMessage: 'People',

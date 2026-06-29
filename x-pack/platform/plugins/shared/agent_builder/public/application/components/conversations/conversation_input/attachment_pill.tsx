@@ -22,10 +22,21 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
 
-const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
-  defaultMessage: 'Remove attachment',
-});
+const removeAttachmentAriaLabel = i18n.translate(
+  'xpack.agentBuilder.attachmentPill.removeAriaLabel',
+  {
+    defaultMessage: 'Remove attachment',
+  }
+);
+
+const removePinnedItemAriaLabel = i18n.translate(
+  'xpack.agentBuilder.attachmentPill.removePinnedItemAriaLabel',
+  {
+    defaultMessage: 'Remove pinned item',
+  }
+);
 
 export interface AttachmentPillProps {
   attachment: Attachment;
@@ -39,9 +50,13 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   onRemoveAttachment,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { euiTheme } = useEuiTheme();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const [isHovered, setIsHovered] = useState(false);
+  const removeAriaLabel = isAgentWorkspaceMount
+    ? removePinnedItemAriaLabel
+    : removeAttachmentAriaLabel;
 
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);

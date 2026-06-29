@@ -41,7 +41,7 @@ const labels = {
   }),
   body: i18n.translate('xpack.agentBuilder.conversationSpine.attachmentsEmptyOverlay.body', {
     defaultMessage:
-      'No attachments yet. Open an app from the panel manager and attach content to this conversation.',
+      'No pinned items yet. Open an app and click the pin button to add content to this conversation.',
   }),
 };
 

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../../../../../hooks/use_navigation';
 import { useAttachmentCartActivation } from './use_attachment_cart_activation';
 
 const GROUP_ATTACHMENT_TYPE = 'group';
@@ -24,6 +25,7 @@ export interface AttachmentCartCardProps {
 export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachment }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { activateAttachment } = useAttachmentCartActivation();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { euiTheme } = useEuiTheme();
 
   const isGroupAttachment = attachment.type === GROUP_ATTACHMENT_TYPE;
@@ -53,13 +55,15 @@ export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachme
     ? uiDefinition?.getHeader?.({ attachment })?.subtitle
     : undefined;
 
-  const activationAriaLabel = i18n.translate(
-    'xpack.agentBuilder.attachmentCartCard.openAttachmentAriaLabel',
-    {
-      defaultMessage: 'Open attachment {title}',
-      values: { title: displayName },
-    }
-  );
+  const activationAriaLabel = isAgentWorkspaceMount
+    ? i18n.translate('xpack.agentBuilder.attachmentCartCard.openPinnedItemAriaLabel', {
+        defaultMessage: 'Open pinned item {title}',
+        values: { title: displayName },
+      })
+    : i18n.translate('xpack.agentBuilder.attachmentCartCard.openAttachmentAriaLabel', {
+        defaultMessage: 'Open attachment {title}',
+        values: { title: displayName },
+      });
 
   const handleActivate = useCallback(() => {
     if (!isActivatable) {

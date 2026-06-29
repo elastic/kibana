@@ -140,4 +140,4 @@ export const POC_APPLICATION_ATTACH_ATTACHMENT: AttachmentInput = {
   items: [],
 };
 
-export const POC_ATTACH_FLIGHT_ICON: IconType = 'documents';
+export const POC_ATTACH_FLIGHT_ICON: IconType = 'pin';

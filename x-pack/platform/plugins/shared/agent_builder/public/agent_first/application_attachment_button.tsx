@@ -14,18 +14,18 @@ import { registerApplicationAttachButtonElement } from './attachment_coordinator
 import { useApplicationAttachmentState } from './use_application_attachment_state';
 
 const labels = {
-  attach: i18n.translate('xpack.agentBuilder.applicationAttachmentButton.attach', {
-    defaultMessage: 'Attach to agent',
+  pin: i18n.translate('xpack.agentBuilder.applicationAttachmentButton.pin', {
+    defaultMessage: 'Pin to conversation',
   }),
-  alreadyAttached: i18n.translate(
-    'xpack.agentBuilder.applicationAttachmentButton.alreadyAttached',
+  alreadyPinned: i18n.translate(
+    'xpack.agentBuilder.applicationAttachmentButton.alreadyPinned',
     {
-      defaultMessage: 'Already attached to this conversation',
+      defaultMessage: 'Already pinned to this conversation',
     }
   ),
-  alreadyAttachedTo: (title: string) =>
-    i18n.translate('xpack.agentBuilder.applicationAttachmentButton.alreadyAttachedTo', {
-      defaultMessage: 'Already attached to: {title}',
+  alreadyPinnedTo: (title: string) =>
+    i18n.translate('xpack.agentBuilder.applicationAttachmentButton.alreadyPinnedTo', {
+      defaultMessage: 'Already pinned to: {title}',
       values: { title },
     }),
 };
@@ -33,7 +33,7 @@ const labels = {
 export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonProps> = ({
   getAttachment,
   linkDescriptor,
-  iconType = 'documents',
+  iconType = 'pin',
   disabled = false,
   displayVariant = 'default',
 }) => {
@@ -63,10 +63,10 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
   const isDisabled = disabled || (!canAttach && !isLinked);
   const tooltip = isLinked
     ? conversationTitle
-      ? labels.alreadyAttachedTo(conversationTitle)
-      : labels.alreadyAttached
-    : labels.attach;
-  const buttonIconType = isLinked ? 'link' : 'paperClip';
+      ? labels.alreadyPinnedTo(conversationTitle)
+      : labels.alreadyPinned
+    : labels.pin;
+  const buttonIconType = isLinked ? 'pinFilled' : 'pin';
 
   const isAppHeader = displayVariant === 'appHeader';
   const appHeaderIconButton = useMemo(
