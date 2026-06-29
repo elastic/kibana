@@ -17,7 +17,7 @@ import {
   enrichEntityRecords,
 } from './fetch_entity_relationships_graph';
 import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
-import { checkIfEntitiesIndexExists } from './utils';
+import { checkIfEntitiesIndexExists, addValuesToSet } from './utils';
 import type {
   EsQuery,
   EntityId,
@@ -155,7 +155,8 @@ export const fetchGraph = async ({
     if (r.targetEntityId) allEntityIds.add(r.targetEntityId);
   }
   for (const r of relationshipsResult.records) {
-    if (r.actorId) allEntityIds.add(r.actorId);
+    // actorIds is the multi-value set of same-type actors merged in the ES|QL STATS.
+    addValuesToSet(allEntityIds, r.actorIds, { dropEmpty: true });
     if (r.targetId) allEntityIds.add(r.targetId);
   }
   for (const r of entitiesResult.records) {
