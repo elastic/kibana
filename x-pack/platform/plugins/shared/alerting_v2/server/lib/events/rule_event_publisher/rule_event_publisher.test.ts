@@ -10,8 +10,9 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EventBus } from '../event_bus';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createRuleEventPublisher } from './rule_event_publisher.mock';
-import type { RuleEventPublisher } from './rule_event_publisher';
+import type { EventRule, RuleEventPublisher } from './rule_event_publisher';
 import {
+  RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
   RULE_DISABLED_EVENT_TYPE,
   RULE_ENABLED_EVENT_TYPE,
@@ -28,80 +29,75 @@ describe('RuleEventPublisher', () => {
     request = httpServerMock.createKibanaRequest();
   });
 
-  describe('payload shape', () => {
-    it('emits a `rule.created` event carrying only { ruleId, spaceId }', () => {
-      publisher.emitRuleCreated(request, ['rule-1'], 'space-1');
+  const cases = [
+    {
+      name: 'emitRuleCreated',
+      type: RULE_CREATED_EVENT_TYPE,
+      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
+        p.emitRuleCreated(r, rules),
+    },
+    {
+      name: 'emitRuleUpdated',
+      type: RULE_UPDATED_EVENT_TYPE,
+      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
+        p.emitRuleUpdated(r, rules),
+    },
+    {
+      name: 'emitRuleDeleted',
+      type: RULE_DELETED_EVENT_TYPE,
+      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
+        p.emitRuleDeleted(r, rules),
+    },
+    {
+      name: 'emitRuleEnabled',
+      type: RULE_ENABLED_EVENT_TYPE,
+      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
+        p.emitRuleEnabled(r, rules),
+    },
+    {
+      name: 'emitRuleDisabled',
+      type: RULE_DISABLED_EVENT_TYPE,
+      emit: (p: RuleEventPublisher, r: KibanaRequest, rules: EventRule[]) =>
+        p.emitRuleDisabled(r, rules),
+    },
+  ];
+
+  describe.each(cases)('$name', ({ type, emit }) => {
+    it('emits the matching event type with the { ruleId, spaceId } payload', () => {
+      emit(publisher, request, [{ id: 'rule-1', spaceId: 'space-1' }]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
       expect(eventBus.publish).toHaveBeenCalledWith(
-        { type: 'rule.created', payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } } },
+        { type, payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } } },
         { request }
       );
     });
-  });
 
-  describe('emit methods', () => {
-    const cases = [
-      {
-        name: 'emitRuleUpdated',
-        type: RULE_UPDATED_EVENT_TYPE,
-        emit: (p: RuleEventPublisher, r: KibanaRequest, ruleIds: string[], space: string) =>
-          p.emitRuleUpdated(r, ruleIds, space),
-      },
-      {
-        name: 'emitRuleDeleted',
-        type: RULE_DELETED_EVENT_TYPE,
-        emit: (p: RuleEventPublisher, r: KibanaRequest, ruleIds: string[], space: string) =>
-          p.emitRuleDeleted(r, ruleIds, space),
-      },
-      {
-        name: 'emitRuleEnabled',
-        type: RULE_ENABLED_EVENT_TYPE,
-        emit: (p: RuleEventPublisher, r: KibanaRequest, ruleIds: string[], space: string) =>
-          p.emitRuleEnabled(r, ruleIds, space),
-      },
-      {
-        name: 'emitRuleDisabled',
-        type: RULE_DISABLED_EVENT_TYPE,
-        emit: (p: RuleEventPublisher, r: KibanaRequest, ruleIds: string[], space: string) =>
-          p.emitRuleDisabled(r, ruleIds, space),
-      },
-    ];
+    it('emits one event per rule for bulk operations', () => {
+      emit(publisher, request, [
+        { id: 'rule-1', spaceId: 'space-1' },
+        { id: 'rule-2', spaceId: 'space-1' },
+      ]);
 
-    describe.each(cases)('$name', ({ type, emit }) => {
-      it('emits the matching event type with the { ruleId, spaceId } payload', () => {
-        emit(publisher, request, ['rule-1'], 'space-1');
+      expect(eventBus.publish).toHaveBeenCalledTimes(2);
+      expect(eventBus.publish.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          type,
+          payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } },
+        })
+      );
+      expect(eventBus.publish.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          type,
+          payload: { rule: { ruleId: 'rule-2', spaceId: 'space-1' } },
+        })
+      );
+    });
 
-        expect(eventBus.publish).toHaveBeenCalledTimes(1);
-        expect(eventBus.publish).toHaveBeenCalledWith(
-          { type, payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } } },
-          { request }
-        );
-      });
+    it('emits nothing for an empty array', () => {
+      emit(publisher, request, []);
 
-      it('emits one event per rule id for bulk operations', () => {
-        emit(publisher, request, ['rule-1', 'rule-2'], 'space-1');
-
-        expect(eventBus.publish).toHaveBeenCalledTimes(2);
-        expect(eventBus.publish.mock.calls[0][0]).toEqual(
-          expect.objectContaining({
-            type,
-            payload: { rule: { ruleId: 'rule-1', spaceId: 'space-1' } },
-          })
-        );
-        expect(eventBus.publish.mock.calls[1][0]).toEqual(
-          expect.objectContaining({
-            type,
-            payload: { rule: { ruleId: 'rule-2', spaceId: 'space-1' } },
-          })
-        );
-      });
-
-      it('emits nothing for an empty id array', () => {
-        emit(publisher, request, [], 'space-1');
-
-        expect(eventBus.publish).not.toHaveBeenCalled();
-      });
+      expect(eventBus.publish).not.toHaveBeenCalled();
     });
   });
 });

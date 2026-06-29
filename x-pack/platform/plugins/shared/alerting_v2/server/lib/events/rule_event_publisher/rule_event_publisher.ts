@@ -24,6 +24,17 @@ import {
 } from './events';
 
 /**
+ * Minimal rule reference carried in a rule-lifecycle event. Kept intentionally
+ * small (a workflow step fetches any further rule data itself); modelled as an
+ * object so fields like `version` can be added later without changing the
+ * publisher signatures.
+ */
+export interface EventRule {
+  id: string;
+  spaceId: string;
+}
+
+/**
  * Public contract for the rule-lifecycle event publisher.
  *
  * Persistence callers ({@link RulesClient}) use these methods after successful
@@ -31,11 +42,11 @@ import {
  * {@link RuleWorkflowSubscriber} maps them to workflow triggers.
  */
 export interface RuleEventPublisherContract {
-  emitRuleCreated(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
-  emitRuleUpdated(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
-  emitRuleDeleted(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
-  emitRuleEnabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
-  emitRuleDisabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
+  emitRuleCreated(request: KibanaRequest, rules: EventRule[]): void;
+  emitRuleUpdated(request: KibanaRequest, rules: EventRule[]): void;
+  emitRuleDeleted(request: KibanaRequest, rules: EventRule[]): void;
+  emitRuleEnabled(request: KibanaRequest, rules: EventRule[]): void;
+  emitRuleDisabled(request: KibanaRequest, rules: EventRule[]): void;
 }
 
 /**
@@ -52,45 +63,44 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
   ) {}
 
-  public emitRuleCreated(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
-    this.publishForRules(request, RULE_CREATED_EVENT_TYPE, ruleIds, spaceId);
+  public emitRuleCreated(request: KibanaRequest, rules: EventRule[]): void {
+    this.publishForRules(request, RULE_CREATED_EVENT_TYPE, rules);
   }
 
-  public emitRuleUpdated(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
-    this.publishForRules(request, RULE_UPDATED_EVENT_TYPE, ruleIds, spaceId);
+  public emitRuleUpdated(request: KibanaRequest, rules: EventRule[]): void {
+    this.publishForRules(request, RULE_UPDATED_EVENT_TYPE, rules);
   }
 
-  public emitRuleDeleted(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
-    this.publishForRules(request, RULE_DELETED_EVENT_TYPE, ruleIds, spaceId);
+  public emitRuleDeleted(request: KibanaRequest, rules: EventRule[]): void {
+    this.publishForRules(request, RULE_DELETED_EVENT_TYPE, rules);
   }
 
-  public emitRuleEnabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
-    this.publishForRules(request, RULE_ENABLED_EVENT_TYPE, ruleIds, spaceId);
+  public emitRuleEnabled(request: KibanaRequest, rules: EventRule[]): void {
+    this.publishForRules(request, RULE_ENABLED_EVENT_TYPE, rules);
   }
 
-  public emitRuleDisabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
-    this.publishForRules(request, RULE_DISABLED_EVENT_TYPE, ruleIds, spaceId);
+  public emitRuleDisabled(request: KibanaRequest, rules: EventRule[]): void {
+    this.publishForRules(request, RULE_DISABLED_EVENT_TYPE, rules);
   }
 
   private publishForRules(
     request: KibanaRequest,
     eventType: RuleEvent['type'],
-    ruleIds: string[],
-    spaceId: string
+    rules: EventRule[]
   ): void {
-    for (const ruleId of ruleIds) {
+    for (const rule of rules) {
       this.publish(request, {
         type: eventType,
-        payload: this.toLifecyclePayload(ruleId, spaceId),
+        payload: this.toLifecyclePayload(rule),
       });
     }
   }
 
-  private toLifecyclePayload(ruleId: string, spaceId: string): RuleLifecycleEvent {
+  private toLifecyclePayload(rule: EventRule): RuleLifecycleEvent {
     return {
       rule: {
-        ruleId,
-        spaceId,
+        ruleId: rule.id,
+        spaceId: rule.spaceId,
       },
     };
   }

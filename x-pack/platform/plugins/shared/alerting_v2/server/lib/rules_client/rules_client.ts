@@ -31,6 +31,7 @@ import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import {
   RulesSavedObjectServiceInternalToken,
@@ -327,7 +328,7 @@ export class RulesClient {
     }
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
-    this.ruleEventPublisher.emitRuleCreated(this.request, [rule.id], this.spaceId);
+    this.ruleEventPublisher.emitRuleCreated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
     return rule;
   }
 
@@ -379,13 +380,19 @@ export class RulesClient {
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
     if (Object.keys(parsed).length > 0) {
-      this.ruleEventPublisher.emitRuleUpdated(this.request, [rule.id], this.spaceId);
+      this.ruleEventPublisher.emitRuleUpdated(this.request, [
+        { id: rule.id, spaceId: this.spaceId },
+      ]);
 
       if (parsed.enabled !== undefined && parsed.enabled !== existingAttrs.enabled) {
         if (rule.enabled) {
-          this.ruleEventPublisher.emitRuleEnabled(this.request, [rule.id], this.spaceId);
+          this.ruleEventPublisher.emitRuleEnabled(this.request, [
+            { id: rule.id, spaceId: this.spaceId },
+          ]);
         } else {
-          this.ruleEventPublisher.emitRuleDisabled(this.request, [rule.id], this.spaceId);
+          this.ruleEventPublisher.emitRuleDisabled(this.request, [
+            { id: rule.id, spaceId: this.spaceId },
+          ]);
         }
       }
     }
@@ -441,7 +448,7 @@ export class RulesClient {
 
     await this.rulesSavedObjectService.delete({ id });
 
-    this.ruleEventPublisher.emitRuleDeleted(this.request, [id], this.spaceId);
+    this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
   }
 
   @withApm
@@ -481,7 +488,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleEnabled(this.request, [rule.id], this.spaceId);
+    this.ruleEventPublisher.emitRuleEnabled(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
     return rule;
   }
 
@@ -514,7 +521,9 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleDisabled(this.request, [rule.id], this.spaceId);
+    this.ruleEventPublisher.emitRuleDisabled(this.request, [
+      { id: rule.id, spaceId: this.spaceId },
+    ]);
     return rule;
   }
 
@@ -644,7 +653,7 @@ export class RulesClient {
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
-    const deletedIds: string[] = [];
+    const deletedRules: EventRule[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
         errors.push({
@@ -656,10 +665,10 @@ export class RulesClient {
         });
         continue;
       }
-      deletedIds.push(result.id);
+      deletedRules.push({ id: result.id, spaceId });
     }
 
-    this.ruleEventPublisher.emitRuleDeleted(this.request, deletedIds, this.spaceId);
+    this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules);
 
     return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -720,7 +729,7 @@ export class RulesClient {
 
       // Rules that actually transitioned to enabled (excludes already-enabled
       // no-ops and failed updates) — emitted as workflow events below.
-      const enabledIds: string[] = [];
+      const enabledRules: EventRule[] = [];
 
       const tasksToSchedule: Array<{
         id: string;
@@ -749,7 +758,7 @@ export class RulesClient {
 
         const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         rules.push(rule);
-        enabledIds.push(rule.id);
+        enabledRules.push({ id: rule.id, spaceId });
 
         tasksToSchedule.push({
           id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
@@ -772,7 +781,7 @@ export class RulesClient {
         }
       }
 
-      this.ruleEventPublisher.emitRuleEnabled(this.request, enabledIds, this.spaceId);
+      this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules);
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
@@ -785,7 +794,7 @@ export class RulesClient {
     const rules: RuleResponse[] = [];
     // Rules that actually transitioned to disabled (excludes already-disabled
     // no-ops and failed updates) — used for both task disabling and the emit.
-    const disabledIds: string[] = [];
+    const disabledRules: EventRule[] = [];
     const disabledTaskIds: string[] = [];
     const resolution = await this.resolveRuleIds(params);
     const { ids } = resolution;
@@ -850,7 +859,7 @@ export class RulesClient {
 
         const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         rules.push(rule);
-        disabledIds.push(rule.id);
+        disabledRules.push({ id: rule.id, spaceId });
         disabledTaskIds.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
       }
     }
@@ -864,9 +873,7 @@ export class RulesClient {
       }
     }
 
-    if (disabledIds.length > 0) {
-      this.ruleEventPublisher.emitRuleDisabled(this.request, disabledIds, this.spaceId);
-    }
+    this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules);
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -923,7 +930,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleUpdated(this.request, [rule.id], this.spaceId);
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
     return { rule, created: false };
   }
 }

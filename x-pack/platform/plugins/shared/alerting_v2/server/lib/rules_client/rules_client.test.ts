@@ -2471,11 +2471,9 @@ describe('RulesClient', () => {
 
         await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-1' } });
 
-        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-1'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-1', spaceId: 'space-1' },
+        ]);
       });
     });
 
@@ -2489,11 +2487,9 @@ describe('RulesClient', () => {
           data: { metadata: { name: 'renamed' } },
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-2'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-2', spaceId: 'space-1' },
+        ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
@@ -2504,16 +2500,12 @@ describe('RulesClient', () => {
 
         await client.updateRule({ id: 'rule-id-wf-3', data: { enabled: true } });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3'],
-          'space-1'
-        );
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3', spaceId: 'space-1' },
+        ]);
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
@@ -2523,16 +2515,12 @@ describe('RulesClient', () => {
 
         await client.updateRule({ id: 'rule-id-wf-3b', data: { enabled: false } });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3b'],
-          'space-1'
-        );
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3b'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3b', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3b', spaceId: 'space-1' },
+        ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
       });
 
@@ -2545,16 +2533,12 @@ describe('RulesClient', () => {
           data: { metadata: { name: 'renamed' }, enabled: true },
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3c'],
-          'space-1'
-        );
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3c'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3c', spaceId: 'space-1' },
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3c', spaceId: 'space-1' },
+        ]);
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
@@ -2567,11 +2551,9 @@ describe('RulesClient', () => {
           data: { enabled: true, metadata: { name: 'renamed' } },
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-3d'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-3d', spaceId: 'space-1' },
+        ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
@@ -2595,11 +2577,9 @@ describe('RulesClient', () => {
 
         await client.upsertRule({ id: 'rule-id-wf-upsert-create', data: workflowCreateData });
 
-        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-upsert-create'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-upsert-create', spaceId: 'space-1' },
+        ]);
       });
 
       it('publishes rule updated when an existing rule is replaced', async () => {
@@ -2630,11 +2610,9 @@ describe('RulesClient', () => {
           data: { ...workflowCreateData, metadata: { name: 'replaced', tags: workflowRuleTags } },
         });
 
-        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-upsert-replace'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-upsert-replace', spaceId: 'space-1' },
+        ]);
       });
     });
 
@@ -2645,11 +2623,9 @@ describe('RulesClient', () => {
 
         await client.deleteRule({ id: 'rule-id-wf-4' });
 
-        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-4'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-4', spaceId: 'space-1' },
+        ]);
       });
     });
 
@@ -2660,11 +2636,9 @@ describe('RulesClient', () => {
 
         await client.enableRule({ id: 'rule-id-wf-enable' });
 
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-enable'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-enable', spaceId: 'space-1' },
+        ]);
       });
 
       it('still emits ruleEnabled and re-ensures the task when the rule is already enabled', async () => {
@@ -2677,11 +2651,9 @@ describe('RulesClient', () => {
         // executor task (self-heal), and still emits the event.
         expect(mockSavedObjectsClient.update).toHaveBeenCalled();
         expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-enable-noop'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-enable-noop', spaceId: 'space-1' },
+        ]);
       });
     });
 
@@ -2692,11 +2664,9 @@ describe('RulesClient', () => {
 
         await client.disableRule({ id: 'rule-id-wf-disable' });
 
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-disable'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-disable', spaceId: 'space-1' },
+        ]);
       });
 
       it('still emits ruleDisabled and removes the task when the rule is already disabled', async () => {
@@ -2709,11 +2679,9 @@ describe('RulesClient', () => {
         // executor task (self-heal), and still emits the event.
         expect(mockSavedObjectsClient.update).toHaveBeenCalled();
         expect(taskManager.removeIfExists).toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
-          request,
-          ['rule-id-wf-5'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-id-wf-5', spaceId: 'space-1' },
+        ]);
       });
     });
 
@@ -2751,13 +2719,11 @@ describe('RulesClient', () => {
 
         await client.bulkEnableRules({ ids: ['rule-ok', 'rule-missing'] });
 
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(
-          request,
-          ['rule-ok'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-ok', spaceId: 'space-1' },
+        ]);
         const enabledIds = (ruleEventPublisher.emitRuleEnabled as jest.Mock).mock.calls[0][1];
-        expect(enabledIds).toEqual(['rule-ok']);
+        expect(enabledIds).toEqual([{ id: 'rule-ok', spaceId: 'space-1' }]);
       });
 
       it('does not publish when all requested rules are already enabled', async () => {
@@ -2814,16 +2780,14 @@ describe('RulesClient', () => {
 
         await client.bulkDisableRules({ ids: ['rule-ok', 'rule-missing'] });
 
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
-          request,
-          ['rule-ok'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          { id: 'rule-ok', spaceId: 'space-1' },
+        ]);
         const disabledIds = (ruleEventPublisher.emitRuleDisabled as jest.Mock).mock.calls[0][1];
-        expect(disabledIds).toEqual(['rule-ok']);
+        expect(disabledIds).toEqual([{ id: 'rule-ok', spaceId: 'space-1' }]);
       });
 
-      it('does not publish when all requested rules are already disabled', async () => {
+      it('publishes no event (empty array) when all requested rules are already disabled', async () => {
         const client = createClient();
         mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
           saved_objects: [
@@ -2839,7 +2803,10 @@ describe('RulesClient', () => {
 
         await client.bulkDisableRules({ ids: ['rule-already-disabled'] });
 
-        expectNoRuleEventEmits();
+        // The length guard was removed; emitRuleDisabled is invoked
+        // unconditionally and no-ops on the empty array (no event published).
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, []);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
       });
     });
 
@@ -2855,11 +2822,10 @@ describe('RulesClient', () => {
 
         await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
 
-        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
-          request,
-          ['rule-1', 'rule-2'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
+          { id: 'rule-1', spaceId: 'space-1' },
+          { id: 'rule-2', spaceId: 'space-1' },
+        ]);
       });
 
       it('publishes rule deleted only for rules that were successfully deleted', async () => {
@@ -2878,11 +2844,9 @@ describe('RulesClient', () => {
 
         await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
 
-        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
-          request,
-          ['rule-1'],
-          'space-1'
-        );
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
+          { id: 'rule-1', spaceId: 'space-1' },
+        ]);
       });
     });
   });
