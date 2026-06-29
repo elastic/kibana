@@ -5059,27 +5059,19 @@ This is the type of text _investigation guides_ will contain.`;
       );
     });
 
-    test('stamps the change with the time the create flow began (Date.now() at start of create)', async () => {
+    test('stamps the change with updated_at from the saved object', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
 
-      // Drive Date.now() so the create flow captures a known timestamp at its start.
-      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
 
-      try {
-        unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+      await trackingClient.create({ data: getMockData() });
 
-        await trackingClient.create({ data: getMockData() });
-
-        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-        const [changes] = changeTrackingService.logBulk.mock.calls[0];
-        expect(changes).toHaveLength(1);
-        expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
-      } finally {
-        dateNowSpy.mockRestore();
-      }
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes).toHaveLength(1);
+      expect(changes[0].timestamp).toBe('2019-02-12T21:01:22.479Z');
     });
 
     test('does not log when the rule type opts out of tracking', async () => {
