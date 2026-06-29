@@ -27,7 +27,7 @@ export const registerGetConfigRoute = (router: IRouter, guidesConfig: GuidesConf
       },
       validate: {
         params: schema.object({
-          guideId: schema.string(),
+          guideId: schema.string({ maxLength: 1000 }),
         }),
       },
     },
