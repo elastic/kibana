@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useStatusByLocation } from './use_status_by_location';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
+import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
@@ -81,6 +82,15 @@ describe('useStatusByLocation', () => {
         expect.arrayContaining([{ term: { config_id: 'cfg-xyz' } }])
       );
       expect(params.aggs.locations.terms.field).toBe('observer.geo.name');
+    });
+
+    it('bounds the query by a @timestamp lower bound so it prunes frozen-tier shards', () => {
+      renderHook(() => useStatusByLocation({ configId: 'cfg-1', monitorLocations: [usEastLocal] }));
+
+      const params = useEsSearchMock.mock.calls[0][0];
+      expect(params.query.bool.filter).toEqual(
+        expect.arrayContaining([{ range: { '@timestamp': { gte: MONITOR_STATUS_LOOKBACK } } }])
+      );
     });
   });
 

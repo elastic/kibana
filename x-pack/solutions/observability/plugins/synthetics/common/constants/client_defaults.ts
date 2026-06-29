@@ -72,6 +72,17 @@ export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
   },
 });
 
+// Lower bound for "latest state" lookups (latest ping per monitor/location).
+// These fetch only the most recent doc, so a `@timestamp` floor lets ES prune
+// long-retention frozen-tier shards by default (independent of the opt-in
+// searchExcludedDataTiers setting). Matches the get_latest_test_run route's max
+// window; monitors idle longer than this render as pending.
+export const MONITOR_STATUS_LOOKBACK = 'now-30d';
+
+export const getStatusLookbackRangeFilter = () => ({
+  range: { '@timestamp': { gte: MONITOR_STATUS_LOOKBACK } },
+});
+
 export const getTimespanFilter = ({ from, to }: { from: string; to: string }) => ({
   range: {
     'monitor.timespan': {

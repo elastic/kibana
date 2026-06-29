@@ -8,6 +8,7 @@
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
+import { getStatusLookbackRangeFilter } from '../../../../common/constants/client_defaults';
 import type { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
@@ -23,6 +24,7 @@ export const useMonitorDetail = (
     query: {
       bool: {
         filter: [
+          getStatusLookbackRangeFilter(),
           {
             term: {
               config_id: configId,
