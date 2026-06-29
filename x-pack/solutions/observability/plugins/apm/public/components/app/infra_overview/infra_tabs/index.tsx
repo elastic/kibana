@@ -24,30 +24,6 @@ const infraTabTestSubjects: Record<InfraTab, string> = {
 export function InfraTabs() {
   const { agentName, data, detailTab, end, start, status } = useInfrastructureAttributes();
   const history = useHistory();
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo, detailTab },
-  } = useApmParams('/services/{serviceName}/infrastructure');
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { data = INITIAL_STATE, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              agentName,
-            },
-          },
-        });
-      }
-    },
-    [environment, kuery, agentName, serviceName, start, end]
-  );
 
   const { containerIds, podNames, hostNames } = data;
 

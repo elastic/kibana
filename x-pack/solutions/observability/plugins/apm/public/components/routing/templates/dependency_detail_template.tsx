@@ -52,8 +52,7 @@ export function DependencyDetailTemplate({ children }: Props) {
         },
       });
     },
-    [dependencyName, start, end],
-    { useLegacyCallApmApi: true }
+    [dependencyName, start, end]
   );
 
   const { data: { metadata } = {} } = dependencyMetadataFetch;
