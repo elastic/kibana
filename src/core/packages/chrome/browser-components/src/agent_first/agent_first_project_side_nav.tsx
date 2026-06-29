@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
 import { useSideNavCollapsed, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { Navigation } from '../project/sidenav/navigation';
+import { AgentFirstProjectNavigation } from './agent_first_project_navigation';
 import { useAutoCollapse } from '../project/sidenav/use_auto_collapse';
 import { AgentFirstNavTopControls } from './agent_first_nav_top_controls';
 import { AgentFirstNavFooterControls } from './agent_first_nav_footer_controls';
@@ -36,7 +36,7 @@ export const AgentFirstProjectSideNav = () => {
           }
         `}
       />
-      <Navigation
+      <AgentFirstProjectNavigation
         isCollapsed={isCollapsed || isAutoCollapsed}
         setWidth={setWidth}
         onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}

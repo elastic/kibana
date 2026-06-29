@@ -41,14 +41,24 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
     headerHeight,
     footerHeight,
     applicationWorkspaceOpen,
+    agentWorkspaceOpen,
     hasAgent,
   } = layoutState;
 
-  const agentColumn =
-    hasAgent && !applicationWorkspaceOpen
-      ? `minmax(${MIN_AGENT_WIDTH}px, 1fr)`
-      : `${agentWidth}px`;
-  const applicationColumn = hasAgent && !applicationWorkspaceOpen ? '0px' : '1fr';
+  let agentColumn = `${agentWidth}px`;
+  let applicationColumn = '1fr';
+
+  if (hasAgent) {
+    if (!agentWorkspaceOpen) {
+      agentColumn = '0px';
+    } else if (!applicationWorkspaceOpen) {
+      agentColumn = `minmax(${MIN_AGENT_WIDTH}px, 1fr)`;
+    }
+
+    if (!applicationWorkspaceOpen) {
+      applicationColumn = '0px';
+    }
+  }
 
   const style = {
     gridTemplateColumns: `

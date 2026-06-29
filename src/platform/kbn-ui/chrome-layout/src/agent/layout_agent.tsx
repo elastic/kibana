@@ -9,10 +9,15 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { euiIncludeSelectorInFocusTrap } from '@kbn/ui-chrome-layout-constants';
 
 import { useLayoutConfig } from '../layout_config_context';
 import { styles } from './layout_agent.styles';
+
+const hiddenStyles = css`
+  display: none;
+`;
 
 export interface LayoutAgentProps {
   children: ReactNode;
@@ -22,13 +27,14 @@ export interface LayoutAgentProps {
  * The agent workspace slot wrapper — a peer app workspace column for Agent Builder.
  */
 export const LayoutAgent = ({ children }: LayoutAgentProps) => {
-  const { chromeStyle } = useLayoutConfig();
+  const { chromeStyle, agentWorkspaceOpen = true } = useLayoutConfig();
 
   return (
     <div
-      css={styles.root(chromeStyle)}
+      css={[styles.root(chromeStyle), !agentWorkspaceOpen ? hiddenStyles : undefined]}
       className="kbnChromeLayoutAgent"
       data-test-subj="kbnChromeLayoutAgent"
+      data-agent-workspace-open={agentWorkspaceOpen}
       {...euiIncludeSelectorInFocusTrap.prop}
     >
       <div css={styles.content}>{children}</div>

@@ -192,7 +192,7 @@ export const Navigation = ({
                         hasContent={getHasSubmenu(item)}
                         isCollapsed={isCollapsed}
                         isCurrent={actualActiveItemId === item.id}
-                        isHighlighted={item.id === visuallyActivePageId}
+                        isHighlighted={item.isHighlighted ?? item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
                         onClick={() => onItemClick?.(item)}
                         {...itemProps}
@@ -308,7 +308,7 @@ export const Navigation = ({
                                 <SideNav.NestedSecondaryMenu.PrimaryMenuItem
                                   key={item.id}
                                   aria-describedby={ariaDescribedBy}
-                                  isHighlighted={item.id === visuallyActivePageId}
+                                  isHighlighted={item.isHighlighted ?? item.id === visuallyActivePageId}
                                   isNew={getIsNewPrimary(item.id)}
                                   hasSubmenu={hasSubmenu}
                                   onClick={() => {
@@ -389,7 +389,7 @@ export const Navigation = ({
                     trigger={
                       <SideNav.Footer.Item
                         aria-describedby={ariaDescribedBy}
-                        isHighlighted={item.id === visuallyActivePageId}
+                        isHighlighted={item.isHighlighted ?? item.id === visuallyActivePageId}
                         isCurrent={actualActiveItemId === item.id}
                         isNew={getIsNewPrimary(item.id)}
                         hasContent={getHasSubmenu(item)}

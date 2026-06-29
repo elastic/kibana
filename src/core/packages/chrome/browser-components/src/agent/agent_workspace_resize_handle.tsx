@@ -25,6 +25,7 @@ export interface AgentWorkspaceResizeHandleProps {
   navigationWidth: number;
   sidebarWidth: number;
   applicationWorkspaceOpen: boolean;
+  agentWorkspaceOpen: boolean;
   onWidthChange: (width: number) => void;
 }
 
@@ -37,6 +38,7 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
   navigationWidth,
   sidebarWidth,
   applicationWorkspaceOpen,
+  agentWorkspaceOpen,
   onWidthChange,
 }) => {
   const startXRef = useRef<number>(0);
@@ -49,11 +51,12 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
           nextWidth,
           navigationWidth,
           sidebarWidth,
-          applicationWorkspaceOpen
+          applicationWorkspaceOpen,
+          agentWorkspaceOpen
         )
       );
     },
-    [applicationWorkspaceOpen, navigationWidth, onWidthChange, sidebarWidth]
+    [agentWorkspaceOpen, applicationWorkspaceOpen, navigationWidth, onWidthChange, sidebarWidth]
   );
 
   const handleMouseDown = useCallback(
@@ -117,7 +120,7 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
     [setWidth, width]
   );
 
-  if (!applicationWorkspaceOpen) {
+  if (!applicationWorkspaceOpen || !agentWorkspaceOpen) {
     return null;
   }
 

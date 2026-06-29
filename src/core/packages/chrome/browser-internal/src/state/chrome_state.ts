@@ -59,6 +59,12 @@ export interface ChromeState {
     onCloseHandlers: ArrayState<() => void>;
   };
 
+  /** Agent-first agent workspace column visibility */
+  agentWorkspace: {
+    isOpen: State<boolean>;
+    onCloseHandlers: ArrayState<() => void>;
+  };
+
   /** Breadcrumbs state (includes legacy badge from setBadge()) */
   breadcrumbs: {
     classic: ArrayState<ChromeBreadcrumb>;
@@ -119,6 +125,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const applicationWorkspaceIsOpen = createState<boolean>(true);
   const applicationWorkspaceOnCloseHandlers = createArrayState<() => void>();
 
+  const agentWorkspaceIsOpen = createState<boolean>(true);
+  const agentWorkspaceOnCloseHandlers = createArrayState<() => void>();
+
   // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
     breadcrumbs,
@@ -166,6 +175,10 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     applicationWorkspace: {
       isOpen: applicationWorkspaceIsOpen,
       onCloseHandlers: applicationWorkspaceOnCloseHandlers,
+    },
+    agentWorkspace: {
+      isOpen: agentWorkspaceIsOpen,
+      onCloseHandlers: agentWorkspaceOnCloseHandlers,
     },
     breadcrumbs: {
       classic: breadcrumbs,
