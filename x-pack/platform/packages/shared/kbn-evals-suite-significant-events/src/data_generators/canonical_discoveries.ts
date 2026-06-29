@@ -7,9 +7,6 @@
 
 import type { Discovery } from '@kbn/streams-schema';
 
-/**
- * Stable timestamp for canonical discoveries — see {@link canonicalDetectionsFromGroundTruth}.
- */
 const CANONICAL_TIMESTAMP = '2024-01-01T00:00:00.000Z';
 
 const slugify = (value: string): string =>
@@ -19,18 +16,6 @@ const slugify = (value: string): string =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-/**
- * Builds a deterministic "canonical" discovery from a terse declaration in a scenario's
- * `input.discoveries`. Mirrors {@link canonicalKIFeaturesFromExpectedGroundTruth}: the dataset
- * declares the essential ground truth (title, root_cause, the detections, optional cause_kis), and
- * this generator stamps the boilerplate (`discovery_id`, `discovery_slug`, `rule_names`,
- * `stream_names`, `processed`, `@timestamp`, `impact`) so canonical judge runs are decoupled from
- * snapshot-extracted discoveries.
- *
- * Evidence resolution is left to the judge: with empty `evidences`, the judge falls back to
- * `search_knowledge_indicators` (rule.id ↔ detection.rule_uuid) → `execute_esql`, so the dataset
- * need not hand-author ES|QL.
- */
 export const canonicalDiscoveryFromGroundTruth = ({
   streamName,
   scenarioId,
