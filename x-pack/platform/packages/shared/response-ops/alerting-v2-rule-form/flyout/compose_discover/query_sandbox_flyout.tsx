@@ -17,8 +17,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleQuery } from './compose_form_types';
-import { getBreachQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/utils/query_helpers';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';

@@ -208,6 +208,7 @@ describe('WorkflowsMeteringService', () => {
       expect(metadata!.triggered_by).toBe('scheduled');
       expect(metadata!.is_test_run).toBe('true');
       expect(metadata!.is_managed).toBe('false');
+      expect(metadata!.is_billable).toBe('true');
       expect(metadata!.workflow_id).toBe('wf-456');
       expect(metadata!.space_id).toBe('default');
       expect(metadata!.managed_by).toBeUndefined();
@@ -229,9 +230,25 @@ describe('WorkflowsMeteringService', () => {
       const { metadata } = record.usage;
 
       expect(metadata!.is_managed).toBe('true');
+      expect(metadata!.is_billable).toBe('false');
       expect(metadata!.is_test_run).toBe('true');
       expect(metadata!.managed_by).toBe('workflowsExtensionsExample');
       expect(metadata!.origin_managed_workflow_id).toBe('system-example-greeting');
+    });
+
+    it('should mark billable managed workflows as billable', async () => {
+      const execution = createMockExecution({
+        managed: true,
+        billable: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+      });
+      const cloudSetup = createMockCloudSetup();
+
+      await meteringService.reportWorkflowExecution(execution, cloudSetup);
+
+      const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
+      expect(record.usage.metadata!.is_billable).toBe('true');
     });
 
     it('should calculate normalized_quantity correctly for 5-min buckets', async () => {
