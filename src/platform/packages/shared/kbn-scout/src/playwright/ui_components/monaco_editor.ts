@@ -230,7 +230,9 @@ export class KibanaCodeEditorWrapper {
   async getSuggestionLabels(): Promise<string[]> {
     const widget = this.getCodeEditorSuggestWidget();
     await widget.waitFor({ state: 'visible' });
-    await widget.locator('.monaco-list-row').first().waitFor({ state: 'visible' });
+    // Auto-retrying readiness wait: the popover is visible before its rows render,
+    // so wait until at least one suggestion row exists before reading labels.
+    await expect(widget.locator('.monaco-list-row')).not.toHaveCount(0);
     return widget.locator('.monaco-list-row .label-name').allInnerTexts();
   }
 
