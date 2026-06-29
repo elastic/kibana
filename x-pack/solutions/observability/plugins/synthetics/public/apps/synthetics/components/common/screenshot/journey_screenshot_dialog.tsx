@@ -236,18 +236,24 @@ export const getScreenshotUrl = ({
   basePath,
   checkGroup,
   stepNumber,
+  timestamp,
 }: {
   basePath: string;
   checkGroup?: string;
   stepNumber: number;
+  timestamp?: string;
 }) => {
   if (!checkGroup) {
     return '';
   }
-  return `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
+  const path = `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
     '{checkGroup}',
     checkGroup
   ).replace('{stepIndex}', stepNumber.toString())}`;
+
+  // Forward the run timestamp so the screenshot query can be bounded to a
+  // narrow window and prune frozen-tier shards instead of scanning every index.
+  return timestamp ? `${path}?timestamp=${encodeURIComponent(timestamp)}` : path;
 };
 
 const prevAriaLabel = i18n.translate('xpack.synthetics.monitor.step.previousStep', {

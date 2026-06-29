@@ -7,10 +7,12 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createEsParams, SyntheticsEsClient } from '../lib';
+import { getCheckGroupTimeRangeFilter } from '../../common/constants/client_defaults';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
   checkGroup: string;
+  timestamp?: string;
 }
 
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
@@ -18,6 +20,7 @@ type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string
 export const getJourneyDetails = async ({
   syntheticsEsClient,
   checkGroup,
+  timestamp,
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
@@ -25,6 +28,10 @@ export const getJourneyDetails = async ({
     body: {
       query: {
         bool: {
+          // The current-run lookup targets a single `check_group`, so it can be
+          // bounded to the run's `@timestamp` to prune frozen-tier shards. The
+          // sibling (previous/next) queries below are intentionally left unbounded
+          // since an adjacent run can be arbitrarily far away in time.
           filter: [
             {
               term: {
@@ -36,7 +43,8 @@ export const getJourneyDetails = async ({
                 'synthetics.type': ['journey/start', 'heartbeat/summary'],
               },
             },
-          ],
+            ...(timestamp ? [getCheckGroupTimeRangeFilter(timestamp)] : []),
+          ] as QueryDslQueryContainer[],
         },
       },
       size: 2,
