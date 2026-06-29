@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/utility-types'
   - '@kbn/es-query-server'
-  - '@kbn/as-code-shared-schemas'
 tags:
   - shared-server
   - package
