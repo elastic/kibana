@@ -182,6 +182,86 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       // Caret at start, no selection
       expect(selection(input)).toEqual([0, 0]);
     });
+
+    it('stays in native caret mode after navigating past the last part', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      pressKey(input, 'ArrowRight');
+      pressKey(input, 'ArrowRight');
+      pressKey(input, 'ArrowRight');
+      expect(selection(input)).toEqual([11, 11]);
+
+      pressKey(input, 'ArrowLeft');
+      expect(selection(input)).toEqual([11, 11]);
+    });
+
+    it('re-enables smart navigation after selectionchange lands on a navigable part', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      // Enter caret mode, then simulate a word selection on "2026" [7, 11]
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      input.focus();
+      input.setSelectionRange(7, 11);
+      document.dispatchEvent(new Event('selectionchange'));
+
+      pressKey(input, 'ArrowLeft');
+      // Smart navigation resumes from "2026" → moves to "1"
+      expect(selection(input)).toEqual([4, 5]);
+    });
+
+    it('stays in caret mode after selectionchange on a non-navigable position', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      input.focus();
+      input.setSelectionRange(5, 5); // caret in separator ", "
+      document.dispatchEvent(new Event('selectionchange'));
+
+      pressKey(input, 'ArrowLeft');
+      expect(selection(input)).toEqual([5, 5]); // unchanged — still in caret mode
+    });
+
+    it('stays in native caret mode after input pointerdown', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      input.setSelectionRange(5, 5);
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      pressKey(input, 'ArrowLeft');
+
+      expect(selection(input)).toEqual([5, 5]);
+    });
   });
 
   describe('onModifyPart', () => {
@@ -203,11 +283,14 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       pressKey(input, 'ArrowRight');
 
       pressKey(input, 'ArrowUp');
-      expect(onModifyPart).toHaveBeenCalledWith({
-        text: 'Jan 1, 2026',
-        part: { text: '1', start: 4, end: 5 },
-        action: 'increase',
-      });
+      expect(onModifyPart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Jan 1, 2026',
+          part: expect.objectContaining({ text: '1', start: 4, end: 5 }),
+          parts: expect.arrayContaining([expect.objectContaining({ text: '1', start: 4, end: 5 })]),
+          action: 'increase',
+        })
+      );
     });
 
     it('is called with correct args on ArrowDown', () => {
@@ -229,11 +312,16 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       pressKey(input, 'ArrowRight');
 
       pressKey(input, 'ArrowDown');
-      expect(onModifyPart).toHaveBeenCalledWith({
-        text: 'Jan 1, 2026',
-        part: { text: '2026', start: 7, end: 11 },
-        action: 'decrease',
-      });
+      expect(onModifyPart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Jan 1, 2026',
+          part: expect.objectContaining({ text: '2026', start: 7, end: 11 }),
+          parts: expect.arrayContaining([
+            expect.objectContaining({ text: '2026', start: 7, end: 11 }),
+          ]),
+          action: 'decrease',
+        })
+      );
     });
 
     it('updates the input value when callback returns a new string', () => {
@@ -278,6 +366,51 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       expect(input.value).toBe('Jan 1, 2026');
       // "1" is still selected at [4, 5]
       expect(selection(input)).toEqual([4, 5]);
+    });
+
+    it('stops propagation when selected part modification returns undefined', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      const onModifyPart = jest.fn().mockReturnValue(undefined);
+      const propagated = jest.fn();
+      document.body.addEventListener('keydown', propagated);
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+          onModifyPart,
+        })
+      );
+
+      pressKey(input, 'ArrowDown');
+
+      document.body.removeEventListener('keydown', propagated);
+      expect(onModifyPart).toHaveBeenCalled();
+      expect(propagated).not.toHaveBeenCalled();
+    });
+
+    it('allows ArrowUp and ArrowDown to propagate from caret mode', () => {
+      const input = createInput('Jan 1, 2026');
+      input.setSelectionRange(5, 5);
+      const ref = { current: input };
+      const onModifyPart = jest.fn();
+      const propagated = jest.fn();
+      document.body.addEventListener('keydown', propagated);
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'none',
+          onModifyPart,
+        })
+      );
+
+      pressKey(input, 'ArrowDown');
+
+      document.body.removeEventListener('keydown', propagated);
+      expect(onModifyPart).not.toHaveBeenCalled();
+      expect(propagated).toHaveBeenCalledTimes(1);
     });
   });
 });

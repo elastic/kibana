@@ -36,8 +36,7 @@ export const formatSignificantEventAsText = (event: SigEvent): string => {
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
     `Discovery slug: ${event.discovery_slug}`,
-    `Status: ${event.verdict}`,
-    `Impact: ${event.impact}`,
+    `Status: ${event.status}`,
     `Criticality: ${event.criticality}`,
     `Confidence: ${event.confidence}`,
     `Streams: ${formatList(event.stream_names)}`,
@@ -120,7 +119,7 @@ export const createSignificantEventAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident, affected streams, impact, root cause, and recommendations.',
+      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident, affected streams, root cause, and recommendations.',
     getTools: () => [],
   };
 };

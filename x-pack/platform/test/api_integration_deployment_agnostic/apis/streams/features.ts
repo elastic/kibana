@@ -79,27 +79,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Exclude and restore', () => {
       it('creates a feature and lists it', async () => {
-        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
-        expect(uuid).to.be.a('string');
+        const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        expect(id).to.be.a('string');
 
         const { features } = await listFeatures(apiClient, STREAM_NAME);
         const found = features.find((f) => f.id === testFeature.id);
         expect(found).to.be.ok();
-        expect(found!.uuid).to.eql(uuid);
+        expect(found!.id).to.eql(id);
 
         // Cleanup
         await deleteFeature(apiClient, STREAM_NAME, uuid);
       });
 
       it('excludes a feature via bulk and hides it from default list', async () => {
-        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
 
-        // Exclude it
+        // Exclude it (mutations are keyed by uuid)
         await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
 
         // Should NOT appear in default list
         const { features } = await listFeatures(apiClient, STREAM_NAME);
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === id);
         expect(found).to.be(undefined);
 
         // Cleanup
@@ -107,7 +107,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns excluded features when include_excluded=true', async () => {
-        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
 
         await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
 
@@ -115,16 +115,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
         });
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === id);
         expect(found).to.be.ok();
-        expect(found!.excluded_at).to.be.a('string');
+        expect(found!.excluded).to.be(true);
 
         // Cleanup
         await deleteFeature(apiClient, STREAM_NAME, uuid);
       });
 
       it('restores an excluded feature with fresh timestamps', async () => {
-        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
 
         await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
 
@@ -133,11 +133,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Should appear in default list again
         const { features } = await listFeatures(apiClient, STREAM_NAME);
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === id);
         expect(found).to.be.ok();
-        expect(found!.excluded_at).to.be(undefined);
-        expect(found!.last_seen).to.be.a('string');
-        expect(found!.expires_at).to.be.a('string');
+        expect(found!.excluded).to.be(undefined);
+        expect(found!.updated_at).to.be.a('string');
 
         // Cleanup
         await deleteFeature(apiClient, STREAM_NAME, uuid);
@@ -148,9 +147,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const feature2: BaseFeature = { ...testFeature, id: 'bulk-test-2' };
         const feature3: BaseFeature = { ...testFeature, id: 'bulk-test-3' };
 
-        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
-        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
-        const { uuid: uuid3 } = await upsertFeature(apiClient, STREAM_NAME, feature3);
+        const { id: id1, uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { id: id2, uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+        const { id: id3, uuid: uuid3 } = await upsertFeature(apiClient, STREAM_NAME, feature3);
 
         // Exclude all 3
         await bulkFeatures(apiClient, STREAM_NAME, [
@@ -161,9 +160,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Default list should have none of the 3
         const { features: afterExclude } = await listFeatures(apiClient, STREAM_NAME);
-        expect(afterExclude.find((f) => f.uuid === uuid1)).to.be(undefined);
-        expect(afterExclude.find((f) => f.uuid === uuid2)).to.be(undefined);
-        expect(afterExclude.find((f) => f.uuid === uuid3)).to.be(undefined);
+        expect(afterExclude.find((f) => f.id === id1)).to.be(undefined);
+        expect(afterExclude.find((f) => f.id === id2)).to.be(undefined);
+        expect(afterExclude.find((f) => f.id === id3)).to.be(undefined);
 
         // Restore 2 of them
         await bulkFeatures(apiClient, STREAM_NAME, [
@@ -172,9 +171,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
 
         const { features: afterRestore } = await listFeatures(apiClient, STREAM_NAME);
-        expect(afterRestore.find((f) => f.uuid === uuid1)).to.be.ok();
-        expect(afterRestore.find((f) => f.uuid === uuid2)).to.be.ok();
-        expect(afterRestore.find((f) => f.uuid === uuid3)).to.be(undefined);
+        expect(afterRestore.find((f) => f.id === id1)).to.be.ok();
+        expect(afterRestore.find((f) => f.id === id2)).to.be.ok();
+        expect(afterRestore.find((f) => f.id === id3)).to.be(undefined);
 
         // Cleanup
         await bulkFeatures(apiClient, STREAM_NAME, [
@@ -185,7 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('hard deletes an excluded feature', async () => {
-        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
 
         await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
 
@@ -196,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
         });
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === id);
         expect(found).to.be(undefined);
       });
     });
@@ -221,8 +220,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream_name: SECOND_STREAM_NAME,
         };
 
-        const { uuid: uuidA } = await upsertFeature(apiClient, STREAM_NAME, featureA);
-        const { uuid: uuidB } = await upsertFeature(apiClient, SECOND_STREAM_NAME, featureB);
+        const { id: idA, uuid: uuidA } = await upsertFeature(apiClient, STREAM_NAME, featureA);
+        const { id: idB, uuid: uuidB } = await upsertFeature(
+          apiClient,
+          SECOND_STREAM_NAME,
+          featureB
+        );
 
         const response = await apiClient
           .fetch('POST /internal/streams/features/_bulk', {
@@ -243,16 +246,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features: streamBFeatures } = await listFeatures(apiClient, SECOND_STREAM_NAME, {
           includeExcluded: true,
         });
-        expect(streamAFeatures.find((f) => f.uuid === uuidA)).to.be(undefined);
-        expect(streamBFeatures.find((f) => f.uuid === uuidB)).to.be(undefined);
+        expect(streamAFeatures.find((f) => f.id === idA)).to.be(undefined);
+        expect(streamBFeatures.find((f) => f.id === idB)).to.be(undefined);
       });
 
       it('deletes multiple features in one request and returns the right counts', async () => {
         const feature1: BaseFeature = { ...testFeature, id: 'bulk-delete-1' };
         const feature2: BaseFeature = { ...testFeature, id: 'bulk-delete-2' };
 
-        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
-        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+        const { id: id1, uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { id: id2, uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
 
         const response = await apiClient
           .fetch('POST /internal/streams/features/_bulk', {
@@ -270,8 +273,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
         });
-        expect(features.find((f) => f.uuid === uuid1)).to.be(undefined);
-        expect(features.find((f) => f.uuid === uuid2)).to.be(undefined);
+        expect(features.find((f) => f.id === id1)).to.be(undefined);
+        expect(features.find((f) => f.id === id2)).to.be(undefined);
       });
 
       it('excludes and restores features across streams in one request', async () => {

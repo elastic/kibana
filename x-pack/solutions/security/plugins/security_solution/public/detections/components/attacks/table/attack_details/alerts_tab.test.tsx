@@ -30,7 +30,6 @@ jest.mock('./use_filtered_related_alert_ids', () => ({
 describe('AlertsTab', () => {
   const defaultProps = {
     attackAlertIds: ['alert-1', 'alert-2'],
-    groupingFilters: [],
     defaultFilters: [],
     isTableLoading: false,
   };
@@ -67,15 +66,20 @@ describe('AlertsTab', () => {
   });
 
   it('renders AlertsTable with correct props', () => {
-    const groupingFilters = [{ meta: { alias: 'group', disabled: false, negate: false } }];
     const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
 
-    renderAlertsTab({ groupingFilters, defaultFilters, isTableLoading: true });
+    renderAlertsTab({ defaultFilters, isTableLoading: true });
 
     expect(AlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
         tableType: expect.any(String),
-        inputFilters: expect.arrayContaining([...defaultFilters, ...groupingFilters]),
+        inputFilters: expect.arrayContaining([
+          ...defaultFilters,
+          expect.objectContaining({
+            meta: expect.objectContaining({ type: 'custom' }),
+            query: { ids: { values: defaultProps.attackAlertIds } },
+          }),
+        ]),
         isLoading: true,
         pageScope: expect.any(String),
         disableAdditionalToolbarControls: true,
@@ -84,57 +88,28 @@ describe('AlertsTab', () => {
     );
   });
 
-  it('passes disableAdditionalToolbarControls as false when groupingFilters is empty', () => {
-    renderAlertsTab({ groupingFilters: [] });
-
-    expect(AlertsTable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        disableAdditionalToolbarControls: false,
-      }),
-      {}
-    );
-  });
-
-  it('passes disableAdditionalToolbarControls as true when groupingFilters is not empty', () => {
-    const groupingFilters = [{ meta: { alias: 'group', disabled: false, negate: false } }];
-
-    renderAlertsTab({ groupingFilters });
-
-    expect(AlertsTable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        disableAdditionalToolbarControls: true,
-      }),
-      {}
-    );
-  });
-
   describe('Filtering Mode and CallOut', () => {
-    it('does not render callout when there are no grouping filters', () => {
-      renderAlertsTab({ groupingFilters: [] });
-      expect(screen.queryByTestId(ALERTS_TAB_CALLOUT_TEST_ID)).not.toBeInTheDocument();
-    });
-
     it('does not render callout when all alerts match the filters', () => {
-      const groupingFilters = [{ meta: { alias: 'group', disabled: false, negate: false } }];
+      const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
       (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
         filteredAlertIds: new Set(['alert-1', 'alert-2']), // Matches defaultProps.attackAlertIds length
         isLoading: false,
         isReady: true,
       });
 
-      renderAlertsTab({ groupingFilters });
+      renderAlertsTab({ defaultFilters });
       expect(screen.queryByTestId(ALERTS_TAB_CALLOUT_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('renders callout and applies query override when there are filtered-out alerts', () => {
-      const groupingFilters = [{ meta: { alias: 'group', disabled: false, negate: false } }];
+      const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
       (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
         filteredAlertIds: new Set(['alert-1']), // Missing 'alert-2'
         isLoading: false,
         isReady: true,
       });
 
-      renderAlertsTab({ groupingFilters });
+      renderAlertsTab({ defaultFilters });
 
       // Callout is visible
       expect(screen.getByTestId(ALERTS_TAB_CALLOUT_TEST_ID)).toBeInTheDocument();
@@ -161,14 +136,14 @@ describe('AlertsTab', () => {
     });
 
     it('toggles to "Show matching alerts only" mode', () => {
-      const groupingFilters = [{ meta: { alias: 'group', disabled: false, negate: false } }];
+      const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
       (useFilteredRelatedAlertIds as jest.Mock).mockReturnValue({
         filteredAlertIds: new Set(['alert-1']),
         isLoading: false,
         isReady: true,
       });
 
-      renderAlertsTab({ groupingFilters });
+      renderAlertsTab({ defaultFilters });
 
       const switchControl = screen.getByTestId(ALERTS_TAB_FILTERING_MODE_CONTROL_TEST_ID);
       fireEvent.click(switchControl);
@@ -177,8 +152,11 @@ describe('AlertsTab', () => {
       expect(AlertsTable).toHaveBeenLastCalledWith(
         expect.objectContaining({
           inputFilters: expect.arrayContaining([
-            ...defaultProps.defaultFilters,
-            ...groupingFilters,
+            ...defaultFilters,
+            expect.objectContaining({
+              meta: expect.objectContaining({ type: 'custom' }),
+              query: { ids: { values: defaultProps.attackAlertIds } },
+            }),
           ]),
         }),
         {}

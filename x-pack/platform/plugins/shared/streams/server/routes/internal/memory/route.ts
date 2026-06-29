@@ -12,6 +12,7 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import {
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -317,15 +318,17 @@ const getCategoryTreeRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
-  }): Promise<{ tree: MemoryCategoryNode[] }> => {
+  }): Promise<{
+    tree: MemoryCategoryNode[];
+    uncategorized: Array<{ id: string; name: string; title: string }>;
+  }> => {
     const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
     await assertMemoryEnabled({ server, licensing, uiSettingsClient });
     const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
-    const tree = await memory.getCategoryTree();
-    return { tree };
+    return memory.getCategoryTree();
   },
 });
 
@@ -539,6 +542,12 @@ const synthesizeMemoryRoute = createServerRoute({
   },
 });
 
+const detectGapsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_detect_gaps',
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  'Trigger gap detection for memory'
+);
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -554,4 +563,5 @@ export const internalMemoryRoutes = {
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
   ...synthesizeMemoryRoute,
+  ...detectGapsRoute,
 };

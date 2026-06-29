@@ -21,6 +21,7 @@ export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_build
 export { getFieldValue } from '../common/domain/euid/commons';
 export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descriptor/types';
 export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
+export { enterpriseLicenseMiddleware } from './routes/middleware/enterprise_license';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');

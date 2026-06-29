@@ -15,14 +15,13 @@ const createEvent = (): SigEvent => ({
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
   discovery_slug: 'agent-event-1',
-  verdict: 'promoted',
+  status: 'promoted',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   root_cause: 'Test root cause',
   criticality: 50,
   confidence: 0.8,
-  impact: 'medium',
   recommendations: ['Investigate the test signal'],
 });
 

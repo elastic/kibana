@@ -394,6 +394,13 @@ function applyAutomaticReadPrivilegeGrants(
 ) {
   readPrivileges.forEach((readPrivilege) => {
     if (readPrivilege) {
+      readPrivilege.savedObject.all = uniq([
+        ...readPrivilege.savedObject.all,
+        // Every user, including those with only read access, must be able to persist their own preferences.
+        // Per-user isolation is enforced by the user-storage service, which scopes every operation to the caller's own profile id.
+        'user-storage',
+        'user-storage-global',
+      ]);
       readPrivilege.savedObject.read = uniq([
         ...readPrivilege.savedObject.read,
         'config',
@@ -402,8 +409,6 @@ function applyAutomaticReadPrivilegeGrants(
         'url',
         'tag',
         'cloud',
-        'user-storage',
-        'user-storage-global',
       ]);
     }
   });

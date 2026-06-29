@@ -56,13 +56,9 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
     metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
-    },
+    recovery_strategy: 'no_breach',
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
-    recovery_policy: { type: 'no_breach' },
     enabled: true,
     createdBy: 'elastic_profile_uid',
     createdAt: '2025-01-01T00:00:00.000Z',
@@ -83,11 +79,8 @@ export function createRuleSoAttributes(
     metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
-    },
+    recovery_strategy: 'no_breach',
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
     enabled: true,
     createdBy: 'elastic_profile_uid',

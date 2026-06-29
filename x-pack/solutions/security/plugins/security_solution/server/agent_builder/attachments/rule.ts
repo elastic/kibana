@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { Logger } from '@kbn/core/server';
+import type {
+  AttachmentTypeDefinition,
+  AttachmentResolveContext,
+} from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { PARAMS_RULE_ID_FIELD } from '../../../common/detection_engine/rule_management/rule_fields';
-import { prepareKQLStringParam } from '../../../common/utils/kql';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { findRules } from '../../lib/detection_engine/rule_management/logic/search/find_rules';
+import { readRules } from '../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
+import { transform } from '../../lib/detection_engine/rule_management/utils/utils';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-interface RuleAttachmentTypeDeps {
-  getStartServices: SecuritySolutionPluginCoreSetupDependencies['getStartServices'];
-}
-
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  /**
-   * Detection rule signature ID this attachment was resolved from.
-   * Present when the attachment was created by investigate-rule.resolve_rule_attachment
-   * (i.e. the user selected a rule from find-rules output rather than creating a new one).
-   */
-  origin: z.string().max(512).optional(),
-  text: z.string().max(100_000),
+  text: z.string().max(500_000),
+  attachmentLabel: z.string().max(1_000).optional(),
 });
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
@@ -37,15 +31,14 @@ const INVESTIGATE_RULE_SKILL_NAME_ID = 'investigate-rule';
 
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
-/**
- * Type guard to narrow attachment data to RuleAttachmentData
- */
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;
 };
-export const createRuleAttachmentType = ({
-  getStartServices,
-}: RuleAttachmentTypeDeps): AttachmentTypeDefinition => {
+
+export const createRuleAttachmentType = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): AttachmentTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.rule,
     validate: (input) => {
@@ -56,52 +49,9 @@ export const createRuleAttachmentType = ({
         return { valid: false, error: parseResult.error.message };
       }
     },
-    // Resolve a rule attachment from a detection rule signature ID and store a rule snapshot
-    // as attachment content. Called once at add-time for by-reference creation.
-    resolve: async (origin, ctx): Promise<RuleAttachmentData> => {
-      const [, startPlugins] = await getStartServices();
-      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(ctx.request);
-
-      const { data } = await findRules({
-        rulesClient,
-        filter: `${PARAMS_RULE_ID_FIELD}: ${prepareKQLStringParam(origin)}`,
-        page: 1,
-        fields: undefined,
-        perPage: undefined,
-        sortField: undefined,
-        sortOrder: undefined,
-      });
-      const ruleObject = data[0];
-      if (!ruleObject) {
-        throw new Error(`Rule with rule_id "${origin}" was not found`);
-      }
-      const params = (ruleObject.params ?? {}) as Record<string, unknown>;
-      const ruleName = String(ruleObject.name ?? origin);
-
-      const rule = {
-        id: ruleObject.id,
-        rule_id: params.ruleId ?? params.rule_id,
-        name: ruleObject.name,
-        description: params.description,
-        type: params.type,
-        language: params.language,
-        query: params.query,
-        index: params.index,
-        interval: ruleObject.schedule?.interval,
-        from: params.from,
-        enabled: ruleObject.enabled,
-        tags: ruleObject.tags,
-        threat: params.threat,
-        investigation_fields: params.investigation_fields,
-      };
-
-      return { origin, text: JSON.stringify(rule), attachmentLabel: ruleName };
-    },
     format: (attachment: Attachment<string, unknown>) => {
-      // Extract data to allow proper type narrowing
       const data = attachment.data;
-      // Necessary because we cannot currently use the AttachmentType type as agent is not
-      // registered with enum AttachmentType in agentBuilder attachment_types.ts
+      // AttachmentType enum is not yet registered for security attachments, so we validate manually.
       if (!isRuleAttachmentData(data)) {
         throw new Error(`Invalid rule attachment data for attachment ${attachment.id}`);
       }
@@ -109,6 +59,28 @@ export const createRuleAttachmentType = ({
         getRepresentation: () => {
           return { type: 'text', value: formatRuleData(data) };
         },
+      };
+    },
+    // By-reference creation: when an attachment is added with `origin` and no `data` — e.g.
+    // investigate-rule.resolve_rule_attachment after the user picks a rule from find-security-rules —
+    // the framework calls this once to populate the card from the live rule.
+    //
+    // `origin` is a detection rule signature (`rule_id`), so we look the rule up by `ruleId` (not the
+    // saved-object `id`). The full transformed rule — including `rule_id` and `id` — is stored in
+    // `text`: the investigate-rule skill reads those identifiers back out of the attachment to query
+    // the rule's alerts (`kibana.alert.rule.rule_id` / `.uuid`), and `origin` is not visible to skills.
+    resolve: async (origin: string, context: AttachmentResolveContext) => {
+      const [, startPlugins] = await core.getStartServices();
+      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(context.request);
+      const rule = await readRules({ rulesClient, id: undefined, ruleId: origin });
+      const transformed = rule ? transform(rule) : null;
+      if (!transformed) {
+        logger.warn(`Failed to resolve rule attachment for rule_id "${origin}"`);
+        throw new Error(`Rule with rule_id "${origin}" was not found`);
+      }
+      return {
+        text: JSON.stringify(transformed),
+        attachmentLabel: transformed.name,
       };
     },
     getTools: () => [

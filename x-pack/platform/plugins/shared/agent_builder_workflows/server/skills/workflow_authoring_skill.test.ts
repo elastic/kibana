@@ -60,6 +60,13 @@ describe('workflowAuthoringSkill', () => {
       expect(workflowAuthoringSkill.content).toContain(platformCoreTools.generateWorkflow);
     });
 
+    it('instructs to use only the slack2 namespace for Slack steps', () => {
+      expect(workflowAuthoringSkill.content).toContain('ONLY use the `slack2.*` namespace');
+      expect(workflowAuthoringSkill.content).toContain('slack2.sendMessage');
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: slack$/m);
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: slack_api/);
+    });
+
     it('does not document the deleted low-level edit tools', () => {
       expect(workflowAuthoringSkill.content).not.toContain('workflow_insert_step');
       expect(workflowAuthoringSkill.content).not.toContain('workflow_modify_step');

@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 144
+ * Registry groups: 145
  * Metric groups: 534
  * Hardcoded fields: 34
- * Total fields: 1200
+ * Total fields: 1201
  *
  * @internal
  *
- * WARNING: This object contains 1200+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1201+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -54,6 +54,12 @@ export const semconvFlat = {
     description: 'Unique identifier for a particular build or compilation of the application.',
     type: 'keyword',
     example: '6cff0a7e-cefc-4668-96f5-1273d8b334d0',
+  },
+  'app.crash.id': {
+    name: 'app.crash.id',
+    description: 'A unique identifier representing an instance of an end-user facing app crash.',
+    type: 'keyword',
+    example: '083d3d2d-9a0e-47f8-be3d-bc3c5538ba38',
   },
   'app.installation.id': {
     name: 'app.installation.id',
@@ -681,6 +687,13 @@ export const semconvFlat = {
     type: 'long',
     example: '1000',
   },
+  'azure.resource_group.name': {
+    name: 'azure.resource_group.name',
+    description:
+      'The name of the Azure [resource group](https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal) the resource belongs to.',
+    type: 'keyword',
+    example: 'my-resource-group',
+  },
   'azure.resource_provider.namespace': {
     name: 'azure.resource_provider.namespace',
     description:
@@ -864,7 +877,7 @@ export const semconvFlat = {
     name: 'cicd.worker.state',
     description: 'The state of a CI/CD worker / agent.',
     type: 'keyword',
-    example: 'idle',
+    example: 'available',
   },
   'cicd.worker.url.full': {
     name: 'cicd.worker.url.full',
@@ -5454,11 +5467,6 @@ export const semconvFlat = {
   'metrics.v8js.gc.duration': {
     name: 'metrics.v8js.gc.duration',
     description: 'Garbage collection duration.',
-    type: 'double',
-  },
-  'metrics.v8js.memory.heap.limit': {
-    name: 'metrics.v8js.memory.heap.limit',
-    description: 'Maximum heap size allowed by the V8 engine.',
     type: 'double',
   },
   'metrics.v8js.memory.heap.space.available_size': {

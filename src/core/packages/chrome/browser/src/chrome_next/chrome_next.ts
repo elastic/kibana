@@ -55,14 +55,32 @@ export interface AppHeaderBadgeItem {
 }
 
 /** @public */
+export interface AppHeaderTabIconBadge {
+  /** EUI icon type rendered in the tab badge. */
+  iconType: string;
+  /** Optional tooltip shown when hovering the badge icon. */
+  tooltip?: string;
+}
+
+/**
+ * Tab badge: either a numeric count (rendered as a notification badge) or an icon
+ * with an optional tooltip.
+ *
+ * @public
+ */
+export type AppHeaderTabBadge = number | AppHeaderTabIconBadge;
+
+/** @public */
 export interface AppHeaderTab {
   id: string;
   label: string;
   isSelected?: boolean;
   onClick?: () => void;
   href?: string;
-  badge?: number;
+  badge?: AppHeaderTabBadge;
   'data-test-subj'?: string;
+  disabled?: boolean;
+  toolTipContent?: string;
 }
 
 /** @public */
@@ -215,6 +233,13 @@ export interface ChromeNext {
      * Per-app, cleared on app change.
      */
     set(config: AppHeaderConfig): () => void;
+  };
+  userMenu: {
+    /**
+     * Set the user menu content for the Chrome-Next global header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
   };
   /**
    * Register a handler that opens the feedback UI in the Chrome Next help menu.

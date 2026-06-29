@@ -439,11 +439,11 @@ groups:
 
       - setting: xpack.actions.queued.max
         description: |
-          Specifies the maximum number of actions that can be queued. It is available in {{ecloud}} 8.11.0 and later versions.
+          Specifies the maximum number of actions that can be queued.
         datatype: int
         default: 1000000
         applies_to:
-          stack: ga
+          stack: ga 8.11
           ech: ga
           self: ga
 
@@ -1355,5 +1355,19 @@ groups:
         default: false
         applies_to:
           stack: ga 7.7
+          ech: ga
+          self: ga
+
+  - group: Rule Registry settings
+    id: rule-registry-settings
+    settings:
+
+      - setting: xpack.ruleRegistry.write.disabledRegistrationContexts
+        description: |
+          An array of observability rule registration contexts whose alert indices should not be written to. Allowed values are `observability.logs`, `observability.metrics`, `observability.apm`, and `observability.uptime`.
+        datatype: array of strings
+        default: "[]"
+        applies_to:
+          stack: ga
           ech: ga
           self: ga

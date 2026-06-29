@@ -6,15 +6,17 @@
  */
 
 import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Feature, KnowledgeIndicator, QueryLink } from '@kbn/streams-schema';
 import {
   isStoredFeatureKnowledgeIndicator,
   isStoredQueryKnowledgeIndicator,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
   type StoredKnowledgeIndicator,
 } from '../data_stream';
 import { combineWhere, inPredicate, IS_NOT_DELETED, IS_NOT_EXCLUDED } from '../esql_helpers';
 import {
+  FEATURE_TYPE,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
   STREAM_NAME,
@@ -26,13 +28,13 @@ import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fall
 import type { SearchMode } from '../../../../../common/queries';
 import type { SigEventsTuningConfig } from '../../../../../common/sig_events_tuning_config';
 import type { RevisionReader } from './revision_reader';
-import type { RuleUnbackedFilter, KnowledgeIndicatorDataStreamClient } from './types';
+import type { RuleUnbackedFilter } from './types';
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
 export class IndicatorSearcher {
   constructor(
-    private readonly dataStreamClient: KnowledgeIndicatorDataStreamClient,
+    private readonly esClient: ElasticsearchClient,
     private readonly logger: Logger,
     private readonly config: Pick<
       SigEventsTuningConfig,
@@ -191,7 +193,8 @@ export class IndicatorSearcher {
       };
     }
 
-    const response = await this.dataStreamClient.search({
+    const response = await this.esClient.search({
+      index: KNOWLEDGE_INDICATORS_DATA_STREAM,
       size: limit,
       track_total_hits: true,
       retriever,
@@ -247,7 +250,7 @@ export class IndicatorSearcher {
     const featureShould = [
       wildcard('title', 3),
       wildcard('description', 2),
-      wildcard('feature.type'),
+      wildcard(FEATURE_TYPE),
       wildcard('feature.subtype'),
       wildcard('tags'),
     ];

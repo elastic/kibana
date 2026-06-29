@@ -276,14 +276,14 @@ export const tagcloudESQLAttributes = {
         colorMode: { type: 'categorical' },
       },
     },
-    query: { esql: 'FROM kibana_sample_data_logsn| STATS AVG(bytes) BY geo.dest' },
+    query: { esql: 'FROM kibana_sample_data_logs| STATS AVG(bytes) BY geo.dest' },
     filters: [],
     datasourceStates: {
       textBased: {
         layers: {
           'ab578f6a-d0c2-4bf0-84a8-86c722d9b434': {
             index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
-            query: { esql: 'FROM kibana_sample_data_logsn| STATS AVG(bytes) BY geo.dest' },
+            query: { esql: 'FROM kibana_sample_data_logs| STATS AVG(bytes) BY geo.dest' },
             columns: [
               {
                 columnId: 'AVG(bytes)',

@@ -8,7 +8,10 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
-import { ConfigSchema } from '../../common/step_types/run_agent_step';
+import {
+  AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+  ConfigSchema,
+} from '../../common/step_types/run_agent_step';
 import { CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW } from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
@@ -389,6 +392,214 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           params: expect.objectContaining({ connectorId: 'inf-1' }),
         })
       );
+    });
+  });
+
+  describe('telemetry attribution (plugin-id / aggregate-by)', () => {
+    const roundCompleteEvents = () =>
+      of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      });
+
+    it('ConfigSchema rejects aggregate-by without plugin-id', () => {
+      const parsed = ConfigSchema.safeParse({ 'aggregate-by': 'streams_significant_events' });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0].message).toBe(AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE);
+      }
+    });
+
+    it('ConfigSchema accepts plugin-id with aggregate-by, and plugin-id alone', () => {
+      expect(
+        ConfigSchema.safeParse({
+          'plugin-id': 'streams_sig_events_discovery',
+          'aggregate-by': 'streams_significant_events',
+        }).success
+      ).toBe(true);
+      expect(ConfigSchema.safeParse({ 'plugin-id': 'streams_sig_events_discovery' }).success).toBe(
+        true
+      );
+    });
+
+    it('forwards plugin-id and aggregate-by as telemetryMetadata to executeAgent', async () => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'plugin-id': 'streams_sig_events_discovery',
+            'aggregate-by': 'streams_significant_events',
+          },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            telemetryMetadata: {
+              pluginId: 'streams_sig_events_discovery',
+              aggregateBy: 'streams_significant_events',
+            },
+          }),
+        })
+      );
+    });
+
+    it('omits telemetryMetadata when no plugin-id is configured', async () => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(createContext({ input: { message: 'hello' } }));
+
+      const callArg = execution.executeAgent.mock.calls[0][0];
+      expect(callArg.params).not.toHaveProperty('telemetryMetadata');
+    });
+  });
+
+  describe('token usage', () => {
+    it('includes usage in output from a single round with model_usage', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'hello' },
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 100, output_tokens: 50 },
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+      });
+    });
+
+    it('accumulates token usage across multiple rounds', async () => {
+      const events$ = of(
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              response: { message: 'intermediate' },
+              model_usage: {
+                connector_id: 'c',
+                llm_calls: 1,
+                input_tokens: 200,
+                output_tokens: 80,
+              },
+            },
+          },
+        },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-2',
+              response: { message: 'final' },
+              model_usage: {
+                connector_id: 'c',
+                llm_calls: 1,
+                input_tokens: 300,
+                output_tokens: 120,
+              },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      // Output should be from the first round (events.find returns first match)
+      expect(res.output?.message).toBe('intermediate');
+      // Usage should be the sum across all rounds
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 500,
+        outputTokens: 200,
+        totalTokens: 700,
+      });
+    });
+
+    it('returns zero usage when round has no model_usage', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+            // no model_usage
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+      });
+    });
+
+    it('preserves partial token counts when the event stream errors mid-execution', async () => {
+      const { concat, throwError: rxThrowError } =
+        jest.requireActual<typeof import('rxjs')>('rxjs');
+
+      // Cold observable: emits one round with tokens, then errors
+      const events$ = concat(
+        of({
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              response: { message: 'partial' },
+              model_usage: {
+                connector_id: 'c',
+                llm_calls: 1,
+                input_tokens: 150,
+                output_tokens: 60,
+              },
+            },
+          },
+        }),
+        rxThrowError(() => new Error('stream interrupted'))
+      );
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.error).toBeInstanceOf(Error);
+      // Partial token counts are preserved in the output despite the error
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 150,
+        outputTokens: 60,
+        totalTokens: 210,
+      });
     });
   });
 });

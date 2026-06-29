@@ -110,7 +110,7 @@ export const alertsTool = (
         nlQuery: enhancedQuery,
         index: searchIndex,
         esClient: esClient.asCurrentUser,
-        model: await modelProvider.getDefaultModel(),
+        modelProvider,
         events,
         logger,
         timeRange,
