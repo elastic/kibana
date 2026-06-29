@@ -100,7 +100,7 @@ SECURITY RULE DATA:
 Complete in order:
 
 1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
-2. When asked why the rule is failing, noisy, slow, or not producing alerts, ALWAYS read the ${INVESTIGATE_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
+2. When asked why the rule is noisy or generating false positives, ALWAYS read the ${INVESTIGATE_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
 3. Use the available tools to research, create, or edit the rule and provide a response.`;
       return description;
     },
