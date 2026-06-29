@@ -6,7 +6,7 @@
  */
 
 import { useReducer } from 'react';
-import type { RuleKind } from './compose_form_types';
+import type { RuleKind } from '../../form/types';
 import type {
   StepId,
   ComposeDiscoverState,
@@ -30,7 +30,6 @@ export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
   initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
-  isBuilderMode?: boolean;
   /** When true, the query is already populated (e.g. from Discover) and the sandbox gate is skipped. */
   isQueryPrePopulated?: boolean;
   /** When true, the flyout opens directly in YAML mode with the sandbox open. */
@@ -41,7 +40,6 @@ export const createInitialState = ({
   mode,
   initialKind = 'alert',
   initialRecoveryType = 'default',
-  isBuilderMode = false,
   isQueryPrePopulated = false,
   forceYamlMode = false,
 }: InitialStateConfig): ComposeDiscoverState => {
@@ -116,13 +114,23 @@ export function reducer(
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const stepCount = getStepIds(action.isAlert).length;
+      const stepCount = (
+        action.isBuilderMode ? getBuilderStepIds(action.isAlert) : getStepIds(action.isAlert)
+      ).length;
       const nextStep = Math.min(state.step + 1, stepCount - 1);
-      return { ...state, step: nextStep, childOpen: false };
+      return {
+        ...state,
+        step: nextStep,
+        childOpen: action.isBuilderMode ? state.childOpen : false,
+      };
     }
     case 'GO_BACK': {
       const prevStep = Math.max(state.step - 1, 0);
-      return { ...state, step: prevStep, childOpen: false };
+      return {
+        ...state,
+        step: prevStep,
+        childOpen: action.isBuilderMode ? state.childOpen : false,
+      };
     }
     case 'OPEN_CHILD':
       return {
