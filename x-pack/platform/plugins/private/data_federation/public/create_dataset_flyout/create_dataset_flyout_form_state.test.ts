@@ -47,9 +47,9 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('omits empty-string fields and returns only set fields', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })
-      ).toEqual({ error_mode: 'skip_row' });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toEqual({
+        error_mode: 'skip_row',
+      });
 
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), partition_detection: 'hive' })
@@ -57,18 +57,18 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('includes schema_sample_size when set to a positive integer', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), schema_sample_size: '10' })
-      ).toEqual({ schema_sample_size: 10 });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), schema_sample_size: '10' })).toEqual({
+        schema_sample_size: 10,
+      });
     });
 
     it('converts header_row boolean form values correctly', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), header_row: 'true' })
-      ).toEqual({ header_row: true });
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), header_row: 'false' })
-      ).toEqual({ header_row: false });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), header_row: 'true' })).toEqual({
+        header_row: true,
+      });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), header_row: 'false' })).toEqual({
+        header_row: false,
+      });
       expect(buildDatasetSettingsFromFormValues({ ...empty(), header_row: '' })).toBeUndefined();
     });
 
@@ -83,15 +83,15 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('includes max_errors of 0 (valid non-negative)', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), max_errors: '0' })
-      ).toEqual({ max_errors: 0 });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), max_errors: '0' })).toEqual({
+        max_errors: 0,
+      });
     });
 
     it('includes max_error_ratio as a float', () => {
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), max_error_ratio: '0.5' })
-      ).toEqual({ max_error_ratio: 0.5 });
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), max_error_ratio: '0.5' })).toEqual({
+        max_error_ratio: 0.5,
+      });
     });
 
     it('includes format and CSV fields together', () => {

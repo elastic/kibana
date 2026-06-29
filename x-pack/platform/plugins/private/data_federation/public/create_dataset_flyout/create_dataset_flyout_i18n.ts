@@ -389,12 +389,9 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsMultiValueSyntaxPlaceholder: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxPlaceholder',
-      {
-        defaultMessage: 'Default',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxPlaceholder', {
+      defaultMessage: 'Default',
+    }),
 
   settingsMultiValueSyntaxNone: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxNone', {
@@ -437,12 +434,9 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsOptimizedReaderPlaceholder: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderPlaceholder',
-      {
-        defaultMessage: 'Default',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderPlaceholder', {
+      defaultMessage: 'Default',
+    }),
 
   settingsOptimizedReaderEnabled: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderEnabled', {
@@ -468,20 +462,14 @@ export const createDatasetFlyoutStrings = {
     ),
 
   settingsLateMaterializationEnabled: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationEnabled',
-      {
-        defaultMessage: 'Enabled',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationEnabled', {
+      defaultMessage: 'Enabled',
+    }),
 
   settingsLateMaterializationDisabled: () =>
-    i18n.translate(
-      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationDisabled',
-      {
-        defaultMessage: 'Disabled',
-      }
-    ),
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationDisabled', {
+      defaultMessage: 'Disabled',
+    }),
 
   advancedSettingsShow: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.advancedSettingsShow', {

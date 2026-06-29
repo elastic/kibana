@@ -42,11 +42,7 @@ export const datasetSchema = schema.object({
       // CSV/TSV commonly changed
       delimiter: optionalString,
       mode: schema.maybe(
-        schema.oneOf([
-          schema.literal('quoted'),
-          schema.literal('escaped'),
-          schema.literal('plain'),
-        ])
+        schema.oneOf([schema.literal('quoted'), schema.literal('escaped'), schema.literal('plain')])
       ),
       header_row: schema.maybe(schema.boolean()),
       null_value: optionalString,
