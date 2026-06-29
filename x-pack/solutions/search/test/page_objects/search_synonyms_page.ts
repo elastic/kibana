@@ -190,8 +190,12 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         FLYOUT_FROM_BADGE: 'searchSynonymsSynonymsRuleFlyoutFromTermBadge',
       },
       async addFromSynonym(synonym: string) {
-        await testSubjects.setValue(this.TEST_IDS.FLYOUT_FROM_INPUT, synonym);
-        await testSubjects.setValue(this.TEST_IDS.FLYOUT_FROM_INPUT, '\uE007');
+        const comboBox = await testSubjects.find(this.TEST_IDS.FLYOUT_FROM_INPUT);
+        const input = await comboBox.findByCssSelector('[role="combobox"]');
+        await input.click();
+        await input.clearValue();
+        await input.type(synonym);
+        await input.pressKeys(browser.keys.ENTER);
       },
       async addMapTo(synonym: string) {
         await testSubjects.setValue(this.TEST_IDS.FLYOUT_MAPTO_INPUT, synonym);
@@ -204,16 +208,27 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         if (index >= initialBadges.length) {
           throw new Error(`Badge with index ${index} not found`);
         }
-        const expectedCount = initialBadges.length - 1;
+        const initialTerms = await Promise.all(
+          initialBadges.map(async (badge) => (await badge.getVisibleText()).trim())
+        );
+        const termToRemove = initialTerms[index];
+        const expectedTerms = initialTerms.filter((_, termIndex) => termIndex !== index);
+
+        const deleteButton = await initialBadges[index].findByTagName('button');
+        await deleteButton.click();
+
         await retry.try(async () => {
           const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
-          if (badges.length === expectedCount) {
+          const terms = await Promise.all(
+            badges.map(async (badge) => (await badge.getVisibleText()).trim())
+          );
+          if (terms.join(',') === expectedTerms.join(',')) {
             return;
           }
-          const deleteButton = await badges[index].findByTagName('button');
-          await deleteButton.click();
           throw new Error(
-            `Clicked remove on badge ${index}, waiting for badge count to drop to ${expectedCount}`
+            `Clicked remove on badge "${termToRemove}", waiting for terms to be ${expectedTerms.join(
+              ','
+            )}; got ${terms.join(',')}`
           );
         });
       },
