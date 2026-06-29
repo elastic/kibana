@@ -58,6 +58,13 @@ export const groupingCorrectnessEvaluator: InvestigatorEvaluator = {
     }
 
     const discoveries = output?.discoveries ?? [];
+    if (discoveries.length === 0) {
+      return Promise.resolve({
+        score: null,
+        label: 'unavailable',
+        explanation: 'Agent emitted zero discoveries — no grouping signal to evaluate',
+      });
+    }
     const actualGroups = discoveries.map((discovery) => {
       const detections = discovery.detections ?? [];
       return detections.map((d) => detectionKey(d)).filter(Boolean);
