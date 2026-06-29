@@ -45,6 +45,7 @@ import {
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { ExternalLinkModal } from './external_link_modal';
+import { normalizeHref } from './normalize_href';
 
 interface Props {
   content: string;
@@ -90,23 +91,6 @@ export function ChatMessageText({
   } = useKibana();
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
-
-  // Skills emit bare root-relative paths (e.g. `/app/security/...`) with no
-  // awareness of the server basePath or active space. `basePath.prepend` adds
-  // both (it returns `${serverBasePath}/s/<space>` + the path), so the link
-  // resolves correctly for both click-driven SPA navigation and
-  // `target="_blank"` opens. Leave absolute and protocol-relative URLs alone.
-  const normalizeHref = useCallback(
-    (href: string): string => {
-      if (!http) {
-        return href;
-      }
-
-      const isRootRelative = href.startsWith('/') && !href.startsWith('//');
-      return isRootRelative ? http.basePath.prepend(href) : href;
-    },
-    [http]
-  );
 
   const handleLinkClick = useCallback(
     (href: string, e: React.MouseEvent) => {
@@ -170,7 +154,7 @@ export function ChatMessageText({
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
       a: (props) => {
-        const normalizedHref = props.href ? normalizeHref(props.href) : props.href;
+        const normalizedHref = props.href ? normalizeHref(props.href, http?.basePath) : props.href;
         return (
           <EuiLink
             {...props}
@@ -252,7 +236,7 @@ export function ChatMessageText({
       ],
       processingPluginList: processingPlugins,
     };
-  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick, normalizeHref]);
+  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick, http]);
 
   return (
     <>

@@ -30,9 +30,9 @@ import {
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { useFindInstalledPrebuiltRuleByRuleId } from '../../../../rule_management/logic/use_find_installed_prebuilt_rule_by_rule_id';
 import { useIsInitializingPrebuiltRulesPackage } from '../../../../rule_management/logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
+import { useDeepLinkedPrebuiltRule } from './use_deep_linked_prebuilt_rule';
 import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -213,53 +213,21 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
 
   // When deep-linked to a specific rule (e.g. from a chat recommendation link at
-  // /rules/add_rules/<rule_id>), the target may not fall on the current page of the
-  // catalog. Fetch it directly by `rule_id` so the preview flyout has data regardless of
-  // pagination. Scoped to the flyout only — the table keeps rendering the paginated `rules`.
+  // /rules/add_rules/<rule_id>), the target may not fall on the current page of the catalog.
+  // Resolve it by `rule_id` so the preview flyout has data regardless of pagination. Scoped to
+  // the flyout only — the table keeps rendering the paginated `rules`.
   const {
-    data: deepLinkReviewResponse,
-    isFetching: isFetchingDeepLinkRule,
-    isFetched: isFetchedDeepLinkRule,
-  } = usePrebuiltRulesInstallReview(
-    {
-      page: 1,
-      perPage: 1,
-      ruleIds: ruleIdFromUrl ? [ruleIdFromUrl] : undefined,
-    },
-    {
-      // Only run when deep-linked and the target isn't already on the current page.
-      enabled: Boolean(ruleIdFromUrl) && !rules.some((r) => r.rule_id === ruleIdFromUrl),
-    }
+    rule: deepLinkRule,
+    isAlreadyInstalled: isDeepLinkRuleInstalled,
+    isResolved: isDeepLinkResolved,
+  } = useDeepLinkedPrebuiltRule({ ruleId: ruleIdFromUrl, currentPageRules: rules });
+
+  // Rules array passed to the preview flyout: the installable rules from the current page plus
+  // the optional deep-link target. The table itself still renders only `rules`.
+  const flyoutRules = useMemo(
+    () => (deepLinkRule ? [...rules, deepLinkRule] : rules),
+    [rules, deepLinkRule]
   );
-  const deepLinkInstallableRule = deepLinkReviewResponse?.rules?.[0];
-
-  // If the deep-link target isn't in the installable catalog (most commonly because it was
-  // already installed), fall back to fetching the installed alerting rule by `rule_id` so
-  // the preview flyout can still open — just with disabled install actions.
-  const shouldLookupInstalledFallback =
-    Boolean(ruleIdFromUrl) &&
-    isFetchedDeepLinkRule &&
-    !isFetchingDeepLinkRule &&
-    !deepLinkInstallableRule &&
-    !rules.some((r) => r.rule_id === ruleIdFromUrl);
-  const {
-    rule: installedFallbackRule,
-    isFetching: isFetchingInstalledFallback,
-    isFetched: isFetchedInstalledFallback,
-  } = useFindInstalledPrebuiltRuleByRuleId(ruleIdFromUrl, {
-    enabled: shouldLookupInstalledFallback,
-  });
-
-  // Rules array passed to the preview flyout: the installable rules from the current page
-  // plus the optional deep-link target — either an installable rule fetched by id, or an
-  // already-installed fallback. The table itself still renders only `rules`.
-  const flyoutRules = useMemo(() => {
-    const deepLinkRule = deepLinkInstallableRule ?? installedFallbackRule;
-    if (deepLinkRule && !rules.some((r) => r.rule_id === deepLinkRule.rule_id)) {
-      return [...rules, deepLinkRule];
-    }
-    return rules;
-  }, [rules, deepLinkInstallableRule, installedFallbackRule]);
 
   const rulesMatchingFilterCount = reviewResponse?.total ?? 0;
   const installableRulesCount = reviewResponse?.stats.num_rules_to_install ?? 0;
@@ -327,7 +295,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const ruleActionsFactory = useCallback(
     (rule: RuleResponse, closeRulePreview: () => void) => {
-      const isPreviewRuleAlreadyInstalled = installedFallbackRule?.rule_id === rule.rule_id;
+      const isPreviewRuleAlreadyInstalled =
+        isDeepLinkRuleInstalled && deepLinkRule?.rule_id === rule.rule_id;
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
       const canPreviewedRuleBeInstalled =
         canEditRules &&
@@ -384,7 +353,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       );
     },
     [
-      installedFallbackRule,
+      isDeepLinkRuleInstalled,
+      deepLinkRule,
       loadingRules,
       canEditRules,
       isRefetching,
@@ -424,38 +394,15 @@ export const AddPrebuiltRulesTableContextProvider = ({
       return;
     }
     if (autoOpenedRuleIdRef.current === ruleIdFromUrl) return;
-    if (!isFetched || isFetching) return;
-    // When the target isn't on the current page, wait for the by-rule_id deep-link lookup
-    // (and, if it found nothing, the installed-rule fallback) to settle before deciding.
-    if (
-      !rules.some((r) => r.rule_id === ruleIdFromUrl) &&
-      (!isFetchedDeepLinkRule || isFetchingDeepLinkRule)
-    ) {
-      return;
-    }
-    if (
-      shouldLookupInstalledFallback &&
-      (!isFetchedInstalledFallback || isFetchingInstalledFallback)
-    ) {
-      return;
-    }
+    // Wait for the table query and the by-rule_id deep-link resolution (incl. its fallback) to
+    // settle on fresh data before deciding — a stale cache could otherwise surface a rule that
+    // was installed in this session and open the install flyout with active install buttons.
+    if (!isFetched || isFetching || !isDeepLinkResolved) return;
     const found = flyoutRules.find((r) => r.rule_id === ruleIdFromUrl);
     if (!found) return;
     autoOpenedRuleIdRef.current = ruleIdFromUrl;
     openRulePreview(ruleIdFromUrl);
-  }, [
-    ruleIdFromUrl,
-    isFetched,
-    isFetching,
-    rules,
-    isFetchedDeepLinkRule,
-    isFetchingDeepLinkRule,
-    shouldLookupInstalledFallback,
-    isFetchedInstalledFallback,
-    isFetchingInstalledFallback,
-    flyoutRules,
-    openRulePreview,
-  ]);
+  }, [ruleIdFromUrl, isFetched, isFetching, isDeepLinkResolved, flyoutRules, openRulePreview]);
 
   const actions = useMemo(
     () => ({
