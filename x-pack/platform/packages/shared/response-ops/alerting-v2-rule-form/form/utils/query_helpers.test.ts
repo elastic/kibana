@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ComposedQuery, StandaloneQuery } from './compose_form_types';
-import { getBreachQuery, getRecoverQuery } from './compose_form_types';
+import type { ComposedQuery, StandaloneQuery } from '../types';
+import { getBreachQuery, getRecoverQuery } from './query_helpers';
 
 const BASE = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_SEGMENT = 'WHERE count > 100';
