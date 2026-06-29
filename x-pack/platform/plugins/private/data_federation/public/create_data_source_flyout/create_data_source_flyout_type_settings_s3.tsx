@@ -19,6 +19,8 @@ import {
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
+import { FederatedIdentityClusterInfoFields } from './federated_identity_cluster_info_fields';
 
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
@@ -173,10 +175,12 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
 
 export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   control,
+  cloudInfo,
   unregister,
   areFieldsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
+  cloudInfo?: FederatedIdentityClusterInfo;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
@@ -247,6 +251,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           inputRef={roleArnField.ref}
         />
       </EuiFormRow>
+      <FederatedIdentityClusterInfoFields cloudInfo={cloudInfo} />
       <EuiButtonEmpty
         size="s"
         flush="left"

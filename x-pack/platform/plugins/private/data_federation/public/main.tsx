@@ -25,6 +25,7 @@ import {
 
 import type { HttpSetup, ToastsStart } from '@kbn/core/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
+import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { DatasetsClient } from './datasets_client';
@@ -55,6 +56,7 @@ type DataSetFlyoutState =
 export interface MainProps {
   httpClient: HttpSetup;
   toasts: ToastsStart;
+  cloudInfo?: FederatedIdentityClusterInfo;
   featureFlags?: {
     enableFederatedIdentityAuth?: boolean;
     enableGoogleCloudStorageDataSourceType?: boolean;
@@ -62,7 +64,7 @@ export interface MainProps {
   };
 }
 
-export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, featureFlags }) => {
+export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudInfo, featureFlags }) => {
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
@@ -787,6 +789,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
           }
           dataSourcesClient={dataClient}
           toasts={toasts}
+          cloudInfo={cloudInfo}
           existingDataSourceNames={items.map((ds) => ds.name)}
           featureFlags={{
             enableFederatedIdentityAuth,

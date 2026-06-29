@@ -6,15 +6,15 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export interface SetupDependencies {
   management: ManagementSetup;
+  cloud?: CloudSetup;
 }
 
-export interface StartDependencies {
-  cloud?: CloudStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataFederationPluginStart {}

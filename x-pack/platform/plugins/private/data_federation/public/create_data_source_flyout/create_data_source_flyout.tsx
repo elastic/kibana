@@ -31,6 +31,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
+import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 import { ALL_DATA_SOURCE_TYPES, DATA_SOURCE_TYPES_TO_ICONS } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
@@ -57,6 +58,7 @@ export interface CreateDataSourceFlyoutProps {
   initialDataSource?: DataSource;
   /** Existing names to prevent duplicates (create mode only). */
   existingDataSourceNames?: readonly string[];
+  cloudInfo?: FederatedIdentityClusterInfo;
   featureFlags?: {
     enableFederatedIdentityAuth?: boolean;
     enableGoogleCloudStorageDataSourceType?: boolean;
@@ -74,6 +76,7 @@ export interface CreateDataSourceFlyoutProps {
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   initialDataSource,
   existingDataSourceNames = [],
+  cloudInfo,
   featureFlags,
   dataSourcesClient,
   toasts,
@@ -307,6 +310,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <CreateDataSourceFlyoutAuthenticationFields
             authenticationMode={authenticationMode}
             control={control}
+            cloudInfo={cloudInfo}
             dataSourceType={dataSourceType}
             requireS3Credentials={!isEditMode}
             requireS3FederatedIdentity={!isEditMode}

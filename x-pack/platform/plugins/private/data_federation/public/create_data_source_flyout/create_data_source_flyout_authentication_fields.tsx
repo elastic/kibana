@@ -11,6 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 import {
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
   showsAuthenticationCredentialFields,
@@ -29,6 +30,7 @@ import {
 
 export function CreateDataSourceFlyoutAuthenticationFields({
   authenticationMode,
+  cloudInfo,
   dataSourceType,
   requireS3Credentials,
   requireS3FederatedIdentity,
@@ -39,6 +41,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   unregister,
 }: {
   authenticationMode: CreateDataSourceAuthenticationMode;
+  cloudInfo?: FederatedIdentityClusterInfo;
   dataSourceType: DataSourceType;
   requireS3Credentials: boolean;
   requireS3FederatedIdentity: boolean;
@@ -69,6 +72,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
         {dataSourceType === 's3' && authenticationMode === 'federated_identity' ? (
           <CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity
             control={control}
+            cloudInfo={cloudInfo}
             unregister={unregister}
             areFieldsRequired={requireS3FederatedIdentity}
           />

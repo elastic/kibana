@@ -9,10 +9,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { Main } from './main';
+import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 
 export interface FederatedDataFeatureFlags {
   enableFederatedIdentityAuth?: boolean;
@@ -24,19 +24,20 @@ export const mountManagementSection = (
   coreStart: CoreStart,
   { element, history }: ManagementAppMountParams,
   {
-    cloud,
+    cloudInfo,
+    isCloudEnabled = false,
     featureFlags: {
       enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = false,
       enableGoogleCloudStorageDataSourceType = false,
       enableAzureDataSourceType = false,
     } = {},
   }: {
-    cloud?: CloudStart;
+    cloudInfo?: FederatedIdentityClusterInfo;
+    isCloudEnabled?: boolean;
     featureFlags?: FederatedDataFeatureFlags;
   }
 ) => {
-  const enableFederatedIdentityAuth =
-    Boolean(cloud?.isCloudEnabled) && enableFederatedIdentityAuthConfig;
+  const enableFederatedIdentityAuth = isCloudEnabled && enableFederatedIdentityAuthConfig;
 
   ReactDOM.render(
     coreStart.rendering.addContext(
@@ -44,6 +45,7 @@ export const mountManagementSection = (
         <Main
           httpClient={coreStart.http}
           toasts={coreStart.notifications.toasts}
+          cloudInfo={cloudInfo}
           featureFlags={{
             enableFederatedIdentityAuth,
             enableGoogleCloudStorageDataSourceType,

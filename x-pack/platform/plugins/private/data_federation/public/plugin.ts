@@ -10,6 +10,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SetupDependencies, StartDependencies, DataFederationPluginStart } from './types';
 import { PLUGIN_ID } from '../common';
+import { buildFederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 
 const PLUGIN_NAME = i18n.translate('xpack.dataFederation.pluginName', {
   defaultMessage: 'ES|QL Data Federation',
@@ -44,10 +45,12 @@ export class DataFederationPlugin
     this.enableAzureDataSourceType = enableAzureDataSourceType;
   }
 
-  public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
+  public setup(core: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies): void {
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;
+    const cloudInfo = buildFederatedIdentityClusterInfo(cloud);
+    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
     void core.getStartServices().then(([coreStart]) => {
       const canManageFederatedData =
         coreStart.application.capabilities?.[PLUGIN_ID]?.manageFederatedData === true;
@@ -63,7 +66,7 @@ export class DataFederationPlugin
         visibleIn: ['globalSearch', 'projectSideNav'],
         async mount(params: ManagementAppMountParams) {
           const { mountManagementSection } = await import('./mount_management_section');
-          const [nextCoreStart, pluginsStart] = await core.getStartServices();
+          const [nextCoreStart] = await core.getStartServices();
 
           const { docTitle } = nextCoreStart.chrome;
           docTitle.change(PLUGIN_NAME);
@@ -72,7 +75,8 @@ export class DataFederationPlugin
           setBreadcrumbs(LIST_BREADCRUMB);
 
           const unmountAppCallback = mountManagementSection(nextCoreStart, params, {
-            cloud: pluginsStart.cloud,
+            cloudInfo,
+            isCloudEnabled,
             featureFlags: {
               enableFederatedIdentityAuth,
               enableGoogleCloudStorageDataSourceType,
