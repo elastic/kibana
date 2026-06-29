@@ -130,8 +130,8 @@ steps:
 
         {{ steps.collect_step_outputs.output | json }}
 
-        Incorporate any new, non-duplicate gaps from those investigations into the _gaps/overview page. Weave them into the appropriate existing sections of the report naturally — do not create a separate section for investigation gaps. If there are no new gaps to add, do not modify the page.
+        Check whether any of those investigation gaps reveal something not already covered in the existing report. If every gap is already reflected in the page, stop — do not write anything. Only if there are genuinely new gaps, incorporate them by weaving them into the appropriate existing sections naturally. Do not create a separate section for investigation gaps.
 
-        Write the updated page using platform_streams_memory_write with categories ["_system/gaps"].
+        Write the updated page using platform_streams_memory_write with categories ["_system/gaps"] only if you made changes.
     on-failure:
       continue: true
