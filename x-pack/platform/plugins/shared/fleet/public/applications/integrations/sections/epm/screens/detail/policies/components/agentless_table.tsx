@@ -39,48 +39,18 @@ import {
   PackagePolicyActionsMenu,
   AgentlessEnrollmentFlyout,
 } from '../../../../../../components';
-import type {
-  AgentlessEnrollmentConnector,
-  AgentlessEnrollmentSelectedInput,
-} from '../../../../../../components';
 
 import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 import { ThroughputCell } from './throughput_cell';
+import { getConnectorsFromPackagePolicy, getSelectedInput } from './agentless_table_adapters';
 
 const REFRESH_INTERVAL_MS = 30000;
 
 const isConnectorPolicy = (packagePolicy: InMemoryPackagePolicy) =>
   packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
-
-// Adapter: extract connector deep-links from the package policy's enabled inputs.
-// Disabled inputs aren't running, so their connectors shouldn't surface as cards.
-export const getConnectorsFromPackagePolicy = (
-  packagePolicy: PackagePolicy
-): AgentlessEnrollmentConnector[] =>
-  (packagePolicy.inputs ?? [])
-    .filter(
-      (input) =>
-        input.enabled &&
-        (!!input?.vars?.connector_id?.value || !!input?.vars?.connector_name?.value)
-    )
-    .map((input) => ({
-      id: input?.vars?.connector_id?.value,
-      name: input?.vars?.connector_name?.value,
-    }));
-
-// Adapter: identify the single enabled input from the package's policy templates
-export const getSelectedInput = (
-  packagePolicy: PackagePolicy
-): AgentlessEnrollmentSelectedInput | undefined => {
-  const enabledInputs = (packagePolicy.inputs ?? []).filter((input) => input.enabled);
-  if (enabledInputs.length === 1 && enabledInputs[0].policy_template) {
-    return { policyTemplate: enabledInputs[0].policy_template, type: enabledInputs[0].type };
-  }
-  return undefined;
-};
 
 export const AgentlessPackagePoliciesTable = ({
   isLoading,

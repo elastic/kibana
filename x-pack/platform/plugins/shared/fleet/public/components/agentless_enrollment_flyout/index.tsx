@@ -28,7 +28,8 @@ import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '..
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
-import type { AgentlessEnrollmentFlyoutProps, AgentlessEnrollmentSelectedInput } from './types';
+import type { AgentlessEnrollmentFlyoutProps } from './types';
+import { resolveIntegrationTitle } from './utils';
 
 // re-export the flyout contract types so external consumers can import them from this module
 export type {
@@ -38,41 +39,6 @@ export type {
 } from './types';
 
 const REFRESH_INTERVAL_MS = 30000;
-
-/** Minimal shape needed from the package's policy templates to resolve a title. */
-interface IntegrationTitleSource {
-  name: string;
-  inputs?: Array<{ type: string; title?: string }>;
-}
-
-/**
- * Resolves the integration title shown in the enrollment copy. When a single input
- * is selected, prefer that input's title from the package's policy templates
- * (e.g. "AWS S3"); otherwise fall back to the package title, then the policy name.
- */
-export const resolveIntegrationTitle = ({
-  packageTitle,
-  policyTemplates,
-  selectedInput,
-  fallbackName,
-}: {
-  packageTitle?: string;
-  policyTemplates?: IntegrationTitleSource[];
-  selectedInput?: AgentlessEnrollmentSelectedInput;
-  fallbackName: string;
-}): string => {
-  if (!packageTitle) {
-    return fallbackName;
-  }
-  if (!selectedInput) {
-    return packageTitle;
-  }
-  const policyTemplate = policyTemplates?.find(
-    (template) => template.name === selectedInput.policyTemplate
-  );
-  const input = policyTemplate?.inputs?.find((i) => i.type === selectedInput.type);
-  return input?.title || packageTitle;
-};
 
 /**
  * This component displays additional status details of an agentless agent enrolled
