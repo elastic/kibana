@@ -42,16 +42,7 @@ describe('RuleExecutionHistoryApi', () => {
     await api.getRuleExecutions(params);
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
-      query: {
-        ruleId: params.ruleId,
-        outcome: params.outcome,
-        from: params.from,
-        to: params.to,
-        sort: params.sort,
-        sortOrder: params.sortOrder,
-        page: params.page,
-        perPage: params.perPage,
-      },
+      query: params,
     });
   });
 
