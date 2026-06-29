@@ -49,6 +49,7 @@ import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import { isBuilderConditionStepId } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
@@ -249,7 +250,6 @@ export function ComposeDiscoverFlyout({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
-    isBuilderMode,
     isQueryPrePopulated: isDiscoverQueryComplete,
     forceYamlMode,
   });
@@ -792,13 +792,14 @@ export function ComposeDiscoverFlyout({
       const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
-    dispatch({ type: 'GO_NEXT', isAlert });
+    dispatch({ type: 'GO_NEXT', isAlert, isBuilderMode });
   }, [
     hasValidationErrors,
     currentStep,
     methods,
     uiState,
     isAlert,
+    isBuilderMode,
     dispatch,
     baseServices,
     builderState,
@@ -822,6 +823,13 @@ export function ComposeDiscoverFlyout({
     handleSubmit,
     hasValidationErrors,
   ]);
+
+  const isBuilderStepValid = useMemo(() => {
+    if (!currentStep || !isBuilderConditionStepId(currentStep.id) || !currentStep.validate)
+      return true;
+    const result = currentStep.validate(methods, uiState, baseServices, builderState);
+    return typeof result === 'boolean' ? result : true;
+  }, [currentStep, methods, uiState, baseServices, builderState]);
 
   const validationCallout = hasValidationErrors ? (
     <>
@@ -1029,6 +1037,8 @@ export function ComposeDiscoverFlyout({
               isCreate={isCreate}
               hasValidationErrors={hasValidationErrors}
               yamlHasErrors={yamlHasErrors}
+              isBuilderMode={isBuilderMode}
+              isBuilderStepValid={isBuilderStepValid}
               isSaving={isSaving}
               onNext={handleNext}
               onFinalSubmit={handleFinalSubmit}
