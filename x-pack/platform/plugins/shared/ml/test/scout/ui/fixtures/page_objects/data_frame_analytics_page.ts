@@ -16,10 +16,7 @@ import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
 export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(
-    private readonly page: ScoutPage,
-    private readonly kbnUrl: KibanaUrl
-  ) {
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
@@ -125,9 +122,7 @@ export class DataFrameAnalyticsPage {
   }
 
   async setDestIndexSameAsJobId(sameAsId: boolean): Promise<void> {
-    const switchEl = this.page.testSubj.locator(
-      'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch'
-    );
+    const switchEl = this.page.testSubj.locator('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
     const isChecked = (await switchEl.getAttribute('aria-checked')) === 'true';
     if (isChecked !== sameAsId) {
       await switchEl.click();
@@ -194,11 +189,11 @@ export class DataFrameAnalyticsPage {
       await startSwitch.click();
     }
     await this.page.testSubj.locator('mlAnalyticsCreateJobWizardCreateButton').click();
-    await this.page.testSubj
-      .locator('analyticsWizardCardManagement')
-      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('analyticsWizardCardManagement').waitFor({ state: 'visible' });
     await this.page.testSubj.locator('analyticsWizardCardManagement').click();
-    await this.page.testSubj.locator('mlAnalyticsJobList').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page.testSubj
+      .locator('mlAnalyticsJobList')
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   // ── Job table ─────────────────────────────────────────────────────────────
@@ -263,9 +258,7 @@ export class DataFrameAnalyticsPage {
         .locator(`[data-test-subj~="row-${jobId}"]`)
         .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
         .click();
-      await this.page.testSubj
-        .locator('mlAnalyticsJobDeleteButton')
-        .waitFor({ state: 'visible' });
+      await this.page.testSubj.locator('mlAnalyticsJobDeleteButton').waitFor({ state: 'visible' });
     }
   }
 
@@ -296,8 +289,60 @@ export class DataFrameAnalyticsPage {
       .locator(`[data-test-subj~="row-${jobId}"]`)
       .locator('[data-test-subj="mlAnalyticsJobMapButton"]')
       .click();
+    await this.page.testSubj.locator('mlPageDataFrameAnalyticsMap').waitFor({ state: 'visible' });
+  }
+
+  // ── Configuration step: dependent variable & training percent ─────────────
+
+  async selectDependentVariable(variable: string): Promise<void> {
+    // Wait for the combo to be fully loaded before interacting
     await this.page.testSubj
-      .locator('mlPageDataFrameAnalyticsMap')
+      .locator('mlAnalyticsCreateJobWizardDependentVariableSelect loaded')
+      .waitFor({ state: 'visible' });
+    // Click the comboBoxInput div to open the dropdown, then type to filter
+    const comboInput = this.page.testSubj.locator(
+      '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+    );
+    await comboInput.click();
+    // Type into the inner <input> element that appears after opening
+    await comboInput.locator('input').fill(variable);
+    // Click the exact matching option in the dropdown list
+    await this.page
+      .locator('.euiComboBoxOption__content', { hasText: new RegExp(`^\\s*${variable}\\s*$`) })
+      .click();
+  }
+
+  async setTrainingPercent(percent: number): Promise<void> {
+    const slider = this.page.testSubj.locator('mlAnalyticsCreateJobWizardTrainingPercentSlider');
+    await slider.waitFor({ state: 'visible' });
+    await slider.focus();
+    // Adjust with arrow keys until the slider value matches, mirroring the FTR setSliderValue helper
+    for (let attempts = 0; attempts < 200; attempts++) {
+      const currentValue = Number((await slider.getAttribute('value')) ?? '0');
+      if (currentValue === percent) break;
+      const diff = percent - currentValue;
+      if (Math.abs(diff) >= 10) {
+        await this.page.keyboard.press(diff > 0 ? 'PageUp' : 'PageDown');
+      } else {
+        await this.page.keyboard.press(diff > 0 ? 'ArrowRight' : 'ArrowLeft');
+      }
+    }
+  }
+
+  // ── Map view: job badge & details flyout (regression) ─────────────────────
+
+  async openMapJobBadge(jobId: string): Promise<void> {
+    await this.page.testSubj.locator(`mlAnalyticsIdSelectionBadge-${jobId}`).click();
+    await this.page.testSubj
+      .locator(`mlAnalyticsJobDetailsFlyoutButton-${jobId}`)
+      .waitFor({ state: 'visible' });
+  }
+
+  async openMapJobDetailsFlyout(jobId: string): Promise<void> {
+    await this.page.testSubj.locator(`mlAnalyticsJobDetailsFlyoutButton-${jobId}`).click();
+    await this.page.testSubj.locator('analyticsDetailsFlyout').waitFor({ state: 'visible' });
+    await this.page.testSubj
+      .locator(`analyticsDetailsFlyout-${jobId}`)
       .waitFor({ state: 'visible' });
   }
 
@@ -324,9 +369,7 @@ export class DataFrameAnalyticsPage {
 
   async openCustomUrlsTab(): Promise<void> {
     await this.page.testSubj.locator('mlEditAnalyticsJobFlyout-customUrls').click();
-    await this.page.testSubj
-      .locator('mlJobOpenCustomUrlFormButton')
-      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mlJobOpenCustomUrlFormButton').waitFor({ state: 'visible' });
   }
 
   private async openCustomUrlEditor(): Promise<void> {
@@ -335,10 +378,7 @@ export class DataFrameAnalyticsPage {
   }
 
   private async selectRadioOption(groupTestSubj: string, value: string): Promise<void> {
-    await this.page.testSubj
-      .locator(groupTestSubj)
-      .locator(`label[for="${value}"]`)
-      .click();
+    await this.page.testSubj.locator(groupTestSubj).locator(`label[for="${value}"]`).click();
   }
 
   async addDiscoverCustomUrl(config: {
@@ -359,6 +399,8 @@ export class DataFrameAnalyticsPage {
       await entitiesCombo.selectMultiOptions(config.queryEntityFieldNames);
     }
     await this.page.testSubj.locator('mlJobAddCustomUrl').click();
+    // Wait for the form editor to close, indicating the URL was added to the list
+    await this.page.testSubj.locator('mlJobCustomUrlForm').waitFor({ state: 'hidden' });
   }
 
   async addDashboardCustomUrl(config: {
@@ -379,6 +421,8 @@ export class DataFrameAnalyticsPage {
       await entitiesCombo.selectMultiOptions(config.queryEntityFieldNames);
     }
     await this.page.testSubj.locator('mlJobAddCustomUrl').click();
+    // Wait for the form editor to close, indicating the URL was added to the list
+    await this.page.testSubj.locator('mlJobCustomUrlForm').waitFor({ state: 'hidden' });
   }
 
   async addOtherTypeCustomUrl(config: { label: string; url: string }): Promise<void> {
@@ -387,5 +431,7 @@ export class DataFrameAnalyticsPage {
     await this.selectRadioOption('mlJobCustomUrlLinkToTypeInput', 'OTHER');
     await this.page.testSubj.locator('mlJobCustomUrlOtherTypeUrlInput').fill(config.url);
     await this.page.testSubj.locator('mlJobAddCustomUrl').click();
+    // Wait for the form editor to close, indicating the URL was added to the list
+    await this.page.testSubj.locator('mlJobCustomUrlForm').waitFor({ state: 'hidden' });
   }
 }
