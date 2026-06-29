@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -388,11 +388,25 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
       application,
+      featureFlags,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
+
     const shouldUseLegacyTimePicker =
-      !enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
