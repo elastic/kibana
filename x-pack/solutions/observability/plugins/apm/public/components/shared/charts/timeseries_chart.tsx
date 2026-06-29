@@ -40,7 +40,7 @@ import { useChartPointerEventContext } from '../../../context/chart_pointer_even
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import {
-  expectedBoundsTitle,
+  EXPECTED_BOUNDS_SERIES_ID,
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
@@ -145,8 +145,8 @@ export function TimeseriesChart({
   // See https://github.com/elastic/elastic-charts/issues/1685
   const legendSort = isComparingExpectedBounds
     ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
-        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle) return -1;
-        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle) return -1;
+        if ((a as XYChartSeriesIdentifier)?.specId === EXPECTED_BOUNDS_SERIES_ID) return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === EXPECTED_BOUNDS_SERIES_ID) return -1;
         return 1;
       }
     : undefined;

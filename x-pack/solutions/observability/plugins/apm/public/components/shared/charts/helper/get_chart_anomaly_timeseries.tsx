@@ -18,9 +18,7 @@ import type { APMChartSpec } from '../../../../../typings/timeseries';
 import type { AnomalyThreshold } from '../../../../../common/anomaly_detection/anomaly_threshold';
 import { DEFAULT_ANOMALY_THRESHOLD } from '../../../../../common/anomaly_detection/anomaly_threshold';
 
-export const expectedBoundsTitle = i18n.translate('xpack.apm.comparison.expectedBoundsTitle', {
-  defaultMessage: 'Expected bounds',
-});
+export const EXPECTED_BOUNDS_SERIES_ID = 'expected_bounds';
 
 // All severity levels ordered low → critical so higher-severity series render on top.
 const ALL_SEVERITIES = [
@@ -58,7 +56,9 @@ export function getChartAnomalyTimeseries({
 
   const boundaries = [
     {
-      title: expectedBoundsTitle,
+      title: i18n.translate('xpack.apm.comparison.expectedBoundsTitle', {
+        defaultMessage: 'Expected bounds',
+      }),
       type: 'area',
       hideLegend: false,
       hideTooltipValue: true,
@@ -71,7 +71,7 @@ export function getChartAnomalyTimeseries({
       yAccessors: ['y1'],
       y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,
-      id: 'expected_bounds',
+      id: EXPECTED_BOUNDS_SERIES_ID,
     },
   ];
 
