@@ -50,7 +50,7 @@ spaceTest.describe('Discover data grid row selection', { tag: '@local-stateful-c
     await page.setViewportSize({ width: 1600, height: 1200 });
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.dataGrid.waitForLoad();
     await pageObjects.dataGrid.waitForDocTableRendered();
   });

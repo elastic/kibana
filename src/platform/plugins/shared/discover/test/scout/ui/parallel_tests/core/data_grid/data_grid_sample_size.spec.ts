@@ -32,7 +32,7 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
       'discover:rowHeightOption': 0,
       'discover:sampleRowsPerPage': testData.DEFAULT_ROWS_PER_PAGE,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.dataGrid.waitForLoad();
     await pageObjects.dataGrid.waitForDocTableRendered();
   });
