@@ -28,6 +28,8 @@ interface UseRegisterCanvasActionButtonsParams {
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
   canWriteDashboards: boolean;
+  onBeforeEditInDashboard?: () => void;
+  showNavigationError?: (error: Error) => void;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -39,10 +41,14 @@ export const useRegisterCanvasActionButtons = ({
   canWriteDashboards,
   dashboardLocatorParams,
   getExistingDashboardId,
+  onBeforeEditInDashboard,
+  showNavigationError,
 }: UseRegisterCanvasActionButtonsParams) => {
   const dashboardLocatorParamsRef = useLatest(dashboardLocatorParams);
   const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
+  const onBeforeEditInDashboardRef = useLatest(onBeforeEditInDashboard);
+  const showNavigationErrorRef = useLatest(showNavigationError);
 
   const missingDashboardWriteControlsReason = i18n.translate(
     'xpack.agentBuilderDashboards.attachments.dashboard.canvasWriteControlsDisabledReason',
@@ -102,12 +108,17 @@ export const useRegisterCanvasActionButtons = ({
           if (isWriteActionDisabled) {
             return;
           }
-          await handleEditInDashboard({
-            locator,
-            getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
-            dashboardLocatorParams: dashboardLocatorParamsRef.current,
-          });
-          closeCanvas();
+          onBeforeEditInDashboardRef.current?.();
+          try {
+            await handleEditInDashboard({
+              locator,
+              getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
+              dashboardLocatorParams: dashboardLocatorParamsRef.current,
+            });
+          } catch (error) {
+            showNavigationErrorRef.current?.(error as Error);
+            return;
+          }
           openSidebarConversationRef.current?.();
         },
       });
@@ -149,6 +160,8 @@ export const useRegisterCanvasActionButtons = ({
     dashboardLocatorParamsRef,
     getExistingDashboardIdRef,
     canWriteDashboards,
+    onBeforeEditInDashboardRef,
+    showNavigationErrorRef,
     missingDashboardWriteControlsReason,
     managedDashboardDisabledReason,
     readOnlyDashboardDisabledReason,

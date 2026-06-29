@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
@@ -51,6 +52,16 @@ export class AgentBuilderDashboardsPlugin
       unifiedSearch: plugins.unifiedSearch,
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
+      showNavigationError: (error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.agentBuilderDashboards.attachments.dashboard.openPinnedItemFailedTitle',
+            {
+              defaultMessage: 'Unable to open pinned item',
+            }
+          ),
+        });
+      },
     });
 
     return {};

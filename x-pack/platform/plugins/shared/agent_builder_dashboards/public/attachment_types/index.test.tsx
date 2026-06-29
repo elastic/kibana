@@ -221,6 +221,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       sidebar: {
         getCurrentAppId$: () => currentAppId$.asObservable(),
       },
+      applicationWorkspace: {
+        open: jest.fn(),
+      },
     } as unknown as ChromeStart;
 
     const dashboardPlugin: DashboardStart = {
@@ -257,6 +260,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getChatEvents(conversationId).next(event);
       },
       currentAppId$,
+      showNavigationError: jest.fn(),
     };
   };
 
@@ -344,12 +348,16 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         sidebar: {
           getCurrentAppId$: () => new BehaviorSubject<string | null>('agentBuilder').asObservable(),
         },
+        applicationWorkspace: {
+          open: jest.fn(),
+        },
       } as unknown as ChromeStart,
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(false),
       } as unknown as FeatureFlagsStart,
       canWriteDashboards: true,
       dashboardLocator: undefined,
+      showNavigationError: jest.fn(),
       dashboardPlugin: {
         dashboardAppClientApi$,
         findDashboardsService,

@@ -29,6 +29,8 @@ export type DashboardCanvasAttachmentProps = AttachmentRenderProps<DashboardAtta
   data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
+  openApplicationWorkspace?: () => void;
+  showNavigationError?: (error: Error) => void;
 };
 
 export const DashboardCanvasAttachment = (props: DashboardCanvasAttachmentProps) => {

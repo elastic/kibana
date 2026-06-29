@@ -60,6 +60,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   data,
   dashboardPlugin,
   canWriteDashboards,
+  showNavigationError,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
@@ -69,6 +70,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   data: DataPublicPluginStart;
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
+  showNavigationError: (error: Error) => void;
 }): (() => void) => {
   const isAgentFirstChrome = isAgentFirst(featureFlags) && isNextChrome(featureFlags);
   let dashboardApi: DashboardApi | undefined;
@@ -137,6 +139,8 @@ export const registerDashboardAttachmentUiDefinition = ({
           data={data}
           checkSavedDashboardExist={checkSavedDashboardExist}
           canWriteDashboards={canWriteDashboards}
+          showNavigationError={showNavigationError}
+          openApplicationWorkspace={() => chrome.applicationWorkspace.open()}
         />
       </React.Suspense>
     ),
@@ -164,16 +168,22 @@ export const registerDashboardAttachmentUiDefinition = ({
             handler: async () => {
               const { handlePreview } = await import('./async_services');
 
-              return handlePreview({
-                attachment,
-                dashboardApi: undefined,
-                canWriteDashboards,
-                isSidebar,
-                dashboardLocator,
-                checkSavedDashboardExist,
-                openCanvas,
-                preferCanvasPreview: false,
-              });
+              chrome.applicationWorkspace.open();
+
+              try {
+                await handlePreview({
+                  attachment,
+                  dashboardApi: undefined,
+                  canWriteDashboards,
+                  isSidebar,
+                  dashboardLocator,
+                  checkSavedDashboardExist,
+                  openCanvas,
+                  preferCanvasPreview: false,
+                });
+              } catch (error) {
+                showNavigationError(error as Error);
+              }
             },
           },
         ];
