@@ -38,9 +38,7 @@ describe('AlertRetrievalStep', () => {
       </AlertRetrievalStep>
     );
 
-    expect(
-      screen.getByText('Choose how alerts are collected and enriched before generation.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Choose how alerts are collected')).toBeInTheDocument();
   });
 
   it('renders children', () => {

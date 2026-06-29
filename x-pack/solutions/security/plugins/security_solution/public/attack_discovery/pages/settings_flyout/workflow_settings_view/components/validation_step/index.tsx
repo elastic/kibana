@@ -17,7 +17,7 @@ const ValidationStepComponent: React.FC<ValidationStepProps> = ({ validationPane
   <>
     <EuiText color="subdued" data-test-subj="validationStepDescription" size="s">
       <FormattedMessage
-        id="xpack.discoveries.components.validationSectionDescription"
+        id="xpack.securitySolution.attackDiscovery.workflowSettingsView.validationSectionDescription"
         defaultMessage="Choose how discoveries are validated or enriched before they are saved as attacks."
       />
     </EuiText>

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer, EuiSteps, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiSteps, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
-import * as i18n from '../translations';
 import type { ValidationItem } from '../types';
+import { WorkflowValidationCallouts } from '../workflow_validation_callouts';
 
 type StepConfig = React.ComponentProps<typeof EuiSteps>['steps'][number];
 
@@ -38,76 +38,9 @@ const WorkflowSettingsViewLayoutComponent: React.FC<WorkflowSettingsViewLayoutPr
     [euiTheme.size.l, euiTheme.size.m, euiTheme.size.xs]
   );
 
-  const errorItems = useMemo(
-    () => workflowValidationItems.filter((item) => item.level === 'error'),
-    [workflowValidationItems]
-  );
-
-  const warningItems = useMemo(
-    () => workflowValidationItems.filter((item) => item.level === 'warning'),
-    [workflowValidationItems]
-  );
-
-  const listStyles = useMemo(
-    () => ({
-      listStyleType: 'disc' as const,
-      marginTop: '8px',
-      paddingLeft: '20px',
-    }),
-    []
-  );
-
   return (
     <>
-      {errorItems.length > 0 && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            data-test-subj="workflowValidationErrorsCallout"
-            iconType="error"
-            size="s"
-            title={i18n.VALIDATION_ERRORS_TITLE}
-          >
-            <EuiText size="s">
-              <ul style={listStyles}>
-                {errorItems.map((item) => (
-                  <li key={item.message}>{item.message}</li>
-                ))}
-              </ul>
-            </EuiText>
-          </EuiCallOut>
-
-          <div>
-            <EuiSpacer size="xl" />
-          </div>
-        </>
-      )}
-
-      {warningItems.length > 0 && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            data-test-subj="workflowValidationWarningsCallout"
-            iconType="warning"
-            size="s"
-            title={i18n.VALIDATION_WARNINGS_TITLE}
-          >
-            <EuiText size="s">
-              <ul style={listStyles}>
-                {warningItems.map((item) => (
-                  <li key={item.message}>{item.message}</li>
-                ))}
-              </ul>
-            </EuiText>
-          </EuiCallOut>
-
-          <div>
-            <EuiSpacer size="xl" />
-          </div>
-        </>
-      )}
+      <WorkflowValidationCallouts workflowValidationItems={workflowValidationItems} />
 
       <EuiSteps css={stepsContentSpacingOverride} headingElement="h3" steps={steps} titleSize="s" />
     </>

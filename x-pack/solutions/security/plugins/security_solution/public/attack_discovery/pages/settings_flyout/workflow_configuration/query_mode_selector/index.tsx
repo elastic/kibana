@@ -21,14 +21,14 @@ export interface QueryModeSelectorProps {
 
 const QUERY_MODE_OPTIONS: EuiButtonGroupOptionProps[] = [
   {
-    id: 'custom_query',
-    label: i18n.QUERY_BUILDER_MODE,
-    'data-test-subj': 'queryModeQueryBuilderModeButton',
-  },
-  {
     id: 'esql',
     label: i18n.ESQL_MODE,
     'data-test-subj': 'queryModeEsqlModeButton',
+  },
+  {
+    id: 'custom_query',
+    label: i18n.QUERY_BUILDER_MODE,
+    'data-test-subj': 'queryModeQueryBuilderModeButton',
   },
 ];
 

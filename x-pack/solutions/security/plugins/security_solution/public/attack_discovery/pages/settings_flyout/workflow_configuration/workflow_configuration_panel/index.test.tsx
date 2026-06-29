@@ -77,8 +77,11 @@ const mockWorkflowsWithPredefined: WorkflowItem[] = [
 ];
 
 const defaultConfig: WorkflowConfiguration = {
-  alertRetrievalWorkflowIds: [],
   alertRetrievalMode: 'custom_query',
+  alertRetrievalWorkflowIds: [],
+  alertRetrievalWorkflowsEnabled: false,
+  defaultRetrievalEnabled: false,
+  skillEnabled: true,
   validationWorkflowId: 'default',
 };
 
@@ -219,8 +222,11 @@ describe('WorkflowConfigurationPanel', () => {
 
   it('renders selected alert retrieval workflow', () => {
     const configWithSelection: WorkflowConfiguration = {
+      alertRetrievalMode: 'custom_query',
       alertRetrievalWorkflowIds: ['alert-retrieval-1'],
-      alertRetrievalMode: 'custom_only',
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: false,
+      skillEnabled: true,
       validationWorkflowId: 'default',
     };
 
@@ -235,8 +241,11 @@ describe('WorkflowConfigurationPanel', () => {
 
   it('renders multiple selected alert retrieval workflows', () => {
     const configWithMultipleSelections: WorkflowConfiguration = {
+      alertRetrievalMode: 'custom_query',
       alertRetrievalWorkflowIds: ['alert-retrieval-1', 'alert-retrieval-2'],
-      alertRetrievalMode: 'custom_only',
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: false,
+      skillEnabled: true,
       validationWorkflowId: 'default',
     };
 
@@ -311,8 +320,11 @@ describe('WorkflowConfigurationPanel', () => {
 
     it('renders label WITH count of 1 when exactly one workflow is selected', () => {
       const configWithOne: WorkflowConfiguration = {
+        alertRetrievalMode: 'custom_query',
         alertRetrievalWorkflowIds: ['alert-retrieval-1'],
-        alertRetrievalMode: 'custom_only',
+        alertRetrievalWorkflowsEnabled: true,
+        defaultRetrievalEnabled: false,
+        skillEnabled: true,
         validationWorkflowId: 'default',
       };
 
@@ -327,8 +339,11 @@ describe('WorkflowConfigurationPanel', () => {
 
     it('renders label WITH count when more than one workflow is selected', () => {
       const configWithTwo: WorkflowConfiguration = {
+        alertRetrievalMode: 'custom_query',
         alertRetrievalWorkflowIds: ['alert-retrieval-1', 'alert-retrieval-2'],
-        alertRetrievalMode: 'custom_only',
+        alertRetrievalWorkflowsEnabled: true,
+        defaultRetrievalEnabled: false,
+        skillEnabled: true,
         validationWorkflowId: 'default',
       };
 
@@ -343,8 +358,11 @@ describe('WorkflowConfigurationPanel', () => {
 
     it('renders label WITH count of 3 when three workflows are selected', () => {
       const configWithThree: WorkflowConfiguration = {
+        alertRetrievalMode: 'custom_query',
         alertRetrievalWorkflowIds: ['alert-retrieval-1', 'alert-retrieval-2', 'validation-1'],
-        alertRetrievalMode: 'custom_only',
+        alertRetrievalWorkflowsEnabled: true,
+        defaultRetrievalEnabled: false,
+        skillEnabled: true,
         validationWorkflowId: 'default',
       };
 

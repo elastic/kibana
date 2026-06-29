@@ -16,10 +16,11 @@ export const getWorkflowConfigStorageKey = (spaceId: string): string => {
   return `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${WORKFLOW_CONFIG_LOCAL_STORAGE_KEY}.${spaceId}`;
 };
 
-const VALID_ALERT_RETRIEVAL_MODES = new Set(['custom_only', 'custom_query', 'esql']);
+const VALID_ALERT_RETRIEVAL_MODES = new Set(['custom_query', 'esql']);
 
 /**
- * Validate that the workflow configuration has the correct structure
+ * Validate that the workflow configuration has the correct composite structure
+ * (three independent retrieval toggles plus their sub-fields).
  */
 const isValidWorkflowConfiguration = (value: unknown): value is WorkflowConfiguration => {
   if (typeof value !== 'object' || value === null) {
@@ -29,6 +30,9 @@ const isValidWorkflowConfiguration = (value: unknown): value is WorkflowConfigur
   const config = value as Partial<WorkflowConfiguration>;
 
   return (
+    typeof config.skillEnabled === 'boolean' &&
+    typeof config.defaultRetrievalEnabled === 'boolean' &&
+    typeof config.alertRetrievalWorkflowsEnabled === 'boolean' &&
     typeof config.alertRetrievalMode === 'string' &&
     VALID_ALERT_RETRIEVAL_MODES.has(config.alertRetrievalMode) &&
     Array.isArray(config.alertRetrievalWorkflowIds) &&
@@ -36,6 +40,44 @@ const isValidWorkflowConfiguration = (value: unknown): value is WorkflowConfigur
     typeof config.validationWorkflowId === 'string' &&
     (config.esqlQuery === undefined || typeof config.esqlQuery === 'string')
   );
+};
+
+/**
+ * Migrates a legacy single-enum workflow configuration (pre-composite shape,
+ * identified by the absence of the `skillEnabled` boolean) to the composite
+ * three-toggle shape.
+ *
+ * Per the migration policy, the retrieval toggles reset to their defaults
+ * (skill ON, default-retrieval OFF, workflows OFF) rather than attempting to
+ * infer toggle state from the dropped enum; the validation workflow, any
+ * selected alert retrieval workflow IDs, and any saved ES|QL query are preserved.
+ *
+ * Migration is gated on the legacy `alertRetrievalMode` string being present so
+ * that genuinely corrupt/unrelated objects still fail validation (and fall back
+ * to defaults with a warning) rather than being silently coerced.
+ */
+const migrateLegacyConfiguration = (parsed: Record<string, unknown>): Record<string, unknown> => {
+  const isAlreadyComposite = typeof parsed.skillEnabled === 'boolean';
+  const isLegacyShape = typeof parsed.alertRetrievalMode === 'string';
+
+  if (isAlreadyComposite || !isLegacyShape) {
+    return parsed;
+  }
+
+  const preservedWorkflowIds =
+    Array.isArray(parsed.alertRetrievalWorkflowIds) &&
+    parsed.alertRetrievalWorkflowIds.every((id) => typeof id === 'string')
+      ? (parsed.alertRetrievalWorkflowIds as string[])
+      : DEFAULT_WORKFLOW_CONFIGURATION.alertRetrievalWorkflowIds;
+
+  return {
+    ...DEFAULT_WORKFLOW_CONFIGURATION,
+    alertRetrievalWorkflowIds: preservedWorkflowIds,
+    ...(typeof parsed.esqlQuery === 'string' ? { esqlQuery: parsed.esqlQuery } : {}),
+    ...(typeof parsed.validationWorkflowId === 'string'
+      ? { validationWorkflowId: parsed.validationWorkflowId }
+      : {}),
+  };
 };
 
 /**
@@ -61,44 +103,16 @@ export const getWorkflowSettings = (spaceId: string): WorkflowConfiguration => {
       delete parsed.promotionWorkflowId;
     }
 
-    // Migrate legacyAlertRetrievalEnabled to alertRetrievalMode
-    if (
-      typeof parsed?.legacyAlertRetrievalEnabled === 'boolean' &&
-      typeof parsed?.alertRetrievalMode !== 'string'
-    ) {
-      parsed.alertRetrievalMode = parsed.legacyAlertRetrievalEnabled
-        ? 'custom_query'
-        : 'custom_only';
-      delete parsed.legacyAlertRetrievalEnabled;
-    }
+    // Migrate the legacy single-enum shape to the composite three-toggle shape
+    const migrated = migrateLegacyConfiguration(parsed);
 
-    // Migrate defaultAlertRetrievalEnabled boolean to alertRetrievalMode enum
-    if (
-      typeof parsed?.defaultAlertRetrievalEnabled === 'boolean' &&
-      typeof parsed?.alertRetrievalMode !== 'string'
-    ) {
-      parsed.alertRetrievalMode = parsed.defaultAlertRetrievalEnabled
-        ? 'custom_query'
-        : 'custom_only';
-      delete parsed.defaultAlertRetrievalEnabled;
-    }
-
-    // Migrate defaultAlertRetrievalMode to alertRetrievalMode
-    if (
-      typeof parsed?.defaultAlertRetrievalMode === 'string' &&
-      typeof parsed?.alertRetrievalMode !== 'string'
-    ) {
-      parsed.alertRetrievalMode = parsed.defaultAlertRetrievalMode;
-      delete parsed.defaultAlertRetrievalMode;
-    }
-
-    if (!isValidWorkflowConfiguration(parsed)) {
+    if (!isValidWorkflowConfiguration(migrated)) {
       // eslint-disable-next-line no-console
       console.warn('Invalid workflow configuration in local storage, using defaults');
       return DEFAULT_WORKFLOW_CONFIGURATION;
     }
 
-    return parsed;
+    return migrated;
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error reading workflow settings from local storage:', error);

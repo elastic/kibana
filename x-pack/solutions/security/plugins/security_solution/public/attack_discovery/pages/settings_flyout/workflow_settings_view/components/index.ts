@@ -17,3 +17,6 @@ export type { ValidationStepProps } from './validation_step';
 
 export { WorkflowSettingsViewLayout } from './workflow_settings_view_layout';
 export type { WorkflowSettingsViewLayoutProps } from './workflow_settings_view_layout';
+
+export { WorkflowValidationCallouts } from './workflow_validation_callouts';
+export type { WorkflowValidationCalloutsProps } from './workflow_validation_callouts';
