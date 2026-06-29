@@ -101,6 +101,20 @@ export default function ({ getService }: FtrProviderContext) {
 
 See the [CONTRIBUTING guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md#running-specific-kibana-tests) for more detail on running specific FTR suites.
 
+## Migrating from FTR to Scout [ftr-migration]
+
+Scout provides equivalent capabilities for most FTR use cases:
+
+| FTR concept                | Scout equivalent                                 |
+| -------------------------- | ------------------------------------------------ |
+| `getService('supertest')`  | `apiClient` fixture                              |
+| `getService('security')`   | `samlAuth` / `apiKey` auth options               |
+| `getService('esArchiver')` | Data setup in `global.setup.ts` via API services |
+| Page object pattern        | [Scout page objects](./page-objects.md)          |
+| Browser interaction        | Playwright `page` fixture                        |
+
+Start with [Set up Scout in your plugin](./setup-scout.md) to add Scout alongside your existing FTR tests.
+
 ## Writing stable FTR tests [ftr-stable-tests]
 
 Consistently writing functional tests that aren't flaky is impossible. There are too many variables that can't be reproduced reliably, and those variables change over time, so instead we have to focus on how we can reduce the flakiness in our tests as much as possible, making them more resilient to changing conditions.
@@ -187,17 +201,3 @@ API integration tests can test many integrations with Elasticsearch in a way tha
 Unit tests are the cheapest tests and can even be run locally by people with a normal amount of patience!
 
 If you could write your test using either Jest Unit, Jest Integration, or API Integration tests (in that order) then it is definitely best to write those instead of a functional test.
-
-## Migrating from FTR to Scout [ftr-migration]
-
-Scout provides equivalent capabilities for most FTR use cases:
-
-| FTR concept                | Scout equivalent                                 |
-| -------------------------- | ------------------------------------------------ |
-| `getService('supertest')`  | `apiClient` fixture                              |
-| `getService('security')`   | `samlAuth` / `apiKey` auth options               |
-| `getService('esArchiver')` | Data setup in `global.setup.ts` via API services |
-| Page object pattern        | [Scout page objects](./page-objects.md)          |
-| Browser interaction        | Playwright `page` fixture                        |
-
-Start with [Set up Scout in your plugin](./setup-scout.md) to add Scout alongside your existing FTR tests.
