@@ -266,7 +266,7 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
       "tags": ["security", "alert-triage"],
       "ciLabels": ["evals:security-alert-triage"],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_security_alert_triage"
     },
     {
       "id": "siem-readiness",

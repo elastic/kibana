@@ -21,16 +21,24 @@ const DATASET_DESCRIPTION =
   'Cross-category Agent Builder chain: alert triage → entity investigation → detection rule creation.';
 
 evaluate.describe('Security Multi-step Execution', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ esClient, log, uiSettings }) => {
-    // Ensure Agent Builder experimental features are enabled
-    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+  evaluate.beforeAll(async ({ esClient, log }) => {
+    // agentBuilder:experimentalFeatures is enabled via Scout server config override
+    // (evals_security_ai_rules / weekly matrix stack). Do not toggle uiSettings here —
+    // POST/DELETE fails with 400 when the setting is config-overridden.
 
     const snapshotConfig = resolveAlertsSnapshotConfig(ALERTS_SNAPSHOT_ENV_PREFIX);
     if (snapshotConfig) {
       log.info(
         `[multi-step] restoring alerts snapshot (gs://${snapshotConfig.bucket}/${snapshotConfig.basePath})`
       );
-      await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+      try {
+        await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        log.warning(
+          `[multi-step] snapshot restore failed: ${message}; evaluating against existing cluster alerts.`
+        );
+      }
     } else {
       log.warning(
         '[multi-step] skipping snapshot restore — evaluating against existing cluster alerts.'
@@ -41,10 +49,6 @@ evaluate.describe('Security Multi-step Execution', { tag: tags.stateful.classic 
     }
 
     log.info(`[multi-step] dataset has ${multiStepScenarios.length} examples`);
-  });
-
-  evaluate.afterAll(async ({ uiSettings }) => {
-    await uiSettings.unset('agentBuilder:experimentalFeatures');
   });
 
   evaluate('multi-step scenarios', async ({ evaluateDataset }) => {

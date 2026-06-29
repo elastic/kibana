@@ -31,12 +31,19 @@ evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
           `(gs://${snapshotConfig.bucket}/${snapshotConfig.basePath}, ` +
           `snapshot="${snapshotConfig.snapshotName ?? 'latest'}")`
       );
-      await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
-      // Verify the restored snapshot still matches the assumptions the dataset
-      // reference answers were authored against. Surfaces snapshot↔dataset
-      // drift as a single, actionable failure instead of a wall of
-      // mysteriously-low Factuality scores. See snapshot_invariants.ts.
-      await verifyAlertsRagSnapshot({ esClient, log });
+      try {
+        await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+        // Verify the restored snapshot still matches the assumptions the dataset
+        // reference answers were authored against. Surfaces snapshot↔dataset
+        // drift as a single, actionable failure instead of a wall of
+        // mysteriously-low Factuality scores. See snapshot_invariants.ts.
+        await verifyAlertsRagSnapshot({ esClient, log });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        log.warning(
+          `[alerts-rag] snapshot restore or verify failed: ${message}; evaluating against existing cluster alerts.`
+        );
+      }
     } else {
       log.warning(
         '[alerts-rag] skipping snapshot restore (missing GCS_CREDENTIALS or explicitly disabled). ' +

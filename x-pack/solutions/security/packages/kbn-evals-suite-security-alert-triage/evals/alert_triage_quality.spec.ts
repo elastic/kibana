@@ -11,8 +11,9 @@
  * Three scenarios:
  *   1. Priority triage (inline mode, 100 alerts / 5 batches ≤ threshold):
  *      LLM sees all data directly; tests severity prioritisation.
- *   2. Entity correlation (inline mode, 100 alerts / 5 batches):
- *      Tests whether the LLM spots the host targeted by multiple alerts.
+ *   2. Entity correlation (Entity Store V2, 8 alerts):
+ *      Seeds host:web-server-01 in Entity Store V2; tests alert triage plus
+ *      entity-analytics profile lookup for the repeatedly targeted host.
  *   3. End-to-end / summary mode (200 alerts / 10 batches > threshold):
  *      Uses both alert groups so attachment_read is required before
  *      the LLM can reason over the data. Covers the full shipped path:
@@ -42,9 +43,14 @@ import { evaluate as base } from '../src/evaluate';
 import { callConverse } from '../src/converse_task';
 import { attachmentReadCompliance } from '../src/evaluators';
 import {
+  installEntityStoreV2,
+  seedWebServer01Entity,
+  teardownEntityStoreV2,
+} from '../src/entity_store_v2_setup';
+import {
   ALL_TRIAGE_EVAL_ALERTS,
   ALL_TRIAGE_EVAL_IDS,
-  ENTITY_CORRELATION_IDS,
+  ENTITY_CORRELATION_V2_IDS,
   PRIORITY_TRIAGE_IDS,
 } from '../src/synthetic_alerts';
 
@@ -84,6 +90,7 @@ function createEvaluateTriageQuality({
   executorClient,
   traceEsClient,
   log,
+  skillNames = ['alert-analysis'],
 }: {
   fetch: HttpHandler;
   connector: { id: string };
@@ -91,6 +98,7 @@ function createEvaluateTriageQuality({
   executorClient: EvalsExecutorClient;
   traceEsClient: TraceEsClient;
   log: ToolingLog;
+  skillNames?: string[];
 }) {
   return async function evaluateTriageQuality({
     dataset,
@@ -102,11 +110,13 @@ function createEvaluateTriageQuality({
     const selectedEvaluators = selectEvaluators([
       evaluators.criteria(criteria),
       attachmentReadCompliance,
-      createSkillInvocationEvaluator({
-        traceEsClient,
-        log,
-        skillName: 'alert-analysis',
-      }),
+      ...skillNames.map((skillName) =>
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName,
+        })
+      ),
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
@@ -139,7 +149,13 @@ function createEvaluateTriageQuality({
 
 type EvaluateTriageQuality = ReturnType<typeof createEvaluateTriageQuality>;
 
-const evaluate = base.extend<{ evaluateTriageQuality: EvaluateTriageQuality }, {}>({
+const evaluate = base.extend<
+  {
+    evaluateTriageQuality: EvaluateTriageQuality;
+    evaluateEntityCorrelationQuality: EvaluateTriageQuality;
+  },
+  {}
+>({
   evaluateTriageQuality: [
     ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
@@ -155,6 +171,22 @@ const evaluate = base.extend<{ evaluateTriageQuality: EvaluateTriageQuality }, {
     },
     { scope: 'test' },
   ],
+  evaluateEntityCorrelationQuality: [
+    ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
+      use(
+        createEvaluateTriageQuality({
+          fetch,
+          connector,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+          skillNames: ['alert-analysis', 'entity-analytics'],
+        })
+      );
+    },
+    { scope: 'test' },
+  ],
 });
 
 // ── Eval spec ─────────────────────────────────────────────────────────────────
@@ -163,40 +195,65 @@ evaluate.describe(
   'Security Alert Triage — output quality',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate.beforeAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
-      log.info(
-        `Indexing ${ALL_TRIAGE_EVAL_ALERTS.length} synthetic triage eval alerts into ${ALERTS_INDEX}`
-      );
-
-      const response = await esClient.bulk({
-        refresh: 'wait_for',
-        operations: ALL_TRIAGE_EVAL_ALERTS.flatMap(({ id, doc }) => [
-          { index: { _index: ALERTS_INDEX, _id: id } },
-          doc,
-        ]),
-      });
-
-      if (response.errors) {
-        const failed = response.items.filter((item) => item.index?.error);
-        throw new Error(
-          `Failed to set up triage eval alerts: ${JSON.stringify(
-            failed.map((f) => f.index?.error)
-          )}`
+    evaluate.beforeAll(
+      async ({
+        esClient,
+        log,
+        supertest: supertestAgent,
+      }: {
+        esClient: EsClient;
+        log: ToolingLog;
+        supertest: import('supertest').Agent;
+      }) => {
+        log.info(
+          `Indexing ${ALL_TRIAGE_EVAL_ALERTS.length} synthetic triage eval alerts into ${ALERTS_INDEX}`
         );
+
+        const response = await esClient.bulk({
+          refresh: 'wait_for',
+          operations: ALL_TRIAGE_EVAL_ALERTS.flatMap(({ id, doc }) => [
+            { index: { _index: ALERTS_INDEX, _id: id } },
+            doc,
+          ]),
+        });
+
+        if (response.errors) {
+          const failed = response.items.filter((item) => item.index?.error);
+          throw new Error(
+            `Failed to set up triage eval alerts: ${JSON.stringify(
+              failed.map((f) => f.index?.error)
+            )}`
+          );
+        }
+
+        log.info(`Successfully indexed ${ALL_TRIAGE_EVAL_ALERTS.length} synthetic alerts`);
+
+        await installEntityStoreV2({ supertest: supertestAgent, log });
+        await seedWebServer01Entity({ esClient, log });
       }
+    );
 
-      log.info(`Successfully indexed ${ALL_TRIAGE_EVAL_ALERTS.length} synthetic alerts`);
-    });
+    evaluate.afterAll(
+      async ({
+        esClient,
+        log,
+        quickApiClient,
+      }: {
+        esClient: EsClient;
+        log: ToolingLog;
+        quickApiClient: import('@kbn/security-solution-plugin/common/api/quickstart_client.gen').Client;
+      }) => {
+        const idsToDelete = ALL_TRIAGE_EVAL_ALERTS.map((alert) => alert.id);
+        log.info(`Deleting ${idsToDelete.length} synthetic triage eval alerts`);
 
-    evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
-      const idsToDelete = ALL_TRIAGE_EVAL_ALERTS.map((alert) => alert.id);
-      log.info(`Deleting ${idsToDelete.length} synthetic triage eval alerts`);
+        await esClient.deleteByQuery({
+          index: ALERTS_INDEX,
+          query: { ids: { values: idsToDelete } },
+        });
 
-      await esClient.deleteByQuery({
-        index: ALERTS_INDEX,
-        query: { ids: { values: idsToDelete } },
-      });
-    });
+        await teardownEntityStoreV2({ quickApiClient, log });
+      }
+    );
 
     evaluate(
       'Priority triage — structured output with severity prioritisation',
@@ -240,29 +297,29 @@ evaluate.describe(
 
     evaluate(
       'Entity correlation — identifies a host targeted by multiple alerts',
-      async ({ evaluateTriageQuality }) => {
-        await evaluateTriageQuality({
+      async ({ evaluateEntityCorrelationQuality }) => {
+        await evaluateEntityCorrelationQuality({
           dataset: {
             name: 'agent builder: security-alert-triage-entity-correlation',
             description:
-              'Tests that the LLM identifies the host appearing in 4 of 8 alerts (web-server-01) ' +
-              'as a correlated or higher-risk target. The 4 web-server-01 alerts show a clear ' +
-              'attack progression: SQL injection → web shell → reverse shell → privilege escalation.',
+              'Entity Store V2 path: 8 alerts (4 on web-server-01) plus a seeded host entity. ' +
+              'Tests alert triage correlation and entity-analytics profile lookup via security.get_entity.',
             examples: [
               {
                 input: {
                   question:
-                    'Review these security alerts. Are any hosts or users targeted ' +
-                    'repeatedly? What does that pattern suggest about the threat?',
+                    'Review these security alerts. Identify any host targeted repeatedly, then use ' +
+                    'the entity analytics skill to retrieve the Entity Store V2 profile for the most ' +
+                    'targeted host and assess whether the alert pattern indicates an active intrusion.',
                 },
                 output: {
                   expected:
-                    'The response identifies web-server-01 as the host appearing in multiple alerts ' +
-                    'and flags the sequence of alerts as evidence of an active intrusion or attack ' +
-                    'progression on that host, recommending immediate investigation or containment.',
+                    'The response identifies web-server-01 as the repeatedly targeted host, calls ' +
+                    'security.get_entity for its Entity Store profile, and recommends immediate ' +
+                    'investigation or containment based on the correlated alerts and entity risk.',
                 },
                 metadata: {
-                  attachments: toAlertAttachments(ENTITY_CORRELATION_IDS),
+                  attachments: toAlertAttachments(ENTITY_CORRELATION_V2_IDS),
                 },
               },
             ],
@@ -270,8 +327,9 @@ evaluate.describe(
           criteria: [
             'The response identifies that one specific host appears in multiple alerts',
             'The response names web-server-01 as the repeatedly targeted host',
-            'The response treats the repeated targeting of a single host as a higher-risk indicator than the single-alert hosts',
-            'The response does not reference any hostname, username, or rule name that is not present in the attached alert data',
+            'The response references Entity Store / entity analytics data for web-server-01 (profile, risk, or asset criticality)',
+            'The response treats the repeated targeting of a single host as a higher-risk indicator than single-alert hosts',
+            'The response does not reference any hostname, username, or rule name that is not present in the attached alert data or entity store seed',
           ],
         });
       }

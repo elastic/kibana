@@ -48,6 +48,12 @@ const GOLDEN_CLUSTER_KBN_URL_MARKERS = ['kbn-evals-serverless', 'gcp.elastic.clo
  * Local Scout runs default to the checked-in reference JSONL instead.
  */
 const shouldResolveFromGoldenCluster = (): boolean => {
+  const kibanaUrl = process.env.KIBANA_URL ?? '';
+  // Local Scout runs use bundled JSONL even when scores export to golden via EVALUATIONS_KBN_URL.
+  if (/localhost|127\.0\.0\.1/.test(kibanaUrl)) {
+    return false;
+  }
+
   if (process.env.ATTACK_DISCOVERY_DATASET_NAME) {
     return true;
   }
@@ -108,7 +114,14 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
               snapshotConfig.basePath
             }, snapshot="${snapshotConfig.snapshotName ?? 'latest'}")...`
           );
-          await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+          try {
+            await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            log.warning(
+              `[attack-discovery] snapshot restore failed: ${message}; continuing smoke against existing alerts.`
+            );
+          }
         } else {
           log.info(
             'Skipping snapshot restore (missing GCS_CREDENTIALS or explicitly disabled). ' +

@@ -11,12 +11,12 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 
 /**
- * Scout stateful config for security-ai-rules evals (Track A + Track B routing).
- * Enables find-security-rules skill registration (`dexAiSkillFindRules`) and
- * Agent Builder experimental UI features used by the routing spec.
+ * Scout stateful config for security-alert-triage evals.
+ * Enables OTLP tracing export, Agent Builder experimental features, and Entity Store V2
+ * (entity-analytics skill with security.get_entity / security.search_entities).
  *
  * Usage:
- *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_security_ai_rules
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_security_alert_triage
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -24,13 +24,12 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
+      '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      `--uiSettings.overrides.securitySolution:entityStoreEnableV2=true`,
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'aiRuleCreationEnabled',
-        'dexAiSkillFindRules',
         'entityAnalyticsEntityStoreV2',
       ])}`,
-      `--uiSettings.overrides.securitySolution:entityStoreEnableV2=true`,
     ],
   },
 };
