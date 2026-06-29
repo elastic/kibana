@@ -113,6 +113,7 @@ const getProps = (): UnifiedDataTableProps => {
       storage: services.storage as unknown as Storage,
       data: services.data,
       theme: services.theme,
+      uiActions: services.uiActions,
     },
     setExpandedDoc: jest.fn(),
     settings: {},

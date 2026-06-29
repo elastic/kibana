@@ -24,6 +24,7 @@
       "triggersActionsUi",
       "ruleRegistry",
       "security",
+      "uiActions",
       "unifiedDocViewer"
     ],
     "optionalPlugins": [
@@ -33,7 +34,6 @@
       "telemetry",
       "cases",
       "spaces",
-      "uiActions",
       "unifiedSearch"
     ],
     "requiredBundles": [

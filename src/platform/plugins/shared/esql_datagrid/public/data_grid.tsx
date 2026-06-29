@@ -29,11 +29,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDataGridProps {
   core: CoreStart;
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   share?: SharePluginStart;
   rows: ESQLRow[];
@@ -128,6 +130,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       toastNotifications: props.core.notifications.toasts,
       fieldFormats: props.fieldFormats,
       storage,
+      uiActions: props.uiActions,
     };
   }, [
     props.core.notifications.toasts,
@@ -135,6 +138,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.core.uiSettings,
     props.data,
     props.fieldFormats,
+    props.uiActions,
   ]);
 
   const discoverLocator = useMemo(() => {

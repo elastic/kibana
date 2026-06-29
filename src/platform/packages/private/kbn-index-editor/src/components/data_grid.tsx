@@ -71,6 +71,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       indexUpdateService,
       indexEditorTelemetryService,
       storage,
+      uiActions,
     },
   } = useKibana<KibanaContextExtra>();
 
@@ -133,8 +134,18 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       dataViewFieldEditor,
       fieldFormats,
       storage,
+      uiActions,
     };
-  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
+  }, [
+    data,
+    theme,
+    uiSettings,
+    notifications?.toasts,
+    dataViewFieldEditor,
+    fieldFormats,
+    storage,
+    uiActions,
+  ]);
 
   const onValueChange = useCallback(
     (docId: string, update: any) => {

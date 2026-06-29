@@ -91,6 +91,11 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/licensing-types'
   - '@kbn/unified-data-table'
+  - '@kbn/esql-utils'
+  - '@kbn/esql'
+  - '@kbn/discover-utils'
+  - '@kbn/css-utils'
+  - '@kbn/presentation-publishing-schemas'
   - '@kbn/cps'
   - '@kbn/zod'
 tags:
