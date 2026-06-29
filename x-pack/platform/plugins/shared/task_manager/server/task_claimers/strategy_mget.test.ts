@@ -418,6 +418,7 @@ describe('TaskClaiming', () => {
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
         size: 40,
         seq_no_primary_term: true,
+        _source: { excludes: ['task.state', 'task.params'] },
       });
       expect(store.getDocVersions).toHaveBeenCalledWith([
         'task:id-1',

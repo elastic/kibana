@@ -96,6 +96,7 @@ export interface SearchOpts {
   sort?: estypes.Sort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
+  _source?: estypes.SearchSourceConfig;
 }
 
 export interface AggregationOpts {
@@ -1114,11 +1115,10 @@ export class TaskStore {
       allTasks = allTasks.concat(this.filterTasks(tasks));
     }
 
+    // API keys are intentionally not decrypted here; the claimer only decrypts the tasks
+    // it claims, via bulkGet. See strategy_mget.ts.
     const allSortedTasks = claimSort(this.definitions, allTasks);
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-      allSortedTasks
-    );
-    return { docs: tasksWithDecryptedApiKeys, versionMap };
+    return { docs: allSortedTasks, versionMap };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {

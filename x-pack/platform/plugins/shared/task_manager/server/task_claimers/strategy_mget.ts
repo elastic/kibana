@@ -12,6 +12,7 @@
 // - if the mget result doesn't match the search result, the task is stale
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
+// - only the claimed tasks are re-fetched in full (params, state, decrypted API keys) via bulkGet
 
 import type { Logger } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
@@ -67,6 +68,9 @@ interface OwnershipClaimingOpts {
 }
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
+
+// params and state are unbounded and only needed for claimed tasks, which bulkGet re-fetches in full
+const CLAIM_SEARCH_SOURCE_EXCLUDES = ['task.state', 'task.params'];
 
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
@@ -343,6 +347,7 @@ async function searchAvailableTasks({
       sort, // note: we could optimize this to not sort on priority, for this case
       size,
       seq_no_primary_term: true,
+      _source: { excludes: CLAIM_SEARCH_SOURCE_EXCLUDES },
     });
   }
 
@@ -370,6 +375,7 @@ async function searchAvailableTasks({
       sort,
       size: capacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
       seq_no_primary_term: true,
+      _source: { excludes: CLAIM_SEARCH_SOURCE_EXCLUDES },
     });
   }
 
