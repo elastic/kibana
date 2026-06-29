@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 import { MAX_ID_LENGTH } from '../../constants';
 import { asCodePaginationParamsSchema } from '../pagination';
 import { MAX_TAG_C0UNT } from '../tags/schema';
+
+type PaginationParamsSchema = ReturnType<typeof asCodePaginationParamsSchema.getPropSchemas>;
+type PartialPaginationParamsSchema = {
+  [K in keyof PaginationParamsSchema]: Type<TypeOf<PaginationParamsSchema[K]> | undefined>;
+};
 
 export const asCodeSearchRequestSchema = schema.object({
   query: schema.maybe(
@@ -50,5 +55,11 @@ export const asCodeSearchRequestSchema = schema.object({
       }
     )
   ),
-  ...asCodePaginationParamsSchema.getPropSchemas(),
+  ...(Object.entries(asCodePaginationParamsSchema.getPropSchemas()).reduce(
+    (prev, [key, prop]) => ({
+      ...prev,
+      [key]: schema.maybe(prop),
+    }),
+    {}
+  ) as PartialPaginationParamsSchema),
 });
