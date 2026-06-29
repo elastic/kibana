@@ -71,7 +71,10 @@ describe('Region Policy Routes', () => {
     });
 
     it('propagates a 404 when no policy is configured', async () => {
-      const error = Object.assign(new Error('Not Found'), { statusCode: 404, message: 'Not Found' });
+      const error = Object.assign(new Error('Not Found'), {
+        statusCode: 404,
+        message: 'Not Found',
+      });
       mockEsClient.transport.request.mockRejectedValue(error);
 
       await mockRouter.callRoute({});
@@ -179,7 +182,10 @@ describe('Region Policy Routes', () => {
     });
 
     it('propagates a 404 when no policy exists to delete', async () => {
-      const error = Object.assign(new Error('Not Found'), { statusCode: 404, message: 'Not Found' });
+      const error = Object.assign(new Error('Not Found'), {
+        statusCode: 404,
+        message: 'Not Found',
+      });
       mockEsClient.transport.request.mockRejectedValue(error);
 
       await mockRouter.callRoute({});

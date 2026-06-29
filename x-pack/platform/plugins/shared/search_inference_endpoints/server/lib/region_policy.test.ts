@@ -53,7 +53,11 @@ describe('region_policy lib', () => {
         allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }],
         fallback_region: { csp: 'aws', region: 'us-east-1' },
       };
-      const response = { region_policy: body, created_at: '2026-01-10T11:23:00Z', updated_at: '2026-01-10T11:23:00Z' };
+      const response = {
+        region_policy: body,
+        created_at: '2026-01-10T11:23:00Z',
+        updated_at: '2026-01-10T11:23:00Z',
+      };
       mockClient.transport.request.mockResolvedValue(response);
 
       const result = await putRegionPolicy(mockClient, body);
