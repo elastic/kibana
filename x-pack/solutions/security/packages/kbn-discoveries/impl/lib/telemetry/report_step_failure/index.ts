@@ -7,21 +7,124 @@
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
-// Stub: the real step-failure telemetry reporter (EBT event) is added by the
-// Telemetry PR (PR5) alongside the rest of the event-based-telemetry wiring.
-// PR4's manual orchestration (run_manual_orchestration) calls this reporter
-// when a pipeline step fails, so it must exist here to type-check. This no-op
-// is FF-off safe: the orchestration path is only reached when the feature flag
-// is ON, and reporting telemetry has no production impact when the FF is OFF.
+import { AttackDiscoveryError } from '../../errors/attack_discovery_error';
+import {
+  ATTACK_DISCOVERY_STEP_FAILURE_EVENT,
+  type ErrorCategory,
+  type StepFailureStep,
+} from '../event_based_telemetry';
+
 interface ReportStepFailureParams {
-  analytics?: AnalyticsServiceSetup;
-  logger: Logger;
-  params: Record<string, unknown>;
+  duration_ms?: number;
+  error_category: ErrorCategory;
+  execution_uuid?: string;
+  step: StepFailureStep;
+  workflow_id?: string;
 }
 
-export const reportStepFailure = (_args: ReportStepFailureParams): void => {};
+const includesAny = (lower: string, needles: readonly string[]): boolean =>
+  needles.some((needle) => lower.includes(needle));
 
-// Stub: the real error-category classifier is added by the Telemetry PR (PR5).
-// PR4's manual orchestration calls it to tag step-failure telemetry, so it must
-// exist here to type-check. FF-off safe: only reached when the FF is ON.
-export const classifyErrorCategory = (_error: unknown): string => 'unknown';
+/**
+ * Ordered failure-category rules. More-specific patterns are listed before
+ * generic ones so that, e.g., "Workflow 'x' is not valid" maps to
+ * `workflow_invalid` rather than the generic `workflow_error` bucket.
+ */
+const CATEGORY_RULES: ReadonlyArray<{
+  category: ErrorCategory;
+  test: (lower: string) => boolean;
+}> = [
+  {
+    category: 'timeout',
+    test: (l) => includesAny(l, ['timeout', 'timed out', 'budget exceeded']),
+  },
+  {
+    category: 'rate_limit',
+    test: (l) => includesAny(l, ['429', 'rate limit', 'too many requests']),
+  },
+  // Interrupted runs (server restart/crash/shutdown mid-execution) — checked before
+  // the generic `workflow_error` catch-all so "prior run was interrupted" is not
+  // bucketed as a generic workflow error.
+  { category: 'interrupted', test: (l) => l.includes('interrupted') },
+  {
+    category: 'network_error',
+    test: (l) =>
+      includesAny(l, ['econnrefused', 'enotfound', 'socket hang up', 'fetch failed', 'etimedout']),
+  },
+  {
+    category: 'permission_error',
+    test: (l) =>
+      includesAny(l, [
+        'forbidden',
+        '403',
+        'unauthorized',
+        '401',
+        'insufficient privileges',
+        'security_exception',
+      ]),
+  },
+  {
+    category: 'concurrent_conflict',
+    test: (l) => includesAny(l, ['409', 'version_conflict', 'conflict', 'was cancelled']),
+  },
+  {
+    category: 'cluster_health',
+    test: (l) =>
+      includesAny(l, [
+        'no_shard_available',
+        'cluster_block',
+        'circuit_breaking_exception',
+        'es_rejected_execution',
+      ]),
+  },
+  { category: 'connector_error', test: (l) => l.includes('connector') },
+  { category: 'anonymization_error', test: (l) => l.includes('anonymization') },
+  {
+    category: 'step_registration_error',
+    test: (l) => includesAny(l, ['not registered', 'unknown step', 'step type']),
+  },
+  { category: 'workflow_disabled', test: (l) => includesAny(l, ['is not enabled', 'is disabled']) },
+  { category: 'workflow_deleted', test: (l) => l.includes('not found') && l.includes('workflow') },
+  {
+    category: 'workflow_invalid',
+    test: (l) =>
+      includesAny(l, [
+        'is not valid',
+        'missing a definition',
+        'has no definition',
+        'no step definitions',
+      ]),
+  },
+  { category: 'validation_error', test: (l) => l.includes('validat') },
+  { category: 'workflow_error', test: (l) => l.includes('workflow') },
+];
+
+export const classifyErrorCategory = (error: unknown): ErrorCategory => {
+  if (error instanceof AttackDiscoveryError) {
+    return error.errorCategory;
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  const lower = message.toLowerCase();
+
+  return CATEGORY_RULES.find(({ test }) => test(lower))?.category ?? 'unknown';
+};
+
+export const reportStepFailure = ({
+  analytics,
+  logger,
+  params,
+}: {
+  analytics: AnalyticsServiceSetup;
+  logger: Logger;
+  params: ReportStepFailureParams;
+}): void => {
+  try {
+    analytics.reportEvent(ATTACK_DISCOVERY_STEP_FAILURE_EVENT.eventType, params);
+  } catch (error) {
+    logger.debug(
+      () =>
+        `Failed to report ${ATTACK_DISCOVERY_STEP_FAILURE_EVENT.eventType} telemetry: ${error.message}`
+    );
+  }
+};

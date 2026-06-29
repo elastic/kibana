@@ -156,6 +156,37 @@ describe('helpers', () => {
       });
     });
 
+    it('should forward duplicatesDroppedCount to the telemetry event', () => {
+      reportAttackDiscoverySuccessTelemetry({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        duplicatesDroppedCount: 5,
+        hasFilter: false,
+        end: 'now',
+        latestReplacements: mockReplacements,
+        logger: mockLogger,
+        size: 10,
+        start: 'now-24h',
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 18,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 2,
+        duplicatesDroppedCount: 5,
+        durationMs: 0,
+        hasFilter: false,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
+      });
+    });
+
     it('calls logger.error when reporting telemetry throws', () => {
       (reportAttackDiscoveryGenerationSuccess as jest.Mock).mockImplementation(() => {
         throw new Error('simulated error');
