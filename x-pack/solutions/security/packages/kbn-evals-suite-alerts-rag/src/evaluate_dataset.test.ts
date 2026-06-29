@@ -219,7 +219,11 @@ describe('createAlertsRagTrajectoryEvaluator', () => {
 });
 
 describe('createAlertsRagExpectedToolCalledEvaluator', () => {
-  type TestStep = { type?: string; tool_id?: string; params?: Record<string, unknown> };
+  interface TestStep {
+    type?: string;
+    tool_id?: string;
+    params?: Record<string, unknown>;
+  }
   const buildArgs = (expected: AlertsRagDatasetExample['output'], steps: TestStep[]) => ({
     input: { question: 'q' },
     expected,

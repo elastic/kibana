@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/agent-builder-common'
   - '@kbn/core'
+  - '@kbn/entity-store'
 tags:
   - functional-tests
   - package

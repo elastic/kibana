@@ -237,11 +237,11 @@ evaluate.describe(
       async ({
         esClient,
         log,
-        quickApiClient,
+        supertest: supertestAgent,
       }: {
         esClient: EsClient;
         log: ToolingLog;
-        quickApiClient: import('@kbn/security-solution-plugin/common/api/quickstart_client.gen').Client;
+        supertest: import('supertest').Agent;
       }) => {
         const idsToDelete = ALL_TRIAGE_EVAL_ALERTS.map((alert) => alert.id);
         log.info(`Deleting ${idsToDelete.length} synthetic triage eval alerts`);
@@ -251,7 +251,7 @@ evaluate.describe(
           query: { ids: { values: idsToDelete } },
         });
 
-        await teardownEntityStoreV2({ quickApiClient, log });
+        await teardownEntityStoreV2({ supertest: supertestAgent, log });
       }
     );
 

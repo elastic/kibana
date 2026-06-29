@@ -10,7 +10,6 @@ import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type supertest from 'supertest';
-import type { Client as QuickstartClient } from '@kbn/security-solution-plugin/common/api/quickstart_client.gen';
 
 export const WEB_SERVER_01_EUID = 'host:web-server-01';
 
@@ -87,14 +86,25 @@ export async function seedWebServer01Entity({
 }
 
 export async function teardownEntityStoreV2({
-  quickApiClient,
+  supertest: agent,
   log,
 }: {
-  quickApiClient: QuickstartClient;
+  supertest: supertest.Agent;
   log: ToolingLog;
 }): Promise<void> {
   try {
-    await quickApiClient.deleteEntityEngines({ query: { delete_data: true } });
+    const res = await agent
+      .delete('/api/entity_store/engines')
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .query({ delete_data: true });
+
+    if (res.status >= 400) {
+      log.warning(
+        `deleteEntityEngines failed during teardown (${res.status}): ${JSON.stringify(res.body)}`
+      );
+    }
   } catch (err) {
     log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
   }
