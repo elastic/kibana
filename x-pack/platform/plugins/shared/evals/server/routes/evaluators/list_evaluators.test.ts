@@ -25,7 +25,7 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Groundedness evaluator',
-        supportedInputs: ['trace', 'direct_context'],
+        supportedInputs: ['trace', 'reference_data'],
         evaluate: jest.fn(),
       },
       {
@@ -109,7 +109,7 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
-      supported_inputs: ['trace', 'direct_context'],
+      supported_inputs: ['trace', 'reference_data'],
     });
   });
 

@@ -16,12 +16,12 @@ import {
 import type { Evaluator, EvaluatorParams, Example, TaskOutput } from '../types';
 
 export type MapContextFn<TOutput = TaskOutput> = (params: EvaluatorParams<Example, TOutput>) => {
-  trace_id?: string;
-  context?: Record<string, unknown>;
+  trace_id: string;
+  reference_data?: Record<string, unknown>;
 };
 
 const defaultMapContext: MapContextFn = ({ output }) => ({
-  trace_id: (output as Record<string, unknown>)?.traceId as string | undefined,
+  trace_id: (output as Record<string, unknown>)?.traceId as string,
 });
 
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };

@@ -24,7 +24,7 @@ export const ListEvaluatorsResponse = lazySchema(() =>
         version: z.string(),
         kind: z.enum(['llm', 'code']),
         description: z.string(),
-        supported_inputs: z.array(z.enum(['trace', 'direct_context'])),
+        supported_inputs: z.array(z.enum(['trace', 'reference_data'])),
       })
     ),
   })

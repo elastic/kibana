@@ -38,13 +38,6 @@ export const groundednessEvaluator: EvaluatorDefinition = {
       };
     }
 
-    if (!trace) {
-      return {
-        label: 'error',
-        explanation: 'Trace is required for groundedness evaluator',
-      };
-    }
-
     let evidence;
     try {
       evidence = await extractGroundednessEvidence(trace, log);

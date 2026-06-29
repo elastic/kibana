@@ -27,8 +27,8 @@ export type ExecuteEvaluatorRequestParamsInput = z.input<typeof ExecuteEvaluator
 export const ExecuteEvaluatorRequestBody = lazySchema(() =>
   z.object({
     connector_id: z.string().optional(),
-    trace_id: z.string().optional(),
-    context: z.object({}).catchall(z.unknown()).optional(),
+    trace_id: z.string(),
+    reference_data: z.object({}).catchall(z.unknown()).optional(),
   })
 );
 export type ExecuteEvaluatorRequestBody = z.infer<typeof ExecuteEvaluatorRequestBody>;

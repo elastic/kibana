@@ -23,7 +23,7 @@ describe('POST /internal/evals/evaluators/{evaluatorName}/_evaluate', () => {
     version: '1.0.0',
     kind: 'llm',
     description: 'Groundedness evaluator',
-    supportedInputs: ['trace', 'direct_context'],
+    supportedInputs: ['trace', 'reference_data'],
     evaluate: jest.fn().mockResolvedValue({
       score: 1,
       label: 'GROUNDED',
@@ -158,7 +158,7 @@ describe('POST /internal/evals/evaluators/{evaluatorName}/_evaluate', () => {
         body: {
           connector_id: 'connector-123',
           trace_id: 'trace-123',
-          context: { question: 'status?' },
+          reference_data: { question: 'status?' },
         },
       } as unknown as Parameters<typeof handler>[1],
       kibanaResponseFactory
@@ -170,7 +170,7 @@ describe('POST /internal/evals/evaluators/{evaluatorName}/_evaluate', () => {
     });
     expect(evaluate).toHaveBeenCalledWith({
       trace: expect.objectContaining({ traceId: 'trace-123' }),
-      context: { question: 'status?' },
+      referenceData: { question: 'status?' },
       inferenceClient: expect.any(Object),
       log: logger,
     });

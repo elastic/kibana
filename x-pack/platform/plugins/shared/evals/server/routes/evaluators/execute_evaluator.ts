@@ -56,7 +56,7 @@ export const registerExecuteEvaluatorRoute = ({
         const {
           connector_id: connectorId,
           trace_id: traceId,
-          context: evaluatorContext,
+          reference_data: referenceData,
         } = request.body;
         const definition = evaluatorRegistry.get(evaluatorName);
 
@@ -90,16 +90,14 @@ export const registerExecuteEvaluatorRoute = ({
           }
 
           const coreContext = await context.core;
-          const traceAccessor = traceId
-            ? createTraceAccessor({
-                traceId,
-                esClient: coreContext.elasticsearch.client.asInternalUser,
-              })
-            : undefined;
+          const traceAccessor = createTraceAccessor({
+            traceId,
+            esClient: coreContext.elasticsearch.client.asInternalUser,
+          });
 
           const result = await definition.evaluate({
             trace: traceAccessor,
-            context: evaluatorContext,
+            referenceData,
             inferenceClient,
             log: logger,
           });

@@ -15,8 +15,8 @@ export interface TraceAccessor {
 }
 
 export interface EvaluatorContext {
-  trace?: TraceAccessor;
-  context?: Record<string, unknown>;
+  trace: TraceAccessor;
+  referenceData?: Record<string, unknown>;
   inferenceClient?: BoundInferenceClient;
   log: Logger;
 }
@@ -33,7 +33,7 @@ export interface EvaluatorDefinition {
   version: string;
   kind: 'llm' | 'code';
   description: string;
-  supportedInputs: Array<'trace' | 'direct_context'>;
+  supportedInputs: Array<'trace' | 'reference_data'>;
   evaluate(ctx: EvaluatorContext): Promise<EvaluatorResult>;
 }
 

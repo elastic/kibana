@@ -96,10 +96,6 @@ export const latencyEvaluatorDef: EvaluatorDefinition = {
   description: 'Returns total trace latency in seconds.',
   supportedInputs: ['trace'],
   async evaluate({ trace, log }) {
-    if (!trace) {
-      return UNAVAILABLE_RESULT;
-    }
-
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
 | WHERE trace.id == "${accessor.traceId}"
@@ -125,10 +121,6 @@ export const inputTokensEvaluatorDef: EvaluatorDefinition = {
   description: 'Returns summed prompt/input token usage across the trace.',
   supportedInputs: ['trace'],
   async evaluate({ trace, log }) {
-    if (!trace) {
-      return UNAVAILABLE_RESULT;
-    }
-
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
 | WHERE trace.id == "${accessor.traceId}"
@@ -153,10 +145,6 @@ export const outputTokensEvaluatorDef: EvaluatorDefinition = {
   description: 'Returns summed completion/output token usage across the trace.',
   supportedInputs: ['trace'],
   async evaluate({ trace, log }) {
-    if (!trace) {
-      return UNAVAILABLE_RESULT;
-    }
-
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
 | WHERE trace.id == "${accessor.traceId}"
@@ -181,10 +169,6 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
   description: 'Returns count of TOOL spans associated with the trace.',
   supportedInputs: ['trace'],
   async evaluate({ trace, log }) {
-    if (!trace) {
-      return UNAVAILABLE_RESULT;
-    }
-
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
 | WHERE trace.id == "${accessor.traceId}" AND attributes.elastic.inference.span.kind == "TOOL"
