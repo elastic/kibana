@@ -54,8 +54,12 @@ const MAX_DOCUMENTS_TO_LOAD = 50;
  * or the legacy expandable flyout). This component does not open any flyout itself.
  */
 interface GraphNodeCallbacks {
-  /** Open a single document (event or alert) preview. */
-  onShowDocument: (id: string, indexName?: string) => void;
+  /**
+   * Open a single document (event or alert) preview. The optional `isEvent` lets banner-aware
+   * consumers pick the banner; consumers that don't need it (e.g. the flyout v2 system flyout,
+   * which opens the full document view) simply omit the parameter.
+   */
+  onShowDocument: (id: string, indexName?: string, isEvent?: boolean) => void;
   /** Open an entity (host/user/service/generic) preview. */
   onShowEntity: (params: {
     engineType: string | undefined;
@@ -153,7 +157,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
       if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
-        onShowDocument(singleDocumentData.id, singleDocumentData.index);
+        onShowDocument(singleDocumentData.id, singleDocumentData.index, docMode === 'single-event');
       } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
         onShowEntity({
           engineType: singleDocumentData.entity?.engine_type,

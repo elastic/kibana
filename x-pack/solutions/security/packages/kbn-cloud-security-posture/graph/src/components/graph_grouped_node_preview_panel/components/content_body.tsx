@@ -33,7 +33,7 @@ export interface ContentBodyProps {
    */
   scopeId: string;
   /** Invoked to open the event/alert details preview for a clicked item. */
-  onShowDocument: (docId: string, indexName?: string) => void;
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
   /** Invoked to open the entity details preview for a clicked item. */
   onShowEntity: (params: {
     engineType: string | undefined;

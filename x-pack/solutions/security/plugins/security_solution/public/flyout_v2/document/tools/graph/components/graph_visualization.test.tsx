@@ -230,7 +230,7 @@ describe('GraphVisualization', () => {
       const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
       onOpenEventPreview?.({} as never);
 
-      expect(callbacks.onShowDocument).toHaveBeenCalledWith('doc-id', 'logs-*');
+      expect(callbacks.onShowDocument).toHaveBeenCalledWith('doc-id', 'logs-*', true);
     });
 
     it('forwards onOpenNetworkPreview straight to GraphInvestigation', async () => {

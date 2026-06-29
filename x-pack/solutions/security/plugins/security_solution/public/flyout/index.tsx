@@ -21,6 +21,7 @@ import type {
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import {
+  ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from './document_details/preview/constants';
@@ -151,14 +152,14 @@ const GraphGroupedNodePreviewPanelForFlyout = (
 ) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onShowDocument = useCallback(
-    (docId: string, indexName?: string) => {
+    (docId: string, indexName?: string, isEvent?: boolean) => {
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
         params: {
           id: docId,
           indexName,
           scopeId: params.scopeId,
-          banner: EVENT_PREVIEW_BANNER,
+          banner: isEvent ? EVENT_PREVIEW_BANNER : ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });

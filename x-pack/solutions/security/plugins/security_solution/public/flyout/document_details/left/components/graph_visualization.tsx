@@ -24,7 +24,11 @@ import {
   EntityPanelKeyByType,
   GenericEntityPanelKey,
 } from '../../../entity_details/shared/constants';
-import { EVENT_PREVIEW_BANNER, GENERIC_ENTITY_PREVIEW_BANNER } from '../../preview/constants';
+import {
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+  GENERIC_ENTITY_PREVIEW_BANNER,
+} from '../../preview/constants';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 export { GRAPH_ID } from '../../../../flyout_v2/document/tools/graph/components/graph_visualization';
@@ -47,14 +51,14 @@ export const GraphVisualization: React.FC = memo(() => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onShowDocument = useCallback(
-    (id: string, indexName?: string) => {
+    (id: string, indexName?: string, isEvent?: boolean) => {
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
         params: {
           id,
           indexName,
           scopeId,
-          banner: EVENT_PREVIEW_BANNER,
+          banner: isEvent ? EVENT_PREVIEW_BANNER : ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });

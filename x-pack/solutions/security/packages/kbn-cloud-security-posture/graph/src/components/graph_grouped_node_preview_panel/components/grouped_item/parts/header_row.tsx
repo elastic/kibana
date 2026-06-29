@@ -48,7 +48,7 @@ export interface HeaderRowProps {
    */
   scopeId: string;
   /** Invoked to open the event/alert details preview for the clicked item. */
-  onShowDocument: (docId: string, indexName?: string) => void;
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
   /** Invoked to open the entity details preview for the clicked item. */
   onShowEntity: (params: {
     engineType: string | undefined;
@@ -87,7 +87,11 @@ export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: Heade
         // event or alert
         const eventOrAlertItem = item as EventItem | AlertItem;
         if (eventOrAlertItem.docId) {
-          onShowDocument(eventOrAlertItem.docId, eventOrAlertItem.index);
+          onShowDocument(
+            eventOrAlertItem.docId,
+            eventOrAlertItem.index,
+            eventOrAlertItem.itemType === DOCUMENT_TYPE_EVENT
+          );
         }
       }
     },

@@ -18,6 +18,7 @@ import { GraphVisualization } from '../../../../../flyout_v2/document/tools/grap
 import { DocumentDetailsPreviewPanelKey } from '../../../../document_details/shared/constants/panel_keys';
 import { EntityPanelKeyByType, GenericEntityPanelKey } from '../../constants';
 import {
+  ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../../../document_details/preview/constants';
@@ -39,14 +40,14 @@ export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onShowDocument = useCallback(
-    (id: string, indexName?: string) => {
+    (id: string, indexName?: string, isEvent?: boolean) => {
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
         params: {
           id,
           indexName,
           scopeId,
-          banner: EVENT_PREVIEW_BANNER,
+          banner: isEvent ? EVENT_PREVIEW_BANNER : ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });
