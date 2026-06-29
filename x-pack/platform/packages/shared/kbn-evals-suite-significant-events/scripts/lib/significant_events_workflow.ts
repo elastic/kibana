@@ -299,7 +299,7 @@ export async function persistSigEventsDiscoveriesForSnapshot(
 ): Promise<{ index: string; count: number }> {
   const discoveries = await fetchAllPaginated<Discovery>(
     config,
-    '/internal/sig_events/discoveries',
+    '/internal/significant_events/discoveries',
     'discoveries'
   );
   return persistDocsForSnapshot(
