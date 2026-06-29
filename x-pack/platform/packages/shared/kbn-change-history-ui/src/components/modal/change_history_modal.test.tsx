@@ -115,6 +115,10 @@ describe('ChangeHistoryModal', () => {
     await waitFor(() => {
       expect(screen.getByTestId('changeHistoryModalEmpty')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('changeHistoryEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('changeHistorySidebarPanel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('changeHistoryPreviewEmpty')).not.toBeInTheDocument();
   });
 
   it('selects a different row when clicked', async () => {
@@ -213,7 +217,7 @@ describe('ChangeHistoryModal', () => {
       expect(screen.getByTestId('changeHistoryItem-evt-2')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-2'));
+    fireEvent.click(screen.getByTestId('changeHistoryItemSelect-evt-2'));
 
     await waitFor(() => {
       expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
@@ -276,7 +280,7 @@ describe('ChangeHistoryModal', () => {
       expect(screen.getByTestId('changeHistoryItem-evt-2')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-2'));
+    fireEvent.click(screen.getByTestId('changeHistoryItemSelect-evt-2'));
 
     await waitFor(() => {
       expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
