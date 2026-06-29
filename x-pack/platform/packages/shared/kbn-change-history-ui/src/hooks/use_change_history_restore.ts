@@ -22,8 +22,7 @@ export interface UseChangeHistoryRestoreResult {
 
 export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
   const { adapter, supports } = useChangeHistoryConfig();
-  const { refetchList, setSelectedChangeId, setListRefreshPending } =
-    useChangeHistoryInternalConfig();
+  const { refetchList, setListRefreshPending } = useChangeHistoryInternalConfig();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
   const abortControllerRef = useRef<AbortController | undefined>();
@@ -44,7 +43,6 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
 
       setIsRestoring(true);
       setError(undefined);
-      setSelectedChangeId(undefined);
       setListRefreshPending(true);
 
       try {
@@ -74,7 +72,7 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
         }
       }
     },
-    [adapter, refetchList, setListRefreshPending, setSelectedChangeId, supports.restore]
+    [adapter, refetchList, setListRefreshPending, supports.restore]
   );
 
   return {

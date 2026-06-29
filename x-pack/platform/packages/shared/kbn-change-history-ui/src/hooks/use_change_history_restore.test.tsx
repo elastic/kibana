@@ -58,6 +58,30 @@ const wrapper =
       </ChangeHistoryProvider>
     );
 
+const SelectionTracker = ({
+  onChange,
+}: {
+  onChange: (selectedChangeId: string | undefined) => void;
+}) => {
+  const { selectedChangeId } = useChangeHistoryInternalConfig();
+
+  useLayoutEffect(() => {
+    onChange(selectedChangeId);
+  }, [onChange, selectedChangeId]);
+
+  return null;
+};
+
+const SelectChangeOnMount = ({ changeId }: { changeId: string }) => {
+  const { setSelectedChangeId } = useChangeHistoryInternalConfig();
+
+  useLayoutEffect(() => {
+    setSelectedChangeId(changeId);
+  }, [changeId, setSelectedChangeId]);
+
+  return null;
+};
+
 describe('useChangeHistoryRestore', () => {
   it('calls adapter.restoreChange and refetches the history list after success', async () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
@@ -121,6 +145,60 @@ describe('useChangeHistoryRestore', () => {
         code: 'RESTORE_CONFLICT',
         message: 'Object was updated by another user.',
       });
+    });
+  });
+
+  it('does not clear the selected change while restore is in flight', async () => {
+    let resolveRestore: (() => void) | undefined;
+    const restoreChange = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRestore = resolve;
+        })
+    );
+    const adapter = createAdapter(restoreChange);
+    const selectedIds: Array<string | undefined> = [];
+    const trackSelection = jest.fn((selectedChangeId: string | undefined) => {
+      selectedIds.push(selectedChangeId);
+    });
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), {
+      wrapper: ({ children }) => (
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID}
+          adapter={adapter}
+          features={{ restore: true }}
+          permissions={{ canRestore: true }}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+        >
+          <SelectChangeOnMount changeId="evt-3" />
+          <SelectionTracker onChange={trackSelection} />
+          {children}
+        </ChangeHistoryProvider>
+      ),
+    });
+
+    await waitFor(() => {
+      expect(selectedIds).toContain('evt-3');
+    });
+
+    let restorePromise: Promise<boolean> | undefined;
+    await act(async () => {
+      restorePromise = result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+      });
+    });
+
+    await waitFor(() => {
+      expect(restoreChange).toHaveBeenCalled();
+    });
+    expect(selectedIds.at(-1)).toBe('evt-3');
+
+    await act(async () => {
+      resolveRestore?.();
+      await restorePromise;
     });
   });
 

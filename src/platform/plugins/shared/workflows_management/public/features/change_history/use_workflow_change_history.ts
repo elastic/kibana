@@ -49,7 +49,10 @@ export const useWorkflowChangeHistoryAdapter = (workflowId: string): ChangeHisto
 export const useWorkflowChangeHistoryRestoreEligibility = (): boolean => {
   const { canUpdateWorkflow } = useWorkflowsCapabilities();
   const workflow = useSelector(selectWorkflow);
-  const managed = workflow?.managed === true;
 
-  return Boolean(canUpdateWorkflow && !managed);
+  if (!workflow) {
+    return false;
+  }
+
+  return Boolean(canUpdateWorkflow && workflow.managed !== true);
 };
