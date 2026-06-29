@@ -83,14 +83,55 @@ kubectl get events -n otel-demo --sort-by='.lastTimestamp'
 Repository: \`open-telemetry/opentelemetry-demo\` (tag \`v1.12.0\`)
 Each service lives under \`src/<service-name>/\` in the repository.
 
-The source code is indexed in Semantic Code Search. To investigate code (find log message origins, trace error types, understand service behaviour), load the following skills before using code tools:
+## Source Code & Code Search
 
+Repository: \`open-telemetry/opentelemetry-demo\` (tag \`v1.12.0\`). Each service lives under \`src/<service-name>/\` in the repository.
+
+The source code is indexed in Semantic Code Search. Use the workflow tools below to investigate code — find log message origins, confirm exact error strings, understand service behaviour, and trace git history. All workflows accept \`repository: "open-telemetry/opentelemetry-demo"\`.
+
+> **Note (interim):** These capabilities are normally loaded as Agent Builder skills (\`scs-code-history-files\`, \`scs-code-history-search\`). Until skill assignment is resolved, invoke the underlying workflows directly via \`execute_workflow\`.
+
+### Code search workflows
+
+| Workflow ID | What it does | Key inputs |
+|-------------|-------------|------------|
+| \`scs-semantic-search\` | Semantic search over source code — find log strings, error types, dependency calls | \`query\`, \`repository\` |
+| \`scs-read-file-from-chunks\` | Read full file content by path | \`file_paths\`, \`repository\` |
+| \`scs-symbol-analysis\` | Resolve a specific symbol (class, function, constant) to definitions and usages | \`symbol_name\`, \`repository\` |
+| \`scs-list-repos\` | List indexed repositories | _(no inputs)_ |
+| \`scs-discover-directories\` | Explore directory structure of the codebase | \`repository\` |
+| \`scs-map-symbols\` | Count symbols per file in a directory | \`directory\`, \`repository\` |
+
+### Git history workflows
+
+| Workflow ID | What it does | Key inputs |
+|-------------|-------------|------------|
+| \`scs-get-file-history\` | List commits that touched a file (newest-first) | \`file_path\`, \`repository\` |
+| \`scs-get-commit\` | Full commit details (message, author, diffs) | \`commit_hash\`, \`repository\` |
+| \`scs-find-introducing-commit\` | Find commit that first introduced an exact phrase/symbol | \`symbol_pattern\`, \`repository\` |
+| \`scs-get-file-authors\` | Contributor leaderboard for one or more files | \`file_paths\`, \`repository\` |
+| \`scs-search-commit-messages\` | Semantic search over commit messages by intent | \`query\`, \`repository\` |
+| \`scs-get-cochanges\` | Files that frequently change together (coupling analysis) | \`file_path\`, \`repository\` |
+
+### Usage guidance
+
+**Tool selection** (cheapest first):
+1. Know a symbol name → \`scs-symbol-analysis\`
+2. Conceptual question → \`scs-semantic-search\` → follow up with \`scs-read-file-from-chunks\` for full file
+3. File timeline / git history → \`scs-get-file-history\` → \`scs-get-commit\`
+4. Unknown structure → \`scs-discover-directories\` first
+
+**Example — find what error strings cart service logs:**
 \`\`\`
-load_skill("scs-code-history-files")
-load_skill("scs-code-history-search")
+execute_workflow(workflowId="scs-semantic-search", inputs={"query": "error log messages cart service", "repository": "open-telemetry/opentelemetry-demo"})
 \`\`\`
 
-These skills provide tools to semantically search the source code, read files, look up symbols, and explore git history. Use them to confirm what exact strings a service logs, what error types it emits, or when a behaviour was introduced.
+**Example — confirm when a behaviour was introduced:**
+\`\`\`
+execute_workflow(workflowId="scs-search-commit-messages", inputs={"query": "add redis connection retry", "repository": "open-telemetry/opentelemetry-demo"})
+\`\`\`
+
+Always use full 40-character commit hashes with \`scs-get-commit\`. The code may be a different version than what is running — treat it as a hint to refine queries, not as ground truth.
 `,
   },
   {
