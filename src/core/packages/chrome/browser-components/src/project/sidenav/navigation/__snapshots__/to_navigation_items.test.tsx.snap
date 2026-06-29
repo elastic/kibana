@@ -65,7 +65,6 @@ Array [
     "id": "dev_tools",
     "label": "Developer Tools",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -536,7 +535,6 @@ Array [
     "id": "discover",
     "label": "Discover",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -546,7 +544,6 @@ Array [
     "id": "dashboards",
     "label": "Dashboards",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -611,7 +608,6 @@ Array [
     "id": "alerts",
     "label": "Alerts",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -621,7 +617,6 @@ Array [
     "id": "attack_discovery",
     "label": "Attack discovery",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -636,7 +631,6 @@ Array [
     "id": "cloud_security_posture-findings",
     "label": "Findings",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -651,7 +645,6 @@ Array [
     "id": "cases",
     "label": "Cases",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,
@@ -783,7 +776,6 @@ Array [
     "id": "threat_intelligence",
     "label": "Intelligence",
     "popoverOnly": false,
-    "sections": undefined,
   },
   Object {
     "badgeType": undefined,

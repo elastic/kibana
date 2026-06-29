@@ -160,6 +160,55 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
   badgeType?: BadgeType;
 }
 
+interface ChromeNavigationNodeCommon
+  extends Omit<NodeDefinitionCommon<AppDeepLinkId, string>, 'link' | 'cloudLink'> {
+  id: string;
+  /** Path in the tree of the node */
+  path: string;
+}
+
+/** @public */
+export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNodeCommon {
+  renderAs: Extract<RenderAs, 'extension'>;
+  slotId: string;
+  extensionId: string;
+  popoverOnly?: boolean;
+  children?: never;
+}
+
+/** @public */
+/**
+ * Chrome project navigation node. This is the tree definition stored in the Chrome service
+ * that is generated based on the NodeDefinition below.
+ * Some of the process that occurs between the 2 are:
+ * - "link" prop get converted to existing ChromNavLink
+ * - "path" is added to each node based on where it is located in the tree
+ * - "isActive" state is set for each node if its URL matches the current location
+ */
+export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon {
+  /**
+   * Indicate if this is a special node
+   * - home - node should be rendered as the home link
+   */
+  renderAs?: Exclude<RenderAs, 'extension'>;
+  /** App id or deeplink id */
+  deepLink?: ChromeNavLink;
+  /**
+   * Optional children of the navigation node. Once a node has "children" defined it is
+   * considered a "group" node.
+   */
+  children?: Array<ChromeProjectNavigationNode | ChromeExtensionPointNavigationNode>;
+  /**
+   * Flag to indicate if the node is an "external" cloud link
+   */
+  isExternalLink?: boolean;
+}
+
+/** @public */
+export interface ChromeSetProjectBreadcrumbsParams {
+  absolute: boolean;
+}
+
 /**
  * Leaf section rendered by a framework template (an "extension slot").
  * Valid only under `panelOpener.children`. The node is plain serializable data:
@@ -214,61 +263,6 @@ export type RootNodeDefinition<
       children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
     });
 
-interface ChromeNavigationNodeCommon {
-  icon?: IconType;
-  href?: string;
-  breadcrumbStatus?: 'hidden' | 'visible';
-  sideNavStatus?: SideNavNodeStatus;
-  getIsActive?: GetIsActiveFn;
-  badgeType?: BadgeType;
-  id: string;
-  title?: string;
-  path: string;
-  deepLink?: ChromeNavLink;
-  isExternalLink?: boolean;
-}
-
-/** @public */
-export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNodeCommon {
-  renderAs: Extract<RenderAs, 'extension'>;
-  slotId: string;
-  extensionId: string;
-  popoverOnly?: boolean;
-  children?: never;
-}
-
-/** @public */
-export interface ChromeStandardNavigationNode extends ChromeNavigationNodeCommon {
-  renderAs?: RenderAs;
-  slotId?: never;
-  extensionId?: never;
-  popoverOnly?: never;
-  children?: ChromeProjectNavigationNode[];
-}
-
-/**
- * @public
- * Chrome project navigation node. This is the tree definition stored in the Chrome service
- * that is generated based on the NodeDefinition below.
- * Some of the process that occurs between the 2 are:
- * - "link" prop get converted to existing ChromNavLink
- * - "path" is added to each node based on where it is located in the tree
- * - "isActive" state is set for each node if its URL matches the current location
- */
-export type ChromeProjectNavigationNode =
-  | ChromeStandardNavigationNode
-  | ChromeExtensionPointNavigationNode;
-
-/**
- * @public
- */
-export type ChromeRootNavigationNode = ChromeStandardNavigationNode;
-
-/** @public */
-export interface ChromeSetProjectBreadcrumbsParams {
-  absolute: boolean;
-}
-
 /**
  * @public
  *
@@ -315,8 +309,8 @@ export type SideNavigationSection = keyof NavigationTreeDefinition;
  */
 export interface NavigationTreeDefinitionUI {
   id: SolutionId;
-  body: Array<ChromeRootNavigationNode>;
-  footer?: Array<ChromeRootNavigationNode>;
+  body: Array<ChromeProjectNavigationNode>;
+  footer?: Array<ChromeProjectNavigationNode>;
 }
 
 /**
