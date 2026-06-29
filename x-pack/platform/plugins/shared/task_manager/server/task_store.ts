@@ -26,13 +26,16 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
-  SavedObjectsUpdateResponse,
   ElasticsearchClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import {
+  isSavedObjectErrorResult,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
@@ -584,6 +587,9 @@ export class TaskStore {
     }
 
     return savedObjects.saved_objects.map((so) => {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
       const taskInstance = savedObjectToConcreteTaskInstance(so);
       return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
@@ -713,7 +719,9 @@ export class TaskStore {
       new Map()
     );
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
+    let updatedSavedObjects: Awaited<
+      ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
+    >['saved_objects'];
     try {
       ({ saved_objects: updatedSavedObjects } =
         await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
@@ -729,7 +737,7 @@ export class TaskStore {
 
     const allInvalidationTargets: InvalidationTarget[] = [];
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
-      if (updatedSavedObject.error !== undefined) {
+      if (isSavedObjectErrorResult(updatedSavedObject)) {
         return asErr({
           type: 'task',
           id: updatedSavedObject.id,
@@ -982,7 +990,7 @@ export class TaskStore {
 
     const tasks: ConcreteTaskInstance[] = [];
     result.saved_objects.forEach((task) => {
-      if (!task.error) {
+      if (!isSavedObjectErrorResult(task)) {
         tasks.push(savedObjectToConcreteTaskInstance(task));
       }
     });
@@ -992,7 +1000,7 @@ export class TaskStore {
     tasksWithDecryptedApiKeys.forEach((task) => taskMap.set(task.id, task));
 
     return result.saved_objects.map((task) => {
-      if (task.error) {
+      if (isSavedObjectErrorResult(task)) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       return asOk(taskMap.get(task.id));
