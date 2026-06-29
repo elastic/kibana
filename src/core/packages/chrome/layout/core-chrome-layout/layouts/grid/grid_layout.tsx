@@ -40,6 +40,7 @@ import {
   useSidebarWidth,
   useSideNavWidth,
   useApplicationWorkspaceOpen,
+  useAgentWorkspaceOpen,
 } from '@kbn/core-chrome-browser-hooks';
 import { isAgentFirst } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
@@ -131,6 +132,7 @@ export class GridLayout implements LayoutService {
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
       const applicationWorkspaceOpen = useApplicationWorkspaceOpen();
+      const agentWorkspaceOpen = useAgentWorkspaceOpen();
 
       const showAgentWorkspace =
         agentFirstEnabled &&
@@ -139,6 +141,7 @@ export class GridLayout implements LayoutService {
         chromeStyle === 'project';
 
       const effectiveApplicationWorkspaceOpen = showAgentWorkspace ? applicationWorkspaceOpen : true;
+      const effectiveAgentWorkspaceOpen = showAgentWorkspace ? agentWorkspaceOpen : true;
 
       const [agentWorkspaceWidth, setAgentWorkspaceWidth] = useState(DEFAULT_AGENT_WIDTH);
 
@@ -149,11 +152,17 @@ export class GridLayout implements LayoutService {
               width,
               navigationWidth,
               sidebarWidth,
-              effectiveApplicationWorkspaceOpen
+              effectiveApplicationWorkspaceOpen,
+              effectiveAgentWorkspaceOpen
             )
           );
         },
-        [effectiveApplicationWorkspaceOpen, navigationWidth, sidebarWidth]
+        [
+          effectiveAgentWorkspaceOpen,
+          effectiveApplicationWorkspaceOpen,
+          navigationWidth,
+          sidebarWidth,
+        ]
       );
 
       useLayoutEffect(() => {
@@ -166,10 +175,12 @@ export class GridLayout implements LayoutService {
             current,
             navigationWidth,
             sidebarWidth,
-            effectiveApplicationWorkspaceOpen
+            effectiveApplicationWorkspaceOpen,
+            effectiveAgentWorkspaceOpen
           )
         );
       }, [
+        effectiveAgentWorkspaceOpen,
         effectiveApplicationWorkspaceOpen,
         navigationWidth,
         showAgentWorkspace,
@@ -185,12 +196,15 @@ export class GridLayout implements LayoutService {
           ...(showAgentWorkspace ? AGENT_FIRST_LAYOUT_OVERRIDES : {}),
           sidebarWidth,
           navigationWidth,
-          agentWidth: showAgentWorkspace ? agentWorkspaceWidth : 0,
+          agentWidth:
+            showAgentWorkspace && effectiveAgentWorkspaceOpen ? agentWorkspaceWidth : 0,
           applicationWorkspaceWidth: 0,
           applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
+          agentWorkspaceOpen: effectiveAgentWorkspaceOpen,
         }),
         [
           agentWorkspaceWidth,
+          effectiveAgentWorkspaceOpen,
           effectiveApplicationWorkspaceOpen,
           layoutConfigKey,
           navigationWidth,
@@ -237,6 +251,7 @@ export class GridLayout implements LayoutService {
             navigationWidth={navigationWidth}
             sidebarWidth={sidebarWidth}
             applicationWorkspaceOpen={effectiveApplicationWorkspaceOpen}
+            agentWorkspaceOpen={effectiveAgentWorkspaceOpen}
             onWidthChange={setAgentWorkspaceWidthClamped}
           >
             <AgentWorkspaceSlot />

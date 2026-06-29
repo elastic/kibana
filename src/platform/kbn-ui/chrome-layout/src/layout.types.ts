@@ -30,6 +30,7 @@ export interface LayoutDimensions {
   applicationMarginRight: number;
   agentMarginLeft: number;
   applicationWorkspaceOpen: boolean;
+  agentWorkspaceOpen: boolean;
 }
 
 /**

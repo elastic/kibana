@@ -24,7 +24,7 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
-  const [isCondensed, setIsCondensed] = useState(false);
+  const [isCondensed, setIsCondensed] = useState(true);
 
   const onKeyDown = useCallback((event: KeyboardEvent) => {
     if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {

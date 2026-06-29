@@ -24,7 +24,7 @@ export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 export const DEFAULT_AGENT_WIDTH = 800;
 
 /** Minimum width of the agent workspace column when agent-first (matches sidebar min). */
-export const MIN_AGENT_WIDTH = 320;
+export const MIN_AGENT_WIDTH = 480;
 
 /** Minimum width reserved for the application workspace when agent-first (matches sidebar min). */
 export const MIN_APPLICATION_WORKSPACE_WIDTH = 320;
@@ -35,8 +35,13 @@ export const MAX_AGENT_VIEWPORT_WIDTH_RATIO = 0.5;
 export const getMaxAgentWorkspaceWidth = (
   navigationWidth: number,
   sidebarWidth: number,
-  applicationWorkspaceOpen = true
+  applicationWorkspaceOpen = true,
+  agentWorkspaceOpen = true
 ): number => {
+  if (!agentWorkspaceOpen) {
+    return MIN_AGENT_WIDTH;
+  }
+
   const maxByViewport = Math.floor(window.innerWidth * MAX_AGENT_VIEWPORT_WIDTH_RATIO);
   const reservedApplicationWidth = applicationWorkspaceOpen ? MIN_APPLICATION_WORKSPACE_WIDTH : 0;
   const maxByRemainingSpace =
@@ -49,12 +54,18 @@ export const clampAgentWorkspaceWidth = (
   width: number,
   navigationWidth: number,
   sidebarWidth: number,
-  applicationWorkspaceOpen = true
+  applicationWorkspaceOpen = true,
+  agentWorkspaceOpen = true
 ): number =>
   Math.max(
     MIN_AGENT_WIDTH,
     Math.min(
-      getMaxAgentWorkspaceWidth(navigationWidth, sidebarWidth, applicationWorkspaceOpen),
+      getMaxAgentWorkspaceWidth(
+        navigationWidth,
+        sidebarWidth,
+        applicationWorkspaceOpen,
+        agentWorkspaceOpen
+      ),
       Math.floor(width)
     )
   );

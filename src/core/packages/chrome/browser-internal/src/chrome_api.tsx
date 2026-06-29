@@ -215,6 +215,37 @@ export function createChromeApi({
       },
     },
 
+    // Agent workspace (agent-first POC)
+    agentWorkspace: {
+      getIsOpen$: () => state.agentWorkspace.isOpen.$,
+      getIsOpen: () => state.agentWorkspace.isOpen.get(),
+      setIsOpen: (isOpen: boolean) => {
+        if (isOpen) {
+          state.agentWorkspace.isOpen.set(true);
+          return;
+        }
+        if (!state.agentWorkspace.isOpen.get()) {
+          return;
+        }
+        state.agentWorkspace.isOpen.set(false);
+        state.agentWorkspace.onCloseHandlers.get().forEach((handler) => handler());
+      },
+      open: () => state.agentWorkspace.isOpen.set(true),
+      close: () => {
+        if (!state.agentWorkspace.isOpen.get()) {
+          return;
+        }
+        state.agentWorkspace.isOpen.set(false);
+        state.agentWorkspace.onCloseHandlers.get().forEach((handler) => handler());
+      },
+      registerOnClose: (handler: () => void) => {
+        state.agentWorkspace.onCloseHandlers.add(handler);
+        return () => {
+          state.agentWorkspace.onCloseHandlers.remove((existing) => existing === handler);
+        };
+      },
+    },
+
     // Project Navigation
     getActiveSolutionNavId$: () =>
       projectNavigation.getActiveSolutionNavId$() as ReturnType<

@@ -61,7 +61,7 @@ export interface SecondaryMenuSection {
  */
 export interface MenuItem {
   /** URL or hash for navigation. */
-  href: string;
+  href?: string;
   /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
   iconType: string;
   /** Unique identifier for this item. */
@@ -74,6 +74,8 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
+  /** Optional highlighted styling independent of URL active state. */
+  isHighlighted?: boolean;
 }
 
 /**

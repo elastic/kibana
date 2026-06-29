@@ -69,7 +69,7 @@ export interface MenuItem {
   /**
    * The URL for the menu item link.
    */
-  href: string;
+  href?: string;
   /**
    * The icon to display for the menu item.
    */
@@ -94,6 +94,10 @@ export interface MenuItem {
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) Forces highlighted styling regardless of URL-based active state.
+   */
+  isHighlighted?: boolean;
 }
 
 /**
