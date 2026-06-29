@@ -72,6 +72,7 @@ export {
 } from './step_registry/types';
 
 export { TriggerRegistry } from './trigger_registry';
+export { createServerTriggerDefinition } from './trigger_registry/types';
 
 export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from './triggers';
 export type { WorkflowExecutionFailedEvent } from './triggers';

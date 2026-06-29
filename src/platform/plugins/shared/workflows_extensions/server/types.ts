@@ -20,12 +20,11 @@ import type {
 } from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
-import type { CommonTriggerDefinition } from '../common';
+import type { ServerTriggerDefinition } from './trigger_registry/types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
-/** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
-export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
-  CommonTriggerDefinition<EventSchema>;
+export type { ServerTriggerDefinition } from './trigger_registry/types';
+export { createServerTriggerDefinition } from './trigger_registry/types';
 
 /**
  * Server-side plugin setup contract.

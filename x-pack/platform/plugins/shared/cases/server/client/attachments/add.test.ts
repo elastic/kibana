@@ -6,6 +6,10 @@
  */
 
 import {
+  ATTACHMENTS_ADDED_EVENT_TYPE,
+  COMMENTS_ADDED_EVENT_TYPE,
+} from '@kbn/domain-events/events/cases';
+import {
   MAX_COMMENT_LENGTH,
   MAX_USER_ACTIONS_PER_CASE,
   SECURITY_SOLUTION_OWNER,
@@ -148,14 +152,24 @@ describe('addComment', () => {
       clientArgs
     );
 
-    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
-      clientArgs.request,
-      expect.objectContaining({
+    expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
+      type: ATTACHMENTS_ADDED_EVENT_TYPE,
+      payload: expect.objectContaining({
         caseId,
         attachmentIds: expect.any(Array),
         attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
-      })
-    );
+      }),
+      request: clientArgs.request,
+    });
+    expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
+      type: COMMENTS_ADDED_EVENT_TYPE,
+      payload: expect.objectContaining({
+        caseId,
+        commentIds: expect.any(Array),
+        owner: SECURITY_SOLUTION_OWNER,
+      }),
+      request: clientArgs.request,
+    });
   });
 });

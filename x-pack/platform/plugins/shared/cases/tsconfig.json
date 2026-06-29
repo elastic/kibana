@@ -102,6 +102,8 @@
     "@kbn/openapi-generator",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/domain-events",
+    "@kbn/core-domain-events-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/resizable-layout",
     "@kbn/css-utils",

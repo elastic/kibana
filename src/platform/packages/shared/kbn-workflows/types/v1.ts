@@ -38,15 +38,17 @@ export enum ExecutionStatus {
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
 export const ExecutionStatusValues = Object.values(ExecutionStatus);
 
-export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
+export const TerminalExecutionStatuses = [
   ExecutionStatus.COMPLETED,
   ExecutionStatus.FAILED,
   ExecutionStatus.CANCELLED,
   ExecutionStatus.SKIPPED,
   ExecutionStatus.TIMED_OUT,
-] as const;
+] as const satisfies readonly ExecutionStatus[];
 
-export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+export type TerminalExecutionStatus = (typeof TerminalExecutionStatuses)[number];
+
+export const NonTerminalExecutionStatuses = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,

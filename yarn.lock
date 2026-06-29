@@ -5589,6 +5589,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-domain-events-server-internal@link:src/core/packages/domain-events/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-domain-events-server-mocks@link:src/core/packages/domain-events/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-domain-events-server@link:src/core/packages/domain-events/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-elasticsearch-client-server-internal@link:src/core/packages/elasticsearch/client-server-internal":
   version "0.0.0"
   uid ""
@@ -6690,6 +6702,10 @@
   uid ""
 
 "@kbn/dom-drag-drop@link:src/platform/packages/shared/kbn-dom-drag-drop":
+  version "0.0.0"
+  uid ""
+
+"@kbn/domain-events@link:src/platform/packages/shared/kbn-domain-events":
   version "0.0.0"
   uid ""
 

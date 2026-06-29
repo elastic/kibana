@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
+import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -71,6 +72,7 @@ export interface CasesClientArgs {
   readonly usageCounter?: IUsageCounter;
   readonly config: ConfigType;
   readonly casesEventBus?: CasesEventBus;
+  readonly domainEvents: DomainEventsServiceStart;
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
 }

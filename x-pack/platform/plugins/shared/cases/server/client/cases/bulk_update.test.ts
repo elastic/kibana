@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  CASE_UPDATED_EVENT_TYPE,
+  CASE_STATUS_CHANGED_EVENT_TYPE,
+} from '@kbn/domain-events/events/cases';
 import { stringify as yamlStringify } from 'yaml';
 import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import {
@@ -81,16 +85,15 @@ describe('update', () => {
     it('emits caseUpdated events for updated cases', async () => {
       await bulkUpdate(cases, clientArgs, casesClientMock);
 
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
-        clientArgs.request,
-        {
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
+        type: CASE_UPDATED_EVENT_TYPE,
+        payload: {
           caseId: mockCases[0].id,
           owner: mockCases[0].attributes.owner,
           updatedFields: ['assignees'],
         },
-        expect.anything()
-      );
+        request: clientArgs.request,
+      });
     });
 
     it('emits caseUpdated events with only fields that actually changed', async () => {
@@ -113,16 +116,25 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
-        clientArgs.request,
-        {
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
+        type: CASE_UPDATED_EVENT_TYPE,
+        payload: {
           caseId: mockCases[0].id,
           owner: mockCases[0].attributes.owner,
           updatedFields: ['status'],
         },
-        expect.anything()
-      );
+        request: clientArgs.request,
+      });
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
+        type: CASE_STATUS_CHANGED_EVENT_TYPE,
+        payload: {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          previousStatus: mockCases[0].attributes.status,
+          status: CaseStatuses.closed,
+        },
+        request: clientArgs.request,
+      });
     });
 
     it('does not notify if the case does not exist', async () => {

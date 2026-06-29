@@ -160,10 +160,18 @@ export const bulkCreate = async (
     const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
 
     createdCasesResponse.cases.forEach((createdCase) => {
-      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
-        caseId: createdCase.id,
-        owner: createdCase.owner as Owner,
+      clientArgs.domainEvents.publish({
+        type: 'cases.caseCreated',
+        payload: {
+          caseId: createdCase.id,
+          owner: createdCase.owner as Owner,
+        },
+        request: clientArgs.request,
       });
+      // clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+      //   caseId: createdCase.id,
+      //   owner: createdCase.owner as Owner,
+      // });
     });
 
     return createdCasesResponse;

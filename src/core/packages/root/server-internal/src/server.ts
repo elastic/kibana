@@ -40,6 +40,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { DomainEventsService } from '@kbn/core-domain-events-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -111,6 +112,7 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly domainEvents: DomainEventsService;
   private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
@@ -175,6 +177,7 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.domainEvents = new DomainEventsService(core);
     this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
@@ -373,6 +376,8 @@ export class Server {
 
     const dataStreamsSetup = await this.dataStreams.setup();
 
+    const domainEventsSetup = this.domainEvents.setup();
+
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
@@ -480,6 +485,7 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      domainEvents: domainEventsSetup,
       userStorage: userStorageSetup,
     };
 
@@ -548,6 +554,8 @@ export class Server {
     this.uptimePerStep.elasticsearch = {
       waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
     };
+
+    const domainEventsStart = this.domainEvents.start();
 
     const dataStreamsStart = await this.dataStreams.start({
       elasticsearch: elasticsearchStart,
@@ -644,6 +652,7 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      domainEvents: domainEventsStart,
       userStorage: userStorageStart,
     };
 

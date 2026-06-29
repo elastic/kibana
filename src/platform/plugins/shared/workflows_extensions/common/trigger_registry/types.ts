@@ -48,6 +48,7 @@ export interface TriggerSnippets {
 export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> {
   /** Globally unique, namespaced identifier (e.g. cases.updated, alerts.recovered) */
   id: string;
+
   /**
    * Payload contract (Zod object schema; must reject unknown fields by default).
    * Adding descriptions to properties (e.g. with .describe()) is recommended so they will

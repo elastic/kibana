@@ -14,6 +14,7 @@ import type {
   HttpMethod,
   InternalConnectorContract,
   StepStabilityLevel,
+  TerminalExecutionStatus,
   WorkflowStepExecutionDto,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
@@ -66,8 +67,8 @@ export function isDangerousStatus(status: ExecutionStatus) {
   return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }
 
-export function isTerminalStatus(status: ExecutionStatus) {
-  return TerminalExecutionStatuses.includes(status);
+export function isTerminalStatus(status: ExecutionStatus): status is TerminalExecutionStatus {
+  return (TerminalExecutionStatuses as readonly ExecutionStatus[]).includes(status);
 }
 
 export function isFailedBeforeSteps(

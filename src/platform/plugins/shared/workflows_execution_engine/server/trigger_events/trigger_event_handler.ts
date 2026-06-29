@@ -11,6 +11,7 @@ import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { DomainEvent } from '@kbn/domain-events';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type {
   EsWorkflowExecution,
@@ -19,7 +20,10 @@ import type {
 } from '@kbn/workflows';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import {
   type EventChainContext,
   getEmitterWorkflowExecutionIdFromRequest,
@@ -159,6 +163,7 @@ export class TriggerEventHandler {
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
   private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient | undefined>;
+  private readonly eventTypeToTriggerIdMap = new Map<string, string[]>();
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
@@ -265,6 +270,148 @@ export class TriggerEventHandler {
       resolutionStats,
       scheduleStats,
     });
+  }
+
+  async handleDomainEvent(event: DomainEvent): Promise<void> {
+    if (!this.config.enabled && !this.config.logEvents) {
+      this.logger.debug(
+        'Event-driven triggers are off (execution and trigger-event logging both disabled); skipping.'
+      );
+      return;
+    }
+    const { type: eventType, request } = event;
+    const triggers = this.getTriggersForDomainEvent(event);
+    if (!triggers.length) {
+      this.logger.debug(`No trigger found for event type ${eventType}; skipping.`);
+      return;
+    }
+
+    const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+    let eventChainContext = getEventChainContext(request);
+    if (eventChainContext === undefined) {
+      eventChainContext = await this.resolveEventChainContextFromEmitterExecution(
+        request,
+        spaceId,
+        this.config.maxChainDepth
+      );
+    }
+
+    // A single domain event can fan out to multiple triggers. Dispatch each independently.
+    for (const trigger of triggers) {
+      await this.dispatchDomainEventToTrigger({ event, trigger, spaceId, eventChainContext });
+    }
+  }
+
+  private async dispatchDomainEventToTrigger(params: {
+    event: DomainEvent;
+    trigger: ServerTriggerDefinition;
+    spaceId: string;
+    eventChainContext: EventChainContext | undefined;
+  }): Promise<void> {
+    const { event, trigger, spaceId, eventChainContext } = params;
+    const { payload: domainEventPayload, request } = event;
+
+    const payload = (trigger.mapEvent?.(event) ?? domainEventPayload) as Record<string, unknown>;
+
+    const triggerId = trigger.id;
+
+    const timestamp = new Date().toISOString();
+    const eventId = generateUuid();
+
+    const eventContextForResolution = {
+      ...payload,
+      timestamp,
+      spaceId,
+      eventChainDepth: nextScheduledEventChainDepth(eventChainContext),
+    };
+
+    this.validateTrigger(triggerId, spaceId, payload);
+
+    const resolutionStartMs = Date.now();
+    const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
+      triggerId,
+      spaceId,
+      eventContextForResolution
+    );
+    const subscriberResolutionMs = Math.max(0, Date.now() - resolutionStartMs);
+    this.logger.trace(
+      `Workflows trigger resolution funnel: triggerId=${triggerId} ${JSON.stringify(
+        resolutionStats
+      )}`
+    );
+
+    if (this.config.logEvents) {
+      await this.writeTriggerEvents({
+        timestamp,
+        eventId,
+        triggerId,
+        spaceId,
+        subscriptions: workflows.map((w) => w.id),
+        payload,
+        ...(eventChainContext?.sourceExecutionId && {
+          sourceExecutionId: eventChainContext.sourceExecutionId,
+        }),
+      });
+    }
+
+    let scheduleStats: TriggerEventScheduleStats;
+    if (this.config.enabled && workflows.length > 0) {
+      const eventParams: ScheduleEventParams = {
+        payload,
+        timestamp,
+        spaceId,
+        eventId,
+        eventChainContext,
+        triggerId,
+      };
+      scheduleStats = await this.scheduleMatchingWorkflows(workflows, request, eventParams);
+      this.logger.trace(
+        `Workflows trigger schedule outcomes: triggerId=${triggerId} ${JSON.stringify(
+          scheduleStats
+        )}`
+      );
+    } else {
+      scheduleStats = createEmptyTriggerScheduleStats();
+    }
+
+    this.telemetryClient.reportTriggerEventDispatched({
+      triggerId,
+      eventId,
+      config: this.config,
+      eventChainContext,
+      subscriberResolutionMs,
+      resolutionStats,
+      scheduleStats,
+    });
+  }
+
+  private getTriggersForDomainEvent(event: DomainEvent): ServerTriggerDefinition[] {
+    if (!this.eventTypeToTriggerIdMap.size) {
+      this.workflowsExtensions.getAllTriggerDefinitions().forEach((current) => {
+        if (current.domainEventType) {
+          const list = this.eventTypeToTriggerIdMap.get(current.domainEventType) ?? [];
+          list.push(current.id);
+          this.eventTypeToTriggerIdMap.set(current.domainEventType, list);
+        }
+      });
+    }
+
+    const triggerIds = this.eventTypeToTriggerIdMap.get(event.type);
+
+    if (!triggerIds?.length) {
+      return [];
+    }
+
+    const triggers: ServerTriggerDefinition[] = [];
+    for (const triggerId of triggerIds) {
+      const trigger = this.workflowsExtensions.getTriggerDefinition(triggerId);
+      // A trigger without `shouldHandleDomainEvent` handles every event of its `domainEventType`.
+      if (trigger && (!trigger.shouldHandleDomainEvent || trigger.shouldHandleDomainEvent(event))) {
+        triggers.push(trigger);
+      }
+    }
+    return triggers;
   }
 
   /**

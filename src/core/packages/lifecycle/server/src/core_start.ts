@@ -25,6 +25,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 
@@ -72,6 +73,8 @@ export interface CoreStart {
   injection: CoreDiServiceStart;
   /** {@link DataStreamsStart} */
   dataStreams: DataStreamsStart;
+  /** {@link DomainEventsServiceStart} */
+  domainEvents: DomainEventsServiceStart;
   /** {@link UserStorageServiceStart} */
   userStorage: UserStorageServiceStart;
 }

@@ -52,6 +52,7 @@ export type {
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  TerminalExecutionStatus,
   // api types
   WorkflowSortField,
   WorkflowsSearchParams,

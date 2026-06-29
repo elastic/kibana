@@ -9,6 +9,7 @@
 
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -30,6 +31,7 @@ jest.mock('../build_workflow_context', () => {
     buildWorkflowContext: jest.fn(),
   };
 });
+import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
 const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
   typeof buildWorkflowContext
 >;
@@ -82,6 +84,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     workflowExecutionState = {
       getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       updateWorkflowExecution: jest.fn(),
+      getLastFailedStepContext: jest.fn().mockReturnValue(undefined),
       getStepExecution: jest.fn(),
       getLatestStepExecution: jest.fn(),
       getStepExecutionsByStepId: jest.fn(),
@@ -117,7 +120,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       }
     });
 
-    fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
+    fakeCoreStart = {
+      domainEvents: { publish: jest.fn() },
+    } as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
 
     stepIoService = {
@@ -137,6 +142,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       workflowLogger,
       workflowExecutionState,
       stepIoService,
+      request: httpServerMock.createKibanaRequest(),
       coreStart: fakeCoreStart as CoreStart,
       dependencies: fakeContextDependencies,
     });
@@ -996,6 +1002,31 @@ describe('WorkflowExecutionRuntimeManager', () => {
       await underTest.saveState();
 
       expect(mockReport).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('publishWorkflowTerminalDomainEvent', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (underTest as any).nextNodeId = undefined;
+      workflowExecution.status = ExecutionStatus.RUNNING;
+      workflowExecution.workflowDefinition = { name: 'Test Workflow' } as EsWorkflowExecution['workflowDefinition'];
+      workflowExecution.spaceId = 'default';
+      (workflowExecutionState.updateWorkflowExecution as jest.Mock).mockImplementation(
+        (update: Partial<EsWorkflowExecution>) => {
+          Object.assign(workflowExecution, update);
+        }
+      );
+    });
+
+    it('should not publish workflows.terminated twice', async () => {
+      await underTest.saveState();
+      await underTest.saveState();
+
+      expect(fakeCoreStart.domainEvents.publish).toHaveBeenCalledTimes(1);
+      expect(fakeCoreStart.domainEvents.publish).toHaveBeenCalledWith(
+        expect.objectContaining({ type: WORKFLOW_TERMINATED_EVENT_TYPE })
+      );
     });
   });
 });

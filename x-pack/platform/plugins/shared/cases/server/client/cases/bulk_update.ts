@@ -83,6 +83,7 @@ import {
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+import { publishCaseUpdatedDomainEvents } from '../../events/publish_case_updated_domain_events';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -803,16 +804,30 @@ export const bulkUpdate = async (
 
     for (const updatedCase of updatedCasesResponse) {
       const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
-      clientArgs.casesEventBus?.emitCaseUpdated(
-        clientArgs.request,
-        {
-          caseId: updatedCase.id,
-          owner: updatedCase.owner as Owner,
+      const payload = {
+        caseId: updatedCase.id,
+        owner: updatedCase.owner as Owner,
+        ...(updatedFields != null ? { updatedFields } : {}),
+      };
 
-          ...(updatedFields != null ? { updatedFields } : {}),
-        },
-        { previousCase: casesMap.get(updatedCase.id), updatedCase }
-      );
+      publishCaseUpdatedDomainEvents({
+        domainEvents: clientArgs.domainEvents,
+        request: clientArgs.request,
+        payload,
+        previousCase: casesMap.get(updatedCase.id),
+        updatedCase,
+      });
+
+      // clientArgs.casesEventBus?.emitCaseUpdated(
+      //   clientArgs.request,
+      //   {
+      //     caseId: updatedCase.id,
+      //     owner: updatedCase.owner as Owner,
+
+      //     ...(updatedFields != null ? { updatedFields } : {}),
+      //   },
+      //   { previousCase: casesMap.get(updatedCase.id), updatedCase }
+      // );
     }
 
     return updatedCasesResponse;

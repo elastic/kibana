@@ -38,6 +38,7 @@ import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespac
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -83,6 +84,7 @@ interface CasesClientFactoryArgs {
   usageCounter?: IUsageCounter;
   config: ConfigType;
   casesEventBus?: CasesEventBus;
+  domainEvents: DomainEventsServiceStart;
   closeReasonValidator?: (
     closeReason: string,
     owner: string,
@@ -192,6 +194,7 @@ export class CasesClientFactory {
       usageCounter: this.options.usageCounter,
       config: this.options.config,
       casesEventBus: this.options.casesEventBus,
+      domainEvents: this.options.domainEvents,
       request,
       closeReasonValidator: boundCloseReasonValidator,
     });
