@@ -119,9 +119,7 @@ export function EditorFrame(props: EditorFrameProps) {
         const targetVisualization = suggestionDatasourceId
           ? visualizationMap[suggestion.visualizationId]
           : undefined;
-        // SAFE_TYPE_BOUNDARY: suggestions and the redux store carry datasource
-        // state opaquely (`unknown`); `applyVizTypeDatasourceDefaults` re-checks
-        // `datasourceId === formBased` before touching it.
+        // Intentional `as FormBasedPrivateState` type assertion as suggestions carry datasource state opaquely (`unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
         const suggestionDatasourceState = suggestion.datasourceState as
           | FormBasedPrivateState
           | undefined;
@@ -133,6 +131,7 @@ export function EditorFrame(props: EditorFrameProps) {
                   kind: 'suggestion',
                   datasourceId: suggestionDatasourceId,
                   datasourceState: suggestionDatasourceState,
+                  // Intentional `as FormBasedPrivateState` type assertion as the redux store carries datasource state opaquely (`unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
                   previousDatasourceState: datasourceStates[suggestionDatasourceId]?.state as
                     | FormBasedPrivateState
                     | undefined,

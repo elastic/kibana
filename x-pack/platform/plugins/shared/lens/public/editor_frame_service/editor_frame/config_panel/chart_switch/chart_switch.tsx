@@ -114,9 +114,7 @@ export const ChartSwitch = memo(function ChartSwitch({
     const getPersistedVisualizationTypeId = (lId: string) =>
       getPersistedLayerVisualizationTypeId(persistedDoc, visualizationMap, lId);
 
-    // SAFE_TYPE_BOUNDARY: the editor frame stores datasource state opaquely
-    // (`DatasourceState['state']` is `unknown`); `applyVizTypeDatasourceDefaults`
-    // re-checks `datasourceId === formBased` before touching it.
+    // Intentional `as FormBasedPrivateState` type assertion as the editor frame stores datasource state opaquely (`DatasourceState['state']` is `unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
     const selectionDatasourceState = selection.datasourceState as FormBasedPrivateState | undefined;
 
     switchToSuggestion(
@@ -144,8 +142,7 @@ export const ChartSwitch = memo(function ChartSwitch({
     // existing datasource state, so the defaults are reconciled through a
     // follow-up datasource update.
     if (selection.sameDatasources && !selection.datasourceState && activeDatasourceId) {
-      // SAFE_TYPE_BOUNDARY: see above; the redux datasource state is opaque and
-      // re-validated inside `applyVizTypeDatasourceDefaults`.
+      // Intentional `as FormBasedPrivateState` type assertion as the redux datasource state is opaque (`DatasourceState['state']` is `unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
       const currentState = datasourceStates[activeDatasourceId]?.state as
         | FormBasedPrivateState
         | undefined;
