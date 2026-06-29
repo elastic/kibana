@@ -82,7 +82,7 @@ export const DiscoverApplicationAttachmentButton = () => {
     <ApplicationAttachmentButton
       getAttachment={getAttachment}
       linkDescriptor={linkDescriptor}
-      iconType="documents"
+      iconType="pin"
       displayVariant="appHeader"
     />
   );

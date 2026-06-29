@@ -13,6 +13,7 @@ import { isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 import { AttachmentGroupPill } from './attachment_group_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
 
 export interface AttachmentPillsRowProps {
   attachments: ConversationAttachment[];
@@ -24,6 +25,9 @@ const labels = {
   attachments: i18n.translate('xpack.agentBuilder.attachmentPillsRow.attachments', {
     defaultMessage: 'Attachments',
   }),
+  pinnedItems: i18n.translate('xpack.agentBuilder.attachmentPillsRow.pinnedItems', {
+    defaultMessage: 'Pinned items',
+  }),
 };
 
 export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
@@ -32,6 +36,8 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   justifyContent = 'flexStart',
 }) => {
   const { removeAttachment } = useConversationContext();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const listAriaLabel = isAgentWorkspaceMount ? labels.pinnedItems : labels.attachments;
 
   if (attachments.length === 0) {
     return null;
@@ -44,7 +50,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       responsive={false}
       justifyContent={justifyContent}
       role="list"
-      aria-label={labels.attachments}
+      aria-label={listAriaLabel}
       data-test-subj="agentBuilderAttachmentPillsRow"
     >
       {attachments.map((attachment, index) => {

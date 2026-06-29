@@ -22,7 +22,7 @@ import {
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
 import { css } from '@emotion/react';
-import { RoundAttachmentPill } from './round_attachment_pill';
+import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -45,10 +45,27 @@ const labels = {
   attachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachments', {
     defaultMessage: 'Attachments',
   }),
-  added: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.added', {
-    defaultMessage: 'Added',
+  pinnedItems: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.pinnedItems', {
+    defaultMessage: 'Pinned items',
   }),
+  attachmentAdded: (description: string) =>
+    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachmentAdded', {
+      defaultMessage: 'Attachment added: {description}',
+      values: { description },
+    }),
+  pinnedItemAdded: (description: string) =>
+    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.pinnedItemAdded', {
+      defaultMessage: 'Pinned item added: {description}',
+      values: { description },
+    }),
 };
+
+const attachmentItemStyles = css`
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const resolveOperation = (
   refOperation: AttachmentRefOperation | undefined,
@@ -95,6 +112,17 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   justifyContent = 'flexStart',
   includeHidden = false,
 }) => {
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const listAriaLabel = isAgentWorkspaceMount ? labels.pinnedItems : labels.attachments;
+
+  const getReferenceMessage = (attachment: VersionedAttachment): string => {
+    const description = attachment.description ?? '';
+    if (isAgentWorkspaceMount && !attachment.hidden) {
+      return labels.pinnedItemAdded(description);
+    }
+    return labels.attachmentAdded(description);
+  };
+
   const resolvedReferences = useMemo((): ResolvedReference[] => {
     const fallbackVersioned = fallbackAttachments?.length
       ? buildFallbackVersionedAttachments(fallbackAttachments)
@@ -175,40 +203,21 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       gutterSize="s"
       direction="column"
       responsive={false}
+      justifyContent={justifyContent}
+      role="list"
+      aria-label={listAriaLabel}
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
-      <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={
-            justifyContent === 'flexEnd'
-              ? css`
-                  text-align: right;
-                `
-              : undefined
-          }
+      {resolvedReferences.map((ref) => (
+        <EuiFlexItem
+          css={attachmentItemStyles}
+          key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
         >
-          {labels.added}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          direction="row"
-          wrap
-          responsive={false}
-          gutterSize="s"
-          justifyContent={justifyContent}
-          role="list"
-          aria-label={labels.attachments}
-        >
-          {resolvedReferences.map((ref) => (
-            <EuiFlexItem grow={false} key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}>
-              <RoundAttachmentPill attachment={ref.attachment} version={ref.version} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+          <EuiText color="subdued" size="xs">
+            {getReferenceMessage(ref.attachment)}
+          </EuiText>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

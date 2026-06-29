@@ -26,6 +26,14 @@ const labels = {
       defaultMessage: '{count, plural, one {# attachment} other {# attachments}}',
       values: { count },
     }),
+  pinnedItems: i18n.translate('xpack.agentBuilder.conversationHeader.attachmentCart.pinnedItems', {
+    defaultMessage: 'Pinned items',
+  }),
+  pinnedItemsAria: (count: number) =>
+    i18n.translate('xpack.agentBuilder.conversationHeader.attachmentCart.pinnedItemsAria', {
+      defaultMessage: '{count, plural, one {# pinned item} other {# pinned items}}',
+      values: { count },
+    }),
 };
 
 const cartPulse = keyframes`
@@ -87,9 +95,19 @@ export const AttachmentCartButton: React.FC = () => {
   const handleOpenCart = useCallback(() => {
     if (isAgentWorkspaceMount && !isEmbeddedContext && spineContext) {
       if (!spineContext.hasAttachments) {
-        spineContext.openAttachmentsEmptyOverlay();
+        if (spineContext.isAttachmentsEmptyOpen) {
+          spineContext.closeAttachmentsEmptyOverlay();
+        } else {
+          spineContext.openAttachmentsEmptyOverlay();
+        }
         return;
       }
+
+      if (spineContext.isSpineActive) {
+        spineContext.closeSpine();
+        return;
+      }
+
       spineContext.openSpine({
         tabId: 'attachments',
         attachmentsView: { mode: 'grid' },
@@ -101,7 +119,12 @@ export const AttachmentCartButton: React.FC = () => {
   }, [isAgentWorkspaceMount, isEmbeddedContext, spineContext, openAttachmentCart]);
 
   const cartIconType = isReceiving ? 'folderOpen' : 'folder';
-  const ariaLabel = labels.attachments(attachmentCount);
+  const tooltipContent = isAgentWorkspaceMount
+    ? labels.pinnedItems
+    : labels.attachments(attachmentCount);
+  const ariaLabel = isAgentWorkspaceMount
+    ? labels.pinnedItemsAria(attachmentCount)
+    : labels.attachments(attachmentCount);
 
   const badgeStyles = css`
     position: absolute;
@@ -123,7 +146,7 @@ export const AttachmentCartButton: React.FC = () => {
         display: inline-flex;
       `}
     >
-      <EuiToolTip content={ariaLabel} position="bottom" disableScreenReaderOutput>
+      <EuiToolTip content={tooltipContent} position="bottom" disableScreenReaderOutput>
         <EuiButtonIcon
           color="text"
           iconType={cartIconType}
