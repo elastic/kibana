@@ -356,7 +356,7 @@ workflowsManagement:
 
 A minimal hand-crafted `dist/v1/` lives next to the integration test for
 illustration:
-[`server/library/__integration__/fixtures/dist/v1/`](./server/library/__integration__/fixtures/dist/v1).
+[`server/library/tests/__fixtures__/dist/v1/`](./server/library/tests/__fixtures__/dist/v1).
 Pointing the server at that directory is a useful smoke test until the Phase 1
 generator output is on disk.
 
