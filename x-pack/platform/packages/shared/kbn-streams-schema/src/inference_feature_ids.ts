@@ -11,7 +11,7 @@ export const STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID =
 
 /** Knowledge Indicator feature extraction (KI extraction). */
 export const STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID =
-  'streams_significant_events_ki_extraction' as const;
+  'streams_sig_events_ki_extraction' as const;
 
 /** Knowledge Indicator query generation. */
 export const STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID =
