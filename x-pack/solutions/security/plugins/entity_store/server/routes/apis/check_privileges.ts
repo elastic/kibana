@@ -55,12 +55,10 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
         const metadataEntityIndexPattern = getMetadataEntityIndexPattern(spaceId);
 
         const response = await checkAndFormatPrivileges({
-          indexPatterns: [
-            entitiesAliasPattern,
-            latestEntityIndexPattern,
-            metadataAliasPattern,
-            metadataEntityIndexPattern,
-          ],
+          // Metadata indices are written by asInternalUser — exclude from has_read/write_permissions
+          // calculation (which gates the enable-store button) while still checking read access via
+          // privilegesToCheck so has_all_required correctly requires read on metadata.
+          indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
           request: req,
           security,
           privilegesToCheck: {
