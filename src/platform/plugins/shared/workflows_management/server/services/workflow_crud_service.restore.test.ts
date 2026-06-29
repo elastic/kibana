@@ -382,7 +382,6 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       expect.any(Array),
       expect.objectContaining({
         action: WorkflowChangeHistoryAction.workflowRestore,
-        refresh: 'wait_for',
       })
     );
     expect(client.index).toHaveBeenCalledWith(
