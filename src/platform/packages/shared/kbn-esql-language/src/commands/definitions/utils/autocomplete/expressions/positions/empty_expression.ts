@@ -19,6 +19,7 @@ import {
   isAtRepeatingValuePosition,
   isAmbiguousPosition,
   pairKeywordAndTextTypes,
+  isConstantParameter,
 } from '../../../signatures';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
@@ -166,7 +167,7 @@ function buildLiteralSuggestions(
 
   const { hasMoreMandatoryArgs } = functionParamContext;
   const suggestions: ISuggestionItem[] = [];
-  const hasConstantOnlyParams = paramDefinitions.some(({ hint }) => hint?.kind === 'constant');
+  const hasConstantOnlyParams = paramDefinitions.some(isConstantParameter);
 
   // Constant-only literals (true, false, null, string/number literals)
   const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
@@ -221,7 +222,7 @@ async function buildFieldAndFunctionSuggestions(
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
 
-  const hasConstantOnlyParam = paramDefinitions.some(({ hint }) => hint?.kind === 'constant');
+  const hasConstantOnlyParam = paramDefinitions.some(isConstantParameter);
   const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
 
   // constantOnly params require literal values, not fields
@@ -329,7 +330,7 @@ function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[]
 /** Filters parameters that only accept constant values (literals or duration types) */
 function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionParameter[] {
   return paramDefinitions.filter(
-    ({ hint, type }) => hint?.kind === 'constant' || /_duration/.test(String(type))
+    (param) => isConstantParameter(param) || /_duration/.test(String(param.type))
   );
 }
 
@@ -461,7 +462,7 @@ function buildConstantOnlyLiteralSuggestions(
   const suggestions = builder.build();
 
   // Add placeholder hint ONLY for explicit constant parameters (not duration-derived ones)
-  const hasExplicitConstantOnly = paramDefinitions.some(({ hint }) => hint?.kind === 'constant');
+  const hasExplicitConstantOnly = paramDefinitions.some(isConstantParameter);
 
   if (hasExplicitConstantOnly) {
     const placeholderType = findConstantPlaceholderType(types);
