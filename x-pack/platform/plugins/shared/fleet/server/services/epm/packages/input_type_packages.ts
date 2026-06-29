@@ -108,13 +108,15 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   // For OTel packages with dynamic_signal_types, we need to create index templates for all signal types
   const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
-  const signalTypes: string[] = isDynamicSignalTypes
-    ? ['logs', 'metrics', 'traces']
-    : [
-        packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-          packagePolicy.inputs[0].streams[0].data_stream?.type ||
-          'logs',
-      ];
+  const signalTypes: string[] = (
+    isDynamicSignalTypes
+      ? ['logs', 'metrics', 'traces']
+      : [
+          packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+            packagePolicy.inputs[0].streams[0].data_stream?.type ||
+            'logs',
+        ]
+  ).filter((type) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type));
 
   // Check each signal type and install templates as needed
   for (const dataStreamType of signalTypes) {
