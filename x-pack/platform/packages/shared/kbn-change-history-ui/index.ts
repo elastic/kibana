@@ -60,3 +60,27 @@ export type {
   UseChangeHistoryAutoSelectionArgs,
   UseChangeHistoryAutoSelectionResult,
 } from './src/hooks';
+export {
+  changeHistoryTelemetryEvents,
+  changeHistoryTelemetryEventNames,
+  changeHistoryTelemetryEventSchemas,
+  ChangeHistoryTelemetryEventTypes,
+} from './src/telemetry';
+export type {
+  ChangeHistoryCompareMode,
+  ChangeHistoryComparisonType,
+  ChangeHistoryFilterType,
+  ChangeHistoryScope,
+  ChangeHistorySelectionSource,
+  ChangeHistoryTelemetryEvent,
+  ChangeHistoryTelemetryEventType,
+  ChangeHistoryTelemetryEventsMap,
+  ChangeHistoryTelemetryScopeFields,
+  ReportChangeHistoryChangeSelectedActionParams,
+  ReportChangeHistoryDiffViewedActionParams,
+  ReportChangeHistoryFilterAppliedActionParams,
+  ReportChangeHistoryOpenedActionParams,
+  ReportChangeHistoryRestoreCompletedActionParams,
+  ReportChangeHistoryRestoreConfirmedActionParams,
+  ReportChangeHistoryRestoreFailedActionParams,
+} from './src/telemetry';
