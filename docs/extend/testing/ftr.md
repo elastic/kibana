@@ -113,7 +113,7 @@ Scout provides equivalent capabilities for most FTR use cases:
 | Page object pattern        | [Scout page objects](./page-objects.md)          |
 | Browser interaction        | Playwright `page` fixture                        |
 
-Start with [Set up Scout in your plugin](./setup-scout.md) to add Scout alongside your existing FTR tests.
+Start with [Set up Scout in your plugin](./setup-scout.md) to add Scout alongside your existing FTR tests, then follow the [Migrate tests to Scout](./migrate-tests.md) guide to port your existing suites.
 
 ## Writing stable FTR tests [ftr-stable-tests]
 
