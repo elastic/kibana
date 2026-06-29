@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
+  "include": ["*.ts", "public/**/*", "common/**/*", "server/**/*", "public/**/*.json", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -36,7 +36,8 @@
     "@kbn/core-http-server",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-transforms",
-    "@kbn/as-code-shared-telemetry"
+    "@kbn/as-code-shared-telemetry",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }
