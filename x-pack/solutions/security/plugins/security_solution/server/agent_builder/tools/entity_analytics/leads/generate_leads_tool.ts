@@ -26,8 +26,8 @@ import {
   upsertLeadGenerationConfig,
 } from '../../../../lib/entity_analytics/lead_generation/saved_object';
 import { fetchCandidateEntities } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
-import { runLeadGenerationPipeline } from '../../../../lib/entity_analytics/lead_generation/run_pipeline';
 import { resolveChatModel } from '../../../../lib/entity_analytics/lead_generation/utils';
+import { runLeadGenerationInBackground } from '../../../../lib/entity_analytics/lead_generation/run_background_pipeline';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import { securityTool } from '../../constants';
 
@@ -231,43 +231,22 @@ export const generateLeadsTool = (
           connectorId: resolvedConnectorId,
         });
 
-        void (async () => {
-          try {
-            await runLeadGenerationPipeline({
-              listEntities: () => fetchCandidateEntities(crudClient, logger),
-              esClient: currentEsClient,
-              logger,
-              spaceId,
-              riskScoreDataClient,
-              executionId: executionUuid,
-              sourceType: 'adhoc',
-              analytics: coreStart.analytics,
-              chatModel,
-            });
-            await upsertLeadGenerationConfig(savedObjectsClient, spaceId, {
-              connectorId: resolvedConnectorId,
-              lastExecutionUuid: executionUuid,
-              lastError: null,
-            }).catch((err: Error) =>
-              logger.warn(
-                `[LeadGeneration] Failed to persist success status (executionUuid=${executionUuid}): ${err.message}`
-              )
-            );
-          } catch (pipelineError) {
-            const errorMessage =
-              pipelineError instanceof Error ? pipelineError.message : String(pipelineError);
-            logger.error(`[LeadGeneration] Background generation failed: ${errorMessage}`);
-            await upsertLeadGenerationConfig(savedObjectsClient, spaceId, {
-              connectorId: resolvedConnectorId,
-              lastExecutionUuid: executionUuid,
-              lastError: errorMessage,
-            }).catch((err: Error) =>
-              logger.warn(
-                `[LeadGeneration] Failed to persist error status (executionUuid=${executionUuid}): ${err.message}`
-              )
-            );
-          }
-        })();
+        runLeadGenerationInBackground({
+          savedObjectsClient,
+          connectorId: resolvedConnectorId,
+          executionUuid,
+          pipelineArgs: {
+            listEntities: () => fetchCandidateEntities(crudClient, logger),
+            esClient: currentEsClient,
+            logger,
+            spaceId,
+            riskScoreDataClient,
+            executionId: executionUuid,
+            sourceType: 'adhoc',
+            analytics: coreStart.analytics,
+            chatModel,
+          },
+        });
 
         return {
           results: [
