@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { PostGenerateRequestBody } from '@kbn/discoveries-schemas';
+import {
+  AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
+  hasAtLeastOneRetrievalToggle,
+  PostGenerateRequestBody,
+} from '@kbn/discoveries-schemas';
 import type { PostGenerateRequestBody as PostGenerateRequestBodyType } from '@kbn/discoveries-schemas';
 import type { ResponseError } from '@kbn/core/server';
 import type { WorkflowConfig } from '../types';
@@ -23,9 +27,17 @@ interface ValidateRequestFailure {
 
 export type ValidateRequestResult = ValidateRequestSuccess | ValidateRequestFailure;
 
+/**
+ * Default composite workflow config when the request omits `workflow_config`:
+ * the always-on skill gate's additional retrieval is on (Toggle 1), the other
+ * two toggles are off, which satisfies the at-least-one-toggle rule.
+ */
 const getDefaultWorkflowConfig = (): WorkflowConfig => ({
   alert_retrieval_mode: 'custom_query',
   alert_retrieval_workflow_ids: [],
+  alert_retrieval_workflows_enabled: false,
+  default_retrieval_enabled: false,
+  skill_enabled: true,
   validation_workflow_id: 'default',
 });
 
@@ -64,31 +76,34 @@ export const validateRequest = ({
       ? {
           alert_retrieval_mode: parsedWorkflowConfig.alert_retrieval_mode,
           alert_retrieval_workflow_ids: parsedWorkflowConfig.alert_retrieval_workflow_ids,
-          esql_query: parsedWorkflowConfig.esql_query,
+          alert_retrieval_workflows_enabled: parsedWorkflowConfig.alert_retrieval_workflows_enabled,
+          default_retrieval_enabled: parsedWorkflowConfig.default_retrieval_enabled,
+          ...(parsedWorkflowConfig.esql_query != null
+            ? { esql_query: parsedWorkflowConfig.esql_query }
+            : {}),
+          skill_enabled: parsedWorkflowConfig.skill_enabled,
           validation_workflow_id: parsedWorkflowConfig.validation_workflow_id,
         }
       : getDefaultWorkflowConfig();
 
-  if (
-    workflowConfig.alert_retrieval_mode === 'custom_only' &&
-    workflowConfig.alert_retrieval_workflow_ids.length === 0
-  ) {
+  if (!hasAtLeastOneRetrievalToggle(workflowConfig)) {
     return {
       body: {
-        message:
-          'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+        message: AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
       },
       ok: false,
     };
   }
 
   if (
+    workflowConfig.default_retrieval_enabled &&
     workflowConfig.alert_retrieval_mode === 'esql' &&
     (workflowConfig.esql_query == null || workflowConfig.esql_query.trim() === '')
   ) {
     return {
       body: {
-        message: 'esql_query is required in workflow_config when alert_retrieval_mode is "esql"',
+        message:
+          'esql_query is required in workflow_config when default_retrieval_enabled is true and alert_retrieval_mode is "esql"',
       },
       ok: false,
     };

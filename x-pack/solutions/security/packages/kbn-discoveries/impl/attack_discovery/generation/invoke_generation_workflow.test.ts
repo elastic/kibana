@@ -106,8 +106,11 @@ describe('invokeGenerationWorkflow', () => {
     start: '2023-12-01T00:00:00Z',
     workflowId,
     workflowConfig: {
-      alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
       alert_retrieval_mode: 'custom_query' as const,
+      alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
+      alert_retrieval_workflows_enabled: false,
+      default_retrieval_enabled: true,
+      skill_enabled: true,
       validation_workflow_id: 'attack-discovery-validation',
     },
     workflowsManagementApi: mockWorkflowsManagementApi,
@@ -353,6 +356,50 @@ describe('invokeGenerationWorkflow', () => {
         .calls[0][2] as Record<string, unknown>;
 
       expect(workflowInputs).not.toHaveProperty('additional_context');
+    });
+
+    it('passes the retrieval additionalContext as additional_context when workflowConfig has none', async () => {
+      const propsWithRetrievalContext = {
+        ...defaultProps,
+        alertRetrievalResult: {
+          ...mockAlertRetrievalResult,
+          additionalContext: 'Skill corroboration: high-risk host',
+        },
+      };
+
+      await invokeGenerationWorkflow(propsWithRetrievalContext);
+
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'default',
+        expect.objectContaining({
+          additional_context: 'Skill corroboration: high-risk host',
+        }),
+        mockRequest,
+        'attack-discovery-pipeline'
+      );
+    });
+
+    it('merges workflowConfig.additional_context with the retrieval additionalContext', async () => {
+      const propsWithBothContexts = {
+        ...defaultProps,
+        alertRetrievalResult: {
+          ...mockAlertRetrievalResult,
+          additionalContext: 'Skill corroboration: high-risk host',
+        },
+        workflowConfig: {
+          ...defaultProps.workflowConfig,
+          additional_context: 'Focus on lateral movement',
+        },
+      };
+
+      await invokeGenerationWorkflow(propsWithBothContexts);
+
+      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mock
+        .calls[0][2] as Record<string, unknown>;
+
+      expect(workflowInputs.additional_context).toContain('Focus on lateral movement');
+      expect(workflowInputs.additional_context).toContain('Skill corroboration: high-risk host');
     });
 
     it('does NOT include newAlerts in the generate-step-succeeded event', async () => {

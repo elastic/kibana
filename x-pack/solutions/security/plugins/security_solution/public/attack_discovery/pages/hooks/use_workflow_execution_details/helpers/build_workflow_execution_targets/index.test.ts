@@ -104,6 +104,39 @@ describe('buildWorkflowExecutionTargets', () => {
     ]);
   });
 
+  it('adds gate targets with the generate_discoveries pipeline phase', () => {
+    const workflowExecutions: WorkflowExecutionsTracking = {
+      alertRetrieval: [],
+      gate: [{ workflowId: 'gate-wf', workflowRunId: 'gate-run' }],
+      generation: null,
+      validation: null,
+    };
+
+    const result = buildWorkflowExecutionTargets({ workflowExecutions });
+
+    expect(result).toEqual([
+      { pipelinePhase: 'generate_discoveries', workflowId: 'gate-wf', workflowRunId: 'gate-run' },
+    ]);
+  });
+
+  it('orders gate targets before the generation target (both under Generation)', () => {
+    const workflowExecutions: WorkflowExecutionsTracking = {
+      alertRetrieval: [{ workflowId: 'alert-wf', workflowRunId: 'alert-run' }],
+      gate: [{ workflowId: 'gate-wf', workflowRunId: 'gate-run' }],
+      generation: { workflowId: 'gen-wf', workflowRunId: 'gen-run' },
+      validation: { workflowId: 'val-wf', workflowRunId: 'val-run' },
+    };
+
+    const result = buildWorkflowExecutionTargets({ workflowExecutions });
+
+    expect(result).toEqual([
+      { pipelinePhase: 'retrieve_alerts', workflowId: 'alert-wf', workflowRunId: 'alert-run' },
+      { pipelinePhase: 'generate_discoveries', workflowId: 'gate-wf', workflowRunId: 'gate-run' },
+      { pipelinePhase: 'generate_discoveries', workflowId: 'gen-wf', workflowRunId: 'gen-run' },
+      { pipelinePhase: 'validate_discoveries', workflowId: 'val-wf', workflowRunId: 'val-run' },
+    ]);
+  });
+
   it('adds workflowRunId as fallback target when not already present', () => {
     const result = buildWorkflowExecutionTargets({
       workflowId: 'my-wf',

@@ -142,3 +142,13 @@ export const INSPECT_RAW_DISCOVERIES = i18n.translate(
     defaultMessage: 'Inspect raw discoveries',
   }
 );
+
+export const MISSING_ALERT_ID_WARNING = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.attackDiscovery.loadingCallout.workflowPipelineMonitor.missingAlertIdWarning',
+    {
+      defaultMessage:
+        '{count, plural, one {# alert was} other {# alerts were}} dropped because they lack a backing document _id. Update this workflow to select the alert _id (for example, add `METADATA _id` to the ES|QL query) so these alerts reach generation.',
+      values: { count },
+    }
+  );

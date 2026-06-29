@@ -15,15 +15,27 @@ import {
   type WorkflowsManagementApi,
 } from '../../../../../invoke_alert_retrieval_workflow';
 import type { AttackDiscoverySource } from '../../../../../../persistence/event_logging';
-import type { AlertRetrievalMode, ParsedApiConfig } from '../../../../../types';
+import type { AlertRetrievalQueryMode, ParsedApiConfig } from '../../../../../types';
 
-export const createLegacyRetrievalPromise = ({
+/**
+ * Builds the built-in default alert retrieval promise (Toggle 2). When the
+ * toggle is off (`defaultRetrievalEnabled === false`) the default retrieval is
+ * skipped and `null` is resolved. When on, the default alert retrieval workflow
+ * runs in the selected query mode (`custom_query` DSL, or `esql` with the
+ * supplied `esqlQuery`).
+ *
+ * The skill's additional retrieval is no longer a retrieval-phase concern — it
+ * is a behavior of the generation-phase gate (`runGatePhase`), so this helper no
+ * longer handles a `skill` mode.
+ */
+export const createDefaultRetrievalPromise = ({
   alertsIndexPattern,
   anonymizationFields,
   apiConfig,
   authenticatedUser,
   alertRetrievalMode,
   defaultAlertRetrievalWorkflowId,
+  defaultRetrievalEnabled,
   end,
   esqlQuery,
   eventLogger,
@@ -31,6 +43,7 @@ export const createLegacyRetrievalPromise = ({
   executionUuid,
   filter,
   logger,
+  maxWaitMs,
   request,
   size,
   source,
@@ -42,8 +55,11 @@ export const createLegacyRetrievalPromise = ({
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ParsedApiConfig;
   authenticatedUser: AuthenticatedUser;
-  alertRetrievalMode: AlertRetrievalMode;
+  /** Query mode for the built-in default retrieval workflow (Toggle 2 sub-field). */
+  alertRetrievalMode: AlertRetrievalQueryMode;
   defaultAlertRetrievalWorkflowId: string;
+  /** Toggle 2: whether the built-in default retrieval workflow runs. */
+  defaultRetrievalEnabled: boolean;
   end?: string;
   esqlQuery?: string;
   eventLogger: IEventLogger;
@@ -51,6 +67,13 @@ export const createLegacyRetrievalPromise = ({
   executionUuid: string;
   filter?: Record<string, unknown>;
   logger: Logger;
+  /**
+   * Maximum time to wait for the retrieval workflow to complete, in
+   * milliseconds. Threaded from the orchestration's remaining pipeline budget
+   * down to `pollForWorkflowCompletion` so the consumer-side poll never gives
+   * up before the workflow's own step timeout.
+   */
+  maxWaitMs?: number;
   request: KibanaRequest;
   size?: number;
   source?: AttackDiscoverySource;
@@ -58,7 +81,7 @@ export const createLegacyRetrievalPromise = ({
   start?: string;
   workflowsManagementApi: WorkflowsManagementApi;
 }): Promise<AlertRetrievalResult | null> => {
-  if (alertRetrievalMode === 'custom_only' || alertRetrievalMode === 'provided') {
+  if (!defaultRetrievalEnabled) {
     return Promise.resolve(null);
   }
 
@@ -74,6 +97,7 @@ export const createLegacyRetrievalPromise = ({
     executionUuid,
     filter,
     logger,
+    ...(maxWaitMs != null ? { maxWaitMs } : {}),
     request,
     size,
     source,

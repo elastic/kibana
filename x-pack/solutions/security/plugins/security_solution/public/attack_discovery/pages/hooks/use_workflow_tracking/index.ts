@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@kbn/react-query';
 
+import { getTrackingRefetchInterval } from './helpers/get_tracking_refetch_interval';
+
 export interface WorkflowTrackingEntry {
   workflow_id: string;
   workflow_run_id: string;
@@ -16,6 +18,7 @@ export interface WorkflowTrackingEntry {
 
 export interface WorkflowTrackingResponse {
   alert_retrieval: WorkflowTrackingEntry[] | null;
+  gate: WorkflowTrackingEntry[] | null;
   generation: WorkflowTrackingEntry | null;
   validation: WorkflowTrackingEntry | null;
 }
@@ -36,6 +39,7 @@ const WORKFLOW_TRACKING_QUERY_KEY = 'GET_WORKFLOW_TRACKING';
 
 const EMPTY_TRACKING: WorkflowTrackingResponse = {
   alert_retrieval: null,
+  gate: null,
   generation: null,
   validation: null,
 };
@@ -107,17 +111,18 @@ export const useWorkflowTracking = ({
         }
 
         const startedAt = pollingStartedAtRef.current ?? Date.now();
-        const MAX_POLLING_MS = 60_000;
-        if (Date.now() - startedAt > MAX_POLLING_MS) {
-          return false;
-        }
-
         const effective = latest ?? EMPTY_TRACKING;
-        const hasGeneration = effective.generation != null;
-        const hasValidation = effective.validation != null;
 
-        // Poll until we see generation + validation (or we time out).
-        return hasGeneration && hasValidation ? false : 2000;
+        // Poll until we see generation + validation (or the safety window
+        // elapses). The window must outlast a full run — the gate phase alone
+        // can take ~45s before the generation tracking entry is written, so a
+        // short cap would freeze the poller mid-run and the Generation row
+        // would not appear until the run completed.
+        return getTrackingRefetchInterval({
+          elapsedMs: Date.now() - startedAt,
+          hasGeneration: effective.generation != null,
+          hasValidation: effective.validation != null,
+        });
       },
       refetchOnWindowFocus: false,
       staleTime: 0,

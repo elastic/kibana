@@ -21,12 +21,24 @@ import {
 import type { AttackDiscoverySource } from '../../../../persistence/event_logging';
 import type { WorkflowConfig } from '../../../types';
 
-export interface ManualOrchestrationOutcome {
+export interface ValidationSucceededOutcome {
   alertRetrievalResult: AlertRetrievalResult;
   generationResult: GenerationWorkflowResult;
   outcome: 'validation_succeeded';
   validationResult: ValidationResult;
 }
+
+/**
+ * Terminal outcome for the zero-alert short-circuit: when alert retrieval
+ * returns no alerts, the pipeline skips both generation and validation (no LLM
+ * call) and surfaces this outcome instead.
+ */
+export interface NoAlertsOutcome {
+  alertRetrievalResult: AlertRetrievalResult;
+  outcome: 'no_alerts';
+}
+
+export type ManualOrchestrationOutcome = NoAlertsOutcome | ValidationSucceededOutcome;
 
 export interface ValidationStepParams {
   alertRetrievalResult: AlertRetrievalResult;
@@ -60,7 +72,7 @@ export const runValidationStep = async ({
   spaceId,
   workflowConfig,
   workflowsManagementApi,
-}: ValidationStepParams): Promise<ManualOrchestrationOutcome> => {
+}: ValidationStepParams): Promise<ValidationSucceededOutcome> => {
   logHealthCheck(logger, 'validation', {
     defaultValidationWorkflowId,
     discoveryCount: generationResult.attackDiscoveries.length,

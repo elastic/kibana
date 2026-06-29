@@ -84,6 +84,7 @@ const GroupedAlertRetrievalContentComponent: React.FC<GroupedAlertRetrievalConte
         return (
           <EuiFlexItem grow={false} key={key}>
             <WorkflowGroupSteps
+              badge={renderWorkflowAlertsCountBadge?.(representativeStep.workflowRunId)}
               inspectButton={renderWorkflowInspectButton?.(
                 representativeStep.workflowRunId,
                 metadata

@@ -89,6 +89,63 @@ describe('GroupedAlertRetrievalContent', () => {
     expect(nameElements).toHaveLength(1);
   });
 
+  it('renders the per-workflow alerts count badge for a multi-step same-workflow group', () => {
+    const subSteps = [
+      createMockStep({
+        id: 's1',
+        stepId: 'retrieve_alerts',
+        workflowId: 'wf-a',
+        workflowName: 'Skill alert retrieval',
+        workflowRunId: 'run-1',
+      }),
+      createMockStep({
+        id: 's2',
+        stepId: 'emit_alert_set',
+        workflowId: 'wf-a',
+        workflowName: 'Skill alert retrieval',
+        workflowRunId: 'run-1',
+      }),
+    ];
+
+    render(
+      <TestProviders>
+        <GroupedAlertRetrievalContent
+          renderWorkflowAlertsCountBadge={(runId) => (
+            <span data-test-subj="alertsCountBadge">{`36 alerts (${runId})`}</span>
+          )}
+          subSteps={subSteps}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('alertsCountBadge')).toHaveTextContent('36 alerts (run-1)');
+  });
+
+  it('renders the per-workflow alerts count badge for a single-step group', () => {
+    const subSteps = [
+      createMockStep({
+        id: 's1',
+        stepId: 'retrieve_alerts',
+        workflowId: 'wf-a',
+        workflowName: 'Default alert retrieval',
+        workflowRunId: 'run-1',
+      }),
+    ];
+
+    render(
+      <TestProviders>
+        <GroupedAlertRetrievalContent
+          renderWorkflowAlertsCountBadge={(runId) => (
+            <span data-test-subj="alertsCountBadge">{`75 alerts (${runId})`}</span>
+          )}
+          subSteps={subSteps}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('alertsCountBadge')).toHaveTextContent('75 alerts (run-1)');
+  });
+
   it('renders separate entries for different workflows', () => {
     const subSteps = [
       createMockStep({

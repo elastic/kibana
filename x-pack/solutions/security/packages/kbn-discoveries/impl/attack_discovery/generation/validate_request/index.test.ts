@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE } from '@kbn/discoveries-schemas';
+
 import { validateRequest } from '.';
 
 describe('validateRequest', () => {
@@ -35,22 +37,21 @@ describe('validateRequest', () => {
     expect(result.ok).toBe(false);
   });
 
-  it('returns a failure when no alert retrieval method is specified', () => {
+  it('returns a failure when no alert retrieval method is specified (all toggles off)', () => {
     const result = validateRequest({
       requestBody: {
         ...validRequestBody,
         workflow_config: {
-          alert_retrieval_mode: 'custom_only',
-          alert_retrieval_workflow_ids: [],
-          validation_workflow_id: 'default',
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: false,
+          skill_enabled: false,
         },
       },
     });
 
     expect(result).toEqual({
       body: {
-        message:
-          'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+        message: AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
       },
       ok: false,
     });
@@ -72,7 +73,7 @@ describe('validateRequest', () => {
     });
   });
 
-  it('returns validated requestBody and normalized workflowConfig', () => {
+  it('returns validated requestBody and a workflowConfig that defaults to the skill toggle enabled', () => {
     const result = validateRequest({ requestBody: validRequestBody });
 
     expect(result).toEqual({
@@ -83,8 +84,26 @@ describe('validateRequest', () => {
       workflowConfig: {
         alert_retrieval_mode: 'custom_query',
         alert_retrieval_workflow_ids: [],
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: false,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
     });
+  });
+
+  it('accepts the skill toggle without requiring esql_query or custom workflow ids', () => {
+    const result = validateRequest({
+      requestBody: {
+        ...validRequestBody,
+        workflow_config: {
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: false,
+          skill_enabled: true,
+        },
+      },
+    });
+
+    expect(result.ok).toBe(true);
   });
 });

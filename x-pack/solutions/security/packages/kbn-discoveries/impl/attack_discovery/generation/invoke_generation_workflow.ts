@@ -158,10 +158,21 @@ const buildWorkflowInputs = ({
   start?: string;
   workflowConfig: WorkflowConfig;
 }): Record<string, unknown> => {
+  // Combine the config-supplied context with the corroboration context the skill
+  // gathered during `skill` retrieval (its Cross-Skill Corroboration loop), so the
+  // generation LLM sees the same extra signal `provided` mode passed to the run
+  // step. Either, both, or neither may be present.
+  const additionalContext = [
+    workflowConfig.additional_context,
+    alertRetrievalResult.additionalContext,
+  ]
+    .filter(
+      (context): context is string => typeof context === 'string' && context.trim().length > 0
+    )
+    .join('\n\n');
+
   return {
-    ...(workflowConfig.additional_context != null
-      ? { additional_context: workflowConfig.additional_context }
-      : {}),
+    ...(additionalContext.length > 0 ? { additional_context: additionalContext } : {}),
     // Pre-retrieved alerts (manual orchestration) - pass array directly, not stringified
     additional_alerts: alertRetrievalResult.alerts,
     alert_retrieval_workflow_ids: workflowConfig.alert_retrieval_workflow_ids,
@@ -660,6 +671,11 @@ export const invokeGenerationWorkflow = async ({
         alertRetrievalResult.workflowExecutions.length > 0
           ? alertRetrievalResult.workflowExecutions
           : null,
+      gate:
+        alertRetrievalResult.gateExecutions != null &&
+        alertRetrievalResult.gateExecutions.length > 0
+          ? alertRetrievalResult.gateExecutions
+          : null,
       generation: workflowExecution,
       validation: null,
     };
@@ -667,8 +683,10 @@ export const invokeGenerationWorkflow = async ({
     logger.info(`Generation workflow started (workflowRunId: ${workflowRunId})`);
 
     // Write generate-step-started event (best-effort).
-    // For 'provided' mode, include the alert strings so the pipeline_data route
-    // can surface them during the running state (before step.input is populated).
+    // For the pre-provided path (no upstream retrieval/gate executions — e.g. the
+    // `agent_builder` run tool), include the alert strings so the pipeline_data
+    // route can surface them during the running state (before step.input is
+    // populated).
     generateStepStartTime = new Date();
     await writeGenerateStepStartedEvent({
       alertsContextCount: alertRetrievalResult.alertsContextCount,
@@ -678,7 +696,7 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
-      ...(workflowConfig.alert_retrieval_mode === 'provided' &&
+      ...(alertRetrievalResult.workflowExecutions.length === 0 &&
       alertRetrievalResult.alerts.length > 0
         ? { providedAlerts: alertRetrievalResult.alerts }
         : {}),
@@ -794,6 +812,11 @@ export const invokeGenerationWorkflow = async ({
       alertRetrieval:
         alertRetrievalResult.workflowExecutions.length > 0
           ? alertRetrievalResult.workflowExecutions
+          : null,
+      gate:
+        alertRetrievalResult.gateExecutions != null &&
+        alertRetrievalResult.gateExecutions.length > 0
+          ? alertRetrievalResult.gateExecutions
           : null,
       generation: workflowExecution,
       validation: null,
