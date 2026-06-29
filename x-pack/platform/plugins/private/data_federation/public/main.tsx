@@ -12,11 +12,14 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -708,9 +711,27 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
   return (
     <>
       <EuiPageSection paddingSize="m">
-        <EuiTitle size="l">
-          <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>{mainTranslations.pageDescription}</p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink href="https://ela.st/esql-data-federation" target="_blank" external={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="documentation" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{mainTranslations.docsLink}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="l" />
         <EuiTabbedContent
           tabs={tabs}

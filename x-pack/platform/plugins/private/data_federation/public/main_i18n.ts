@@ -12,6 +12,15 @@ export const mainTranslations = {
     defaultMessage: 'ES|QL Data Federation',
   }),
 
+  pageDescription: i18n.translate('xpack.dataFederation.pageDescription', {
+    defaultMessage:
+      'Manage data sources and data sets to query external data with ES|QL.',
+  }),
+
+  docsLink: i18n.translate('xpack.dataFederation.docsLink', {
+    defaultMessage: 'Documentation',
+  }),
+
   columns: {
     dataSources: {
       name: i18n.translate('xpack.dataFederation.table.columnName', {
