@@ -940,6 +940,31 @@ describe('invokeAlertRetrievalWorkflow', () => {
     });
   });
 
+  describe('when the workflow does not complete before maxWaitMs', () => {
+    const mockRunningExecution: WorkflowExecutionDto = {
+      ...mockCompletedExecution,
+      status: ExecutionStatus.RUNNING,
+    };
+
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockRunningExecution
+      );
+    });
+
+    it('honors the provided maxWaitMs in the timeout error', async () => {
+      const promise = invokeAlertRetrievalWorkflow({ ...defaultProps, maxWaitMs: 1000 });
+
+      const expectation = expect(promise).rejects.toThrow('Workflow timed out after 1000ms');
+
+      await jest.advanceTimersByTimeAsync(2000);
+
+      await expectation;
+    });
+  });
+
   describe('when writeAttackDiscoveryEvent fails for started event', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);

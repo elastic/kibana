@@ -10,7 +10,8 @@ export type ExtractionStrategy =
   | 'custom_workflow'
   | 'default_custom_query'
   | 'default_esql'
-  | 'provided';
+  | 'provided'
+  | 'skill';
 
 /** Per-workflow alert retrieval data extracted by extract_pipeline_alert_data. */
 export interface AlertRetrievalData {

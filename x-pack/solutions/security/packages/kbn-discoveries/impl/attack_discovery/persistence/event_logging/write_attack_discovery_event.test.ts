@@ -416,6 +416,48 @@ describe('writeAttackDiscoveryEvent', () => {
     });
   });
 
+  describe('conversationId', () => {
+    it('includes conversationId in event.reference JSON when provided', async () => {
+      await writeAttackDiscoveryEvent({
+        ...defaultParams,
+        conversationId: 'conversation-abc-123',
+      });
+
+      const loggedEvent = mockEventLogger.logEvent.mock.calls[0][0];
+      const parsed = JSON.parse(loggedEvent?.event?.reference as string);
+
+      expect(parsed.conversationId).toBe('conversation-abc-123');
+    });
+
+    it('does not set event.reference when conversationId is not provided', async () => {
+      await writeAttackDiscoveryEvent(defaultParams);
+
+      const loggedEvent = mockEventLogger.logEvent.mock.calls[0][0];
+
+      expect(loggedEvent?.event?.reference).toBeUndefined();
+    });
+
+    it('coexists with workflowExecutions in event.reference', async () => {
+      const workflowExecutions = {
+        alertRetrieval: [{ workflowId: 'alert-wf', workflowRunId: 'alert-run' }],
+        generation: null,
+        validation: null,
+      };
+
+      await writeAttackDiscoveryEvent({
+        ...defaultParams,
+        conversationId: 'conversation-abc-123',
+        workflowExecutions,
+      });
+
+      const loggedEvent = mockEventLogger.logEvent.mock.calls[0][0];
+      const parsed = JSON.parse(loggedEvent?.event?.reference as string);
+
+      expect(parsed.conversationId).toBe('conversation-abc-123');
+      expect(parsed.alertRetrieval).toEqual(workflowExecutions.alertRetrieval);
+    });
+  });
+
   describe('sourceMetadata', () => {
     const sourceMetadata = {
       actionExecutionUuid: 'action-exec-uuid-123',

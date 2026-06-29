@@ -31,6 +31,7 @@ const validTracking: WorkflowExecutionsTracking = {
       workflowRunId: 'alert-retrieval-run-id',
     },
   ],
+  gate: null,
   generation: {
     workflowId: 'workflow-generation',
     workflowRunId: 'generation-run-id',
@@ -181,6 +182,7 @@ describe('getWorkflowExecutionsTracking', () => {
   it('returns tracking with null alertRetrieval', async () => {
     const trackingWithNullAlertRetrieval: WorkflowExecutionsTracking = {
       alertRetrieval: null,
+      gate: null,
       generation: {
         workflowId: 'workflow-generation',
         workflowRunId: 'generation-run-id',
@@ -226,6 +228,7 @@ describe('getWorkflowExecutionsTracking', () => {
           workflowRunId: 'custom-esql-run-id',
         },
       ],
+      gate: null,
       generation: {
         workflowId: 'workflow-generation',
         workflowRunId: 'generation-run-id',
@@ -314,6 +317,34 @@ describe('getWorkflowExecutionsTracking', () => {
       workflowId: 'workflow-validate',
       workflowRunId: 'validation-run-id',
     });
+  });
+
+  it('surfaces the generation-phase gate executions from event.reference', async () => {
+    const eventWithGate = {
+      alertRetrieval: [{ workflowId: 'workflow-default', workflowRunId: 'default-run-id' }],
+      gate: [{ workflowId: 'workflow-gate', workflowRunId: 'gate-run-id' }],
+      generation: { workflowId: 'workflow-generation', workflowRunId: 'generation-run-id' },
+      validation: null,
+    };
+
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [{ _source: { event: { reference: JSON.stringify(eventWithGate) } } }],
+        total: { value: 1 },
+      },
+    });
+
+    const result = await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+    });
+
+    expect(result?.gate).toEqual([{ workflowId: 'workflow-gate', workflowRunId: 'gate-run-id' }]);
+    // gate executions must NOT leak into alertRetrieval
+    expect(result?.alertRetrieval).toEqual([
+      { workflowId: 'workflow-default', workflowRunId: 'default-run-id' },
+    ]);
   });
 
   it('deduplicates alertRetrieval entries with the same workflowRunId across events', async () => {
