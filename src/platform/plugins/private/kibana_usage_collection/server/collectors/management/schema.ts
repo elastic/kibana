@@ -504,7 +504,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'array',
     items: {
       type: 'keyword',
-      _meta: { description: 'Non-default value of setting.' },
+      _meta: {
+        description:
+          'Field names configured as default columns for the Logs tab in APM trace samples.',
+      },
     },
   },
   'observability:apmAWSLambdaPriceFactor': {

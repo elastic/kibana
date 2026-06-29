@@ -11683,7 +11683,7 @@
           "items": {
             "type": "keyword",
             "_meta": {
-              "description": "Non-default value of setting."
+              "description": "Field names configured as default columns for the Logs tab in APM trace samples."
             }
           }
         },
