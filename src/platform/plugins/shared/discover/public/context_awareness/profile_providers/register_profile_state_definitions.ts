@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as i18nCore from './core';
+import type { ProfileStateRegistry } from '../profile_state';
+import { registerExampleProfileStateDefinitions } from './example/profile_state';
 
-export const i18n = i18nCore;
-export {
-  SUPPORTED_LOCALE_IDS,
-  getLocaleLabel,
-  toCanonicalLocaleId,
-  setAvailableLocales,
-  getAvailableLocales,
-  getBrowserPreferredLocale,
-} from './locales';
-export type { AvailableLocale, SupportedLocaleId } from './locales';
+/**
+ * Registers all profile state definitions supported by Discover.
+ */
+export const registerProfileStateDefinitions = (registry: ProfileStateRegistry) => {
+  registerExampleProfileStateDefinitions(registry);
+};
