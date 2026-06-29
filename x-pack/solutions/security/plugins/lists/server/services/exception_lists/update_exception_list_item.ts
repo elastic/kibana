@@ -23,10 +23,12 @@ import type {
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import type { RefreshFalseOrWaitFor } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
+  toSavedObjectRefresh,
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
 } from './utils';
@@ -49,6 +51,7 @@ export interface UpdateExceptionListItemOptions {
   tags: TagsOrUndefined;
   tieBreaker?: string;
   type: ExceptionListItemTypeOrUndefined;
+  refresh?: RefreshFalseOrWaitFor;
 }
 
 export const updateExceptionListItem = async ({
@@ -67,6 +70,7 @@ export const updateExceptionListItem = async ({
   user,
   tags,
   type,
+  refresh,
 }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const exceptionListItem = await getExceptionListItem({
@@ -99,6 +103,7 @@ export const updateExceptionListItem = async ({
         updated_by: user,
       },
       {
+        refresh: toSavedObjectRefresh(refresh),
         version: _version,
       }
     );

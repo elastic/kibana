@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type {
+  MutatingOperationRefreshSetting,
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
@@ -25,12 +26,21 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { exceptionListItemType, exceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
+import type { RefreshFalseOrWaitFor } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionListSoSchema } from '../../../schemas/saved_objects';
 import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_list_client_types';
+
+export const toSavedObjectRefresh = (
+  refresh: RefreshFalseOrWaitFor | undefined
+): MutatingOperationRefreshSetting | undefined => {
+  if (refresh === undefined) return undefined;
+  if (refresh === 'wait_for') return 'wait_for';
+  return false;
+};
 
 export { validateData } from './validate_data';
 
@@ -307,44 +317,66 @@ export const transformCreateCommentsToComments = ({
 };
 
 export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema = ({
+  comments,
+  description,
+  entries,
   expireTime,
-  listId,
   itemId,
+  listId,
+  meta,
+  name,
   namespaceType,
   osTypes,
-  ...rest
+  tags,
+  type,
 }: CreateExceptionListItemOptions): CreateExceptionListItemSchema => {
   return {
-    ...rest,
+    comments,
+    description,
+    entries,
     expire_time: expireTime,
     item_id: itemId,
     list_id: listId,
+    meta,
+    name,
     namespace_type: namespaceType,
     os_types: osTypes,
+    tags,
+    type,
   };
 };
 
 export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema = ({
+  _version,
+  comments,
+  entries,
+  id,
   itemId,
+  meta,
   namespaceType,
   osTypes,
   expireTime,
+  tags,
   // The `UpdateExceptionListItemOptions` type differs from the schema in that some properties are
   // marked as having `undefined` as a valid value, where the schema, however, requires it.
   // So we assign defaults here
   description = '',
   name = '',
   type = 'simple',
-  ...rest
 }: UpdateExceptionListItemOptions): UpdateExceptionListItemSchema => {
   return {
-    ...rest,
+    _version,
+    comments,
     description,
+    entries,
     expire_time: expireTime,
+    id,
     item_id: itemId,
+    meta,
     name,
     namespace_type: namespaceType,
     os_types: osTypes,
+    tags,
     type,
   };
 };

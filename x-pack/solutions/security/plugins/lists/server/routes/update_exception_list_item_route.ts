@@ -11,6 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import {
   UpdateExceptionListItemRequestBody,
+  UpdateExceptionListItemRequestQuery,
   UpdateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -39,6 +40,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
         validate: {
           request: {
             body: buildRouteValidationWithZod(UpdateExceptionListItemRequestBody),
+            query: buildRouteValidationWithZod(UpdateExceptionListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -51,6 +53,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
         }
 
         try {
+          const { refresh } = request.query;
           const {
             description,
             id,
@@ -92,6 +95,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             name,
             namespaceType,
             osTypes: osTypesArray,
+            refresh,
             tags: tagsArray,
             type,
           });

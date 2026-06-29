@@ -13,5 +13,7 @@ export const refreshWithWaitFor = t.union([
   t.literal('false'),
   t.literal('wait_for'),
 ]);
+export const refreshFalseOrWaitFor = t.union([t.literal('false'), t.literal('wait_for')]);
 export type Refresh = t.TypeOf<typeof refresh>;
 export type RefreshWithWaitFor = t.TypeOf<typeof refreshWithWaitFor>;
+export type RefreshFalseOrWaitFor = t.TypeOf<typeof refreshFalseOrWaitFor>;

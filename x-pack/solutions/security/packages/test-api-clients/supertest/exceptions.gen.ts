@@ -24,7 +24,10 @@ import {
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { CreateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
-import type { CreateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
+import type {
+  CreateExceptionListItemRequestQueryInput,
+  CreateExceptionListItemRequestBodyInput,
+} from '@kbn/securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
 import type {
   CreateRuleExceptionListItemsRequestParamsInput,
   CreateRuleExceptionListItemsRequestBodyInput,
@@ -41,7 +44,10 @@ import type { ReadExceptionListRequestQueryInput } from '@kbn/securitysolution-e
 import type { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
 import type { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
 import type { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list/update_exception_list.gen';
-import type { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
+import type {
+  UpdateExceptionListItemRequestQueryInput,
+  UpdateExceptionListItemRequestBodyInput,
+} from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
@@ -73,7 +79,8 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
+      .send(props.body as object)
+      .query(props.query);
   },
   /**
    * Create exception items that apply to a single detection rule.
@@ -241,7 +248,8 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
+      .send(props.body as object)
+      .query(props.query);
   },
 });
 
@@ -265,6 +273,7 @@ export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }
 export interface CreateExceptionListItemProps {
+  query: CreateExceptionListItemRequestQueryInput;
   body: CreateExceptionListItemRequestBodyInput;
 }
 export interface CreateRuleExceptionListItemsProps {
@@ -308,5 +317,6 @@ export interface UpdateExceptionListProps {
   body: UpdateExceptionListRequestBodyInput;
 }
 export interface UpdateExceptionListItemProps {
+  query: UpdateExceptionListItemRequestQueryInput;
   body: UpdateExceptionListItemRequestBodyInput;
 }
