@@ -56,6 +56,13 @@ export interface ContentProps {
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
+  /**
+   * Whether the caller's `openDetailsPanel` can navigate to the graph view and resolution group
+   * tabs. The v1 `HostPanel` and the agent-builder canvas forward those tabs to a left panel that
+   * renders them, so they leave this on. The v2 `Host` flyout does not yet wire up those tabs, so
+   * it sets this to `false` to hide the (otherwise no-op) Show-graph icon and Resolution-group link.
+   */
+  enableGraphAndResolutionNavigation?: boolean;
 }
 
 /**
@@ -76,6 +83,7 @@ export const Content = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
+  enableGraphAndResolutionNavigation = true,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -112,22 +120,22 @@ export const Content = ({
         )}
       {entityStoreEntityId && (
         <>
-          {/* TODO: pass `openDetailsPanel` back in once index.tsx handles the GRAPH_VIEW tab (currently a no-op) */}
           <VisualizationsSection
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
+            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
           />
           <EuiHorizontalRule margin="m" />
         </>
       )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
-          {/* TODO: pass `openDetailsPanel` back in once index.tsx handles the RESOLUTION_GROUP tab (currently a no-op) */}
           <ResolutionSection
             entityId={entityStoreEntityId}
             entityType={EntityType.host}
             scopeId={scopeId}
+            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
           />
           <EuiHorizontalRule />
         </>

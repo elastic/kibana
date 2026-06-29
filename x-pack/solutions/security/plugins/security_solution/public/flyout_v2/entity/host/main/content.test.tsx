@@ -13,8 +13,13 @@ import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_
 import { Content } from './content';
 import { mockHostEntityRiskScores } from '../../../../flyout/entity_details/mocks';
 
+const mockResolutionSection = jest.fn(() => (
+  <div data-test-subj="securitySolutionFlyoutResolutionSection" />
+));
+const mockVisualizationsSection = jest.fn(() => null);
+
 jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
-  ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
+  ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
 }));
 jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
   useHasEntityResolutionLicense: jest.fn(() => false),
@@ -25,7 +30,8 @@ jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summ
 jest.mock(
   '../../../../flyout/entity_details/shared/components/right/visualizations_section',
   () => ({
-    VisualizationsSection: () => null,
+    VisualizationsSection: (props: { openDetailsPanel?: unknown }) =>
+      mockVisualizationsSection(props),
   })
 );
 jest.mock(
@@ -75,5 +81,43 @@ describe('Content — resolution license gating', () => {
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
     render(<Content {...defaultProps} />, { wrapper: TestProviders });
     expect(screen.getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
+  });
+});
+
+describe('Content — graph/resolution navigation gating', () => {
+  const openDetailsPanel = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+  });
+
+  it('forwards openDetailsPanel to the graph and resolution sections by default', () => {
+    render(<Content {...defaultProps} openDetailsPanel={openDetailsPanel} />, {
+      wrapper: TestProviders,
+    });
+    expect(mockVisualizationsSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ openDetailsPanel })
+    );
+    expect(mockResolutionSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ openDetailsPanel })
+    );
+  });
+
+  it('withholds openDetailsPanel from the graph and resolution sections when navigation is disabled', () => {
+    render(
+      <Content
+        {...defaultProps}
+        openDetailsPanel={openDetailsPanel}
+        enableGraphAndResolutionNavigation={false}
+      />,
+      { wrapper: TestProviders }
+    );
+    expect(mockVisualizationsSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ openDetailsPanel: undefined })
+    );
+    expect(mockResolutionSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ openDetailsPanel: undefined })
+    );
   });
 });

@@ -391,6 +391,11 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            // The v2 flyout does not yet wire up the graph view / resolution group tabs, so hide
+            // their navigation here. v1 HostPanel and the agent-builder canvas keep it (default).
+            // TODO: remove this prop (and `enableGraphAndResolutionNavigation` in content.tsx) once
+            // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
+            enableGraphAndResolutionNavigation={false}
           />
         )}
       </EuiFlyoutBody>
