@@ -166,7 +166,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
         bodySchema.validate({
           updates: [{ id: 'a'.repeat(1025), attributes: { enabled: false } }],
         })
-      ).toThrow(/\[updates\.0\.id\]: value has length \[1025\] but it must have a maximum length of \[1024\]/);
+      ).toThrow(
+        /\[updates\.0\.id\]: value has length \[1025\] but it must have a maximum length of \[1024\]/
+      );
     });
   });
 
