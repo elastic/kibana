@@ -70,20 +70,24 @@ describe('SecurityNavControl', () => {
             <span
               class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
             >
-              <div
-                aria-label="full name (email)"
-                class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
-                data-test-subj="userMenuAvatar"
-                role="img"
-                style="background-color: rgb(97, 162, 255); color: rgb(0, 0, 0);"
-                title="full name (email)"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-user"
+                id="generated-id_euiToolTipAnchor"
               >
-                <span
-                  aria-hidden="true"
+                <div
+                  aria-label="some@email"
+                  class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
+                  data-test-subj="userMenuAvatar"
+                  role="img"
+                  style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
                 >
-                  fn
-                </span>
-              </div>
+                  <span
+                    aria-hidden="true"
+                  >
+                    s
+                  </span>
+                </div>
+              </span>
             </span>
           </span>
         </span>
@@ -213,140 +217,131 @@ describe('SecurityNavControl', () => {
             aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
-            <div
-              class="euiContextMenuPanel emotion-euiContextMenuPanel"
-              tabindex="-1"
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="profileLink"
+              href="edit-profile-link"
+              rel="noreferrer"
             >
-              <div
-                class="euiContextMenuPanel__list"
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
               >
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="profileLink"
-                  href="edit-profile-link"
-                  rel="noreferrer"
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="user"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      Edit profile
-                    </span>
-                  </span>
-                </a>
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="userMenuLink__link1"
-                  href="path-to-link-1"
-                  rel="noreferrer"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="user"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Edit profile
+                </span>
+              </span>
+            </a>
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuLink__link1"
+              href="path-to-link-1"
+              rel="noreferrer"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="empty"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      link1
-                    </span>
-                  </span>
-                </a>
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="userMenuLink__link2"
-                  href="path-to-link-2"
-                  rel="noreferrer"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  link1
+                </span>
+              </span>
+            </a>
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuLink__link2"
+              href="path-to-link-2"
+              rel="noreferrer"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="empty"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      link2
-                    </span>
-                  </span>
-                </a>
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="userMenuLink__link3"
-                  href="path-to-link-3"
-                  rel="noreferrer"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  link2
+                </span>
+              </span>
+            </a>
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuLink__link3"
+              href="path-to-link-3"
+              rel="noreferrer"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="empty"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      link3
-                    </span>
-                  </span>
-                </a>
-                <div>
-                  Dummy Component
-                </div>
-                <div
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
-                  data-test-subj="logoutLink"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  link3
+                </span>
+              </span>
+            </a>
+            <div>
+              Dummy Component
+            </div>
+            <div
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+              data-test-subj="logoutLink"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="logOut"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      Log out
-                    </span>
-                  </span>
-                </div>
-              </div>
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="logOut"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Log out
+                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -402,112 +397,103 @@ describe('SecurityNavControl', () => {
             aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
-            <div
-              class="euiContextMenuPanel emotion-euiContextMenuPanel"
-              tabindex="-1"
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuLink__link1"
+              href="path-to-link-1"
+              rel="noreferrer"
             >
-              <div
-                class="euiContextMenuPanel__list"
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
               >
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="userMenuLink__link1"
-                  href="path-to-link-1"
-                  rel="noreferrer"
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="empty"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      link1
-                    </span>
-                  </span>
-                </a>
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="userMenuLink__link2"
-                  href="path-to-link-2"
-                  rel="noreferrer"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  link1
+                </span>
+              </span>
+            </a>
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuLink__link2"
+              href="path-to-link-2"
+              rel="noreferrer"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="empty"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      link2
-                    </span>
-                  </span>
-                </a>
-                <a
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
-                  data-test-subj="userMenuLink__link3"
-                  href="path-to-link-3"
-                  rel="noreferrer"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  link2
+                </span>
+              </span>
+            </a>
+            <a
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
+              data-test-subj="userMenuLink__link3"
+              href="path-to-link-3"
+              rel="noreferrer"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="empty"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      link3
-                    </span>
-                  </span>
-                </a>
-                <div
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
-                  data-test-subj="logoutLink"
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  link3
+                </span>
+              </span>
+            </a>
+            <div
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+              data-test-subj="logoutLink"
+            >
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
+              >
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="logOut"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      Log out
-                    </span>
-                  </span>
-                </div>
-              </div>
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="logOut"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Log out
+                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -558,36 +544,27 @@ describe('SecurityNavControl', () => {
             class="euiContextMenuPanel__list"
           >
             <div
-              class="euiContextMenuPanel emotion-euiContextMenuPanel"
-              tabindex="-1"
+              class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+              data-test-subj="logoutLink"
             >
-              <div
-                class="euiContextMenuPanel__list"
+              <span
+                class="euiListItemLayout__content emotion-euiListItemLayout__content"
               >
-                <div
-                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
-                  data-test-subj="logoutLink"
+                <span
+                  class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                 >
                   <span
-                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
-                  >
-                    <span
-                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="emotion-euiContextMenu__icon"
-                        data-euiicon-type="logOut"
-                      />
-                    </span>
-                    <span
-                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
-                    >
-                      Log in
-                    </span>
-                  </span>
-                </div>
-              </div>
+                    aria-hidden="true"
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="logOut"
+                  />
+                </span>
+                <span
+                  class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                >
+                  Log in
+                </span>
+              </span>
             </div>
           </div>
         </div>
