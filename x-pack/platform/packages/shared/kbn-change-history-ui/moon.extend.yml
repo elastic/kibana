@@ -1,2 +1,0 @@
-dependsOn:
-  - '@kbn/react-query'
