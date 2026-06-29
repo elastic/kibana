@@ -58,7 +58,7 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
     <>
       <EuiFormRow
         fullWidth
-        aria-label={intl.formatMessage({
+        label={intl.formatMessage({
           id: 'xpack.ml.calendarsEdit.calendarForm.dstEventsAriaLabel',
           defaultMessage: 'Time zone',
         })}
