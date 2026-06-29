@@ -4,5 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export { processorEventRt, type UIProcessorEvent } from '@kbn/apm-types';
 export { ProcessorEvent } from '@kbn/apm-types-shared';

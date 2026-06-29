@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export { ServerlessType } from '@kbn/apm-types';
+import { ServerlessType } from '@kbn/apm-types';
 
 /**
  * Gets the serverless function name from serverless id.
  * Serverless id example: arn:aws:lambda:us-west-2:123456789012:function:my-function
  * The function name is the last part after "function:"
  */
-export { ServerlessType } from '@kbn/apm-types';
-import { ServerlessType } from '@kbn/apm-types';
-
 const serverlessIdRegex = /function:(.*)/;
 export function getServerlessFunctionNameFromId(serverlessId: string) {
   const match = serverlessIdRegex.exec(serverlessId);

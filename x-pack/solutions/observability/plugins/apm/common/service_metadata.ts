@@ -24,7 +24,7 @@ import {
   SERVICE_VERSION,
 } from './es_fields/apm';
 import { asMutableArray } from './utils/as_mutable_array';
-
+export type { ContainerType } from '@kbn/apm-types';
 export const SERVICE_METADATA_SERVICE_KEYS = asMutableArray([
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
@@ -62,5 +62,3 @@ export const SERVICE_METADATA_KUBERNETES_KEYS = asMutableArray([
   KUBERNETES_POD_UID,
   KUBERNETES_REPLICASET_NAME,
 ] as const);
-
-export type { ContainerType } from '@kbn/apm-types';
