@@ -26,7 +26,7 @@ permissions:
 
 # Activation rules:
 # - Manual runs always activate.
-# - `kickoff`: a Flaky Test Fixer PR is opened with (or labeled) `flaky-test-fixer`.
+# - `kickoff`: a `kibanamachine`-authored PR is opened with (or labeled) `flaky-test-fixer`.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
@@ -37,6 +37,7 @@ if: >-
     (github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number != '') ||
     (
       github.event_name == 'pull_request_target' &&
+      github.event.pull_request.user.login == 'kibanamachine' &&
       (
         (github.event.action == 'labeled' && github.event.label.name == 'flaky-test-fixer') ||
         (github.event.action == 'opened' && contains(github.event.pull_request.labels.*.name, 'flaky-test-fixer'))
@@ -171,7 +172,7 @@ Determine the mode from the triggering event. For a manual dispatch, if the PR a
 
 ## Number of runs
 
-Trigger the flaky test runner at most 3 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count the comments this workflow previously posted on the PR whose body starts with `/flaky ` (authored by `kibanamachine` or `github-actions[bot]`). Never post a `/flaky` comment that would exceed 3 total.
+Trigger the flaky test runner at most 3 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count the comments this workflow previously posted on the PR whose body starts with `/flaky ` (authored by `kibanamachine`). Never post a `/flaky` comment that would exceed 3 total.
 
 ## State
 

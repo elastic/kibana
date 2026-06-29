@@ -12,7 +12,7 @@ jobs:
       github.event.issue.pull_request
       && (
         contains(fromJSON('["MEMBER","OWNER"]'), github.event.comment.author_association)
-        || contains(fromJSON('["kibanamachine","github-actions[bot]"]'), github.event.comment.user.login)
+        || github.event.comment.user.login == 'kibanamachine'
       )
       && startsWith(github.event.comment.body, '/flaky ')
     runs-on: ubuntu-latest
