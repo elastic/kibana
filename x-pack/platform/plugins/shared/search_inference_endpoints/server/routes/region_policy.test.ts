@@ -136,8 +136,16 @@ describe('Region Policy Routes', () => {
       });
     });
 
+    it('rejects empty allowed_regions array', () => {
+      mockRouter.shouldThrow({ body: { allowed_regions: [] } });
+    });
+
     it('rejects allowed_geos with non-string elements', () => {
       mockRouter.shouldThrow({ body: { allowed_geos: [123] } });
+    });
+
+    it('rejects empty allowed_geos array', () => {
+      mockRouter.shouldThrow({ body: { allowed_geos: [] } });
     });
 
     it('rejects malformed fallback_region shape', () => {

@@ -77,11 +77,14 @@ export const defineRegionPolicyRoutes = ({
                     csp: schema.string({ minLength: 1, maxLength: 64 }),
                     region: schema.string({ minLength: 1, maxLength: 128 }),
                   }),
-                  { maxSize: 100 }
+                  { minSize: 1, maxSize: 100 }
                 )
               ),
               allowed_geos: schema.maybe(
-                schema.arrayOf(schema.string({ minLength: 1, maxLength: 64 }), { maxSize: 50 })
+                schema.arrayOf(schema.string({ minLength: 1, maxLength: 64 }), {
+                  minSize: 1,
+                  maxSize: 50,
+                })
               ),
               fallback_region: schema.maybe(
                 schema.object({
