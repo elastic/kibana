@@ -163,7 +163,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   },
 });
 
-const readAllSignificantEventsRoute = createServerRoute({
+const readQueryOccurrenceStatsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_query_occurrence_stats',
   params: z.object({
     query: z.object({
@@ -173,11 +173,11 @@ const readAllSignificantEventsRoute = createServerRoute({
         .string()
         .regex(BUCKET_SIZE_PATTERN)
         .describe('Size of time buckets for aggregation'),
-      query: z.string().optional().describe('Query string to filter significant events queries'),
+      query: z.string().optional().describe('Query string to filter stream queries'),
       streamNames: z
         .union([z.string().transform((val) => [val]), z.array(z.string())])
         .optional()
-        .describe('Stream names to filter significant events'),
+        .describe('Stream names to filter results by'),
       searchMode: searchModeSchema,
     }),
   }),
@@ -328,7 +328,7 @@ const significantEventsDiscoveryStatusRoute = createServerRoute({
 export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
-  ...readAllSignificantEventsRoute,
+  ...readQueryOccurrenceStatsRoute,
   ...significantEventsDiscoveryExecuteRoute,
   ...significantEventsDiscoveryStatusRoute,
 };

@@ -209,6 +209,8 @@ export {
 } from './src/models/ingest/failure_store';
 
 export type {
+  QueryOccurrenceSeries,
+  QueryOccurrenceStatsResponse,
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   GeneratedSignificantEventQuery,
