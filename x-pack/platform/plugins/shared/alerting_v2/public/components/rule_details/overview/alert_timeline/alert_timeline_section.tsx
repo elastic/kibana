@@ -20,15 +20,12 @@ import {
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { parseDurationToMs, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  ALERT_TIMELINE_TOP_N_DEFAULT,
-  deriveAlertTimelineData,
-} from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { deriveAlertTimelineData } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
@@ -44,13 +41,16 @@ const DAY_MS = 24 * HOUR_MS;
 
 const DEFAULT_ALERT_TIMELINE_TIME_RANGE = { from: 'now-7d', to: 'now' };
 
-const resolveGteLte = (from: string, to: string): { gteMs: number; lteMs: number } => {
+const resolveTimeWindow = (
+  from: string,
+  to: string
+): { windowStartMs: number; windowEndMs: number } => {
   const fromMs = datemath.parse(from)?.valueOf();
   const toMs = datemath.parse(to, { roundUp: true })?.valueOf();
   const now = Date.now();
   return {
-    gteMs: Number.isFinite(fromMs) ? (fromMs as number) : now - 7 * DAY_MS,
-    lteMs: Number.isFinite(toMs) ? (toMs as number) : now,
+    windowStartMs: Number.isFinite(fromMs) ? (fromMs as number) : now - 7 * DAY_MS,
+    windowEndMs: Number.isFinite(toMs) ? (toMs as number) : now,
   };
 };
 
@@ -77,42 +77,30 @@ export const AlertTimelineSection: React.FC = () => {
 
   const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
 
-  const { gteMs, lteMs } = useMemo(() => {
+  const { windowStartMs, windowEndMs } = useMemo(() => {
     void refreshTick;
-    return resolveGteLte(timeRange.from, timeRange.to);
+    return resolveTimeWindow(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  const bufferMs = useMemo(() => {
-    const scheduleMs = parseDurationToMs(rule.schedule.every);
-    const fallback = 60_000;
-    const ms = Number.isFinite(scheduleMs) ? scheduleMs : fallback;
-    return Math.min(Math.max(2 * ms, fallback), 60 * 60_000);
-  }, [rule.schedule.every]);
-  const fetchGteMs = gteMs - bufferMs;
-
-  const { events, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
-    useFetchRuleEvents({
-      ruleId: rule.id,
-      gteMs,
-      lteMs,
-      eventGteMs: fetchGteMs,
-      groupingFields,
-      topN: ALERT_TIMELINE_TOP_N_DEFAULT,
-      data,
-    });
+  const { phases, groupingValuesByHash, summary, isLoading, isError } = useFetchRuleEvents({
+    ruleId: rule.id,
+    windowStartMs,
+    windowEndMs,
+    groupingFields,
+    data,
+  });
 
   const timelineData = useMemo(
     () =>
       deriveAlertTimelineData(
-        events,
+        phases,
         groupingValuesByHash,
         'recently_active',
-        gteMs,
-        lteMs,
-        summary,
-        totalSeriesCount
+        windowStartMs,
+        windowEndMs,
+        summary
       ),
-    [events, groupingValuesByHash, gteMs, lteMs, summary, totalSeriesCount]
+    [phases, groupingValuesByHash, windowStartMs, windowEndMs, summary]
   );
 
   const discoverHref = useMemo(
@@ -122,12 +110,12 @@ export const AlertTimelineSection: React.FC = () => {
         capabilities: application.capabilities,
         uiSettings,
         timeRange: {
-          from: new Date(gteMs).toISOString(),
-          to: new Date(lteMs).toISOString(),
+          from: new Date(windowStartMs).toISOString(),
+          to: new Date(windowEndMs).toISOString(),
         },
         ruleEsql: getRootEsqlQuery(rule.query),
       }),
-    [share, application.capabilities, uiSettings, gteMs, lteMs, rule.query]
+    [share, application.capabilities, uiSettings, windowStartMs, windowEndMs, rule.query]
   );
 
   const viewAllHref = useMemo(
@@ -136,12 +124,12 @@ export const AlertTimelineSection: React.FC = () => {
         paths.alertEpisodesListHref({
           filters: { ruleId: rule.id, status: 'all' },
           timeRange: {
-            from: new Date(gteMs).toISOString(),
-            to: new Date(lteMs).toISOString(),
+            from: new Date(windowStartMs).toISOString(),
+            to: new Date(windowEndMs).toISOString(),
           },
         })
       ),
-    [http, rule.id, gteMs, lteMs]
+    [http, rule.id, windowStartMs, windowEndMs]
   );
 
   const getEpisodeHref = useCallback(
@@ -277,8 +265,8 @@ export const AlertTimelineSection: React.FC = () => {
         {!isLoading && !isError && timelineData.rows.length > 0 && (
           <AlertTimelineChart
             rows={timelineData.rows}
-            gteMs={gteMs}
-            lteMs={lteMs}
+            windowStartMs={windowStartMs}
+            windowEndMs={windowEndMs}
             timeZone={timeZone}
             showLabelColumn={hasGroupingFields}
             onEpisodeClick={onEpisodeClick}
