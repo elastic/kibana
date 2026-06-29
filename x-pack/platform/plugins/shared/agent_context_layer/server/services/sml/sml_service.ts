@@ -1394,15 +1394,11 @@ export const buildOriginUri = (type: string, originId: string): string => `${typ
  * content mode and `getSmlData` in origin mode can both produce >1
  * chunk per origin. Ordering is unspecified.
  *
- * Lookups happen via the `origin.uri` keyword field — the only
- * top-level identifier the storage actually mapped (an earlier
- * design queried a phantom `origin_id` keyword that lives nowhere in
- * the mapping, so every lookup silently returned `[]` and the
- * per-origin routes 404'd unconditionally). The compound URI is also
- * the only safe addressable key because the bare `originId` is not
- * guaranteed unique across SML types — a lens id and a dashboard id
- * can legitimately collide. The HTTP routes carry both pieces in the
- * URL (`/sml/{type}/{originId}`) for the same reason.
+ * Lookups happen via the `origin.uri` keyword field — the only mapped
+ * origin identifier. The compound URI is the only safe addressable key
+ * because bare `originId` is not unique across SML types (a lens id and
+ * a dashboard id can legitimately collide). The HTTP routes carry both
+ * pieces in the URL (`/sml/{type}/{originId}`) for the same reason.
  *
  * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow is
  * logged with `track_total_hits` so operators can spot a producer

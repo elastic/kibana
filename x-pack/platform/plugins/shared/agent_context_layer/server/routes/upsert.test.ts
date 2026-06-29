@@ -98,10 +98,7 @@ describe('registerUpsertRoute', () => {
 
   it('passes action=update and created=false when origin already exists in caller space', async () => {
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
-    // The route now privilege-checks existing chunks before overwriting
-    // them — see the "returns 404 when caller lacks read access" test
-    // for the rationale. This test focuses on the happy path, so we
-    // explicitly authorize the chunk read.
+    // Privilege-checks existing chunks before overwriting — authorize the read so the happy path proceeds.
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
     mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
@@ -250,12 +247,8 @@ describe('registerUpsertRoute', () => {
   });
 
   it('rejects body/param payloads that overflow the maxLength caps', () => {
-    // Defense-in-depth against unbounded HTTP payloads — a missing
-    // `maxLength` once let a single PUT push arbitrary content into
-    // the SML index. Pin each cap so a future refactor can't silently
-    // drop them. The actual values (`MAX_SML_*`) are exercised
-    // indirectly via the schema; testing each at length+1 keeps the
-    // assertions agnostic of the literal value.
+    // Pin each cap so a future refactor can't silently drop them. Testing at length+1
+    // keeps assertions agnostic of the literal MAX_SML_* values.
     const [routeConfig] = router.put.mock.calls[0];
     const bodySchema = (routeConfig as any).validate.body;
     const paramsSchema = (routeConfig as any).validate.params;

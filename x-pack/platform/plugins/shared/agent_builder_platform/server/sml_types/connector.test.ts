@@ -195,13 +195,9 @@ describe('connectorSmlType', () => {
 
   describe('getPermissions', () => {
     it('returns the saved_object:action/get Kibana privilege', () => {
-      // The actions plugin's feature registration grants saved-object
-      // read access on the `action` saved object type as the gate for
-      // connector reads (and the execute route's prerequisite check).
-      // No bare `action:execute` privilege is registered — earlier
-      // iterations stamped that string and chunks were invisible to
-      // everyone. Pinning the privilege here so a regression to a
-      // non-existent privilege name fails loudly.
+      // The actions plugin gates connector reads on saved-object read access for the `action`
+      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
+      // so a regression to a non-existent privilege name fails loudly.
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
         kibana: { privileges: [{ name: 'saved_object:action/get' }] },

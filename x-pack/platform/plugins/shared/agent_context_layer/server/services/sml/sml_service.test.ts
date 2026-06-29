@@ -2230,10 +2230,7 @@ describe('SmlService', () => {
 
       expect(result).toHaveLength(2);
       expect(result.map((d) => d.id).sort()).toEqual(['chunk-1', 'chunk-2']);
-      // Query targets the canonical `origin.uri` keyword — the only
-      // top-level identifier the storage actually maps. Earlier
-      // revisions queried a phantom `origin_id` field that didn't
-      // exist in the mapping and every lookup silently returned [].
+      // Query targets the canonical `origin.uri` keyword — the only mapped origin field.
       const passed = esClient.search.mock.calls[0][0] as any;
       const filters = passed.query.bool.filter as any[];
       expect(filters[0]).toEqual({ term: { 'origin.uri': 'visualization://ref-1' } });

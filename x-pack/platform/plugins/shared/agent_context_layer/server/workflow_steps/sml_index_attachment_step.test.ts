@@ -348,10 +348,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
         action: 'create',
       })
     );
-    // The redundant `getTypeDefinition` guard was removed from the
-    // workflow step — registration handling lives entirely inside the
-    // indexer (registered → stamp `getPermissions`, unregistered →
-    // stamp empty + warn).
+    // Registration handling lives in the indexer — the step never calls getTypeDefinition.
     expect(startContract.getTypeDefinition).not.toHaveBeenCalled();
     expect(result.error).toBeUndefined();
     expect(result.output?.action).toBe('upsert');
