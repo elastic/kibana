@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/react-query'
-  - '@kbn/react-query'
 tags:
   - shared-browser
   - package
