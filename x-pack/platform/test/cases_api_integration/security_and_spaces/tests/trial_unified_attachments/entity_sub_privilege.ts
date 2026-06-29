@@ -11,11 +11,7 @@ import type { UnifiedReferenceAttachmentPayload } from '@kbn/cases-plugin/common
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getPostCaseRequest, postCommentEntityReq } from '../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
-  createCase,
-  createComment,
-} from '../../../common/lib/api';
+import { deleteAllCaseItems, createCase, createComment } from '../../../common/lib/api';
 import {
   superUser,
   secOnly,

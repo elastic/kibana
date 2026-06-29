@@ -363,6 +363,5 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
     });
-
   });
 };
