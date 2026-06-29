@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { createPortal } from 'react-dom';
 import {
   EuiButtonIcon,
@@ -23,6 +23,7 @@ import { applicationWorkspaceFixedOverlayStyles } from '../../agent_workspace/ap
 import { headerHeight } from '../../application/components/conversations/conversation.styles';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
 import { useOptionalConversationSpineContext } from './conversation_spine_context';
+import { useEscapeKeyHandler } from './hooks/use_escape_key_handler';
 
 const overlayEntrance = keyframes`
   from {
@@ -54,6 +55,14 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
   const closeAttachmentsEmptyOverlay =
     spineContext?.closeAttachmentsEmptyOverlay ?? (() => undefined);
   const [, retryMount] = useReducer((count) => count + 1, 0);
+
+  const isOverlayOpen = isAgentWorkspaceMount && isAttachmentsEmptyOpen && !hasAttachments;
+
+  const onEscape = useCallback(() => {
+    closeAttachmentsEmptyOverlay();
+  }, [closeAttachmentsEmptyOverlay]);
+
+  useEscapeKeyHandler(onEscape, isOverlayOpen);
 
   useEffect(() => {
     if (!isAgentWorkspaceMount || !isAttachmentsEmptyOpen || hasAttachments) {
