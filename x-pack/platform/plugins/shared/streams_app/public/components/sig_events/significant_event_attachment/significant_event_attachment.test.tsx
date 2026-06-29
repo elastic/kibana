@@ -84,7 +84,7 @@ describe('significantEventAttachmentDefinition', () => {
       updateOrigin: jest.fn(),
     };
 
-    it('returns an "Open" SECONDARY button when openCanvas is provided and not in canvas', () => {
+    it('returns an "Open preview" SECONDARY button when openCanvas is provided and not in canvas', () => {
       const openCanvas = jest.fn();
       const buttons =
         significantEventAttachmentDefinition.getActionButtons?.({
@@ -94,7 +94,8 @@ describe('significantEventAttachmentDefinition', () => {
         }) ?? [];
 
       expect(buttons).toHaveLength(1);
-      expect(buttons[0].label).toBe('Open');
+      expect(buttons[0].label).toBe('Open preview');
+      expect(buttons[0].icon).toBe('eye');
       expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
 
       buttons[0].handler();
