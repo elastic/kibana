@@ -12,7 +12,7 @@ import {
   RuleOperationValidationError,
   type RuleOperation,
 } from './operations';
-import { AGENT_BUILDER_RULE_TAG } from '../../common/constants';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createMockEsClient = () => elasticsearchServiceMock.createScopedClusterClient();
 
@@ -402,7 +402,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
 
-      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_RULE_TAG]);
+      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
 
     it('appends the tag without clobbering user/LLM-provided tags', async () => {
@@ -412,17 +412,17 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
 
-      expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_RULE_TAG]);
+      expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
     });
 
     it('does not duplicate the tag when it is already present', async () => {
       const ops: RuleOperation[] = [
-        { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_RULE_TAG] },
+        { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
       ];
 
       const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
 
-      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_RULE_TAG]);
+      expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
 
     it('skips stamping when the 20-tag cap is already reached', async () => {
@@ -443,7 +443,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
 
-      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_RULE_TAG]);
+      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
 
     it('re-adds the tag on edit when the user previously removed it', async () => {
@@ -454,7 +454,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
 
-      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_RULE_TAG]);
+      expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
 
     it('throws when state_transition is set on a non-alert kind', async () => {
@@ -710,7 +710,7 @@ describe('executeRuleOperations', () => {
       expect(result.data.metadata).toEqual({
         name: 'Test Rule',
         description: 'A test',
-        tags: ['test', AGENT_BUILDER_RULE_TAG],
+        tags: ['test', AGENT_BUILDER_TAG],
       });
     });
 

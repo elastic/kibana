@@ -15,10 +15,11 @@ export const alertingTools = {
 } as const;
 
 /**
- * Tag automatically applied to every Alerting v2 rule created through Agent
- * Builder. Used to measure adoption (telemetry) and to let users filter
- * agent-created rules in the Rules list. It is a regular, user-editable tag:
- * it is (re-)applied whenever Agent Builder creates or edits a rule, so a tag
- * the user removes is restored the next time the agent touches the rule.
+ * Tag automatically applied to every Alerting v2 rule and action policy created
+ * or edited through Agent Builder. Used to measure adoption (telemetry) and to
+ * let users filter agent-created entities in their lists. It is a regular,
+ * user-editable tag: it is (re-)applied whenever Agent Builder creates or edits
+ * an entity, so a tag the user removes is restored the next time the agent
+ * touches it.
  */
-export const AGENT_BUILDER_RULE_TAG = 'agent-builder';
+export const AGENT_BUILDER_TAG = 'agent-builder';

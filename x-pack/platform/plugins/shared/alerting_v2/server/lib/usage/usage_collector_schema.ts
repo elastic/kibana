@@ -149,6 +149,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'long',
     _meta: { description: 'Number of action policies with a matcher.' },
   },
+  action_policies_count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of action policies currently tagged as created/edited via Agent Builder.',
+    },
+  },
   action_policies_count_with_group_by: {
     type: 'long',
     _meta: { description: 'Number of action policies with group by.' },

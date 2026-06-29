@@ -36,12 +36,14 @@ export interface ActionPolicyStatsAggregations {
   count_with_group_by: { doc_count: number };
   avg_group_by_fields_count: { value: number | null };
   count_with_matcher: { doc_count: number };
+  count_agent_builder_assisted: { doc_count: number };
 }
 export type ActionPolicyStatsResults = Pick<
   LatestTaskStateSchema,
   | 'action_policies_count'
   | 'action_policies_unique_workflow_count'
   | 'action_policies_count_with_matcher'
+  | 'action_policies_count_agent_builder_assisted'
   | 'action_policies_count_with_group_by'
   | 'action_policies_avg_group_by_fields_count'
   | 'action_policies_count_by_throttle_interval'

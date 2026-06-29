@@ -240,6 +240,13 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Number of action policies with a matcher.' },
             type: 'long',
           },
+          action_policies_count_agent_builder_assisted: {
+            _meta: {
+              description:
+                'Number of action policies currently tagged as created/edited via Agent Builder.',
+            },
+            type: 'long',
+          },
           action_policies_unique_workflow_count: {
             _meta: {
               description: 'Number of unique workflows referenced by action policies.',

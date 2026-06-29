@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { AGENT_BUILDER_RULE_TAG } from '../../../agent_builder/common/constants';
+import { AGENT_BUILDER_TAG } from '../../../agent_builder/common/constants';
 import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
 import type { RuleStatsAggregations, RuleStatsResults } from './types';
 
@@ -159,7 +159,7 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
         filter: { term: { [`${RULE_SAVED_OBJECT_TYPE}.enabled`]: true } },
       },
       count_agent_builder_assisted: {
-        filter: { term: { [`${RULE_SAVED_OBJECT_TYPE}.metadata.tags`]: AGENT_BUILDER_RULE_TAG } },
+        filter: { term: { [`${RULE_SAVED_OBJECT_TYPE}.metadata.tags`]: AGENT_BUILDER_TAG } },
       },
       count_by_kind: {
         terms: { field: `${RULE_SAVED_OBJECT_TYPE}.kind`, size: TERMS_SIZE },

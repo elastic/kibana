@@ -26,7 +26,7 @@ import {
   isRecoveryQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
-import { AGENT_BUILDER_RULE_TAG } from '../../common/constants';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
@@ -39,10 +39,10 @@ const MAX_RULE_TAGS = 20;
  */
 const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
   const existing = tags ?? [];
-  if (existing.includes(AGENT_BUILDER_RULE_TAG) || existing.length >= MAX_RULE_TAGS) {
+  if (existing.includes(AGENT_BUILDER_TAG) || existing.length >= MAX_RULE_TAGS) {
     return existing;
   }
-  return [...existing, AGENT_BUILDER_RULE_TAG];
+  return [...existing, AGENT_BUILDER_TAG];
 };
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
