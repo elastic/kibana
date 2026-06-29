@@ -183,6 +183,10 @@ describe('EditOutputFlyout', () => {
       kafkaSectionsLabels.forEach((label) => {
         expect(utils.queryByText(label)).toBeNull();
       });
+
+      // Show the new mTLS sub-section headings
+      expect(utils.queryByText('Server certificate authorities')).not.toBeNull();
+      expect(utils.queryByText('Client certificate (mTLS)')).not.toBeNull();
     });
   });
 
@@ -318,6 +322,49 @@ describe('EditOutputFlyout', () => {
         expect.objectContaining({
           secrets: { ssl: { key: 'key' } },
           ssl: { certificate: 'cert', certificate_authorities: [] },
+        })
+      );
+    });
+  });
+
+  it('should save a logstash output with only server CA configured (no client cert or key)', async () => {
+    // Regression test for https://github.com/elastic/kibana/issues/272243
+    // Server-only TLS (one-way) must be saveable without a client certificate or key.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        certificate: '',
+        certificate_authorities: ['/etc/ssl/ca.pem'],
+      },
+    });
+
+    // Trigger a change to mark the form as modified so the Save button becomes enabled
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputL',
+        expect.objectContaining({
+          ssl: expect.objectContaining({
+            certificate_authorities: ['/etc/ssl/ca.pem'],
+          }),
         })
       );
     });

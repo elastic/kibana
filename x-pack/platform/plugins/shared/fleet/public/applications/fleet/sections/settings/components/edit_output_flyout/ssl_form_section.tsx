@@ -46,9 +46,9 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
   const showmTLSText = type === outputType.Elasticsearch || type === outputType.RemoteElasticsearch;
   const showAccordionOpen =
     !!inputs.sslKeySecretInput.value ||
+    !!inputs.sslKeyInput.value ||
     inputs.sslCertificateAuthoritiesInput.value?.length > 0 ||
-    !!inputs.sslCertificateInput.value ||
-    !!inputs.sslKeySecretInput.value;
+    !!inputs.sslCertificateInput.value;
 
   return (
     <>
@@ -126,6 +126,19 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             />
           )}
           <EuiSpacer size="m" />
+          {type !== 'download_source' && (
+            <>
+              <EuiTitle size="xxs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.sslServerCaSectionTitle"
+                    defaultMessage="Server certificate authorities"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <MultiRowInput
             placeholder={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
@@ -143,6 +156,30 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             sortable={false}
             {...inputs.sslCertificateAuthoritiesInput.props}
           />
+          {type !== 'download_source' && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiTitle size="xxs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.sslClientCertSectionTitle"
+                    defaultMessage="Client certificate (mTLS)"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.sslClientCertSectionDescription"
+                      defaultMessage="Optional. Add these settings only when setting up an mTLS connection."
+                    />
+                  </EuiTextColor>
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiFormRow
             fullWidth
             label={
