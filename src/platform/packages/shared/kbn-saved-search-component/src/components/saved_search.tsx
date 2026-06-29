@@ -120,7 +120,6 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     // the embeddable when columns change.
   }, [
     sort,
-    columns,
     grid,
     rowHeight,
     rowsPerPage,
@@ -262,7 +261,7 @@ const SavedSearchComponentTable: React.FC<
       if (!embeddableApi.current) return;
       embeddableApi.current.setColumns(columns);
     },
-    [columns]
+    [columns, isEmbeddableApiAvailable]
   );
 
   useEffect(
