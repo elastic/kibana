@@ -26,10 +26,28 @@ import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
 
+export interface BulkCreatePrebuiltRulesArgs {
+  rules: PrebuiltRuleAsset[];
+}
+
+export interface BulkCreatePrebuiltRulesResultItem {
+  id: string;
+  rule_id: string;
+  version: number;
+}
+
+export interface BulkCreatePrebuiltRulesResult {
+  results: Array<{ result: BulkCreatePrebuiltRulesResultItem }>;
+  errors: Array<{ item: PrebuiltRuleAsset; error: Error }>;
+}
+
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
+  bulkCreatePrebuiltRules: (
+    args: BulkCreatePrebuiltRulesArgs
+  ) => Promise<BulkCreatePrebuiltRulesResult>;
   updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
