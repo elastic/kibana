@@ -610,6 +610,7 @@ export class ManagedWorkflowsService {
       ...workflowData,
       managed: true,
       managedBy: definition.pluginId,
+      billable: definition.billable,
       definitionHash,
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,
