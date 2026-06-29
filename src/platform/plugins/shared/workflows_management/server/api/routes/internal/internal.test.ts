@@ -45,6 +45,11 @@ describe('Internal Routes', () => {
     getHistoryForWorkflow: jest.Mock;
     restoreWorkflowVersion: jest.Mock;
   };
+  let mockAudit: {
+    logWorkflowAccessed: jest.Mock;
+    logWorkflowUpdated: jest.Mock;
+    logWorkflowRestored: jest.Mock;
+  };
   let mockTriggerEventsIsEnabled: boolean;
   let mockSearch: jest.Mock;
   const mockSearchTriggerEventLog = jest.fn<
@@ -92,6 +97,11 @@ describe('Internal Routes', () => {
       searchExecutionsView: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
       restoreWorkflowVersion: jest.fn(),
+    };
+    mockAudit = {
+      logWorkflowAccessed: jest.fn(),
+      logWorkflowUpdated: jest.fn(),
+      logWorkflowRestored: jest.fn(),
     };
     mockSearch = jest.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
@@ -150,7 +160,7 @@ describe('Internal Routes', () => {
       service: mockWorkflowsService,
       logger,
       spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
-      audit: { logWorkflowAccessed: jest.fn(), logWorkflowUpdated: jest.fn() },
+      audit: mockAudit,
     } as unknown as RouteDependencies;
 
     registerInternalRoutes(routeDependencies);
@@ -443,6 +453,12 @@ describe('Internal Routes', () => {
       request
     );
     expect(response.ok).toHaveBeenCalledWith({ body: restored });
+    expect(mockAudit.logWorkflowRestored).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      eventId: 'event-v3',
+      version: 8,
+    });
+    expect(mockAudit.logWorkflowUpdated).not.toHaveBeenCalled();
   });
 
   it('returns not found when the history event does not exist', async () => {
@@ -465,6 +481,11 @@ describe('Internal Routes', () => {
       body: {
         message: "Change history event 'missing-event' not found for workflow 'wf-1'.",
       },
+    });
+    expect(mockAudit.logWorkflowRestored).toHaveBeenCalledWith(request, {
+      id: 'wf-1',
+      eventId: 'missing-event',
+      error: expect.any(WorkflowHistoryEventNotFoundError),
     });
   });
 

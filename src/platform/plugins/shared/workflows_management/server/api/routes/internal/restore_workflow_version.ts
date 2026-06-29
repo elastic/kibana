@@ -47,11 +47,12 @@ export function registerRestoreWorkflowVersionRoute(deps: RouteDependencies) {
           const { id, eventId } = request.params;
           const spaceId = spaces.getSpaceId(request);
           const restored = await api.restoreWorkflowVersion(id, eventId, spaceId, request);
-          audit.logWorkflowUpdated(request, { id });
+          audit.logWorkflowRestored(request, { id, eventId, version: restored.version });
           return response.ok({ body: restored });
         } catch (error) {
-          audit.logWorkflowUpdated(request, {
+          audit.logWorkflowRestored(request, {
             id: request.params.id,
+            eventId: request.params.eventId,
             error,
           });
           return handleRouteError(response, error as Error);
