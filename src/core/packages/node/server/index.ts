@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { NodeInfo, NodeRoles } from './src/types';
+export type { NodeInfo, NodeRoles, NodeRemoteService } from './src/types';
