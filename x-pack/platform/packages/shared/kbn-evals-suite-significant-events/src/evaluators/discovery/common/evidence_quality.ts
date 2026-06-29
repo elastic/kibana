@@ -14,7 +14,7 @@ import {
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_hypothesis_test',
-    text: 'Every evidences[] entry that records an executed query (esql_query is non-null) documents a hypothesis test, not a bare observation: it states the hypothesis the query tests, what a confirming result would look like, what was actually found (a count/pattern or "no matching rows"), and a verdict of confirms / refutes / inconclusive with a reason. The canonical structure is "Testing: … Expected if true: … Found: … Verdict: …".',
+    text: 'Every evidences[] entry where the judge stamped confirmed: true (evidence the judge re-verified via execute_esql in this cycle) must document a hypothesis test using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Entries without a confirmed stamp (carried forward from input without re-verification in this cycle) are exempt and may retain whatever description they arrived with.',
     score: 1,
   },
   {

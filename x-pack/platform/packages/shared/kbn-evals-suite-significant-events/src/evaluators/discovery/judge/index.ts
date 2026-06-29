@@ -9,10 +9,8 @@ import { selectEvaluators } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import type { JudgeEvaluator } from '../types';
-import {
-  createToolTrajectoryEvaluator,
-  createExecuteEsqlGroundingEvaluator,
-} from '../common/tool_usage_validation';
+import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grouding';
+import { createToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
   createCriticalityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
@@ -30,7 +28,7 @@ export const createJudgeEvaluators = (
 ): JudgeEvaluator[] => {
   const codeEvaluators: JudgeEvaluator[] = [
     schemaValidityJudgeEvaluator,
-    createToolTrajectoryEvaluator(),
+    createToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
   ];

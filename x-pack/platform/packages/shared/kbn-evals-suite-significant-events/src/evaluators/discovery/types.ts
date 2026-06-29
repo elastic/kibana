@@ -6,7 +6,7 @@
  */
 
 import type { ConverseStep, EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { Discovery, SigEvent } from '@kbn/streams-schema';
+import type { Detection, Discovery, SigEvent } from '@kbn/streams-schema';
 
 /** Fields every discovery agent output carries: the converse trail and trace id. */
 export interface AgentOutputBase {
@@ -15,9 +15,7 @@ export interface AgentOutputBase {
 }
 
 /** Common per-scenario expectations shared by every discovery example's `output`. */
-export interface ExpectedBase {
-  /** Tool ids the agent is expected to call; defaults to the discovery tool set when omitted. */
-  expectedTools?: string[];
+export interface ExampleOutputBase {
   criteria?: EvaluationCriterion[];
 }
 
@@ -26,15 +24,18 @@ export interface InvestigatorAgentOutput extends AgentOutputBase {
 }
 
 export interface InvestigatorEvaluationExample {
-  input: Record<string, unknown>;
-  output: ExpectedBase & {
-    expected_kind?: string;
+  input: {
+    episodeSuffix: string;
+    detections: Array<Detection>;
+    continuationCandidates?: Array<Discovery>;
+  };
+  output: ExampleOutputBase & {
     expected_min_evidence_count?: number;
     /**
      * Canonical expected discoveries (detections + evidences + cause_kis) — the grouping check
      * derives its expected groups from these discoveries' `detections[].rule_name`s.
      */
-    expected_discoveries?: Array<Partial<Discovery>>;
+    expected_discoveries?: Array<Discovery>;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
@@ -50,10 +51,11 @@ export interface JudgeAgentOutput extends AgentOutputBase {
 }
 
 export interface JudgeEvaluationExample {
-  input: Record<string, unknown>;
-  output: ExpectedBase & {
-    expected_status?: string;
-    expect_assessment_note?: boolean;
+  input: {
+    discoveries: Array<Discovery>;
+  };
+  output: ExampleOutputBase & {
+    expected_ground_truth?: string;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
