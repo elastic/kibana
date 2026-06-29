@@ -30,6 +30,7 @@ import { deleteObservableStepDefinition } from './steps/delete_observable';
 import { getCasesStepDefinition } from './steps/get_cases';
 import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
 import { setCustomFieldStepDefinition } from './steps/set_custom_field';
+import { removeTagsStepDefinition } from './steps/remove_tags';
 import {
   assignCaseStepDefinition,
   closeCaseStepDefinition,
@@ -76,4 +77,5 @@ export const casesStepRegistry: CasesStepFactory[] = [
   getCasesStepDefinition,
   setCustomFieldStepDefinition,
   createCaseFromTemplateStepDefinition,
+  removeTagsStepDefinition,
 ];
