@@ -38,16 +38,16 @@ import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 
 const EXAMPLE_PROMPTS = [
-  i18n.translate('aiPanel.editFlyout.example1', {
+  i18n.translate('xpack.aiPanel.editFlyout.example1', {
     defaultMessage: 'KPI cards: total count, average value, and trend indicator',
   }),
-  i18n.translate('aiPanel.editFlyout.example2', {
+  i18n.translate('xpack.aiPanel.editFlyout.example2', {
     defaultMessage: 'Status board with color-coded thresholds (green / yellow / red)',
   }),
-  i18n.translate('aiPanel.editFlyout.example3', {
+  i18n.translate('xpack.aiPanel.editFlyout.example3', {
     defaultMessage: 'Top 5 items ranked by value with horizontal percentage bars',
   }),
-  i18n.translate('aiPanel.editFlyout.example4', {
+  i18n.translate('xpack.aiPanel.editFlyout.example4', {
     defaultMessage: 'Timeline of events grouped by category with counts',
   }),
 ];
@@ -150,7 +150,7 @@ export const EditAiPanelFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="editAiPanelFlyoutTitle">
-            {i18n.translate('aiPanel.editFlyout.title', {
+            {i18n.translate('xpack.aiPanel.editFlyout.title', {
               defaultMessage: 'Edit AI Panel',
             })}
           </h2>
@@ -159,10 +159,10 @@ export const EditAiPanelFlyout = ({
 
       <EuiFlyoutBody>
         <EuiFormRow
-          label={i18n.translate('aiPanel.editFlyout.promptLabel', {
+          label={i18n.translate('xpack.aiPanel.editFlyout.promptLabel', {
             defaultMessage: 'Prompt',
           })}
-          helpText={i18n.translate('aiPanel.editFlyout.promptHelp', {
+          helpText={i18n.translate('xpack.aiPanel.editFlyout.promptHelp', {
             defaultMessage: 'Describe what you want the panel to show.',
           })}
           fullWidth
@@ -173,7 +173,7 @@ export const EditAiPanelFlyout = ({
             rows={5}
             fullWidth
             disabled={isAiAvailable === false}
-            placeholder={i18n.translate('aiPanel.editFlyout.promptPlaceholder', {
+            placeholder={i18n.translate('xpack.aiPanel.editFlyout.promptPlaceholder', {
               defaultMessage:
                 'e.g. Show a status board of top product categories by revenue with color-coded thresholds...',
             })}
@@ -187,7 +187,7 @@ export const EditAiPanelFlyout = ({
               size="s"
               color="warning"
               iconType="warning"
-              title={i18n.translate('aiPanel.editFlyout.noAiConnector', {
+              title={i18n.translate('xpack.aiPanel.editFlyout.noAiConnector', {
                 defaultMessage:
                   'AI features are not available. Configure an AI connector to enable prompt-based generation.',
               })}
@@ -199,7 +199,7 @@ export const EditAiPanelFlyout = ({
 
         <EuiText size="xs" color="subdued">
           <p>
-            {i18n.translate('aiPanel.editFlyout.examplesLabel', {
+            {i18n.translate('xpack.aiPanel.editFlyout.examplesLabel', {
               defaultMessage: 'Examples:',
             })}
           </p>
@@ -211,7 +211,7 @@ export const EditAiPanelFlyout = ({
               <EuiBadge
                 color="primary"
                 onClick={() => setDraftPrompt(example)}
-                onClickAriaLabel={i18n.translate('aiPanel.editFlyout.useExampleAriaLabel', {
+                onClickAriaLabel={i18n.translate('xpack.aiPanel.editFlyout.useExampleAriaLabel', {
                   defaultMessage: 'Use this example prompt',
                 })}
               >
@@ -235,7 +235,7 @@ export const EditAiPanelFlyout = ({
                   <EuiFlexItem>
                     <EuiText size="s">
                       <strong>
-                        {i18n.translate('aiPanel.editFlyout.dataSourceLabel', {
+                        {i18n.translate('xpack.aiPanel.editFlyout.dataSourceLabel', {
                           defaultMessage: 'Data source (ES|QL)',
                         })}
                       </strong>
@@ -269,7 +269,7 @@ export const EditAiPanelFlyout = ({
                 <EuiCallOut
                   size="s"
                   color="primary"
-                  title={i18n.translate('aiPanel.editFlyout.timeRangeHint', {
+                  title={i18n.translate('xpack.aiPanel.editFlyout.timeRangeHint', {
                     defaultMessage:
                       'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
                   })}
@@ -287,7 +287,7 @@ export const EditAiPanelFlyout = ({
                 isLoading={isPreviewLoading}
                 disabled={!draftEsqlQuery.trim()}
               >
-                {i18n.translate('aiPanel.editFlyout.previewData', {
+                {i18n.translate('xpack.aiPanel.editFlyout.previewData', {
                   defaultMessage: 'Preview data',
                 })}
               </EuiButton>
@@ -305,7 +305,7 @@ export const EditAiPanelFlyout = ({
                   <EuiCallOut
                     size="s"
                     color="warning"
-                    title={i18n.translate('aiPanel.editFlyout.noRows', {
+                    title={i18n.translate('xpack.aiPanel.editFlyout.noRows', {
                       defaultMessage: 'Query returned no rows for the current time range.',
                     })}
                     announceOnMount
@@ -317,7 +317,7 @@ export const EditAiPanelFlyout = ({
                 <>
                   <EuiSpacer size="s" />
                   <EuiBasicTable<Record<string, unknown>>
-                    tableCaption={i18n.translate('aiPanel.editFlyout.previewCaption', {
+                    tableCaption={i18n.translate('xpack.aiPanel.editFlyout.previewCaption', {
                       defaultMessage: 'ES|QL query preview',
                     })}
                     items={tableItems}
@@ -343,7 +343,7 @@ export const EditAiPanelFlyout = ({
               <EuiFlexItem>
                 <EuiText size="s">
                   <strong>
-                    {i18n.translate('aiPanel.editFlyout.templateLabel', {
+                    {i18n.translate('xpack.aiPanel.editFlyout.templateLabel', {
                       defaultMessage: 'Template (HTML)',
                     })}
                   </strong>
@@ -357,7 +357,7 @@ export const EditAiPanelFlyout = ({
           <EuiCallOut
             size="s"
             color="warning"
-            title={i18n.translate('aiPanel.editFlyout.templateWarning', {
+            title={i18n.translate('xpack.aiPanel.editFlyout.templateWarning', {
               defaultMessage:
                 'Advanced: editing the template directly may produce unexpected results if placeholder syntax is broken.',
             })}
@@ -365,7 +365,7 @@ export const EditAiPanelFlyout = ({
           <EuiSpacer size="s" />
           <EuiFormRow
             fullWidth
-            helpText={i18n.translate('aiPanel.editFlyout.templateHelp', {
+            helpText={i18n.translate('xpack.aiPanel.editFlyout.templateHelp', {
               defaultMessage:
                 'The HTML template uses Liquid syntax filled with live query data. Changing the prompt will regenerate this template.',
             })}
@@ -400,7 +400,7 @@ export const EditAiPanelFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose}>
-              {i18n.translate('aiPanel.editFlyout.cancel', {
+              {i18n.translate('xpack.aiPanel.editFlyout.cancel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
@@ -418,7 +418,7 @@ export const EditAiPanelFlyout = ({
                 onClose();
               }}
             >
-              {i18n.translate('aiPanel.editFlyout.save', {
+              {i18n.translate('xpack.aiPanel.editFlyout.save', {
                 defaultMessage: 'Apply and close',
               })}
             </EuiButton>

@@ -79,14 +79,14 @@ export const AiPanelComponent = ({
           iconColor="subdued"
           title={
             <h3>
-              {i18n.translate('aiPanel.aiUnavailable.title', {
+              {i18n.translate('xpack.aiPanel.aiUnavailable.title', {
                 defaultMessage: 'AI not available',
               })}
             </h3>
           }
           body={
             <p>
-              {i18n.translate('aiPanel.aiUnavailable.body', {
+              {i18n.translate('xpack.aiPanel.aiUnavailable.body', {
                 defaultMessage:
                   'This panel requires an AI connector to generate content. Contact your administrator to configure one.',
               })}
@@ -98,7 +98,7 @@ export const AiPanelComponent = ({
       {!isAiUnavailable && error && (
         <EuiCallOut
           color="danger"
-          title={i18n.translate('aiPanel.error.title', {
+          title={i18n.translate('xpack.aiPanel.error.title', {
             defaultMessage: 'Failed to generate panel',
           })}
           style={{ margin: euiTheme.size.base }}
