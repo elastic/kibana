@@ -20,11 +20,7 @@ import type {
 } from '@kbn/cloud-security-posture';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
-import {
-  ALERT_PREVIEW_BANNER,
-  EVENT_PREVIEW_BANNER,
-  GENERIC_ENTITY_PREVIEW_BANNER,
-} from './document_details/preview/constants';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from './document_details/preview/constants';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -66,13 +62,13 @@ import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_det
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
 import {
-  EntityPanelKeyByType,
   GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
   WatchlistsFlyoutKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
+import { buildEntityPreviewPanel } from './entity_details/shared/utils/build_entity_preview_panel';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
@@ -168,41 +164,15 @@ const GraphGroupedNodePreviewPanelForFlyout = (
   );
 
   const onShowEntity = useCallback(
-    ({
-      engineType,
-      entityId,
-      entityName,
-    }: {
+    (entity: {
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
     }) => {
-      const panelId =
-        engineType && engineType in EntityPanelKeyByType
-          ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
-          : GenericEntityPanelKey;
-      if (!panelId) {
-        return;
+      const panel = buildEntityPreviewPanel({ ...entity, scopeId: params.scopeId });
+      if (panel) {
+        openPreviewPanel(panel);
       }
-      const nameParam =
-        engineType === 'host'
-          ? { hostName: entityName }
-          : engineType === 'user'
-          ? { userName: entityName }
-          : engineType === 'service'
-          ? { serviceName: entityName }
-          : {};
-      openPreviewPanel({
-        id: panelId,
-        params: {
-          entityId,
-          scopeId: params.scopeId,
-          isPreviewMode: true,
-          banner: GENERIC_ENTITY_PREVIEW_BANNER,
-          isEngineMetadataExist: true,
-          ...nameParam,
-        },
-      });
     },
     [openPreviewPanel, params.scopeId]
   );
