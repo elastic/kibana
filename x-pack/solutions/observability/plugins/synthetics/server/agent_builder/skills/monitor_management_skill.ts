@@ -67,7 +67,7 @@ This displays the interactive monitor card for the user to review.
 
 ## Persistence
 
-The \`${syntheticsTools.manageMonitor}\` tool only manages the **in-memory attachment** — it never writes to Elasticsearch. Direct the user to the rendered attachment's action buttons for persistence; do not attempt to create, update, delete, enable, or disable Synthetics monitors directly via API calls.
+The \`${syntheticsTools.manageMonitor}\` tool only manages the **in-memory attachment** — it never writes to Elasticsearch. Tell the user to persist their changes by clicking the **Save monitor** button on the rendered attachment (or **Update monitor** if it has already been saved). Do not attempt to create, update, delete, enable, or disable Synthetics monitors directly via API calls.
 
 ## Discovering Existing Locations
 

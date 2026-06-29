@@ -264,7 +264,11 @@ export class SyntheticsPlugin
         ({ createMonitorAttachmentDefinition, MONITOR_ATTACHMENT_TYPE: monitorAttachmentType }) => {
           agentBuilder.attachments.addAttachmentType(
             monitorAttachmentType,
-            createMonitorAttachmentDefinition()
+            createMonitorAttachmentDefinition({
+              http: coreStart.http,
+              application: coreStart.application,
+              notifications: coreStart.notifications,
+            })
           );
         }
       );
