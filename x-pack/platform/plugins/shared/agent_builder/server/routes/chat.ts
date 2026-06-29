@@ -201,7 +201,7 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          description: 'Optional conversation access control. Defaults to private when omitted.',
+          description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.',
         },
       }
     )
