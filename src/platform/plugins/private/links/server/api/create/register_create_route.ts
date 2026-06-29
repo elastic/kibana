@@ -8,7 +8,7 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { logRequest } from '@kbn/as-code-utils';
+import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -64,9 +64,7 @@ export function registerCreateRoute(
           if (e.isBoom && e.output.statusCode === 403) {
             return res.forbidden({ body: { message: e.message } });
           }
-          const message = e.stack ?? e.message;
-          logRequest(logger, req, 'error', message);
-          throw e;
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );

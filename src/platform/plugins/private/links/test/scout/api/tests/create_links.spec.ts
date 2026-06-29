@@ -125,6 +125,9 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request body.links.0]: expected "type" to be one of ["dashboardLink", "externalLink"] but got ["invalidLinkType"]'
+    );
   });
 
   apiTest('validation - returns 400 when layout has an invalid value', async ({ apiClient }) => {
@@ -141,6 +144,11 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request body.layout]: types that failed validation:\n\
+- [request body.layout.0]: expected value to equal [horizontal]\n\
+- [request body.layout.1]: expected value to equal [vertical]'
+    );
   });
 
   apiTest(
@@ -156,6 +164,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create links');
     }
   );
 });

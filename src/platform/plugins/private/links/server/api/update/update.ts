@@ -15,12 +15,17 @@ import { transformIn } from '../../../common/api/transforms';
 import type { StoredLinksState } from '../../links_saved_object';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from './types';
+import { create } from '../create/create';
+import type { LinksCreateResponseBody } from '../create';
 
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
   updateBody: LinksUpdateRequestBody
-): Promise<LinksUpdateResponseBody> {
+): Promise<{
+  body: LinksCreateResponseBody | LinksUpdateResponseBody;
+  operation: 'create' | 'update';
+}> {
   const { core } = await requestCtx.resolve(['core']);
 
   const { state: soState, references } = transformIn(updateBody);
@@ -39,12 +44,8 @@ export async function update(
   // Create path
   if (isNewLibraryItem) {
     asCodeIdSchema.validate(id);
-    const savedObject = await core.savedObjects.client.create<StoredLinksState>(
-      LINKS_LIBRARY_TYPE,
-      soState,
-      { id, references }
-    );
-    return getLinksCRUResponseBody(savedObject);
+    const body = await create(requestCtx, updateBody, id);
+    return { body, operation: 'create' };
   }
 
   // Update path (existing library item)
@@ -59,5 +60,5 @@ export async function update(
       mergeAttributes: false,
     }
   );
-  return getLinksCRUResponseBody(savedObject);
+  return { body: getLinksCRUResponseBody(savedObject), operation: 'update' };
 }

@@ -48,6 +48,7 @@ apiTest.describe('links - delete', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(204);
+    expect(response.body).toStrictEqual({});
   });
 
   apiTest('should return 404 for a non-existing links item', async ({ apiClient }) => {
@@ -78,6 +79,7 @@ apiTest.describe('links - delete', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to delete links');
     }
   );
 });

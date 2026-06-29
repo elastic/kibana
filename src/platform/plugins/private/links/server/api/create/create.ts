@@ -25,7 +25,7 @@ export async function create(
   const savedObject = await core.savedObjects.client.create<StoredLinksState>(
     LINKS_LIBRARY_TYPE,
     soState,
-    { references }
+    { references, id }
   );
 
   return getLinksCRUResponseBody(savedObject);

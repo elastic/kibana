@@ -115,6 +115,9 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+      );
     }
   );
 
@@ -136,6 +139,11 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        '[request body.layout]: types that failed validation:\n\
+- [request body.layout.0]: expected value to equal [horizontal]\n\
+- [request body.layout.1]: expected value to equal [vertical]'
+      );
     }
   );
 
@@ -154,6 +162,7 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create links');
     }
   );
 });

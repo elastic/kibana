@@ -8,7 +8,7 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { logRequest } from '@kbn/as-code-utils';
+import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -66,24 +66,27 @@ export function registerUpdateRoute(
           403: {
             description: 'forbidden',
           },
+          409: {
+            description: 'conflict',
+          },
         },
       },
     },
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          const result = await update(ctx, req.params.id, req.body);
-          return result.meta.created_at === result.meta.updated_at
-            ? res.created({ body: result })
-            : res.ok({ body: result });
+          const { body, operation } = await update(ctx, req.params.id, req.body);
+          if (operation === 'create') {
+            return res.created({ body });
+          } else {
+            return res.ok({ body });
+          }
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 403) {
             logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
-          const message = e.stack ?? e.message;
-          logRequest(logger, req, 'error', message);
-          throw e;
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );
