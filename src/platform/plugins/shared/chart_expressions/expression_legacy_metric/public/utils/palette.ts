@@ -18,9 +18,6 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
  *  - a single `0` has no meaningful range, so we fall back to a fixed `[-50, 100]` domain that keeps
  *    the palette visible instead of collapsing to `[0, 0]`.
  *  - multiple rows span the actual min/max of the values, so every tile is colored relative to the others
- *
- * Kept local to the legacy metric (rather than reusing the metric chart's `getDataBoundsForPalette`)
- * so this deprecated chart's coloring stays decoupled from the metric chart's evolving logic.
  */
 export const getLegacyMetricDataBounds = (
   metricId?: string,
