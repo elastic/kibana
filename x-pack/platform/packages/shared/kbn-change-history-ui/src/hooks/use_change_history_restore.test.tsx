@@ -48,12 +48,19 @@ const createHarness = (
 };
 
 describe('useChangeHistoryRestore', () => {
-  it('calls adapter.restoreChange, invalidates cache, and invokes onRestored after success', async () => {
+  it('calls adapter.restoreChange, invokes onRestored, then invalidates cache', async () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const onRestored = jest.fn(async (): Promise<void> => undefined);
+    const callOrder: string[] = [];
+    const onRestored = jest.fn(async (): Promise<void> => {
+      callOrder.push('onRestored');
+    });
     const adapter = createAdapter(restoreChange);
     const { wrapper, queryClient } = createHarness(adapter);
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = jest
+      .spyOn(queryClient, 'invalidateQueries')
+      .mockImplementation(async () => {
+        callOrder.push('invalidate');
+      });
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
       wrapper,
@@ -78,6 +85,7 @@ describe('useChangeHistoryRestore', () => {
       refetchType: 'active',
     });
     expect(onRestored).toHaveBeenCalledTimes(1);
+    expect(callOrder).toEqual(['onRestored', 'invalidate']);
   });
 
   it('does not invoke onRestored or invalidate cache when restore fails', async () => {

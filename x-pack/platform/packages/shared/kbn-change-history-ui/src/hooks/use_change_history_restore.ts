@@ -13,7 +13,7 @@ import { mapChangeHistoryRestoreError } from '../utils/map_change_history_restor
 import { useInvalidateChangeHistory } from './use_invalidate_change_history';
 
 export interface UseChangeHistoryRestoreArgs {
-  /** Invoked after cache invalidation (e.g. to unlock selection for auto-select). */
+  /** Invoked after a successful restore, before cache invalidation (e.g. to unlock selection). */
   onRestored?: () => Promise<void> | void;
 }
 
@@ -61,8 +61,8 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
-        await invalidateChangeHistory(objectId);
         await onRestored?.();
+        await invalidateChangeHistory(objectId);
 
         if (abortController.signal.aborted) {
           return false;
