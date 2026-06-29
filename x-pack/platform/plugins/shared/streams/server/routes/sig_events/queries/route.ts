@@ -186,6 +186,7 @@ const upsertQueryRoute = createServerRoute({
       esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
+      expires_at: body.expires_at,
     });
 
     return {
@@ -358,7 +359,8 @@ const bulkQueriesRoute = createServerRoute({
 
     for (const operation of operations) {
       if ('index' in operation && operation.index) {
-        const { id, title, description, esql, severity_score, evidence } = operation.index;
+        const { id, title, description, esql, severity_score, evidence, expires_at } =
+          operation.index;
         try {
           validateEsqlQueryForStreamOrThrow({ esqlQuery: esql.query, stream: definition });
         } catch (error) {
@@ -374,6 +376,7 @@ const bulkQueriesRoute = createServerRoute({
             esql,
             severity_score,
             evidence,
+            expires_at,
             type: deriveQueryType(esql.query),
           },
         });

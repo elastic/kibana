@@ -106,16 +106,15 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           )
         );
 
-        const roundEvents = events.filter(isRoundCompleteEvent);
-        if (roundEvents.length === 0) {
+        const roundEvent = events.find(isRoundCompleteEvent);
+        if (!roundEvent) {
           throw new Error('No round_complete event received from execution service');
         }
 
-        // Use the last round's response as the step output (final agent reply)
-        const lastRound = roundEvents[roundEvents.length - 1].data.round;
+        const round = roundEvent.data.round;
         const outputMessage = schema
-          ? JSON.stringify(lastRound.response.structured_output)
-          : lastRound.response.message;
+          ? JSON.stringify(round.response.structured_output)
+          : round.response.message;
 
         let outputConversationId: string | undefined;
         if (storeConversation) {
@@ -131,7 +130,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         return {
           output: {
             message: outputMessage,
-            structured_output: lastRound.response.structured_output,
+            structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
             metadata: { usage },
           },
