@@ -32,13 +32,9 @@ const ALL_SEVERITIES = [
 ] as const;
 
 // Maps each severity string to its numeric lower bound for comparison.
-const SEVERITY_NUMERIC_THRESHOLD: Partial<Record<string, number>> = {
-  [ML_ANOMALY_SEVERITY.CRITICAL]: ML_ANOMALY_THRESHOLD.CRITICAL,
-  [ML_ANOMALY_SEVERITY.MAJOR]: ML_ANOMALY_THRESHOLD.MAJOR,
-  [ML_ANOMALY_SEVERITY.MINOR]: ML_ANOMALY_THRESHOLD.MINOR,
-  [ML_ANOMALY_SEVERITY.WARNING]: ML_ANOMALY_THRESHOLD.WARNING,
-  [ML_ANOMALY_SEVERITY.LOW]: ML_ANOMALY_THRESHOLD.LOW,
-};
+const SEVERITY_NUMERIC_THRESHOLD: Partial<Record<string, number>> = Object.fromEntries(
+  ALL_SEVERITIES.map(({ severity, threshold }) => [severity, threshold])
+);
 
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
