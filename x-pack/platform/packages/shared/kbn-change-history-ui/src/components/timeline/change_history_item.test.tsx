@@ -10,7 +10,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
+import { ChangeHistoryProvider } from '../../provider/change_history_provider';
+import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
+import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../../test_utils/change_history_test_fixtures';
 import { ChangeHistoryItem } from './change_history_item';
+
+const adapter: ChangeHistoryAdapter = {
+  listChanges: jest.fn(),
+  getChange: jest.fn(),
+};
 
 const baseItem = {
   id: 'evt-1',
@@ -22,13 +30,17 @@ const baseItem = {
   metadata: { version: 6 },
 };
 
-const renderItem = (overrides?: Partial<typeof baseItem>) =>
+const renderItem = (
+  overrides?: Partial<typeof baseItem>,
+  providerProps?: Partial<React.ComponentProps<typeof ChangeHistoryProvider>>
+) =>
   render(
     <I18nProvider>
-      <ChangeHistoryItem
-        item={{ ...baseItem, ...overrides }}
-        selected={false}
-        onClick={jest.fn()}
+      <ChangeHistoryProvider
+        objectId={TEST_OBJECT_ID}
+        adapter={adapter}
+        labels={{ previewTitle: TEST_OBJECT_TITLE }}
+        renderPreview={() => null}
         renderBadge={({ item }) => (
           <EuiBadge color="hollow">
             {item.isCurrent
@@ -36,7 +48,14 @@ const renderItem = (overrides?: Partial<typeof baseItem>) =>
               : `v${item.metadata?.version}`}
           </EuiBadge>
         )}
-      />
+        {...providerProps}
+      >
+        <ChangeHistoryItem
+          item={{ ...baseItem, ...overrides }}
+          selected={false}
+          onClick={jest.fn()}
+        />
+      </ChangeHistoryProvider>
     </I18nProvider>
   );
 
@@ -52,14 +71,17 @@ describe('ChangeHistoryItem', () => {
   it('marks the item as selected for styling', () => {
     render(
       <I18nProvider>
-        <ChangeHistoryItem
-          item={baseItem}
-          selected={true}
-          onClick={jest.fn()}
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
           renderBadge={({ item }) => (
             <EuiBadge color="hollow">v{String(item.metadata?.version ?? '')}</EuiBadge>
           )}
-        />
+        >
+          <ChangeHistoryItem item={baseItem} selected={true} onClick={jest.fn()} />
+        </ChangeHistoryProvider>
       </I18nProvider>
     );
 
