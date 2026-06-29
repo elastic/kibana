@@ -28,7 +28,7 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
   }
 
   return (
-    <CollectorContextProvider serviceInstanceId={serviceInstanceId}>
+    <CollectorContextProvider serviceInstanceId={serviceInstanceId} enrolledAt={agent.enrolled_at}>
       <EuiPanel paddingSize="m" hasBorder>
         <CollectorConfigView config={config} health={agent.health} />
       </EuiPanel>

@@ -38,7 +38,7 @@ export interface UseErrorPatternsResult {
   error?: Error;
 }
 
-const TIME_RANGE_TO_MS: Record<TimeRange, number> = {
+export const TIME_RANGE_TO_MS: Record<TimeRange, number> = {
   '5m': 5 * 60 * 1000,
   '1h': 60 * 60 * 1000,
   '1d': 24 * 60 * 60 * 1000,
@@ -79,8 +79,15 @@ const buildQuery = (
   serviceInstanceId: string,
   level: LogLevel,
   now: number,
-  timeRangeMs: number
-) => ({
+  timeRangeMs: number,
+  enrolledAt?: string
+) => {
+  const enrolledAtMs = enrolledAt ? Date.parse(enrolledAt) : NaN;
+  const timeRangeGte = now - timeRangeMs;
+  // Floor the lower bound at enrolled_at so logs from a previous enrollment on the same
+  // host are never surfaced for the current collector instance.
+  const gte = !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeGte ? enrolledAtMs : timeRangeGte;
+  return {
   params: {
     index: OTEL_LOG_INDEX,
     track_total_hits: false,
@@ -91,7 +98,7 @@ const buildQuery = (
           filter: [
             { term: { 'service.instance.id': serviceInstanceId } },
             { terms: { 'log.level': LOG_LEVEL_VALUES[level] } },
-            { range: { '@timestamp': { gte: now - timeRangeMs, lte: now } } },
+            { range: { '@timestamp': { gte, lte: now } } },
           ],
         },
       },
@@ -117,7 +124,8 @@ const buildQuery = (
       },
     },
   },
-});
+  };
+};
 
 const mapBucketsToPatterns = (buckets: CategorizeTextBucket[]): ErrorPattern[] =>
   buckets.map((bucket) => ({
@@ -133,14 +141,16 @@ const mapBucketsToPatterns = (buckets: CategorizeTextBucket[]): ErrorPattern[] =
 export const useErrorPatterns = ({
   serviceInstanceId,
   timeRange,
+  enrolledAt,
 }: {
   serviceInstanceId: string;
   timeRange: TimeRange;
+  enrolledAt?: string;
 }): UseErrorPatternsResult => {
   const { data: dataService } = useStartServices();
 
   const { data, isLoading, error } = useQuery(
-    ['errorPatterns', serviceInstanceId, timeRange],
+    ['errorPatterns', serviceInstanceId, timeRange, enrolledAt],
     async () => {
       const now = Date.now();
       const timeRangeMs = TIME_RANGE_TO_MS[timeRange];
@@ -151,7 +161,7 @@ export const useErrorPatterns = ({
             dataService.search.search<
               IKibanaSearchRequest,
               IKibanaSearchResponse<{ aggregations?: ErrorPatternsAggregations }>
-            >(buildQuery(serviceInstanceId, level, now, timeRangeMs))
+            >(buildQuery(serviceInstanceId, level, now, timeRangeMs, enrolledAt))
           )
         )
       );

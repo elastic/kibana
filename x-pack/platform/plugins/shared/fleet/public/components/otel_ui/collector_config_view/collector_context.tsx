@@ -9,15 +9,17 @@ import React, { createContext, useContext, useMemo } from 'react';
 
 interface CollectorContextValue {
   serviceInstanceId?: string;
+  enrolledAt?: string;
 }
 
 const CollectorContext = createContext<CollectorContextValue>({});
 
 export const CollectorContextProvider: React.FC<{
   serviceInstanceId?: string;
+  enrolledAt?: string;
   children: React.ReactNode;
-}> = ({ serviceInstanceId, children }) => {
-  const value = useMemo(() => ({ serviceInstanceId }), [serviceInstanceId]);
+}> = ({ serviceInstanceId, enrolledAt, children }) => {
+  const value = useMemo(() => ({ serviceInstanceId, enrolledAt }), [serviceInstanceId, enrolledAt]);
   return <CollectorContext.Provider value={value}>{children}</CollectorContext.Provider>;
 };
 
