@@ -1438,6 +1438,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_pending_invalidation @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_to_invalidate @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/cases @elastic/kibana-cases
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/config @elastic/appex-sharedux
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/connector_token @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_connector @elastic/kibana-core
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_stream-config @elastic/integration-experience
@@ -1861,7 +1862,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
 
@@ -2040,6 +2040,7 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/data_lifecycle_helpers.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/pin_failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/doc_counts.ts @elastic/kibana-management
@@ -3695,6 +3696,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/agents/scout-reviewer.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
+/.github/workflows/label-scout-prs.yml @elastic/appex-qa
+/.github/labeler-scout.yml @elastic/appex-qa
 
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
