@@ -5,14 +5,11 @@
  * 2.0.
  */
 import { evaluate as evalsBase } from '@kbn/evals';
-import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { getFlags } from '@kbn/dev-cli-runner';
 import type { SignificantEventsSpecificEvaluationWorkerFixtures } from './types';
 
-const base = withPhoenixExecutor(evalsBase);
-
-export const evaluate = base.extend<{}, SignificantEventsSpecificEvaluationWorkerFixtures>({
+export const evaluate = evalsBase.extend<{}, SignificantEventsSpecificEvaluationWorkerFixtures>({
   logger: [
     async ({ log }, use) => {
       const logger = toolingLogToLogger({

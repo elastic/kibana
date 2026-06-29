@@ -1597,7 +1597,6 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "12.1.0",
-    "@arizeai/phoenix-client": "4.2.0",
     "@axe-core/playwright": "4.11.0",
     "@babel/core": "7.26.8",
     "@babel/eslint-parser": "7.24.7",
@@ -1757,7 +1756,6 @@
     "@kbn/esql-scripts": "link:src/platform/packages/private/kbn-esql-scripts",
     "@kbn/evals": "link:x-pack/platform/packages/shared/kbn-evals",
     "@kbn/evals-extensions": "link:x-pack/platform/packages/shared/kbn-evals-extensions",
-    "@kbn/evals-phoenix-executor": "link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor",
     "@kbn/evals-suite-agent-builder": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder",
     "@kbn/evals-suite-agent-builder-dashboards": "link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards",
     "@kbn/evals-suite-alerts-rag": "link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag",

@@ -114,12 +114,6 @@ describe('extractSearchRetrievedDocs', () => {
 });
 
 describe('createEvaluateExternalDataset', () => {
-  const originalExecutorType = process.env.KBN_EVALS_EXECUTOR;
-
-  afterEach(() => {
-    process.env.KBN_EVALS_EXECUTOR = originalExecutorType;
-  });
-
   function createTraceEvaluator(name: string): Evaluator<Example, unknown> {
     return {
       name,
@@ -176,8 +170,7 @@ describe('createEvaluateExternalDataset', () => {
     return { evaluator, runExperiment };
   }
 
-  it('uses Elasticsearch external dataset description when executor is not Phoenix', async () => {
-    delete process.env.KBN_EVALS_EXECUTOR;
+  it('uses Elasticsearch external dataset description', async () => {
     const { evaluator, runExperiment } = createTestSetup();
 
     await evaluator('dataset-from-es');
@@ -189,28 +182,6 @@ describe('createEvaluateExternalDataset', () => {
           {
             name: 'dataset-from-es',
             description: 'External dataset resolved from Elasticsearch by name',
-            examples: [],
-          },
-        ],
-        trustUpstreamDataset: true,
-      }),
-      expect.any(Array)
-    );
-  });
-
-  it('uses Phoenix external dataset description when executor is Phoenix', async () => {
-    process.env.KBN_EVALS_EXECUTOR = 'phoenix';
-    const { evaluator, runExperiment } = createTestSetup();
-
-    await evaluator('dataset-from-phoenix');
-
-    expect(runExperiment).toHaveBeenCalledTimes(1);
-    expect(runExperiment).toHaveBeenCalledWith(
-      expect.objectContaining({
-        datasets: [
-          {
-            name: 'dataset-from-phoenix',
-            description: 'External dataset resolved from Phoenix by name',
             examples: [],
           },
         ],

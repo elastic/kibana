@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-significant-events
 dependsOn:
   - '@kbn/evals'
-  - '@kbn/evals-phoenix-executor'
   - '@kbn/tooling-log'
   - '@kbn/streams-ai'
   - '@kbn/scout'

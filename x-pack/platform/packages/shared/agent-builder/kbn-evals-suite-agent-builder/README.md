@@ -142,19 +142,19 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=ll
 
 > **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
 
-### External Phoenix dataset evaluations
+### External Elasticsearch dataset evaluations
 
-If you want to run evaluations against a dataset that exists in Phoenix and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your Phoenix dataset and run evals with the command:
+If you want to run evaluations against a dataset that exists in Elasticsearch and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your dataset and run evals with the command:
 
 ```bash
-DATASET_NAME="my-phoenix-dataset" \
+DATASET_NAME="my-dataset" \
 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/external/external_dataset.spec.ts
 ```
 
 Notes:
 
-- The external dataset **must already exist in Phoenix**. If it doesn't, the run will fail with a clear error.
-- In this mode, the suite **does not** create or upsert datasets/examples- Phoenix dataset is the source of truth.
+- The external dataset **must already exist in Elasticsearch**. If it doesn't, the run will fail with a clear error.
+- In this mode, the suite **does not** create or upsert datasets/examples — the Elasticsearch dataset is the source of truth.
 - Dataset examples must match the example schema already using in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
 
 ### Evaluation comparisons
@@ -190,5 +190,5 @@ node scripts/evals compare agent-builder-baseline agent-builder-change
 
 Notes:
 
-- The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
+- The two runs must use the same executor/orchestrator.
 - `compare` reads through `EVALUATIONS_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601/dev`).

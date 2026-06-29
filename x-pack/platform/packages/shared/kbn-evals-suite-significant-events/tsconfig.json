@@ -8,7 +8,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/evals",
-    "@kbn/evals-phoenix-executor",
     "@kbn/tooling-log",
     "@kbn/streams-ai",
     "@kbn/scout",
