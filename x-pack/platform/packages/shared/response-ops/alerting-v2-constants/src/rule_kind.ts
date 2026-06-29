@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './advanced_settings';
-export * from './artifacts';
-export * from './esql_params';
-export * from './labels';
-export * from './rule_kind';
+/** EUI icon names for Alerting V2 rule kind badges. */
+export const RULE_KIND_ICONS = {
+  alert: 'bell',
+  signal: 'radar',
+} as const satisfies Record<'alert' | 'signal', string>;

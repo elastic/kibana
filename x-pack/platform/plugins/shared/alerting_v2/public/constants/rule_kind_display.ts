@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_KIND_ICONS } from '@kbn/alerting-v2-constants';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
@@ -17,10 +18,7 @@ export const RULE_KIND_LABELS: Record<RuleKind, string> = {
   }),
 };
 
-export const RULE_KIND_ICONS: Record<RuleKind, string> = {
-  alert: 'bell',
-  signal: 'radar',
-};
+export { RULE_KIND_ICONS };
 
 export const RULE_KIND_TOOLTIPS: Record<RuleKind, string> = {
   alert: i18n.translate('xpack.alertingV2.ruleDetails.kindAlertTooltip', {

@@ -379,11 +379,6 @@ export const RULE_KIND_TOOLTIPS: Record<RuleKind, string> = {
   signal: RULE_OVERVIEW_KIND_SIGNAL_TOOLTIP,
 };
 
-export const RULE_KIND_ICONS: Record<RuleKind, string> = {
-  alert: 'bell',
-  signal: 'radar',
-};
-
 export const RULE_OVERVIEW_ENABLED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.enabled',
   {
