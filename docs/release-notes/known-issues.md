@@ -23,6 +23,23 @@ Upgrade to {{stack}} 9.4.3+.
 **Resolved**
 
 This issue is resolved in {{stack}} 9.4.3+.
+::::
+
+::::{dropdown} Canvas workpad autoplay stops after the first page
+
+Applies to: {{stack}} 9.3.6, 8.19.17
+
+**Details**
+
+When autoplay is enabled for a Canvas workpad, the presentation stops advancing after the first page instead of cycling through all pages.
+
+**Workaround**
+
+Navigate between pages manually, or upgrade to a release that includes the fix.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.3.7 and 8.19.18.
 
 ::::
 
