@@ -44,6 +44,8 @@ export const UserActionFindRequestSchema = paginationSchema({
 }).extend({
   types: z.array(z.enum(UserActionFindRequestTypesValues)).optional(),
   sortOrder: z.enum(['desc', 'asc']).optional(),
+  author: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export const UserActionFindResponseSchema = z.object({

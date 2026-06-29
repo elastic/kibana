@@ -863,6 +863,170 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      describe('author filter', () => {
+        it('filters user actions by author username', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              author: 'elastic',
+            },
+          });
+
+          for (const userAction of response.userActions) {
+            expect(userAction.created_by.username).to.be('elastic');
+          }
+        });
+
+        it('returns empty results when author does not match', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              author: 'nonexistent_user',
+            },
+          });
+
+          expect(response.total).to.be(0);
+          expect(response.userActions.length).to.be(0);
+        });
+      });
+
+      describe('search filter', () => {
+        it('filters user actions by search term in comment payload', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'cool comment',
+            },
+          });
+
+          expect(response.total).to.be(1);
+          expect(response.userActions[0].type).to.eql('comment');
+        });
+
+        it('returns empty results when search term does not match', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'xyz_no_match_term',
+            },
+          });
+
+          expect(response.total).to.be(0);
+          expect(response.userActions.length).to.be(0);
+        });
+
+        it('search is case-insensitive', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'COOL COMMENT',
+            },
+          });
+
+          expect(response.total).to.be(1);
+        });
+
+        it('paginates search results correctly', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: theCase.id,
+                  version: theCase.version,
+                  title: 'This is a cool title',
+                },
+              ],
+            },
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'cool',
+              page: 1,
+              perPage: 1,
+            },
+          });
+
+          expect(response.perPage).to.be(1);
+          expect(response.page).to.be(1);
+          expect(response.total).to.be(2);
+          expect(response.userActions.length).to.be(1);
+        });
+
+        it('combines search and author filters', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'cool comment',
+              author: 'elastic',
+            },
+          });
+
+          expect(response.total).to.be(1);
+          expect(response.userActions[0].type).to.eql('comment');
+          expect(response.userActions[0].created_by.username).to.be('elastic');
+        });
+      });
+
       describe('rbac', () => {
         const supertestWithoutAuth = getService('supertestWithoutAuth');
 
