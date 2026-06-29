@@ -14,7 +14,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
   const retry = getService('retry');
 
   const expectIndexDetailPageHeader = async function () {
-    await testSubjects.existOrFail('indexDetailsHeader', { timeout: 2000 });
+    await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
   };
   const expectSearchIndexDetailsTabsExists = async function () {
     await testSubjects.existOrFail('indexDetailsTab-overview');
@@ -164,8 +164,8 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
-      await retry.waitFor('index details page title to show up', async () => {
-        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+      await retry.waitFor('index details page content to show up', async () => {
+        return (await testSubjects.isDisplayed('indexDetailsContent')) === true;
       });
     },
 
