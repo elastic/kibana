@@ -17,6 +17,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
+import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
 
 // ── Test data ────────────────────────────────────────────────────────────────
 
@@ -92,49 +93,18 @@ test.describe(
         override: true,
       });
       dataViewId = dataView.id;
-
-      const dashboard = await kbnClient.savedObjects.create({
-        type: 'dashboard',
-        overwrite: false,
-        attributes: {
-          title: 'ML Test',
-          hits: 0,
-          description: '',
-          panelsJSON: '[]',
-          optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
-          version: 1,
-          timeRestore: false,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
-          },
-        },
-      });
-      dashboardSavedObjectId = dashboard.id;
+      dashboardSavedObjectId = await createMLTestDashboard(kbnClient);
     });
 
     test.afterAll(async ({ apiServices, kbnClient, esClient }) => {
-      await apiServices.ml.indices.cleanDataFrameAnalytics();
-      if (dataViewId) {
-        await apiServices.dataViews.delete(dataViewId);
-      }
-      if (dashboardSavedObjectId) {
-        await kbnClient.savedObjects.delete({
-          type: 'dashboard',
-          id: dashboardSavedObjectId,
-        });
-      }
-
-      // Remove the destination index created when the job ran; ignore if it doesn't exist
-      await esClient.indices.delete({ index: testData.destinationIndex, ignore_unavailable: true });
-
-      // Remove the destination data view auto-created alongside the index
-      const destViews = await apiServices.dataViews.getAll();
-      const destView = destViews.data.find(
-        (dv: { title: string }) => dv.title === testData.destinationIndex
-      );
-      if (destView) {
-        await apiServices.dataViews.delete(destView.id);
-      }
+      await cleanupDfaTest({
+        apiServices,
+        kbnClient,
+        esClient,
+        dataViewId,
+        dashboardId: dashboardSavedObjectId,
+        destinationIndex: testData.destinationIndex,
+      });
     });
 
     test('bank marketing classification: full creation journey', async ({
@@ -447,11 +417,8 @@ test.describe(
         ).toBeVisible();
 
         // Scatterplot matrix controls (canvas assertions skipped — Borealis TODO)
-        await page.testSubj.locator('mlScatterplotMatrixSampleSizeSelect').selectOption('10000');
-        const scatterSwitch = page.testSubj.locator('mlScatterplotMatrixRandomizeQuerySwitch');
-        if ((await scatterSwitch.getAttribute('aria-checked')) !== 'true') {
-          await scatterSwitch.click();
-        }
+        await dataFrameAnalytics.setScatterplotSampleSize('10000');
+        await dataFrameAnalytics.setScatterplotRandomizeQuery(true);
       });
 
       // ── Step 8: displays the analytics job in the map view ────────────

@@ -15,9 +15,16 @@ import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
  */
 export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly dependentVariableComboBox: EuiComboBoxWrapper;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+    // Use { locator } form with CSS ~= (whole-word) match because the element's
+    // data-test-subj becomes "mlAnalyticsCreateJobWizardDependentVariableSelect loaded"
+    // once options have loaded — an exact string match would miss it.
+    this.dependentVariableComboBox = new EuiComboBoxWrapper(page, {
+      locator: '[data-test-subj~="mlAnalyticsCreateJobWizardDependentVariableSelect"]',
+    });
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -29,18 +36,19 @@ export class DataFrameAnalyticsPage {
 
   // ── Creation wizard ───────────────────────────────────────────────────────
 
-  /** Clicks the appropriate "create" button and waits for the source selection page. */
+  /**
+   * Clicks the empty-state "create first job" button and waits for the source
+   * selection page. After cleanDataFrameAnalytics the list is always empty, so
+   * the empty-state button is always the right entry point — if it is missing,
+   * the test fails loudly here rather than silently using a fallback.
+   */
   async startCreation(): Promise<void> {
-    const firstBtn = this.page.testSubj.locator('mlAnalyticsCreateFirstButton');
-    if (await firstBtn.isVisible()) {
-      await firstBtn.click();
-    } else {
-      await this.page.testSubj.locator('mlAnalyticsButtonCreate').click();
-    }
+    await this.page.testSubj.locator('mlAnalyticsCreateFirstButton').click();
     await this.page.testSubj.locator('mlDFAPageSourceSelection').waitFor({ state: 'visible' });
   }
 
   async selectSource(sourceName: string): Promise<void> {
+    await this.page.testSubj.locator('savedObjectFinderSearchInput').fill(sourceName);
     await this.page.testSubj.locator(`savedObjectTitle${sourceName}`).click();
     await this.page.testSubj.locator('mlAnalyticsCreationContainer').waitFor({ state: 'visible' });
   }
@@ -79,6 +87,8 @@ export class DataFrameAnalyticsPage {
     await this.page.testSubj.locator('mlScatterplotMatrixSampleSizeSelect').selectOption(value);
   }
 
+  // TODO: replace idempotent toggle with explicit click once suite state
+  // is well-understood; see Scout page-object best practices.
   async setScatterplotRandomizeQuery(enable: boolean): Promise<void> {
     const switchEl = this.page.testSubj.locator('mlScatterplotMatrixRandomizeQuerySwitch');
     const isChecked = (await switchEl.getAttribute('aria-checked')) === 'true';
@@ -121,6 +131,8 @@ export class DataFrameAnalyticsPage {
     await this.page.testSubj.locator('mlDFAnalyticsJobCreationJobDescription').fill(desc);
   }
 
+  // TODO: replace idempotent toggle with explicit click once suite state
+  // is well-understood; see Scout page-object best practices.
   async setDestIndexSameAsJobId(sameAsId: boolean): Promise<void> {
     const switchEl = this.page.testSubj.locator('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
     const isChecked = (await switchEl.getAttribute('aria-checked')) === 'true';
@@ -183,6 +195,8 @@ export class DataFrameAnalyticsPage {
    * Creates and immediately starts the job (assumes the "start job" switch is on by default).
    * Navigates back to the job list after the creation card appears.
    */
+  // TODO: replace idempotent toggle with explicit click once suite state
+  // is well-understood; see Scout page-object best practices.
   async createAndStartJob(): Promise<void> {
     const startSwitch = this.page.testSubj.locator('mlAnalyticsCreateJobWizardStartJobSwitch');
     if ((await startSwitch.getAttribute('aria-checked')) !== 'true') {
@@ -251,23 +265,19 @@ export class DataFrameAnalyticsPage {
     };
   }
 
-  private async ensureActionsMenuOpen(jobId: string): Promise<void> {
-    if (!(await this.page.testSubj.locator('mlAnalyticsJobDeleteButton').isVisible())) {
-      await this.page.testSubj
-        .locator('~mlAnalyticsTable')
-        .locator(`[data-test-subj~="row-${jobId}"]`)
-        .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
-        .click();
-      await this.page.testSubj.locator('mlAnalyticsJobDeleteButton').waitFor({ state: 'visible' });
-    }
+  private async openActionsMenu(jobId: string): Promise<void> {
+    await this.page.testSubj
+      .locator('~mlAnalyticsTable')
+      .locator(`[data-test-subj~="row-${jobId}"]`)
+      .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
+      .click();
+    // Wait for the edit button to confirm the menu opened; avoids relying on the
+    // unscoped mlAnalyticsJobDeleteButton that could match a stale menu for another row.
+    await this.page.testSubj.locator('mlAnalyticsJobEditButton').waitFor({ state: 'visible' });
   }
 
   async openEditFlyout(jobId: string): Promise<void> {
-    // Close any stale open menu first
-    if (await this.page.testSubj.locator('mlAnalyticsJobDeleteButton').isVisible()) {
-      await this.page.keyboard.press('Escape');
-    }
-    await this.ensureActionsMenuOpen(jobId);
+    await this.openActionsMenu(jobId);
     await this.page.testSubj.locator('mlAnalyticsJobEditButton').click();
     await this.page.testSubj.locator('mlAnalyticsEditFlyout').waitFor({ state: 'visible' });
   }
@@ -295,37 +305,32 @@ export class DataFrameAnalyticsPage {
   // ── Configuration step: dependent variable & training percent ─────────────
 
   async selectDependentVariable(variable: string): Promise<void> {
-    // Wait for the combo to be fully loaded before interacting
+    // Wait for options to finish loading before interacting with the combo box.
+    // No ~ prefix here: the exact-match selector correctly targets the element whose
+    // data-test-subj is "mlAnalyticsCreateJobWizardDependentVariableSelect loaded".
     await this.page.testSubj
       .locator('mlAnalyticsCreateJobWizardDependentVariableSelect loaded')
       .waitFor({ state: 'visible' });
-    // Click the comboBoxInput div to open the dropdown, then type to filter
-    const comboInput = this.page.testSubj.locator(
-      '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
-    );
-    await comboInput.click();
-    // Type into the inner <input> element that appears after opening
-    await comboInput.locator('input').fill(variable);
-    // Click the exact matching option in the dropdown list
-    await this.page
-      .locator('.euiComboBoxOption__content', { hasText: new RegExp(`^\\s*${variable}\\s*$`) })
-      .click();
+    // The options render as role="option" items with test-subj "optionsListControlSelection-{field}".
+    // Passing optionTestSubj avoids the strict-mode violation that occurs when getByRole('option')
+    // matches other role="option" items visible on the page (e.g. the includes/excludes table).
+    await this.dependentVariableComboBox.selectSingleOption(variable, {
+      optionTestSubj: `optionsListControlSelection-${variable}`,
+    });
   }
 
   async setTrainingPercent(percent: number): Promise<void> {
     const slider = this.page.testSubj.locator('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     await slider.waitFor({ state: 'visible' });
-    await slider.focus();
-    // Adjust with arrow keys until the slider value matches, mirroring the FTR setSliderValue helper
-    for (let attempts = 0; attempts < 200; attempts++) {
-      const currentValue = Number((await slider.getAttribute('value')) ?? '0');
-      if (currentValue === percent) break;
-      const diff = percent - currentValue;
-      if (Math.abs(diff) >= 10) {
-        await this.page.keyboard.press(diff > 0 ? 'PageUp' : 'PageDown');
-      } else {
-        await this.page.keyboard.press(diff > 0 ? 'ArrowRight' : 'ArrowLeft');
-      }
+    await slider.fill(String(percent));
+    // Hard fail if EUI ignores the native fill (e.g. only responds to keyboard events).
+    // The fix in that case is a deterministic Home + N×ArrowRight sequence, not the old loop.
+    const actual = Number(await slider.getAttribute('value'));
+    if (actual !== percent) {
+      throw new Error(
+        `setTrainingPercent: fill() did not take — expected ${percent}, got ${actual}. ` +
+          `Check whether the EUI slider requires keyboard interaction instead.`
+      );
     }
   }
 
