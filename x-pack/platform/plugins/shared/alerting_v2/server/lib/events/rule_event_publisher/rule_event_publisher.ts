@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import { buildRuleSnapshot } from '../../../../common/workflows/triggers';
 import type { RuleLifecycleEvent } from '../../../../common/workflows/triggers';
-import type { RuleSavedObjectAttributes } from '../../../saved_objects';
-import type { RuleResponse } from '../../rules_client/types';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -24,11 +20,7 @@ import {
   RULE_DISABLED_EVENT_TYPE,
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
-  type RuleCreatedEvent,
-  type RuleDeletedEvent,
-  type RuleDisabledEvent,
-  type RuleEnabledEvent,
-  type RuleUpdatedEvent,
+  type RuleEvent,
 } from './events';
 
 /**
@@ -39,18 +31,11 @@ import {
  * {@link RuleWorkflowSubscriber} maps them to workflow triggers.
  */
 export interface RuleEventPublisherContract {
-  emitRuleCreated(request: KibanaRequest, rule: RuleResponse, spaceId: string): void;
-  emitRuleUpdated(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void;
-  emitRuleDeleted(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void;
-  emitRuleEnabled(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void;
-  emitRuleDisabled(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void;
-  emitAfterRuleUpdate(
-    request: KibanaRequest,
-    parsed: UpdateRuleData,
-    existingAttrs: RuleSavedObjectAttributes,
-    rule: RuleResponse,
-    spaceId: string
-  ): void;
+  emitRuleCreated(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
+  emitRuleUpdated(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
+  emitRuleDeleted(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
+  emitRuleEnabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
+  emitRuleDisabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void;
 }
 
 /**
@@ -67,83 +52,50 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
   ) {}
 
-  public emitRuleCreated(request: KibanaRequest, rule: RuleResponse, spaceId: string): void {
-    this.publishForRules(request, RULE_CREATED_EVENT_TYPE, [rule], spaceId);
+  public emitRuleCreated(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
+    this.publishForRules(request, RULE_CREATED_EVENT_TYPE, ruleIds, spaceId);
   }
 
-  public emitRuleUpdated(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void {
-    this.publishForRules(request, RULE_UPDATED_EVENT_TYPE, rules, spaceId);
+  public emitRuleUpdated(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
+    this.publishForRules(request, RULE_UPDATED_EVENT_TYPE, ruleIds, spaceId);
   }
 
-  public emitRuleDeleted(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void {
-    this.publishForRules(request, RULE_DELETED_EVENT_TYPE, rules, spaceId);
+  public emitRuleDeleted(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
+    this.publishForRules(request, RULE_DELETED_EVENT_TYPE, ruleIds, spaceId);
   }
 
-  public emitRuleEnabled(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void {
-    this.publishForRules(request, RULE_ENABLED_EVENT_TYPE, rules, spaceId);
+  public emitRuleEnabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
+    this.publishForRules(request, RULE_ENABLED_EVENT_TYPE, ruleIds, spaceId);
   }
 
-  public emitRuleDisabled(request: KibanaRequest, rules: RuleResponse[], spaceId: string): void {
-    this.publishForRules(request, RULE_DISABLED_EVENT_TYPE, rules, spaceId);
-  }
-
-  public emitAfterRuleUpdate(
-    request: KibanaRequest,
-    parsed: UpdateRuleData,
-    existingAttrs: RuleSavedObjectAttributes,
-    rule: RuleResponse,
-    spaceId: string
-  ): void {
-    if (Object.keys(parsed).length === 0) {
-      return;
-    }
-
-    const payload = this.toLifecyclePayload(rule, spaceId);
-
-    this.publish(request, { type: RULE_UPDATED_EVENT_TYPE, payload });
-
-    if (parsed.enabled !== undefined && parsed.enabled !== existingAttrs.enabled) {
-      this.publish(request, {
-        type: rule.enabled ? RULE_ENABLED_EVENT_TYPE : RULE_DISABLED_EVENT_TYPE,
-        payload,
-      });
-    }
+  public emitRuleDisabled(request: KibanaRequest, ruleIds: string[], spaceId: string): void {
+    this.publishForRules(request, RULE_DISABLED_EVENT_TYPE, ruleIds, spaceId);
   }
 
   private publishForRules(
     request: KibanaRequest,
-    eventType:
-      | typeof RULE_CREATED_EVENT_TYPE
-      | typeof RULE_UPDATED_EVENT_TYPE
-      | typeof RULE_DELETED_EVENT_TYPE
-      | typeof RULE_ENABLED_EVENT_TYPE
-      | typeof RULE_DISABLED_EVENT_TYPE,
-    rules: RuleResponse[],
+    eventType: RuleEvent['type'],
+    ruleIds: string[],
     spaceId: string
   ): void {
-    for (const rule of rules) {
+    for (const ruleId of ruleIds) {
       this.publish(request, {
         type: eventType,
-        payload: this.toLifecyclePayload(rule, spaceId),
+        payload: this.toLifecyclePayload(ruleId, spaceId),
       });
     }
   }
 
-  private toLifecyclePayload(rule: RuleResponse, spaceId: string): RuleLifecycleEvent {
+  private toLifecyclePayload(ruleId: string, spaceId: string): RuleLifecycleEvent {
     return {
-      rule: buildRuleSnapshot(rule, spaceId),
+      rule: {
+        ruleId,
+        spaceId,
+      },
     };
   }
 
-  private publish(
-    request: KibanaRequest,
-    event:
-      | RuleCreatedEvent
-      | RuleUpdatedEvent
-      | RuleDeletedEvent
-      | RuleEnabledEvent
-      | RuleDisabledEvent
-  ): void {
+  private publish(request: KibanaRequest, event: RuleEvent): void {
     this.eventBus.publish(event, { request });
   }
 }

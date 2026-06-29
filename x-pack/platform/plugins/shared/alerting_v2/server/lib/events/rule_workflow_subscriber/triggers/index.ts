@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import {
-  ruleCreatedTrigger,
-  ruleDeletedTrigger,
-  ruleDisabledTrigger,
-  ruleEnabledTrigger,
-  ruleUpdatedTrigger,
-} from './rule_lifecycle';
+import { ruleCreatedTrigger } from './rule_created';
+import { ruleUpdatedTrigger } from './rule_updated';
+import { ruleDeletedTrigger } from './rule_deleted';
+import { ruleEnabledTrigger } from './rule_enabled';
+import { ruleDisabledTrigger } from './rule_disabled';
 import type { RuleWorkflowTriggerBinding } from './types';
 
 export type { RuleWorkflowTriggerBinding } from './types';
-export {
-  ruleCreatedTrigger,
-  ruleDeletedTrigger,
-  ruleDisabledTrigger,
-  ruleEnabledTrigger,
-  ruleUpdatedTrigger,
-} from './rule_lifecycle';
+export { RuleCreatedTriggerId, ruleCreatedTrigger } from './rule_created';
+export { RuleUpdatedTriggerId, ruleUpdatedTrigger } from './rule_updated';
+export { RuleDeletedTriggerId, ruleDeletedTrigger } from './rule_deleted';
+export { RuleEnabledTriggerId, ruleEnabledTrigger } from './rule_enabled';
+export { RuleDisabledTriggerId, ruleDisabledTrigger } from './rule_disabled';
 
 /**
  * Catalog of every rule-lifecycle → workflow-trigger mapping owned by `alerting_v2`.
@@ -36,7 +32,7 @@ export {
  *
  *  1. Add the event type + discriminator constant to
  *     `rule_event_publisher/events.ts` and extend the `RuleEvent` union there.
- *  2. Add a binding in `rule_lifecycle.ts` (or a dedicated binding file).
+ *  2. Create a binding file in this folder (mirror `rule_created.ts`).
  *  3. Append the binding to {@link RULE_WORKFLOW_TRIGGERS}.
  */
 export const RULE_WORKFLOW_TRIGGERS: ReadonlyArray<RuleWorkflowTriggerBinding> = [

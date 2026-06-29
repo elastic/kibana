@@ -65,23 +65,23 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleCreated',
-    schemaHash: '4d64f5c755a1558d34b2c2fc5421cd0bff70a0866e15d9fe664ede35f8b76707',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
   {
     id: 'alerting.ruleDeleted',
-    schemaHash: '4d64f5c755a1558d34b2c2fc5421cd0bff70a0866e15d9fe664ede35f8b76707',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
   {
     id: 'alerting.ruleDisabled',
-    schemaHash: '4d64f5c755a1558d34b2c2fc5421cd0bff70a0866e15d9fe664ede35f8b76707',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
   {
     id: 'alerting.ruleEnabled',
-    schemaHash: '4d64f5c755a1558d34b2c2fc5421cd0bff70a0866e15d9fe664ede35f8b76707',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
   {
     id: 'alerting.ruleUpdated',
-    schemaHash: '4d64f5c755a1558d34b2c2fc5421cd0bff70a0866e15d9fe664ede35f8b76707',
+    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
   {
     id: 'cases.caseCreated',

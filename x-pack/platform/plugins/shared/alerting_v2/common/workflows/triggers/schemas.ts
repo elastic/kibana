@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { ruleKindSchema, tagsSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 
+const MAX_RULE_SNAPSHOT_FIELD_LENGTH = 1024;
+
 export const ruleSnapshotSchema = z.object({
-  ruleId: z.string().describe('Unique rule identifier.'),
-  spaceId: z.string().describe('Kibana space ID where the rule lives.'),
-  name: z.string().describe('Rule display name.'),
-  kind: ruleKindSchema.describe('Rule kind: alert or signal.'),
-  query: z.string().describe('ES|QL detection query (evaluation.query.base).'),
-  enabled: z.boolean().describe('Whether the rule is enabled after the operation.'),
-  tags: tagsSchema.describe('Rule tags for categorization and workflow trigger filtering.'),
+  ruleId: z.string().max(MAX_RULE_SNAPSHOT_FIELD_LENGTH).describe('Unique rule identifier.'),
+  spaceId: z
+    .string()
+    .max(MAX_RULE_SNAPSHOT_FIELD_LENGTH)
+    .describe('Kibana space ID where the rule lives.'),
 });
 
 export type RuleSnapshot = z.infer<typeof ruleSnapshotSchema>;
