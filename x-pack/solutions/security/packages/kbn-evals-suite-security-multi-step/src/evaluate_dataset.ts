@@ -164,6 +164,35 @@ export const toDatasetExample = (ex: MultiStepExample): MultiStepDatasetExample 
   },
 });
 
+export const createMultiStepExpectedToolCalledEvaluator = (): Evaluator<
+  MultiStepDatasetExample,
+  TaskOutput
+> => ({
+  name: 'ExpectedToolCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, expected }) => {
+    const exp = expected as MultiStepDatasetExpected | undefined;
+    const toolSequence = exp?.tool_sequence;
+    if (!toolSequence?.length) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No tool_sequence annotation — skipping ExpectedToolCalled.',
+      };
+    }
+
+    const expectedToolId = toolSequence[0];
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((step) => step.tool_id)
+      .filter((id): id is string => Boolean(id));
+
+    return {
+      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
+      metadata: { expectedToolId, usedToolIds },
+    };
+  },
+});
+
 export const createMultiStepTrajectoryEvaluator = (): Evaluator<
   MultiStepDatasetExample,
   TaskOutput
@@ -228,6 +257,7 @@ export const buildMultiStepEvaluators = ({
     outputTokens as Evaluator<MultiStepDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<MultiStepDatasetExample, TaskOutput>,
     createDynamicSkillInvocationEvaluator({ traceEsClient, log }),
+    createMultiStepExpectedToolCalledEvaluator(),
     createMultiStepTrajectoryEvaluator(),
   ];
 };

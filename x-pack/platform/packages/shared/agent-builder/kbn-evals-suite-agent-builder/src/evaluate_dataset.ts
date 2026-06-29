@@ -65,6 +65,27 @@ export type EvaluateDataset = ({
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
 
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
+const FIND_RULES_TOOL_ID = 'security.find_rules';
+const DISCOVER_RULE_TAGS_TOOL_ID = 'security.discover_rule_tags';
+
+function isFindRulesRoutingMetadata(metadata?: DatasetExample['metadata']): boolean {
+  const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+  const category = getStringMeta(metadata, 'category');
+  return expectedOnlyToolId === FIND_RULES_TOOL_ID || category === 'find-rules';
+}
+
+export function allowedDomainToolIdsForExample(
+  metadata?: DatasetExample['metadata']
+): string[] | null {
+  const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+  if (!expectedOnlyToolId) {
+    return null;
+  }
+  if (isFindRulesRoutingMetadata(metadata)) {
+    return [DISCOVER_RULE_TAGS_TOOL_ID, FIND_RULES_TOOL_ID];
+  }
+  return [expectedOnlyToolId];
+}
 
 function collectUniqueExpectedSkills(examples: DatasetExample[]): string[] {
   const names = new Set<string>();
@@ -242,12 +263,13 @@ function configureExperiment({
         }
 
         const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
+        const allowedToolIds = allowedDomainToolIdsForExample(metadata) ?? [expectedOnlyToolId];
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
-        const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
+        const allAllowed = usedToolIds.every((id) => allowedToolIds.includes(id));
 
         return {
-          score: hasExpected && allExpected ? 1 : 0,
-          metadata: { expectedOnlyToolId, usedToolIds },
+          score: hasExpected && allAllowed ? 1 : 0,
+          metadata: { expectedOnlyToolId, allowedToolIds, usedToolIds },
         };
       },
     },

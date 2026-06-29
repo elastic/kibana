@@ -6,10 +6,11 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
+import type { DefaultEvaluators, Evaluator, TaskOutput } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   buildAlertsRagEvaluators,
+  createAlertsRagExpectedToolCalledEvaluator,
   createAlertsRagTrajectoryEvaluator,
   toDatasetExample,
   type AlertsRagDatasetExample,
@@ -74,6 +75,8 @@ describe('buildAlertsRagEvaluators', () => {
     // `alert-analysis` skill rather than freelancing with raw tools.
     // Detected via `filestore.read` of `alert-analysis/SKILL.md` in the trace.
     'Skill Invoked (alert-analysis)',
+    // L4 — minimum-sufficient tool from golden `tool_sequence` was invoked.
+    'ExpectedToolCalled',
     // Tool-call sequence alignment — LCS for order + set intersection for
     // coverage, scored against `tool_sequence` annotations on the dataset.
     // Code-judged (no LLM cost). Reports N/A for unannotated examples so
@@ -211,5 +214,38 @@ describe('createAlertsRagTrajectoryEvaluator', () => {
     const metadata = result.metadata as { missingTools: string[]; extraTools: string[] };
     expect(metadata.missingTools).toEqual(['security.alerts']);
     expect(metadata.extraTools).toEqual(['platform.alerting.search']);
+  });
+});
+
+describe('createAlertsRagExpectedToolCalledEvaluator', () => {
+  const buildArgs = (
+    expected: AlertsRagDatasetExample['output'],
+    steps: TaskOutput['steps']
+  ) => ({
+    input: { question: 'q' },
+    expected,
+    output: { steps } satisfies TaskOutput,
+    metadata: { category: 'field_specific_lookup', dataset_split: ['regression'] },
+  });
+
+  it('passes when the golden tool from tool_sequence was invoked', async () => {
+    const evaluator = createAlertsRagExpectedToolCalledEvaluator();
+    const result = await evaluator.evaluate(
+      buildArgs(
+        { reference: 'r', expected: 'r', tool_sequence: ['security.alerts'] },
+        [{ type: 'tool_call', tool_id: 'security.alerts', params: {} }]
+      )
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('returns N/A when tool_sequence is missing', async () => {
+    const evaluator = createAlertsRagExpectedToolCalledEvaluator();
+    const result = await evaluator.evaluate(
+      buildArgs({ reference: 'r', expected: 'r' }, [
+        { type: 'tool_call', tool_id: 'security.alerts', params: {} },
+      ])
+    );
+    expect(result.score).toBeNull();
   });
 });
