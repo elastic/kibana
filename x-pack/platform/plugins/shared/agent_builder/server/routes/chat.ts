@@ -194,14 +194,15 @@ export const conversePayloadSchema = schema.object({
           {
             meta: {
               description:
-                'Access mode to apply when creating a new conversation. Ignored when continuing an existing conversation.',
+                'Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.',
             },
           }
         ),
       },
       {
         meta: {
-          description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.',
+          description:
+            '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.',
         },
       }
     )
