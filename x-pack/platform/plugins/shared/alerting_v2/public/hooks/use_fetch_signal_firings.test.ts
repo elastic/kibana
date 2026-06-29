@@ -10,6 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useFetchSignalFirings } from './use_fetch_signal_firings';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 
 jest.mock('@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search', () => ({
   runEsqlAsyncSearch: jest.fn(),
@@ -34,6 +35,9 @@ const LTE_MS = Date.parse('2026-06-02T00:00:00.000Z');
 const RULE_ID = 'rule-abc';
 
 const mockData = {} as DataPublicPluginStart;
+
+// Distinct, opaque ES|QL responses used as identity sentinels in the mocks below.
+const rawResponse = (): ESQLSearchResponse => ({ columns: [], values: [] });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -75,11 +79,9 @@ describe('useFetchSignalFirings', () => {
   });
 
   it('transforms histogram rows into buckets', async () => {
-    const RAW = Symbol('raw-histogram');
-    const RAW_SUMMARY = Symbol('raw-summary');
-    mockRunEsqlAsyncSearch
-      .mockResolvedValueOnce(RAW as never)
-      .mockResolvedValueOnce(RAW_SUMMARY as never);
+    const RAW = rawResponse();
+    const RAW_SUMMARY = rawResponse();
+    mockRunEsqlAsyncSearch.mockResolvedValueOnce(RAW).mockResolvedValueOnce(RAW_SUMMARY);
 
     mockEsqlResponseToObjectRows.mockImplementation((raw) => {
       if (raw === RAW) {
@@ -105,10 +107,8 @@ describe('useFetchSignalFirings', () => {
   });
 
   it('filters out buckets with unparseable timestamps', async () => {
-    const RAW = Symbol('raw');
-    mockRunEsqlAsyncSearch
-      .mockResolvedValueOnce(RAW as never)
-      .mockResolvedValueOnce(Symbol('raw-summary') as never);
+    const RAW = rawResponse();
+    mockRunEsqlAsyncSearch.mockResolvedValueOnce(RAW).mockResolvedValueOnce(rawResponse());
 
     mockEsqlResponseToObjectRows.mockImplementation((raw) => {
       if (raw === RAW) {
@@ -131,10 +131,8 @@ describe('useFetchSignalFirings', () => {
 
   it('returns lastFiringMs from the summary query', async () => {
     const LAST_FIRING_ISO = '2026-06-01T14:30:00.000Z';
-    const RAW_SUMMARY = Symbol('raw-summary');
-    mockRunEsqlAsyncSearch
-      .mockResolvedValueOnce(Symbol('raw-histogram') as never)
-      .mockResolvedValueOnce(RAW_SUMMARY as never);
+    const RAW_SUMMARY = rawResponse();
+    mockRunEsqlAsyncSearch.mockResolvedValueOnce(rawResponse()).mockResolvedValueOnce(RAW_SUMMARY);
 
     mockEsqlResponseToObjectRows.mockImplementation((raw) => {
       if (raw === RAW_SUMMARY) {
@@ -153,8 +151,8 @@ describe('useFetchSignalFirings', () => {
 
   it('returns null for lastFiringMs when the summary returns no rows', async () => {
     mockRunEsqlAsyncSearch
-      .mockResolvedValueOnce(Symbol('raw-histogram') as never)
-      .mockResolvedValueOnce(Symbol('raw-summary') as never);
+      .mockResolvedValueOnce(rawResponse())
+      .mockResolvedValueOnce(rawResponse());
     mockEsqlResponseToObjectRows.mockReturnValue([] as never);
 
     const { result } = renderHook(() => useFetchSignalFirings(defaultOptions), {
@@ -168,7 +166,7 @@ describe('useFetchSignalFirings', () => {
   it('sets isHistogramError when the histogram query rejects', async () => {
     mockRunEsqlAsyncSearch
       .mockRejectedValueOnce(new Error('histogram boom'))
-      .mockResolvedValueOnce(Symbol('raw-summary') as never);
+      .mockResolvedValueOnce(rawResponse());
     mockEsqlResponseToObjectRows.mockReturnValue([] as never);
 
     const { result } = renderHook(() => useFetchSignalFirings(defaultOptions), {
@@ -181,7 +179,7 @@ describe('useFetchSignalFirings', () => {
 
   it('sets isSummaryError when the summary query rejects', async () => {
     mockRunEsqlAsyncSearch
-      .mockResolvedValueOnce(Symbol('raw-histogram') as never)
+      .mockResolvedValueOnce(rawResponse())
       .mockRejectedValueOnce(new Error('summary boom'));
     mockEsqlResponseToObjectRows.mockReturnValue([] as never);
 
