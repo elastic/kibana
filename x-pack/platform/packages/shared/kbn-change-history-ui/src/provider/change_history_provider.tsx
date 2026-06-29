@@ -24,7 +24,7 @@ export interface ChangeHistoryProviderProps {
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
-  labels?: ChangeHistoryLabels;
+  labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
   children: React.ReactNode;
@@ -86,18 +86,17 @@ export const ChangeHistoryProvider = ({
       renderPreview,
       renderBadge,
       labels: {
-        previewBackLabel: labels?.previewBackLabel ?? i18n.BACK_TO_HOST,
-        previewTitle: labels?.previewTitle ?? labels?.modalTitle ?? '',
-        timelinePanelTitle: labels?.timelinePanelTitle ?? i18n.TIMELINE_PANEL_TITLE,
+        previewBackLabel: labels.previewBackLabel ?? i18n.BACK_TO_HOST,
+        previewTitle: labels.previewTitle,
       },
       supports,
+      isOpen: isModalOpen,
     }),
     [
       adapter,
-      labels?.modalTitle,
-      labels?.previewBackLabel,
-      labels?.previewTitle,
-      labels?.timelinePanelTitle,
+      isModalOpen,
+      labels.previewBackLabel,
+      labels.previewTitle,
       objectId,
       renderBadge,
       renderPreview,

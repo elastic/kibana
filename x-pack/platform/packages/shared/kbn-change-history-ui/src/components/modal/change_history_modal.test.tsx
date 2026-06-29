@@ -47,6 +47,7 @@ const renderModal = ({
       <ChangeHistoryProvider
         objectId="workflow-1"
         adapter={adapter}
+        labels={{ previewTitle: 'Test workflow' }}
         renderPreview={({ change }) => (
           <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
         )}
@@ -192,6 +193,7 @@ describe('ChangeHistoryModal', () => {
           objectId="workflow-1"
           adapter={adapter}
           features={{ restore: true }}
+          labels={{ previewTitle: 'Test workflow' }}
           renderPreview={({ change }) => (
             <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
           )}
@@ -226,6 +228,7 @@ describe('ChangeHistoryModal', () => {
           objectId="workflow-1"
           adapter={adapter}
           features={{ restore: true }}
+          labels={{ previewTitle: 'Test workflow' }}
           renderPreview={({ change }) => (
             <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
           )}

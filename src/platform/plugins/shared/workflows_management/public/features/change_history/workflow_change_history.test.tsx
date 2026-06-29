@@ -8,7 +8,7 @@
  */
 
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import {
   WorkflowChangeHistoryListItem,
@@ -192,7 +192,9 @@ describe('WorkflowChangeHistoryListItem', () => {
       expect(screen.getByTestId('changeHistoryRestoreConfirmModal')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Restore'));
+    fireEvent.click(
+      within(screen.getByTestId('changeHistoryRestoreConfirmModal')).getByText('Restore')
+    );
 
     await waitFor(() => {
       expect(http.post).toHaveBeenCalledWith(

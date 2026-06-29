@@ -31,6 +31,7 @@ const Harness = ({ objectId }: { objectId: string }) => (
     <ChangeHistoryProvider
       objectId={objectId}
       adapter={adapter}
+      labels={{ previewTitle: 'Test workflow' }}
       renderPreview={() => <div data-test-subj="previewPanel" />}
     >
       <ChangeHistoryTrigger />

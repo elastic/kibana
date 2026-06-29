@@ -5,7 +5,7 @@ Shared browser package for **change history** UI in Kibana. Domains integrate vi
 ## Integration (3 steps)
 
 1. **Implement `ChangeHistoryAdapter`** — `listChanges` and `getChange`, optional `restoreChange`.
-2. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, optional `renderBadge`, labels and optional `features`.
+2. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, `labels.previewTitle`, optional `renderBadge` and `features`.
 3. **Render `ChangeHistoryTrigger` + `ChangeHistoryModal`** — modal overlay; no dedicated route required.
 
 ```tsx
@@ -14,6 +14,7 @@ Shared browser package for **change history** UI in Kibana. Domains integrate vi
   adapter={workflowChangeHistoryAdapter}
   renderPreview={renderWorkflowYamlPreview}
   renderBadge={renderWorkflowBadge}
+  labels={{ previewTitle: workflowName }}
 >
   <ChangeHistoryTrigger />
   <ChangeHistoryModal />
@@ -38,5 +39,4 @@ node scripts/jest x-pack/platform/packages/shared/kbn-change-history-ui/src/comp
 - Types (`ChangeHistoryAdapter`, DTOs, …)
 - `ChangeHistoryProvider`, `useChangeHistoryConfig`, `useChangeHistoryList`, `useChangeHistoryDetail`
 - `ChangeHistoryModal`, `ChangeHistoryTrigger`, `ChangeHistoryPreviewPanel`
-- Timeline (`ChangeHistoryTimeline`, …)
 - `createChangeHistoryHttpAdapter`

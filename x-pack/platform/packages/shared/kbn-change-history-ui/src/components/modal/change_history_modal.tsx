@@ -14,6 +14,7 @@ import { ChangeHistoryTimeline } from '../timeline/change_history_timeline';
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
+import * as i18n from '../timeline/translations';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
 import { ChangeHistorySidebarPanel } from './change_history_sidebar_panel';
@@ -30,7 +31,7 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { adapter, objectId, renderBadge, labels, supports } = useChangeHistoryConfig();
+  const { adapter, objectId, labels, supports } = useChangeHistoryConfig();
   const {
     isModalOpen,
     closeModal,
@@ -162,7 +163,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
         isLoading={isLoadingMore}
         onSelectItem={(item) => setSelectedChangeId(item.id)}
         onLoadMore={loadMore}
-        renderBadge={renderBadge}
       />
     );
   };
@@ -185,7 +185,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
             <ChangeHistoryPreviewPanel listItems={items} />
           </ChangeHistoryPreviewShell>
 
-          <ChangeHistorySidebarPanel title={labels.timelinePanelTitle} onClose={closeModal}>
+          <ChangeHistorySidebarPanel title={i18n.TIMELINE_PANEL_TITLE} onClose={closeModal}>
             {renderSidebarContent()}
           </ChangeHistorySidebarPanel>
         </div>

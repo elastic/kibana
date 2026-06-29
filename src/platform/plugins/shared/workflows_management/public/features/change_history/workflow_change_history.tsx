@@ -50,7 +50,7 @@ export const WorkflowChangeHistoryProvider = ({
       renderBadge={renderWorkflowChangeHistoryBadge}
       labels={{
         previewBackLabel: BACK_TO_WORKFLOW,
-        previewTitle: workflowName,
+        previewTitle: workflowName ?? workflowId,
       }}
       features={{ restore: true }}
       permissions={{ canRestore }}
@@ -61,18 +61,12 @@ export const WorkflowChangeHistoryProvider = ({
   );
 };
 
-export interface WorkflowChangeHistoryListItemProps {
-  onClick?: () => void;
-}
-
-export const WorkflowChangeHistoryListItem = ({
-  onClick,
-}: WorkflowChangeHistoryListItemProps): JSX.Element | null => {
+export const WorkflowChangeHistoryListItem = (): JSX.Element | null => {
   const isEnabled = useWorkflowChangeHistoryEnabled();
 
   if (!isEnabled) {
     return null;
   }
 
-  return <ChangeHistoryListGroupItem onClick={onClick} />;
+  return <ChangeHistoryListGroupItem />;
 };

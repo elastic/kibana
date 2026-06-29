@@ -45,6 +45,7 @@ const wrapper =
         objectId="workflow-1"
         adapter={adapter}
         features={features}
+        labels={{ previewTitle: 'Test workflow' }}
         renderPreview={() => null}
       >
         {children}
@@ -63,7 +64,8 @@ describe('useChangeHistoryRestore', () => {
           objectId="workflow-1"
           adapter={adapter}
           features={{ restore: true }}
-          renderPreview={() => null}
+          labels={{ previewTitle: 'Test workflow' }}
+        renderPreview={() => null}
         >
           <ListRefetchRegistrar refetch={refetchList} />
           {children}

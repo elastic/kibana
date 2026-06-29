@@ -10,18 +10,6 @@ export { createChangeHistoryHttpAdapter } from './src/adapters';
 export type { ChangeHistoryHttpAdapterConfig } from './src/adapters';
 export { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from './src/types';
 export {
-  ChangeHistoryTimeline,
-  ChangeHistoryItem,
-  ChangeHistoryFooter,
-  ChangeHistoryActionBadge,
-  ChangeHistoryEmptyPrompt,
-} from './src/components/timeline';
-export type {
-  ChangeHistoryTimelineProps,
-  ChangeHistoryItemProps,
-  ChangeHistoryFooterProps,
-} from './src/components/timeline';
-export {
   ChangeHistoryModal,
   ChangeHistoryTrigger,
   ChangeHistoryListGroupItem,
@@ -29,11 +17,7 @@ export {
   ChangeHistoryRestoreButton,
   ChangeHistoryDefaultPreviewHeaderActions,
 } from './src/components/modal';
-export type {
-  ChangeHistoryTriggerProps,
-  ChangeHistoryListGroupItemProps,
-  ChangeHistoryRestoreButtonProps,
-} from './src/components/modal';
+export type { ChangeHistoryRestoreButtonProps } from './src/components/modal';
 export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
 export type { ChangeHistoryProviderProps, ChangeHistoryConfigValue } from './src/provider';
 export { useChangeHistoryList, useChangeHistoryDetail, useChangeHistoryRestore } from './src/hooks';

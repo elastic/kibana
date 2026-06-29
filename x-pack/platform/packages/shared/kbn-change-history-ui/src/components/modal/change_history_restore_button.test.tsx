@@ -50,6 +50,7 @@ const renderButton = ({
       <ChangeHistoryProvider
         objectId="workflow-1"
         adapter={adapter}
+        labels={{ previewTitle: 'Test workflow' }}
         features={features}
         renderPreview={() => null}
       >
@@ -80,7 +81,7 @@ describe('ChangeHistoryRestoreButton', () => {
     expect(screen.getByTestId('changeHistoryRestoreConfirmModal')).toBeInTheDocument();
     expect(screen.getByText('Restore version 3?')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Restore'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(restoreChange).toHaveBeenCalledWith({
@@ -106,7 +107,7 @@ describe('ChangeHistoryRestoreButton', () => {
     renderButton({ restoreChange });
 
     fireEvent.click(screen.getByTestId('changeHistoryRestoreButton'));
-    fireEvent.click(screen.getByText('Restore'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(screen.getByText('YAML validation failed.')).toBeInTheDocument();

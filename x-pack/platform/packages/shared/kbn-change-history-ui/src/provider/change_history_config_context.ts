@@ -15,7 +15,6 @@ import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_previ
 export interface ChangeHistoryResolvedLabels {
   previewBackLabel: string;
   previewTitle: string;
-  timelinePanelTitle: string;
 }
 
 /** Host-facing provider configuration exposed via `useChangeHistoryConfig`. */
@@ -26,6 +25,8 @@ export interface ChangeHistoryConfigValue {
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryResolvedLabels;
   supports: ChangeHistorySupports;
+  /** Whether the change history modal is open. */
+  isOpen: boolean;
 }
 
 export type { ChangeHistoryLabels };
