@@ -80,7 +80,7 @@ export const useCaseViewHeader = ({
   // Metadata
   const metadata = useMemo((): AppHeaderMetadataItems => {
     const reporterName =
-      caseData.createdBy.fullName ?? caseData.createdBy.username ?? UNKNOWN_REPORTER;
+      caseData.createdBy.fullName || caseData.createdBy.username || UNKNOWN_REPORTER;
     const formattedDate = moment.tz(caseData.createdAt, timeZone).format(dateFormat);
 
     const reportedByItem = {
