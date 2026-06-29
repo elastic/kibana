@@ -25,6 +25,7 @@ import type {
   GetFileContentInput,
   GetFileMetadataInput,
   GetItemChildrenInput,
+  ListRecentFilesInput,
   ListSharedWithMeInput,
   SearchInput,
 } from './types';
@@ -32,6 +33,7 @@ import {
   GetFileContentInputSchema,
   GetFileMetadataInputSchema,
   GetItemChildrenInputSchema,
+  ListRecentFilesInputSchema,
   ListSharedWithMeInputSchema,
   SearchInputSchema,
 } from './types';
@@ -258,16 +260,18 @@ export const OneDrive: ConnectorSpec = {
         'List files the authenticated user has recently accessed or modified. ' +
         'Files on external drives include a remoteItem property. To use getFileMetadata or ' +
         'getFileContent on those items, pass remoteItem.id as itemId and ' +
-        'remoteItem.parentReference.driveId as driveId — the top-level id alone will 404.',
-      input: lazySchema(() => z.object({})),
-      handler: async (ctx) => {
+        'remoteItem.parentReference.driveId as driveId — the top-level id alone will 404. ' +
+        'If the response contains a nextPageToken field, pass it as pageToken to fetch the next page.',
+      input: ListRecentFilesInputSchema,
+      handler: async (ctx, input: ListRecentFilesInput) => {
         const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/drive/recent', {
           params: {
             $select: 'id,name,size,webUrl,file,createdDateTime,lastModifiedDateTime,remoteItem',
             $top: 25,
+            ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
           },
         });
-        return response.data;
+        return withNextPageToken(response.data);
       },
     },
   },
@@ -310,9 +314,8 @@ export const OneDrive: ConnectorSpec = {
     '',
     '### Reading file content',
     'To read a file: call `search` or `getItemChildren` to find the item ID, then `getFileContent`.',
-    'For metadata only (size, dates, path), use `getFileMetadata` instead.',
-    '`getFileContent` returns UTF-8 for text files and base64 for binary files.',
-    'Check the `encoding` field ("utf-8" or "base64") in the response to know how to interpret `content`.',
+    'Use `getFileMetadata` first if you only need size, dates, or path — it avoids downloading the content.',
+    'Before calling `getFileContent` on an unknown file, check its size in the metadata response.',
     'For PDFs and Office documents, prefer passing the file through an Elasticsearch ingest',
     'pipeline attachment processor rather than processing raw binary content in the agent context.',
     '',

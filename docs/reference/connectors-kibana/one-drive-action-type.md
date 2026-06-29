@@ -17,7 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [one-drive-connector-configuration]
 
-OneDrive connectors use **OAuth 2.0 authorization code** (Microsoft Entra ID). In {{kib}} you provide:
+OneDrive connectors use **OAuth 2.0 authorization code** (Microsoft Entra ID). In {{kib}}, you provide:
 
 Client ID
 :   The Application (client) ID from your Azure App registration.
@@ -42,7 +42,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The OneDrive connector has the following actions:
 
 Get me
-:   Retrieve details about the currently authenticated Microsoft account, including display name, email address, and user ID.
+:   Retrieve details about the authenticated Microsoft account, including display name, email address, and user ID.
 
 Get drive
 :   Retrieve metadata about the authenticated user's personal OneDrive, including quota information (used space and total capacity), drive ID, and owner details.
@@ -55,25 +55,32 @@ Get item children
 
 Search
 :   Search for files and folders in OneDrive by keyword. Searches across file names and content.
-    - `query` (required on the first page): Keyword or phrase to search for, for example `Q3 budget report`. Must be re-passed alongside `pageToken` on subsequent pages.
+    - `query` (required on the first page): Keyword or phrase to search for. For example, `Q3 budget report`. Must be re-passed alongside `pageToken` on subsequent pages.
     - `top` (optional): Maximum number of results to return (1–200). Defaults to 25.
     - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
 Get file metadata
 :   Get detailed metadata for a specific file or folder by its item ID, including name, size, content type, modification date, path, and a time-limited download URL.
-    - `itemId` (required): ID of the file or folder. Use item IDs returned by search or Get item children.
+    - `itemId` (required): ID of the file or folder. Use item IDs returned by search or Get item children. For shared or recent items with a `remoteItem`, use `remoteItem.id`.
+    - `driveId` (optional): Drive ID that owns the item. Required for shared or recent items that have a `remoteItem` — use `remoteItem.parentReference.driveId`. Omit for items from your own drive.
 
 Get file content
-:   Download the content of a file from OneDrive. Text files (`.txt`, `.md`, `.csv`, `.json`) are returned as a plain UTF-8 string. Binary files (PDFs, `.docx`, `.xlsx`, images) are returned base64-encoded. The response includes an `encoding` field (`"utf-8"` or `"base64"`) and a `mimeType` field.
-    WARNING: Large files and binary formats produce very large payloads. Only use this action when you have a plan to process the data, for example via an Elasticsearch ingest pipeline attachment processor.
-    - `itemId` (required): ID of the file to download. Use item IDs returned by search or Get item children.
+:   Download the content of a file from OneDrive. For text files (`.txt`, `.md`, `.csv`, `.json`), the connector returns a plain UTF-8 string. For binary files (PDFs, `.docx`, `.xlsx`, images), the connector returns base64-encoded content. The response includes an `encoding` field (`utf-8` or `base64`) and a `mimeType` field.
+
+    ::::{warning}
+    Large files and binary formats produce very large payloads. Only use this action when you have a plan to process the data, for example through an Elasticsearch ingest pipeline attachment processor.
+    ::::
+
+    - `itemId` (required): ID of the file to download. Use item IDs returned by search or Get item children. For shared or recent items with a `remoteItem`, use `remoteItem.id`.
+    - `driveId` (optional): Drive ID that owns the item. Required for shared or recent items that have a `remoteItem` — use `remoteItem.parentReference.driveId`. Omit for items from your own drive.
 
 List shared with me
 :   List files that others have shared with the authenticated user, including name, URL, size, and sharing owner.
     - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
 List recent files
-:   List files the authenticated user has recently accessed or modified, returning up to 25 items.
+:   List files the authenticated user has recently accessed or modified.
+    - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
 ## Get API credentials [one-drive-api-credentials]
 

@@ -244,19 +244,14 @@ describe('OneDrive', () => {
       );
     });
 
-    it('uses base search URL and passes $skiptoken when only pageToken is provided', async () => {
-      mockGet.mockResolvedValue({ data: { value: [] } });
-      const input = parse('search', { pageToken: 'TOKEN_ONLY' });
-      await OneDrive.actions.search.handler(mockContext, input);
-
-      expect(mockGet).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/me/drive/root/search',
-        expect.objectContaining({ params: expect.objectContaining({ $skiptoken: 'TOKEN_ONLY' }) })
-      );
-    });
-
     it('rejects when neither query nor pageToken is provided', () => {
       expect(() => parse('search', {})).toThrow();
+    });
+
+    it('rejects when pageToken is provided without query', () => {
+      expect(() => parse('search', { pageToken: 'TOKEN_ONLY' })).toThrow(
+        'query is required when pageToken is provided'
+      );
     });
 
     it('extracts nextPageToken from @odata.nextLink when present', async () => {
@@ -439,6 +434,32 @@ describe('OneDrive', () => {
           }),
         })
       );
+    });
+
+    it('passes $skiptoken when pageToken is provided', async () => {
+      mockGet.mockResolvedValue({ data: { value: [] } });
+      await OneDrive.actions.listRecentFiles.handler(mockContext, { pageToken: 'TOKEN_RECENT' });
+
+      expect(mockGet).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/me/drive/recent',
+        expect.objectContaining({ params: expect.objectContaining({ $skiptoken: 'TOKEN_RECENT' }) })
+      );
+    });
+
+    it('extracts nextPageToken from @odata.nextLink when present', async () => {
+      mockGet.mockResolvedValue({
+        data: {
+          value: [],
+          '@odata.nextLink':
+            'https://graph.microsoft.com/v1.0/me/drive/recent?$skiptoken=RECENT_NEXT&$top=25',
+        },
+      });
+      const result = (await OneDrive.actions.listRecentFiles.handler(mockContext, {})) as Record<
+        string,
+        unknown
+      >;
+
+      expect(result.nextPageToken).toBe('RECENT_NEXT');
     });
   });
 

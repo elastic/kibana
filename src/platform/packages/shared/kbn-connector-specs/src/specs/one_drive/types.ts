@@ -49,8 +49,16 @@ export const SearchInputSchema = lazySchema(() =>
     .superRefine((val, ctx) => {
       if (!val.query && !val.pageToken) {
         ctx.addIssue({
-          code: 'custom' as const,
+          code: 'custom',
           message: 'Either query or pageToken must be provided.',
+          path: ['query'],
+        });
+      }
+      if (val.pageToken && !val.query) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'query is required when pageToken is provided — the Graph API continuation token is tied to the original query.',
           path: ['query'],
         });
       }
@@ -87,6 +95,13 @@ export const ListSharedWithMeInputSchema = lazySchema(() =>
   })
 );
 export type ListSharedWithMeInput = z.infer<typeof ListSharedWithMeInputSchema>;
+
+export const ListRecentFilesInputSchema = lazySchema(() =>
+  z.object({
+    pageToken: pageTokenField,
+  })
+);
+export type ListRecentFilesInput = z.infer<typeof ListRecentFilesInputSchema>;
 
 const driveIdField = z
   .string()
