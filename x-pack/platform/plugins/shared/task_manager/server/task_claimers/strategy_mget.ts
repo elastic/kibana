@@ -7,7 +7,7 @@
 
 // Basic operation of this task claimer:
 // - search for candidate tasks to run, more than we actually can run
-// - initial search returns a slimmer task document for I/O efficiency (no params or state)
+// - initial search returns a slimmer task document for I/O efficiency (no params, state, or API key)
 // - for each task found, do an mget to get the current seq_no and primary_term
 // - if the mget result doesn't match the search result, the task is stale
 // - from the non-stale search results, return as many as we can run based on available
@@ -69,8 +69,16 @@ interface OwnershipClaimingOpts {
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
-// params and state are unbounded and only needed for claimed tasks, which bulkGet re-fetches in full
-const CLAIM_SEARCH_SOURCE_EXCLUDES = ['task.state', 'task.params'];
+// The candidate search over-fetches tasks we won't claim. params/state are unbounded and only
+// needed once claimed, and excluding apiKey/userScope means TaskStore.msearch sees no key on these
+// docs and skips decryption. Claimed tasks are re-fetched in full (with key + state) via bulkGet.
+const CLAIM_SEARCH_SOURCE_EXCLUDES = [
+  'task.state',
+  'task.params',
+  'task.apiKey',
+  'task.uiamApiKey',
+  'task.userScope',
+];
 
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts

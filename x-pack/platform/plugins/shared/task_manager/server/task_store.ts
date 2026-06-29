@@ -1115,10 +1115,14 @@ export class TaskStore {
       allTasks = allTasks.concat(this.filterTasks(tasks));
     }
 
-    // API keys are intentionally not decrypted here; the claimer only decrypts the tasks
-    // it claims, via bulkGet. See strategy_mget.ts.
     const allSortedTasks = claimSort(this.definitions, allTasks);
-    return { docs: allSortedTasks, versionMap };
+    // Decryption is driven by the documents: callers that exclude the apiKey/uiamApiKey fields
+    // from _source (e.g. the mget claimer's slim candidate search) yield tasks with no key, so
+    // this is a no-op for them and decryption only happens on fully-fetched tasks.
+    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
+      allSortedTasks
+    );
+    return { docs: tasksWithDecryptedApiKeys, versionMap };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {

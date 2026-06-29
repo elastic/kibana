@@ -418,7 +418,17 @@ describe('TaskClaiming', () => {
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
         size: 40,
         seq_no_primary_term: true,
-        _source: { excludes: ['task.state', 'task.params'] },
+        // candidate search drops unbounded params/state and the API key fields (so msearch skips
+        // decryption); claimed winners are re-fetched in full via bulkGet
+        _source: {
+          excludes: [
+            'task.state',
+            'task.params',
+            'task.apiKey',
+            'task.uiamApiKey',
+            'task.userScope',
+          ],
+        },
       });
       expect(store.getDocVersions).toHaveBeenCalledWith([
         'task:id-1',

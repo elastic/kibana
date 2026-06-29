@@ -22,9 +22,11 @@ const POLLING_INTERVAL = 500;
 const TASK_TYPE = '_winnersOnlyType';
 
 // The mget claimer over-fetches candidates (4 * capacity) but should only ever hydrate and
-// decrypt the tasks it actually claims. We spy on the private bulkGetDecryptedTaskApiKeys,
-// which is reached exclusively via TaskStore.bulkGet (the claimed-winners re-fetch), and
-// assert it is never handed more ids than the capacity in a single claim cycle.
+// decrypt the tasks it actually claims. The candidate search excludes the apiKey fields from
+// _source, so the candidate-path decryption sees no key and no-ops; the only real decryption
+// happens when the claimed winners are re-fetched in full via TaskStore.bulkGet. We spy on the
+// private bulkGetDecryptedTaskApiKeys and assert it is never handed more ids than the capacity
+// in a single claim cycle.
 const decryptSpy = jest.spyOn(
   TaskStore.prototype as unknown as {
     bulkGetDecryptedTaskApiKeys: (taskIds: string[]) => Promise<Map<string, unknown>>;
