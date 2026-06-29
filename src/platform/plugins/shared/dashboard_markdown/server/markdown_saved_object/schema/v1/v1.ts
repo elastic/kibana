@@ -8,33 +8,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  MARKDOWN_TITLE_MAX_LENGTH,
-  MARKDOWN_DESCRIPTION_MAX_LENGTH,
-  MARKDOWN_CONTENT_MAX_LENGTH,
-} from '../../../../common/constants';
+import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
-export const markdownAttributesSchema = schema.object(
-  {
-    title: schema.string({
-      meta: { description: 'A human-readable title' },
-      maxLength: MARKDOWN_TITLE_MAX_LENGTH,
-    }),
-    description: schema.maybe(
-      schema.string({
-        meta: { description: 'A short description.' },
-        maxLength: MARKDOWN_DESCRIPTION_MAX_LENGTH,
-      })
-    ),
-    content: schema.string({
-      meta: { description: 'Markdown enriched text content' },
-      maxLength: MARKDOWN_CONTENT_MAX_LENGTH,
-    }),
-    settings: schema.maybe(
-      schema.object({
-        open_links_in_new_tab: schema.boolean(),
-      })
-    ),
-  },
-  { unknowns: 'forbid' }
-);
+export const markdownAttributesSchema = serializedTitlesSchema.extends({
+  content: schema.string({
+    meta: { description: 'Markdown enriched text content' },
+  }),
+  settings: schema.maybe(
+    schema.object({
+      open_links_in_new_tab: schema.boolean(),
+    })
+  ),
+});
