@@ -7,19 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { isValidElement } from 'react';
+import React, { isValidElement, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useAgentWorkspaceOpen } from '@kbn/core-chrome-browser-hooks';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { ChromeNextGlobalHeaderLogo } from '../chrome_next/global_header/global_header_logo';
 import { useContextSwitcher } from '../shared/chrome_hooks';
+import { useChromeComponentsDeps } from '../context';
+import { AgentFirstAgentsNavItem } from './agent_first_agents_nav_item';
 
-export const AgentFirstNavTopControls = () => {
+export interface AgentFirstNavTopControlsProps {
+  isCollapsed: boolean;
+}
+
+export const AgentFirstNavTopControls = ({ isCollapsed }: AgentFirstNavTopControlsProps) => {
   const { euiTheme } = useEuiTheme();
+  const chrome = useChromeService();
+  const agentWorkspaceOpen = useAgentWorkspaceOpen();
+  const { application } = useChromeComponentsDeps();
+  const showAgentsToggle = application.capabilities.agentBuilder?.show === true;
   const switcher = useContextSwitcher();
   const navSwitcher =
     switcher && isValidElement(switcher)
       ? React.cloneElement(switcher, { iconOnly: true })
       : switcher;
+
+  const toggleAgentsWorkspace = useCallback(() => {
+    if (agentWorkspaceOpen) {
+      chrome.agentWorkspace.close();
+    } else {
+      chrome.agentWorkspace.open();
+    }
+  }, [agentWorkspaceOpen, chrome]);
 
   return (
     <div
@@ -30,7 +50,6 @@ export const AgentFirstNavTopControls = () => {
         gap: ${euiTheme.size.xs};
         width: 100%;
         padding-top: ${euiTheme.size.s};
-        padding-bottom: ${euiTheme.size.xs};
       `}
       data-test-subj="agentFirstNavTopControls"
     >
@@ -47,6 +66,15 @@ export const AgentFirstNavTopControls = () => {
           {navSwitcher}
         </div>
       ) : null}
+      {showAgentsToggle ? (
+        <AgentFirstAgentsNavItem
+          isActive={agentWorkspaceOpen}
+          isCollapsed={isCollapsed}
+          onClick={toggleAgentsWorkspace}
+        />
+      ) : null}
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" size="half" />
     </div>
   );
 };
