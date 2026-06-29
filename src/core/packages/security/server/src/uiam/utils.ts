@@ -16,10 +16,6 @@ const UIAM_CREDENTIALS_PREFIX = 'essu_';
  * loopback HTTP requests that authenticate with an *internal* UIAM API key. It tells the HTTP
  * authentication provider to attach the UIAM client-authentication shared secret when validating the
  * credential against Elasticsearch.
- *
- * The shared secret itself never travels on the wire: the marker only opts a request into
- * server-side secret attachment. External callers never set it, so non-internal/global cloud API
- * keys (validated by the ES `_cloud_api_key` realm, which rejects a shared secret) keep working.
  */
 export const UIAM_INTERNAL_CLIENT_AUTH_HEADER = 'x-kbn-uiam-internal-client-auth';
 

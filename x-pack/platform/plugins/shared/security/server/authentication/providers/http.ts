@@ -113,16 +113,13 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    // Internal UIAM API keys (e.g. an `ApiKey essu_...` minted by Task Manager and replayed by the
-    // workflows engine over a loopback HTTP request) must be validated against Elasticsearch with the
-    // UIAM client-authentication shared secret. We only attach it for requests that carry the
-    // `UIAM_INTERNAL_CLIENT_AUTH_HEADER` marker set by those trusted in-process callers; the secret
-    // stays server-side and the marker is never forwarded to ES.
-    //
-    // The marker is required: non-internal/global cloud API keys are also `essu_`-prefixed but are
-    // validated by the ES `_cloud_api_key` realm, which rejects a shared secret (401). External
-    // callers never set the marker, so those keys keep working. The Bearer scheme is reserved for the
-    // UIAM OAuth path handled above and is excluded here.
+    /**
+     * Internal UIAM API keys (e.g. an `ApiKey essu_...` minted by Task Manager and replayed by the
+     * workflows engine over a loopback HTTP request) must be validated against Elasticsearch with the
+     * UIAM client-authentication shared secret. We only attach it for requests that carry the
+     * `UIAM_INTERNAL_CLIENT_AUTH_HEADER` marker set by those trusted in-process callers; the secret
+     * stays server-side and the marker is never forwarded to ES.
+     */
     const clientAuthHeaders =
       this.options.uiam &&
       authorizationHeader.scheme.toLowerCase() !== 'bearer' &&

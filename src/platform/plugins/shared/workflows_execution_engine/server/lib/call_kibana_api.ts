@@ -216,9 +216,6 @@ export async function callKibanaApi<T = unknown>(
   const url = `${baseUrl}${params.path}${buildQueryString(params.query)}`;
 
   const callerHeaders = stripReservedHeaders(params.headers);
-  // When authenticating with an internal UIAM API key, mark the loopback request so the HTTP auth
-  // provider attaches the UIAM client-authentication shared secret (which stays server-side). See
-  // UIAM_INTERNAL_CLIENT_AUTH_HEADER.
   const parsedAuth = HTTPAuthorizationHeader.parseFromRequest(fakeRequest);
   const outboundHeaders: Record<string, string> = {
     ...callerHeaders,
@@ -227,6 +224,9 @@ export async function callKibanaApi<T = unknown>(
     'kbn-xsrf': 'true',
     [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+    // When authenticating with an internal UIAM API key, mark the loopback request so the HTTP auth
+    // provider attaches the UIAM client-authentication shared secret (which stays server-side). See
+    // UIAM_INTERNAL_CLIENT_AUTH_HEADER.
     ...(parsedAuth && isUiamCredential(parsedAuth)
       ? { [UIAM_INTERNAL_CLIENT_AUTH_HEADER]: 'true' }
       : {}),
