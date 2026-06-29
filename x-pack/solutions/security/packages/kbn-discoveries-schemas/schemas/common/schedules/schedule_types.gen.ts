@@ -50,25 +50,34 @@ export const AttackDiscoveryApiConfig = z.object({
 });
 
 /**
- * Workflow configuration for alert retrieval and validation
+ * Composite workflow configuration for alert retrieval and validation. Three independent retrieval toggles (skill_enabled, default_retrieval_enabled, alert_retrieval_workflows_enabled) compose the alert set; at least one must be enabled.
  */
 export type WorkflowConfig = z.infer<typeof WorkflowConfig>;
 export const WorkflowConfig = z.object({
   /**
-   * Array of user-created alert retrieval workflow IDs to execute
+   * Query mode for the built-in default alert retrieval workflow. Only meaningful when default_retrieval_enabled is true.
+   */
+  alert_retrieval_mode: z.enum(['custom_query', 'esql']).optional().default('custom_query'),
+  /**
+   * Array of user-created alert retrieval workflow IDs to execute. Only meaningful when alert_retrieval_workflows_enabled is true.
    */
   alert_retrieval_workflow_ids: z.array(z.string()).optional().default([]),
   /**
-   * Controls how the built-in default alert retrieval workflow operates
+   * Toggle 3 - whether the user-created alert retrieval workflows run.
    */
-  alert_retrieval_mode: z
-    .enum(['custom_only', 'esql', 'custom_query'])
-    .optional()
-    .default('custom_query'),
+  alert_retrieval_workflows_enabled: z.boolean().optional().default(false),
   /**
-   * ES|QL query for alert retrieval (required when alert_retrieval_mode is 'esql')
+   * Toggle 2 - whether the built-in default alert retrieval workflow runs.
+   */
+  default_retrieval_enabled: z.boolean().optional().default(false),
+  /**
+   * ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql').
    */
   esql_query: z.string().optional(),
+  /**
+   * Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
+   */
+  skill_enabled: z.boolean().optional().default(true),
   /**
    * ID of the validation workflow to use (or 'default' for built-in)
    */

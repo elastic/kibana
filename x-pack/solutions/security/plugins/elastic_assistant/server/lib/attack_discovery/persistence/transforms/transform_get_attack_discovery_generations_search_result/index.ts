@@ -179,6 +179,21 @@ export const parseErrorClassification = (parsed: unknown): ParsedErrorClassifica
   };
 };
 
+/**
+ * Parses the persisted Agent Builder conversation id from a parsed event.reference
+ * JSON object. Returns null if absent or not a string (backward compat with events
+ * written before skill-based retrieval persisted a conversation id).
+ */
+export const parseConversationId = (parsed: unknown): string | null => {
+  if (!isRecord(parsed)) {
+    return null;
+  }
+
+  const { conversationId } = parsed;
+
+  return typeof conversationId === 'string' ? conversationId : null;
+};
+
 interface ParsedSourceMetadata {
   action_execution_uuid?: string;
   rule_id?: string;
@@ -310,6 +325,8 @@ const parseWorkflowExecutionsTracking = (
   }
 
   const alertRetrieval = parseAlertRetrievalReferences(value.alertRetrieval);
+  // The generation-phase gate (skill) executions, surfaced under Generation in the UI
+  const gate = parseAlertRetrievalReferences(value.gate);
   // Support both new (generation) and legacy (orchestrator) keys for backward compatibility
   const generation =
     parseWorkflowExecutionReference(value.generation) ??
@@ -317,12 +334,13 @@ const parseWorkflowExecutionsTracking = (
   // Support both new (validation) and legacy (promotion) keys for backward compatibility
   const validation = parseWorkflowExecutionReference(value.validation ?? value.promotion);
 
-  if (alertRetrieval == null && generation == null && validation == null) {
+  if (alertRetrieval == null && gate == null && generation == null && validation == null) {
     return undefined;
   }
 
   return {
     alertRetrieval,
+    gate,
     generation,
     validation,
   };
@@ -403,6 +421,7 @@ const mergeWorkflowExecutionsFromReferenceBuckets = ({
 
   const merged: WorkflowExecutionsTracking = {
     alertRetrieval: null,
+    gate: null,
     generation: null,
     validation: null,
   };
@@ -433,6 +452,23 @@ const mergeWorkflowExecutionsFromReferenceBuckets = ({
               merged.alertRetrieval,
               tracking.alertRetrieval
             );
+          }
+          hasAnyData = true;
+        }
+
+        // Merge gate arrays (same dedup/real-over-stub strategy as alert retrieval)
+        if (tracking.gate != null) {
+          if (
+            merged.gate == null ||
+            (!hasRealAlertRetrievalExecution(merged.gate) &&
+              hasRealAlertRetrievalExecution(tracking.gate))
+          ) {
+            merged.gate = mergeAlertRetrievalReferences(
+              hasRealAlertRetrievalExecution(merged.gate) ? merged.gate : null,
+              tracking.gate
+            );
+          } else {
+            merged.gate = mergeAlertRetrievalReferences(merged.gate, tracking.gate);
           }
           hasAnyData = true;
         }
@@ -586,6 +622,46 @@ const parseErrorClassificationFromReferenceBuckets = ({
 };
 
 /**
+ * Extracts the persisted conversation id from event.reference buckets, returning the
+ * last non-null value found. Only the skill alert-retrieval-succeeded event writes a
+ * conversation id, so typically only one bucket will contain it.
+ */
+const parseConversationIdFromReferenceBuckets = ({
+  executionUuid,
+  logger,
+  workflowReferenceBuckets,
+}: {
+  executionUuid: string;
+  logger: Logger;
+  workflowReferenceBuckets: Array<{ key: string }> | undefined;
+}): string | undefined => {
+  if (!workflowReferenceBuckets || workflowReferenceBuckets.length === 0) {
+    return undefined;
+  }
+
+  let lastFound: string | null = null;
+
+  for (const bucket of workflowReferenceBuckets) {
+    try {
+      const parsed = JSON.parse(bucket.key) as unknown;
+      const conversationId = parseConversationId(parsed);
+      if (conversationId != null) {
+        lastFound = conversationId;
+      }
+    } catch (error) {
+      logger.debug(
+        () =>
+          `Failed to parse conversation id bucket for executionUuid ${executionUuid}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+      );
+    }
+  }
+
+  return lastFound ?? undefined;
+};
+
+/**
  * Parses all event.reference-derived data for a single generation bucket in one
  * pass, sharing the workflow_reference buckets across each parser.
  */
@@ -598,6 +674,7 @@ const parseWorkflowReferenceData = ({
   executionUuid: string;
   logger: Logger;
 }): {
+  conversationId: string | undefined;
   errorClassification: ParsedErrorClassification | undefined;
   sourceMetadata: ParsedSourceMetadata | undefined;
   validationSummary: ParsedValidationSummary | undefined;
@@ -606,6 +683,11 @@ const parseWorkflowReferenceData = ({
   const workflowReferenceBuckets = bucket.workflow_reference?.buckets;
 
   return {
+    conversationId: parseConversationIdFromReferenceBuckets({
+      executionUuid,
+      logger,
+      workflowReferenceBuckets,
+    }),
     errorClassification: parseErrorClassificationFromReferenceBuckets({
       executionUuid,
       logger,
@@ -683,8 +765,13 @@ export const transformGetAttackDiscoveryGenerationsSearchResult = ({
          */
         const workflowId: string | undefined = bucket.workflow_id?.buckets[0]?.key;
         const workflowRunId: string | undefined = bucket.workflow_run_id?.buckets[0]?.key;
-        const { errorClassification, sourceMetadata, validationSummary, workflowExecutions } =
-          parseWorkflowReferenceData({ bucket, executionUuid, logger });
+        const {
+          conversationId,
+          errorClassification,
+          sourceMetadata,
+          validationSummary,
+          workflowExecutions,
+        } = parseWorkflowReferenceData({ bucket, executionUuid, logger });
 
         if (connectorId == null) {
           throw new Error(
@@ -710,6 +797,7 @@ export const transformGetAttackDiscoveryGenerationsSearchResult = ({
         return {
           alerts_context_count: alertsContextCount,
           connector_id: connectorId,
+          ...(conversationId != null ? { conversation_id: conversationId } : {}),
           discoveries,
           ...(errorClassification?.errorCategory != null
             ? { error_category: errorClassification.errorCategory }

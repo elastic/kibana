@@ -16,6 +16,7 @@ export const ERROR_CATEGORIES = {
   cluster_health: 'cluster_health',
   concurrent_conflict: 'concurrent_conflict',
   connector_error: 'connector_error',
+  interrupted: 'interrupted',
   network_error: 'network_error',
   permission_error: 'permission_error',
   rate_limit: 'rate_limit',

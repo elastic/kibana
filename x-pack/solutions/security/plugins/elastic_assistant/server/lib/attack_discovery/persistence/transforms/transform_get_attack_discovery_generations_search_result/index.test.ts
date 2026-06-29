@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
+  parseConversationId,
   parseErrorClassification,
   parseSourceMetadata,
   parseValidationSummary,
@@ -24,6 +25,7 @@ describe('transformGetAttackDiscoveryGenerationsSearchResult', () => {
         workflowRunId: 'alert-retrieval-run',
       },
     ],
+    gate: null,
     generation: {
       workflowId: 'generation-workflow',
       workflowRunId: 'generation-run',
@@ -735,6 +737,7 @@ describe('transformGetAttackDiscoveryGenerationsSearchResult', () => {
             workflowRunId: 'real-alert-run-123',
           },
         ],
+        gate: null,
         generation: {
           workflowId: 'generation-workflow',
           workflowRunId: 'real-orch-run-456',
@@ -744,6 +747,55 @@ describe('transformGetAttackDiscoveryGenerationsSearchResult', () => {
           workflowRunId: 'real-validation-run-789',
         },
       });
+    });
+
+    it('surfaces the generation-phase gate executions and keeps them out of alertRetrieval', () => {
+      const bucketWithGate = JSON.stringify({
+        alertRetrieval: [
+          { workflowId: 'alert-retrieval-workflow', workflowRunId: 'real-alert-run-123' },
+        ],
+        gate: [{ workflowId: 'gate-workflow', workflowRunId: 'real-gate-run-321' }],
+        generation: { workflowId: 'generation-workflow', workflowRunId: 'real-orch-run-456' },
+        validation: null,
+      });
+
+      const rawResponse = {
+        aggregations: {
+          generations: {
+            buckets: [
+              {
+                key: 'exec-uuid-with-gate',
+                doc_count: 1,
+                alerts_context_count: { value: 10 },
+                connector_id: { buckets: [{ key: 'test-connector', doc_count: 1 }] },
+                discoveries: { value: 5 },
+                event_actions: {
+                  buckets: [
+                    { key: 'generation-started', doc_count: 1 },
+                    { key: 'generation-succeeded', doc_count: 1 },
+                  ],
+                },
+                event_reason: { buckets: [] },
+                loading_message: { buckets: [] },
+                generation_end_time: { value_as_string: '2025-07-30T00:00:00Z' },
+                generation_start_time: { value_as_string: '2025-07-29T00:00:00Z' },
+                workflow_reference: {
+                  buckets: [{ key: bucketWithGate, doc_count: 1 }],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({ rawResponse, logger });
+
+      expect(result.generations[0].workflow_executions?.gate).toEqual([
+        { workflowId: 'gate-workflow', workflowRunId: 'real-gate-run-321' },
+      ]);
+      expect(result.generations[0].workflow_executions?.alertRetrieval).toEqual([
+        { workflowId: 'alert-retrieval-workflow', workflowRunId: 'real-alert-run-123' },
+      ]);
     });
 
     it('prefers real IDs over stub IDs when merging', () => {
@@ -1344,6 +1396,231 @@ describe('transformGetAttackDiscoveryGenerationsSearchResult', () => {
 
       expect(result.generations[0].error_category).toBeUndefined();
       expect(result.generations[0].failed_workflow_id).toBeUndefined();
+    });
+  });
+
+  describe('parseConversationId', () => {
+    it('extracts conversationId when present', () => {
+      expect(parseConversationId({ conversationId: 'conversation-abc-123' })).toBe(
+        'conversation-abc-123'
+      );
+    });
+
+    it('returns null when conversationId is missing', () => {
+      expect(parseConversationId({ workflowExecutions: {} })).toBeNull();
+    });
+
+    it('returns null when parsed is not a record', () => {
+      expect(parseConversationId(null)).toBeNull();
+      expect(parseConversationId(undefined)).toBeNull();
+      expect(parseConversationId('string')).toBeNull();
+      expect(parseConversationId(42)).toBeNull();
+    });
+
+    it('returns null when conversationId is not a string', () => {
+      expect(parseConversationId({ conversationId: 123 })).toBeNull();
+      expect(parseConversationId({ conversationId: null })).toBeNull();
+    });
+  });
+
+  describe('conversation_id field in transform output', () => {
+    const buildRawResponseWithReference = (referenceJson: unknown) => ({
+      aggregations: {
+        generations: {
+          buckets: [
+            {
+              key: 'exec-uuid-conversation',
+              doc_count: 1,
+              alerts_context_count: { value: 10 },
+              connector_id: { buckets: [{ key: 'test-connector', doc_count: 1 }] },
+              discoveries: { value: 3 },
+              event_actions: {
+                buckets: [
+                  { key: 'alert-retrieval-started', doc_count: 1 },
+                  { key: 'alert-retrieval-succeeded', doc_count: 1 },
+                  { key: 'generation-started', doc_count: 1 },
+                  { key: 'generation-succeeded', doc_count: 1 },
+                ],
+              },
+              event_reason: { buckets: [] },
+              loading_message: { buckets: [{ key: 'Loading...', doc_count: 1 }] },
+              generation_end_time: { value_as_string: '2025-08-01T00:00:00Z' },
+              generation_start_time: { value_as_string: '2025-07-31T00:00:00Z' },
+              workflow_reference: {
+                buckets: [{ key: JSON.stringify(referenceJson), doc_count: 1 }],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    it('includes conversation_id in the response when conversationId is in event.reference', () => {
+      const rawResponse = buildRawResponseWithReference({
+        alertRetrieval: [{ workflowId: 'skill-wf', workflowRunId: 'skill-run' }],
+        conversationId: 'conversation-abc-123',
+        generation: null,
+        validation: null,
+      });
+
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({ logger, rawResponse });
+
+      expect(result.generations[0].conversation_id).toBe('conversation-abc-123');
+    });
+
+    it('returns undefined conversation_id for events without a conversationId', () => {
+      const rawResponse = buildRawResponseWithReference({
+        alertRetrieval: null,
+        generation: { workflowId: 'gen-wf', workflowRunId: 'gen-run-1' },
+        validation: null,
+      });
+
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({ logger, rawResponse });
+
+      expect(result.generations[0].conversation_id).toBeUndefined();
+    });
+
+    it('returns undefined conversation_id when workflow_reference is absent', () => {
+      const rawResponse = {
+        aggregations: {
+          generations: {
+            buckets: [
+              {
+                key: 'exec-uuid-no-ref',
+                doc_count: 1,
+                alerts_context_count: { value: 5 },
+                connector_id: { buckets: [{ key: 'test-connector', doc_count: 1 }] },
+                discoveries: { value: 3 },
+                event_actions: {
+                  buckets: [
+                    { key: 'generation-started', doc_count: 1 },
+                    { key: 'generation-succeeded', doc_count: 1 },
+                  ],
+                },
+                event_reason: { buckets: [] },
+                loading_message: { buckets: [{ key: 'Loading...', doc_count: 1 }] },
+                generation_end_time: { value_as_string: '2025-08-01T00:00:00Z' },
+                generation_start_time: { value_as_string: '2025-07-31T00:00:00Z' },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({ logger, rawResponse });
+
+      expect(result.generations[0].conversation_id).toBeUndefined();
+    });
+
+    it('returns the last non-null conversationId when multiple buckets are present', () => {
+      const bucket1 = JSON.stringify({ conversationId: 'conversation-first' });
+      const bucket2 = JSON.stringify({ conversationId: 'conversation-final' });
+
+      const rawResponse = {
+        aggregations: {
+          generations: {
+            buckets: [
+              {
+                key: 'exec-uuid-multi-conversation',
+                doc_count: 2,
+                alerts_context_count: { value: 10 },
+                connector_id: { buckets: [{ key: 'test-connector', doc_count: 2 }] },
+                discoveries: { value: 3 },
+                event_actions: {
+                  buckets: [
+                    { key: 'generation-started', doc_count: 1 },
+                    { key: 'generation-succeeded', doc_count: 1 },
+                  ],
+                },
+                event_reason: { buckets: [] },
+                loading_message: { buckets: [{ key: 'Loading...', doc_count: 2 }] },
+                generation_end_time: { value_as_string: '2025-08-01T00:00:00Z' },
+                generation_start_time: { value_as_string: '2025-07-31T00:00:00Z' },
+                workflow_reference: {
+                  buckets: [
+                    { key: bucket1, doc_count: 1 },
+                    { key: bucket2, doc_count: 1 },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({ logger, rawResponse });
+
+      expect(result.generations[0].conversation_id).toBe('conversation-final');
+    });
+  });
+
+  describe('conversation_id field for scheduled generations', () => {
+    // A scheduled (event.category: scheduled) generation is identified downstream
+    // by its source_metadata (rule_id / rule_name), which only scheduled and
+    // action-triggered runs write to the event log. This locks in that the gate's
+    // persisted conversation_id is surfaced alongside that scheduled indicator, so
+    // the schedule execution flyout can render a ConversationLink for the report.
+    let result: ReturnType<typeof transformGetAttackDiscoveryGenerationsSearchResult>;
+    beforeEach(() => {
+      const rawResponse = {
+        aggregations: {
+          generations: {
+            buckets: [
+              {
+                key: 'exec-uuid-scheduled-conversation',
+                doc_count: 1,
+                alerts_context_count: { value: 10 },
+                connector_id: { buckets: [{ key: 'test-connector', doc_count: 1 }] },
+                discoveries: { value: 3 },
+                event_actions: {
+                  buckets: [
+                    { key: 'alert-retrieval-started', doc_count: 1 },
+                    { key: 'alert-retrieval-succeeded', doc_count: 1 },
+                    { key: 'generation-started', doc_count: 1 },
+                    { key: 'generation-succeeded', doc_count: 1 },
+                  ],
+                },
+                event_reason: { buckets: [] },
+                loading_message: { buckets: [{ key: 'Loading...', doc_count: 1 }] },
+                generation_end_time: { value_as_string: '2025-08-01T00:00:00Z' },
+                generation_start_time: { value_as_string: '2025-07-31T00:00:00Z' },
+                workflow_reference: {
+                  buckets: [
+                    {
+                      key: JSON.stringify({
+                        alertRetrieval: [{ workflowId: 'skill-wf', workflowRunId: 'skill-run' }],
+                        conversationId: 'conversation-scheduled-123',
+                        generation: null,
+                        sourceMetadata: {
+                          actionExecutionUuid: 'action-exec-uuid-789',
+                          ruleId: 'rule-scheduled-456',
+                          ruleName: 'Scheduled Attack Discovery',
+                        },
+                        validation: null,
+                      }),
+                      doc_count: 1,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      result = transformGetAttackDiscoveryGenerationsSearchResult({ logger, rawResponse });
+    });
+
+    it('surfaces the conversation_id for the scheduled generation', () => {
+      expect(result.generations[0].conversation_id).toBe('conversation-scheduled-123');
+    });
+
+    it('surfaces the source_metadata that identifies the run as scheduled', () => {
+      expect(result.generations[0].source_metadata).toEqual({
+        action_execution_uuid: 'action-exec-uuid-789',
+        rule_id: 'rule-scheduled-456',
+        rule_name: 'Scheduled Attack Discovery',
+      });
     });
   });
 
