@@ -35,7 +35,6 @@ Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jes
 
 ### Scout (UI/API with Playwright)
 - When iterating, start the stack once with `node scripts/scout start-server --arch stateful --domain classic` and run `run-tests` against it, instead of rebooting ES+Kibana on every run.
-- When iterating, start the stack once with `node scripts/scout start-server --stateful` and run `run-tests` against it, instead of rebooting ES+Kibana on every run.
 
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
