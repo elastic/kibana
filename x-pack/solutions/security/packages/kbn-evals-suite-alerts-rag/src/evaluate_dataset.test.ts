@@ -14,6 +14,7 @@ import {
   createAlertsRagTrajectoryEvaluator,
   toDatasetExample,
   type AlertsRagDatasetExample,
+  type AlertsRagDatasetMetadata,
 } from './evaluate_dataset';
 import type { AlertsRagExample } from './dataset';
 
@@ -218,23 +219,23 @@ describe('createAlertsRagTrajectoryEvaluator', () => {
 });
 
 describe('createAlertsRagExpectedToolCalledEvaluator', () => {
-  const buildArgs = (
-    expected: AlertsRagDatasetExample['output'],
-    steps: TaskOutput['steps']
-  ) => ({
+  type TestStep = { type?: string; tool_id?: string; params?: Record<string, unknown> };
+  const buildArgs = (expected: AlertsRagDatasetExample['output'], steps: TestStep[]) => ({
     input: { question: 'q' },
     expected,
-    output: { steps } satisfies TaskOutput,
-    metadata: { category: 'field_specific_lookup', dataset_split: ['regression'] },
+    output: { steps } as TaskOutput,
+    metadata: {
+      category: 'field_specific_lookup',
+      dataset_split: ['regression'],
+    } satisfies AlertsRagDatasetMetadata,
   });
 
   it('passes when the golden tool from tool_sequence was invoked', async () => {
     const evaluator = createAlertsRagExpectedToolCalledEvaluator();
     const result = await evaluator.evaluate(
-      buildArgs(
-        { reference: 'r', expected: 'r', tool_sequence: ['security.alerts'] },
-        [{ type: 'tool_call', tool_id: 'security.alerts', params: {} }]
-      )
+      buildArgs({ reference: 'r', expected: 'r', tool_sequence: ['security.alerts'] }, [
+        { type: 'tool_call', tool_id: 'security.alerts', params: {} },
+      ])
     );
     expect(result.score).toBe(1);
   });
