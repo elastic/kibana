@@ -244,6 +244,7 @@ describe('snoozeRule change tracking', () => {
     unsecuredSavedObjectsClient.update.mockResolvedValue({
       id: 'rule-1',
       type: 'alert',
+      updated_at: '2023-03-05T10:30:00.000Z',
       attributes: { snoozeSchedule: updatedRuleSO.attributes.snoozeSchedule },
       references: [],
     });
@@ -316,7 +317,7 @@ describe('snoozeRule change tracking', () => {
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
-    expect(changes[0].timestamp).toBe('2019-02-12T21:01:22.479Z');
+    expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
   });
 
   test('logs the change only after the OCC retry succeeds', async () => {

@@ -4962,6 +4962,7 @@ This is the type of text _investigation guides_ will contain.`;
     const createdRuleSO = {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
+      updated_at: '2023-03-05T10:30:00.000Z',
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -5041,8 +5042,7 @@ This is the type of text _investigation guides_ will contain.`;
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
           {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
+            timestamp: '2023-03-05T10:30:00.000Z',
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
@@ -5071,7 +5071,7 @@ This is the type of text _investigation guides_ will contain.`;
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
       expect(changes).toHaveLength(1);
-      expect(changes[0].timestamp).toBe('2019-02-12T21:01:22.479Z');
+      expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
     });
 
     test('does not log when the rule type opts out of tracking', async () => {

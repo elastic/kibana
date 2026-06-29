@@ -564,6 +564,7 @@ describe('updateRuleApiKey()', () => {
     const updatedRuleSO = {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
+      updated_at: '2023-03-05T10:30:00.000Z',
       attributes: {
         name: ruleName,
         alertTypeId: 'myType',
@@ -705,7 +706,7 @@ describe('updateRuleApiKey()', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
-      expect(changes[0].timestamp).toBe('2019-02-12T21:01:22.479Z');
+      expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
     });
 
     test('logs the change only after the OCC retry succeeds (no logging on the failed attempt)', async () => {

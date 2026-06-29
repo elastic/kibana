@@ -3440,6 +3440,7 @@ describe('bulkEdit()', () => {
       ({
         id,
         type: RULE_SAVED_OBJECT_TYPE,
+        updated_at: '2023-03-05T10:30:00.000Z',
         attributes: {
           ...existingRule.attributes,
           tags: ['foo', 'test-1'],
@@ -3600,8 +3601,8 @@ describe('bulkEdit()', () => {
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
       expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
-        '2019-02-12T21:01:22.479Z',
-        '2019-02-12T21:01:22.479Z',
+        '2023-03-05T10:30:00.000Z',
+        '2023-03-05T10:30:00.000Z',
       ]);
     });
 

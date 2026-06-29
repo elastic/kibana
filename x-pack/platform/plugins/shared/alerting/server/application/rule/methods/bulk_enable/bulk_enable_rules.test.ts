@@ -1292,7 +1292,10 @@ describe('bulkEnableRules', () => {
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+        saved_objects: [
+          { ...enabledRuleForBulkOps1, updated_at: '2023-03-05T10:30:00.000Z' },
+          { ...enabledRuleForBulkOps2, updated_at: '2023-03-05T11:00:00.000Z' },
+        ],
       });
 
       await trackingClient.bulkEnableRules({ filter: 'fake_filter' });
@@ -1300,8 +1303,8 @@ describe('bulkEnableRules', () => {
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
       expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
-        '2019-02-12T21:01:22.479Z',
-        '2019-02-12T21:01:22.479Z',
+        '2023-03-05T10:30:00.000Z',
+        '2023-03-05T11:00:00.000Z',
       ]);
     });
 
