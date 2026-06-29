@@ -75,7 +75,7 @@ interface ErrorPatternsAggregations {
   };
 }
 
-const buildQuery = (
+export const buildQuery = (
   serviceInstanceId: string,
   level: LogLevel,
   now: number,
