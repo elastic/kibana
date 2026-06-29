@@ -2173,7 +2173,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       const result = validatePackagePolicy(
         { ...basePolicy, additional_datastreams_permissions: ['profiles-generic.otel-default'] },
         minimalPackage as unknown as PackageInfo,
-        deps
+        parse
       );
       expect(result.additional_datastreams_permissions).toBeNull();
     });
@@ -2182,7 +2182,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       const result = validatePackagePolicy(
         { ...basePolicy, additional_datastreams_permissions: ['profiling-events-default'] },
         minimalPackage as unknown as PackageInfo,
-        deps
+        parse
       );
       expect(result.additional_datastreams_permissions).not.toBeNull();
       expect(result.additional_datastreams_permissions![0]).toContain('profiling-events-default');
