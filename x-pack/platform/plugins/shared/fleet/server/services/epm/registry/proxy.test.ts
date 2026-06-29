@@ -40,7 +40,6 @@ describe('getProxyAgentOptions', () => {
       headers: { Host: 'targethost' },
       host: '12.34.56.78',
       port: 910,
-      protocol: 'https:',
       rejectUnauthorized: undefined,
     });
 
@@ -52,7 +51,6 @@ describe('getProxyAgentOptions', () => {
       headers: { Host: 'example.com' },
       host: '12.34.56.78',
       port: 910,
-      protocol: 'https:',
       rejectUnauthorized: undefined,
     });
 
@@ -65,7 +63,6 @@ describe('getProxyAgentOptions', () => {
       headers: { Host: 'example.com' },
       host: '12.34.56.78',
       port: 910,
-      protocol: 'https:',
       rejectUnauthorized: undefined,
     });
   });
@@ -82,7 +79,6 @@ describe('getProxyAgentOptions', () => {
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'http:',
           rejectUnauthorized: undefined,
         });
       });
@@ -97,7 +93,6 @@ describe('getProxyAgentOptions', () => {
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'https:',
           rejectUnauthorized: undefined,
         });
       });
@@ -113,7 +108,6 @@ describe('getProxyAgentOptions', () => {
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'http:',
           rejectUnauthorized: undefined,
         });
       });
@@ -126,7 +120,6 @@ describe('getProxyAgentOptions', () => {
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'https:',
           rejectUnauthorized: undefined,
         });
       });

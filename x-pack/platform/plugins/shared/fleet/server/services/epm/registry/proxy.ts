@@ -42,7 +42,6 @@ export function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAg
   return {
     host: proxyParsed.hostname,
     port: Number(proxyParsed.port),
-    protocol: proxyParsed.protocol,
     ...(proxyParsed.username && { username: proxyParsed.username, password: proxyParsed.password }),
     // The headers to send
     headers: options.proxyHeaders || {
