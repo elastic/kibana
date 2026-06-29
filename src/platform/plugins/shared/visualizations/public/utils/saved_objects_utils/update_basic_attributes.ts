@@ -74,7 +74,7 @@ export const updateBasicSoAttributes = async (
   });
 
   let { references } = extractedReferences;
-  console.log({ references, newAttributes });
+
   const attributes = {
     ...extractedReferences.attributes,
     title: newAttributes.title,
