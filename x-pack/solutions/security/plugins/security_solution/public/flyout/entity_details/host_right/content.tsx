@@ -24,6 +24,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import type { EntityRiskScore, HostItem } from '../../../../common/search_strategy';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { BehavioralAnomaliesSection } from '../../../entity_analytics/components/behavioral_anomalies';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -96,6 +97,11 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      <BehavioralAnomaliesSection
+        entityId={entityRecord?.entity.id ?? hostName}
+        isPreviewMode={isPreviewMode}
+        openDetailsPanel={openDetailsPanel}
+      />
       {entityStoreEntityId && (
         <>
           <VisualizationsSection

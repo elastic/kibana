@@ -21,6 +21,7 @@ import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { BehavioralAnomaliesSection } from '../../../entity_analytics/components/behavioral_anomalies';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
@@ -78,6 +79,11 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
+      <BehavioralAnomaliesSection
+        entityId={entityRecord?.entity.id ?? serviceName}
+        isPreviewMode={isPreviewMode}
+        openDetailsPanel={openDetailsPanel}
+      />
       {entityStoreEntityId && (
         <>
           <VisualizationsSection

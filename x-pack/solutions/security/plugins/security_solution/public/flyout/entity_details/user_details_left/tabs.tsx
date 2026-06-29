@@ -9,6 +9,9 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  getBehavioralAnomaliesTab,
+  getBehavioralAnomaliesV2Tab,
+  getBehavioralAnomaliesV3Tab,
   getInsightsInputTab,
   getResolutionGroupTab,
   getRiskInputTab,
@@ -58,6 +61,13 @@ export const useTabs = (
         })
       );
     }
+
+    // Prototype tab order: v.3 ("Behavioral anomalies-v.3") leads, then
+    // v.2 ("BA-v.2"), then v.1 ("BA-v.1"). Drop any of the three lines +
+    // its import to remove that version.
+    tabs.push(getBehavioralAnomaliesV3Tab());
+    tabs.push(getBehavioralAnomaliesV2Tab());
+    tabs.push(getBehavioralAnomaliesTab());
 
     if (oktaManagedUser) {
       tabs.push(getOktaTab(oktaManagedUser));

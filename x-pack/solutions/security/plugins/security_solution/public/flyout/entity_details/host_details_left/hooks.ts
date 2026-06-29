@@ -9,6 +9,9 @@ import { useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
+  getBehavioralAnomaliesTab,
+  getBehavioralAnomaliesV2Tab,
+  getBehavioralAnomaliesV3Tab,
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
@@ -103,7 +106,22 @@ export const useTabs = ({
           ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
+    // Prototype tab order: v.3 ("Behavioral anomalies-v.3") leads, then
+    // v.2 ("BA-v.2"), then v.1 ("BA-v.1"). Drop any of the three entries +
+    // its import to remove that version.
+    const behavioralAnomaliesV3Tab = [getBehavioralAnomaliesV3Tab()];
+    const behavioralAnomaliesV2Tab = [getBehavioralAnomaliesV2Tab()];
+    const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
+
+    return [
+      ...riskScoreTab,
+      ...behavioralAnomaliesV3Tab,
+      ...behavioralAnomaliesV2Tab,
+      ...behavioralAnomaliesTab,
+      ...insightsTab,
+      ...graphViewTab,
+      ...resolutionTab,
+    ];
   }, [
     isRiskScoreExist,
     hostName,
