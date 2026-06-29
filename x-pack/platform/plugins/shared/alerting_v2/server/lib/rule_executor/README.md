@@ -236,9 +236,9 @@ When the no-data query reports the group as still having data:
 
 | `recovery_strategy` | Outcome |
 | --- | --- |
-| `'no_breach'` | The group already has a `recovered` event from the recovery step (78% example: `78% < 80%` doesn't matter — `no_breach` recovers any active group missing from breach). Leave it alone. |
-| `'query'` | If the recovery query matched the group, recovery already wrote a `recovered` event — leave it. If it didn't match (UNKNOWN_D limbo: data is present but neither breaching nor recovering), append a synthetic `breached` event so the episode stays alive. |
-| `'none'` | UNKNOWN_E: no recovery is configured and the group is present but not breaching. No event is written; the episode drifts out of lookback windows over time. This is the documented trade-off of opting out of recovery. |
+| `'no_breach'` | The group already has a `recovered` event from the recovery step — `no_breach` recovers any active group missing from breach. Leave it alone. |
+| `'query'` | If the recovery query matched the group, recovery already wrote a `recovered` event — leave it. If it didn't match (data is present but neither breaching nor recovering), append a synthetic `breached` event so the episode stays alive. |
+| `'none'` | No recovery is configured and the group is present but not breaching. No event is written; the episode drifts out of lookback windows over time. This is the documented trade-off of opting out of recovery. |
 
 ### Summary
 
