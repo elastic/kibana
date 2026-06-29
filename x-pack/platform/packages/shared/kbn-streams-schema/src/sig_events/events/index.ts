@@ -25,6 +25,27 @@ export const SIG_EVENT_STATUS_OPTIONS = [
 export const sigEventStatusSchema = z.enum(SIG_EVENT_STATUS_OPTIONS);
 export type SigEventStatus = z.infer<typeof sigEventStatusSchema>;
 
+export const SIG_EVENT_INVESTIGATION_RESULT_STATUS_OPTIONS = ['success', 'failed'] as const;
+
+export const sigEventInvestigationResultStatusSchema = z.enum(
+  SIG_EVENT_INVESTIGATION_RESULT_STATUS_OPTIONS
+);
+export type SigEventInvestigationResultStatus = z.infer<
+  typeof sigEventInvestigationResultStatusSchema
+>;
+
+/**
+ * One investigation run attached to this significant event.
+ * `workflow_execution_id` is the investigation workflow execution id, used to
+ * fetch detailed RCA data from the corresponding workflow run.
+ */
+export const sigEventInvestigationSchema = z.object({
+  workflow_execution_id: z.string().max(MAX_ID_LENGTH),
+  result_status: sigEventInvestigationResultStatusSchema,
+  completed_date: z.iso.datetime({ offset: true }),
+});
+export type SigEventInvestigation = z.infer<typeof sigEventInvestigationSchema>;
+
 export const sigEventSchema = z.object({
   '@timestamp': z.iso.datetime({ offset: true }),
   created_at: z.iso.datetime({ offset: true }),
@@ -47,6 +68,7 @@ export const sigEventSchema = z.object({
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
   assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+  investigations: z.array(sigEventInvestigationSchema).max(100).optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;

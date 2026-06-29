@@ -278,13 +278,18 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   SIG_EVENT_STATUS_OPTIONS,
+  SIG_EVENT_INVESTIGATION_RESULT_STATUS_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
   type Discovery,
   sigEventSchema,
   sigEventStatusSchema,
+  sigEventInvestigationSchema,
+  sigEventInvestigationResultStatusSchema,
   type SigEvent,
+  type SigEventInvestigation,
+  type SigEventInvestigationResultStatus,
   type KnowledgeIndicator,
   type SigEventStatus,
 } from './src/sig_events';

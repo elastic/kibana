@@ -7,6 +7,7 @@
 
 import {
   sigEventSchema,
+  sigEventInvestigationSchema,
   type Detection,
   type SigEvent,
   type Discovery,
@@ -14,6 +15,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { attachInvestigationToEvent } from '../../../../lib/sig_events/events/attach_investigation';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
@@ -209,9 +211,41 @@ const eventsLifecycleRoute = createServerRoute({
   },
 });
 
+const eventsAttachInvestigationRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/events/{id}/investigations',
+  options: {
+    access: 'internal',
+    summary: 'Attach investigation to event',
+    description: 'Record a completed investigation run against a significant event.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+    body: sigEventInvestigationSchema,
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return attachInvestigationToEvent({
+      eventClient: getEventClient(),
+      eventId: params.path.id,
+      investigation: params.body,
+    });
+  },
+});
+
 export const internalSigEventsEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
   ...eventsLifecycleRoute,
   ...eventsBulkCreateRoute,
+  ...eventsAttachInvestigationRoute,
 };

@@ -139,6 +139,20 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 - Status `completed` — the execution output contains the RCA findings.
 - Status `failed` — the output contains error details.
 
+### Recording the investigation on a Significant Event
+
+When you triggered an investigation for a Significant Event **and** it has now reached a terminal state (either from the initial `execute_workflow` call or after polling with `get_workflow_execution_status`), record the result back on the event using `platform.streams.sig_events.event_investigation_attach`.
+
+Use the following values:
+- `event_id` — the `event_id` of the Significant Event you sourced in the triggering step.
+- `workflow_execution_id` — the `executionId` returned by `execute_workflow` (or from `get_workflow_execution_status`).
+- `result_status` — `"success"` if the investigation completed without errors, `"failed"` otherwise.
+- `completed_date` — the current ISO-8601 datetime.
+
+This step is idempotent: the investigation workflow also auto-records itself when it runs via the triage pipeline, so calling this tool for the same execution id is safe and will be a no-op if the record already exists.
+
+Only call this tool when a Significant Event was the context for the investigation (`event_id` is known). Skip it for free-form issues or alert investigations.
+
 ### Presenting results
 
 When the investigation completes, summarise the structured output for the user:
