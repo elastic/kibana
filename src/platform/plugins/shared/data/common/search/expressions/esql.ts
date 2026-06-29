@@ -313,6 +313,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
         const inputQuery = ignoreGlobalFilters ? [] : input.query || [];
         params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
+
+        if (input.useApproximation !== undefined) {
+          params.approximation = input.useApproximation;
+        }
       }
 
       let startTime = Date.now();
@@ -355,6 +359,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
+            approximation: input?.useApproximation,
             dropNullColumns: true,
             includeExecutionMetadata: true,
           }
