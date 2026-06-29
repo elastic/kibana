@@ -13,4 +13,4 @@ export type { ChangeHistoryListGroupItemProps } from './change_history_list_grou
 export { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 export { ChangeHistoryRestoreButton } from './change_history_restore_button';
 export type { ChangeHistoryRestoreButtonProps } from './change_history_restore_button';
-export { ChangeHistoryDefaultPreviewFooter } from './change_history_default_preview_footer';
+export { ChangeHistoryDefaultPreviewHeaderActions } from './change_history_default_preview_header_actions';

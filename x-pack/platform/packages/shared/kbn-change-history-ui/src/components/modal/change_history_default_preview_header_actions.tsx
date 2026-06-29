@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
 import { ChangeHistoryRestoreButton } from './change_history_restore_button';
 
-export function ChangeHistoryDefaultPreviewFooter(): JSX.Element | null {
+export function ChangeHistoryDefaultPreviewHeaderActions(): JSX.Element | null {
   const { adapter, objectId, supports } = useChangeHistoryConfig();
   const { selectedChangeId } = useChangeHistoryInternalConfig();
   const { change, isLoading } = useChangeHistoryDetail({
@@ -22,24 +20,14 @@ export function ChangeHistoryDefaultPreviewFooter(): JSX.Element | null {
     changeId: selectedChangeId,
     enabled: supports.restore && Boolean(selectedChangeId),
   });
-  const { euiTheme } = useEuiTheme();
 
   if (!supports.restore || isLoading || !change) {
     return null;
   }
 
   return (
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-      responsive={false}
-      css={css`
-        padding: ${euiTheme.size.m} ${euiTheme.size.l};
-      `}
-      data-test-subj="changeHistoryDefaultPreviewFooter"
-    >
-      <EuiFlexItem grow={false}>
-        <ChangeHistoryRestoreButton change={change} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div data-test-subj="changeHistoryDefaultPreviewHeaderActions">
+      <ChangeHistoryRestoreButton change={change} />
+    </div>
   );
 }

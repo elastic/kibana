@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const RESTORE_BUTTON_LABEL = i18n.translate('xpack.changeHistoryUi.restore.buttonLabel', {
-  defaultMessage: 'Restore version',
+  defaultMessage: 'Restore',
 });
 
 export const RESTORE_CONFIRM_TITLE = (version?: number): string =>

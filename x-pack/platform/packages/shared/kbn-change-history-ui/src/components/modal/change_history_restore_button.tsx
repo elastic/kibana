@@ -54,6 +54,7 @@ export function ChangeHistoryRestoreButton({
   return (
     <>
       <EuiButton
+        iconType="undo"
         fill
         color="primary"
         onClick={handleOpenConfirm}

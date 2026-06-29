@@ -27,7 +27,7 @@ export {
   ChangeHistoryListGroupItem,
   ChangeHistoryPreviewPanel,
   ChangeHistoryRestoreButton,
-  ChangeHistoryDefaultPreviewFooter,
+  ChangeHistoryDefaultPreviewHeaderActions,
 } from './src/components/modal';
 export type {
   ChangeHistoryTriggerProps,

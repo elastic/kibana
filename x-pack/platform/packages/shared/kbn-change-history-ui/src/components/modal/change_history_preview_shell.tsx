@@ -20,6 +20,7 @@ export interface ChangeHistoryPreviewShellProps {
   backLabel: string;
   title?: string;
   onBack: () => void;
+  headerActions?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;
 }
@@ -28,6 +29,7 @@ export function ChangeHistoryPreviewShell({
   backLabel,
   title,
   onBack,
+  headerActions,
   footer,
   children,
 }: ChangeHistoryPreviewShellProps): JSX.Element {
@@ -70,25 +72,35 @@ export function ChangeHistoryPreviewShell({
   return (
     <div css={styles.shell} data-test-subj="changeHistoryPreviewShell">
       <div css={styles.header}>
-        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="arrowLeft"
-              flush="left"
-              onClick={onBack}
-              data-test-subj="changeHistoryPreviewBack"
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="xs"
+              alignItems="flexStart"
+              responsive={false}
             >
-              {backLabel}
-            </EuiButtonEmpty>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="arrowLeft"
+                  flush="left"
+                  onClick={onBack}
+                  data-test-subj="changeHistoryPreviewBack"
+                >
+                  {backLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              {title ? (
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="m">
+                    <h1>{title}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {title ? (
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h1>{title}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-          ) : null}
+          {headerActions ? <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem> : null}
         </EuiFlexGroup>
       </div>
 

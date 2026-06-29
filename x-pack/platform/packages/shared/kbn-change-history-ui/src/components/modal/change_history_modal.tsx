@@ -17,7 +17,7 @@ import { useChangeHistoryInternalConfig } from '../../provider/use_change_histor
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
 import { ChangeHistorySidebarPanel } from './change_history_sidebar_panel';
-import { ChangeHistoryDefaultPreviewFooter } from './change_history_default_preview_footer';
+import { ChangeHistoryDefaultPreviewHeaderActions } from './change_history_default_preview_header_actions';
 
 const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
   if (timestamps.length === 0) {
@@ -130,11 +130,14 @@ export function ChangeHistoryModal(): JSX.Element | null {
     ? getHistoryStartedAt(items.map((item) => item.timestamp))
     : undefined;
 
-  const previewFooter =
-    renderPreviewFooter?.({
-      objectId,
-      selectedChangeId,
-    }) ?? (supports.restore ? <ChangeHistoryDefaultPreviewFooter /> : undefined);
+  const previewHeaderActions = supports.restore ? (
+    <ChangeHistoryDefaultPreviewHeaderActions />
+  ) : undefined;
+
+  const previewFooter = renderPreviewFooter?.({
+    objectId,
+    selectedChangeId,
+  });
 
   const renderSidebarContent = () => {
     if (showLoadingSidebar) {
@@ -183,6 +186,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
             backLabel={labels.previewBackLabel}
             title={labels.previewTitle}
             onBack={closeModal}
+            headerActions={previewHeaderActions}
             footer={previewFooter}
           >
             <ChangeHistoryPreviewPanel listItems={items} />
