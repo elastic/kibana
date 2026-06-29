@@ -96,7 +96,7 @@ describe('createGetUserDataInventoryTool', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('unavailable'));
     });
 
-    it('returns empty integrations (not error) when Fleet API throws', async () => {
+    it('returns ToolResultType.error and logs when Fleet API throws', async () => {
       const { getStartServices, mockLogger, mockRequest, getPackagesMock } = createMockDeps();
       getPackagesMock.mockRejectedValue(new Error('Fleet is down'));
 
@@ -106,10 +106,12 @@ describe('createGetUserDataInventoryTool', () => {
 
       expect('results' in result).toBe(true);
       if ('results' in result) {
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        expect(result.results[0].data).toEqual({ integrations: [] });
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(result.results[0].data).toEqual({
+          message: expect.stringContaining('Fleet is down'),
+        });
       }
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Fleet is down'));
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Fleet is down'));
     });
   });
 });

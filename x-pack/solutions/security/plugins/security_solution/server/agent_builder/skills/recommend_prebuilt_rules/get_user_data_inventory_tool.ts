@@ -65,16 +65,15 @@ export const createGetUserDataInventoryTool = ({
         ],
       };
     } catch (error) {
-      logger.warn(
-        `get_user_data_inventory: Fleet API call failed, returning empty inventory: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`get_user_data_inventory: Fleet API call failed: ${message}`);
       return {
         results: [
           {
-            type: ToolResultType.other,
-            data: { integrations: [] },
+            type: ToolResultType.error,
+            data: {
+              message: `Failed to fetch user data inventory: ${message}`,
+            },
           },
         ],
       };
