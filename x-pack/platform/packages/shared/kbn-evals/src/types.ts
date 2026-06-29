@@ -118,6 +118,30 @@ export interface DefaultEvaluators {
     toolCalls: Evaluator;
     cachedTokens: Evaluator;
   };
+  trajectory: (config: {
+    extractToolCalls: (output: unknown) => string[];
+    goldenPathExtractor: (expected: unknown) => string[];
+    orderWeight?: number;
+    coverageWeight?: number;
+  }) => Evaluator;
+  conversationCoherence: () => Evaluator;
+  multiJudge: (config: {
+    judges: Evaluator[];
+    strategy?: 'mean' | 'median' | 'majority';
+    logger?: { warn: (msg: string) => void };
+  }) => Evaluator;
+  security: {
+    toolPoisoning: (config: {
+      allowedTools: string[];
+      extractToolCalls: (output: unknown) => string[];
+    }) => Evaluator;
+    promptLeakDetection: (config?: {
+      patterns?: RegExp[];
+      excludePatterns?: RegExp[];
+    }) => Evaluator;
+    scopeViolation: (config: { allowedPatterns: RegExp[] }) => Evaluator;
+  };
+  similarity: (config?: { threshold?: number }) => Evaluator;
 }
 
 export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOutput> = (

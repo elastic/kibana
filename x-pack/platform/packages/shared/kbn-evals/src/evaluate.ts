@@ -31,6 +31,15 @@ import {
   createOutputTokensEvaluator,
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
+import { createTrajectoryEvaluator } from './evaluators/trajectory';
+import { createConversationCoherenceEvaluator } from './evaluators/conversation_coherence';
+import { createMultiJudgeEvaluator } from './evaluators/multi_judge';
+import {
+  createToolPoisoningEvaluator,
+  createPromptLeakDetectionEvaluator,
+  createScopeViolationEvaluator,
+} from './evaluators/security';
+import { createSimilarityEvaluator } from './evaluators/similarity';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
 import { EvalsClient } from './utils/evals_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
@@ -422,6 +431,19 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             log,
           }),
         },
+        trajectory: (config) => createTrajectoryEvaluator(config),
+        conversationCoherence: () =>
+          createConversationCoherenceEvaluator({
+            inferenceClient: evaluatorInferenceClient,
+            log,
+          }),
+        multiJudge: (config) => createMultiJudgeEvaluator(config),
+        security: {
+          toolPoisoning: (config) => createToolPoisoningEvaluator(config),
+          promptLeakDetection: (config) => createPromptLeakDetectionEvaluator(config),
+          scopeViolation: (config) => createScopeViolationEvaluator(config),
+        },
+        similarity: (config) => createSimilarityEvaluator(config),
       };
       await use(evaluators);
     },
