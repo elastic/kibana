@@ -5,21 +5,31 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { SERVER_APP_ID } from '../../../../../../common';
 import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
+import type { RuleParams } from '../../../rule_schema';
+import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import { applyRuleDefaults } from './mergers/apply_rule_defaults';
+import { convertRuleResponseToAlertingRule } from './converters/convert_rule_response_to_alerting_rule';
+import { validateMlAuth } from './utils';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
+  BulkCreatePrebuiltRulesArgs,
+  BulkCreatePrebuiltRulesResult,
   BulkDeleteRulesArgs,
   BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
@@ -123,6 +133,92 @@ export const createDetectionRulesClient = ({
             ...args.changeTracking,
           },
         });
+      });
+    },
+
+    async bulkCreatePrebuiltRules(
+      args: BulkCreatePrebuiltRulesArgs
+    ): Promise<BulkCreatePrebuiltRulesResult> {
+      return withSecuritySpan('DetectionRulesClient.bulkCreatePrebuiltRules', async () => {
+        const { rules } = args;
+        const results: BulkCreatePrebuiltRulesResult['results'] = [];
+        const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
+
+        if (rules.length === 0) return { results, errors };
+
+        const checkedTypes = new Set<string>();
+        const mlAuthErrorByType = new Map<string, Error>();
+        for (const rule of rules) {
+          if (!checkedTypes.has(rule.type)) {
+            checkedTypes.add(rule.type);
+            try {
+              await validateMlAuth(mlAuthz, rule.type);
+            } catch (e) {
+              mlAuthErrorByType.set(rule.type, e instanceof Error ? e : new Error(String(e)));
+            }
+          }
+        }
+
+        const itemById = new Map<string, PrebuiltRuleAsset>();
+        const bulkInputs: Array<{
+          data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
+            alertTypeId: string;
+            consumer: string;
+            enabled: boolean;
+          };
+          options: { id: string };
+        }> = [];
+
+        for (const rule of rules) {
+          const mlError = mlAuthErrorByType.get(rule.type);
+          if (mlError) {
+            errors.push({ item: rule, error: mlError });
+          } else {
+            const id = uuidv4();
+            itemById.set(id, rule);
+            const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
+            const data = {
+              ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
+              alertTypeId: ruleTypeMappings[rule.type],
+              consumer: SERVER_APP_ID,
+              enabled: false,
+            };
+            bulkInputs.push({ data, options: { id } });
+          }
+        }
+
+        if (bulkInputs.length === 0) return { results, errors };
+
+        const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>(
+          {
+            rules: bulkInputs,
+            changeTracking: {
+              action: SecurityRuleChangeTrackingAction.ruleInstall,
+              metadata: { bulkCount: rules.length },
+            },
+          }
+        );
+
+        for (const id of successfulIds) {
+          const asset = itemById.get(id);
+          if (asset) {
+            results.push({
+              result: { id, rule_id: asset.rule_id, version: asset.version },
+            });
+          }
+        }
+
+        for (const err of bulkErrors) {
+          const item = itemById.get(err.rule.id);
+          if (item) {
+            errors.push({
+              item,
+              error: Object.assign(new Error(err.message), { statusCode: err.status }),
+            });
+          }
+        }
+
+        return { results, errors };
       });
     },
 
