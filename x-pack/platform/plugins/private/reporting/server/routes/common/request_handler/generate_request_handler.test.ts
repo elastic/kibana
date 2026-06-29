@@ -170,7 +170,8 @@ describe('Handle request to generate', () => {
       });
 
       const { _id, created_at, ...snapObj } = report;
-      expect(snapObj.payload.version).toBe('7.14.0');
+      // defaults to the current Kibana version from getKibanaPackageInfo() rather than a hardcoded fallback
+      expect(snapObj.payload.version).toBe(reportingCore.getKibanaPackageInfo().version);
     });
   });
 
