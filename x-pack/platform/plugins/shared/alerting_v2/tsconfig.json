@@ -120,7 +120,8 @@
     "@kbn/cps",
     "@kbn/core-ui-settings-browser",
     "@kbn/management-settings-ids",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-application-browser-mocks"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
