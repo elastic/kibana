@@ -190,6 +190,17 @@ export interface TopSnippetsConfig {
 }
 
 /**
+ * AgentBuilder dashboard service's start contract.
+ */
+export interface DashboardStart {
+  /**
+   * Syncs the Agent Builder overview dashboard across all spaces.
+   * Installs when `tracingEnabled` is true, removes otherwise.
+   */
+  syncOverview: (tracingEnabled: boolean) => Promise<void>;
+}
+
+/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -257,4 +268,8 @@ export interface AgentBuilderPluginStart {
    * Conversations service (read-only), to list and retrieve conversations.
    */
   conversations: ConversationsStart;
+  /**
+   * Dashboard service, to manage Agent Builder managed dashboards.
+   */
+  dashboard: DashboardStart;
 }

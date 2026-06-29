@@ -9,57 +9,42 @@ import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
-import { syncAgentBuilderOverviewDashboard } from '@kbn/agent-builder-plugin/server';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
-const installAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
-  endpoint: 'POST /internal/gen_ai_settings/agent_builder/install_tracing_dashboard',
+const syncAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
+  endpoint: 'POST /internal/gen_ai_settings/agent_builder/sync_tracing_dashboard',
   security: {
     authz: {
       requiredPrivileges: ['manage_advanced_settings'],
     },
   },
   handler: async (resources): Promise<{ installed: boolean }> => {
-    const { request, plugins, logger } = resources;
+    const { request, plugins } = resources;
+
+    if (!plugins.agentBuilder) {
+      return { installed: false };
+    }
 
     const coreStart = await plugins.core.start();
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
       coreStart.savedObjects.getScopedClient(request)
     );
 
-    const isEnabled = await uiSettingsClient.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID);
+    const tracingEnabled = await uiSettingsClient.get<boolean>(
+      AGENT_BUILDER_TRACING_ENABLED_SETTING_ID
+    );
     const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
       AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
     );
-    if (!isEnabled || !experimentalFeaturesEnabled) {
-      return { installed: false };
-    }
+    const enabled = tracingEnabled && experimentalFeaturesEnabled;
 
-    await syncAgentBuilderOverviewDashboard(coreStart, true, logger);
+    const agentBuilderStart = await plugins.agentBuilder.start();
+    await agentBuilderStart.dashboard.syncOverview(enabled);
 
-    return { installed: true };
-  },
-});
-
-const uninstallAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
-  endpoint: 'DELETE /internal/gen_ai_settings/agent_builder/tracing_dashboard',
-  security: {
-    authz: {
-      requiredPrivileges: ['manage_advanced_settings'],
-    },
-  },
-  handler: async (resources): Promise<{ uninstalled: boolean }> => {
-    const { plugins, logger } = resources;
-
-    const coreStart = await plugins.core.start();
-
-    await syncAgentBuilderOverviewDashboard(coreStart, false, logger);
-
-    return { uninstalled: true };
+    return { installed: enabled };
   },
 });
 
 export const agentBuilderTracingDashboardRoutes = {
-  ...installAgentBuilderTracingDashboardRoute,
-  ...uninstallAgentBuilderTracingDashboardRoute,
+  ...syncAgentBuilderTracingDashboardRoute,
 };

@@ -320,6 +320,10 @@ export class AgentBuilderPlugin
           };
         },
       },
+      dashboard: {
+        syncOverview: (tracingEnabled: boolean) =>
+          syncAgentBuilderOverviewDashboard(coreStart, tracingEnabled, this.logger),
+      },
     };
   }
 

@@ -112,10 +112,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     const tokenUsageTrackingTurnedOn =
       unsavedChanges[GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]?.unsavedValue === true;
 
-    const tracingEnabledTurnedOn =
-      unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue === true;
-    const tracingEnabledTurnedOff =
-      unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue === false;
+    const tracingSettingChanged =
+      unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue !== undefined;
 
     const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
       ? chatExperienceField.savedValue
@@ -160,35 +158,17 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       }
     }
 
-    if (tracingEnabledTurnedOn) {
+    if (tracingSettingChanged) {
       try {
         await genAiSettingsApi(
-          'POST /internal/gen_ai_settings/agent_builder/install_tracing_dashboard',
+          'POST /internal/gen_ai_settings/agent_builder/sync_tracing_dashboard',
           { signal: null }
         );
       } catch (error) {
         notifications.toasts.addDanger({
-          title: i18n.translate('xpack.gen_ai_settings.agentBuilderTracing.installDashboardError', {
-            defaultMessage: 'Failed to install Agent Builder tracing dashboard',
+          title: i18n.translate('xpack.gen_ai_settings.agentBuilderTracing.syncDashboardError', {
+            defaultMessage: 'Failed to sync Agent Builder tracing dashboard',
           }),
-          text: error?.body?.message ?? error?.message,
-        });
-      }
-    }
-
-    if (tracingEnabledTurnedOff) {
-      try {
-        await genAiSettingsApi('DELETE /internal/gen_ai_settings/agent_builder/tracing_dashboard', {
-          signal: null,
-        });
-      } catch (error) {
-        notifications.toasts.addDanger({
-          title: i18n.translate(
-            'xpack.gen_ai_settings.agentBuilderTracing.uninstallDashboardError',
-            {
-              defaultMessage: 'Failed to remove Agent Builder tracing dashboard',
-            }
-          ),
           text: error?.body?.message ?? error?.message,
         });
       }
