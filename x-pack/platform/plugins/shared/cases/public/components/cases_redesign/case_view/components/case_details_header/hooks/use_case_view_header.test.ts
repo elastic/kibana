@@ -48,19 +48,7 @@ describe('useCaseViewHeader', () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
   });
 
-  it('returns an editable title with incremental ID when user has update permissions', () => {
-    const caseWithId: CaseUI = { ...basicCase, incrementalId: 42 };
-    const { result } = renderHook(
-      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithId }),
-      { wrapper }
-    );
-
-    expect(result.current.headerTitle).toEqual(
-      expect.objectContaining({ text: `#42 ${basicCase.title}` })
-    );
-  });
-
-  it('returns an editable title without prefix when incrementalId is undefined', () => {
+  it('returns an editable title with case name only', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
@@ -99,6 +87,20 @@ describe('useCaseViewHeader', () => {
     expect(result.current.headerTitle).toBe(basicCase.title);
   });
 
+  it('rejects empty title on save', async () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const title = result.current.headerTitle;
+    expect(typeof title).not.toBe('string');
+    if (typeof title !== 'string') {
+      const error = await act(async () => title.onSave(''));
+      expect(error).toBeDefined();
+      expect(onUpdateField).not.toHaveBeenCalled();
+    }
+  });
+
   it('calls onUpdateField when editable title is saved', async () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
@@ -114,20 +116,31 @@ describe('useCaseViewHeader', () => {
     }
   });
 
-  it('strips incremental ID prefix when saving title', async () => {
+  it('includes incremental ID in metadata when present', () => {
     const caseWithId: CaseUI = { ...basicCase, incrementalId: 42 };
     const { result } = renderHook(
       () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithId }),
       { wrapper }
     );
 
-    const title = result.current.headerTitle;
-    if (typeof title !== 'string') {
-      await act(async () => {
-        await title.onSave('#42 Updated Title');
-      });
-      expect(onUpdateField).toHaveBeenCalledWith({ key: 'title', value: 'Updated Title' });
-    }
+    expect(result.current.metadata[0]).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        label: '#42',
+        'data-test-subj': 'case-view-incremental-id',
+      })
+    );
+  });
+
+  it('does not include incremental ID in metadata when undefined', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const incrementalIdItem = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-incremental-id'
+    );
+    expect(incrementalIdItem).toBeUndefined();
   });
 
   it('returns metadata with reporter name and created date', () => {
@@ -136,16 +149,24 @@ describe('useCaseViewHeader', () => {
     });
 
     expect(result.current.metadata).toBeDefined();
-    expect(result.current.metadata[0]).toEqual(
+
+    const reportedBy = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
+    );
+    expect(reportedBy).toEqual(
       expect.objectContaining({
         type: 'text',
-        label: expect.stringContaining(basicCase.createdBy.fullName!),
+        label: `Reported by: ${basicCase.createdBy.fullName!}`,
       })
     );
-    expect(result.current.metadata[1]).toEqual(
+
+    const createdAt = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-created-at'
+    );
+    expect(createdAt).toEqual(
       expect.objectContaining({
         type: 'text',
-        'data-test-subj': 'case-view-created-at',
+        label: expect.stringContaining('on: '),
       })
     );
   });

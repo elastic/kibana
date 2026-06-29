@@ -20,7 +20,12 @@ import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_
 import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
 import * as commonI18n from '../../../../../../common/translations';
-import { REPORTED_BY, CREATED_ON, EDIT_CASE_NAME_ARIA } from '../../../../translations';
+import {
+  REPORTED_BY,
+  CREATED_ON,
+  UNKNOWN_REPORTER,
+  EDIT_CASE_NAME_ARIA,
+} from '../../../../translations';
 import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
 
@@ -56,45 +61,53 @@ export const useCaseViewHeader = ({
 
   // Title
   const headerTitle = useMemo((): AppHeaderTitle => {
-    const prefix = typeof caseData.incrementalId === 'number' ? `#${caseData.incrementalId} ` : '';
-    const displayTitle = `${prefix}${caseData.title}`;
-
     if (!permissions.update) {
-      return displayTitle;
+      return caseData.title;
     }
 
     return {
-      text: displayTitle,
-      onSave: async (nextTitle: string) => {
-        const titleValue = nextTitle.startsWith(prefix)
-          ? nextTitle.slice(prefix.length)
-          : nextTitle;
-        if (!titleValue) {
+      text: caseData.title,
+      onSave: (nextTitle: string) => {
+        if (!nextTitle.trim()) {
           return commonI18n.TITLE_REQUIRED;
         }
-        onUpdateField({ key: 'title', value: titleValue });
+        onUpdateField({ key: 'title', value: nextTitle.trim() });
       },
       ariaLabel: EDIT_CASE_NAME_ARIA,
     };
-  }, [caseData.incrementalId, caseData.title, permissions.update, onUpdateField]);
+  }, [caseData.title, permissions.update, onUpdateField]);
 
   // Metadata
   const metadata = useMemo((): AppHeaderMetadataItems => {
-    const reporterName = caseData.createdBy.fullName ?? caseData.createdBy.username ?? '';
+    const reporterName =
+      caseData.createdBy.fullName ?? caseData.createdBy.username ?? UNKNOWN_REPORTER;
     const formattedDate = moment.tz(caseData.createdAt, timeZone).format(dateFormat);
-    return [
-      {
-        type: 'text' as const,
-        label: `${REPORTED_BY}: ${reporterName}`,
-        'data-test-subj': 'case-view-reported-by',
-      },
-      {
-        type: 'text' as const,
-        label: `${CREATED_ON}: ${formattedDate}`,
-        'data-test-subj': 'case-view-created-at',
-      },
-    ];
-  }, [caseData.createdBy, caseData.createdAt, timeZone, dateFormat]);
+
+    const reportedByItem = {
+      type: 'text' as const,
+      label: REPORTED_BY(reporterName),
+      'data-test-subj': 'case-view-reported-by',
+    };
+    const createdAtItem = {
+      type: 'text' as const,
+      label: CREATED_ON(formattedDate),
+      'data-test-subj': 'case-view-created-at',
+    };
+
+    if (typeof caseData.incrementalId === 'number') {
+      return [
+        {
+          type: 'text' as const,
+          label: `#${caseData.incrementalId}`,
+          'data-test-subj': 'case-view-incremental-id',
+        },
+        reportedByItem,
+        createdAtItem,
+      ];
+    }
+
+    return [reportedByItem, createdAtItem];
+  }, [caseData.incrementalId, caseData.createdBy, caseData.createdAt, timeZone, dateFormat]);
 
   // Back
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);
