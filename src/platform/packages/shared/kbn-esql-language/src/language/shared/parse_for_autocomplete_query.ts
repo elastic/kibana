@@ -15,12 +15,15 @@ import {
   correctQuerySyntax,
   findAstPosition,
   removeAutocompleteMarkers,
+  unwrapExpressionParens,
 } from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
+import { getEsqlLexerTokens, type EsqlLexerToken } from './lexer_scope';
 
 interface ParsedAutocompleteQuery {
   innerText: string;
   root: ESQLAstQueryExpression;
+  tokens: EsqlLexerToken[];
 }
 
 /**
@@ -29,12 +32,16 @@ interface ParsedAutocompleteQuery {
  */
 export function parseAutocompleteQuery(fullText: string, offset: number): ParsedAutocompleteQuery {
   const innerText = fullText.substring(0, offset);
+  // Keep tokens tied to the real editor text; correctedQuery can add synthetic markers/brackets.
+  const tokens = getEsqlLexerTokens(innerText);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const cleanRoot = removeAutocompleteMarkers(root);
 
   return {
     innerText,
-    root: removeAutocompleteMarkers(root),
+    root: unwrapExpressionParens(cleanRoot),
+    tokens,
   };
 }
 
