@@ -42,7 +42,7 @@ export async function update(
     const savedObject = await core.savedObjects.client.create<StoredLinksState>(
       LINKS_LIBRARY_TYPE,
       soState,
-      { references }
+      { id, references }
     );
     return getLinksCRUResponseBody(savedObject);
   }
