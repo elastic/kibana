@@ -15,7 +15,7 @@ import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { UpdateMonitorAPI } from './update_monitor_api';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
-  getPrivateLocations: jest.fn().mockResolvedValue([]),
+  getPrivateLocationsForNamespaces: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('../edit_monitor', () => ({
@@ -97,16 +97,20 @@ const mockValidationResultFor = (attributes: Record<string, unknown>) => ({
 
 const createMockRouteContext = () => {
   const findDecryptedMonitors = jest.fn().mockResolvedValue([]);
+  const createInternalRepository = jest.fn().mockReturnValue({});
   return {
     routeContext: {
       request: {} as any,
       response: { forbidden: jest.fn((opts: any) => opts) } as any,
       spaceId: 'default',
-      server: { logger: { error: jest.fn() } } as any,
+      server: {
+        logger: { error: jest.fn() },
+        coreStart: { savedObjects: { createInternalRepository } },
+      } as any,
       savedObjectsClient: {} as any,
       monitorConfigRepository: { findDecryptedMonitors } as any,
     } as any,
-    mocks: { findDecryptedMonitors },
+    mocks: { findDecryptedMonitors, createInternalRepository },
   };
 };
 
@@ -135,10 +139,10 @@ describe('UpdateMonitorAPI', () => {
     assertCanUpdateMonitorInAllSpaces.mockResolvedValue(undefined);
     validateMonitorPrivateLocationSpaces.mockReturnValue(null);
 
-    const { getPrivateLocations } = jest.requireMock(
+    const { getPrivateLocationsForNamespaces } = jest.requireMock(
       '../../../synthetics_service/get_private_locations'
     );
-    getPrivateLocations.mockResolvedValue([]);
+    getPrivateLocationsForNamespaces.mockResolvedValue([]);
   });
 
   describe('happy path', () => {
@@ -314,10 +318,12 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('records private-location-space coverage failures', async () => {
-      const { getPrivateLocations } = jest.requireMock(
+      const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
       );
-      getPrivateLocations.mockResolvedValue([{ id: 'pl-1', label: 'PL', spaces: ['default'] }]);
+      getPrivateLocationsForNamespaces.mockResolvedValue([
+        { id: 'pl-1', label: 'PL', spaces: ['default'] },
+      ]);
 
       const { validateMonitorPrivateLocationSpaces } = jest.requireMock(
         '../monitor_locations_utils'
@@ -456,7 +462,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('private locations fetch', () => {
     it('skips the SO read when the patch does not touch locations or spaces', async () => {
-      const { getPrivateLocations } = jest.requireMock(
+      const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
       );
 
@@ -466,11 +472,11 @@ describe('UpdateMonitorAPI', () => {
       const api = new UpdateMonitorAPI(routeContext);
       await api.execute({ updates: updatesFor(['mon-1'], { enabled: false, tags: ['x'] }) });
 
-      expect(getPrivateLocations).not.toHaveBeenCalled();
+      expect(getPrivateLocationsForNamespaces).not.toHaveBeenCalled();
     });
 
     it('fetches once per execute when the patch touches locations', async () => {
-      const { getPrivateLocations } = jest.requireMock(
+      const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
       );
 
@@ -487,7 +493,43 @@ describe('UpdateMonitorAPI', () => {
         }),
       });
 
-      expect(getPrivateLocations).toHaveBeenCalledTimes(1);
+      expect(getPrivateLocationsForNamespaces).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the internal repository and expands to monitor + patch spaces', async () => {
+      /*
+       * Regression: the previous implementation used the request-scoped
+       * savedObjectsClient with no namespace expansion, so a multi-space patch
+       * could see fewer private locations than the sync step / single-PUT and
+       * wrongly report `forbidden`. The fetch must agree with
+       * `loadPrivateLocationsForSurvivors` in `update_monitor_bulk.ts` and
+       * `normalizeMonitor` in `add_monitor_api.ts`: internal repo +
+       * union(spaceId, every monitor's KIBANA_SPACES, every patch's
+       * KIBANA_SPACES).
+       */
+      const { getPrivateLocationsForNamespaces } = jest.requireMock(
+        '../../../synthetics_service/get_private_locations'
+      );
+      const internalClient = { id: 'internal' };
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.createInternalRepository.mockReturnValue(internalClient);
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({
+          id: 'mon-1',
+          attributes: { [ConfigKey.KIBANA_SPACES]: ['team-a'] },
+        }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      await api.execute({
+        updates: updatesFor(['mon-1'], { [ConfigKey.KIBANA_SPACES]: ['team-b', 'team-c'] }),
+      });
+
+      expect(mocks.createInternalRepository).toHaveBeenCalledTimes(1);
+      expect(getPrivateLocationsForNamespaces).toHaveBeenCalledTimes(1);
+      const [client, namespaces] = getPrivateLocationsForNamespaces.mock.calls[0];
+      expect(client).toBe(internalClient);
+      expect([...namespaces].sort()).toEqual(['default', 'team-a', 'team-b', 'team-c']);
     });
   });
 

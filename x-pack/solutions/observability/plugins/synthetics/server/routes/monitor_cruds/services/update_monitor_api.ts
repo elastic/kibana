@@ -61,7 +61,7 @@ import {
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils/secrets';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 
 export type UpdateMonitorErrorCode =
   | 'not_found'
@@ -123,7 +123,7 @@ export class UpdateMonitorAPI {
      * per-id loop. Skipped entirely if no patch can touch private locations —
      * most patches (e.g. `{ enabled: false }`) won't.
      */
-    const allPrivateLocations = await this.maybeLoadPrivateLocations(updates);
+    const allPrivateLocations = await this.maybeLoadPrivateLocations(updates, decryptedMonitors);
 
     for (const decryptedMonitor of decryptedMonitors) {
       const patch = patchById.get(decryptedMonitor.id) ?? {};
@@ -336,9 +336,18 @@ export class UpdateMonitorAPI {
    * references `locations` directly, or it changes the spaces the monitor is
    * shared to (because that broadens the set of spaces the existing private
    * locations must already cover).
+   *
+   * Uses the internal repository over the union of the request space, each
+   * monitor's current `KIBANA_SPACES`, and each patch's `KIBANA_SPACES`, so
+   * this validation fetch sees the same private locations the sync step
+   * (`loadPrivateLocationsForSurvivors`) and the single-monitor PUT
+   * (`add_monitor_api.normalizeMonitor`) see. The request-scoped client with
+   * no namespace expansion would only see locations in the request space and
+   * could wrongly reject a legitimate multi-space patch.
    */
   private async maybeLoadPrivateLocations(
-    updates: MonitorBulkUpdate[]
+    updates: MonitorBulkUpdate[],
+    decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>
   ): Promise<SyntheticsPrivateLocations> {
     const touchesLocationsOrSpaces = updates.some(
       ({ attributes }) =>
@@ -348,7 +357,24 @@ export class UpdateMonitorAPI {
     if (!touchesLocationsOrSpaces) {
       return [];
     }
-    return getPrivateLocations(this.routeContext.savedObjectsClient);
+
+    const { server, spaceId } = this.routeContext;
+    const namespaces = new Set<string>([spaceId]);
+    for (const monitor of decryptedMonitors) {
+      const prevSpaces = monitor.attributes[ConfigKey.KIBANA_SPACES] ?? [];
+      for (const s of prevSpaces) {
+        if (s) namespaces.add(s);
+      }
+    }
+    for (const { attributes } of updates) {
+      const patchSpaces = attributes[ConfigKey.KIBANA_SPACES] ?? [];
+      for (const s of patchSpaces) {
+        if (s) namespaces.add(s);
+      }
+    }
+
+    const internalClient = server.coreStart.savedObjects.createInternalRepository();
+    return getPrivateLocationsForNamespaces(internalClient, [...namespaces]);
   }
 
   private checkPrivateLocationSpaces(
