@@ -87,6 +87,15 @@ if [[ $EXIT_CODE -eq 0 ]]; then
   exit 0
 fi
 
+# Exit code 2 means "no tests matched" (see hasTestsInPlaywrightConfig). With `--grep`, a config
+# fans out to one job per (arch, domain) mode and the same pattern is applied to each, so it is
+# expected for some modes to match zero tests. Treat that as a non-failure (mirrors configs.sh)
+# instead of reporting a spurious red job.
+if [[ $EXIT_CODE -eq 2 ]]; then
+  echo "--- No matching tests for $config_path ($mode)${SCOUT_GREP:+ [grep: $SCOUT_GREP]} — skipping"
+  exit 0
+fi
+
 echo "Scout test exited with code $EXIT_CODE for $config_path ($mode)"
 echo "^^^ +++"
 
