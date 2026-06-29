@@ -22,7 +22,7 @@ const COMMAND_EXECUTION_RESULT_SUCCESS_TITLE = i18n.translate(
   { defaultMessage: 'Action completed.' }
 );
 const COMMAND_EXECUTION_RESULT_CANCELED_TITLE = i18n.translate(
-  'xpack.securitySolution.commandExecutionResult.successTitle',
+  'xpack.securitySolution.commandExecutionResult.canceledTitle',
   { defaultMessage: 'Action canceled.' }
 );
 const COMMAND_EXECUTION_SUBMIT_RESULT_SUCCESS_TITLE = i18n.translate(
