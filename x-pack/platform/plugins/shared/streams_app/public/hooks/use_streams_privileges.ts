@@ -14,7 +14,10 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
+import {
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+} from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
@@ -26,6 +29,7 @@ export function useStreamsPrivileges() {
   const {
     core: {
       pricing,
+      featureFlags,
       application: {
         capabilities: { streams },
       },
@@ -37,6 +41,14 @@ export function useStreamsPrivileges() {
   } = useKibana();
 
   const license = useObservable(licensing.license$);
+
+  // Outermost significant events gate: the Technical Preview rollout flag (defaults to false).
+  // Mirrors the server-side ordering in `assertSignificantEventsAccess` so entry points stay
+  // hidden in deployments where the feature has not been rolled out yet.
+  const significantEventsFeatureFlagEnabled = useObservable(
+    featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
+    false
+  );
 
   const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
 
@@ -78,7 +90,10 @@ export function useStreamsPrivileges() {
       },
       significantEventsDiscovery: license && {
         enabled: significantEventsDiscoveryEnabled,
-        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
+        available:
+          significantEventsFeatureFlagEnabled &&
+          license.hasAtLeast('enterprise') &&
+          significantEventsAvailableForTier,
       },
       queryStreams: {
         enabled: queryStreamsEnabled,
