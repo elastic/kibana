@@ -11,7 +11,7 @@ import { FilterStateStore } from '@kbn/es-query';
 export const alertsFilterQuerySchema = schema.object(
   {
     kql: schema.string({
-      maxLength: 8192,
+      maxLength: 10000,
       meta: { description: 'A filter written in Kibana Query Language (KQL).' },
     }),
     filters: schema.arrayOf(
