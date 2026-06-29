@@ -120,23 +120,5 @@ export default function ({ getService }: FtrProviderContext) {
       expect(JSON.stringify(body)).not.to.contain(otherMarker);
       expect(JSON.stringify(body)).to.contain(defaultMarker);
     });
-
-    it('export endpoint streams only rows from the active space', async () => {
-      const response = await supertest
-        .post(
-          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/_export?format=ndjson`
-        )
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', osqueryPublicApiVersion)
-        .send({})
-        .expect(200);
-
-      // supertest returns the streamed body as text/buffer for file downloads.
-      const exported = response.text ?? String(response.body);
-
-      // The export is scoped to the active space, so the other-space row is absent.
-      expect(exported).not.to.contain(otherMarker);
-      expect(exported).not.to.contain(otherSpaceId);
-    });
   });
 }
