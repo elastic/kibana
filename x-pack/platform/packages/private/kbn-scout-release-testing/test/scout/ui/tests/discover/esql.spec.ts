@@ -47,7 +47,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     await uiSettings.set({
       'timepicker:timeDefaults': TIME_DEFAULTS,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   test.afterEach(async ({ kbnClient }) => {
