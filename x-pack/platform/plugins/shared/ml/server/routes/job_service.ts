@@ -1103,7 +1103,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canUpdateDatafeed'],
+          requiredPrivileges: ['ml:canUpdateDatafeed', 'ml:canStartStopDatafeed'],
         },
       },
       summary: 'Bulk update project routing on datafeeds',
