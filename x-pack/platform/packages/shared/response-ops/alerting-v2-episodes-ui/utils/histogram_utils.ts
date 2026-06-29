@@ -18,7 +18,6 @@ export interface HistogramEpisodeRow {
   first_timestamp: string;
   last_timestamp: string;
   'episode.status': string;
-  effective_status?: string;
   [key: string]: unknown;
 }
 

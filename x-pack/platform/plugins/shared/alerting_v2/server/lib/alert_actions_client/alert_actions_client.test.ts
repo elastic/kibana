@@ -17,6 +17,8 @@ import {
   getBulkAlertEventsESQLResponse,
   getAlertEventESQLResponse,
   getEmptyESQLResponse,
+  getLastEpisodeLifecycleActionsESQLResponse,
+  getPreDeactivateAlertEventESQLResponse,
 } from './fixtures/query_responses';
 
 describe('AlertActionsClient', () => {
@@ -143,6 +145,249 @@ describe('AlertActionsClient', () => {
     });
   });
 
+  describe('createAction deactivate', () => {
+    const deactivateAction: CreateAlertActionBody = {
+      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+      reason: 'no longer relevant',
+    };
+
+    /** Pulls the [create-meta, doc, create-meta, doc, ...] tuples from the single bulk call. */
+    const getBulkPairs = () => {
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const pairs: Array<{ create: unknown; doc: unknown }> = [];
+      for (let i = 0; i < operations.length; i += 2) {
+        pairs.push({ create: operations[i], doc: operations[i + 1] });
+      }
+      return pairs;
+    };
+
+    beforeEach(() => {
+      storageServiceEsClient.bulk.mockReset();
+      storageServiceEsClient.bulk.mockResolvedValue({ items: [], errors: false, took: 1 });
+    });
+
+    // Handler-internal behaviour (synthetic rule-event shape, severity
+    // omission, malformed `data_json`, and the
+    // active/recovering/inactive/pending precondition variants) is
+    // covered exhaustively by `handlers/deactivate.test.ts`. The tests
+    // here cover only what the orchestrator owns: persistence layout,
+    // audit-doc construction, event emission, and the surfacing of
+    // loader errors.
+
+    it('submits both the synthetic .rule-events doc and the .alert-actions audit doc in a single bulk call', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+
+      await client.createAction({ groupHash: 'test-group-hash', action: deactivateAction });
+
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const pairs = getBulkPairs();
+      expect(pairs).toHaveLength(2);
+      expect(pairs[0].create).toEqual({ create: { _index: '.rule-events' } });
+      expect(pairs[1].create).toEqual({ create: { _index: '.alert-actions' } });
+    });
+
+    it('builds the .alert-actions audit doc with fields drawn from the latest event', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+
+      await client.createAction({ groupHash: 'test-group-hash', action: deactivateAction });
+
+      expect(getBulkPairs()[1].doc).toMatchObject({
+        action_type: 'deactivate',
+        group_hash: 'test-group-hash',
+        episode_id: 'episode-1',
+        rule_id: 'test-rule-id',
+        last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
+        reason: 'no longer relevant',
+        space_id: 'default',
+        actor: 'test-uid',
+      });
+    });
+
+    it('uses wait_for refresh so the deactivation is immediately visible', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+
+      await client.createAction({ groupHash: 'test-group-hash', action: deactivateAction });
+
+      expect(storageServiceEsClient.bulk.mock.calls[0][0].refresh).toBe('wait_for');
+    });
+
+    it('emits the persisted deactivate action document', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+
+      await client.createAction({ groupHash: 'test-group-hash', action: deactivateAction });
+
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledTimes(1);
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
+        expect.objectContaining({ action_type: 'deactivate', group_hash: 'test-group-hash' }),
+      ]);
+    });
+
+    it('does not emit the action event when the bulk write rejects', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+      storageServiceEsClient.bulk.mockReset();
+      storageServiceEsClient.bulk.mockRejectedValueOnce(new Error('bulk write failed'));
+
+      await expect(
+        client.createAction({ groupHash: 'test-group-hash', action: deactivateAction })
+      ).rejects.toThrow('bulk write failed');
+
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+
+    it('throws ALERT_EVENT_NOT_FOUND and writes nothing when there is no prior rule event', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({ groupHash: 'unknown-group-hash', action: deactivateAction })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: 'ALERT_EVENT_NOT_FOUND', details: { group_hash: 'unknown-group-hash' } },
+      });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createAction activate', () => {
+    const activateAction: CreateAlertActionBody = {
+      action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+      reason: 'reopen this episode',
+    };
+
+    /** Pulls the [create-meta, doc, create-meta, doc, ...] tuples from the single bulk call. */
+    const getBulkPairs = () => {
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const pairs: Array<{ create: unknown; doc: unknown }> = [];
+      for (let i = 0; i < operations.length; i += 2) {
+        pairs.push({ create: operations[i], doc: operations[i + 1] });
+      }
+      return pairs;
+    };
+
+    /**
+     * Sets up the three sequential ESQL reads the activate flow performs:
+     *
+     *   1. latest `.rule-events` doc for `group_hash` (must be the deactivate-synthetic).
+     *   2. latest `.alert-actions` doc for the episode (must be `deactivate`).
+     *   3. pre-deactivate `.rule-events` doc for the episode (the lifecycle state to restore).
+     */
+    const mockHappyPathReads = () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(getAlertEventESQLResponse({ episode_status: 'inactive' }))
+        .mockResolvedValueOnce(
+          getLastEpisodeLifecycleActionsESQLResponse([
+            { episode_id: 'episode-1', last_action_type: 'deactivate' },
+          ])
+        )
+        .mockResolvedValueOnce(getPreDeactivateAlertEventESQLResponse([{}]));
+    };
+
+    beforeEach(() => {
+      storageServiceEsClient.bulk.mockReset();
+      storageServiceEsClient.bulk.mockResolvedValue({ items: [], errors: false, took: 1 });
+    });
+
+    // Handler-internal behaviour (synthetic rule-event reconstruction
+    // from the pre-deactivate event, episode_status / status_count
+    // preservation, severity omission, malformed `data_json`, and the
+    // inactive / last-lifecycle-deactivate / pre-deactivate-required
+    // precondition variants — plus the non-lifecycle-interleave
+    // happy-path case) is covered exhaustively by
+    // `handlers/activate.test.ts`. The tests here cover only what the
+    // orchestrator owns: persistence layout, audit-doc construction,
+    // event emission, and the way 404s from the activate handler's
+    // `loadContext` surface to the caller.
+
+    it('submits both the synthetic .rule-events doc and the .alert-actions audit doc in a single bulk call', async () => {
+      mockHappyPathReads();
+
+      await client.createAction({ groupHash: 'test-group-hash', action: activateAction });
+
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const pairs = getBulkPairs();
+      expect(pairs).toHaveLength(2);
+      expect(pairs[0].create).toEqual({ create: { _index: '.rule-events' } });
+      expect(pairs[1].create).toEqual({ create: { _index: '.alert-actions' } });
+    });
+
+    it('builds the .alert-actions audit doc from the latest event and the activate body', async () => {
+      mockHappyPathReads();
+
+      await client.createAction({ groupHash: 'test-group-hash', action: activateAction });
+
+      expect(getBulkPairs()[1].doc).toMatchObject({
+        action_type: 'activate',
+        group_hash: 'test-group-hash',
+        episode_id: 'episode-1',
+        rule_id: 'test-rule-id',
+        last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
+        reason: 'reopen this episode',
+        space_id: 'default',
+        actor: 'test-uid',
+      });
+    });
+
+    it('emits the persisted activate action document', async () => {
+      mockHappyPathReads();
+
+      await client.createAction({ groupHash: 'test-group-hash', action: activateAction });
+
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledTimes(1);
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
+        expect.objectContaining({ action_type: 'activate', group_hash: 'test-group-hash' }),
+      ]);
+    });
+
+    it('throws ALERT_EVENT_NOT_FOUND when there is no prior rule event for the group_hash', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({ groupHash: 'unknown-group-hash', action: activateAction })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: 'ALERT_EVENT_NOT_FOUND', details: { group_hash: 'unknown-group-hash' } },
+      });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+
+    it('surfaces ALERT_EVENT_NOT_FOUND from the activate handler when no pre-deactivate event exists', async () => {
+      // Verifies that Boom 404s thrown from the activate handler's
+      // `loadContext` (here: missing pre-deactivate event) are
+      // propagated unchanged through the orchestrator without writing
+      // or emitting anything. The other activate preconditions
+      // (inactive + last-lifecycle-deactivate) are exercised at the
+      // handler level.
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse({ episode_id: 'episode-1', episode_status: 'inactive' })
+        )
+        .mockResolvedValueOnce(
+          getLastEpisodeLifecycleActionsESQLResponse([
+            { episode_id: 'episode-1', last_action_type: 'deactivate' },
+          ])
+        )
+        .mockResolvedValueOnce(getPreDeactivateAlertEventESQLResponse([]));
+
+      await expect(
+        client.createAction({ groupHash: 'test-group-hash', action: activateAction })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'ALERT_EVENT_NOT_FOUND',
+          details: { group_hash: 'test-group-hash', episode_id: 'episode-1' },
+        },
+      });
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createBulkActions', () => {
     it('should process all actions successfully', async () => {
       const actions: BulkCreateAlertActionItemBody[] = [
@@ -218,6 +463,170 @@ describe('AlertActionsClient', () => {
 
       expect(result).toEqual({ processed: 0, total: 2 });
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    describe('lifecycle dispatch (deactivate/activate)', () => {
+      const getBulkOperations = () => storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
+
+      it('writes a synthetic .rule-events doc alongside the audit doc for a bulk deactivate', async () => {
+        const actions: BulkCreateAlertActionItemBody[] = [
+          {
+            group_hash: 'group-hash-1',
+            action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            reason: 'bulk deactivate',
+          },
+        ];
+
+        queryServiceEsClient.esql.query.mockResolvedValueOnce(
+          getBulkAlertEventsESQLResponse([
+            { group_hash: 'group-hash-1', episode_id: 'episode-1', episode_status: 'active' },
+          ])
+        );
+
+        const result = await client.createBulkActions(actions);
+
+        expect(result).toEqual({ processed: 1, total: 1 });
+        expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+
+        const operations = getBulkOperations();
+        expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
+        expect(operations[1]).toMatchObject({
+          group_hash: 'group-hash-1',
+          status: 'recovered',
+          episode: { id: 'episode-1', status: 'inactive' },
+          type: 'alert',
+          source: 'internal',
+        });
+        expect(operations[2]).toEqual({ create: { _index: '.alert-actions' } });
+        expect(operations[3]).toMatchObject({
+          action_type: 'deactivate',
+          group_hash: 'group-hash-1',
+          episode_id: 'episode-1',
+          reason: 'bulk deactivate',
+        });
+      });
+
+      it('silently skips a bulk deactivate item whose precondition fails (already inactive)', async () => {
+        const actions: BulkCreateAlertActionItemBody[] = [
+          {
+            group_hash: 'group-hash-1',
+            action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            reason: 'should be skipped',
+          },
+          {
+            group_hash: 'group-hash-2',
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+            episode_id: 'episode-2',
+          },
+        ];
+
+        queryServiceEsClient.esql.query.mockResolvedValueOnce(
+          getBulkAlertEventsESQLResponse([
+            { group_hash: 'group-hash-1', episode_id: 'episode-1', episode_status: 'inactive' },
+            { group_hash: 'group-hash-2', episode_id: 'episode-2', episode_status: 'active' },
+          ])
+        );
+
+        const result = await client.createBulkActions(actions);
+
+        expect(result).toEqual({ processed: 1, total: 2 });
+        expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+        const operations = getBulkOperations();
+        expect(operations).toHaveLength(2);
+        expect(operations[0]).toEqual({ create: { _index: '.alert-actions' } });
+        expect(operations[1]).toMatchObject({ action_type: 'ack', group_hash: 'group-hash-2' });
+        expect(emitEpisodeActionsSpy.mock.calls[0][1]).toHaveLength(1);
+      });
+
+      it('writes a restored synthetic .rule-events doc alongside the audit doc for a bulk activate', async () => {
+        const actions: BulkCreateAlertActionItemBody[] = [
+          {
+            group_hash: 'group-hash-1',
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            reason: 'bulk activate',
+          },
+        ];
+
+        queryServiceEsClient.esql.query
+          .mockResolvedValueOnce(
+            getBulkAlertEventsESQLResponse([
+              {
+                group_hash: 'group-hash-1',
+                episode_id: 'episode-1',
+                episode_status: 'inactive',
+              },
+            ])
+          )
+          .mockResolvedValueOnce(
+            getLastEpisodeLifecycleActionsESQLResponse([
+              { episode_id: 'episode-1', last_action_type: 'deactivate' },
+            ])
+          )
+          .mockResolvedValueOnce(
+            getPreDeactivateAlertEventESQLResponse([
+              {
+                group_hash: 'group-hash-1',
+                episode_id: 'episode-1',
+                episode_status: 'active',
+              },
+            ])
+          );
+
+        const result = await client.createBulkActions(actions);
+
+        expect(result).toEqual({ processed: 1, total: 1 });
+        const operations = getBulkOperations();
+        expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
+        expect(operations[1]).toMatchObject({
+          group_hash: 'group-hash-1',
+          episode: { id: 'episode-1', status: 'active' },
+          status: 'breached',
+          type: 'alert',
+          source: 'internal',
+        });
+        expect(operations[2]).toEqual({ create: { _index: '.alert-actions' } });
+        expect(operations[3]).toMatchObject({
+          action_type: 'activate',
+          group_hash: 'group-hash-1',
+          episode_id: 'episode-1',
+          reason: 'bulk activate',
+        });
+      });
+
+      // NOTE: the silent-skip orchestration channel is covered by the
+      // bulk-deactivate test above. The activate-specific lifecycle
+      // precondition (double-activate, natural recovery) is exercised
+      // at the handler level in `handlers/activate.test.ts`.
+
+      it('rethrows unexpected (non-Boom-4xx) errors so the whole batch fails loudly', async () => {
+        const actions: BulkCreateAlertActionItemBody[] = [
+          {
+            group_hash: 'group-hash-1',
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            reason: 'unexpected error path',
+          },
+        ];
+
+        // Lifecycle and pre-deactivate fire in parallel; either rejection
+        // would propagate, but we reject both to keep the test deterministic
+        // regardless of which `Promise.all` sees first.
+        queryServiceEsClient.esql.query
+          .mockResolvedValueOnce(
+            getBulkAlertEventsESQLResponse([
+              {
+                group_hash: 'group-hash-1',
+                episode_id: 'episode-1',
+                episode_status: 'inactive',
+              },
+            ])
+          )
+          .mockRejectedValueOnce(new Error('ES outage'))
+          .mockRejectedValueOnce(new Error('ES outage'));
+
+        await expect(client.createBulkActions(actions)).rejects.toThrow('ES outage');
+        expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+        expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+      });
     });
   });
 

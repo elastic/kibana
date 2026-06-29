@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 
+/** Parameters for {@link StorageServiceContract.bulkIndexDocs}. */
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
   docs: readonly TDocument[];
@@ -18,10 +19,35 @@ export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> 
   refresh?: boolean | 'wait_for';
 }
 
+/**
+ * Parameters for {@link StorageServiceContract.bulkIndexAcrossIndices}.
+ *
+ * The doc element is intentionally typed as `Record<string, unknown>` rather
+ * than a generic: this method is for heterogeneous batches (different shapes
+ * per element), and tying every doc to a single `TDocument` either forces
+ * callers to spell out the union or breaks inference. Each caller composes
+ * the batch from its own typed inputs and the runtime is shape-agnostic.
+ */
+export interface BulkIndexAcrossIndicesParams {
+  docs: ReadonlyArray<{ index: string; doc: Record<string, unknown> }>;
+  /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
+  refresh?: boolean | 'wait_for';
+}
+
 export interface StorageServiceContract {
+  /** Bulk-index N documents into a single target index. */
   bulkIndexDocs<TDocument extends Record<string, unknown>>(
     params: BulkIndexDocsParams<TDocument>
   ): Promise<void>;
+
+  /**
+   * Bulk-index N documents where each doc carries its own target index.
+   *
+   * Use when one logical operation must atomically fan out across data
+   * streams (e.g. writing a rule event and an audit action in one round-trip).
+   * Operations are submitted in array order.
+   */
+  bulkIndexAcrossIndices(params: BulkIndexAcrossIndicesParams): Promise<void>;
 }
 
 @injectable()
@@ -31,21 +57,30 @@ export class StorageService implements StorageServiceContract {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
-    index,
-    docs,
-    refresh = false,
-  }: BulkIndexDocsParams<TDocument>): Promise<void> {
-    if (docs.length === 0) {
+  public async bulkIndexDocs<TDocument extends Record<string, unknown>>(
+    params: BulkIndexDocsParams<TDocument>
+  ): Promise<void> {
+    const entries = params.docs.map((doc) => ({ index: params.index, doc }));
+    await this.writeBulk(entries, params.refresh ?? false);
+  }
+
+  public async bulkIndexAcrossIndices(params: BulkIndexAcrossIndicesParams): Promise<void> {
+    await this.writeBulk(params.docs, params.refresh ?? false);
+  }
+
+  private async writeBulk<TDocument extends Record<string, unknown>>(
+    entries: ReadonlyArray<{ index: string; doc: TDocument }>,
+    refresh: boolean | 'wait_for'
+  ): Promise<void> {
+    if (entries.length === 0) {
       return;
     }
 
-    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
-      {
-        create: { _index: index },
-      },
-      doc,
-    ]);
+    const operations: NonNullable<BulkRequest<TDocument>['operations']> = entries.flatMap(
+      ({ index, doc }) => [{ create: { _index: index } }, doc]
+    );
+
+    const indexLabel = Array.from(new Set(entries.map((entry) => entry.index))).join(', ');
 
     try {
       const response = await this.esClient.bulk({
@@ -53,7 +88,7 @@ export class StorageService implements StorageServiceContract {
         refresh,
       });
 
-      this.logBulkIndexResponse({ index, docsCount: docs.length, response });
+      this.logBulkIndexResponse({ index: indexLabel, docsCount: entries.length, response });
     } catch (error) {
       this.logger.error({
         error,

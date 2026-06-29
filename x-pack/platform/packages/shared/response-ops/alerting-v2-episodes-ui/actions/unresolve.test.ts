@@ -32,46 +32,24 @@ const makeDeps = () => ({
 describe('createUnresolveAction', () => {
   beforeEach(() => jest.restoreAllMocks());
 
-  it('compatible when some episode is not activated and not already ACTIVE', () => {
+  it('compatible when at least one episode is INACTIVE', () => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: undefined })],
+        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE })],
       })
     ).toBe(true);
   });
 
-  it('not compatible when every episode is already activated', () => {
+  it.each([
+    ALERT_EPISODE_STATUS.ACTIVE,
+    ALERT_EPISODE_STATUS.RECOVERING,
+    ALERT_EPISODE_STATUS.PENDING,
+  ] as const)('not compatible when every episode is %s', (status) => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: 'activate' })],
+        episodes: [makeEpisode({ 'episode.status': status })],
       })
     ).toBe(false);
-  });
-
-  it('not compatible when every episode has status ACTIVE', () => {
-    expect(
-      createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-            last_deactivate_action: undefined,
-          }),
-        ],
-      })
-    ).toBe(false);
-  });
-
-  it('compatible when last_deactivate_action is deactivate even if episode.status is stale ACTIVE', () => {
-    expect(
-      createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.ACTIVE, // stale — not yet refreshed from ES
-            last_deactivate_action: 'deactivate',
-          }),
-        ],
-      })
-    ).toBe(true);
   });
 
   it('not compatible on empty selection', () => {
