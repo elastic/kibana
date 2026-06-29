@@ -33,7 +33,7 @@ const labels = {
 export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonProps> = ({
   getAttachment,
   linkDescriptor,
-  iconType = 'pin',
+  iconType = 'documents',
   disabled = false,
   displayVariant = 'default',
 }) => {
