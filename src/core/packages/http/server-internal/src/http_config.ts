@@ -200,12 +200,17 @@ const configSchema = schema.object(
         { defaultValue: [], maxSize: 100 }
       ),
       allowedSchemes: offeringBasedSchema({
-        serverless: schema.arrayOf(schema.string({ validate: validateXsrfScheme }), {
+        serverless: schema.arrayOf(schema.string({ validate: validateXsrfScheme, maxLength: 50 }), {
           defaultValue: ['apikey', 'bearer'],
+          maxSize: 100,
         }),
-        traditional: schema.arrayOf(schema.string({ validate: validateXsrfScheme }), {
-          defaultValue: [],
-        }),
+        traditional: schema.arrayOf(
+          schema.string({ validate: validateXsrfScheme, maxLength: 50 }),
+          {
+            defaultValue: [],
+            maxSize: 100,
+          }
+        ),
       }),
     }),
     excludeRoutes: schema.arrayOf(
