@@ -29,10 +29,7 @@ describe('useInvalidateChangeHistory', () => {
     const { wrapper, queryClient } = createQueryClientWrapper();
 
     const { result: listResult } = renderHook(
-      () =>
-        useInfiniteQuery(changeHistoryListQueryKey({ objectId: 'obj-1' }), () =>
-          listChanges()
-        ),
+      () => useInfiniteQuery(changeHistoryListQueryKey({ objectId: 'obj-1' }), () => listChanges()),
       { wrapper }
     );
 
