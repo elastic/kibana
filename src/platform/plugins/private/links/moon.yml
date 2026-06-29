@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-http-server'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-utils'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/scout'
