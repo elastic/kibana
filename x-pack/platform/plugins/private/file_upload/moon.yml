@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/file-upload-common'
   - '@kbn/test-jest-helpers'
+  - '@kbn/code-editor-mock'
 tags:
   - plugin
   - prod

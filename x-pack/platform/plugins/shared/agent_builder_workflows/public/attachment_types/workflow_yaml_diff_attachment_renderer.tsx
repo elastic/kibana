@@ -153,7 +153,7 @@ const MonacoDiffViewer: React.FC<{
       padding: { top: 4, bottom: 4 },
       contextmenu: false,
       domReadOnly: true,
-      lightbulb: { enabled: false },
+      lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
       quickSuggestions: false,
       suggestOnTriggerCharacters: false,
       hover: { enabled: false },

@@ -237,6 +237,8 @@ jest.mock('@kbn/monaco', () => ({
       }),
     },
   },
+  defaultThemesResolvers: {},
+  initializeSupportedLanguages: jest.fn(),
   YAML_LANG_ID: 'yaml',
 }));
 

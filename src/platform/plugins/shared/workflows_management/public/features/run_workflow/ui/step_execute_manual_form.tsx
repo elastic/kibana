@@ -124,7 +124,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
                 formatOnType: true,
                 quickSuggestions: false,
                 suggestOnTriggerCharacters: false,
-                wordBasedSuggestions: false,
+                wordBasedSuggestions: 'off',
                 parameterHints: {
                   enabled: false,
                 },

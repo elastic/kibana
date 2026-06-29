@@ -304,6 +304,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           it('should show field suggestions for metric argument when index pattern set', async () => {
+            await monacoEditor.setCodeEditorValue('');
             await monacoEditor.typeCodeEditorValue(
               '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
               'timelionCodeEditor'

@@ -36,6 +36,7 @@ json-stable-stringify
 apache-arrow
 oxlint
 react-element-to-jsx-string
+@babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
 tar-fs
@@ -50,3 +51,4 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+monaco-marker-data-provider

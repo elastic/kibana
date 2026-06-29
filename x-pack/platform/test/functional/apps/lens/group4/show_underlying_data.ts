@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const browser = getService('browser');
 
   describe('show underlying data', () => {
@@ -176,16 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
-        formula: `average(memory, kql=`,
-        keepOpen: true,
+        formula: `average(memory, kql='bytes > 2000')`,
       });
-
-      const input = await find.activeElement();
-      await input.type(`bytes > 2000`);
-      // the tooltip seems to be there as long as the focus is in the query string
-      await input.pressKeys(browser.keys.RIGHT);
-
-      await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled

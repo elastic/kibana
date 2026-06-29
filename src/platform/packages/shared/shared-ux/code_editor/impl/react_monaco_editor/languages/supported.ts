@@ -21,4 +21,4 @@ export {
   CONSOLE_LANG_ID,
   CONSOLE_OUTPUT_LANG_ID,
   PROMQL_LANG_ID,
-} from '@kbn/monaco/src/languages';
+} from '@kbn/monaco';

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
@@ -18,6 +17,7 @@ export class ConsolePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly browser = this.ctx.getService('browser');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public async getTextArea() {
     const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
@@ -37,9 +37,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearEditorText() {
-    const textArea = await this.getTextArea();
-    await textArea.clickMouseButton();
-    await textArea.clearValueWithKeyboard();
+    await this.monacoEditor.clearCodeEditorValue('consoleMonacoEditor');
   }
 
   public async focusInputEditor() {
@@ -57,38 +55,56 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async scrollOutputToTop() {
-    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
-    const textArea = await outputEditor.findByTagName('textarea');
-    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await textArea.pressKeys([selectionKey, Key.HOME]);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoOutput', 'cursorTop');
   }
 
   public async selectAllOutputText() {
-    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
-    const textArea = await outputEditor.findByTagName('textarea');
-    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await textArea.pressKeys([selectionKey, 'a']);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoOutput', 'selectAll');
   }
 
   public async getOutputText() {
-    const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
-    const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
-    return await outputViewDiv.getVisibleText();
+    return await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoOutput');
   }
 
   public async pressEnter() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys(Key.ENTER);
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', '\n');
+  }
+
+  public async acceptAutocompleteSuggestion() {
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'acceptSelectedSuggestion');
   }
 
   public async enterText(text: string) {
-    const textArea = await this.getTextArea();
-    await textArea.type(text);
+    if (!text) return;
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', text);
+    const trimmed = text.trimStart();
+    const isComment =
+      trimmed.startsWith('#') || trimmed.startsWith('//') || trimmed.startsWith('/*');
+    if (!text.includes('\n') && !isComment) {
+      // Single-line non-comment text: the user is typing within a line and may expect
+      // autocomplete to evaluate. Multi-line text and comments are always setup/context —
+      // no completion needed. For comments, triggerSuggest would bypass Monaco's
+      // language-aware suppression and incorrectly show the widget inside comment lines.
+      await this.monacoEditor.triggerSuggest('consoleMonacoEditor');
+    }
+  }
+
+  /**
+   * Explicitly ask Monaco to evaluate completions at the current cursor position,
+   * without inserting any text. Use this after multi-line enterText calls where
+   * the ending text is a trigger character (e.g. triple-quote for ESQL).
+   */
+  public async triggerSuggest() {
+    await this.monacoEditor.triggerSuggest('consoleMonacoEditor');
+  }
+
+  public async appendText(text: string) {
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', text);
   }
 
   public async promptAutocomplete(letter = 'b') {
-    const textArea = await this.getTextArea();
-    await textArea.type(letter);
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', letter);
+    await this.monacoEditor.triggerSuggest('consoleMonacoEditor');
     await this.retry.waitFor(
       'autocomplete to be visible',
       async () => await this.isAutocompleteVisible()
@@ -103,10 +119,13 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getAutocompleteSuggestion(index: number) {
-    await this.retry.waitFor(
-      'verify suggestions widget is displayed',
-      async () => await this.isAutocompleteVisible()
-    );
+    await this.retry.waitFor('suggestions widget has items', async () => {
+      if (!(await this.isAutocompleteVisible())) return false;
+      const widget = await this.find.byClassName('suggest-widget').catch(() => null);
+      if (!widget) return false;
+      const items = await widget.findAllByClassName('monaco-list-row');
+      return items.length > 0;
+    });
 
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
@@ -131,77 +150,67 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async pressUp(shift: boolean = false) {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
+    await this.monacoEditor.simulateKeyCommand(
+      'consoleMonacoEditor',
+      shift ? 'cursorUpSelect' : 'cursorUp'
+    );
   }
 
   public async pressDown(shift: boolean = false) {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys(shift ? [Key.SHIFT, Key.DOWN] : Key.DOWN);
+    await this.monacoEditor.simulateKeyCommand(
+      'consoleMonacoEditor',
+      shift ? 'cursorDownSelect' : 'cursorDown'
+    );
   }
 
   public async pressRight(shift: boolean = false) {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys(shift ? [Key.SHIFT, Key.RIGHT] : Key.RIGHT);
+    await this.monacoEditor.simulateKeyCommand(
+      'consoleMonacoEditor',
+      shift ? 'cursorRightSelect' : 'cursorRight'
+    );
   }
 
   public async pressLeft(shift: boolean = false) {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
+    await this.monacoEditor.simulateKeyCommand(
+      'consoleMonacoEditor',
+      shift ? 'cursorLeftSelect' : 'cursorLeft'
+    );
   }
 
   public async pressCtrlSpace() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([
-      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
-      Key.SPACE,
-    ]);
+    await this.triggerSuggest();
   }
+
   public async pressCtrlEnter() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([
-      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
-      Key.ENTER,
-    ]);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'sendRequest');
   }
 
   public async pressCtrlI() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'i']);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'autoIndent');
   }
 
   public async pressCtrlUp() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], Key.UP]);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'moveUp');
   }
 
   public async pressCtrlDown() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([
-      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
-      Key.DOWN,
-    ]);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'moveDown');
   }
 
   public async pressCtrlL() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'l']);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'moveToLine');
   }
 
   public async pressCtrlSlash() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'openDocs');
   }
 
   public async pressEscape() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys(Key.ESCAPE);
+    await this.monacoEditor.simulateKeyCommand('consoleMonacoEditor', 'Escape');
   }
 
   public async selectAllRequests() {
-    const textArea = await this.getTextArea();
-    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await textArea.pressKeys([selectionKey, 'a']);
+    await this.monacoEditor.selectAllCodeEditorValue('consoleMonacoEditor');
   }
 
   public async getEditor() {
@@ -228,15 +237,26 @@ export class ConsolePageObject extends FtrService {
     return await editorViewDiv.getComputedStyle('font-size');
   }
 
-  public async pasteClipboardValue() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'v']);
-  }
-
   public async copyRequestsToClipboard() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    // Ctrl+A / Ctrl+C on the textarea no longer works reliably in Monaco 0.54 EditContext mode,
+    // so we read the value via the Monaco API and write it to the clipboard programmatically.
+    const content = await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoEditor');
+    const clipboardError = await this.browser.executeAsync(
+      (text: string, done: (errorMessage: string | null) => void) => {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => done(null))
+          .catch((error) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            done(errorMessage);
+          });
+      },
+      content
+    );
+
+    if (clipboardError) {
+      throw new Error(`Failed to copy requests to clipboard: ${clipboardError}`);
+    }
   }
 
   public async isA11yOverlayVisible() {
@@ -521,7 +541,7 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
-  public async isCopyToLanguageButtonVisible() {
+  public async isCopyAsButtonVisible() {
     return await this.testSubjects.exists('consoleMenuCopyAsButton');
   }
 
@@ -535,41 +555,32 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    // Click "Select language" menu item to open language selector modal
+    // Open the language selector modal from the context menu
     await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    // Wait for the modal to open
-    await this.retry.waitFor('language selector modal to open', async () => {
-      return await this.testSubjects.exists(`languageOption-${language}`);
-    });
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
 
-    // Select the language option
-    await this.testSubjects.click(`languageOption-${language}`);
-
-    // Click "Copy code" button to copy with the selected language
-    await this.testSubjects.click('copyAsLanguageSubmit');
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
   }
 
   public async changeDefaultLanguage(language: string) {
-    // Click "Select language" menu item to open language selector modal
+    // Open the language selector modal from the context menu
     await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    // Wait for the modal to open
-    await this.retry.waitFor('language selector modal to open', async () => {
-      return await this.testSubjects.exists(`languageOption-${language}`);
-    });
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
 
-    // Select the language option
-    await this.testSubjects.click(`languageOption-${language}`);
-
-    // Click "Set as default" button (moves the badge)
+    // Mark the selected language as the new default
     await this.testSubjects.click('setAsDefaultLanguage');
 
-    // Click "Cancel" to close modal and save the default
-    await this.testSubjects.click('closeCopyAsModal');
+    // Close the modal — this persists the new default to storage
+    const closeModalButton = await this.testSubjects.find('closeCopyAsModal');
+    await closeModalButton.click();
   }
 
-  public async clickCopyToLanguageButton() {
+  public async clickCopyAsButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }

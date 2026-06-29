@@ -27,3 +27,4 @@ export {
 
 export { getUndoRedoService } from './src/undo_redo_service';
 export type { UndoRedoService, UndoRedoElement } from './src/undo_redo_service';
+export { getWorker } from './src/worker_factory';

@@ -14,7 +14,7 @@ import {
   ESQL_LANG_ID,
   type CodeEditorProps,
   type MonacoMessage,
-  type monaco,
+  monaco,
 } from '@kbn/code-editor';
 import type { EsqlLanguageDeps } from '../types';
 
@@ -199,7 +199,7 @@ export const useEditorConfig = ({
       fontSize: 14,
       hideCursorInOverviewRuler: true,
       lightbulb: {
-        enabled: false,
+        enabled: monaco.editor.ShowLightbulbIconMode.Off,
       },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',

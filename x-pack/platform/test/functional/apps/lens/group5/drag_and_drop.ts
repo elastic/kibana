@@ -378,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
           operation: 'formula',
-          formula: `moving_average(average(bytes), window=5`,
+          formula: `moving_average(average(bytes), window=5)`,
         });
         await lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_yDimensionPanel  > lns-dimensionTrigger',

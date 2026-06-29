@@ -31,6 +31,7 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
@@ -138,16 +139,13 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async enterMarkdown(markdown: string) {
     await this.clearMarkdown();
-    const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-    await input.type(markdown);
+    await this.monacoEditor.setCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor', markdown);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async clearMarkdown() {
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-      await input.clickMouseButton();
-      await input.clearValueWithKeyboard();
+      await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
 
       const linesContainer = await this.find.byCssSelector(
         '.tvbMarkdownEditor__editor .view-lines'
@@ -160,8 +158,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async waitForMarkdownTextAreaCleaned() {
-    const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-    await input.clearValueWithKeyboard();
+    await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
     const text = await this.getMarkdownText();
     return text.length === 0;
   }

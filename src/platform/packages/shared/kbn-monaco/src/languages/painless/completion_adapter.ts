@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@elastic/apm-rum';
 import { monaco } from '../../monaco_imports';
 import type { EditorStateService } from './lib';
 import type { PainlessCompletionResult, PainlessCompletionKind } from './types';
@@ -37,10 +38,7 @@ const getCompletionKind = (kind: PainlessCompletionKind): monaco.languages.Compl
 
 export class PainlessCompletionAdapter implements monaco.languages.CompletionItemProvider {
   constructor(
-    private worker: {
-      (...uris: monaco.Uri[]): Promise<PainlessWorker>;
-      (arg0: monaco.Uri): Promise<PainlessWorker>;
-    },
+    private worker: (...uris: monaco.Uri[]) => Promise<PainlessWorker>,
     private editorStateService: EditorStateService
   ) {}
 
@@ -52,49 +50,57 @@ export class PainlessCompletionAdapter implements monaco.languages.CompletionIte
     model: monaco.editor.IReadOnlyModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> {
-    // Active line characters
-    const currentLineChars = model.getValueInRange({
-      startLineNumber: position.lineNumber,
-      startColumn: 0,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column,
-    });
+    try {
+      // Active line characters
+      const currentLineChars = model.getValueInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: 0,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      });
 
-    const worker = await this.worker(model.uri);
+      const worker = await this.worker(model.uri);
 
-    const { context, fields } = this.editorStateService.getState();
-    const autocompleteInfo: PainlessCompletionResult = await worker.provideAutocompleteSuggestions(
-      currentLineChars,
-      context,
-      fields
-    );
+      const { context, fields } = this.editorStateService.getState();
+      const autocompleteInfo: PainlessCompletionResult =
+        await worker.provideAutocompleteSuggestions(currentLineChars, context, fields);
 
-    const wordInfo = model.getWordUntilPosition(position);
-    const wordRange = {
-      startLineNumber: position.lineNumber,
-      endLineNumber: position.lineNumber,
-      startColumn: wordInfo.startColumn,
-      endColumn: wordInfo.endColumn,
-    };
+      const wordInfo = model.getWordUntilPosition(position);
+      const wordRange = {
+        startLineNumber: position.lineNumber,
+        endLineNumber: position.lineNumber,
+        startColumn: wordInfo.startColumn,
+        endColumn: wordInfo.endColumn,
+      };
 
-    const suggestions = autocompleteInfo.suggestions.map(
-      ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
-        return {
-          label,
-          insertText,
-          documentation,
-          range: wordRange,
-          kind: getCompletionKind(kind),
-          insertTextRules: insertTextAsSnippet
-            ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-            : undefined,
-        };
-      }
-    );
+      const suggestions = autocompleteInfo.suggestions.map(
+        ({ label, insertText, documentation, kind, insertTextAsSnippet }) => {
+          return {
+            label,
+            insertText,
+            documentation,
+            range: wordRange,
+            kind: getCompletionKind(kind),
+            insertTextRules: insertTextAsSnippet
+              ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+              : undefined,
+          };
+        }
+      );
 
-    return {
-      incomplete: autocompleteInfo.isIncomplete,
-      suggestions,
-    };
+      return {
+        incomplete: autocompleteInfo.isIncomplete,
+        suggestions,
+      };
+    } catch (e) {
+      // Gracefully handle worker errors by disabling autocomplete
+      apm.captureError(e instanceof Error ? e : new Error(String(e)), {
+        labels: { worker: 'painless' },
+      });
+      return {
+        incomplete: false,
+        suggestions: [],
+      };
+    }
   }
 }

@@ -746,25 +746,18 @@ export class StreamsApp {
   }
 
   async fillGrokPatternInput(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternExpression').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternExpression',
+      value
+    );
   }
 
   async fillGrokPatternDefinitionsInput(value: string) {
     await this.page.getByRole('button', { name: 'Advanced settings' }).click();
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppPatternDefinitionsEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternDefinitionsEditor',
+      value
+    );
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -796,15 +789,10 @@ export class StreamsApp {
   }
 
   async fillCustomSamplesEditor(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppCustomSamplesDataSourceEditor',
+      value
+    );
   }
 
   async fillCondition(field: string, operator: string, value: string) {

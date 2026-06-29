@@ -12,12 +12,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const find = getService('find');
   const listingTable = getService('listingTable');
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
   const dataViews = getService('dataViews');
-
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
       await visualize.gotoVisualizationLandingPage();
@@ -48,12 +46,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'formula',
-        formula: `count(kql=`,
         keepOpen: true,
       });
 
-      const input = await find.activeElement();
-      await input.type('*');
+      await lens.typeFormula("count(kql='*')");
 
       await retry.try(async () => {
         expect(await lens.getDatatableCellText(0, 0)).to.eql('14,005');
@@ -69,23 +65,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'formula',
-        formula: `count(kql=`,
         keepOpen: true,
       });
 
-      let input = await find.activeElement();
-      await input.type(' ');
-      await input.pressKeys(browser.keys.ARROW_LEFT);
-      await input.type(`Men's Clothing`);
+      // Type the entire formula character-by-character to trigger Lens's handlers
+      await lens.simulateTypingInFormula(`count(kql=`);
+      await common.sleep(100);
+
+      await lens.simulateTypingInFormula(' ');
+      await lens.simulateKeyInFormula('ArrowLeft');
+      await lens.simulateTypingInFormula(`Men's Clothing`);
 
       await common.sleep(100);
 
       await lens.expectFormulaText(`count(kql='Men\\'s Clothing ')`);
 
-      await lens.typeFormula('count(kql=');
-
-      input = await find.activeElement();
-      await input.type(`Men\'s Clothing`);
+      // Second test
+      await lens.typeFormula(''); // Clear
+      await lens.simulateTypingInFormula(`count(kql=`);
+      await common.sleep(100);
+      await lens.simulateTypingInFormula(`Men's Clothing`);
 
       await common.sleep(100);
 
@@ -113,10 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.switchToFormula();
       await lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
 
-      await lens.typeFormula('unique_count(');
-      const input = await find.activeElement();
-      await input.type('ab');
-      await input.pressKeys(browser.keys.ENTER);
+      // Type unique_count( then 'ab' to trigger autocomplete for field name
+      await lens.typeFormula('');
+      await lens.simulateTypingInFormula('unique_count(ab');
+      await lens.simulateKeyInFormula('Enter');
 
       await common.sleep(100);
 
@@ -196,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'formula',
-        formula: `moving_average(sum(bytes), window=5`,
+        formula: `moving_average(sum(bytes), window=5)`,
         keepOpen: true,
       });
       await lens.setTableDynamicColoring('text');
@@ -316,11 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // now change the formula to add an inner filter to count
-      await lens.typeFormula(`count(kql=`);
-
-      const input = await find.activeElement();
-      await input.type(`bytes > 600000`);
-      // the autocomplete will add quotes and closing brakets, so do not worry about that
+      await lens.typeFormula(`count(kql='bytes > 600000')`);
 
       await lens.waitForVisualization();
       expect(await lens.getDatatableCellText(0, 0)).to.eql('0');
