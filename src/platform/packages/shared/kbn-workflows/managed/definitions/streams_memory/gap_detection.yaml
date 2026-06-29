@@ -84,9 +84,6 @@ steps:
               - range:
                   finishedAt:
                     gte: 'now-7d'
-            must_not:
-              - term:
-                  isTestRun: true
     on-failure:
       continue: true
 
