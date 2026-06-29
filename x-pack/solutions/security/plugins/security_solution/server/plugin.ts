@@ -141,6 +141,7 @@ import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
 import { administersMaintainer } from './lib/entity_analytics/maintainers/administers';
 import { supervisesMaintainer } from './lib/entity_analytics/maintainers/supervises';
+import { ownsMaintainer } from './lib/entity_analytics/maintainers/owns';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -390,6 +391,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
       plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
       plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
 
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,

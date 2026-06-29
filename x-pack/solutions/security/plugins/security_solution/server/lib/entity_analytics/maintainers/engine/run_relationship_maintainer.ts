@@ -31,7 +31,6 @@ import type {
   RelationshipMaintainerSourceResult,
   RelationshipMaintainerTelemetryCollector,
 } from '../types';
-
 export type { RelationshipMaintainerSourceResult, RelationshipMaintainerTelemetryCollector };
 
 interface CompositeAggregations {

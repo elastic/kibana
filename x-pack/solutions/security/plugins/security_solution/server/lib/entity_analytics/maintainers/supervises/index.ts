@@ -58,7 +58,8 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
         failed: result.totalWriteErrors,
-        // TODO: extend telemetry schema to include droppedTargets (phantom ID validation)
+        // TODO: investigate whether to extend the telemetry funnel schema with a new field for
+        // droppedTargets (result.totalDroppedTargets) or map it to an existing field before wiring.
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
