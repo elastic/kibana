@@ -14,6 +14,7 @@ import {
   type HuntTier2When,
   type TelemetryProbeTier,
 } from '../../../common/threat_intelligence/hub';
+import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { huntForThreat } from './hunt_for_threat';
 import type { HuntForThreatParams, HuntForThreatResult, HuntIoc } from './hunt_for_threat';
 import { huntBehavior } from './hunt_behavior';
@@ -83,6 +84,7 @@ export type HuntOrchestratedTier2SkipReason =
 
 export interface HuntOrchestratedParams {
   report_id?: string;
+  spaceId: string;
   /**
    * Override the report text used for Tier 2 extraction. When omitted,
    * the orchestrator falls back to fetching `content.body_text` from the
@@ -222,7 +224,14 @@ const resolveReportContext = async (
     const response = await esClient.search({
       index: THREAT_REPORTS_INDEX_PATTERN,
       size: 1,
-      query: { ids: { values: [params.report_id] } },
+      query: {
+        bool: {
+          filter: [
+            buildSpaceFilterTerms(params.spaceId),
+            { ids: { values: [params.report_id] } },
+          ],
+        },
+      },
       _source: ['content.body_text', 'rank_score'],
     });
     const hit = response.hits.hits[0];
@@ -392,6 +401,7 @@ export const huntOrchestrated = async (
     llm_confidence_threshold: llmThreshold,
     tier2_when: tier2When = 'on_hits',
     max_tier2_sample_events: maxSamples = DEFAULT_TIER2_SAMPLE_EVENTS,
+    spaceId,
   } = params;
 
   const tier1Params: HuntForThreatParams = {
@@ -401,6 +411,7 @@ export const huntOrchestrated = async (
     time_range: timeRange,
     size,
     max_assets: maxAssets,
+    spaceId,
   };
   const tier1Raw = await huntForThreat(esClient, logger, tier1Params);
   // Atomic-rule proposals are emitted only when Tier 1 *actually*

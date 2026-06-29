@@ -181,6 +181,7 @@ describe('huntOrchestrated', () => {
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         tier2_when: 'never',
+        spaceId: 'default',
       });
       expect(result.status).toBe('tier1_only');
       expect(result.tier2_skipped_reason).toBe('configured_never');
@@ -193,6 +194,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
+        spaceId: 'default',
       });
       expect(result.status).toBe('tier1_only');
       expect(result.tier2_skipped_reason).toBe('no_environment_hits');
@@ -201,7 +203,9 @@ describe('huntOrchestrated', () => {
 
     it('returns tier1_only with "no_searchable_input" when default policy + no IOCs', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoSearchableInput());
-      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {});
+      const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
+        spaceId: 'default',
+      });
       expect(result.status).toBe('tier1_only');
       expect(result.tier2_skipped_reason).toBe('no_searchable_input');
     });
@@ -217,6 +221,7 @@ describe('huntOrchestrated', () => {
           report_id: 'report-1',
           text: 'body of the report',
           tier2_when: 'always',
+          spaceId: 'default',
         }
       );
       expect(result.status).toBe('tier1_and_tier2');
@@ -230,6 +235,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
       const result = await huntOrchestrated(buildEsClient(), undefined, logger, {
         report_id: 'report-1',
+        spaceId: 'default',
       });
       expect(result.status).toBe('tier1_only');
       expect(result.tier2_skipped_reason).toBe('no_inference');
@@ -245,6 +251,7 @@ describe('huntOrchestrated', () => {
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'inline report text',
+        spaceId: 'default',
       });
 
       expect(result.status).toBe('tier1_and_tier2');
@@ -277,6 +284,7 @@ describe('huntOrchestrated', () => {
 
       const result = await huntOrchestrated(esClient, buildScopedModel(), logger, {
         report_id: 'report-1',
+        spaceId: 'default',
       });
 
       expect(result.status).toBe('tier1_and_tier2');
@@ -291,6 +299,7 @@ describe('huntOrchestrated', () => {
 
       const result = await huntOrchestrated(esClient, buildScopedModel(), logger, {
         report_id: 'report-1',
+        spaceId: 'default',
       });
 
       expect(result.status).toBe('tier2_only_skipped');
@@ -306,6 +315,7 @@ describe('huntOrchestrated', () => {
         report_id: 'report-1',
         text: 'body',
         tier2_when: 'always',
+        spaceId: 'default',
       });
 
       const [, , params] = huntBehaviorMock.mock.calls[0];
@@ -320,6 +330,7 @@ describe('huntOrchestrated', () => {
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'body',
+        spaceId: 'default',
       });
       expect(result.tier1.tier).toBe(1);
       expect(result.tier2?.tier).toBe(2);
@@ -331,6 +342,7 @@ describe('huntOrchestrated', () => {
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
         text: 'body',
+        spaceId: 'default',
       });
       expect(result.message).toContain('Tier 1');
       expect(result.message).toContain('Tier 2');
@@ -351,7 +363,7 @@ describe('huntOrchestrated', () => {
         }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
 
       expect(writeHuntFeedbackSafeMock).toHaveBeenCalledTimes(1);
@@ -371,7 +383,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.4 }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
 
       expect(writeHuntFeedbackSafeMock).toHaveBeenCalledTimes(1);
@@ -386,7 +398,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.4 }),
         undefined,
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
 
       expect(writeHuntFeedbackSafeMock).toHaveBeenCalledTimes(1);
@@ -399,6 +411,7 @@ describe('huntOrchestrated', () => {
       await huntOrchestrated(buildEsClient(null), buildScopedModel(), logger, {
         text: 'body',
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
+        spaceId: 'default',
       });
 
       expect(writeHuntFeedbackSafeMock).not.toHaveBeenCalled();
@@ -411,6 +424,7 @@ describe('huntOrchestrated', () => {
       await huntOrchestrated(buildEsClient(null), buildScopedModel(), logger, {
         report_id: 'stale-or-deleted-report',
         text: 'body',
+        spaceId: 'default',
       });
 
       expect(writeHuntFeedbackSafeMock).not.toHaveBeenCalled();
@@ -423,7 +437,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
       expect(result.tier1.proposed_atomic_rules).toBeDefined();
       expect(result.tier1.proposed_atomic_rules).toHaveLength(2);
@@ -442,7 +456,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
       expect(huntBehaviorMock).toHaveBeenCalledTimes(1);
       const [, , params] = huntBehaviorMock.mock.calls[0];
@@ -469,7 +483,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
       const [, , params] = huntBehaviorMock.mock.calls[0];
       expect(params.article_context?.proposed_atomic_rules).toBeUndefined();
@@ -479,6 +493,7 @@ describe('huntOrchestrated', () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {
         report_id: 'report-1',
+        spaceId: 'default',
       });
       expect(result.tier1.proposed_atomic_rules).toBeUndefined();
     });
@@ -492,7 +507,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
       expect(result.tier1.proposed_atomic_rules).toBeUndefined();
       // next_step should not reference the atomic block when none was emitted.
@@ -518,7 +533,7 @@ describe('huntOrchestrated', () => {
         buildEsClient({ body_text: 'body', rank_score: 0.5 }),
         buildScopedModel(),
         logger,
-        { report_id: 'report-1' }
+        { report_id: 'report-1', spaceId: 'default' }
       );
 
       // Resolve in reverse order to assert the orchestrator awaits both.

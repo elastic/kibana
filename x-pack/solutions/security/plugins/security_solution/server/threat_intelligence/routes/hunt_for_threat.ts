@@ -12,6 +12,7 @@ import {
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../common/threat_intelligence/hub';
 import { huntForThreat, type HuntIoc } from '../services';
+import { resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
 
 const huntForThreatBodySchema = schema.object({
@@ -46,7 +47,11 @@ const huntForThreatBodySchema = schema.object({
  * ATT&CK technique IDs. The Agent Builder tool wrapper delegates to this
  * service.
  */
-export const registerHuntForThreatRoute = ({ router, logger }: RouteRegistrationDeps): void => {
+export const registerHuntForThreatRoute = ({
+  router,
+  logger,
+  getSpacesService,
+}: RouteRegistrationDeps): void => {
   router.versioned
     .post({
       path: HUNT_FOR_THREAT_API_PATH,
@@ -65,6 +70,7 @@ export const registerHuntForThreatRoute = ({ router, logger }: RouteRegistration
       async (context, request, response) => {
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
           const result = await huntForThreat(esClient, logger, {
             report_id: request.body.report_id,
@@ -73,6 +79,7 @@ export const registerHuntForThreatRoute = ({ router, logger }: RouteRegistration
             time_range: request.body.time_range,
             size: request.body.size,
             max_assets: request.body.max_assets,
+            spaceId,
           });
           return response.ok({ body: result });
         } catch (err) {

@@ -264,7 +264,7 @@ describe('resolveHuntFeedbackTarget', () => {
       },
     } as unknown as Awaited<ReturnType<typeof esClient.search>>);
 
-    const target = await resolveHuntFeedbackTarget(esClient, 'report-1');
+    const target = await resolveHuntFeedbackTarget(esClient, 'report-1', 'default');
     expect(target).toEqual({
       index: '.ds-.kibana-threat-reports-000001',
       id: 'report-1',
@@ -284,7 +284,7 @@ describe('resolveHuntFeedbackTarget', () => {
         hits: [],
       },
     } as unknown as Awaited<ReturnType<typeof esClient.search>>);
-    const target = await resolveHuntFeedbackTarget(esClient, 'missing-report');
+    const target = await resolveHuntFeedbackTarget(esClient, 'missing-report', 'default');
     expect(target).toBeUndefined();
   });
 
@@ -307,7 +307,7 @@ describe('resolveHuntFeedbackTarget', () => {
         ],
       },
     } as unknown as Awaited<ReturnType<typeof esClient.search>>);
-    const target = await resolveHuntFeedbackTarget(esClient, 'legacy-report');
+    const target = await resolveHuntFeedbackTarget(esClient, 'legacy-report', 'default');
     expect(target).toEqual({
       index: '.ds-.kibana-threat-reports-000002',
       id: 'legacy-report',

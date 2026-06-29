@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
+import { buildSpaceFilterTerms } from '../lib/space_filter';
 import type { HuntForThreatResult } from './hunt_for_threat';
 
 /**
@@ -140,12 +141,15 @@ export const buildHuntFeedbackDoc = ({
  */
 export const resolveHuntFeedbackTarget = async (
   esClient: ElasticsearchClient,
-  reportId: string
+  reportId: string,
+  spaceId: string
 ): Promise<HuntFeedbackTarget | undefined> => {
   const response = await esClient.search({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size: 1,
-    query: { ids: { values: [reportId] } },
+    query: {
+      bool: { filter: [buildSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }] },
+    },
     _source: ['rank_score'],
   });
   const hit = response.hits.hits[0];

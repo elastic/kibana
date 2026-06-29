@@ -11,6 +11,7 @@ import {
   THREAT_REPORTS_INDEX_PATTERN,
   type IocType,
 } from '../../../common/threat_intelligence/hub';
+import { buildSpaceFilterTerms } from '../lib/space_filter';
 
 /**
  * Domain capability module for the `hunt_for_threat` action.
@@ -45,6 +46,7 @@ export interface HuntForThreatParams {
   time_range?: { from: string; to: string };
   size?: number;
   max_assets?: number;
+  spaceId: string;
 }
 
 export interface HuntForThreatHit {
@@ -175,6 +177,7 @@ export const huntForThreat = async (
     time_range: timeRange,
     size = 25,
     max_assets: maxAssets = 50,
+    spaceId,
   } = params;
 
   let resolvedIocs: HuntIoc[] = explicitIocs ?? [];
@@ -185,7 +188,9 @@ export const huntForThreat = async (
       const reportResponse = await esClient.search({
         index: THREAT_REPORTS_INDEX_PATTERN,
         size: 1,
-        query: { ids: { values: [reportId] } },
+        query: {
+          bool: { filter: [buildSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }] },
+        },
         _source: ['extracted.iocs', 'extracted.ttps.techniques', 'extracted.behaviors'],
       });
       const reportSource = reportResponse.hits.hits[0]?._source as

@@ -14,6 +14,7 @@ import {
   type HuntTier2When,
 } from '../../../common/threat_intelligence/hub';
 import { huntOrchestrated, type HuntIoc } from '../services';
+import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteRegistrationDeps } from '.';
 
@@ -73,6 +74,7 @@ export const registerHuntOrchestratedRoute = ({
   router,
   logger,
   getInference,
+  getSpacesService,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
@@ -92,6 +94,7 @@ export const registerHuntOrchestratedRoute = ({
       async (context, request, response) => {
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
 
         // `resolveScopedModel` returns a structured failure rather than
         // throwing when GenAI is unavailable; the orchestrator handles
@@ -118,6 +121,7 @@ export const registerHuntOrchestratedRoute = ({
             llm_confidence_threshold: request.body.llm_confidence_threshold,
             tier2_when: request.body.tier2_when as HuntTier2When | undefined,
             max_tier2_sample_events: request.body.max_tier2_sample_events,
+            spaceId,
           });
           return response.ok({ body: result });
         } catch (err) {
