@@ -14,7 +14,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DOCUMENT_TYPE_ALERT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_EVENT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
@@ -38,7 +41,7 @@ export interface EventActionsButtonProps {
    */
   scopeId: string;
   /** Invoked to open the event/alert details preview for the clicked item. */
-  onShowDocument: (docId: string, indexName?: string) => void;
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
 }
 
 /**
@@ -55,7 +58,7 @@ export const EventActionsButton = ({ item, scopeId, onShowDocument }: EventActio
 
   const handleShowEventDetails = useCallback(() => {
     if (item.docId) {
-      onShowDocument(item.docId, item.index);
+      onShowDocument(item.docId, item.index, item.itemType === DOCUMENT_TYPE_EVENT);
     }
   }, [item, onShowDocument]);
 

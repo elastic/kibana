@@ -61,7 +61,7 @@ let defaultProps: {
   dataViewId: string;
   documentIds: string[];
   entityItems: EntityItem[];
-  onShowDocument: (docId: string, indexName?: string) => void;
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
   onShowEntity: (params: {
     engineType: string | undefined;
     entityId: string;

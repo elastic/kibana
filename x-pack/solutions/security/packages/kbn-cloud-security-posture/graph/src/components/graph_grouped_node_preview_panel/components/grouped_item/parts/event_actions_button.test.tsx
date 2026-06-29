@@ -106,7 +106,11 @@ describe('EventActionsButton', () => {
       const eventDetailsButton = screen.getByText('Show event details');
       fireEvent.click(eventDetailsButton);
 
-      expect(mockOnShowDocument).toHaveBeenCalledWith(mockEventItem.docId, mockEventItem.index);
+      expect(mockOnShowDocument).toHaveBeenCalledWith(
+        mockEventItem.docId,
+        mockEventItem.index,
+        true
+      );
     });
   });
 
@@ -141,7 +145,11 @@ describe('EventActionsButton', () => {
       const alertDetailsButton = screen.getByText('Show alert details');
       fireEvent.click(alertDetailsButton);
 
-      expect(mockOnShowDocument).toHaveBeenCalledWith(mockAlertItem.docId, mockAlertItem.index);
+      expect(mockOnShowDocument).toHaveBeenCalledWith(
+        mockAlertItem.docId,
+        mockAlertItem.index,
+        false
+      );
     });
   });
 });

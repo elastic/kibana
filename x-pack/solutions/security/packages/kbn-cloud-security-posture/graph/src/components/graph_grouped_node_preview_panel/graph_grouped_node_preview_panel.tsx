@@ -63,7 +63,7 @@ export interface GraphGroupedNodePreviewPanelProps {
    * The consumer owns how the preview is rendered (e.g. the flyout v2 system flyout, or the
    * legacy expandable flyout) — this component does not open any flyout itself.
    */
-  onShowDocument: (docId: string, indexName?: string) => void;
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
   /**
    * Invoked to open an entity preview for a clicked item. As with `onShowDocument`, the consumer
    * owns how the preview is rendered — this component does not open any flyout itself.

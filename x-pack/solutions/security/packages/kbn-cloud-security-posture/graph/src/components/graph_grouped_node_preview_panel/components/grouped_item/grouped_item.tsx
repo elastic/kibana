@@ -24,7 +24,7 @@ export type GroupedItemProps =
       isLoading: true;
       item?: EntityOrEventItem;
       scopeId?: string;
-      onShowDocument?: (docId: string, indexName?: string) => void;
+      onShowDocument?: (docId: string, indexName?: string, isEvent?: boolean) => void;
       onShowEntity?: (params: {
         engineType: string | undefined;
         entityId: string;
@@ -39,7 +39,7 @@ export type GroupedItemProps =
        */
       scopeId: string;
       /** Invoked to open the event/alert details preview for the clicked item. */
-      onShowDocument: (docId: string, indexName?: string) => void;
+      onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
       /** Invoked to open the entity details preview for the clicked item. */
       onShowEntity: (params: {
         engineType: string | undefined;
