@@ -11,6 +11,7 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 const tools = {
   readFile: sanitizeToolId(internalTools.readFile),
+  listFiles: sanitizeToolId(internalTools.listFiles),
   bash: sanitizeToolId(internalTools.bash),
 };
 
@@ -34,6 +35,7 @@ export const getFileSystemInstructions = ({
 
   The following tools can interact with the VFS:
   - ${tools.readFile}: read a single file's content.
+  - ${tools.listFiles}: list the entries (files and subdirectories) under a directory.
   ${bashToolSection}
 `);
 };

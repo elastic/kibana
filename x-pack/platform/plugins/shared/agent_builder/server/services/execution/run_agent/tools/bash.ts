@@ -77,7 +77,7 @@ Stdout and stderr are truncated past a token safeguard for the model — the tru
 
 ## Guidelines
 
-- Prefer bash tool for composition, piping, and writing files. Prefer read_file tool for a single-file read.
+- Prefer bash tool for composition, piping, and writing files. Prefer other VFS tools (read_file, list_files...) when they are sufficient for the task.
 - Use /workspace for persistent files you're planning to re-use, use /tmp for temporary file you won't need anymore
 - /tool_calls and /skills are read only folders
 
