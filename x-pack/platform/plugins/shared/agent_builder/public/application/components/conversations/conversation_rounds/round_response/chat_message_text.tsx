@@ -92,18 +92,18 @@ export function ChatMessageText({
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
 
   // Skills emit bare root-relative paths (e.g. `/app/security/...`) with no
-  // awareness of the server basePath. Prepend it so the link resolves correctly
-  // for both click-driven SPA navigation and `target="_blank"` opens.
+  // awareness of the server basePath or active space. `basePath.prepend` adds
+  // both (it returns `${serverBasePath}/s/<space>` + the path), so the link
+  // resolves correctly for both click-driven SPA navigation and
+  // `target="_blank"` opens. Leave absolute and protocol-relative URLs alone.
   const normalizeHref = useCallback(
     (href: string): string => {
       if (!http) {
         return href;
       }
 
-      const basePath = http.basePath.get();
       const isRootRelative = href.startsWith('/') && !href.startsWith('//');
-      const alreadyPrefixed = basePath !== '' && href.startsWith(`${basePath}/`);
-      return isRootRelative && !alreadyPrefixed ? http.basePath.prepend(href) : href;
+      return isRootRelative ? http.basePath.prepend(href) : href;
     },
     [http]
   );

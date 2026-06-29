@@ -86,7 +86,7 @@ The goal is to surface rules that are **worth installing here.** Four factors ma
 
 | Tool | When to use | Returns |
 |---|---|---|
-| \`security.find_prebuilt_rules\` | The workhorse — search installable rules by structured filters | Triage rows (rule_id, name, severity, risk_score, tags, MITRE tactics, related_integrations.package) + total + \`space_url_prefix\` (for building install links) |
+| \`security.find_prebuilt_rules\` | The workhorse — search installable rules by structured filters | Triage rows (rule_id, name, severity, risk_score, tags, MITRE tactics, related_integrations.package) + total |
 | \`security.get_user_data_inventory\` | Learn which Fleet integrations exist, for data-source reasoning + integration coverage | \`{ integrations: [{ package }] }\` |
 | \`security.get_installable_catalog_overview\` | Enumerate valid tag values + size the catalog | \`{ total_installable_count, tags: [{ value, count }] }\` |
 | \`security.get_installed_rules_mitre_coverage\` | What MITRE tactics/techniques the installed rules already cover | \`total_installed_rules\`, \`total_with_mitre_mapping\`, and per-tactic + per-technique counts |
@@ -214,10 +214,10 @@ Do **not** re-call \`security.get_user_data_inventory\`, \`security.get_installa
 
 Every rule you name — in tables, recommendation lists, refinements, and follow-up answers — MUST be a Markdown link that opens that rule's install flyout:
 
-\`[<Rule Name>](<space_url_prefix>/app/security/rules/add_rules/<rule_id>)\`
+\`[<Rule Name>](/app/security/rules/add_rules/<rule_id>)\`
 
 - \`<rule_id>\` is the rule's \`rule_id\` from a \`security.find_prebuilt_rules\` result — copy it verbatim; never URL-encode, alter, or invent it.
-- \`<space_url_prefix>\` is the \`space_url_prefix\` string returned in that same result. Prepend it to **every** \`/app/...\` path you emit so links land in the user's current space. It is empty in the default space (the path stays \`/app/security/rules/add_rules/<rule_id>\`) and \`/s/<space-id>\` in custom spaces — the wrong prefix sends users to the wrong space.
+- Emit the path exactly as shown — a plain root-relative \`/app/...\` path. Do **not** prepend a space segment (\`/s/<id>\`) or base path; the UI resolves the user's active space and base path automatically, so adding one yourself produces a broken, doubled path.
 - This holds on **every** turn, including follow-ups and refinements. A bare bold or plain-text rule name is not acceptable — it breaks the user's path to install. If you are about to emit a rule name without a link, stop and add the link.
 
 Correct: \`- **[Suspicious PowerShell Invocation](/app/security/rules/add_rules/abc-123)** — high; relies on the endpoint integration, which you have installed (so likely has data)\`
@@ -254,7 +254,7 @@ Each maps a user request to the tool call(s). These are patterns for you, not sc
 
 This skill is read-only — never claim to have installed, enabled, edited, or deleted a rule. If the user asks you to install ("install these", "enable rule X"), say plainly that you can't, then offer the two ways they can do it themselves:
 1. **Click any rule's install link** in your response (see Rule Links) — it opens that rule's install flyout directly.
-2. **Open the Add Elastic Rules page** at \`<space_url_prefix>/app/security/rules/add_rules\` and install from the UI. The prefix comes from the \`security.find_prebuilt_rules\` result; in the default space it is empty, so the path is just \`/app/security/rules/add_rules\`.
+2. **Open the Add Elastic Rules page** at \`/app/security/rules/add_rules\` and install from the UI. Emit it as that plain root-relative path; the UI resolves the active space and base path.
 
 Do not invent other install commands, API endpoints, or CLI flows.`;
 
