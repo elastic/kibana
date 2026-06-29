@@ -211,8 +211,6 @@ export {
 export type {
   QueryOccurrenceSeries,
   QueryOccurrenceStatsResponse,
-  SignificantEventsResponse,
-  SignificantEventsGetResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
