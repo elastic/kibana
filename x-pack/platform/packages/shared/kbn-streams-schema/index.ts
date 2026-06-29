@@ -291,6 +291,12 @@ export {
   type SignificantEvent,
   type KnowledgeIndicator,
   type SignificantEventStatus,
+  significantEventsTuningConfigSchema,
+  type SignificantEventsTuningConfig,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
+  type TuningConfigFieldBounds,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  validateSignificantEventsTuningConfig,
 } from './src/significant_events';
 export type {
   StreamsKIsOnboardingResult,
