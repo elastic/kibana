@@ -18,10 +18,6 @@ const TEST_INDEX = 'test-compose-discover';
 const TEST_QUERY = `FROM ${TEST_INDEX} | LIMIT 10`;
 const BASE_QUERY = `FROM ${TEST_INDEX} | STATS count = COUNT(*)`;
 const ALERT_SEGMENT = '| WHERE count > 0';
-// Composed base used to seed an alert rule whose edit flyout shows the base/alert split
-// tabs. `doc_count` is a derived STATS column only available via the base query, so it
-// proves the alert-tab autocomplete joins the base + breach query.
-const COMPOSED_BASE_QUERY = `FROM ${TEST_INDEX} | STATS doc_count = COUNT(*)`;
 // Create uses a single unified editor; the heuristic split separates base + alert
 // condition on Apply. Tests type the whole pipeline as one query.
 const UNIFIED_QUERY = `${BASE_QUERY} ${ALERT_SEGMENT}`;
@@ -412,9 +408,16 @@ test.describe(
       await test.step('seed a composed alert rule via API', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
+            // Omit recovery_strategy so the rule is GUI-representable. The builder
+            // default ('no_breach') is non-representable, which forces the edit
+            // flyout into YAML mode where the form-mode editor button is absent.
+            recovery_strategy: undefined,
+            // `doc_count` is a derived STATS column only available via the base query,
+            // so suggesting it in the alert tab proves the autocomplete joins the base
+            // query with the appended breach segment.
             query: {
               format: 'composed',
-              base: COMPOSED_BASE_QUERY,
+              base: `FROM ${TEST_INDEX} | STATS doc_count = COUNT(*)`,
               breach: { segment: 'WHERE doc_count > 0' },
             },
             metadata: { name: 'scout-compose-discover-suggest' },
