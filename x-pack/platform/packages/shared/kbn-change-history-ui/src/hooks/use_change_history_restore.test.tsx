@@ -43,7 +43,7 @@ const wrapper =
 describe('useChangeHistoryRestore', () => {
   it('calls adapter.restoreChange and invokes onRestored after success', async () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const onRestored = jest.fn().mockResolvedValue(undefined);
+    const onRestored = jest.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
@@ -73,7 +73,7 @@ describe('useChangeHistoryRestore', () => {
         message: 'Object was updated by another user.',
       },
     });
-    const onRestored = jest.fn();
+    const onRestored = jest.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
@@ -99,7 +99,7 @@ describe('useChangeHistoryRestore', () => {
 
   it('does not call restore when the feature is disabled', async () => {
     const restoreChange = jest.fn();
-    const onRestored = jest.fn();
+    const onRestored = jest.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {

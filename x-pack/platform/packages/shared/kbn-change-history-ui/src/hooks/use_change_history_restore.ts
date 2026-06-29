@@ -24,9 +24,9 @@ export interface UseChangeHistoryRestoreResult {
   restoreChange: (params: RestoreChangeParams) => Promise<boolean>;
 }
 
-export const useChangeHistoryRestore = ({
-  onRestored,
-}: UseChangeHistoryRestoreArgs = {}): UseChangeHistoryRestoreResult => {
+export const useChangeHistoryRestore: (
+  args?: UseChangeHistoryRestoreArgs
+) => UseChangeHistoryRestoreResult = ({ onRestored } = {}) => {
   const { adapter, supports } = useChangeHistoryConfig();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
