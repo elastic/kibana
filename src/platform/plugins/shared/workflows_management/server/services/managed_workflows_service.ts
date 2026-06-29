@@ -9,7 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -28,8 +28,8 @@ import type {
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
-import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -393,14 +393,21 @@ export class ManagedWorkflowsService {
     }
 
     const response = await this.deps.workflowsExecutionEngine.executeWorkflow(
-      {
-        id: workflowDocumentId,
-        name: existing.name,
-        enabled: existing.enabled,
-        definition: existing.definition,
-        yaml: existing.yaml,
-        ...pickManagedWorkflowFields(existing),
-      },
+      toWorkflowExecutionEngineModel(
+        {
+          id: workflowDocumentId,
+          name: existing.name,
+          enabled: existing.enabled,
+          definition: existing.definition,
+          yaml: existing.yaml,
+          version: existing.version,
+          managed: existing.managed,
+          managedBy: existing.managedBy,
+          originManagedWorkflowId: existing.originManagedWorkflowId,
+          managedVersion: existing.managedVersion,
+        },
+        { spaceId }
+      ),
       context,
       request
     );
