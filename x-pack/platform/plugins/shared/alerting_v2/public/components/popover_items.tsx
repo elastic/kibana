@@ -28,6 +28,11 @@ export interface PopoverItemsProps<T> {
   popoverTitle?: string;
   numberOfItemsToDisplay?: number;
   dataTestPrefix?: string;
+  /**
+   * When true, visible items wrap to multiple lines instead of clipping on overflow.
+   * Defaults to false (single line + overflow hidden) for table-cell contexts.
+   */
+  wrapItems?: boolean;
 }
 
 interface OverflowListProps<T> {
@@ -77,6 +82,7 @@ const PopoverItemsComponent = <T extends unknown>({
   popoverButtonIcon,
   numberOfItemsToDisplay = 0,
   dataTestPrefix = 'items',
+  wrapItems = false,
 }: PopoverItemsProps<T>) => {
   const [isExceptionOverflowPopoverOpen, setIsExceptionOverflowPopoverOpen] = useState(false);
 
@@ -102,9 +108,10 @@ const PopoverItemsComponent = <T extends unknown>({
               flexDirection: 'row',
               alignItems: 'center',
               gap: 4,
+              width: '100%',
               minWidth: 0,
               overflow: 'hidden',
-              whiteSpace: 'nowrap',
+              ...(wrapItems ? { flexWrap: 'wrap' } : { whiteSpace: 'nowrap' }),
             }}
           >
             {items.slice(0, numberOfItemsToDisplay).map(renderItem)}
