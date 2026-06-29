@@ -12,8 +12,6 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
-export const DEFAULT_EXECUTION_DATA_STREAM_RETENTION = '30d';
-
 const EventTriggersConfigSchema = schema.object({
   /**
    * When false, event-driven workflow execution is disabled: event-triggered runs
@@ -65,15 +63,6 @@ const configSchema = schema.object({
       description:
         'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
         'Useful for observability but adds to document size. Disabled by default for performance.',
-    },
-  }),
-  executionDataStreamRetention: schema.string({
-    defaultValue: DEFAULT_EXECUTION_DATA_STREAM_RETENTION,
-    meta: {
-      description:
-        'Data lifecycle retention for workflow and step execution data streams. ' +
-        'Written into the composable index template as data_stream.lifecycle.data_retention when streams are registered. ' +
-        'Uses Elasticsearch duration format (e.g. "7d", "1d"). Should be much greater than the maximum workflow timeout.',
     },
   }),
 });

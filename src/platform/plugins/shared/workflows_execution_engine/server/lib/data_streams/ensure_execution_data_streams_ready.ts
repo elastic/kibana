@@ -49,18 +49,6 @@ const verifyOrCreateDataStream = async (
   }
 };
 
-const updateDataStreamRetention = async (
-  esClient: ElasticsearchClient,
-  streamName: string,
-  dataRetention: string
-): Promise<void> => {
-  await esClient.indices.putDataLifecycle({
-    name: streamName,
-    enabled: true,
-    data_retention: dataRetention,
-  });
-};
-
 /**
  * Registers index templates (via core data streams) and ensures both execution
  * data streams exist before reads/writes against `.workflows-executions` or
@@ -68,8 +56,7 @@ const updateDataStreamRetention = async (
  */
 export const ensureExecutionDataStreamsReady = async (
   dataStreams: DataStreamsStart,
-  esClient: ElasticsearchClient,
-  dataRetention: string
+  esClient: ElasticsearchClient
 ): Promise<void> => {
   if (!ensureReadyPromise) {
     ensureReadyPromise = (async () => {
@@ -80,10 +67,6 @@ export const ensureExecutionDataStreamsReady = async (
       await Promise.all([
         verifyOrCreateDataStream(esClient, WORKFLOWS_EXECUTIONS_INDEX),
         verifyOrCreateDataStream(esClient, WORKFLOWS_STEP_EXECUTIONS_INDEX),
-      ]);
-      await Promise.all([
-        updateDataStreamRetention(esClient, WORKFLOWS_EXECUTIONS_INDEX, dataRetention),
-        updateDataStreamRetention(esClient, WORKFLOWS_STEP_EXECUTIONS_INDEX, dataRetention),
       ]);
     })().catch((error) => {
       ensureReadyPromise = undefined;

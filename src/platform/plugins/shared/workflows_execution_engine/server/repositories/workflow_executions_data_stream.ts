@@ -21,18 +21,12 @@ const workflowExecutionsMappings =
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS as unknown as MappingsDefinition;
 
 // Note: Bump the version when you make changes to the definition.
-export const initializeWorkflowExecutionsDataStream = (
-  coreDataStreams: DataStreamsSetup,
-  dataRetention: string
-): void => {
+export const initializeWorkflowExecutionsDataStream = (coreDataStreams: DataStreamsSetup): void => {
   coreDataStreams.registerDataStream({
     name: WORKFLOWS_EXECUTIONS_INDEX,
     version: 1,
     hidden: true,
     template: {
-      lifecycle: {
-        data_retention: dataRetention,
-      },
       mappings: workflowExecutionsMappings,
     },
   });

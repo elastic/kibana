@@ -13,12 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { DEFAULT_EXECUTION_DATA_STREAM_RETENTION } from '../config';
 import type { ContextDependencies } from '../workflow_context_manager/types';
-
-const defaultExecutionDataStreamConfig = {
-  executionDataStreamRetention: DEFAULT_EXECUTION_DATA_STREAM_RETENTION,
-} as const;
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
   enabled: true,
@@ -29,7 +24,6 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
   eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
   collectQueueMetrics: false,
-  ...defaultExecutionDataStreamConfig,
 });
 
 export const createMockLogger = (): Logger =>
