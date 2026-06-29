@@ -150,6 +150,24 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       };
       expect(value.updates[0].attributes).toEqual({});
     });
+
+    it('rejects more than 500 updates (matches the decrypt page size)', () => {
+      const updates = Array.from({ length: 501 }, (_, i) => ({
+        id: `monitor-id-${i}`,
+        attributes: { enabled: false },
+      }));
+      expect(() => bodySchema.validate({ updates })).toThrow(
+        /array size is \[501\], but cannot be greater than \[500\]/
+      );
+    });
+
+    it('rejects an id longer than 1024 characters', () => {
+      expect(() =>
+        bodySchema.validate({
+          updates: [{ id: 'a'.repeat(1025), attributes: { enabled: false } }],
+        })
+      ).toThrow(/\[updates\.0\.id\]: value has length \[1025\] but it must have a maximum length of \[1024\]/);
+    });
   });
 
   describe('handler', () => {

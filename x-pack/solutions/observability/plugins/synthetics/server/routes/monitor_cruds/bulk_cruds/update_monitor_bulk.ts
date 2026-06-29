@@ -71,12 +71,18 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: schema.object({
+        // `maxSize` matches the `perPage: 500` decrypt page in
+        // `monitorConfigRepository.findDecryptedMonitors`, so a single bulk
+        // call always fits in one PIT page and an arbitrarily large request
+        // can't be used as a DoS amplifier (each entry triggers decrypt +
+        // merge + io-ts validation). `maxLength` on `id` blocks the long-
+        // string DoS variant CodeQL flagged for the prior `ids` schema.
         updates: schema.arrayOf(
           schema.object({
-            id: schema.string({ minLength: 1 }),
+            id: schema.string({ minLength: 1, maxLength: 1024 }),
             attributes: schema.object({}, { unknowns: 'allow' }),
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 500 }
         ),
       }),
     },
