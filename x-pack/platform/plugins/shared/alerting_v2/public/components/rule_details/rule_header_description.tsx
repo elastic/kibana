@@ -8,11 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  RULE_KIND_ICONS,
-  RULE_KIND_LABELS,
-  RULE_KIND_TOOLTIPS,
-} from '../../constants/rule_kind_display';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { useRule } from './rule_context';
 
 /**

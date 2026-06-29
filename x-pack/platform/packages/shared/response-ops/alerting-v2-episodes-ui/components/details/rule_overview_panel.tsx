@@ -18,7 +18,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { RULE_KIND_ICONS } from '@kbn/alerting-v2-constants';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { getBreachEsqlQuery, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import * as i18n from './translations';
 
@@ -31,7 +31,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
   rule,
   ruleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelProps) => {
-  const ruleKindLabel = i18n.RULE_KIND_LABELS[rule.kind] ?? rule.kind;
+  const ruleKindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
 
   const titleNode = (
     <EuiTitle size="xs">
@@ -67,7 +67,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.RULE_KIND_TOOLTIPS[rule.kind] ?? ''}>
+          <EuiToolTip content={RULE_KIND_TOOLTIPS[rule.kind] ?? ''}>
             <EuiBadge
               color="hollow"
               iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}

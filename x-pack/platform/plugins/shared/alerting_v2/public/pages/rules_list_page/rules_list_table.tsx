@@ -33,11 +33,7 @@ import { BULK_FILTER_MAX_RULES, getRootEsqlQuery, type RuleKind } from '@kbn/ale
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import {
-  RULE_KIND_ICONS,
-  RULE_KIND_LABELS,
-  RULE_KIND_TOOLTIPS,
-} from '../../constants/rule_kind_display';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleActionsMenu } from './rule_actions_menu';
 
