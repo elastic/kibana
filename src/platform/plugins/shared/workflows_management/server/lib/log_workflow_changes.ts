@@ -15,6 +15,7 @@ import { formatRestoreHistoryComment } from './format_restore_history_comment';
 import { isRetryableChangeHistoryError } from './is_retryable_change_history_error';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+  WorkflowChangeHistoryAction,
   type WorkflowChangeHistoryActionType,
 } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowRestoreMetadata } from '../../common/lib/workflow_change_history/types';
@@ -100,6 +101,8 @@ export const logWorkflowChanges = async ({
   const logOpts: ScopedLogChangeHistoryOptions = {
     action,
     spaceId,
+    // Restore is interactive: wait until this history row is searchable without forcing a shard refresh.
+    ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: 'wait_for' } : {}),
     ...(correlationId ? { correlationId } : {}),
     ...(restoreMetadata
       ? {

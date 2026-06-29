@@ -220,6 +220,7 @@ describe('logWorkflowChanges', () => {
     expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(expect.any(Array), {
       action: WorkflowChangeHistoryAction.workflowRestore,
       spaceId: 'default',
+      refresh: 'wait_for',
       data: {
         event: {
           reason: 'Restored from v3',
