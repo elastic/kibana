@@ -58,7 +58,7 @@ export const SharepointServer: ConnectorSpec = {
 
   schema: lazySchema(() =>
     z.object({
-      siteUrl: z.string().url().describe('SharePoint Server site URL').meta({
+      siteUrl: z.string().url().max(2048).describe('SharePoint Server site URL').meta({
         label: 'Site URL',
         widget: 'text',
         placeholder: 'https://sharepoint.company.com/sites/mysite',
