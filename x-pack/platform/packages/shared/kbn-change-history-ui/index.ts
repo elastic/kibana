@@ -20,6 +20,7 @@ export {
 export type {
   ChangeHistoryRestoreButtonProps,
   ChangeHistoryDefaultPreviewHeaderActionsProps,
+  ChangeHistoryPreviewPanelProps,
 } from './src/components/modal';
 export {
   ChangeHistoryProvider,
@@ -31,7 +32,19 @@ export type {
   ChangeHistoryConfigValue,
   ChangeHistoryModalContextValue,
 } from './src/provider';
-export { useChangeHistoryList, useChangeHistoryDetail, useChangeHistoryRestore } from './src/hooks';
+export {
+  useChangeHistoryList,
+  useChangeHistoryDetail,
+  useChangeHistoryRestore,
+  useInvalidateChangeHistory,
+  useChangeHistoryAutoSelection,
+  CHANGE_HISTORY_QUERY_KEY,
+  CHANGE_HISTORY_LIST_QUERY_KEY,
+  changeHistoryObjectQueryKeyPrefix,
+  changeHistoryListQueryKey,
+  changeHistoryDetailQueryKey,
+  changeHistoryListQueryKeyPrefix,
+} from './src/hooks';
 export {
   getChangeHistoryErrorCode,
   getChangeHistoryErrorCodeFromBody,
@@ -44,4 +57,6 @@ export type {
   UseChangeHistoryDetailResult,
   UseChangeHistoryRestoreArgs,
   UseChangeHistoryRestoreResult,
+  UseChangeHistoryAutoSelectionArgs,
+  UseChangeHistoryAutoSelectionResult,
 } from './src/hooks';

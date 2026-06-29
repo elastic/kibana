@@ -10,6 +10,7 @@ import { useChangeHistoryDetail } from './use_change_history_detail';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
 import { TEST_SNAPSHOT } from '../test_utils/change_history_test_fixtures';
+import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
 
 describe('useChangeHistoryDetail', () => {
   it('does not show loading for synchronously resolved cache hits', async () => {
@@ -26,12 +27,16 @@ describe('useChangeHistoryDetail', () => {
       getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
-    const { result } = renderHook(() =>
-      useChangeHistoryDetail({
-        adapter,
-        objectId: 'obj-1',
-        changeId: 'evt-1',
-      })
+    const { wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryDetail({
+          adapter,
+          objectId: 'obj-1',
+          changeId: 'evt-1',
+        }),
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -55,6 +60,8 @@ describe('useChangeHistoryDetail', () => {
       getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
+    const { wrapper } = createQueryClientWrapper();
+
     const { result, rerender } = renderHook(
       ({ enabled }) =>
         useChangeHistoryDetail({
@@ -63,7 +70,7 @@ describe('useChangeHistoryDetail', () => {
           changeId: 'evt-1',
           enabled,
         }),
-      { initialProps: { enabled: true } }
+      { initialProps: { enabled: true }, wrapper }
     );
 
     await waitFor(() => {

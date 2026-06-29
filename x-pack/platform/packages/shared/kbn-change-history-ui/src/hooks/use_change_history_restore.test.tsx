@@ -11,6 +11,8 @@ import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
 import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../test_utils/change_history_test_fixtures';
+import { changeHistoryObjectQueryKeyPrefix } from './change_history_list_query_key';
+import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
 
 const createAdapter = (
   restoreChange: ChangeHistoryAdapter['restoreChange']
@@ -20,14 +22,15 @@ const createAdapter = (
   restoreChange,
 });
 
-const wrapper =
-  (
-    adapter: ChangeHistoryAdapter,
-    features: { restore?: boolean } = { restore: true },
-    permissions: { canRestore?: boolean } = { canRestore: true }
-  ) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
+const createHarness = (
+  adapter: ChangeHistoryAdapter,
+  features: { restore?: boolean } = { restore: true },
+  permissions: { canRestore?: boolean } = { canRestore: true }
+) => {
+  const { wrapper: QueryClientWrapper, queryClient } = createQueryClientWrapper();
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientWrapper>
       <ChangeHistoryProvider
         objectId={TEST_OBJECT_ID}
         adapter={adapter}
@@ -38,16 +41,22 @@ const wrapper =
       >
         {children}
       </ChangeHistoryProvider>
-    );
+    </QueryClientWrapper>
+  );
+
+  return { wrapper, queryClient };
+};
 
 describe('useChangeHistoryRestore', () => {
-  it('calls adapter.restoreChange and invokes onRestored after success', async () => {
+  it('calls adapter.restoreChange, invalidates cache, and invokes onRestored after success', async () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
     const onRestored = jest.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(adapter);
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
-      wrapper: wrapper(adapter),
+      wrapper,
     });
 
     await act(async () => {
@@ -63,10 +72,15 @@ describe('useChangeHistoryRestore', () => {
       changeId: 'evt-3',
       signal: expect.any(AbortSignal),
     });
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID),
+      refetchType: 'active',
+    });
     expect(onRestored).toHaveBeenCalledTimes(1);
   });
 
-  it('does not invoke onRestored when restore fails', async () => {
+  it('does not invoke onRestored or invalidate cache when restore fails', async () => {
     const restoreChange = jest.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_CONFLICT',
@@ -75,9 +89,11 @@ describe('useChangeHistoryRestore', () => {
     });
     const onRestored = jest.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(adapter);
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
-      wrapper: wrapper(adapter),
+      wrapper,
     });
 
     await act(async () => {
@@ -88,6 +104,7 @@ describe('useChangeHistoryRestore', () => {
       expect(succeeded).toBe(false);
     });
 
+    expect(invalidateSpy).not.toHaveBeenCalled();
     expect(onRestored).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(result.current.error).toEqual({
@@ -101,9 +118,11 @@ describe('useChangeHistoryRestore', () => {
     const restoreChange = jest.fn();
     const onRestored = jest.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(adapter, { restore: false });
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
-      wrapper: wrapper(adapter, { restore: false }),
+      wrapper,
     });
 
     await act(async () => {
@@ -115,6 +134,7 @@ describe('useChangeHistoryRestore', () => {
     });
 
     expect(restoreChange).not.toHaveBeenCalled();
+    expect(invalidateSpy).not.toHaveBeenCalled();
     expect(onRestored).not.toHaveBeenCalled();
     expect(result.current.canRestore).toBe(false);
   });

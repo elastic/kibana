@@ -20,6 +20,7 @@ import {
   TEST_SNAPSHOT,
   TEST_SNAPSHOT_OLDER,
 } from '../../test_utils/change_history_test_fixtures';
+import { createQueryClientWrapper } from '../../test_utils/create_query_client_wrapper';
 
 const listItem = {
   id: 'evt-1',
@@ -45,24 +46,31 @@ const createAdapter = (overrides?: Partial<ChangeHistoryAdapter>): ChangeHistory
 
 const renderModal = ({
   adapter = createAdapter(),
+  ...providerProps
 }: {
   adapter?: ChangeHistoryAdapter;
-} = {}) =>
-  render(
+} & Partial<React.ComponentProps<typeof ChangeHistoryProvider>> = {}) => {
+  const { wrapper: QueryClientWrapper } = createQueryClientWrapper();
+
+  return render(
     <I18nProvider>
-      <ChangeHistoryProvider
-        objectId={TEST_OBJECT_ID}
-        adapter={adapter}
-        labels={{ previewTitle: TEST_OBJECT_TITLE }}
-        renderPreview={({ change }) => (
-          <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
-        )}
-      >
-        <ChangeHistoryTrigger />
-        <ChangeHistoryModal />
-      </ChangeHistoryProvider>
+      <QueryClientWrapper>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID}
+          adapter={adapter}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={({ change }) => (
+            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
+          )}
+          {...providerProps}
+        >
+          <ChangeHistoryTrigger />
+          <ChangeHistoryModal />
+        </ChangeHistoryProvider>
+      </QueryClientWrapper>
     </I18nProvider>
   );
+};
 
 const openModal = () => {
   fireEvent.click(screen.getByTestId('changeHistoryTrigger'));
@@ -193,23 +201,11 @@ describe('ChangeHistoryModal', () => {
       restoreChange: jest.fn().mockResolvedValue(undefined),
     });
 
-    render(
-      <I18nProvider>
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          features={{ restore: true }}
-          permissions={{ canRestore: true }}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          renderPreview={({ change }) => (
-            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
-          )}
-        >
-          <ChangeHistoryTrigger />
-          <ChangeHistoryModal />
-        </ChangeHistoryProvider>
-      </I18nProvider>
-    );
+    renderModal({
+      adapter,
+      features: { restore: true },
+      permissions: { canRestore: true },
+    });
 
     openModal();
 
@@ -268,23 +264,11 @@ describe('ChangeHistoryModal', () => {
       restoreChange: jest.fn().mockResolvedValue(undefined),
     });
 
-    render(
-      <I18nProvider>
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          features={{ restore: true }}
-          permissions={{ canRestore: true }}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          renderPreview={({ change }) => (
-            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
-          )}
-        >
-          <ChangeHistoryTrigger />
-          <ChangeHistoryModal />
-        </ChangeHistoryProvider>
-      </I18nProvider>
-    );
+    renderModal({
+      adapter,
+      features: { restore: true },
+      permissions: { canRestore: true },
+    });
 
     openModal();
 
@@ -319,23 +303,11 @@ describe('ChangeHistoryModal', () => {
       restoreChange: jest.fn().mockResolvedValue(undefined),
     });
 
-    render(
-      <I18nProvider>
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          features={{ restore: true }}
-          permissions={{ canRestore: true }}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          renderPreview={({ change }) => (
-            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
-          )}
-        >
-          <ChangeHistoryTrigger />
-          <ChangeHistoryModal />
-        </ChangeHistoryProvider>
-      </I18nProvider>
-    );
+    renderModal({
+      adapter,
+      features: { restore: true },
+      permissions: { canRestore: true },
+    });
 
     openModal();
 

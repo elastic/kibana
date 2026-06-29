@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
 import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_error_prompt';
 import { ChangeHistoryTimeline } from '../timeline/change_history_timeline';
+import { useChangeHistoryAutoSelection } from '../../hooks/use_change_history_auto_selection';
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
@@ -34,39 +35,36 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const { adapter, objectId, labels, supports } = useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
 
-  // Volatile, modal-internal state lives here (not in context) and flows down by props.
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
-  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList(
-    {
+  const { items, total, isLoading, isFetchingFirstPage, isLoadingMore, error, loadMore } =
+    useChangeHistoryList({
       adapter,
       objectId,
       enabled: isOpen,
-    }
-  );
+    });
 
-  const refetchAndSelectCurrent = useCallback(async (): Promise<void> => {
-    const result = await refetch();
-    const currentChangeId = result?.items[0]?.id;
-    if (currentChangeId) {
-      setSelectedChangeId(currentChangeId);
-    }
-  }, [refetch]);
+  const { lockSelectionDecision, unlockSelectionDecision } = useChangeHistoryAutoSelection({
+    objectId,
+    items,
+    isFetchingFirstPage,
+    enabled: isOpen,
+    setSelectedChangeId,
+  });
 
-  // Reset the selection whenever the modal closes so a fresh open re-selects the latest change.
   useEffect(() => {
     if (!isOpen) {
       setSelectedChangeId(undefined);
+      unlockSelectionDecision();
     }
-  }, [isOpen]);
+  }, [isOpen, unlockSelectionDecision]);
 
-  // Auto-select the most recent change when the modal opens with no selection.
-  useEffect(() => {
-    if (!isOpen || selectedChangeId || isLoading || items.length === 0) {
-      return;
-    }
-
-    setSelectedChangeId(items[0]?.id);
-  }, [isOpen, isLoading, items, selectedChangeId]);
+  const handleSelectItem = useCallback(
+    (changeId: string) => {
+      lockSelectionDecision();
+      setSelectedChangeId(changeId);
+    },
+    [lockSelectionDecision]
+  );
 
   const styles = useMemo(
     () => ({
@@ -134,7 +132,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const previewHeaderActions = supports.restore ? (
     <ChangeHistoryDefaultPreviewHeaderActions
       selectedChangeId={selectedChangeId}
-      onRestored={refetchAndSelectCurrent}
+      onRestored={unlockSelectionDecision}
     />
   ) : undefined;
 
@@ -165,7 +163,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
         selectedItemId={selectedChangeId}
         historyStartedAt={historyStartedAt}
         isLoading={isLoadingMore}
-        onSelectItem={(item) => setSelectedChangeId(item.id)}
+        onSelectItem={(item) => handleSelectItem(item.id)}
         onLoadMore={loadMore}
       />
     );

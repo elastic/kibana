@@ -25,6 +25,9 @@ import {
   TEST_OBJECT_ID_B,
   TEST_OBJECT_TITLE,
 } from '../test_utils/change_history_test_fixtures';
+import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+
+const { wrapper: QueryClientWrapper } = createQueryClientWrapper();
 
 const adapter: ChangeHistoryAdapter = {
   listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
@@ -33,15 +36,17 @@ const adapter: ChangeHistoryAdapter = {
 
 const Harness = ({ objectId }: { objectId: string }) => (
   <I18nProvider>
-    <ChangeHistoryProvider
-      objectId={objectId}
-      adapter={adapter}
-      labels={{ previewTitle: TEST_OBJECT_TITLE }}
-      renderPreview={() => <div data-test-subj="previewPanel" />}
-    >
-      <ChangeHistoryTrigger />
-      <ChangeHistoryModal />
-    </ChangeHistoryProvider>
+    <QueryClientWrapper>
+      <ChangeHistoryProvider
+        objectId={objectId}
+        adapter={adapter}
+        labels={{ previewTitle: TEST_OBJECT_TITLE }}
+        renderPreview={() => <div data-test-subj="previewPanel" />}
+      >
+        <ChangeHistoryTrigger />
+        <ChangeHistoryModal />
+      </ChangeHistoryProvider>
+    </QueryClientWrapper>
   </I18nProvider>
 );
 

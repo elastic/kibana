@@ -10,9 +10,10 @@ import type { ChangeHistoryError } from '../types/change_history_error';
 import type { RestoreChangeParams } from '../types/restore_change_params';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 import { mapChangeHistoryRestoreError } from '../utils/map_change_history_restore_error';
+import { useInvalidateChangeHistory } from './use_invalidate_change_history';
 
 export interface UseChangeHistoryRestoreArgs {
-  /** Invoked after a successful restore (e.g. to refetch and re-select the current change). */
+  /** Invoked after cache invalidation (e.g. to unlock selection for auto-select). */
   onRestored?: () => Promise<void> | void;
 }
 
@@ -27,7 +28,8 @@ export interface UseChangeHistoryRestoreResult {
 export const useChangeHistoryRestore: (
   args?: UseChangeHistoryRestoreArgs
 ) => UseChangeHistoryRestoreResult = ({ onRestored } = {}) => {
-  const { adapter, supports } = useChangeHistoryConfig();
+  const { adapter, objectId, supports } = useChangeHistoryConfig();
+  const invalidateChangeHistory = useInvalidateChangeHistory();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
   const abortControllerRef = useRef<AbortController | undefined>();
@@ -59,6 +61,7 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
+        await invalidateChangeHistory(objectId);
         await onRestored?.();
 
         if (abortController.signal.aborted) {
@@ -79,7 +82,7 @@ export const useChangeHistoryRestore: (
         }
       }
     },
-    [adapter, onRestored, supports.restore]
+    [adapter, invalidateChangeHistory, objectId, onRestored, supports.restore]
   );
 
   return {

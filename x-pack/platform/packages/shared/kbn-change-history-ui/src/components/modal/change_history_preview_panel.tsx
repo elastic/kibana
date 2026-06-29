@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type FC } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -50,10 +50,10 @@ export interface ChangeHistoryPreviewPanelProps {
   listItems?: ChangeHistoryListItem[];
 }
 
-export function ChangeHistoryPreviewPanel({
+export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
   selectedChangeId,
   listItems = [],
-}: ChangeHistoryPreviewPanelProps): JSX.Element {
+}) => {
   const { adapter, objectId, renderPreview } = useChangeHistoryConfig();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
@@ -143,4 +143,4 @@ export function ChangeHistoryPreviewPanel({
       })}
     </div>
   );
-}
+};

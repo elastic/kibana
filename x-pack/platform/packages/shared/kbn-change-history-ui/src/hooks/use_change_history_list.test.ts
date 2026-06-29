@@ -9,6 +9,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChangeHistoryList } from './use_change_history_list';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { TEST_OBJECT_ID } from '../test_utils/change_history_test_fixtures';
+import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
 
 describe('useChangeHistoryList', () => {
   it('loads paginated changes and appends on loadMore', async () => {
@@ -32,12 +33,16 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { result } = renderHook(() =>
-      useChangeHistoryList({
-        adapter,
-        objectId: 'obj-1',
-        pageSize: 1,
-      })
+    const { wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: 'obj-1',
+          pageSize: 1,
+        }),
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -91,6 +96,8 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
+    const { wrapper } = createQueryClientWrapper();
+
     const { result, rerender } = renderHook(
       ({ objectId }) =>
         useChangeHistoryList({
@@ -98,7 +105,7 @@ describe('useChangeHistoryList', () => {
           objectId,
           pageSize: 20,
         }),
-      { initialProps: { objectId: 'obj-1' } }
+      { initialProps: { objectId: 'obj-1' }, wrapper }
     );
 
     rerender({ objectId: 'obj-2' });
@@ -167,11 +174,15 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { result } = renderHook(() =>
-      useChangeHistoryList({
-        adapter,
-        objectId: TEST_OBJECT_ID,
-      })
+    const { wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: TEST_OBJECT_ID,
+        }),
+      { wrapper }
     );
 
     await waitFor(() => {
