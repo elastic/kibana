@@ -372,7 +372,7 @@ class SmlIndexerImpl implements SmlIndexer {
     if (!definition && !this.warnedUnregisteredTypes.has(attachmentType)) {
       this.warnedUnregisteredTypes.add(attachmentType);
       this.logger.warn(
-        `SML indexer: writing chunks under unregistered type '${attachmentType}' (origin '${originId}', and likely more) with empty permissions — these chunks will be publicly readable within their space. Register an SmlTypeDefinition for '${attachmentType}' if you need a permission gate.`
+        `SML indexer: unregistered type '${attachmentType}' (origin '${originId}'): stamping empty permissions — chunks will be publicly readable within their space. Register an SmlTypeDefinition to add a permission gate.`
       );
     }
 
@@ -616,24 +616,12 @@ class SmlIndexerImpl implements SmlIndexer {
       return (response.count ?? 0) > 0;
     } catch (error) {
       if (isNotFoundError(error)) {
-        // "Index doesn't exist yet" is unambiguous: there *cannot* be a
-        // manual entry yet, so first-write crawls aren't blocked by this
-        // path. Distinct from the generic catch below.
+        // index_not_found: no index yet, no manual entry.
         return false;
       }
-      // On unexpected ES errors, fail-CLOSED (assume a manual entry
-      // exists, so the crawler does NOT overwrite). Admins use manual
-      // entries to pin curated context or suppress sensitive resources
-      // from LLM context — silently destroying them is unacceptable.
-      //
-      // The trade-off: a transient ES error now causes the crawler to
-      // *skip* this origin for one cycle. That's the correct default —
-      // a skipped crawl is recoverable on the next cycle, a deleted
-      // manual entry is not. Callers that genuinely need to clobber a
-      // manual entry (e.g. operator-driven force re-crawl) can pass
-      // `force: true` to `indexAttachment`, which bypasses this probe.
+      // Unexpected ES error: fail-closed — skip this crawl tick rather than risk destroying a manual entry.
       this.logger.warn(
-        `SML indexer: hasManualEntry check failed for origin '${originUri}'; treating as manual-entry-present (fail-closed) to avoid clobbering curated content. Pass force=true to override on the next cycle: ${
+        `SML indexer: hasManualEntry check failed for origin '${originUri}' (fail-closed): ${
           (error as Error).message
         }`
       );

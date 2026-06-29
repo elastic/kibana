@@ -97,11 +97,6 @@ export const registerDeleteRoute = ({
           });
         }
 
-        // Single delete — `type` pins the canonical `origin.uri`, no
-        // multi-type fan-out needed. The previous shape looped over
-        // distinct types because the URL omitted `type` and the
-        // route had to discover it; that whole branch is dead with
-        // `type` in the path.
         await sml.deleteAttachment({
           originId,
           attachmentType: type,

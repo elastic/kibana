@@ -85,24 +85,6 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       }
     },
 
-    /**
-     * Connector chunks are gated by `saved_object:action/get` — the same
-     * privilege the actions plugin's feature config exposes as
-     * `savedObject.read: [ACTION_SAVED_OBJECT_TYPE]` and that the
-     * connector-execution route requires before invoking a connector
-     * (see `x-pack/platform/plugins/shared/actions/server/feature.ts`).
-     *
-     * Earlier iterations used the bare string `'action:execute'`, which
-     * is **not** a registered Kibana privilege. The actions plugin
-     * doesn't expose a cluster-level "execute" privilege — execution
-     * authority is derived from saved-object read access on the action
-     * saved object plus saved-object write access on `action_task_params`.
-     * Stamping `'action:execute'` made the chunk un-resolvable by
-     * `checkPrivilegesDynamicallyWithRequest` for every user, so
-     * connector chunks were silently invisible to everyone, including
-     * superusers. Using `kibanaSavedObjectPermissions` aligns the gate
-     * with what the actions plugin actually validates.
-     */
     getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
 
     toAttachment: async (item, context) => {

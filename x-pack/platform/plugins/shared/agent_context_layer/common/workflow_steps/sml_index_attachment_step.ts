@@ -33,7 +33,7 @@ export const ContextEngineAddEntryStepTypeId = 'contextEngine.addEntry';
 // far past the ~512-token window the embedding model truncates to. These
 // bounds exist primarily to harden the public input surface against
 // pathological payloads (CodeQL DoS rule), not to reflect storage limits.
-const MAX_SML_IDENTIFIER_LENGTH = 256;
+const MAX_SML_IDENTIFIER_LENGTH = 512;
 const MAX_SML_TITLE_LENGTH = 1024;
 const MAX_SML_DESCRIPTION_LENGTH = 8192;
 const MAX_SML_CONTENT_LENGTH = 50_000;
@@ -84,50 +84,15 @@ const ChunkSchema = z
         'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
       ),
   })
-  // strict() rejects the legacy `permissions` field outright instead of
-  // silently dropping it. Permissions are derived from the registered SML
-  // type's `getPermissions` hook now — accepting a workflow-supplied
-  // `permissions` field would let workflow authors think they were
-  // controlling chunk visibility when they were not.
   .strict();
 
 /**
  * Step input.
  *
- * Workflow-driven writes always go through the content-mode path on the SML
- * start contract — caller-supplied chunks are written as
- * `ingestion_method: 'manual'`.
- *
- * Caller-supplied permissions are **not** part of the contract: chunks are
- * gated by the {@link SmlTypeDefinition.getPermissions} hook of the type
- * named by `attachmentType`, so workflow writes inherit the same access
- * control as a crawler-driven write. The chunk schema is `strict()` and
- * rejects an extraneous `permissions` field so authors do not assume they
- * can override that gate. To use the visualization/dashboard/connector/etc.
- * gate, set `attachmentType` to the matching SML type id. To write a chunk
- * that should be readable by anyone in the space, set `attachmentType` to
- * a type with no `getPermissions` hook, or to a name that isn't registered
- * at all — in both cases the indexer stamps empty permissions. The
- * unregistered path additionally emits a once-per-process server-side
- * warn naming the namespace, so workflow authors can confirm their type
- * id is recognized when they expect it to be.
- *
- * `attachmentType` must be a lowercase identifier (`[a-z][a-z0-9_]*`).
- * This is a syntactic guard against junk values leaking in as durable
- * chunk namespaces — semantic validation (does the registry know this
- * type?) is intentionally absent so ad-hoc namespaces are allowed.
- *
- * - `upsert` requires `chunks` and always performs a full replace: every
- *   prior chunk for the `origin_id` is removed and the supplied chunks are
- *   written. There is no fail-if-exists / fail-if-not-found distinction —
- *   the indexer's content-mode path is idempotent by design, so we expose
- *   a single `upsert` action rather than the misleading `create`/`update`
- *   pair.
- * - `delete` requires only the origin/type identifiers and wipes every
- *   chunk recorded for the `origin_id` regardless of how it was produced
- *   (both crawled and manual entries). This matches the "workflow owns
- *   this origin" semantic and is the opposite of the crawler's default
- *   delete (which preserves curated manual entries).
+ * Permissions are stamped by the indexer from the type's `getPermissions` hook —
+ * callers cannot supply them. Unregistered types get empty permissions (publicly
+ * readable within the space). `upsert` is a full replace; `delete` wipes all
+ * chunks for the origin regardless of how they were produced.
  */
 const AttachmentTypeSchema = z
   .string()
