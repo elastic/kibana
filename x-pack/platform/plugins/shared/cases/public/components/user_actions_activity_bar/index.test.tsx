@@ -24,28 +24,23 @@ describe('UserActionsActivityBar ', () => {
     perPage: 10,
   };
 
+  const defaultProps = {
+    onUserActionsActivityChanged,
+    params,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders correctly', () => {
-    renderWithTestingProviders(
-      <UserActionsActivityBar
-        onUserActionsActivityChanged={onUserActionsActivityChanged}
-        params={params}
-      />
-    );
+    renderWithTestingProviders(<UserActionsActivityBar {...defaultProps} />);
 
     expect(screen.getByTestId('user-actions-activity-bar')).toBeInTheDocument();
   });
 
   it('should change filter correctly', async () => {
-    renderWithTestingProviders(
-      <UserActionsActivityBar
-        onUserActionsActivityChanged={onUserActionsActivityChanged}
-        params={params}
-      />
-    );
+    renderWithTestingProviders(<UserActionsActivityBar {...defaultProps} />);
 
     const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-comments');
 
@@ -62,12 +57,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should change sort order correctly', async () => {
-    renderWithTestingProviders(
-      <UserActionsActivityBar
-        onUserActionsActivityChanged={onUserActionsActivityChanged}
-        params={params}
-      />
-    );
+    renderWithTestingProviders(<UserActionsActivityBar {...defaultProps} />);
 
     const sortSelect = screen.getByTestId('user-actions-sort-select');
 
@@ -81,12 +71,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should not change filter when sort order changed', async () => {
-    renderWithTestingProviders(
-      <UserActionsActivityBar
-        onUserActionsActivityChanged={onUserActionsActivityChanged}
-        params={params}
-      />
-    );
+    renderWithTestingProviders(<UserActionsActivityBar {...defaultProps} />);
 
     const sortSelect = screen.getByTestId('user-actions-sort-select');
 
@@ -106,12 +91,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should not change sort order when filter changed', async () => {
-    renderWithTestingProviders(
-      <UserActionsActivityBar
-        onUserActionsActivityChanged={onUserActionsActivityChanged}
-        params={params}
-      />
-    );
+    renderWithTestingProviders(<UserActionsActivityBar {...defaultProps} />);
 
     const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-history');
 

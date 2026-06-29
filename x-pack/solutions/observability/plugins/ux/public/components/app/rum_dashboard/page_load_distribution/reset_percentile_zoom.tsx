@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiHideFor, EuiShowFor, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiHideFor,
+  EuiShowFor,
+  EuiToolTip,
+} from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import type { PercentileRange } from './types';
 
@@ -22,13 +29,15 @@ export function ResetPercentileZoom({ percentileRange, setPercentileRange }: Pro
   return !isDisabled ? (
     <EuiFlexItem grow={false}>
       <EuiShowFor sizes={['xs']}>
-        <EuiButtonIcon
-          data-test-subj="uxResetPercentileZoomButton"
-          iconType="inspect"
-          size="s"
-          aria-label={I18LABELS.resetZoom}
-          onClick={onClick}
-        />
+        <EuiToolTip content={I18LABELS.resetZoom} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="uxResetPercentileZoomButton"
+            iconType="inspect"
+            size="s"
+            aria-label={I18LABELS.resetZoom}
+            onClick={onClick}
+          />
+        </EuiToolTip>
       </EuiShowFor>
       <EuiHideFor sizes={['xs']}>
         <EuiButtonEmpty

@@ -11,7 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
-import { buildKibanaRequest } from '@kbn/workflows';
+import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
@@ -231,6 +231,16 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         headers: { ...authHeaders, ...jsonContentType, ...connectorHeaders },
       };
     }
+
+    const normalizedMethod = requestConfig.method?.toUpperCase();
+    if (!normalizedMethod || !(KibanaHttpMethods as readonly string[]).includes(normalizedMethod)) {
+      throw new Error(
+        `Invalid HTTP method "${requestConfig.method}". Valid values: ${KibanaHttpMethods.join(
+          ', '
+        )}`
+      );
+    }
+    requestConfig.method = normalizedMethod;
 
     // Use the local implementation to handle all requests including multipart and fetcher options.
     const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);

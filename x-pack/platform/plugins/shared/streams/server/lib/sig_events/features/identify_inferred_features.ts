@@ -12,10 +12,12 @@ import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/infere
 import type { StreamType } from '@kbn/streams-schema';
 import {
   type Feature,
+  type FeatureUpsert,
   type BaseFeature,
   type IterationResult,
   isComputedFeature,
   isFeatureWithFilter,
+  normalizeFeatureSlug,
 } from '@kbn/streams-schema';
 import {
   EMPTY_TOKENS,
@@ -23,7 +25,7 @@ import {
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/streams-ai';
-import type { FeatureClient } from '../../streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { fetchSampleDocuments } from '../../tasks/task_definitions/features_identification/fetch_sample_documents';
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
 import type { SigEventsTuningConfig } from '../../../../common/sig_events_tuning_config';
@@ -44,7 +46,6 @@ type IterationTuningParams = Partial<
   Pick<
     SigEventsTuningConfig,
     | 'sample_size'
-    | 'feature_ttl_days'
     | 'entity_filtered_ratio'
     | 'diverse_ratio'
     | 'max_excluded_features_in_prompt'
@@ -60,6 +61,7 @@ type IterationTuningParams = Partial<
 
 export interface FeaturesIdentifiedTelemetry {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -82,6 +84,7 @@ export interface FeaturesIdentifiedTelemetry {
 
 export interface TelemetryContext {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -178,6 +181,7 @@ async function tryIdentifyFeatures(
 interface RunInferredIterationOptions {
   esClient: ElasticsearchClient;
   streamName: string;
+  samplingSource: string;
   start: number;
   end: number;
   runId: string;
@@ -207,8 +211,8 @@ type InferredIterationResult =
         | {
             state: 'success';
             tokensUsed: ChatCompletionTokenCount;
-            newFeatures: Feature[];
-            updatedFeatures: Feature[];
+            newFeatures: FeatureUpsert[];
+            updatedFeatures: FeatureUpsert[];
             ignoredFeatures: IgnoredFeature[];
             codeIgnoredCount: number;
           };
@@ -217,6 +221,7 @@ type InferredIterationResult =
 async function runInferredIteration({
   esClient,
   streamName,
+  samplingSource,
   start,
   end,
   runId,
@@ -238,13 +243,12 @@ async function runInferredIteration({
     max_entity_filters: maxEntityFilters = DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_entity_filters,
     max_excluded_features_in_prompt:
       maxExcludedFeaturesInPrompt = DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_excluded_features_in_prompt,
-    feature_ttl_days: featureTtlDays,
     maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
   } = tuning;
 
   const batchResult = await fetchSampleDocuments({
     esClient,
-    index: streamName,
+    index: samplingSource,
     start,
     end,
     features: discoveredFeatures.filter(isFeatureWithFilter),
@@ -312,7 +316,6 @@ async function runInferredIteration({
     discoveredFeatures,
     ignoredFeatures,
     excludedFeatures,
-    featureTtlDays,
     runId,
     logger,
   });
@@ -342,12 +345,14 @@ async function runInferredIteration({
 
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
-  featureClient: FeatureClient;
+  kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
+  connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
+  samplingSource: string;
   streamType: StreamType;
   start: number;
   end: number;
@@ -362,19 +367,21 @@ export interface IdentifyInferredFeaturesResult {
   hasDocuments: boolean;
   docsCount: number;
   docIds: string[];
-  discoveredFeatures: Feature[];
+  discoveredFeatures: FeatureUpsert[];
   iterationResult: IterationResult;
   nextDiverseOffset: number;
 }
 
 export async function identifyInferredFeatures({
   esClient,
-  featureClient,
+  kiClient,
   soClient,
   inferenceClient,
+  connectorId,
   logger,
   signal,
   streamName,
+  samplingSource,
   streamType,
   start,
   end,
@@ -389,8 +396,8 @@ export async function identifyInferredFeatures({
     { hits: excludedFeatures },
     { featurePromptOverride: systemPrompt },
   ] = await Promise.all([
-    featureClient.getFeatures(streamName),
-    featureClient.getExcludedFeatures(streamName),
+    kiClient.getFeatures(streamName),
+    kiClient.getExcludedFeatures(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
   ]);
 
@@ -401,6 +408,7 @@ export async function identifyInferredFeatures({
   const iterationResult = await runInferredIteration({
     esClient,
     streamName,
+    samplingSource,
     start,
     end,
     runId,
@@ -441,6 +449,7 @@ export async function identifyInferredFeatures({
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,
+    connector_id: connectorId,
     iteration,
     stream_name: streamName,
     stream_type: streamType,
@@ -478,15 +487,20 @@ export async function identifyInferredFeatures({
 
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
-    await featureClient.bulk(
+    const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
+    await kiClient.bulk(
       streamName,
-      allChanged.map((feature) => ({ index: { feature } }))
+      allChanged.map((feature) => {
+        const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
+        const expiresAt = !prior || prior.expires_at ? kiClient.getDefaultExpiresAt() : undefined;
+        return { index: { feature: { ...feature, expires_at: expiresAt } } };
+      })
     );
   }
 
-  const discoveredMap = new Map(discoveredFeatures.map((f) => [f.uuid, f]));
+  const discoveredMap = new Map<string, FeatureUpsert>(discoveredFeatures.map((f) => [f.id, f]));
   for (const feature of allChanged) {
-    discoveredMap.set(feature.uuid, feature);
+    discoveredMap.set(feature.id, feature);
   }
 
   const iterationEntry: IterationResult = {

@@ -63,6 +63,14 @@ export function useOnboardingApi() {
           }
         );
       },
+      getOnboardingStatuses: async (streamNames: string[]) => {
+        return streamsRepositoryClient.fetch('POST /internal/streams/onboarding/_bulk_status', {
+          signal,
+          params: {
+            body: { streamNames },
+          },
+        });
+      },
       cancelOnboarding: async (streamName: string) => {
         await streamsRepositoryClient.fetch(
           'POST /internal/streams/{streamName}/onboarding/_execute',

@@ -6,7 +6,11 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { ALL_VALUE, type CompositeSLOSummaryResponse, type GetSLOResponse } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  type CompositeSLOWithSummaryResponse,
+  type GetSLOResponse,
+} from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { CreateCompositeSLOForm } from '../types';
 
@@ -22,12 +26,12 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
   const { isLoading, isError, data } = useQuery({
     queryKey: ['fetchCompositeSlo', compositeSloId],
     queryFn: async ({ signal }) => {
-      const response = await http.get<CompositeSLOSummaryResponse>(
+      const response = await http.get<CompositeSLOWithSummaryResponse>(
         `/api/observability/slo_composites/${encodeURIComponent(compositeSloId!)}`,
         { signal }
       );
 
-      const uniqueSloIds = [...new Set(response.members.map((m) => m.id))];
+      const uniqueSloIds = [...new Set(response.members.map((m) => m.sloId))];
       const definitions = await Promise.all(
         uniqueSloIds.map((id) =>
           http
@@ -51,18 +55,18 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
 }
 
 function toFormValues(
-  response: CompositeSLOSummaryResponse,
+  response: CompositeSLOWithSummaryResponse,
   defMap: Map<string, { name: string; groupBy: string | string[] }>
 ): CreateCompositeSLOForm {
   return {
     name: response.name,
     description: response.description,
-    members: response.members.map(({ id, instanceId, weight }) => {
-      const def = defMap.get(id);
+    members: response.members.map(({ sloId, instanceId, weight }) => {
+      const def = defMap.get(sloId);
       const groupBy = def?.groupBy ?? ALL_VALUE;
       return {
-        sloId: id,
-        sloName: def?.name ?? id,
+        sloId,
+        sloName: def?.name ?? sloId,
         groupBy,
         instanceId: instanceId ?? ALL_VALUE,
         weight,
