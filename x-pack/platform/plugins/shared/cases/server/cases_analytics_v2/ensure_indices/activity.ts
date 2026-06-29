@@ -68,6 +68,23 @@ export async function ensureActivityIndex({
       return;
     }
 
+    // Surface shard-limit failures with an actionable message. See
+    // `ensureCaseIndex` for the full explanation — the same fix applies:
+    //
+    //   PUT _cluster/settings
+    //   { "persistent": { "cluster.max_shards_per_node": 1500 } }
+    if (errType === 'validation_exception') {
+      const reason: string =
+        err?.body?.error?.reason ?? err?.meta?.body?.error?.reason ?? err?.message ?? '';
+      if (reason.includes('shards')) {
+        throw new Error(
+          `Bootstrap of ${ACTIVITY_INDEX_NAME} failed: cluster may be at the shard limit. ` +
+            `Increase cluster.max_shards_per_node. ` +
+            `Original error: ${reason}`
+        );
+      }
+    }
+
     throw err;
   }
 }

@@ -80,6 +80,27 @@ export async function ensureCaseIndex({
       return;
     }
 
+    // Surface shard-limit failures with an actionable message. ES returns
+    // `validation_exception` when `cluster.max_shards_per_node` (default
+    // 1000) is reached. We already minimise our footprint with
+    // `auto_expand_replicas: '0-1'` (1 shard on single-node clusters), but
+    // a busy dev/CI environment may still be at the limit. The fix is a
+    // one-liner in Kibana Dev Tools:
+    //
+    //   PUT _cluster/settings
+    //   { "persistent": { "cluster.max_shards_per_node": 1500 } }
+    if (errType === 'validation_exception') {
+      const reason: string =
+        err?.body?.error?.reason ?? err?.meta?.body?.error?.reason ?? err?.message ?? '';
+      if (reason.includes('shards')) {
+        throw new Error(
+          `Bootstrap of ${CASE_INDEX_NAME} failed: cluster may be at the shard limit. ` +
+            `Increase cluster.max_shards_per_node. ` +
+            `Original error: ${reason}`
+        );
+      }
+    }
+
     // Rethrow so the caller decides how to handle it:
     //   - Plugin start: catches, logs at ERROR, and continues (analytics
     //     is a downstream feature; Kibana must still start).

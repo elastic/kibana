@@ -77,6 +77,27 @@ describe('ensureActivityIndex', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('throws an actionable message when the cluster shard limit is reached', async () => {
+    const { esClient, logger } = buildDeps();
+    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    const err = Object.assign(new Error('Validation Failed: 1: this action would add [2] shards'), {
+      meta: {
+        body: {
+          error: {
+            type: 'validation_exception',
+            reason:
+              'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [1000]/[1000] maximum normal shards open',
+          },
+        },
+      },
+    });
+    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+
+    await expect(ensureActivityIndex({ esClient, logger })).rejects.toThrow(
+      'cluster.max_shards_per_node'
+    );
+  });
+
   it('throws on unexpected ES failure so the caller can handle it', async () => {
     const { esClient, logger } = buildDeps();
     (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
