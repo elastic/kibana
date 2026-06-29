@@ -38,6 +38,7 @@ import {
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { getFormattedError } from '../../../../../util/errors';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import {
@@ -48,6 +49,16 @@ import {
 export function SettingsTab() {
   const { core } = useKibana();
   const modelSettingsUrl = useModelSettingsUrl();
+
+  // Saving these settings hits two routes with different privileges: the streams
+  // settings route (requires the streams `manage` privilege) and core's UI
+  // settings routes used by `core.settings.client`/`globalClient` (require
+  // `advancedSettings.save`). Gate the whole form on both so the user never
+  // triggers a partial save that 403s halfway through.
+  const { ui: streamsUiPrivileges } = useStreamsPrivileges();
+  const canManageStreams = streamsUiPrivileges.manage;
+  const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
+  const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(
@@ -147,6 +158,31 @@ export function SettingsTab() {
 
   return (
     <>
+      {!canEditSettings && (
+        <>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.noPermissionCalloutTitle',
+              { defaultMessage: 'You need additional privileges to edit these settings' }
+            )}
+            color="warning"
+            iconType="lock"
+            data-test-subj="streams-settings-no-permission-callout"
+            announceOnMount={false}
+          >
+            <p>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.noPermissionCalloutDescription',
+                {
+                  defaultMessage:
+                    'Editing these settings requires both the Streams "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
@@ -237,6 +273,7 @@ export function SettingsTab() {
                     onChange={(e) => setIndexPatterns(e.target.value)}
                     placeholder={DEFAULT_INDEX_PATTERNS}
                     rows={2}
+                    disabled={!canEditSettings}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -252,8 +289,8 @@ export function SettingsTab() {
           <EuiText size="s">
             <h3>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionTitle',
-                { defaultMessage: 'Continuous KI extraction' }
+                'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingTitle',
+                { defaultMessage: 'Continuous KI onboarding' }
               )}
             </h3>
           </EuiText>
@@ -270,17 +307,17 @@ export function SettingsTab() {
                   (continuousExtraction.saved.intervalHours ??
                     DEFAULT_EXTRACTION_INTERVAL_HOURS) === 0
                     ? i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatusEveryRun',
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingActiveStatusEveryRun',
                         {
                           defaultMessage:
-                            'Continuous extraction is active. Streams have no cooldown and are re-eligible for extraction immediately after each run.',
+                            'Continuous onboarding is active. Streams have no cooldown and are re-eligible for onboarding immediately after each run.',
                         }
                       )
                     : i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatus',
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingActiveStatus',
                         {
                           defaultMessage:
-                            'Continuous extraction is active. Streams are re-extracted at most every {hours} hours.',
+                            'Continuous onboarding is active. Streams are re-onboarded at most every {hours} hours.',
                           values: {
                             hours:
                               continuousExtraction.saved.intervalHours ??
@@ -289,7 +326,7 @@ export function SettingsTab() {
                         }
                       )
                 }
-                data-test-subj="streams-settings-continuous-extraction-status"
+                data-test-subj="streams-settings-continuous-onboarding-status"
               />
               <EuiSpacer size="m" />
             </>
@@ -301,8 +338,8 @@ export function SettingsTab() {
                   <EuiText size="m">
                     <h4>
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionLabel',
-                        { defaultMessage: 'Automatic extraction' }
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingLabel',
+                        { defaultMessage: 'Automatic onboarding' }
                       )}
                     </h4>
                   </EuiText>
@@ -310,10 +347,10 @@ export function SettingsTab() {
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
                     {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionHelp',
+                      'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingHelp',
                       {
                         defaultMessage:
-                          'When enabled, knowledge indicator extraction runs automatically on managed streams at the configured interval.',
+                          'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
                       }
                     )}
                   </EuiText>
@@ -324,10 +361,10 @@ export function SettingsTab() {
               <EuiForm component="div">
                 <EuiFormRow>
                   <EuiSwitch
-                    data-test-subj="streams-settings-continuous-extraction-toggle"
+                    data-test-subj="streams-settings-continuous-onboarding-toggle"
                     label={i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.enableContinuousExtraction',
-                      { defaultMessage: 'Enable continuous KI extraction' }
+                      'xpack.streams.significantEventsDiscovery.settings.enableContinuousKiOnboarding',
+                      { defaultMessage: 'Enable continuous KI onboarding' }
                     )}
                     checked={continuousExtraction.draft.enabled}
                     onChange={(e) =>
@@ -336,23 +373,24 @@ export function SettingsTab() {
                         enabled: e.target.checked,
                       }))
                     }
+                    disabled={!canEditSettings}
                   />
                 </EuiFormRow>
                 <EuiFormRow
                   label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.extractionIntervalLabel',
-                    { defaultMessage: 'Extraction interval (hours)' }
+                    'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalLabel',
+                    { defaultMessage: 'Onboarding interval (hours)' }
                   )}
                   helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.extractionIntervalHelp',
+                    'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalHelp',
                     {
                       defaultMessage:
-                        'Minimum period in hours between extractions for a given stream. Set to 0 for no cooldown between runs.',
+                        'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
                     }
                   )}
                 >
                   <EuiFieldNumber
-                    data-test-subj="streams-settings-extraction-interval"
+                    data-test-subj="streams-settings-onboarding-interval"
                     value={continuousExtraction.draft.intervalHours}
                     onChange={(e) =>
                       continuousExtraction.setDraft((prev) => ({
@@ -364,7 +402,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={!continuousExtraction.draft.enabled}
+                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -376,7 +414,7 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsHelp',
                     {
                       defaultMessage:
-                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous extraction.',
+                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous onboarding.',
                     }
                   )}
                 >
@@ -389,7 +427,7 @@ export function SettingsTab() {
                         excludedStreamPatterns: e.target.value,
                       }))
                     }
-                    disabled={!continuousExtraction.draft.enabled}
+                    disabled={!canEditSettings || !continuousExtraction.draft.enabled}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
                       { defaultMessage: 'logs.debug.*' }
@@ -421,6 +459,7 @@ export function SettingsTab() {
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
+                isDisabled={!canEditSettings}
                 onClick={() => {
                   const defaultYaml = configToAnnotatedYaml(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
                   setDraftConfigYaml(defaultYaml);
@@ -442,12 +481,13 @@ export function SettingsTab() {
             iconType="warning"
             title={i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningInfo', {
               defaultMessage:
-                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade extraction quality or cause unexpected behavior. Changes take effect on the next run.',
+                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
             })}
           />
           <EuiSpacer size="m" />
           <SigEventsTuningConfigEditor
             value={draftConfigYaml}
+            isReadOnly={!canEditSettings}
             onChange={(yaml, parsed) => {
               setDraftConfigYaml(yaml);
               setParsedTuningConfig(parsed);
@@ -483,7 +523,9 @@ export function SettingsTab() {
                     size="s"
                     onClick={handleSave}
                     isLoading={isSaving}
-                    isDisabled={hasTuningConfigChanges && parsedTuningConfig === null}
+                    isDisabled={
+                      !canEditSettings || (hasTuningConfigChanges && parsedTuningConfig === null)
+                    }
                   >
                     {i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',

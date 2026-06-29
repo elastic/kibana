@@ -1,5 +1,5 @@
 {
-  "sha1": "9ec5b86086e9b8060e0b9abf6a700ea46a30965f",
+  "sha1": "e0506c8a87559b09f04014dec96f2a071fe2dccb",
   "tests": [
     {
       "id": "1b513f723098bcd-67df9619ed61daf",
@@ -27,6 +27,20 @@
         "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/step_duration.spec.ts",
         "line": 17,
         "column": 7
+      }
+    },
+    {
+      "id": "225887aa712da13-2f1411f8f65b4df",
+      "title": "Exploratory View - prefilled from the UX app opens a prefilled Exploratory View and breaks down by user agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/ux_prefill_exploratory_view.spec.ts",
+        "line": 39,
+        "column": 9
       }
     }
   ]

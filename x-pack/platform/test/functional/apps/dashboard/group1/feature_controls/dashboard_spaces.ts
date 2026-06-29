@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.existOrFail('newItemButton');
+        await dashboard.expectCreateButtonExists();
       });
 
       it(`create new dashboard shows addNew button`, async () => {

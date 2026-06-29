@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
+import type { Feature } from '../feature';
 import type { SignificantEventsResponse } from '../api/significant_events';
 
 export interface EsqlQuery {
@@ -53,6 +54,7 @@ export interface StreamQuery extends StreamQueryBase {
   severity_score?: number;
   evidence?: string[];
   features?: QueryFeature[];
+  expires_at?: string;
 }
 
 const streamQueryBaseSchema = z.object({
@@ -72,6 +74,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   evidence: z.array(z.string()).optional(),
   features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
+  expires_at: z.iso.datetime().optional(),
 });
 
 export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
@@ -92,6 +95,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   description: z.string().default(''),
+  expires_at: z.iso.datetime().optional(),
 });
 
 /**
@@ -116,13 +120,28 @@ export interface QueriesOccurrencesGetResponse {
 }
 
 export interface QueryLink {
-  'asset.uuid': string;
-  'asset.type': 'query';
-  'asset.id': string;
   query: StreamQuery;
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */
   rule_id: string;
+  /**
+   * ISO timestamp of the latest revision in storage. Bumped by every write.
+   * Read-only at the domain layer.
+   */
+  updated_at?: string;
+  /**
+   * ISO timestamp after which this query is considered stale.
+   * Computed as `updated_at + ki_ttl_days` from the tuning config.
+   */
+  expires_at?: string;
 }
+
+/**
+ * Unified knowledge indicator on the wire. Discriminated by the root `type`
+ * field. Used by server callers that handle both feature and query KIs.
+ */
+export type KnowledgeIndicator =
+  | { type: 'feature'; feature: Feature }
+  | { type: 'query'; query: QueryLink };

@@ -80,13 +80,11 @@ test.describe.skip('Stack Monitoring feature controls', { tag: tags.stateful.cla
   test('Kibana base:all user does NOT see the Stack Monitoring sidebar link', async ({
     browserAuth,
     samlAuth,
-    page,
     pageObjects,
-    kbnUrl,
   }) => {
     await samlAuth.setCustomRole(CUSTOM_ROLES.global_all_kibana_only);
     await browserAuth.loginAs(samlAuth.customRoleName);
-    await page.goto(kbnUrl.app('home'));
+    await pageObjects.home.goto();
 
     const navLinks = await pageObjects.collapsibleNav.getNavLinks();
     expect(navLinks).not.toContain('Stack Monitoring');

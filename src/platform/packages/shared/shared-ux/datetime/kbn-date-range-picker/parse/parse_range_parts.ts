@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { DATE_RANGE_DISPLAY_DELIMITER, DATE_TYPE_NOW, NOW_KEYWORD } from '../constants';
 import type { DateType } from '../types';
 import { PARSER_DELIMITERS, buildDelimiterPattern, escapeRegExp } from './parse_text';
@@ -15,6 +16,8 @@ export type DateUnit = 'month' | 'day' | 'year' | 'hour' | 'minute' | 'second' |
 
 export type PartKind =
   | DateUnit
+  | 'weekday'
+  | 'timezone'
   | 'relative-direction'
   | 'relative-value'
   | 'relative-unit'
@@ -29,6 +32,7 @@ export interface RangePart {
   kind: PartKind;
   navigable: boolean;
   rangeIndex: 0 | 1 | null;
+  format?: string;
 }
 
 interface DelimiterSplit {
@@ -53,35 +57,77 @@ const SHORTHAND_RELATIVE_RE = /^(now)?([+-])(\d+)([a-zA-Z]+)(\/[smhdwMy])?$/;
 const LONG_RELATIVE_RE = /^(last|past|next)\s+(\d+)\s+(\w+)$/i;
 const NATURAL_INSTANT_RE = /^(\d+)\s+(\w+)\s+(ago|from now)$/i;
 const INSTANT_FROM_NOW_RE = /^(in)\s+(\d+)\s+(\w+)$/i;
-const ABSOLUTE_TOKEN_RE = /([A-Za-z]+|\d+)/g;
-const MONTH_NAMES: ReadonlySet<string> = new Set([
-  'jan',
-  'january',
-  'feb',
-  'february',
-  'mar',
-  'march',
-  'apr',
-  'april',
-  'may',
-  'jun',
-  'june',
-  'jul',
-  'july',
-  'aug',
-  'august',
-  'sep',
-  'sept',
-  'september',
-  'oct',
-  'october',
-  'nov',
-  'november',
-  'dec',
-  'december',
-]);
+const INPUT_ABSOLUTE_FORMATS = [
+  // Keep this list in sync with parse_text.ts DEFAULT_CONFIG.absoluteFormats
+  // and the formats emitted by format_time_range.ts.
+  'MMM D, YYYY, HH:mm:ss.SSS',
+  'MMM D YYYY, HH:mm:ss.SSS',
+  'MMM D, YYYY, HH:mm:ss',
+  'MMM D YYYY, HH:mm:ss',
+  'MMM D, YYYY, HH:mm',
+  'MMM D YYYY, HH:mm',
+  'MMM D, YYYY @ HH:mm:ss.SSS',
+  'MMM D, YYYY @ HH:mm:ss',
+  'MMM D, YYYY @ HH:mm',
+  'MMM D, YYYY @ HH',
+  'MMM D, YYYY',
+  'MMM D YYYY',
+  'MMM D, HH:mm:ss.SSS',
+  'MMM D, HH:mm:ss',
+  'MMM D, HH:mm',
+  'MMM D',
+  'YYYY-MM-DD H:mm',
+  'M/D/YYYY H:mm',
+  'M/D H:mm',
+  'M/D/YYYY',
+  'M/D',
+  'ddd, DD MMM YY HH:mm:ss ZZ',
+  'ddd, DD MMM YY HH:mm ZZ',
+  'DD MMM YY HH:mm:ss ZZ',
+  'DD MMM YY HH:mm ZZ',
+  'ddd, DD MMM YYYY HH:mm:ss ZZ',
+  'ddd, DD MMM YYYY HH:mm ZZ',
+  'DD MMM YYYY HH:mm:ss ZZ',
+  'DD MMM YYYY HH:mm ZZ',
+  'ddd, DD MMM YYYY HH:mm:ss',
+  'ddd, DD MMM YYYY HH:mm',
+  'DD MMM YYYY HH:mm:ss',
+  'DD MMM YYYY HH:mm',
+  // Time-only sides are emitted by compact display text.
+  'HH:mm:ss.SSS',
+  'HH:mm:ss',
+  'HH:mm',
+] as const;
+const FORMAT_TOKEN_RE = /MMMM|MMM|YYYY|SSS|dddd|ddd|YY|DD|HH|ZZ|MM|M|D|H|mm|ss|Z/g;
 
-const getMatchIndex = (match: RegExpMatchArray): number => match.index ?? 0;
+type FormatToken =
+  | 'MMMM'
+  | 'MMM'
+  | 'MM'
+  | 'M'
+  | 'YYYY'
+  | 'YY'
+  | 'DD'
+  | 'D'
+  | 'HH'
+  | 'H'
+  | 'mm'
+  | 'ss'
+  | 'SSS'
+  | 'dddd'
+  | 'ddd'
+  | 'ZZ'
+  | 'Z';
+
+type FormatSegment =
+  | {
+      type: 'literal';
+      text: string;
+    }
+  | {
+      type: 'token';
+      token: FormatToken;
+    };
 
 const addPart = (
   parts: RangePart[],
@@ -89,7 +135,8 @@ const addPart = (
   start: number,
   kind: PartKind,
   navigable: boolean,
-  rangeIndex: RangePart['rangeIndex']
+  rangeIndex: RangePart['rangeIndex'],
+  format?: string
 ) => {
   parts.push({
     text,
@@ -98,6 +145,7 @@ const addPart = (
     kind,
     navigable,
     rangeIndex,
+    ...(format ? { format } : {}),
   });
 };
 
@@ -289,12 +337,143 @@ const parseNaturalInstant = (
   return null;
 };
 
-const getAbsoluteNumericKind = (numericIndex: number, isTimeOnly: boolean): DateUnit => {
-  const numericKinds: DateUnit[] = isTimeOnly
-    ? ['hour', 'minute', 'second', 'millisecond']
-    : ['day', 'hour', 'minute', 'second', 'millisecond'];
+/** Compiles a moment format into literal and token segments. */
+export const compileFormatTokens = (format: string): FormatSegment[] => {
+  const segments: FormatSegment[] = [];
+  let cursor = 0;
 
-  return numericKinds[numericIndex] ?? 'millisecond';
+  for (const match of format.matchAll(FORMAT_TOKEN_RE)) {
+    const tokenStart = match.index ?? 0;
+    if (tokenStart > cursor) {
+      segments.push({ type: 'literal', text: format.slice(cursor, tokenStart) });
+    }
+    segments.push({ type: 'token', token: match[0] as FormatToken });
+    cursor = tokenStart + match[0].length;
+  }
+
+  if (cursor < format.length) {
+    segments.push({ type: 'literal', text: format.slice(cursor) });
+  }
+
+  return segments;
+};
+
+const getFormatTokenPattern = (token: FormatToken): string => {
+  switch (token) {
+    case 'MMMM':
+    case 'MMM':
+    case 'dddd':
+    case 'ddd':
+      return '[A-Za-z]+';
+    case 'YYYY':
+      return '\\d{4}';
+    case 'YY':
+    case 'MM':
+    case 'DD':
+    case 'HH':
+    case 'mm':
+    case 'ss':
+      return '\\d{2}';
+    case 'SSS':
+      return '\\d{3}';
+    case 'M':
+    case 'D':
+    case 'H':
+      return '\\d{1,2}';
+    case 'ZZ':
+      return '[+-]\\d{4}';
+    case 'Z':
+      return '(?:Z|[+-]\\d{2}:?\\d{2})';
+  }
+};
+
+const getFormatTokenKind = (token: FormatToken): PartKind => {
+  switch (token) {
+    case 'MMMM':
+    case 'MMM':
+    case 'MM':
+    case 'M':
+      return 'month';
+    case 'DD':
+    case 'D':
+      return 'day';
+    case 'YYYY':
+    case 'YY':
+      return 'year';
+    case 'HH':
+    case 'H':
+      return 'hour';
+    case 'mm':
+      return 'minute';
+    case 'ss':
+      return 'second';
+    case 'SSS':
+      return 'millisecond';
+    case 'dddd':
+    case 'ddd':
+      return 'weekday';
+    case 'ZZ':
+    case 'Z':
+      return 'timezone';
+  }
+};
+
+const buildFormatRegex = (segments: FormatSegment[]): RegExp =>
+  new RegExp(
+    `^${segments
+      .map((segment) =>
+        segment.type === 'literal'
+          ? escapeRegExp(segment.text)
+          : `(${getFormatTokenPattern(segment.token)})`
+      )
+      .join('')}$`
+  );
+
+interface CompiledFormat {
+  format: string;
+  segments: FormatSegment[];
+  regex: RegExp;
+}
+
+// `INPUT_ABSOLUTE_FORMATS` is fixed, so the segments and matching regex for each
+// format only need to be compiled once at module load rather than on every parse.
+const COMPILED_ABSOLUTE_FORMATS: readonly CompiledFormat[] = INPUT_ABSOLUTE_FORMATS.map(
+  (format) => {
+    const segments = compileFormatTokens(format);
+    return { format, segments, regex: buildFormatRegex(segments) };
+  }
+);
+
+const parseAbsoluteDateWithFormat = (
+  side: string,
+  offset: number,
+  rangeIndex: RangePart['rangeIndex'],
+  { format, segments, regex }: CompiledFormat
+): RangePart[] => {
+  const match = side.match(regex);
+  if (!match) return [];
+
+  const parts: RangePart[] = [];
+  let captureIndex = 1;
+  let cursor = 0;
+
+  for (const segment of segments) {
+    if (segment.type === 'literal') {
+      cursor += segment.text.length;
+      continue;
+    }
+
+    const tokenText = match[captureIndex++];
+    const tokenStart = side.indexOf(tokenText, cursor);
+    if (tokenStart === -1) return [];
+
+    const kind = getFormatTokenKind(segment.token);
+    addPart(parts, tokenText, offset + tokenStart, kind, true, rangeIndex, format);
+
+    cursor = tokenStart + tokenText.length;
+  }
+
+  return parts;
 };
 
 const parseAbsoluteDate = (
@@ -302,36 +481,13 @@ const parseAbsoluteDate = (
   offset: number,
   rangeIndex: RangePart['rangeIndex']
 ): RangePart[] => {
-  const tokens = Array.from(side.matchAll(ABSOLUTE_TOKEN_RE));
-  const hasMonth = tokens.some((match) => MONTH_NAMES.has(match[0].toLowerCase()));
-  const isTimeOnly = !hasMonth && side.includes(':');
-  const parts: RangePart[] = [];
-  let numericIndex = 0;
-
-  for (const token of tokens) {
-    const text = token[0];
-    const start = offset + getMatchIndex(token);
-    const lower = text.toLowerCase();
-
-    if (MONTH_NAMES.has(lower)) {
-      addPart(parts, text, start, 'month', true, rangeIndex);
-      continue;
+  for (const compiled of COMPILED_ABSOLUTE_FORMATS) {
+    if (moment(side, compiled.format, true).isValid()) {
+      return parseAbsoluteDateWithFormat(side, offset, rangeIndex, compiled);
     }
-
-    if (!/^\d+$/.test(text)) {
-      continue;
-    }
-
-    if (/^\d{4}$/.test(text)) {
-      addPart(parts, text, start, 'year', true, rangeIndex);
-      continue;
-    }
-
-    addPart(parts, text, start, getAbsoluteNumericKind(numericIndex, isTimeOnly), true, rangeIndex);
-    numericIndex++;
   }
 
-  return parts;
+  return [];
 };
 
 const parseSide = (
@@ -363,6 +519,23 @@ const parseSide = (
   );
 };
 
+/** Infers which side a compact one-sided display label edits. */
+const getCompactDisplayRangeIndex = (display: string): RangePart['rangeIndex'] => {
+  const trimmed = display.trim();
+  const longRelativeMatch = trimmed.match(LONG_RELATIVE_RE);
+  const naturalInstantMatch = trimmed.match(NATURAL_INSTANT_RE);
+
+  if (
+    longRelativeMatch?.[1].toLowerCase() === 'next' ||
+    naturalInstantMatch?.[3].toLowerCase() === 'from now' ||
+    INSTANT_FROM_NOW_RE.test(trimmed)
+  ) {
+    return 1;
+  }
+
+  return 0;
+};
+
 /**
  * Splits edit-input text into semantic range parts.
  */
@@ -392,5 +565,5 @@ export function parseDisplayParts(display: string): RangePart[] {
     ];
   }
 
-  return parseSide(display, 0, null);
+  return parseSide(display, 0, getCompactDisplayRangeIndex(display));
 }

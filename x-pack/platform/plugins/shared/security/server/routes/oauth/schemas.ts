@@ -12,6 +12,8 @@ import type { OAuthClientLogoMediaType } from '../../../common/oauth/constants';
 import {
   OAUTH_CLIENT_LOGO_MAX_DATA_LENGTH,
   OAUTH_CLIENT_LOGO_MEDIA_TYPES,
+  OAUTH_CLIENT_NAME_MAX_LENGTH,
+  OAUTH_CONNECTION_NAME_MAX_LENGTH,
   OAUTH_MAX_STRING_FIELD_LENGTH,
   OAUTH_MAX_URI_LENGTH,
   OAUTH_REDIRECT_URIS_MAX_SIZE,
@@ -34,6 +36,7 @@ export const clientTypeSchema = schema.oneOf([
 export const redirectUrisSchema = schema.arrayOf(
   schema.string({ minLength: 1, maxLength: OAUTH_MAX_URI_LENGTH }),
   {
+    minSize: 1,
     maxSize: OAUTH_REDIRECT_URIS_MAX_SIZE,
   }
 );
@@ -49,7 +52,7 @@ export const nullableClientMetadataSchema = schema.recordOf(
 );
 
 export const createClientBodySchema = schema.object({
-  client_name: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
+  client_name: schema.string({ minLength: 1, maxLength: OAUTH_CLIENT_NAME_MAX_LENGTH }),
   client_type: schema.maybe(clientTypeSchema),
   client_metadata: schema.maybe(clientMetadataSchema),
   client_logo: schema.maybe(clientLogoSchema),
@@ -58,7 +61,7 @@ export const createClientBodySchema = schema.object({
 
 export const updateClientBodySchema = schema.object({
   client_name: schema.maybe(
-    schema.nullable(schema.string({ maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }))
+    schema.nullable(schema.string({ maxLength: OAUTH_CLIENT_NAME_MAX_LENGTH }))
   ),
   client_metadata: schema.maybe(nullableClientMetadataSchema),
   client_logo: schema.maybe(schema.nullable(clientLogoSchema)),
@@ -66,5 +69,5 @@ export const updateClientBodySchema = schema.object({
 });
 
 export const updateConnectionBodySchema = schema.object({
-  name: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
+  name: schema.string({ minLength: 1, maxLength: OAUTH_CONNECTION_NAME_MAX_LENGTH }),
 });

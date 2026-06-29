@@ -37,6 +37,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         application: {
           capabilities: {
             cloudConnect: { show: true, configure: true },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
         },
@@ -44,6 +45,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     })),
   };
 });
+
+const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
 const { useQueryInferenceEndpoints } = jest.requireMock('../hooks/use_inference_endpoints');
 
@@ -237,5 +240,49 @@ describe('InferenceEndpoints', () => {
     expect(screen.queryByTestId('eis-documentation')).not.toBeInTheDocument();
     expect(screen.queryByTestId('view-your-models')).not.toBeInTheDocument();
     expect(screen.getByTestId('api-documentation')).toBeInTheDocument();
+  });
+
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          application: {
+            capabilities: {
+              cloudConnect: { show: true, configure: true },
+              searchInferenceEndpoints: { show: true, manage: false },
+            },
+            navigateToApp: jest.fn(),
+          },
+        },
+      });
+    });
+
+    it('hides the Add endpoint button in the header when third-party endpoints exist', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: mixedEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.queryByTestId('add-inference-endpoint-header-button')).not.toBeInTheDocument();
+      expect(screen.getByTestId('externalInferenceHeader')).toBeInTheDocument();
+    });
+
+    it('hides the Add endpoint button in the empty prompt', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: onlyElasticEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.queryByTestId('addEndpointButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
+    });
   });
 });

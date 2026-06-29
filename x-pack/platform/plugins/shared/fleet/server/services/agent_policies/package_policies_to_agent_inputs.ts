@@ -45,7 +45,7 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
 };
 
-const combineConditions = (conditions: Array<string | undefined>): string | undefined => {
+const combineConditions = (conditions: Array<string | null | undefined>): string | undefined => {
   const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
   if (filtered.length === 0) return undefined;
   if (filtered.length === 1) return filtered[0];
@@ -186,7 +186,7 @@ export interface GetFullInputStreamsOptions {
   /** Map of stream ids <destinationId, originalId>. */
   streamsOriginalIdsMap?: Map<string, string>;
   /** Pre-gated by the caller; layered onto the input-level condition. */
-  userIntegrationCondition?: string;
+  userIntegrationCondition?: string | null;
 }
 
 export const getFullInputStreams = (

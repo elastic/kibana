@@ -21,9 +21,13 @@ describe('workflowAuthoringSkill', () => {
   });
 
   describe('getRegistryTools', () => {
-    it('includes all surviving workflow tools and generate_workflow', () => {
+    it('includes all surviving workflow tools, generate_workflow, and execute_workflow', () => {
       const tools = workflowAuthoringSkill.getRegistryTools!();
-      expect(tools).toEqual([...Object.values(workflowTools), platformCoreTools.generateWorkflow]);
+      expect(tools).toEqual([
+        ...Object.values(workflowTools),
+        platformCoreTools.generateWorkflow,
+        platformCoreTools.executeWorkflow,
+      ]);
     });
 
     it('does not include the deleted low-level edit tools', () => {
@@ -54,6 +58,13 @@ describe('workflowAuthoringSkill', () => {
 
     it('delegates creation and editing to generate_workflow', () => {
       expect(workflowAuthoringSkill.content).toContain(platformCoreTools.generateWorkflow);
+    });
+
+    it('instructs to use only the slack2 namespace for Slack steps', () => {
+      expect(workflowAuthoringSkill.content).toContain('ONLY use the `slack2.*` namespace');
+      expect(workflowAuthoringSkill.content).toContain('slack2.sendMessage');
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: slack$/m);
+      expect(workflowAuthoringSkill.content).not.toMatch(/type: slack_api/);
     });
 
     it('does not document the deleted low-level edit tools', () => {

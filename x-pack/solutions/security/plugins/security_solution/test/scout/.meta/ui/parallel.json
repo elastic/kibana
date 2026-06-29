@@ -1,5 +1,5 @@
 {
-  "sha1": "57029de0fe074dc39a490573f638697c0cdce060",
+  "sha1": "8883461afd05fa49154b03fa94e4bef8f2d6b88d",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -203,7 +203,7 @@
     {
       "id": "1615ae6cdd866ca-4d3a81e2c9a2ebd",
       "title": "Entity analytics management page - Risk Score tab Risk Score tab is selected by default",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -212,14 +212,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 14
       }
     },
     {
       "id": "1615ae6cdd866ca-0d4aa171beff992",
       "title": "Entity analytics management page - Risk Score tab should show preview error panel when API fails",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -228,14 +228,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 14
       }
     },
     {
       "id": "1615ae6cdd866ca-ed4dbcbf851573b",
       "title": "Entity analytics management page - Risk Score tab should show save bar when toggling retain checkbox",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -244,14 +244,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 14
       }
     },
     {
       "id": "1615ae6cdd866ca-f58e084bddd50df",
       "title": "Entity analytics management page - Risk Score tab should show save bar when toggling closed alerts switch",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -260,14 +260,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 88,
+        "line": 89,
         "column": 14
       }
     },
     {
       "id": "1615ae6cdd866ca-ca0f8d19aa15832",
       "title": "Entity analytics management page - Risk Score tab should discard changes when clicking discard button",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -276,14 +276,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 106,
+        "line": 107,
         "column": 14
       }
     },
     {
       "id": "1615ae6cdd866ca-02f079bc2cd45e2",
       "title": "Entity analytics management page - Risk Score tab should save changes and persist after page reload",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -292,7 +292,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 129,
+        "line": 130,
         "column": 14
       }
     },
@@ -313,6 +313,34 @@
       }
     },
     {
+      "id": "105a595b3d3179c-668900ccdf79d81",
+      "title": "Bulk add alerts to chat should disable the \"Add to chat\" bulk action when all alerts are selected via the query button",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    },
+    {
+      "id": "105a595b3d3179c-236824c49e31bf1",
+      "title": "Bulk add alerts to chat should open agent builder conversation with attachment chip and pre-filled prompt, and send multiple alerts to the LLM",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
+        "line": 90,
+        "column": 14
+      }
+    },
+    {
       "id": "a1e93b8abddca76-5a5001b848eec67",
       "title": "Run workflow alert action should show success toast with workflow link and open workflows app in new tab after executing",
       "expectedStatus": "skipped",
@@ -322,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 81,
+        "line": 41,
         "column": 12
       }
     },
@@ -336,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 153,
+        "line": 113,
         "column": 12
       }
     },
@@ -350,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 171,
+        "line": 131,
         "column": 12
       }
     },
@@ -459,6 +487,94 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_agent_builder_chrome_nav.spec.ts",
         "line": 44,
+        "column": 14
+      }
+    },
+    {
+      "id": "4590c32e59db580-70f1d886ab87713",
+      "title": "Serverless Security - AI Value Report item hidden in project chrome on essentials tier hides AI Value Report in chrome nav on essentials tier",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_ai_value_report_chrome_nav.spec.ts",
+        "line": 15,
+        "column": 14
+      }
+    },
+    {
+      "id": "09ea96a744bb261-b6c3ce7e87e3b8c",
+      "title": "Serverless Security - AI Value Report item hidden in project chrome for non-socManager role hides AI Value Report in chrome nav for a non-socManager role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_ai_value_report_role_chrome_nav.spec.ts",
+        "line": 15,
+        "column": 14
+      }
+    },
+    {
+      "id": "0e2e581757f10a8-b63472fd75edd4f",
+      "title": "AI Value Report renders the sample data banner, badge and attack discovery CTA when there are no attack discoveries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ai_value_report.spec.ts",
+        "line": 22,
+        "column": 14
+      }
+    },
+    {
+      "id": "0e2e581757f10a8-89f0a961d32bcde",
+      "title": "AI Value Report export button is disabled when there is no real data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ai_value_report.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "0e2e581757f10a8-c10e3c1a58b1390",
+      "title": "AI Value Report shows NoPrivileges for a user without the socManagement capability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ai_value_report.spec.ts",
+        "line": 51,
         "column": 14
       }
     }

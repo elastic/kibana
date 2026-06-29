@@ -41,52 +41,75 @@ export interface SavedObservabilityOnboardingFlow extends ObservabilityOnboardin
   updatedAt: number;
 }
 
+const MAX_FLOW_TYPE_LENGTH = 64;
+const MAX_DATASET_NAME_LENGTH = 255;
+const MAX_SERVICE_NAME_LENGTH = 256;
+const MAX_CUSTOM_CONFIGURATIONS_LENGTH = 10_000;
+const MAX_LOG_FILE_PATH_LENGTH = 4096;
+const MAX_NAMESPACE_LENGTH = 256;
+const MAX_OS_ARCH_LENGTH = 64;
+const MAX_AGENT_ID_LENGTH = 256;
+const MAX_PACKAGE_NAME_LENGTH = 255;
+const MAX_PACKAGE_VERSION_LENGTH = 64;
+const MAX_DATA_STREAM_TYPE_LENGTH = 64;
+const MAX_DATA_STREAM_DATASET_LENGTH = 255;
+const MAX_KIBANA_ASSET_TYPE_LENGTH = 64;
+const MAX_KIBANA_ASSET_ID_LENGTH = 255;
+const MAX_HOSTNAME_LENGTH = 253;
+const MAX_STEP_NAME_LENGTH = 256;
+const MAX_STEP_STATUS_LENGTH = 64;
+const MAX_STEP_MESSAGE_LENGTH = 10_000;
+
 const LogFilesStateSchema = schema.object({
-  datasetName: schema.string(),
-  serviceName: schema.maybe(schema.string()),
-  customConfigurations: schema.maybe(schema.string()),
-  logFilePaths: schema.arrayOf(schema.string(), { maxSize: 100 }),
-  namespace: schema.string(),
+  datasetName: schema.string({ maxLength: MAX_DATASET_NAME_LENGTH }),
+  serviceName: schema.maybe(schema.string({ maxLength: MAX_SERVICE_NAME_LENGTH })),
+  customConfigurations: schema.maybe(
+    schema.string({ maxLength: MAX_CUSTOM_CONFIGURATIONS_LENGTH })
+  ),
+  logFilePaths: schema.arrayOf(schema.string({ maxLength: MAX_LOG_FILE_PATH_LENGTH }), {
+    maxSize: 100,
+  }),
+  namespace: schema.string({ maxLength: MAX_NAMESPACE_LENGTH }),
 });
 
 const SystemLogsStateSchema = schema.object({
-  namespace: schema.string(),
+  namespace: schema.string({ maxLength: MAX_NAMESPACE_LENGTH }),
 });
 
 const LogsDetectLoadingStepPayloadSchema = schema.object({
-  os: schema.string(),
-  arch: schema.string(),
+  os: schema.string({ maxLength: MAX_OS_ARCH_LENGTH }),
+  arch: schema.string({ maxLength: MAX_OS_ARCH_LENGTH }),
 });
 
 const ElasticAgentStepPayloadSchema = schema.object({
-  agentId: schema.string(),
+  agentId: schema.string({ maxLength: MAX_AGENT_ID_LENGTH }),
 });
 
 export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
   schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgName: schema.string({ maxLength: MAX_PACKAGE_NAME_LENGTH }),
+    pkgVersion: schema.string({ maxLength: MAX_PACKAGE_VERSION_LENGTH }),
     installSource: schema.oneOf([schema.literal('registry'), schema.literal('custom')]),
     // codeql[js/kibana/unbounded-array-in-schema] Populated from Fleet package metadata, not user input
     inputs: schema.arrayOf(schema.any()),
     // codeql[js/kibana/unbounded-array-in-schema] Populated from Fleet packageInfo.data_streams (registry) or hardcoded to 1 (custom)
     dataStreams: schema.arrayOf(
       schema.object({
-        type: schema.string(),
-        dataset: schema.string(),
+        type: schema.string({ maxLength: MAX_DATA_STREAM_TYPE_LENGTH }),
+        dataset: schema.string({ maxLength: MAX_DATA_STREAM_DATASET_LENGTH }),
       })
     ),
     // codeql[js/kibana/unbounded-array-in-schema] Populated from Fleet pkg.installed_kibana (registry) or empty array (custom)
     kibanaAssets: schema.arrayOf(
       schema.object({
-        type: schema.string(),
-        id: schema.string(),
+        type: schema.string({ maxLength: MAX_KIBANA_ASSET_TYPE_LENGTH }),
+        id: schema.string({ maxLength: MAX_KIBANA_ASSET_ID_LENGTH }),
       })
     ),
     metadata: schema.maybe(
       schema.oneOf([
         schema.object({
-          hostname: schema.string(),
+          hostname: schema.string({ maxLength: MAX_HOSTNAME_LENGTH }),
         }),
       ])
     ),
@@ -110,13 +133,13 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          type: schema.string(),
+          type: schema.string({ maxLength: MAX_FLOW_TYPE_LENGTH }),
           state: schema.maybe(schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema])),
           progress: schema.mapOf(
-            schema.string(),
+            schema.string({ maxLength: MAX_STEP_NAME_LENGTH }),
             schema.object({
-              status: schema.string(),
-              message: schema.maybe(schema.string()),
+              status: schema.string({ maxLength: MAX_STEP_STATUS_LENGTH }),
+              message: schema.maybe(schema.string({ maxLength: MAX_STEP_MESSAGE_LENGTH })),
               payload: schema.maybe(ElasticAgentStepPayloadSchema),
             })
           ),
@@ -127,15 +150,15 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          type: schema.string(),
+          type: schema.string({ maxLength: MAX_FLOW_TYPE_LENGTH }),
           state: schema.maybe(
             schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema, schema.never()])
           ),
           progress: schema.mapOf(
-            schema.string(),
+            schema.string({ maxLength: MAX_STEP_NAME_LENGTH }),
             schema.object({
-              status: schema.string(),
-              message: schema.maybe(schema.string()),
+              status: schema.string({ maxLength: MAX_STEP_STATUS_LENGTH }),
+              message: schema.maybe(schema.string({ maxLength: MAX_STEP_MESSAGE_LENGTH })),
               payload: schema.maybe(
                 schema.oneOf([
                   ElasticAgentStepPayloadSchema,

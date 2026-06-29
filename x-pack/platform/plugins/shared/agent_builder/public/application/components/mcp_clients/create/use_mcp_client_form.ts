@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { useForm } from 'react-hook-form';
 import {
-  OAUTH_MAX_STRING_FIELD_LENGTH,
+  OAUTH_CLIENT_NAME_MAX_LENGTH,
   OAUTH_MAX_URI_LENGTH,
   OAUTH_REDIRECT_URIS_MAX_SIZE,
 } from '@kbn/security-plugin/common/oauth';
@@ -102,8 +102,8 @@ const mcpClientFormSchema = z.object({
   clientName: z
     .string()
     .min(1, mcpClientI18nMessages.clientName.requiredError)
-    .max(OAUTH_MAX_STRING_FIELD_LENGTH, {
-      error: mcpClientI18nMessages.clientName.tooLongError(OAUTH_MAX_STRING_FIELD_LENGTH),
+    .max(OAUTH_CLIENT_NAME_MAX_LENGTH, {
+      error: mcpClientI18nMessages.clientName.tooLongError(OAUTH_CLIENT_NAME_MAX_LENGTH),
     }),
   clientLogo: clientLogoSchema,
   redirect: redirectSchema,

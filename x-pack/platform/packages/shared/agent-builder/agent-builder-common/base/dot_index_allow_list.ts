@@ -33,6 +33,8 @@ export const DOT_INDEX_ALLOW_LIST_PATTERNS: readonly string[] = [
   '.items-*',
   '.siem-signals-*',
   '.monitoring-*',
+  '.fleet-agents*',
+  '.metrics-endpoint.metadata_united_*',
 ];
 
 const ALLOW_LIST_REGEXES: readonly RegExp[] = DOT_INDEX_ALLOW_LIST_PATTERNS.map(patternToRegex);

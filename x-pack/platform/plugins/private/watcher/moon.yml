@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -58,6 +59,7 @@ fileGroups:
     - public/**/*
     - common/**/*
     - __fixtures__/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

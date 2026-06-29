@@ -14,29 +14,37 @@ import { platformStreamsMemoryTools } from './tool_ids';
 import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
 
-const patchOperationSchema = z.object({
-  old_text: z
-    .string()
-    .optional()
-    .describe(
-      'Exact text to find in the document (must be unique). Omit new_text to delete this text.'
-    ),
-  new_text: z.string().optional().describe('Replacement text. Only used with old_text.'),
-  heading: z
-    .string()
-    .optional()
-    .describe(
-      'Target a specific markdown heading. Used with "content" to replace the section, or with "append" to add under it.'
-    ),
-  content: z
-    .string()
-    .optional()
-    .describe('Replace the entire content under the specified heading with this text.'),
-  append: z
-    .string()
-    .optional()
-    .describe('Append this text to the end of the document, or under the specified heading.'),
-});
+const patchOperationSchema = z
+  .object({
+    old_text: z
+      .string()
+      .optional()
+      .describe(
+        'Exact text to find in the document (must be unique). Omit new_text to delete this text.'
+      ),
+    new_text: z.string().optional().describe('Replacement text. Only used with old_text.'),
+    heading: z
+      .string()
+      .optional()
+      .describe(
+        'Target a specific markdown heading. Used with "content" to replace the section, or with "append" to add under it.'
+      ),
+    content: z
+      .string()
+      .optional()
+      .describe('Replace the entire content under the specified heading with this text.'),
+    append: z
+      .string()
+      .optional()
+      .describe('Append this text to the end of the document, or under the specified heading.'),
+  })
+  .refine(
+    (op) => op.old_text !== undefined || op.heading !== undefined || op.append !== undefined,
+    {
+      message:
+        'Each operation must specify one of: old_text (search-and-replace), heading+content (section replace), or append.',
+    }
+  );
 
 const memoryPatchSchema = z.object({
   id: z.string().optional().describe('Target page by UUID.'),
@@ -160,7 +168,7 @@ export const createMemoryPatchTool = ({
   tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async ({ id, name, operations, change_summary: changeSummary }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,
@@ -226,7 +234,9 @@ export const createMemoryPatchTool = ({
         return {
           results: [
             createErrorResult({
-              message: `Patch failed — all operations rolled back. Errors: ${errors.join('; ')}`,
+              message: `Patch failed — no changes persisted (${appliedCount} of ${
+                operations.length
+              } ops would have succeeded). Errors: ${errors.join('; ')}`,
             }),
           ],
         };

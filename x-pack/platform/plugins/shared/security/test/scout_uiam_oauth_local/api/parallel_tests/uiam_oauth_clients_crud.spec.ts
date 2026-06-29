@@ -50,10 +50,7 @@ apiTest.describe(
       await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
-    // Temporarily skipped: Kibana now sends `project_id` in the create-client payload, but the
-    // promoted `docker.elastic.co/kibana-ci/uiam:latest-verified` image does not yet accept that
-    // field. Re-enable once a UIAM image that supports `project_id` is promoted to `latest-verified`.
-    apiTest.skip(
+    apiTest(
       'creates, reads, lists, patches (incl. redirect_uris), and revokes a client',
       async ({ apiClient }) => {
         const clientName = `scout-crud-${Date.now()}`;

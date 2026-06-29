@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ActionPolicyType } from '@kbn/alerting-v2-schemas';
 import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
 
 export type RuleId = string;
@@ -54,16 +53,11 @@ export interface DispatcherTaskState {
 export interface Rule {
   id: RuleId;
   spaceId: string;
-  kind: 'alert' | 'signal';
   name: string;
-  description: string;
   tags: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
-interface BaseActionPolicy {
+export interface ActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
@@ -89,19 +83,6 @@ interface BaseActionPolicy {
   apiKey?: string;
 }
 
-export interface GlobalActionPolicy extends BaseActionPolicy {
-  type: 'global';
-}
-
-export interface SingleRuleActionPolicy extends BaseActionPolicy {
-  type: 'single_rule';
-  ruleId: string;
-}
-
-export type ActionPolicy = GlobalActionPolicy | SingleRuleActionPolicy;
-
-export type { ActionPolicyType };
-
 export interface MatchedPair {
   episode: AlertEpisode;
   policy: ActionPolicy;
@@ -114,13 +95,17 @@ export interface ActionGroup {
   destinations: ActionPolicyDestination[];
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
+
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface LastNotifiedRecord {
@@ -155,7 +140,7 @@ export interface DispatcherPipelineState {
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'engine_disabled';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

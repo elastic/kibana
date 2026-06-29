@@ -65,6 +65,7 @@ describe('set unified alerts workflow status', () => {
           index: [
             '.alerts-security.alerts-default',
             '.alerts-security.attack.discovery.alerts-default',
+            '.adhoc.alerts-security.attack.discovery.alerts-default',
           ],
         })
       );

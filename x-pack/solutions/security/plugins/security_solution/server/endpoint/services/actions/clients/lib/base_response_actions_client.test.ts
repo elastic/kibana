@@ -46,8 +46,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
 

@@ -14,8 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { PackageList } from '../../../common';

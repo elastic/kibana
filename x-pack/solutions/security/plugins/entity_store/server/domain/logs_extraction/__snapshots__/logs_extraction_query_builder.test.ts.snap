@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -9,9 +10,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = entity.id
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ recent.entity.EngineMetadata.UntypedId = TO_STRING(entity.id)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -24,7 +25,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.type = LAST(TO_STRING(entity.type), @timestamp) WHERE TO_STRING(entity.type) IS NOT NULL,
  recent.entity.sub_type = LAST(TO_STRING(entity.sub_type), @timestamp) WHERE TO_STRING(entity.sub_type) IS NOT NULL,
  recent.entity.url = LAST(TO_STRING(entity.url), @timestamp) WHERE TO_STRING(entity.url) IS NOT NULL,
- recent.entity.attributes.watchlists = VALUES(TO_STRING(entity.attributes.watchlists)),
  recent.entity.attributes.asset = LAST(TO_BOOLEAN(entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(entity.attributes.asset) IS NOT NULL,
  recent.entity.attributes.managed = LAST(TO_BOOLEAN(entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(entity.attributes.managed) IS NOT NULL,
  recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(entity.attributes.mfa_enabled) IS NOT NULL,
@@ -32,11 +32,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.attributes.permissions = VALUES(TO_STRING(entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(entity.lifecycle.last_activity) IS NOT NULL,
- recent.entity.behaviors.rule_names = VALUES(TO_STRING(entity.behaviors.rule_names)),
- recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(entity.behaviors.anomaly_job_ids)),
  recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(entity.relationships.administers.host.id)),
  recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(entity.relationships.administers.user.id)),
  recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(entity.relationships.administers.user.email)),
@@ -93,10 +91,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(entity.relationships.supervises.service.name)),
  recent.entity.relationships.supervises.ids = VALUES(TO_STRING(entity.relationships.supervises.entity.id)),
- recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(entity.relationships.resolution.resolved_to) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL,
  recent.cloud.account.id = LAST(TO_STRING(cloud.account.id), @timestamp) WHERE TO_STRING(cloud.account.id) IS NOT NULL,
  recent.cloud.account.name = LAST(TO_STRING(cloud.account.name), @timestamp) WHERE TO_STRING(cloud.account.name) IS NOT NULL,
  recent.cloud.availability_zone = LAST(TO_STRING(cloud.availability_zone), @timestamp) WHERE TO_STRING(cloud.availability_zone) IS NOT NULL,
@@ -131,10 +125,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.asset.vendor = LAST(TO_STRING(asset.vendor), @timestamp) WHERE TO_STRING(asset.vendor) IS NOT NULL,
  recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
  recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
- recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
- recent.entity.risk.calculated_level = LAST(TO_STRING(entity.risk.calculated_level), @timestamp) WHERE TO_STRING(entity.risk.calculated_level) IS NOT NULL,
- recent.entity.risk.calculated_score = LAST(TO_DOUBLE(entity.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(entity.risk.calculated_score) IS NOT NULL,
- recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(entity.risk.calculated_score_norm) IS NOT NULL
+ recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
@@ -149,7 +140,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
  entity.url = COALESCE(recent.entity.url, entity.url),
- entity.attributes.watchlists = MV_SLICE(MV_UNION(recent.entity.attributes.watchlists, entity.attributes.watchlists), 0, 49),
  entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
  entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
  entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
@@ -160,8 +150,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
  entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
  entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
- entity.behaviors.rule_names = MV_SLICE(MV_UNION(recent.entity.behaviors.rule_names, entity.behaviors.rule_names), 0, 49),
- entity.behaviors.anomaly_job_ids = MV_SLICE(MV_UNION(recent.entity.behaviors.anomaly_job_ids, entity.behaviors.anomaly_job_ids), 0, 49),
  entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
@@ -218,10 +206,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
- entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
- entity.relationships.resolution.risk.calculated_level = COALESCE(recent.entity.relationships.resolution.risk.calculated_level, entity.relationships.resolution.risk.calculated_level),
- entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
- entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
  cloud.account.id = COALESCE(recent.cloud.account.id, cloud.account.id),
  cloud.account.name = COALESCE(recent.cloud.account.name, cloud.account.name),
  cloud.availability_zone = COALESCE(recent.cloud.availability_zone, cloud.availability_zone),
@@ -257,9 +241,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  asset.environment = COALESCE(recent.asset.environment, asset.environment),
  asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
- entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
- entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
@@ -277,7 +258,8 @@ asset*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -285,11 +267,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -346,9 +332,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
  recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
  recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
- recent.entity.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE TO_STRING(host.risk.calculated_level) IS NOT NULL,
- recent.entity.risk.calculated_score = LAST(TO_DOUBLE(host.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score) IS NOT NULL,
- recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(host.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score_norm) IS NOT NULL,
  recent.event.module = VALUES(TO_STRING(event.module)),
  recent.event.dataset = VALUES(TO_STRING(event.dataset)),
  recent.data_stream.dataset = VALUES(TO_STRING(data_stream.dataset)),
@@ -356,7 +339,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE TO_STRING(host.entity.type) IS NOT NULL,
  recent.entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE TO_STRING(host.entity.sub_type) IS NOT NULL,
  recent.entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE TO_STRING(host.entity.url) IS NOT NULL,
- recent.entity.attributes.watchlists = VALUES(TO_STRING(host.entity.attributes.watchlists)),
  recent.entity.attributes.asset = LAST(TO_BOOLEAN(host.entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.asset) IS NOT NULL,
  recent.entity.attributes.managed = LAST(TO_BOOLEAN(host.entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.managed) IS NOT NULL,
  recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(host.entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.mfa_enabled) IS NOT NULL,
@@ -364,11 +346,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.attributes.permissions = VALUES(TO_STRING(host.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(host.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
- recent.entity.behaviors.rule_names = VALUES(TO_STRING(host.entity.behaviors.rule_names)),
- recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(host.entity.behaviors.anomaly_job_ids)),
  recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(host.entity.relationships.administers.host.id)),
  recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(host.entity.relationships.administers.user.id)),
  recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(host.entity.relationships.administers.user.email)),
@@ -424,11 +404,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id)),
- recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(host.entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.resolved_to) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(host.entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
@@ -488,9 +464,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  asset.environment = COALESCE(recent.asset.environment, asset.environment),
  asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
- entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
- entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
  event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 49),
  data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
@@ -498,7 +471,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
  entity.url = COALESCE(recent.entity.url, entity.url),
- entity.attributes.watchlists = MV_SLICE(MV_UNION(recent.entity.attributes.watchlists, entity.attributes.watchlists), 0, 49),
  entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
  entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
  entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
@@ -509,8 +481,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
  entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
  entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
- entity.behaviors.rule_names = MV_SLICE(MV_UNION(recent.entity.behaviors.rule_names, entity.behaviors.rule_names), 0, 49),
- entity.behaviors.anomaly_job_ids = MV_SLICE(MV_UNION(recent.entity.behaviors.anomaly_job_ids, entity.behaviors.anomaly_job_ids), 0, 49),
  entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
@@ -567,10 +537,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
- entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
- entity.relationships.resolution.risk.calculated_level = COALESCE(recent.entity.relationships.resolution.risk.calculated_level, entity.relationships.resolution.risk.calculated_level),
- entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
- entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
@@ -591,7 +557,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host with pagination 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -599,11 +566,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -660,9 +631,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
  recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
  recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
- recent.entity.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE TO_STRING(host.risk.calculated_level) IS NOT NULL,
- recent.entity.risk.calculated_score = LAST(TO_DOUBLE(host.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score) IS NOT NULL,
- recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(host.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score_norm) IS NOT NULL,
  recent.event.module = VALUES(TO_STRING(event.module)),
  recent.event.dataset = VALUES(TO_STRING(event.dataset)),
  recent.data_stream.dataset = VALUES(TO_STRING(data_stream.dataset)),
@@ -670,7 +638,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE TO_STRING(host.entity.type) IS NOT NULL,
  recent.entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE TO_STRING(host.entity.sub_type) IS NOT NULL,
  recent.entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE TO_STRING(host.entity.url) IS NOT NULL,
- recent.entity.attributes.watchlists = VALUES(TO_STRING(host.entity.attributes.watchlists)),
  recent.entity.attributes.asset = LAST(TO_BOOLEAN(host.entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.asset) IS NOT NULL,
  recent.entity.attributes.managed = LAST(TO_BOOLEAN(host.entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.managed) IS NOT NULL,
  recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(host.entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.mfa_enabled) IS NOT NULL,
@@ -678,11 +645,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.attributes.permissions = VALUES(TO_STRING(host.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(host.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
- recent.entity.behaviors.rule_names = VALUES(TO_STRING(host.entity.behaviors.rule_names)),
- recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(host.entity.behaviors.anomaly_job_ids)),
  recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(host.entity.relationships.administers.host.id)),
  recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(host.entity.relationships.administers.user.id)),
  recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(host.entity.relationships.administers.user.email)),
@@ -738,11 +703,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id)),
- recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(host.entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.resolved_to) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(host.entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
@@ -805,9 +766,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  asset.environment = COALESCE(recent.asset.environment, asset.environment),
  asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
- entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
- entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
  event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 49),
  data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
@@ -815,7 +773,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
  entity.url = COALESCE(recent.entity.url, entity.url),
- entity.attributes.watchlists = MV_SLICE(MV_UNION(recent.entity.attributes.watchlists, entity.attributes.watchlists), 0, 49),
  entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
  entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
  entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
@@ -826,8 +783,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
  entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
  entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
- entity.behaviors.rule_names = MV_SLICE(MV_UNION(recent.entity.behaviors.rule_names, entity.behaviors.rule_names), 0, 49),
- entity.behaviors.anomaly_job_ids = MV_SLICE(MV_UNION(recent.entity.behaviors.anomaly_job_ids, entity.behaviors.anomaly_job_ids), 0, 49),
  entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
@@ -884,10 +839,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
- entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
- entity.relationships.resolution.risk.calculated_level = COALESCE(recent.entity.relationships.resolution.risk.calculated_level, entity.relationships.resolution.risk.calculated_level),
- entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
- entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
@@ -908,7 +859,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host with recoveryId 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -916,11 +868,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -977,9 +933,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
  recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
  recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
- recent.entity.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE TO_STRING(host.risk.calculated_level) IS NOT NULL,
- recent.entity.risk.calculated_score = LAST(TO_DOUBLE(host.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score) IS NOT NULL,
- recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(host.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.risk.calculated_score_norm) IS NOT NULL,
  recent.event.module = VALUES(TO_STRING(event.module)),
  recent.event.dataset = VALUES(TO_STRING(event.dataset)),
  recent.data_stream.dataset = VALUES(TO_STRING(data_stream.dataset)),
@@ -987,7 +940,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE TO_STRING(host.entity.type) IS NOT NULL,
  recent.entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE TO_STRING(host.entity.sub_type) IS NOT NULL,
  recent.entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE TO_STRING(host.entity.url) IS NOT NULL,
- recent.entity.attributes.watchlists = VALUES(TO_STRING(host.entity.attributes.watchlists)),
  recent.entity.attributes.asset = LAST(TO_BOOLEAN(host.entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.asset) IS NOT NULL,
  recent.entity.attributes.managed = LAST(TO_BOOLEAN(host.entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.managed) IS NOT NULL,
  recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(host.entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(host.entity.attributes.mfa_enabled) IS NOT NULL,
@@ -995,11 +947,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.attributes.permissions = VALUES(TO_STRING(host.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(host.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(host.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(host.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(host.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(host.entity.lifecycle.last_activity) IS NOT NULL,
- recent.entity.behaviors.rule_names = VALUES(TO_STRING(host.entity.behaviors.rule_names)),
- recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(host.entity.behaviors.anomaly_job_ids)),
  recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(host.entity.relationships.administers.host.id)),
  recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(host.entity.relationships.administers.user.id)),
  recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(host.entity.relationships.administers.user.email)),
@@ -1055,11 +1005,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(host.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(host.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(host.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id)),
- recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(host.entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.resolved_to) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(host.entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(host.entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
@@ -1122,9 +1068,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  asset.environment = COALESCE(recent.asset.environment, asset.environment),
  asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
- entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
- entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
  event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 49),
  data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
@@ -1132,7 +1075,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
  entity.url = COALESCE(recent.entity.url, entity.url),
- entity.attributes.watchlists = MV_SLICE(MV_UNION(recent.entity.attributes.watchlists, entity.attributes.watchlists), 0, 49),
  entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
  entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
  entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
@@ -1143,8 +1085,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
  entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
  entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
- entity.behaviors.rule_names = MV_SLICE(MV_UNION(recent.entity.behaviors.rule_names, entity.behaviors.rule_names), 0, 49),
- entity.behaviors.anomaly_job_ids = MV_SLICE(MV_UNION(recent.entity.behaviors.anomaly_job_ids, entity.behaviors.anomaly_job_ids), 0, 49),
  entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
@@ -1201,10 +1141,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
- entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
- entity.relationships.resolution.risk.calculated_level = COALESCE(recent.entity.relationships.resolution.risk.calculated_level, entity.relationships.resolution.risk.calculated_level),
- entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
- entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
@@ -1225,7 +1161,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1233,9 +1170,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = service.name
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ recent.entity.EngineMetadata.UntypedId = TO_STRING(service.name)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1261,9 +1198,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
  recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
  recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
- recent.entity.risk.calculated_level = LAST(TO_STRING(service.risk.calculated_level), @timestamp) WHERE TO_STRING(service.risk.calculated_level) IS NOT NULL,
- recent.entity.risk.calculated_score = LAST(TO_DOUBLE(service.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(service.risk.calculated_score) IS NOT NULL,
- recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(service.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(service.risk.calculated_score_norm) IS NOT NULL,
  recent.event.module = VALUES(TO_STRING(event.module)),
  recent.event.dataset = VALUES(TO_STRING(event.dataset)),
  recent.data_stream.dataset = VALUES(TO_STRING(data_stream.dataset)),
@@ -1271,7 +1205,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.type = LAST(TO_STRING(service.entity.type), @timestamp) WHERE TO_STRING(service.entity.type) IS NOT NULL,
  recent.entity.sub_type = LAST(TO_STRING(service.entity.sub_type), @timestamp) WHERE TO_STRING(service.entity.sub_type) IS NOT NULL,
  recent.entity.url = LAST(TO_STRING(service.entity.url), @timestamp) WHERE TO_STRING(service.entity.url) IS NOT NULL,
- recent.entity.attributes.watchlists = VALUES(TO_STRING(service.entity.attributes.watchlists)),
  recent.entity.attributes.asset = LAST(TO_BOOLEAN(service.entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(service.entity.attributes.asset) IS NOT NULL,
  recent.entity.attributes.managed = LAST(TO_BOOLEAN(service.entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(service.entity.attributes.managed) IS NOT NULL,
  recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(service.entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(service.entity.attributes.mfa_enabled) IS NOT NULL,
@@ -1279,11 +1212,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.attributes.permissions = VALUES(TO_STRING(service.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(service.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(service.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(service.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(service.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(service.entity.lifecycle.last_activity) IS NOT NULL,
- recent.entity.behaviors.rule_names = VALUES(TO_STRING(service.entity.behaviors.rule_names)),
- recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(service.entity.behaviors.anomaly_job_ids)),
  recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(service.entity.relationships.administers.host.id)),
  recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(service.entity.relationships.administers.user.id)),
  recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(service.entity.relationships.administers.user.email)),
@@ -1339,11 +1270,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.relationships.supervises.raw_identifiers.host.name = VALUES(TO_STRING(service.entity.relationships.supervises.host.name)),
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(service.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(service.entity.relationships.supervises.service.name)),
- recent.entity.relationships.supervises.ids = VALUES(TO_STRING(service.entity.relationships.supervises.entity.id)),
- recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(service.entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(service.entity.relationships.resolution.resolved_to) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(service.entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(service.entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(service.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(service.entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(service.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(service.entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL
+ recent.entity.relationships.supervises.ids = VALUES(TO_STRING(service.entity.relationships.supervises.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
@@ -1372,9 +1299,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  asset.environment = COALESCE(recent.asset.environment, asset.environment),
  asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
- entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
- entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
  event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 49),
  data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
@@ -1382,7 +1306,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
  entity.url = COALESCE(recent.entity.url, entity.url),
- entity.attributes.watchlists = MV_SLICE(MV_UNION(recent.entity.attributes.watchlists, entity.attributes.watchlists), 0, 49),
  entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
  entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
  entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
@@ -1393,8 +1316,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
  entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
  entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
- entity.behaviors.rule_names = MV_SLICE(MV_UNION(recent.entity.behaviors.rule_names, entity.behaviors.rule_names), 0, 49),
- entity.behaviors.anomaly_job_ids = MV_SLICE(MV_UNION(recent.entity.behaviors.anomaly_job_ids, entity.behaviors.anomaly_job_ids), 0, 49),
  entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
@@ -1451,10 +1372,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
- entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
- entity.relationships.resolution.risk.calculated_level = COALESCE(recent.entity.relationships.resolution.risk.calculated_level, entity.relationships.resolution.risk.calculated_level),
- entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
- entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
@@ -1472,7 +1389,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1480,17 +1398,30 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
  _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
- _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL)
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ recent.entity.EngineMetadata.UntypedId = CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1520,9 +1451,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE TO_STRING(asset.environment) IS NOT NULL,
  recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE TO_STRING(asset.criticality) IS NOT NULL,
  recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE TO_STRING(asset.business_unit) IS NOT NULL,
- recent.entity.risk.calculated_level = LAST(TO_STRING(user.risk.calculated_level), @timestamp) WHERE TO_STRING(user.risk.calculated_level) IS NOT NULL,
- recent.entity.risk.calculated_score = LAST(TO_DOUBLE(user.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(user.risk.calculated_score) IS NOT NULL,
- recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(user.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(user.risk.calculated_score_norm) IS NOT NULL,
  recent.event.module = VALUES(TO_STRING(event.module)),
  recent.event.dataset = VALUES(TO_STRING(event.dataset)),
  recent.data_stream.dataset = VALUES(TO_STRING(data_stream.dataset)),
@@ -1530,7 +1458,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  recent.entity.type = LAST(TO_STRING(user.entity.type), @timestamp) WHERE TO_STRING(user.entity.type) IS NOT NULL,
  recent.entity.sub_type = LAST(TO_STRING(user.entity.sub_type), @timestamp) WHERE TO_STRING(user.entity.sub_type) IS NOT NULL,
  recent.entity.url = LAST(TO_STRING(user.entity.url), @timestamp) WHERE TO_STRING(user.entity.url) IS NOT NULL,
- recent.entity.attributes.watchlists = VALUES(TO_STRING(user.entity.attributes.watchlists)),
  recent.entity.attributes.asset = LAST(TO_BOOLEAN(user.entity.attributes.asset), @timestamp) WHERE TO_BOOLEAN(user.entity.attributes.asset) IS NOT NULL,
  recent.entity.attributes.managed = LAST(TO_BOOLEAN(user.entity.attributes.managed), @timestamp) WHERE TO_BOOLEAN(user.entity.attributes.managed) IS NOT NULL,
  recent.entity.attributes.mfa_enabled = LAST(TO_BOOLEAN(user.entity.attributes.mfa_enabled), @timestamp) WHERE TO_BOOLEAN(user.entity.attributes.mfa_enabled) IS NOT NULL,
@@ -1538,11 +1465,9 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  recent.entity.attributes.permissions = VALUES(TO_STRING(user.entity.attributes.permissions)),
  recent.entity.attributes.known_redirects = VALUES(TO_STRING(user.entity.attributes.known_redirects)),
  recent.entity.attributes.oauth_consent_restriction = LAST(TO_STRING(user.entity.attributes.oauth_consent_restriction), @timestamp) WHERE TO_STRING(user.entity.attributes.oauth_consent_restriction) IS NOT NULL,
- recent.entity.lifecycle.first_seen = FIRST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
- recent.entity.lifecycle.last_seen = LAST(@timestamp, @timestamp) WHERE @timestamp IS NOT NULL,
+ recent.entity.lifecycle.first_seen = FIRST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
+ recent.entity.lifecycle.last_seen = LAST(TO_DATETIME(@timestamp), @timestamp) WHERE TO_DATETIME(@timestamp) IS NOT NULL,
  recent.entity.lifecycle.last_activity = LAST(TO_DATETIME(user.entity.lifecycle.last_activity), @timestamp) WHERE TO_DATETIME(user.entity.lifecycle.last_activity) IS NOT NULL,
- recent.entity.behaviors.rule_names = VALUES(TO_STRING(user.entity.behaviors.rule_names)),
- recent.entity.behaviors.anomaly_job_ids = VALUES(TO_STRING(user.entity.behaviors.anomaly_job_ids)),
  recent.entity.relationships.administers.raw_identifiers.host.id = VALUES(TO_STRING(user.entity.relationships.administers.host.id)),
  recent.entity.relationships.administers.raw_identifiers.user.id = VALUES(TO_STRING(user.entity.relationships.administers.user.id)),
  recent.entity.relationships.administers.raw_identifiers.user.email = VALUES(TO_STRING(user.entity.relationships.administers.user.email)),
@@ -1599,10 +1524,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  recent.entity.relationships.supervises.raw_identifiers.user.name = VALUES(TO_STRING(user.entity.relationships.supervises.user.name)),
  recent.entity.relationships.supervises.raw_identifiers.service.name = VALUES(TO_STRING(user.entity.relationships.supervises.service.name)),
  recent.entity.relationships.supervises.ids = VALUES(TO_STRING(user.entity.relationships.supervises.entity.id)),
- recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(user.entity.relationships.resolution.resolved_to), @timestamp) WHERE TO_STRING(user.entity.relationships.resolution.resolved_to) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(user.entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE TO_STRING(user.entity.relationships.resolution.risk.calculated_level) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(user.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE TO_DOUBLE(user.entity.relationships.resolution.risk.calculated_score) IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(user.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE TO_DOUBLE(user.entity.relationships.resolution.risk.calculated_score_norm) IS NOT NULL,
  recent.host.entity.id = VALUES(TO_STRING(host.entity.id)),
  recent.host.id = VALUES(TO_STRING(host.id)),
  recent.host.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL
@@ -1613,11 +1534,11 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
 | WHERE TO_STRING(entity.id) IS NOT NULL OR TO_STRING(recent.entity.namespace) == \\"local\\" OR MV_CONTAINS(TO_STRING(recent.event.kind), \\"asset\\") OR (TO_STRING(recent.event.kind) != \\"enrichment\\" OR TO_STRING(recent.event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(recent.event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(recent.event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"group\\")) 
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
-| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\"), CONCAT(TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name)
-| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND NOT (TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\")), TO_STRING(recent.user.name), recent.entity.name)
-| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), TO_STRING(recent.user.name), recent.entity.name),
-    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), \\"high\\", recent.entity.confidence)
-| EVAL recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) == \\"local\\"), \\"medium\\", recent.entity.confidence)
+| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\"), CONCAT(TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name),
+    recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND NOT (TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\")), TO_STRING(recent.user.name), recent.entity.name),
+    recent.entity.name = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), TO_STRING(recent.user.name), recent.entity.name),
+    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), \\"high\\", recent.entity.confidence),
+    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) == \\"local\\"), \\"medium\\", recent.entity.confidence)
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 49),
  event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 49),
@@ -1644,9 +1565,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  asset.environment = COALESCE(recent.asset.environment, asset.environment),
  asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
- entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
- entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 49),
  event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 49),
  data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
@@ -1654,7 +1572,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
  entity.url = COALESCE(recent.entity.url, entity.url),
- entity.attributes.watchlists = MV_SLICE(MV_UNION(recent.entity.attributes.watchlists, entity.attributes.watchlists), 0, 49),
  entity.attributes.asset = COALESCE(recent.entity.attributes.asset, entity.attributes.asset),
  entity.attributes.managed = COALESCE(recent.entity.attributes.managed, entity.attributes.managed),
  entity.attributes.mfa_enabled = COALESCE(recent.entity.attributes.mfa_enabled, entity.attributes.mfa_enabled),
@@ -1665,8 +1582,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  entity.lifecycle.first_seen = COALESCE(entity.lifecycle.first_seen, recent.entity.lifecycle.first_seen),
  entity.lifecycle.last_seen = COALESCE(recent.entity.lifecycle.last_seen, entity.lifecycle.last_seen),
  entity.lifecycle.last_activity = COALESCE(recent.entity.lifecycle.last_activity, entity.lifecycle.last_activity),
- entity.behaviors.rule_names = MV_SLICE(MV_UNION(recent.entity.behaviors.rule_names, entity.behaviors.rule_names), 0, 49),
- entity.behaviors.anomaly_job_ids = MV_SLICE(MV_UNION(recent.entity.behaviors.anomaly_job_ids, entity.behaviors.anomaly_job_ids), 0, 49),
  entity.relationships.administers.raw_identifiers.host.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.host.id, entity.relationships.administers.raw_identifiers.host.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.id = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.id, entity.relationships.administers.raw_identifiers.user.id), 0, 49),
  entity.relationships.administers.raw_identifiers.user.email = MV_SLICE(MV_UNION(recent.entity.relationships.administers.raw_identifiers.user.email, entity.relationships.administers.raw_identifiers.user.email), 0, 49),
@@ -1723,10 +1638,6 @@ true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\
  entity.relationships.supervises.raw_identifiers.user.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.user.name, entity.relationships.supervises.raw_identifiers.user.name), 0, 49),
  entity.relationships.supervises.raw_identifiers.service.name = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.raw_identifiers.service.name, entity.relationships.supervises.raw_identifiers.service.name), 0, 49),
  entity.relationships.supervises.ids = MV_SLICE(MV_UNION(recent.entity.relationships.supervises.ids, entity.relationships.supervises.ids), 0, 49),
- entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
- entity.relationships.resolution.risk.calculated_level = COALESCE(recent.entity.relationships.resolution.risk.calculated_level, entity.relationships.resolution.risk.calculated_level),
- entity.relationships.resolution.risk.calculated_score = COALESCE(recent.entity.relationships.resolution.risk.calculated_score, entity.relationships.resolution.risk.calculated_score),
- entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
  host.entity.id = MV_SLICE(MV_UNION(recent.host.entity.id, host.entity.id), 0, 49),
  host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 49),
  host.name = COALESCE(recent.host.name, host.name),
@@ -1748,7 +1659,8 @@ host*,
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for generic entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1757,7 +1669,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for host entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1766,7 +1679,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for service entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1775,7 +1689,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for user entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")

@@ -40,9 +40,9 @@ export interface AlertActionEventEnvelope {
  *
  * @example
  * ```ts
- * type EpisodeAckedEvent = BaseAlertActionEvent<
- *   'episode.acked',
- *   { reason: string | null }
+ * type EpisodeTaggedEvent = BaseAlertActionEvent<
+ *   'episode.tagged',
+ *   { tags: readonly string[] }
  * >;
  * ```
  */
@@ -57,25 +57,148 @@ export const EPISODE_ASSIGNED_EVENT_TYPE = 'episode.assigned' as const;
 
 /** Payload of {@link EpisodeAssignedEvent}. */
 export interface EpisodeAssignedPayload {
-  /** New assignee user-profile uid, or `null` when unassigning. */
-  readonly assigneeUid: string | null;
+  /** New assignee user-profile uid. */
+  readonly assigneeUid: string;
 }
 
 /**
- * Domain event published when the assignee of an alerting episode changes —
- * either set to a specific user, or cleared to `null`.
+ * Domain event published when an alerting episode is assigned to a user.
  */
 export type EpisodeAssignedEvent = BaseAlertActionEvent<
   typeof EPISODE_ASSIGNED_EVENT_TYPE,
   EpisodeAssignedPayload
 >;
 
+/** Discriminator value for {@link EpisodeUnassignedEvent}. */
+export const EPISODE_UNASSIGNED_EVENT_TYPE = 'episode.unassigned' as const;
+
+/**
+ * Domain event published when the assignee of an alerting episode is cleared.
+ * Carries no extra payload beyond the shared envelope.
+ */
+export type EpisodeUnassignedEvent = BaseAlertActionEvent<
+  typeof EPISODE_UNASSIGNED_EVENT_TYPE,
+  Record<string, never>
+>;
+
+/** Discriminator value for {@link EpisodeAckedEvent}. */
+export const EPISODE_ACKED_EVENT_TYPE = 'episode.acked' as const;
+
+/**
+ * Domain event published when an alerting episode is acknowledged.
+ * Carries no extra payload beyond the shared envelope.
+ */
+export type EpisodeAckedEvent = BaseAlertActionEvent<
+  typeof EPISODE_ACKED_EVENT_TYPE,
+  Record<string, never>
+>;
+
+/** Discriminator value for {@link EpisodeUnackedEvent}. */
+export const EPISODE_UNACKED_EVENT_TYPE = 'episode.unacked' as const;
+
+/**
+ * Domain event published when acknowledgement is removed from an alerting episode.
+ * Carries no extra payload beyond the shared envelope.
+ */
+export type EpisodeUnackedEvent = BaseAlertActionEvent<
+  typeof EPISODE_UNACKED_EVENT_TYPE,
+  Record<string, never>
+>;
+
+/** Discriminator value for {@link EpisodeTaggedEvent}. */
+export const EPISODE_TAGGED_EVENT_TYPE = 'episode.tagged' as const;
+
+/** Payload of {@link EpisodeTaggedEvent}. */
+export interface EpisodeTaggedPayload {
+  /** Tags added to the alerting episode. */
+  readonly tags: readonly string[];
+}
+
+/**
+ * Domain event published when tags are added to an alerting episode.
+ */
+export type EpisodeTaggedEvent = BaseAlertActionEvent<
+  typeof EPISODE_TAGGED_EVENT_TYPE,
+  EpisodeTaggedPayload
+>;
+
+/** Discriminator value for {@link EpisodeSnoozedEvent}. */
+export const EPISODE_SNOOZED_EVENT_TYPE = 'episode.snoozed' as const;
+
+/** Payload of {@link EpisodeSnoozedEvent}. */
+export interface EpisodeSnoozedPayload {
+  /** ISO datetime when the snooze expires, or `null` when it has no expiry. */
+  readonly expiry: string | null;
+}
+
+/**
+ * Domain event published when an alerting episode is snoozed.
+ */
+export type EpisodeSnoozedEvent = BaseAlertActionEvent<
+  typeof EPISODE_SNOOZED_EVENT_TYPE,
+  EpisodeSnoozedPayload
+>;
+
+/** Discriminator value for {@link EpisodeUnsnoozedEvent}. */
+export const EPISODE_UNSNOOZED_EVENT_TYPE = 'episode.unsnoozed' as const;
+
+/**
+ * Domain event published when snooze is removed from an alerting episode.
+ * Carries no extra payload beyond the shared envelope.
+ */
+export type EpisodeUnsnoozedEvent = BaseAlertActionEvent<
+  typeof EPISODE_UNSNOOZED_EVENT_TYPE,
+  Record<string, never>
+>;
+
+/** Discriminator value for {@link EpisodeActivatedEvent}. */
+export const EPISODE_ACTIVATED_EVENT_TYPE = 'episode.activated' as const;
+
+/** Payload of {@link EpisodeActivatedEvent}. */
+export interface EpisodeActivatedPayload {
+  /** Reason the alerting episode was activated. */
+  readonly reason: string;
+}
+
+/**
+ * Domain event published when an alerting episode is activated.
+ */
+export type EpisodeActivatedEvent = BaseAlertActionEvent<
+  typeof EPISODE_ACTIVATED_EVENT_TYPE,
+  EpisodeActivatedPayload
+>;
+
+/** Discriminator value for {@link EpisodeDeactivatedEvent}. */
+export const EPISODE_DEACTIVATED_EVENT_TYPE = 'episode.deactivated' as const;
+
+/** Payload of {@link EpisodeDeactivatedEvent}. */
+export interface EpisodeDeactivatedPayload {
+  /** Reason the alerting episode was deactivated. */
+  readonly reason: string;
+}
+
+/**
+ * Domain event published when an alerting episode is deactivated.
+ */
+export type EpisodeDeactivatedEvent = BaseAlertActionEvent<
+  typeof EPISODE_DEACTIVATED_EVENT_TYPE,
+  EpisodeDeactivatedPayload
+>;
+
 /**
  * Discriminated union of every alert-action domain event.
  *
- * Extend this when a new alert-action event type is added (ack, snooze,
- * tag, …). Cross-domain events (rule executor, dispatcher) live under
- * their own unions and are composed into `AlertingDomainEvent` in
- * `lib/events/domain_events`.
+ * Extend this when a new alert-action event type is added. Cross-domain
+ * events (rule executor, dispatcher) live under their own unions and are
+ * composed into `AlertingDomainEvent` in `lib/events/domain_events`.
  */
-export type AlertActionEvent = EpisodeAssignedEvent;
+export type AlertActionEvent =
+  | EpisodeAssignedEvent
+  | EpisodeUnassignedEvent
+  | EpisodeAckedEvent
+  | EpisodeUnackedEvent
+  | EpisodeTaggedEvent
+  | EpisodeSnoozedEvent
+  | EpisodeUnsnoozedEvent
+  | EpisodeActivatedEvent
+  | EpisodeDeactivatedEvent;

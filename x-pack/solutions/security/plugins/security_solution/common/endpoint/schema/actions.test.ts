@@ -27,6 +27,7 @@ import {
 } from '../../api/endpoint';
 import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import { MemoryDumpActionRequestSchema } from '../../api/endpoint/actions/response_actions/memory_dump';
+import { isActionSupportedByAgentType } from '../service/response_actions/is_response_action_supported';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('actions schemas', () => {
@@ -1214,13 +1215,18 @@ describe('actions schemas', () => {
       });
     });
   });
-  describe('CancelActionRequestSchema', () => {
+
+  describe.each(
+    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) =>
+      isActionSupportedByAgentType(agentType, 'cancel', 'manual')
+    )
+  )('CancelActionRequestSchema for agent type: %s', (agentType) => {
     it('should validate valid cancel request with all base fields', () => {
       expect(() => {
         CancelActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint-123'],
           comment: 'Cancelling action due to change in requirements',
-          agent_type: 'microsoft_defender_endpoint',
+          agent_type: agentType,
           parameters: {
             id: '12345678-1234-5678-9012-123456789012',
           },
@@ -1235,6 +1241,7 @@ describe('actions schemas', () => {
             id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
+          agent_type: agentType,
         });
       }).not.toThrow();
     });
@@ -1245,6 +1252,7 @@ describe('actions schemas', () => {
           parameters: {
             id: '',
           },
+          agent_type: agentType,
           endpoint_ids: ['endpoint-123'],
         });
       }).toThrow();
@@ -1257,6 +1265,7 @@ describe('actions schemas', () => {
             id: '    ',
           },
           endpoint_ids: ['endpoint-123'],
+          agent_type: agentType,
         });
       }).toThrow();
     });
@@ -1267,6 +1276,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['endpoint-123'],
           comment: 'Cancel reason',
           parameters: {},
+          agent_type: agentType,
         });
       }).toThrow();
     });
@@ -1278,6 +1288,7 @@ describe('actions schemas', () => {
             id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
+          agent_type: agentType,
           comment: 'Cancelling due to policy change',
         });
       }).not.toThrow();
@@ -1289,6 +1300,7 @@ describe('actions schemas', () => {
           parameters: {
             id: '12345678-1234-5678-9012-123456789012',
           },
+          agent_type: agentType,
           endpoint_ids: ['endpoint-123'],
         });
       }).not.toThrow();
@@ -1301,12 +1313,41 @@ describe('actions schemas', () => {
             id: '12345678-1234-5678-9012-123456789012',
           },
           endpoint_ids: ['endpoint-123'],
+          agent_type: agentType,
           alert_ids: ['alert-456'],
           case_ids: ['case-789'],
           comment: 'Cancel with related alerts and cases',
         });
       }).not.toThrow();
     });
+
+    if (agentType === 'endpoint') {
+      it('should accept `--force` argument is present', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            parameters: {
+              id: '12345678-1234-5678-9012-123456789012',
+              force: true,
+            },
+            endpoint_ids: ['endpoint-123'],
+            agent_type: agentType,
+          });
+        }).not.toThrow();
+      });
+    } else {
+      it('should reject if `-force` argument is present', () => {
+        expect(() => {
+          CancelActionRequestSchema.body.validate({
+            parameters: {
+              id: '12345678-1234-5678-9012-123456789012',
+              force: true,
+            },
+            endpoint_ids: ['endpoint-123'],
+            agent_type: agentType,
+          });
+        }).toThrow();
+      });
+    }
   });
 
   describe('MemoryDumpActionRequestSchema', () => {

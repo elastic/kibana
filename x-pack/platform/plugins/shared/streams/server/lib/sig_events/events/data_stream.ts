@@ -21,19 +21,17 @@ export const eventsMappings = {
     discovery_slug: mappings.keyword(),
     previous_event_id: mappings.keyword(),
     stream_names: mappings.keyword(),
-    verdict: mappings.keyword(),
-    impact: mappings.keyword(),
+    status: mappings.keyword(),
     title: mappings.text(),
     summary: mappings.text(),
   },
 } satisfies MappingsDefinition;
-
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
 export type { SigEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 4,
+  version: 6,
   hidden: true,
   template: {
     priority: 500,

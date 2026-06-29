@@ -131,6 +131,46 @@ describe('Create OAuth Client route', () => {
     ).toThrow(/project_id/);
   });
 
+  describe('client_name length validation aligned with UIAM (128)', () => {
+    it('accepts a client_name at the 128-character limit', () => {
+      expect(() => createClientBodySchema.validate({ client_name: 'a'.repeat(128) })).not.toThrow();
+    });
+
+    it('rejects a client_name over the 128-character limit', () => {
+      expect(() => createClientBodySchema.validate({ client_name: 'a'.repeat(129) })).toThrow(
+        /client_name/
+      );
+    });
+  });
+
+  describe('redirect_uris size validation aligned with UIAM (1-20)', () => {
+    const uri = 'https://example.com/cb';
+
+    it('rejects an empty redirect_uris array', () => {
+      expect(() =>
+        createClientBodySchema.validate({ client_name: 'Test', redirect_uris: [] })
+      ).toThrow(/redirect_uris/);
+    });
+
+    it('accepts 20 redirect URIs', () => {
+      expect(() =>
+        createClientBodySchema.validate({
+          client_name: 'Test',
+          redirect_uris: Array.from({ length: 20 }, () => uri),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects 21 redirect URIs', () => {
+      expect(() =>
+        createClientBodySchema.validate({
+          client_name: 'Test',
+          redirect_uris: Array.from({ length: 21 }, () => uri),
+        })
+      ).toThrow(/redirect_uris/);
+    });
+  });
+
   it('overrides any body-supplied `resource` with the configured value as defense-in-depth', async () => {
     oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
 

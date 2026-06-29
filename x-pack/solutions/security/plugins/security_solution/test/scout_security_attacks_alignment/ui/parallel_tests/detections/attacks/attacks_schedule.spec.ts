@@ -25,7 +25,7 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
       });
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {

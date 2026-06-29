@@ -77,11 +77,13 @@ export interface MenuItem {
 }
 
 /**
- * The complete navigation structure containing primary and footer items.
+ * The complete navigation structure containing primary, overflow, and footer items.
  */
 export interface NavigationStructure {
   /** Items displayed in the footer area of the navigation. */
   footerItems: MenuItem[];
+  /** Items that are always placed in the overflow ("More") menu. */
+  overflowItems?: MenuItem[];
   /** Items displayed in the primary/main area of the navigation. */
   primaryItems: MenuItem[];
 }
@@ -120,6 +122,8 @@ export interface NavigationProps {
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
+  /** When true, renders a centered horizontal separator at the top of the side nav. */
+  showTopSeparator?: boolean;
   /** Content to display inside the side panel footer. */
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */

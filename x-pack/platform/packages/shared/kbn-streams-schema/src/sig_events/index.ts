@@ -7,7 +7,14 @@
 
 export { detectionSchema, type Detection } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
-export { sigEventSchema, type SigEvent } from './events';
+export type { KnowledgeIndicator } from '../queries';
+export {
+  SIG_EVENT_STATUS_OPTIONS,
+  sigEventSchema,
+  sigEventStatusSchema,
+  type SigEvent,
+  type SigEventStatus,
+} from './events';
 export {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,

@@ -85,6 +85,26 @@ describe('episodes_list_url_state', () => {
         filterState: { status: 'active' },
       });
     });
+
+    it('reads groupHash and groupingValues from the URL blob', async () => {
+      const storage = await createKbnTestUrlStorage({
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', region: null },
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toMatchObject({
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', region: null },
+      });
+    });
+
+    it('ignores groupingValues when it is not a plain object', async () => {
+      const storage = await createKbnTestUrlStorage({
+        groupingValues: 'not-an-object',
+      });
+      expect(
+        readEpisodesListAppStateFromUrlStorage(storage).filterState.groupingValues
+      ).toBeUndefined();
+    });
   });
 
   describe('writeEpisodesListAppStateToUrlStorage', () => {
@@ -117,6 +137,27 @@ describe('episodes_list_url_state', () => {
           queryString: 'host',
           timeFrom: 'now-7d',
           timeTo: 'now',
+        },
+      });
+    });
+
+    it('round-trips groupHash and groupingValues', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        {
+          status: 'active',
+          groupHash: 'xyz',
+          groupingValues: { 'host.name': 'web-01', region: null },
+        },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [EPISODES_LIST_APP_STATE_KEY]: {
+          groupHash: 'xyz',
+          groupingValues: { 'host.name': 'web-01', region: null },
         },
       });
     });

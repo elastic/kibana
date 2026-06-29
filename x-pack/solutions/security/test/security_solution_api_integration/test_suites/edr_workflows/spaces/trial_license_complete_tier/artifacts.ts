@@ -17,7 +17,7 @@ import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { exceptionItemToCreateExceptionItem } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
   ExceptionListItemSchema,

@@ -14,7 +14,7 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { omit } from 'lodash';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { enableFleetSpaceAwareness } from './fleet_services';
 import {
   fetchKibanaStatus,
@@ -333,15 +333,9 @@ export const createKbnClient = ({
  */
 export const buildUrlWithSpaceId = (url: string, spaceId: string): string => {
   const newUrl = new URL(url);
-  let requestPath = newUrl.pathname;
-  const currentUrlSpace = getSpaceIdFromPath(requestPath); // NOTE: we are not currently supporting a Kibana base path prefix
+  const { pathname } = getSpaceIdFromPath(newUrl.pathname);
 
-  if (currentUrlSpace.pathHasExplicitSpaceIdentifier) {
-    // Get the request path (if any) from the url
-    requestPath = requestPath.substring(`/s/${currentUrlSpace.spaceId}`.length) || '/';
-  }
-
-  newUrl.pathname = addSpaceIdToPath('/', spaceId, requestPath);
+  newUrl.pathname = addSpaceIdToPath('/', spaceId, pathname);
 
   return newUrl.href;
 };

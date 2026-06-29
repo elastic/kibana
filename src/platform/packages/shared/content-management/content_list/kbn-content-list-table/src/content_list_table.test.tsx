@@ -14,6 +14,7 @@ import {
   contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
+  type ContentListItemConfig,
 } from '@kbn/content-list-provider';
 import { ContentListTable, getRowId } from './content_list_table';
 
@@ -36,9 +37,11 @@ const createWrapper =
     findItems?: jest.Mock;
     isReadOnly?: boolean;
     getHref?: (item: { id: string }) => string;
+    item?: ContentListItemConfig;
   }) =>
   ({ children }: { children: React.ReactNode }) => {
-    const { findItems = createFindItems(), isReadOnly, getHref } = options ?? {};
+    const { findItems = createFindItems(), isReadOnly, getHref, item } = options ?? {};
+    const resolvedItem = item ?? (getHref ? { getHref } : undefined);
 
     return (
       <ContentListProvider
@@ -46,7 +49,7 @@ const createWrapper =
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
         dataSource={{ findItems }}
         isReadOnly={isReadOnly}
-        item={getHref ? { getHref } : undefined}
+        item={resolvedItem}
       >
         {children}
       </ContentListProvider>
@@ -498,29 +501,58 @@ describe('ContentListTable', () => {
     });
 
     /**
-     * `Column.Actions` ships `min-width: 'max-content'` to keep its row icons
-     * (including EUI's auto-collapsed 3-dot overflow trigger) on a single
-     * line. That floor only resolves to the unwrapped icon-row width if the
-     * cell's flex container is forbidden from wrapping; otherwise EUI's
-     * default `flex-wrap: wrap` lets `max-content` collapse to the widest
-     * single icon and the column shrinks underneath the trigger.
+     * `Column.Actions` ships `min-width: 'max-content'` to keep its row
+     * icons (including EUI's auto-collapsed 3-dot overflow trigger) on a
+     * single line. That floor only resolves to the unwrapped icon-row
+     * width if the cell's flex container is forbidden from wrapping;
+     * otherwise EUI's default `flex-wrap: wrap` on
+     * `.euiTableCellContent` lets `max-content` collapse to the widest
+     * single icon and the column shrinks, stacking the icons vertically.
      *
-     * jsdom doesn't lay out tables, so we can't observe the visual outcome
-     * directly. We instead assert the CSS rule reaches the document — same
-     * approach as the wide-viewport `Column.Name` test above.
+     * Asserts that the override's selector actually matches body action
+     * cells in the DOM — not just that the rule text is present in a
+     * stylesheet. A previous incarnation of this override targeted
+     * `td[data-test-subj='content-list-table-column-actions']`, but
+     * `EuiBasicTable.renderItemActionsCell` never forwards a column's
+     * `data-test-subj` to its body `<td>` cells (only the header `<th>`
+     * receives it), so the selector matched zero nodes and the rule was
+     * dead. The old test only checked that the rule text was emitted,
+     * which is why the regression kept reappearing. The cascade itself
+     * isn't asserted because jsdom's `getComputedStyle` does not honor
+     * specificity reliably; in a real browser our `(0,3,1)` selector
+     * wins over EUI's single-class `(0,1,0)` rule.
      */
-    it('emits the actions-cell nowrap override as a CSS rule', async () => {
-      const Wrapper = createWrapper();
+    it('emits an actions-cell nowrap override whose selector matches body cells', async () => {
+      const Wrapper = createWrapper({ item: { actions: { delete: { onBulkAction: jest.fn() } } } });
+      const { Column, Action } = ContentListTable;
+
       render(
         <Wrapper>
-          <ContentListTable title="Dashboards" />
+          <ContentListTable title="Dashboards">
+            <Column.Name />
+            <Column.Actions>
+              <Action.Delete />
+            </Column.Actions>
+          </ContentListTable>
         </Wrapper>
       );
 
       expect(await screen.findByText('Dashboard One')).toBeInTheDocument();
 
+      // Sanity: EUI must be tagging body action `<td>`s with the class our
+      // selector anchors on. If this breaks, EUI's class naming changed
+      // and the override needs a new anchor.
+      const actionCells = document.querySelectorAll(
+        'td.euiTableRowCell--hasActions .euiTableCellContent'
+      );
+      expect(actionCells.length).toBeGreaterThan(0);
+
+      // Find the override in the stylesheet by its content (flex-wrap: nowrap
+      // anchored on .euiTableRowCell--hasActions). Scanning by content rather
+      // than by hashed Emotion class keeps the assertion stable across
+      // refactors of `cssActionsCellNoWrap`.
       const styleSheets = Array.from(document.styleSheets);
-      const allRulesText = styleSheets
+      const overrideRule = styleSheets
         .flatMap((sheet) => {
           try {
             return Array.from(sheet.cssRules);
@@ -528,12 +560,20 @@ describe('ContentListTable', () => {
             return [];
           }
         })
-        .map((rule) => rule.cssText)
-        .join('\n');
+        .find(
+          (rule): rule is CSSStyleRule =>
+            rule instanceof CSSStyleRule &&
+            rule.selectorText.includes('.euiTableRowCell--hasActions') &&
+            /nowrap/.test(rule.style.flexWrap ?? rule.cssText)
+        );
+      expect(overrideRule).toBeDefined();
 
-      expect(allRulesText).toMatch(
-        /td\[data-test-subj=['"]content-list-table-column-actions['"]\][^{]*\.euiTableCellContent[^{]*\{[^}]*flex-wrap:\s*nowrap/
-      );
+      // The crucial assertion the old test missed: the rule's selector must
+      // resolve to the same body action cells in the DOM. If a future
+      // refactor anchors the selector on something EUI doesn't emit (the
+      // original regression), this fails immediately.
+      const matchedByOverride = document.querySelectorAll(overrideRule!.selectorText);
+      expect(matchedByOverride.length).toBe(actionCells.length);
     });
 
     it('keeps cell counts in lockstep when consumers add their own columns', async () => {

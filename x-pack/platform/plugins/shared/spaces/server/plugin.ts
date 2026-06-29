@@ -129,9 +129,7 @@ export class SpacesPlugin
   ): SpacesPluginSetupApi {
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
-    const spacesServiceSetup = this.spacesService.setup({
-      basePath: core.http.basePath,
-    });
+    const spacesServiceSetup = this.spacesService.setup();
 
     const getSpacesService = () => {
       if (!this.spacesServiceStart) {
@@ -243,7 +241,6 @@ export class SpacesPlugin
     const spacesClientStart = this.spacesClientService.start(core, plugins.features, plugins.cps);
 
     this.spacesServiceStart = this.spacesService.start({
-      basePath: core.http.basePath,
       spacesClientService: spacesClientStart,
     });
 

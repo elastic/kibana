@@ -9,17 +9,30 @@ import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
 
-import type { AgentPolicy, PackagePolicy, OutputType, ValueOf, Output } from '../types';
+import type {
+  AgentPolicy,
+  PackagePolicy,
+  OutputType,
+  ValueOf,
+  Output,
+  OtelExporterOutput,
+} from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
+  OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
   AGENTLESS_ALLOWED_OUTPUT_TYPES,
   DEFAULT_OUTPUT,
 } from '../constants';
+
+import { packagePolicyHasOtelInputs } from './otelcol_helpers';
+
+const agentPolicyHasOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean =>
+  (agentPolicy.package_policies ?? []).some((pp) => packagePolicyHasOtelInputs(pp.inputs));
 
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,
@@ -47,17 +60,27 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
+  if (agentPolicyHasOtelInputs(agentPolicy)) {
+    return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
+  }
+
   return Object.values(outputType);
 }
 
 /**
- * Return allowed output type for a given package policy
+ * Return allowed output types for a given package policy.
  */
 export function getAllowedOutputTypesForPackagePolicy(
-  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  }
 ): string[] {
   if (packagePolicy.supports_agentless) {
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
+  if (packagePolicyHasOtelInputs(packagePolicy.inputs)) {
+    return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
 
   return Object.values(outputType);
@@ -111,6 +134,17 @@ export function getDefaultPresetForEsOutput(
 
 export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
   return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
+}
+
+export function outputTypeSupportsOtelExporter(type: ValueOf<OutputType> | undefined): boolean {
+  return type !== undefined && OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT.includes(type);
+}
+
+/** Narrows outputs that carry OTel exporter fields. */
+export function isOtelExporterOutput<T extends { type?: ValueOf<OutputType> }>(
+  output: T
+): output is T & OtelExporterOutput {
+  return outputTypeSupportsOtelExporter(output.type);
 }
 
 /**

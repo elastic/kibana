@@ -12,6 +12,7 @@ import {
   convertStepsForUI,
   convertUIStepsToDSL,
   isActionBlock,
+  isConditionBlock,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
@@ -214,19 +215,33 @@ export const interactiveModeMachine = setup({
         };
       }
     ),
-    maybeAutoSelectParentConditionForProcessor: ({ context }, params: { id?: string }) => {
+    maybeAutoSelectConditionForEditedStep: ({ context }, params: { id?: string }) => {
       if (!params.id) return;
 
       const stepRef = context.stepRefs.find((ref) => ref.id === params.id);
       const step = stepRef?.getSnapshot()?.context.step;
-      if (!step || !isActionBlock(step)) return;
+      if (!step) return;
 
-      maybeAutoFilterByParentCondition(
-        context.stepRefs,
-        step.parentId,
-        context.parentRef,
-        step.branch
-      );
+      // Editing a condition block itself should filter the preview by that condition,
+      // regardless of whether it was just created or loaded from a saved pipeline.
+      if (isConditionBlock(step)) {
+        maybeAutoFilterByParentCondition(
+          context.stepRefs,
+          step.customIdentifier,
+          context.parentRef
+        );
+        return;
+      }
+
+      // Editing a processor should filter the preview by its parent condition (if any).
+      if (isActionBlock(step)) {
+        maybeAutoFilterByParentCondition(
+          context.stepRefs,
+          step.parentId,
+          context.parentRef,
+          step.branch
+        );
+      }
     },
     deleteStep: assign(({ context }, params: { id: string }) => {
       const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
@@ -358,6 +373,12 @@ export const interactiveModeMachine = setup({
         selectedConditionId: params.conditionId,
       };
     }),
+    // Reverts a condition filter that was applied automatically when entering a step's
+    // scope (edit/create). Manual selections are preserved by the parent's
+    // `hasAutoSelectedConditionId` guard, so this is a no-op for those.
+    clearAutoConditionFilter: ({ context }) => {
+      context.parentRef.send({ type: 'simulation.clearAutoConditionFilter' });
+    },
     /* Pipeline suggestion actions */
     overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
       // Clean-up existing step refs
@@ -593,7 +614,7 @@ export const interactiveModeMachine = setup({
               guard: 'hasSimulatePrivileges',
               actions: [
                 {
-                  type: 'maybeAutoSelectParentConditionForProcessor',
+                  type: 'maybeAutoSelectConditionForEditedStep',
                   params: ({ event }) => event,
                 },
               ],
@@ -682,6 +703,7 @@ export const interactiveModeMachine = setup({
             },
             'step.cancel': {
               target: 'idle',
+              actions: [{ type: 'clearAutoConditionFilter' }],
             },
             'step.save': {
               target: 'idle',
@@ -713,6 +735,7 @@ export const interactiveModeMachine = setup({
             },
             'step.cancel': {
               target: 'idle',
+              actions: [{ type: 'clearAutoConditionFilter' }],
             },
             'step.delete': {
               target: 'idle',

@@ -25,8 +25,7 @@
     ],
     "requiredBundles": [
       "agentBuilder",
-      "kibanaReact",
-      "spaces",
+      "kibanaReact"
     ]
   }
 }
