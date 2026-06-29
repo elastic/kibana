@@ -125,7 +125,7 @@ export const Host: FC<HostProps> = memo(function Host({
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
