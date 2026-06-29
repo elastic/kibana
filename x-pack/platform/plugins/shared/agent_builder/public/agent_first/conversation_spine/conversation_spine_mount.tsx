@@ -9,8 +9,8 @@ import React, { useEffect, useReducer } from 'react';
 import { createPortal } from 'react-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
-import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import type { AttachmentsService } from '../../services/attachments/attachements_service';
+import { applicationWorkspaceFixedOverlayStyles } from '../../agent_workspace/application_workspace_fixed_overlay_styles';
 import { getApplicationWorkspaceMountElement } from '../../agent_workspace/agent_workspace_flyout_defaults';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
 import { useOptionalConversationSpineContext } from './conversation_spine_context';
@@ -66,12 +66,7 @@ export const ConversationSpineMount: React.FC<ConversationSpineMountProps> = ({
   }
 
   const mountStyles = css`
-    position: absolute;
-    inset: 0;
-    z-index: ${layoutLevels.applicationTopBar + 1};
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    ${applicationWorkspaceFixedOverlayStyles};
     background: ${euiTheme.colors.backgroundBasePlain};
     animation: ${spineEntrance} 200ms ease-out;
   `;
