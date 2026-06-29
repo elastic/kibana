@@ -22,12 +22,8 @@ describe('transformFindMutedAlertInstancesBody', () => {
     });
   });
 
-  it('returns an empty object when no fields are provided', () => {
-    expect(transformFindMutedAlertInstancesBody({})).toEqual({});
-  });
-
-  it('omits fields that are not provided', () => {
-    expect(transformFindMutedAlertInstancesBody({ page: 3 })).toEqual({ page: 3 });
+  it('omits the optional filter when not provided', () => {
+    expect(transformFindMutedAlertInstancesBody({ page: 3, per_page: 0 })).toEqual({ page: 3 });
   });
 
   it('omits falsy values', () => {
