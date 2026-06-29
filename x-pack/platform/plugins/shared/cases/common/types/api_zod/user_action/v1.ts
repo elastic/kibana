@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
+import {
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+} from '../../../constants';
 import { paginationSchema } from '../../../schema_zod';
 import { UserActionsSchema } from '../../domain_zod/user_action/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
@@ -44,8 +48,8 @@ export const UserActionFindRequestSchema = paginationSchema({
 }).extend({
   types: z.array(z.enum(UserActionFindRequestTypesValues)).optional(),
   sortOrder: z.enum(['desc', 'asc']).optional(),
-  author: z.string().max(256).optional(),
-  search: z.string().max(256).optional(),
+  author: z.string().max(MAX_USER_ACTION_AUTHOR_LENGTH).optional(),
+  search: z.string().max(MAX_USER_ACTION_SEARCH_LENGTH).optional(),
 });
 
 export const UserActionFindResponseSchema = z.object({

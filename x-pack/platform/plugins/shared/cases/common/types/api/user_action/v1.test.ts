@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { MAX_USER_ACTION_AUTHOR_LENGTH, MAX_USER_ACTION_SEARCH_LENGTH } from '../../../constants';
 import {
   type CaseUserActionStatsResponse,
   CaseUserActionStatsResponseRt,
@@ -66,6 +68,42 @@ describe('User actions APIs', () => {
         const result = UserActionFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+      });
+
+      it(`throws an error when the search is more than ${MAX_USER_ACTION_SEARCH_LENGTH} characters`, () => {
+        const search = 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1);
+
+        expect(
+          PathReporter.report(UserActionFindRequestRt.decode({ ...defaultRequest, search }))
+        ).toContain(
+          `The length of the search is too long. The maximum length is ${MAX_USER_ACTION_SEARCH_LENGTH}.`
+        );
+      });
+
+      it(`throws an error when the author is more than ${MAX_USER_ACTION_AUTHOR_LENGTH} characters`, () => {
+        const author = 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1);
+
+        expect(
+          PathReporter.report(UserActionFindRequestRt.decode({ ...defaultRequest, author }))
+        ).toContain(
+          `The length of the author is too long. The maximum length is ${MAX_USER_ACTION_AUTHOR_LENGTH}.`
+        );
+      });
+
+      it('zod: throws an error when the search is too long', () => {
+        const result = UserActionFindRequestSchema.safeParse({
+          ...defaultRequest,
+          search: 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1),
+        });
+        expect(result.success).toBe(false);
+      });
+
+      it('zod: throws an error when the author is too long', () => {
+        const result = UserActionFindRequestSchema.safeParse({
+          ...defaultRequest,
+          author: 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1),
+        });
+        expect(result.success).toBe(false);
       });
     });
 

@@ -8,7 +8,11 @@
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+} from '@kbn/cases-plugin/common/constants';
 import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -289,6 +293,24 @@ export default ({ getService }: FtrProviderContext): void => {
           caseID: theCase.id,
           supertest,
           options: { page: 209, perPage: 100 },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the search term is too long', async () => {
+        await findInternalCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { search: 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1) },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the author is too long', async () => {
+        await findInternalCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { author: 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1) },
           expectedHttpCode: 400,
         });
       });
