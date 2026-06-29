@@ -295,7 +295,7 @@ describe('disableSentenceCase', () => {
   const buildSimpleTree = (
     nodes: Array<Partial<ChromeProjectNavigationNode>>
   ): NavigationTreeDefinitionUI => ({
-    id: 'search',
+    id: 'es',
     body: nodes.map((n, idx) => ({
       id: `node-${idx}`,
       path: `node-${idx}`,
@@ -318,7 +318,6 @@ describe('disableSentenceCase', () => {
     const {
       navItems: { primaryItems },
     } = createNavigationItems(tree);
-    // toSentenceCase lowercases after the first character for non-glossary terms
     expect(primaryItems[0]?.label).toBe('Es|ql');
   });
 

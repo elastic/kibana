@@ -163,7 +163,7 @@ interface NodeDefinitionBase {
   /**
    * When true, the side navigation renders this node's label exactly as provided in `title`,
    * skipping the automatic sentence-casing applied to all other nodes. Useful for labels
-   * with intentional casing that the formatter would corrupt (e.g. "ES|QL" → "Es|ql").
+   * with intentional casing that the formatter would corrupt (e.g. "ES|QL" -> "Es|ql").
    * @default false
    */
   disableSentenceCase?: boolean;
