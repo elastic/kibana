@@ -42,20 +42,37 @@ export const transformScheduleToApi = (
     workflow_config:
       schedule.params.workflowConfig != null
         ? (() => {
+            // New composite-persisted schedules carry the three independent toggles
+            // directly. Legacy-persisted schedules only have the single-enum shape;
+            // derive the composite toggles from the legacy fields for backward
+            // compatibility (legacy `custom_only` meant "default retrieval off"; the
+            // skill toggle is on by default — the always-on gate).
             const wc = schedule.params.workflowConfig as {
               alertRetrievalMode?: 'custom_only' | 'custom_query' | 'esql';
               alertRetrievalWorkflowIds?: string[];
+              alertRetrievalWorkflowsEnabled?: boolean;
               defaultAlertRetrievalEnabled?: boolean;
+              defaultRetrievalEnabled?: boolean;
               esqlQuery?: string;
+              skillEnabled?: boolean;
               validationWorkflowId?: string;
             };
-            const alertRetrievalMode =
-              wc.alertRetrievalMode ??
-              (wc.defaultAlertRetrievalEnabled === false ? 'custom_only' : 'custom_query');
+            const isComposite = typeof wc.skillEnabled === 'boolean';
+            const alertRetrievalWorkflowIds = wc.alertRetrievalWorkflowIds ?? [];
+            const isCustomOnly = wc.alertRetrievalMode === 'custom_only';
+            const alertRetrievalMode = wc.alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
+
             return {
               alert_retrieval_mode: alertRetrievalMode,
-              alert_retrieval_workflow_ids: wc.alertRetrievalWorkflowIds ?? [],
-              esql_query: wc.esqlQuery,
+              alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
+              alert_retrieval_workflows_enabled: isComposite
+                ? wc.alertRetrievalWorkflowsEnabled ?? false
+                : alertRetrievalWorkflowIds.length > 0,
+              default_retrieval_enabled: isComposite
+                ? wc.defaultRetrievalEnabled ?? false
+                : wc.defaultAlertRetrievalEnabled ?? !isCustomOnly,
+              ...(wc.esqlQuery != null ? { esql_query: wc.esqlQuery } : {}),
+              skill_enabled: isComposite ? wc.skillEnabled ?? true : true,
               validation_workflow_id: wc.validationWorkflowId ?? 'default',
             };
           })()

@@ -421,7 +421,7 @@ describe.skip('EditForm', () => {
       await waitFor(() => {
         expect(screen.getByTestId('alertRetrievalContent')).toHaveAttribute(
           'data-default-alert-retrieval-mode',
-          'custom_query'
+          'esql'
         );
       });
     });
@@ -442,10 +442,51 @@ describe.skip('EditForm', () => {
       });
     });
 
+    it('does NOT render the validation errors callout when at least one retrieval method is enabled', async () => {
+      await renderWorkflowComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertRetrievalStep')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
+    });
+
+    it('renders the validation errors callout when no retrieval method is enabled', async () => {
+      const noRetrievalWorkflowConfig = {
+        ...DEFAULT_WORKFLOW_CONFIGURATION,
+        alertRetrievalWorkflowsEnabled: false,
+        defaultRetrievalEnabled: false,
+        skillEnabled: false,
+      };
+
+      await act(() => {
+        render(
+          <TestProviders>
+            <EditForm
+              {...defaultProps}
+              initialValue={{
+                ...defaultProps.initialValue,
+                workflowConfig: noRetrievalWorkflowConfig,
+              }}
+              isWorkflowsEnabled={true}
+            />
+          </TestProviders>
+        );
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('workflowValidationErrorsCallout')).toBeInTheDocument();
+      });
+    });
+
     it('populates the form with saved workflow_config values', async () => {
       const savedWorkflowConfig = {
+        alertRetrievalMode: 'custom_query' as const,
         alertRetrievalWorkflowIds: ['workflow-1'],
-        alertRetrievalMode: 'custom_only' as const,
+        alertRetrievalWorkflowsEnabled: true,
+        defaultRetrievalEnabled: false,
+        skillEnabled: true,
         validationWorkflowId: 'custom-validation',
       };
 
@@ -511,9 +552,12 @@ describe.skip('EditForm', () => {
       const esqlQuery = 'FROM .alerts-security.alerts-default | WHERE event.kind == "signal"';
 
       const esqlWorkflowConfig = {
-        alertRetrievalWorkflowIds: [],
         alertRetrievalMode: 'esql' as const,
+        alertRetrievalWorkflowIds: [],
+        alertRetrievalWorkflowsEnabled: false,
+        defaultRetrievalEnabled: true,
         esqlQuery,
+        skillEnabled: true,
         validationWorkflowId: 'default',
       };
 
@@ -576,6 +620,147 @@ describe.skip('EditForm', () => {
         expect(result!.isValid).toBe(true);
         expect(result!.data.workflowConfig).toEqual(esqlWorkflowConfig);
       });
+    });
+  });
+});
+
+describe('EditForm — empty alert retrieval workflows (deferred validation)', () => {
+  const mockTriggersActionsUi = triggersActionsUiMock.createStart();
+  const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
+  const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<
+    typeof useGenerateWorkflow
+  >;
+
+  const emptyWorkflowsConfig = {
+    alertRetrievalMode: 'custom_query' as const,
+    alertRetrievalWorkflowIds: [],
+    alertRetrievalWorkflowsEnabled: true,
+    defaultRetrievalEnabled: false,
+    skillEnabled: false,
+    validationWorkflowId: 'default',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(true),
+        },
+        lens: {
+          EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+        },
+        triggersActionsUi: mockTriggersActionsUi,
+        uiSettings: {
+          get: jest.fn(),
+        },
+        unifiedSearch: {
+          ui: {
+            SearchBar: () => <div data-test-subj="mockSearchBar" />,
+          },
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    (useConnectors as jest.Mock).mockReturnValue({
+      connectors: mockConnectors,
+      setCurrentConnector: jest.fn(),
+    });
+
+    mockUseListWorkflows.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isSuccess: true,
+      status: 'success' as const,
+    } as unknown as ReturnType<typeof useListWorkflows>);
+
+    mockUseGenerateWorkflow.mockReturnValue({
+      cancelGeneration: jest.fn(),
+      generatedWorkflow: null,
+      isGenerating: false,
+      startGeneration: jest.fn(),
+    } as UseGenerateWorkflowResult);
+  });
+
+  const renderWith = async (workflowConfig: Record<string, unknown>) => {
+    const onChange = jest.fn();
+
+    await act(() => {
+      render(
+        <TestProviders>
+          <EditForm
+            initialValue={{
+              ...defaultProps.initialValue,
+              connectorId: 'test-id',
+              name: 'Test schedule',
+              workflowConfig: workflowConfig as never,
+            }}
+            isWorkflowsEnabled={true}
+            onChange={onChange}
+          />
+        </TestProviders>
+      );
+    });
+
+    return onChange;
+  };
+
+  const latestSubmit = (onChange: jest.Mock) =>
+    onChange.mock.calls[onChange.mock.calls.length - 1][0].submit as () => Promise<{
+      isValid: boolean;
+      data: Record<string, unknown>;
+    }>;
+
+  it('blocks submit (isValid=false) when the workflows toggle is the sole source and empty', async () => {
+    const onChange = await renderWith(emptyWorkflowsConfig);
+
+    let result: { isValid: boolean; data: Record<string, unknown> } | undefined;
+    await act(async () => {
+      result = await latestSubmit(onChange)();
+    });
+
+    expect(result?.isValid).toBe(false);
+  });
+
+  it('allows submit when a workflow is selected', async () => {
+    const onChange = await renderWith({
+      ...emptyWorkflowsConfig,
+      alertRetrievalWorkflowIds: ['workflow-1'],
+    });
+
+    let result: { isValid: boolean; data: Record<string, unknown> } | undefined;
+    await act(async () => {
+      result = await latestSubmit(onChange)();
+    });
+
+    expect(result?.isValid).toBe(true);
+  });
+
+  it('allows submit when the skill toggle is also enabled', async () => {
+    const onChange = await renderWith({ ...emptyWorkflowsConfig, skillEnabled: true });
+
+    let result: { isValid: boolean; data: Record<string, unknown> } | undefined;
+    await act(async () => {
+      result = await latestSubmit(onChange)();
+    });
+
+    expect(result?.isValid).toBe(true);
+  });
+
+  it('reveals the validation errors callout after a blocked submit attempt', async () => {
+    const onChange = await renderWith(emptyWorkflowsConfig);
+
+    expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
+
+    await act(async () => {
+      await latestSubmit(onChange)();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowValidationErrorsCallout')).toHaveTextContent(
+        'Select at least one alert retrieval workflow'
+      );
     });
   });
 });

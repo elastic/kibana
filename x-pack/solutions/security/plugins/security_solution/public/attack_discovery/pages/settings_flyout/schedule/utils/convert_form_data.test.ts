@@ -76,7 +76,7 @@ describe('convertFormDataInBaseSchedule', () => {
     });
   });
 
-  it('includes workflowConfig in camelCase when workflowConfig is present', () => {
+  it('does NOT carry workflowConfig (composite toggles are workflows-path only)', () => {
     const baseSchedule = convertFormDataInBaseSchedule(
       {
         name: 'workflow test',
@@ -91,42 +91,13 @@ describe('convertFormDataInBaseSchedule', () => {
         interval: '10m',
         actions: [],
         workflowConfig: {
+          alertRetrievalMode: 'custom_query' as const,
           alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-          alertRetrievalMode: 'custom_only' as const,
+          alertRetrievalWorkflowsEnabled: true,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: 'custom-validation',
         },
-      },
-      '.alert-*',
-      {} as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
-      createStubDataView({ spec: {} })
-    );
-
-    expect(baseSchedule.params).toEqual(
-      expect.objectContaining({
-        workflowConfig: {
-          alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-          alertRetrievalMode: 'custom_only',
-          validationWorkflowId: 'custom-validation',
-        },
-      })
-    );
-  });
-
-  it('does not include workflow_config when workflowConfig is undefined', () => {
-    const baseSchedule = convertFormDataInBaseSchedule(
-      {
-        name: 'no workflow',
-        connectorId: 'connector 1',
-        alertsSelectionSettings: {
-          end: 'now',
-          filters: [],
-          query: { query: '', language: 'kuery' },
-          size: 100,
-          start: 'now-24h',
-        },
-        interval: '10m',
-        actions: [],
       },
       '.alert-*',
       {} as AIConnector,
@@ -190,7 +161,7 @@ describe('convertFormDataInBaseSchedule', () => {
     expect(baseSchedule.params).not.toHaveProperty('type');
   });
 
-  it('includes both workflow_config and type when both are present', () => {
+  it('includes type but never workflowConfig even when workflowConfig is present', () => {
     const baseSchedule = convertFormDataInBaseSchedule(
       {
         name: 'full workflow schedule',
@@ -206,8 +177,11 @@ describe('convertFormDataInBaseSchedule', () => {
         actions: [],
         type: 'attack_discovery',
         workflowConfig: {
-          alertRetrievalWorkflowIds: ['wf-1'],
           alertRetrievalMode: 'custom_query' as const,
+          alertRetrievalWorkflowIds: ['wf-1'],
+          alertRetrievalWorkflowsEnabled: true,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: 'default',
         },
       },
@@ -220,13 +194,9 @@ describe('convertFormDataInBaseSchedule', () => {
     expect(baseSchedule.params).toEqual(
       expect.objectContaining({
         type: 'attack_discovery',
-        workflowConfig: {
-          alertRetrievalWorkflowIds: ['wf-1'],
-          alertRetrievalMode: 'custom_query',
-          validationWorkflowId: 'default',
-        },
       })
     );
+    expect(baseSchedule.params).not.toHaveProperty('workflowConfig');
   });
 
   it('omits model and provider from apiConfig when the connector has neither', () => {
@@ -520,5 +490,70 @@ describe('convertFormDataToWorkflowSchedule', () => {
     );
 
     expect(result.params.api_config).not.toHaveProperty('provider');
+  });
+
+  it('emits the composite workflow_config in snake_case when workflowConfig is present', () => {
+    const result = convertFormDataToWorkflowSchedule(
+      {
+        name: 'composite',
+        connectorId: 'c1',
+        alertsSelectionSettings: {
+          end: 'now',
+          filters: [],
+          query: { query: '', language: 'kuery' },
+          size: 50,
+          start: 'now-1h',
+        },
+        interval: '1h',
+        actions: [],
+        workflowConfig: {
+          alertRetrievalMode: 'esql',
+          alertRetrievalWorkflowIds: ['wf-1', 'wf-2'],
+          alertRetrievalWorkflowsEnabled: true,
+          defaultRetrievalEnabled: true,
+          esqlQuery: 'FROM .alerts-security.alerts-default',
+          skillEnabled: false,
+          validationWorkflowId: 'custom-validate',
+        },
+      },
+      '.alert-*',
+      { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
+    );
+
+    expect(result.params.workflow_config).toEqual({
+      alert_retrieval_mode: 'esql',
+      alert_retrieval_workflow_ids: ['wf-1', 'wf-2'],
+      alert_retrieval_workflows_enabled: true,
+      default_retrieval_enabled: true,
+      esql_query: 'FROM .alerts-security.alerts-default',
+      skill_enabled: false,
+      validation_workflow_id: 'custom-validate',
+    });
+  });
+
+  it('does not include workflow_config when workflowConfig is undefined', () => {
+    const result = convertFormDataToWorkflowSchedule(
+      {
+        name: 'no composite',
+        connectorId: 'c1',
+        alertsSelectionSettings: {
+          end: 'now',
+          filters: [],
+          query: { query: '', language: 'kuery' },
+          size: 50,
+          start: 'now-1h',
+        },
+        interval: '1h',
+        actions: [],
+      },
+      '.alert-*',
+      { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
+    );
+
+    expect(result.params).not.toHaveProperty('workflow_config');
   });
 });

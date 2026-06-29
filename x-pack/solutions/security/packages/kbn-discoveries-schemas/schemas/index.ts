@@ -55,6 +55,13 @@ export {
   WorkflowConfig,
 } from './common/schedules/schedule_types.gen';
 
+// Schedule workflow config validation (at-least-one-toggle)
+export {
+  AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
+  WorkflowConfigWithRetrievalToggle,
+  hasAtLeastOneRetrievalToggle,
+} from './common/schedules/workflow_config_validation';
+
 // Schedule routes
 export {
   CreateAttackDiscoveryScheduleRequestBody,

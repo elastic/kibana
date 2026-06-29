@@ -15,6 +15,7 @@ import { convertToBuildEsQuery } from '../../../../../common/lib/kuery';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
 import { getGenAiConfig } from '../../../use_attack_discovery/helpers';
 import { parseFilterQuery } from '../../parse_filter_query';
+import { workflowConfigFormToApi } from './workflow_config_form_to_api';
 
 const isGeneralAction = (action: RuleAction | RuleSystemAction): action is RuleAction =>
   'group' in action;
@@ -55,6 +56,17 @@ export const convertActionsToSnakeCase = (
     };
   });
 
+/**
+ * Converts form data to the camelCase base (public elastic_assistant) schedule
+ * shape used when the workflows feature flag is OFF.
+ *
+ * This path intentionally does NOT carry `workflowConfig`: the composite
+ * retrieval toggles are only rendered (and only set on the form) when the
+ * workflows feature flag is ON, which routes through
+ * {@link convertFormDataToWorkflowSchedule} instead. Keeping the
+ * `workflowConfig` mapping in a single place ({@link workflowConfigFormToApi})
+ * removes a duplicate, drift-prone builder.
+ */
 export const convertFormDataInBaseSchedule = (
   scheduleData: AttackDiscoveryScheduleSchema,
   alertsIndexPattern: string,
@@ -81,17 +93,6 @@ export const convertFormDataInBaseSchedule = (
     ...(connector.apiProvider != null ? { provider: connector.apiProvider } : {}),
   };
 
-  const { workflowConfig } = scheduleData;
-  const workflowConfigPayload =
-    workflowConfig != null
-      ? {
-          alertRetrievalMode: workflowConfig.alertRetrievalMode,
-          alertRetrievalWorkflowIds: workflowConfig.alertRetrievalWorkflowIds,
-          ...(workflowConfig.esqlQuery != null ? { esqlQuery: workflowConfig.esqlQuery } : {}),
-          validationWorkflowId: workflowConfig.validationWorkflowId,
-        }
-      : undefined;
-
   return {
     actions: scheduleData.actions,
     enabled: true,
@@ -106,7 +107,6 @@ export const convertFormDataInBaseSchedule = (
       size: alertsSelectionSettings.size,
       start: alertsSelectionSettings.start,
       ...(scheduleData.type != null ? { type: scheduleData.type } : {}),
-      ...(workflowConfigPayload != null ? { workflowConfig: workflowConfigPayload } : {}),
     },
     schedule: { interval: scheduleData.interval },
   };
@@ -137,14 +137,7 @@ export const convertFormDataToWorkflowSchedule = (
 
   const { workflowConfig } = scheduleData;
   const workflowConfigPayload =
-    workflowConfig != null
-      ? {
-          alert_retrieval_mode: workflowConfig.alertRetrievalMode,
-          alert_retrieval_workflow_ids: workflowConfig.alertRetrievalWorkflowIds,
-          ...(workflowConfig.esqlQuery != null ? { esql_query: workflowConfig.esqlQuery } : {}),
-          validation_workflow_id: workflowConfig.validationWorkflowId,
-        }
-      : undefined;
+    workflowConfig != null ? workflowConfigFormToApi(workflowConfig) : undefined;
 
   return {
     actions: convertActionsToSnakeCase(scheduleData.actions),

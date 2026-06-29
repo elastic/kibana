@@ -217,8 +217,11 @@ describe('workflowExecutor', () => {
         start: params.start,
         type: 'attack_discovery',
         workflowConfig: {
-          alert_retrieval_workflow_ids: [],
           alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: mockWorkflowsManagementApi,
@@ -307,6 +310,18 @@ describe('workflowExecutor', () => {
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('Workflow executor completed successfully')
+    );
+  });
+
+  it('forwards the rule executor cancellation probe (shouldStopExecution) to executeGenerationWorkflow', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await workflowExecutor({ deps, options });
+
+    expect(executeGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shouldStopExecution: ruleExecutorServices.shouldStopExecution,
+      })
     );
   });
 
