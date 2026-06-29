@@ -212,6 +212,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
 
+  // If page URL contains a rule_id, we fetch the rule for this rule_id.
   const { deepLinkedRule, isDeepLinkedRuleInstalled, isDeepLinkedRuleResolved } =
     useDeepLinkedPrebuiltRule({ ruleId: ruleIdFromUrl, currentPageRules: rules });
 
@@ -299,7 +300,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         !isPreviewRuleAlreadyInstalled &&
         !(isPreviewRuleLoading || isRefetching || isInitializingPrebuiltRulesPackage);
 
-      const installWithoutEnablingButton = (
+      const installButton = (
         <EuiButton
           disabled={!canPreviewedRuleBeInstalled}
           onClick={() => {
@@ -330,10 +331,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
           <EuiFlexItem>
             {isPreviewRuleAlreadyInstalled ? (
               <EuiToolTip content={i18n.RULE_ALREADY_INSTALLED_TOOLTIP}>
-                {installWithoutEnablingButton}
+                {installButton}
               </EuiToolTip>
             ) : (
-              installWithoutEnablingButton
+              installButton
             )}
           </EuiFlexItem>
           <EuiFlexItem>
@@ -359,9 +360,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     ]
   );
 
-  // On close, drop the :ruleId path segment so the URL reflects "flyout
-  // closed" — a subsequent click on the same chat link then re-navigates to
-  // the same URL, which re-fires the auto-open effect with a fresh ref state.
+  // On close, remove the :ruleId path segment so the URL reflects "flyout closed".
   const closeRulePreviewAction = useCallback(() => {
     if (ruleIdFromUrl) {
       history.replace(RULES_ADD_PATH);
@@ -389,13 +388,20 @@ export const AddPrebuiltRulesTableContextProvider = ({
       autoOpenedRuleIdRef.current = null;
       return;
     }
-    if (autoOpenedRuleIdRef.current === ruleIdFromUrl) return;
+    if (autoOpenedRuleIdRef.current === ruleIdFromUrl) {
+      return;
+    }
     // Wait for the table query and the by-rule_id deep-link resolution (incl. its fallback) to
     // settle on fresh data before deciding — a stale cache could otherwise surface a rule that
     // was installed in this session and open the install flyout with active install buttons.
-    if (!isFetched || isFetching || !isDeepLinkedRuleResolved) return;
+    if (!isFetched || isFetching || !isDeepLinkedRuleResolved) {
+      return;
+    }
     const found = flyoutRules.find((r) => r.rule_id === ruleIdFromUrl);
-    if (!found) return;
+    if (!found) {
+      return;
+    }
+
     autoOpenedRuleIdRef.current = ruleIdFromUrl;
     openRulePreview(ruleIdFromUrl);
   }, [
