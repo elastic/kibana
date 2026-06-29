@@ -356,7 +356,7 @@ describe(`feature_privilege_builder`, () => {
         `);
       });
 
-      test('grants `find_muted_alerts` privileges to rules under feature consumer', () => {
+      test('grants `read_muted_alerts` privileges to rules under feature consumer', () => {
         const actions = new Actions();
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
 
@@ -364,7 +364,7 @@ describe(`feature_privilege_builder`, () => {
           alerting: {
             rule: {
               all: [],
-              find_muted_alerts: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read_muted_alerts: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {

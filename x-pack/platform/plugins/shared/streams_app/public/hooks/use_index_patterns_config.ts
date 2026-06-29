@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { streamMatchesIndexPatterns, DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
@@ -29,15 +29,7 @@ export function useIndexPatternsConfig() {
     return patterns.length > 0 ? patterns : [DEFAULT_INDEX_PATTERNS];
   }, [rawValue]);
 
-  const filterStreamsByIndexPatterns = useMemo(() => {
-    return <T extends { stream: { name: string } }>(streamsToFilter: T[]): T[] =>
-      streamsToFilter.filter((streamItem) =>
-        streamMatchesIndexPatterns(streamItem.stream.name, indexPatterns)
-      );
-  }, [indexPatterns]);
-
   return {
     indexPatterns,
-    filterStreamsByIndexPatterns,
   };
 }
