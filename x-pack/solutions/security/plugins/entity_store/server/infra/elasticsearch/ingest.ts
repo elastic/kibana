@@ -134,7 +134,7 @@ export async function ingestEntities({
       datasource: documentGenerator(),
       index: targetIndex,
       // Single refresh after all batches complete
-      refreshOnCompletion: refresh !== false ? targetIndex : false,
+      refreshOnCompletion: targetIndex,
       flushBytes: BATCH_SIZE,
       concurrency: 1,
       retries: 3,
