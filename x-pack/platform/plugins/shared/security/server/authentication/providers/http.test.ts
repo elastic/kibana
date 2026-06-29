@@ -462,7 +462,6 @@ describe('HTTPAuthenticationProvider', () => {
 
       expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
     });
-
   });
 
   describe('UIAM API key authentication', () => {
