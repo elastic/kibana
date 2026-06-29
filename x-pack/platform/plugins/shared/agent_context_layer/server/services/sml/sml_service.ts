@@ -1380,10 +1380,7 @@ const extractTotalHits = (total: SearchTotalHits | number | undefined): number =
 
 /**
  * Compose the canonical `origin.uri` from the SML `type` and bare
- * `originId`. Single source of truth so callers can't disagree about
- * the URI scheme (an earlier iteration had two divergent builders —
- * one in `buildIndexOp`, one in `deleteChunks` — which made adding a
- * new addressable identifier a footgun).
+ * `originId`. Single source of truth for the URI scheme.
  *
  * Exported for the HTTP routes; the indexer derives it internally.
  */

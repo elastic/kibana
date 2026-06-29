@@ -67,10 +67,9 @@ export interface SmlIndexer {
    * **`getPermissions` failures fail-closed.** When the registered type's
    * `getPermissions` hook throws, the call is aborted *before* any
    * mutation (existing chunks remain intact) and the throw is propagated
-   * to the caller. The previous "log + stamp empty permissions" handling
-   * was actually fail-OPEN given the read-path filter's
-   * `kbnPrivs.length === 0 → public` semantic. See
-   * `resolvePermissionsForOrigin` for the full rationale.
+   * to the caller. Stamping empty permissions instead would be fail-open:
+   * the read-path filter treats `kbnPrivs.length === 0` as publicly
+   * readable. See `resolvePermissionsForOrigin` for the full rationale.
    *
    * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are
    * removed — manual entries for the same `origin_id` are preserved. This keeps
