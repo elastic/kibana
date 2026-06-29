@@ -64,12 +64,6 @@ const baseRequest = (
         pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
         sort: { field: '@timestamp', direction: Direction.desc },
       } as unknown as StrategyRequestType<FactoryQueryTypes>;
-    case OsqueryQueries.exportResults:
-      return {
-        ...common,
-        baseFilter: 'action_id: "action-1"',
-        size: 1000,
-      } as unknown as StrategyRequestType<FactoryQueryTypes>;
     default:
       // Force a compile-time error if a new factory type is added without a
       // request fixture here — the invariant test must cover every type.
