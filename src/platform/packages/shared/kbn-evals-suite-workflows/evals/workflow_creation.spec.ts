@@ -749,3 +749,203 @@ evaluate.describe(
     });
   }
 );
+
+// ---------------------------------------------------------------------------
+// Frontier-model challenge cases: prompts that look like routine workflow
+// asks but encode hidden cross-step constraints, const-reuse density, or
+// failure-branch requirements that Sonnet/Opus/Gemini Pro reliably skip.
+// Calibrated against the 0.84-0.87 Criteria ceiling observed post-hardening
+// — these target the slack between "perfect-looking output" and "actually
+// satisfies all the implicit requirements."
+// ---------------------------------------------------------------------------
+
+evaluate.describe(
+  'Hidden-constraint creation: top-tier challenge cases',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate(
+      'reuses a const value across at least three steps instead of re-declaring it',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: const-reuse-density',
+            description:
+              'Frontier models often inline values they should hoist into `consts:`. Case requires a single threshold const referenced from three different steps.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a "Latency Watchdog" workflow that runs every 5 minutes, searches apm-* for transactions where duration.us is above 2000000, logs each slow transaction\'s id to console, and sends a Slack message that includes the same 2000000 threshold so on-call knows the alert criterion. Use the threshold value exactly once in the workflow definition.',
+                },
+                output: {
+                  criteria: [
+                    'The workflow has a scheduled trigger every 5 minutes.',
+                    'A top-level `consts:` block declares a threshold constant (e.g. `slow_threshold_us`) with the value 2000000.',
+                    'The elasticsearch.search step references the const via `{{ consts.<name> }}` in its range filter rather than inlining 2000000.',
+                    'The Slack message references the same const via `{{ consts.<name> }}` rather than inlining the number, so changing the const changes both places.',
+                    'The literal `2000000` appears at MOST once in the produced YAML — anywhere else, the const must be used.',
+                    'The step type is elasticsearch.search (not elasticsearch.query, elasticsearch.find, or another fictional type).',
+                  ],
+                  expectedStepTypes: ['elasticsearch.search', 'slack.postMessage'],
+                  expectedStepCount: { min: 3, max: 5 },
+                  expectedLiquidChains: [{ ref: 'consts.', resolvesTo: 'consts' }],
+                  expectedMaxToolCalls: 5,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-const-reuse' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'threads data from step N into step N+2 (not the immediate next step)',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: hidden-cross-step-dataflow',
+            description:
+              'A "look up X, transform it in step 2, then USE step 1 again in step 3" shape. Models often hand off only the most recent output and forget to thread step 1 forward.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a "User Enrichment" workflow on manual trigger that fetches a user record from https://api.example.com/user/123, then asks https://api.example.com/geocode for the lat/lng of that user\'s address field, then sends a Slack message saying "{name} ({email}) is located at {lat},{lng}" where name and email come from the FIRST API call and lat/lng come from the second.',
+                },
+                output: {
+                  criteria: [
+                    'There are two HTTP steps and one Slack step, in that order.',
+                    "The second HTTP step's body or query references the address field of the first step's response (e.g. via `{{ steps.fetch_user.output.body.address }}`).",
+                    "The Slack message references BOTH the first step's output (name and email) AND the second step's output (lat and lng) — not just the most recent step.",
+                    'Specifically, `{{ steps.<first_step_name>.output...name }}` and `{{ steps.<first_step_name>.output...email }}` appear in the Slack message body.',
+                    'Specifically, `{{ steps.<second_step_name>.output...lat }}` and `{{ steps.<second_step_name>.output...lng }}` also appear in the Slack message body.',
+                    'No fictional step type — uses http and slack.postMessage.',
+                  ],
+                  expectedStepTypes: ['http', 'slack.postMessage'],
+                  expectedStepCount: { min: 3, max: 4 },
+                  expectedMaxToolCalls: 5,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-cross-step-dataflow' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'foreach over a nested list with per-item conditional action',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: foreach-with-per-item-condition',
+            description:
+              'foreach + per-item if: gating. Models often emit the foreach correctly but skip the conditional, processing every item regardless of state.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create an "Alert Auto-Acknowledge" workflow triggered by alerts. It should loop over event.alerts and, for each alert whose severity is "low", send a Slack message to #noise saying it was auto-acknowledged. High and medium severity alerts should NOT trigger a Slack message in this workflow.',
+                },
+                output: {
+                  criteria: [
+                    'The workflow has an alert trigger.',
+                    'There is a foreach step iterating over `event.alerts`.',
+                    'Inside the foreach, there is a slack.postMessage step targeting #noise.',
+                    'The Slack step is gated by an `if:` (or equivalent step-level condition) that explicitly references the current item\'s severity field — e.g. `{{ foreach.item.severity }} == "low"` or `kibana.alert.severity` from the iterated alert.',
+                    "The condition resolves to TRUE only for low-severity items — not always-true, not based on event.* aggregate fields that don't exist on the per-item scope.",
+                    'High/medium-severity items must not produce a Slack message — the if must EXCLUDE them, not include all severities.',
+                  ],
+                  expectedStepTypes: ['foreach', 'slack.postMessage'],
+                  expectedStepCount: { min: 1, max: 3 },
+                  expectedLiquidChains: [
+                    { ref: 'event.alerts', resolvesTo: 'event-field' },
+                    { ref: 'foreach.item', resolvesTo: 'foreach-item' },
+                  ],
+                  expectedMaxToolCalls: 5,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-foreach-condition' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'required on-failure branch with diagnostic context',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: failure-branch-required',
+            description:
+              'When the prompt asks for "robust" or "fault-tolerant" behaviour, models often add `on-failure: continue` and call it done. We want explicit failure branching with diagnostic context — the kind of resilience that surfaces problems, not the kind that silences them.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a "Robust Daily Export" workflow on a daily schedule that runs an esql.query exporting yesterday\'s events to an external archive via HTTP POST. If either the query OR the export fails, the workflow should NOT silently succeed — it should log the failure with which step failed and why (the error message), then page on-call via PagerDuty including that same diagnostic detail.',
+                },
+                output: {
+                  criteria: [
+                    "There is an esql.query step exporting the previous day's events.",
+                    'There is an http step doing the POST export.',
+                    "There is explicit failure handling — NOT just `on-failure: continue` everywhere. Either an `on-failure:` block that runs a logging + PagerDuty step, or an `if:`-gated branch that reads the prior step's status/error.",
+                    "The failure branch references the failing step's name AND its error message in the diagnostic content — `{{ steps.<name>.error }}` or `{{ steps.<name>.error.message }}` appears in the Slack/log/PagerDuty payload.",
+                    'The PagerDuty step receives the same diagnostic detail (not a generic "workflow failed" message).',
+                    'The workflow does NOT report success on failure — the chosen `on-failure` semantics must surface the error, not swallow it.',
+                  ],
+                  expectedStepTypes: ['esql.query', 'http', 'pagerduty.triggerEvent'],
+                  expectedStepCount: { min: 4, max: 8 },
+                  expectedMaxToolCalls: 6,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-failure-branch' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'deceptive tool choice: the obvious step type is wrong',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: deceptive-tool-choice',
+            description:
+              'Prompt phrasing suggests one obvious step type, but the connector for it does not exist and the right answer is a different step. Tests whether the agent actually checks the schema before committing.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a workflow that "searches the Kibana fleet agents for ones in unhealthy state and sends a summary email." Trigger is daily.',
+                },
+                output: {
+                  criteria: [
+                    'The workflow uses the elasticsearch.search step against the .fleet-agents index (or fleet-agents data stream) rather than inventing a fictional `fleet.searchAgents` or `kibana.getFleetAgents` step type.',
+                    'The query filters on the agent\'s health/status field (e.g. last_checkin_status, status, local_metadata.health.status) — not on a hand-waved "unhealthy" tag that does not exist on the document.',
+                    'The agent EITHER called get_step_definitions for the relevant step type before generating, OR avoided fictional types in the produced YAML.',
+                    "There is an email step that summarizes the search hits, referencing the search step's output.",
+                    'The workflow has a daily scheduled trigger.',
+                    'No fictional step types — only elasticsearch.search, email, console, schedule trigger are permitted.',
+                  ],
+                  expectedStepTypes: ['elasticsearch.search', 'email'],
+                  expectedStepCount: { min: 2, max: 4 },
+                  expectedMaxToolCalls: 6,
+                  expectedToolSequence: ['get_step_definitions', 'platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-deceptive-tool-choice' },
+              },
+            ],
+          },
+        });
+      }
+    );
+  }
+);
