@@ -37,6 +37,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { normalizeUrl } from '../../connector_utils';
 import type {
   ExecuteStatementInput,
   RunQueryInput,
@@ -179,7 +180,7 @@ const submitStatement = async (
     };
   }
 
-  const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}`;
+  const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
 
   const response = await ctx.client.post(url, body, {
     params: { async: true },
@@ -271,7 +272,6 @@ export const Snowflake: ConnectorSpec = {
     z.object({
       accountUrl: z
         .url()
-        .transform((val) => val.replace(/\/+$/, ''))
         .describe('Snowflake account URL')
         .meta({
           widget: 'text',
@@ -393,7 +393,7 @@ export const Snowflake: ConnectorSpec = {
         const params: Record<string, unknown> = {};
         if (input.partition !== undefined) params.partition = input.partition;
 
-        const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}`;
+        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}`;
 
         const response = await ctx.client.get(url, {
           params,
@@ -412,7 +412,9 @@ export const Snowflake: ConnectorSpec = {
       handler: async (ctx, input: CancelStatementInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
 
-        const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}/cancel`;
+        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}/${
+          input.statementHandle
+        }/cancel`;
 
         const response = await ctx.client.post(
           url,
@@ -436,7 +438,7 @@ export const Snowflake: ConnectorSpec = {
         const params = buildListParams(input);
         if (input.history !== undefined) params.history = input.history;
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases`;
+        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_REST_API_V2}/databases`;
         const response = await ctx.client.get(url, { params });
         return response.data;
       },
@@ -451,9 +453,9 @@ export const Snowflake: ConnectorSpec = {
         const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
-          input.database
-        )}/schemas`;
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(input.database)}/schemas`;
         const response = await ctx.client.get(url, { params });
         return response.data;
       },
@@ -469,7 +471,9 @@ export const Snowflake: ConnectorSpec = {
         const params = buildListParams(input);
         if (input.history !== undefined) params.history = input.history;
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/tables`;
         const response = await ctx.client.get(url, { params });
@@ -486,7 +490,9 @@ export const Snowflake: ConnectorSpec = {
         const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/views`;
         const response = await ctx.client.get(url, { params });
@@ -502,7 +508,9 @@ export const Snowflake: ConnectorSpec = {
       handler: async (ctx, input: DescribeTableInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/tables/${encodeURIComponent(input.name)}`;
         const response = await ctx.client.get(url);
@@ -518,7 +526,9 @@ export const Snowflake: ConnectorSpec = {
       handler: async (ctx, input: DescribeViewInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/views/${encodeURIComponent(input.name)}`;
         const response = await ctx.client.get(url);
@@ -535,7 +545,9 @@ export const Snowflake: ConnectorSpec = {
         const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/cortex-search-services`;
         const response = await ctx.client.get(url, { params });
@@ -556,7 +568,9 @@ export const Snowflake: ConnectorSpec = {
         if (input.filter !== undefined) body.filter = input.filter;
         if (input.limit !== undefined) body.limit = input.limit;
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/cortex-search-services/${encodeURIComponent(
           input.serviceName
@@ -574,7 +588,7 @@ export const Snowflake: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       const { accountUrl } = ctx.config as { accountUrl: string };
-      const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}`;
+      const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
 
       const response = await ctx.client.post(
         url,
