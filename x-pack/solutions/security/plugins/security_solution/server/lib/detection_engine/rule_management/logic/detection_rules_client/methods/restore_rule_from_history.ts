@@ -32,16 +32,7 @@ import {
 import { getRuleById } from './get_rule_by_id';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
-export const restoreRuleFromHistory = async ({
-  actionsClient,
-  rulesClient,
-  prebuiltRuleAssetClient,
-  mlAuthz,
-  rulesAuthz,
-  ruleId,
-  changeId,
-  currentRuleRevision,
-}: {
+interface RestoreRuleFromHistoryParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
@@ -50,7 +41,18 @@ export const restoreRuleFromHistory = async ({
   ruleId: RuleObjectId;
   changeId: string;
   currentRuleRevision?: number;
-}): Promise<{ rule: RuleResponse; no_change?: true }> => {
+}
+
+interface RestoreRuleFromHistoryResult {
+  rule: RuleResponse;
+  no_change?: true;
+}
+
+export const restoreRuleFromHistory = async (
+  params: RestoreRuleFromHistoryParams
+): Promise<RestoreRuleFromHistoryResult> => {
+  const { rulesClient, ruleId, changeId, currentRuleRevision } = params;
+
   const existingRule = await getRuleById({ rulesClient, id: ruleId });
 
   if (existingRule == null && currentRuleRevision != null) {
@@ -89,45 +91,34 @@ export const restoreRuleFromHistory = async ({
   const snapshotRule = convertAlertingRuleToRuleResponse(item.rule as SanitizedRule<RuleParams>);
 
   if (existingRule == null) {
-    const conflictingRule = await getRuleByRuleId({ rulesClient, ruleId: snapshotRule.rule_id });
-
-    if (conflictingRule != null) {
-      throw new ClientError(
-        `Cannot restore rule: a rule with rule_id "${snapshotRule.rule_id}" already exists (id: "${conflictingRule.id}"). The rule may have been reinstalled after deletion. Delete the existing rule first, or restore from its own history instead.`,
-        409
-      );
-    }
-
-    await validateMlAuth(mlAuthz, snapshotRule.type);
-
-    validateFieldWritePermissions(
-      {
-        exceptions_list: snapshotRule.exceptions_list,
-        note: snapshotRule.note,
-        investigation_fields: snapshotRule.investigation_fields,
-        enabled: false,
-      },
-      rulesAuthz
-    );
-
-    const createdRule = await rulesClient.create<RuleParams>({
-      data: {
-        ...convertRuleResponseToAlertingRule(snapshotRule, actionsClient),
-        alertTypeId: ruleTypeMappings[snapshotRule.type],
-        consumer: SERVER_APP_ID,
-        enabled: false,
-      },
-      options: { id: ruleId },
-      changeTracking: {
-        action: SecurityRuleChangeTrackingAction.ruleRestore,
-        metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
-        refresh: 'wait_for',
-      },
+    return restoreDeletedRule({
+      ...params,
+      snapshotRule,
     });
-
-    return { rule: convertAlertingRuleToRuleResponse(createdRule) };
   }
 
+  return restoreRuleState({
+    ...params,
+    existingRule,
+    snapshotRule,
+  });
+};
+
+interface RestoreRuleStateParams extends RestoreRuleFromHistoryParams {
+  existingRule: RuleResponse;
+  snapshotRule: RuleResponse;
+}
+
+async function restoreRuleState({
+  actionsClient,
+  rulesClient,
+  prebuiltRuleAssetClient,
+  mlAuthz,
+  rulesAuthz,
+  changeId,
+  existingRule,
+  snapshotRule,
+}: RestoreRuleStateParams): Promise<RestoreRuleFromHistoryResult> {
   await validateMlAuth(mlAuthz, existingRule.type);
 
   const ruleWithUpdates = await applyRuleUpdate({
@@ -166,4 +157,56 @@ export const restoreRuleFromHistory = async ({
   });
 
   return { rule: convertAlertingRuleToRuleResponse(updatedRule) };
-};
+}
+
+interface RestoreDeletedRuleParams extends RestoreRuleFromHistoryParams {
+  snapshotRule: RuleResponse;
+}
+
+async function restoreDeletedRule({
+  actionsClient,
+  rulesClient,
+  mlAuthz,
+  rulesAuthz,
+  ruleId,
+  changeId,
+  snapshotRule,
+}: RestoreDeletedRuleParams): Promise<RestoreRuleFromHistoryResult> {
+  const conflictingRule = await getRuleByRuleId({ rulesClient, ruleId: snapshotRule.rule_id });
+
+  if (conflictingRule != null) {
+    throw new ClientError(
+      `Cannot restore rule: a rule with rule_id "${snapshotRule.rule_id}" already exists (id: "${conflictingRule.id}"). The rule may have been reinstalled after deletion. Delete the existing rule first, or restore from its own history instead.`,
+      409
+    );
+  }
+
+  await validateMlAuth(mlAuthz, snapshotRule.type);
+
+  validateFieldWritePermissions(
+    {
+      exceptions_list: snapshotRule.exceptions_list,
+      note: snapshotRule.note,
+      investigation_fields: snapshotRule.investigation_fields,
+      enabled: false,
+    },
+    rulesAuthz
+  );
+
+  const createdRule = await rulesClient.create<RuleParams>({
+    data: {
+      ...convertRuleResponseToAlertingRule(snapshotRule, actionsClient),
+      alertTypeId: ruleTypeMappings[snapshotRule.type],
+      consumer: SERVER_APP_ID,
+      enabled: false,
+    },
+    options: { id: ruleId },
+    changeTracking: {
+      action: SecurityRuleChangeTrackingAction.ruleRestore,
+      metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
+      refresh: 'wait_for',
+    },
+  });
+
+  return { rule: convertAlertingRuleToRuleResponse(createdRule) };
+}
