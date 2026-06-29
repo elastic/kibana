@@ -21,7 +21,6 @@ export interface ChangeHistoryPreviewShellProps {
   title?: string;
   onBack: () => void;
   headerActions?: ReactNode;
-  footer?: ReactNode;
   children: ReactNode;
 }
 
@@ -30,7 +29,6 @@ export function ChangeHistoryPreviewShell({
   title,
   onBack,
   headerActions,
-  footer,
   children,
 }: ChangeHistoryPreviewShellProps): JSX.Element {
   const euiThemeContext = useEuiTheme();
@@ -60,10 +58,6 @@ export function ChangeHistoryPreviewShell({
         overflow: hidden;
         display: flex;
         flex-direction: column;
-      `,
-      footer: css`
-        flex-shrink: 0;
-        border-top: ${euiTheme.border.thin};
       `,
     }),
     [euiTheme, euiThemeContext]
@@ -105,12 +99,6 @@ export function ChangeHistoryPreviewShell({
       </div>
 
       <div css={styles.body}>{children}</div>
-
-      {footer ? (
-        <div css={styles.footer} data-test-subj="changeHistoryPreviewFooter">
-          {footer}
-        </div>
-      ) : null}
     </div>
   );
 }

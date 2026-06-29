@@ -12,7 +12,6 @@ import type {
   ChangeHistoryPermissions,
 } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
-import type { ChangeHistoryPreviewFooterRenderFn } from '../types/change_history_preview_footer';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
@@ -24,7 +23,6 @@ export interface ChangeHistoryProviderProps {
   objectId: string;
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
-  renderPreviewFooter?: ChangeHistoryPreviewFooterRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels?: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
@@ -36,7 +34,6 @@ export const ChangeHistoryProvider = ({
   objectId,
   adapter,
   renderPreview,
-  renderPreviewFooter,
   renderBadge,
   labels,
   features,
@@ -87,7 +84,6 @@ export const ChangeHistoryProvider = ({
       objectId,
       adapter,
       renderPreview,
-      renderPreviewFooter,
       renderBadge,
       labels: {
         previewBackLabel: labels?.previewBackLabel ?? i18n.BACK_TO_HOST,
@@ -105,7 +101,6 @@ export const ChangeHistoryProvider = ({
       objectId,
       renderBadge,
       renderPreview,
-      renderPreviewFooter,
       supports,
     ]
   );

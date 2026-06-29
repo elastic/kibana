@@ -15,7 +15,6 @@ export type {
 export type { ChangeHistoryError, ChangeHistoryErrorCode } from './change_history_error';
 export { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from './change_history_constants';
 export type { ChangeHistoryPreviewRenderFn } from './change_history_preview';
-export type { ChangeHistoryPreviewFooterRenderFn } from './change_history_preview_footer';
 export type { ChangeHistoryBadgeRenderFn } from './change_history_badge';
 export type { ChangeHistoryAdapter } from './change_history_adapter';
 export type {

@@ -10,7 +10,6 @@ import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type { ChangeHistorySupports } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
-import type { ChangeHistoryPreviewFooterRenderFn } from '../types/change_history_preview_footer';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 
 export interface ChangeHistoryResolvedLabels {
@@ -24,7 +23,6 @@ export interface ChangeHistoryConfigValue {
   objectId: string;
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
-  renderPreviewFooter?: ChangeHistoryPreviewFooterRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryResolvedLabels;
   supports: ChangeHistorySupports;

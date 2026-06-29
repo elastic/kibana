@@ -30,8 +30,7 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { adapter, objectId, renderBadge, renderPreviewFooter, labels, supports } =
-    useChangeHistoryConfig();
+  const { adapter, objectId, renderBadge, labels, supports } = useChangeHistoryConfig();
   const {
     isModalOpen,
     closeModal,
@@ -134,11 +133,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
     <ChangeHistoryDefaultPreviewHeaderActions />
   ) : undefined;
 
-  const previewFooter = renderPreviewFooter?.({
-    objectId,
-    selectedChangeId,
-  });
-
   const renderSidebarContent = () => {
     if (showLoadingSidebar) {
       return <ChangeHistoryTimeline items={[]} isLoading />;
@@ -187,7 +181,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
             title={labels.previewTitle}
             onBack={closeModal}
             headerActions={previewHeaderActions}
-            footer={previewFooter}
           >
             <ChangeHistoryPreviewPanel listItems={items} />
           </ChangeHistoryPreviewShell>
