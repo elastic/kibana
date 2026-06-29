@@ -9,6 +9,7 @@
 
 import type { ChangeHistoryAdapter, ChangeHistoryDetail } from '@kbn/change-history-ui';
 import type { HttpSetup } from '@kbn/core/public';
+import { WorkflowApi } from '@kbn/workflows-ui';
 
 import {
   mapWorkflowHistoryItemToDetail,
@@ -43,6 +44,7 @@ export const createWorkflowChangeHistoryAdapter = (
   { onWorkflowRestored }: CreateWorkflowChangeHistoryAdapterOptions = {}
 ): ChangeHistoryAdapter => {
   const changeCache = new Map<string, ChangeHistoryDetail>();
+  const workflowApi = new WorkflowApi(http);
 
   return {
     listChanges: async ({ objectId, page, signal }) => {
@@ -94,15 +96,7 @@ export const createWorkflowChangeHistoryAdapter = (
 
     restoreChange: async ({ objectId, changeId, signal }) => {
       try {
-        await http.post(
-          `${WORKFLOW_CHANGE_HISTORY_LIST_PATH}/${encodeURIComponent(
-            objectId
-          )}/history/${encodeURIComponent(changeId)}/restore`,
-          {
-            version: INTERNAL_API_VERSION,
-            signal,
-          }
-        );
+        await workflowApi.restoreWorkflowVersion(objectId, changeId, { signal });
         await onWorkflowRestored?.(objectId);
       } catch (error) {
         throw mapWorkflowRestoreHttpError(error);
