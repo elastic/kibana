@@ -78,10 +78,9 @@ kubectl get events -n otel-demo --sort-by='.lastTimestamp'
 | flagd | Feature flag daemon | 8013 |
 | load-generator | Python/Locust | 8089 |
 
-## Source Code
+## Feature Flags
 
-Repository: \`open-telemetry/opentelemetry-demo\` (tag \`v1.12.0\`)
-Each service lives under \`src/<service-name>/\` in the repository.
+The demo code contains error-injection feature flags controlled by \`flagd\` (e.g. \`productCatalogFailure\`, \`cartServiceFailure\`). **These are never enabled in this environment.** When investigating errors or anomalies, ignore any feature-flag-related code paths — they are not the cause. Focus on real runtime signals (logs, traces, live cluster state) rather than the flag-based fault-injection logic in the source.
 
 ## Source Code & Code Search
 
