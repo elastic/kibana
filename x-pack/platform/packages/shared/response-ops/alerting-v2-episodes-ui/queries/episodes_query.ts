@@ -92,7 +92,7 @@ export interface EpisodesFilterState {
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
   /** Severity values (OR). Includes EPISODE_SEVERITY_FILTER_NONE for episodes without severity. */
-  severities?: string[] | null;
+  severity?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
 }
@@ -125,9 +125,8 @@ const buildSeveritySortEval = (): string => {
   return `EVAL ${SEVERITY_SORT_FIELD} = CASE(${cases}, ${EPISODE_WITHOUT_SEVERITY_SORT_VALUE})`;
 };
 
-const resolveSortField = (query: ComposerQuery, sortField: string): string => {
+const resolveSortField = (sortField: string): string => {
   if (sortField === 'severity') {
-    query.pipe(buildSeveritySortEval());
     return SEVERITY_SORT_FIELD;
   }
 
@@ -216,8 +215,8 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
   }
-  if (filterState.severities?.length) {
-    addSeverityFilter(query, filterState.severities);
+  if (filterState.severity?.length) {
+    addSeverityFilter(query, filterState.severity);
   }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
@@ -275,7 +274,11 @@ export const buildEpisodesQuery = (
     applyFilterState(query, filterState);
   }
 
-  const sortField = resolveSortField(query, sortState.sortField);
+  if (sortState.sortField === 'severity') {
+    query.pipe(buildSeveritySortEval());
+  }
+
+  const sortField = resolveSortField(sortState.sortField);
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS

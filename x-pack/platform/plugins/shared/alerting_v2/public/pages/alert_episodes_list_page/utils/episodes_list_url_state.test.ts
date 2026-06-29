@@ -42,7 +42,7 @@ describe('episodes_list_url_state', () => {
         ruleId: 'r1',
         queryString: '  host  ',
         tags: ['a', 'b'],
-        severities: ['high', '__no_severity__'],
+        severity: ['high', '__no_severity__'],
         assigneeUid: 'u1',
         extra: 'ignored',
         timeFrom: 'now-7d',
@@ -54,7 +54,7 @@ describe('episodes_list_url_state', () => {
           ruleId: 'r1',
           queryString: 'host',
           tags: ['a', 'b'],
-          severities: ['high', '__no_severity__'],
+          severity: ['high', '__no_severity__'],
           assigneeUid: 'u1',
         },
         timeRange: { from: 'now-7d', to: 'now' },
@@ -97,6 +97,16 @@ describe('episodes_list_url_state', () => {
         groupHash: 'abc123',
         groupingValues: { 'host.name': 'web-01', region: null },
       });
+    });
+
+    it('reads legacy severities URL key as severity', async () => {
+      const storage = await createKbnTestUrlStorage({
+        severities: ['high', '__no_severity__'],
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.severity).toEqual([
+        'high',
+        '__no_severity__',
+      ]);
     });
 
     it('ignores groupingValues when it is not a plain object', async () => {
@@ -143,24 +153,24 @@ describe('episodes_list_url_state', () => {
       });
     });
 
-    it('round-trips severities', async () => {
+    it('round-trips severity', async () => {
       const storage = await createKbnTestUrlStorage();
 
       await writeEpisodesListAppStateToUrlStorage(
         storage,
         {
           status: 'active',
-          severities: ['high', '__no_severity__'],
+          severity: ['high', '__no_severity__'],
         },
         DEFAULT_EPISODES_LIST_TIME_RANGE
       );
 
       expect(storage.get('_a')).toEqual({
         [EPISODES_LIST_APP_STATE_KEY]: {
-          severities: ['high', '__no_severity__'],
+          severity: ['high', '__no_severity__'],
         },
       });
-      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.severities).toEqual([
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.severity).toEqual([
         'high',
         '__no_severity__',
       ]);

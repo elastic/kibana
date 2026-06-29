@@ -271,7 +271,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { severities: ['high'] }
+      { severity: ['high'] }
     );
     const queryString = query.print('basic');
 
@@ -282,7 +282,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { severities: ['high', 'critical'] }
+      { severity: ['high', 'critical'] }
     );
     const queryString = query.print('basic');
 
@@ -293,7 +293,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { severities: ['__no_severity__'] }
+      { severity: ['__no_severity__'] }
     );
     const queryString = query.print('basic');
 
@@ -304,7 +304,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { severities: ['high', '__no_severity__'] }
+      { severity: ['high', '__no_severity__'] }
     );
     const queryString = query.print('basic');
 
@@ -332,7 +332,7 @@ describe('buildEpisodesQuery', () => {
         ruleId: undefined,
         groupHash: null,
         tags: null,
-        severities: null,
+        severity: null,
       }
     );
     const queryString = query.print('basic');

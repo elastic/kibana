@@ -11,7 +11,7 @@ import { AlertEpisodesSeverityFilter } from './severity_filter';
 
 describe('AlertEpisodesSeverityFilter', () => {
   const defaultProps = {
-    selectedSeverities: null as string[] | null,
+    selectedSeverities: null,
     onSeveritiesChange: jest.fn(),
     'data-test-subj': 'test-severity-filter',
   };

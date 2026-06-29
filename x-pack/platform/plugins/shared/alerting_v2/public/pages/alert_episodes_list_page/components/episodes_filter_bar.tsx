@@ -83,8 +83,8 @@ export const EpisodesFilterBar = ({
   );
 
   const onSeveritiesChange = useCallback(
-    (severities: string[] | undefined) => {
-      onFilterChange((prev) => ({ ...prev, severities }));
+    (severity: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, severity }));
     },
     [onFilterChange]
   );
@@ -143,7 +143,7 @@ export const EpisodesFilterBar = ({
               />
 
               <AlertEpisodesSeverityFilter
-                selectedSeverities={filterState.severities}
+                selectedSeverities={filterState.severity}
                 onSeveritiesChange={onSeveritiesChange}
                 data-test-subj="episodesFilterBar-severity"
               />
