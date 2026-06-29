@@ -109,7 +109,7 @@ export const useFetchSignalFirings = ({
     interval,
     lastFiringMs: summaryQuery.data ?? null,
     isLoading: enabled && (histogramQuery.isLoading || summaryQuery.isLoading),
-    isError: histogramQuery.isError || summaryQuery.isError,
+    isError: histogramQuery.isError,
     refetch: () => {
       histogramQuery.refetch();
       summaryQuery.refetch();

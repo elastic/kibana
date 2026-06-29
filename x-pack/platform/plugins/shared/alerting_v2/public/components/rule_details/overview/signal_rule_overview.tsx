@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -64,10 +64,12 @@ export const SignalRuleOverview: React.FC = () => {
     [setTimeRange]
   );
 
-  const { gteMs, lteMs } = useMemo(
-    () => resolveGteLte(timeRange.from, timeRange.to),
-    [timeRange.from, timeRange.to]
-  );
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  const { gteMs, lteMs } = useMemo(() => {
+    void refreshTick;
+    return resolveGteLte(timeRange.from, timeRange.to);
+  }, [timeRange.from, timeRange.to, refreshTick]);
 
   const { buckets, interval, lastFiringMs, isLoading, isError, refetch } = useFetchSignalFirings({
     ruleId: rule.id,
@@ -76,7 +78,10 @@ export const SignalRuleOverview: React.FC = () => {
     data,
   });
 
-  const handleRefresh = useCallback(() => refetch(), [refetch]);
+  const handleRefresh = useCallback(() => {
+    setRefreshTick((n) => n + 1);
+    refetch();
+  }, [refetch]);
 
   const intervalMs = useMemo(() => intervalToMs(interval), [interval]);
 
@@ -133,6 +138,108 @@ export const SignalRuleOverview: React.FC = () => {
     ];
   }, [kpis, lastFiringMs]);
 
+  const renderKpiBody = () => {
+    if (isLoading) {
+      return (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="signalOverviewKpiLoading"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    if (isError) {
+      return (
+        <EuiText size="s" color="danger" data-test-subj="signalOverviewKpiError">
+          {i18n.translate('xpack.alertingV2.signalOverview.kpiErrorBody', {
+            defaultMessage: 'Could not load signal counts.',
+          })}
+        </EuiText>
+      );
+    }
+    return <StatsRow stats={stats} data-test-subj="signalOverviewStatsRow" />;
+  };
+
+  const renderChartBody = () => {
+    if (isLoading) {
+      return (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="signalOverviewLoading"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingChart size="l" />
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    if (isError) {
+      return (
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          data-test-subj="signalOverviewError"
+          title={
+            <h4>
+              {i18n.translate('xpack.alertingV2.signalOverview.errorTitle', {
+                defaultMessage: 'Could not load rule events',
+              })}
+            </h4>
+          }
+          body={
+            <EuiText size="s">
+              {i18n.translate('xpack.alertingV2.signalOverview.errorBody', {
+                defaultMessage:
+                  'Try a smaller time range or refresh the page. Check the rule events index is reachable.',
+              })}
+            </EuiText>
+          }
+        />
+      );
+    }
+    if (buckets.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          iconType="visBarVerticalStacked"
+          data-test-subj="signalOverviewEmpty"
+          title={
+            <h4>
+              {i18n.translate('xpack.alertingV2.signalOverview.emptyTitle', {
+                defaultMessage: 'No signals in this window',
+              })}
+            </h4>
+          }
+          body={
+            <EuiText size="s">
+              {i18n.translate('xpack.alertingV2.signalOverview.emptyBody', {
+                defaultMessage: 'Signals appear here once the rule fires.',
+              })}
+            </EuiText>
+          }
+        />
+      );
+    }
+    return (
+      <SignalFiringsChart
+        buckets={buckets}
+        gteMs={gteMs}
+        lteMs={lteMs}
+        minIntervalMs={intervalMs}
+        timeZone={timeZone}
+        onBrushRange={onBrushRange}
+      />
+    );
+  };
+
   return (
     <div data-test-subj="signalRuleOverview">
       {/* Section header — no panel */}
@@ -166,21 +273,7 @@ export const SignalRuleOverview: React.FC = () => {
 
       {/* KPI panel */}
       <EuiPanel hasBorder paddingSize="m" data-test-subj="signalOverviewKpiPanel">
-        {isLoading && (
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            responsive={false}
-            data-test-subj="signalOverviewKpiLoading"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiLoadingChart size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        {!isLoading && !isError && (
-          <StatsRow stats={stats} data-test-subj="signalOverviewStatsRow" />
-        )}
+        {renderKpiBody()}
       </EuiPanel>
 
       <EuiSpacer size="m" />
@@ -216,75 +309,7 @@ export const SignalRuleOverview: React.FC = () => {
 
         <EuiSpacer size="m" />
 
-        {isLoading && (
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            responsive={false}
-            data-test-subj="signalOverviewLoading"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="l" />
-              <EuiLoadingChart size="l" />
-              <EuiSpacer size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-
-        {!isLoading && isError && (
-          <EuiEmptyPrompt
-            color="danger"
-            iconType="warning"
-            data-test-subj="signalOverviewError"
-            title={
-              <h4>
-                {i18n.translate('xpack.alertingV2.signalOverview.errorTitle', {
-                  defaultMessage: 'Could not load rule events',
-                })}
-              </h4>
-            }
-            body={
-              <EuiText size="s">
-                {i18n.translate('xpack.alertingV2.signalOverview.errorBody', {
-                  defaultMessage:
-                    'Try a smaller time range or refresh the page. Check the rule events index is reachable.',
-                })}
-              </EuiText>
-            }
-          />
-        )}
-
-        {!isLoading && !isError && buckets.length === 0 && (
-          <EuiEmptyPrompt
-            iconType="visBarVerticalStacked"
-            data-test-subj="signalOverviewEmpty"
-            title={
-              <h4>
-                {i18n.translate('xpack.alertingV2.signalOverview.emptyTitle', {
-                  defaultMessage: 'No signals in this window',
-                })}
-              </h4>
-            }
-            body={
-              <EuiText size="s">
-                {i18n.translate('xpack.alertingV2.signalOverview.emptyBody', {
-                  defaultMessage: 'Signals appear here once the rule fires.',
-                })}
-              </EuiText>
-            }
-          />
-        )}
-
-        {!isLoading && !isError && buckets.length > 0 && (
-          <SignalFiringsChart
-            buckets={buckets}
-            gteMs={gteMs}
-            lteMs={lteMs}
-            minIntervalMs={intervalMs}
-            timeZone={timeZone}
-            onBrushRange={onBrushRange}
-          />
-        )}
+        {renderChartBody()}
       </EuiPanel>
     </div>
   );
