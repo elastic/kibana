@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -109,6 +110,61 @@ export class ComposeDiscoverPage {
 
   async openEditFlyout(ruleId: string) {
     await this.editRuleButton(ruleId).click();
+  }
+
+  /** Container for the editable alert-condition block editor inside the sandbox. */
+  public get alertQueryEditor(): Locator {
+    return this.page.testSubj.locator('composeDiscoverAlertQueryEditor');
+  }
+
+  /** Opens the sandbox from the alert-condition summary (edit / "Open query editor"). */
+  async openSandboxEditor() {
+    await this.alertSummaryEditorButton.click();
+  }
+
+  async switchSandboxTab(tab: 'base' | 'alert' | 'recovery') {
+    await this.page.testSubj.locator(`querySandboxTab-${tab}`).click();
+  }
+
+  /**
+   * Sets the alert block editor content to `fragment` and programmatically triggers
+   * Monaco autocomplete on that editor. The editor is located by its `data-test-subj`
+   * (not by model index) so it stays correct regardless of how many Monaco models exist.
+   */
+  async setAlertQueryAndTriggerSuggest(fragment: string) {
+    await this.alertQueryEditor.locator('textarea').click();
+    await this.page.evaluate((text) => {
+      const monacoEnv = (window as unknown as { MonacoEnvironment?: any }).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const container = document.querySelector(
+        '[data-test-subj="composeDiscoverAlertQueryEditor"]'
+      );
+      if (!container) {
+        throw new Error('Alert query editor container not found');
+      }
+      const editor = (monacoEnv.monaco.editor.getEditors() as any[]).find(
+        (e) =>
+          typeof e.getDomNode === 'function' && e.getDomNode() && container.contains(e.getDomNode())
+      );
+      if (!editor) {
+        throw new Error('Alert query editor instance not found');
+      }
+      const model = editor.getModel();
+      model.setValue(text);
+      editor.setPosition(model.getPositionAt(text.length));
+      editor.focus();
+      editor.trigger('scout-test', 'editor.action.triggerSuggest', {});
+    }, fragment);
+  }
+
+  /** Visible labels in the Monaco autocomplete suggestion popover. */
+  async getVisibleSuggestionLabels(): Promise<string[]> {
+    const widget = this.codeEditor.getCodeEditorSuggestWidget();
+    await widget.waitFor({ state: 'visible' });
+    await expect(widget.locator('.monaco-list-row')).not.toHaveCount(0);
+    return widget.locator('.monaco-list-row .label-name').allInnerTexts();
   }
 
   /**
