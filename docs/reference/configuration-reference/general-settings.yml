@@ -1497,7 +1497,7 @@ groups:
           :applies_to: serverless: ga
           In Serverless environments, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check by default.
         datatype: string
-        default: []
+        default: "[]"
         applies_to:
           stack: ga 9.5
           ech: ga
