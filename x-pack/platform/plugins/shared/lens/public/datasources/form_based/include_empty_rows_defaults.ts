@@ -197,18 +197,28 @@ function getPersistedFormBasedLayers(
  * target type restores its saved value instead, so a round trip returns to the
  * configuration the user explicitly saved.
  *
+ * `targetLayerId` scopes the reconciliation to a single layer, used by a
+ * same-visualization subtype switch (e.g. XY series type) that only changes the
+ * type of one layer. When omitted, every layer is reconciled, as a
+ * cross-visualization switch collapses the whole chart to one type.
+ *
  * Returns the state reference unchanged when nothing needs to be rewritten.
  */
 export function applyEmptyRowsDefaultsOnTypeSwitch(
   suggestionState: FormBasedPrivateState,
   persistedDoc: LensDocument | undefined,
   targetVisualizationTypeId: string | undefined,
-  getPersistedVisualizationTypeId?: (layerId: string) => string | undefined
+  getPersistedVisualizationTypeId?: (layerId: string) => string | undefined,
+  targetLayerId?: string
 ): FormBasedPrivateState {
   const targetDefault = getDefaultIncludeEmptyRows(targetVisualizationTypeId);
   const persistedLayers = getPersistedFormBasedLayers(persistedDoc);
 
   return mapBucketColumns(suggestionState, (layerId, columnId) => {
+    if (targetLayerId !== undefined && layerId !== targetLayerId) {
+      return undefined;
+    }
+
     const persistedColumn = persistedLayers?.[layerId]?.columns?.[columnId];
     const restoresSavedType =
       persistedColumn !== undefined &&

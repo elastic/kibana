@@ -392,4 +392,49 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
         ?.includeEmptyRows
     ).toBe(true);
   });
+
+  describe('targetLayerId scoping (subtype switch)', () => {
+    it('reconciles only the target layer and leaves sibling layers untouched', () => {
+      // Multi-data-layer XY: only layerB switches series type to bar. layerA must
+      // keep its line (ON) date histogram instead of being flipped to bar's OFF.
+      const suggestion = makeState({
+        layerA: { col: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+        layerB: { col: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+      });
+
+      const next = applyEmptyRowsDefaultsOnTypeSwitch(
+        suggestion,
+        undefined,
+        SeriesTypes.BAR,
+        undefined,
+        'layerB'
+      );
+
+      expect(
+        (next.layers.layerA.columns.col as { params?: { includeEmptyRows?: boolean } }).params
+          ?.includeEmptyRows
+      ).toBe(true);
+      expect(
+        (next.layers.layerB.columns.col as { params?: { includeEmptyRows?: boolean } }).params
+          ?.includeEmptyRows
+      ).toBe(false);
+    });
+
+    it('returns the same state reference when the target layer needs no change', () => {
+      const suggestion = makeState({
+        layerA: { col: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+        layerB: { col: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
+      });
+
+      const next = applyEmptyRowsDefaultsOnTypeSwitch(
+        suggestion,
+        undefined,
+        SeriesTypes.BAR,
+        undefined,
+        'layerB'
+      );
+
+      expect(next).toBe(suggestion);
+    });
+  });
 });

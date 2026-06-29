@@ -157,6 +157,9 @@ export const ChartSwitch = memo(function ChartSwitch({
           persistedDoc,
           targetVisualizationTypeId,
           getPersistedVisualizationTypeId,
+          // A subtype switch only changes this layer's type, so reconcile only
+          // its columns and leave sibling layers (e.g. other XY series) intact.
+          targetLayerId: layerId,
         });
         if (nextState !== currentState) {
           dispatchLens(

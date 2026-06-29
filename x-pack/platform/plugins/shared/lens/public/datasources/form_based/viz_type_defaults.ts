@@ -44,6 +44,12 @@ export interface TypeSwitchContext extends BaseContext {
   persistedDoc: LensDocument | undefined;
   /** Resolves a layer's persisted visualization type id (subtype aware). */
   getPersistedVisualizationTypeId?: (layerId: string) => string | undefined;
+  /**
+   * Scopes reconciliation to a single layer for a same-visualization subtype
+   * switch (e.g. XY series type), which only changes that layer's type. Omitted
+   * for a cross-visualization switch, which collapses the whole chart.
+   */
+  targetLayerId?: string;
 }
 
 export type VizTypeDefaultsContext = SuggestionDropContext | TypeSwitchContext;
@@ -78,6 +84,7 @@ export function applyVizTypeDatasourceDefaults(
     datasourceState,
     context.persistedDoc,
     targetVisualizationTypeId,
-    context.getPersistedVisualizationTypeId
+    context.getPersistedVisualizationTypeId,
+    context.targetLayerId
   );
 }
