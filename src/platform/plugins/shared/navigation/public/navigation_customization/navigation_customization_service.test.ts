@@ -247,13 +247,23 @@ describe('NavigationCustomizationService', () => {
       });
     };
 
-    it('reports did_customize: false on first setup when nothing is stored', () => {
+    it('reports did_customize: false on first setup when nothing is stored', async () => {
       const { core, chrome } = makeDeps();
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
-      // getNavigation$ emits synchronously (of), so the baseline event fires inline.
+      // getNavigation$ emits synchronously (of), but the baseline is reported only
+      // after the "reported" flag write resolves, so flush microtasks first.
       service.enableUi({ core, chrome, solution: 'es' });
+
+      // The flag is persisted first so the baseline is not re-reported on the next
+      // page load; the event is emitted only on a successful write.
+      expect(core.userStorage.set).toHaveBeenCalledWith(
+        NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY,
+        true
+      );
+
+      await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(
@@ -265,11 +275,25 @@ describe('NavigationCustomizationService', () => {
           hidden_item_ids: [],
         })
       );
-      // Persist the flag so the baseline is not re-reported on the next page load.
+    });
+
+    it('does not report the baseline when the flag write fails (read-only user)', async () => {
+      const { core, chrome } = makeDeps();
+      (core.userStorage.set as jest.Mock).mockRejectedValue(new Error('Forbidden'));
+      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      const service = new NavigationCustomizationService();
+
+      service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsyncImport();
+
+      // The write was attempted, but its rejection means the user cannot persist a
+      // customization — so the baseline is neither reported nor (being unpersisted)
+      // re-fired on the next load.
       expect(core.userStorage.set).toHaveBeenCalledWith(
         NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY,
         true
       );
+      expect(reportEvent).not.toHaveBeenCalled();
     });
 
     it('does not report when a customization is already stored', () => {
@@ -287,13 +311,14 @@ describe('NavigationCustomizationService', () => {
       );
     });
 
-    it('treats an empty stored customization as no customization and still reports the baseline', () => {
+    it('treats an empty stored customization as no customization and still reports the baseline', async () => {
       const { core, chrome } = makeDeps();
       stubStoredValues(core, { customization: { moves: [], hidden: [] } });
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(
@@ -323,13 +348,14 @@ describe('NavigationCustomizationService', () => {
       expect(reportEvent).not.toHaveBeenCalled();
     });
 
-    it('reports the baseline at most once across repeated enableUi calls', () => {
+    it('reports the baseline at most once across repeated enableUi calls', async () => {
       const { core, chrome } = makeDeps();
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
       service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
     });
@@ -416,9 +442,9 @@ describe('NavigationCustomizationService', () => {
     /**
      * Opens the modal through the registered chrome handler and returns the
      * `onSave` callback the service handed to `openCustomizeNavigationModal`,
-     * plus the analytics mock. The baseline-detection event fires synchronously
-     * during `enableUi`, so we clear analytics before returning to isolate the
-     * save event under test.
+     * plus the analytics mock. The baseline-detection event fires asynchronously
+     * (after the "reported" flag write resolves), so we clear analytics *after*
+     * flushing to isolate the save event under test.
      */
     const openModalAndGetOnSave = async (
       deps: ReturnType<typeof makeDeps>
@@ -431,13 +457,13 @@ describe('NavigationCustomizationService', () => {
 
       service.enableUi({ core, chrome, solution: 'es' });
 
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
-      reportEvent.mockClear();
-
       const handler = (chrome.project.registerCustomizeNavigationHandler as jest.Mock).mock
         .calls[0][0] as () => void;
       handler();
       await flushAsyncImport();
+
+      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
 
       const { onSave } = openModalMock.mock.calls[0][0];
       return { onSave, reportEvent };
@@ -449,6 +475,8 @@ describe('NavigationCustomizationService', () => {
 
       // Reset-to-default / unchanged: no moves and nothing hidden.
       onSave({ moves: [], hidden: [] }, ['a', 'b'], []);
+      // The event is reported only after the persist (here a `remove`) resolves.
+      await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(
@@ -467,6 +495,7 @@ describe('NavigationCustomizationService', () => {
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [{ id: 'b', afterId: null }], hidden: [] }, ['b', 'a'], []);
+      await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
@@ -479,6 +508,7 @@ describe('NavigationCustomizationService', () => {
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [], hidden: asHidden('b') }, ['a', 'b'], ['b']);
+      await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
@@ -488,6 +518,24 @@ describe('NavigationCustomizationService', () => {
           hidden_item_ids: ['b'],
         })
       );
+    });
+
+    it('does not report when the persist fails (read-only user)', async () => {
+      const deps = makeDeps();
+      // Both the set (real customization) and remove (reset) paths can reject for
+      // a user without write access; fail both so either branch is covered.
+      (deps.core.userStorage.set as jest.Mock).mockRejectedValue(new Error('Forbidden'));
+      (deps.core.userStorage.remove as jest.Mock).mockRejectedValue(new Error('Forbidden'));
+      const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
+
+      onSave({ moves: [{ id: 'b', afterId: null }], hidden: [] }, ['b', 'a'], []);
+      await flushAsyncImport();
+
+      // The write failed (the user saw the error toast instead), so no event is
+      // emitted for a customization that never landed.
+      expect(deps.core.userStorage.set).toHaveBeenCalled();
+      expect(reportEvent).not.toHaveBeenCalled();
+      expect(deps.core.notifications.toasts.addError).toHaveBeenCalled();
     });
   });
 });

@@ -144,17 +144,31 @@ export class NavigationCustomizationService {
               hidden: overflowSet.has(node.id),
             }));
             const navProps = buildNavItemsProperties(itemsPayload);
-            reportNavigationCustomization(core.analytics, {
-              space_type: solution,
-              did_customize: false,
-              ...navProps,
-            });
-            core.userStorage.set(NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY, true).catch(() => {
-              // Persisting the "reported" flag can fail for read-only users. Swallow it
-              // silently — unlike a save, this is passive bookkeeping, not a user action,
-              // so no error toast is warranted. The cost is that the baseline event then
-              // re-fires on subsequent page loads, mildly inflating its count.
-            });
+            // Persist the "reported" flag first and emit the baseline only on a
+            // successful write. The flag and the customization itself go through
+            // the same user-storage route and permission, so a successful write
+            // proves the user could also persist a real customization. This
+            // gates the baseline on write capability without a separate
+            // capabilities check:
+            //  - Read-only users (write rejects) emit no baseline at all. They
+            //    can never persist a customization, so excluding them avoids
+            //    both re-firing the event on every page load (the flag never
+            //    sticks) and padding the baseline denominator with users who
+            //    structurally cannot convert to `did_customize: true`.
+            //  - Writable users emit exactly once; the flag then suppresses it
+            //    on subsequent loads.
+            core.userStorage
+              .set(NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY, true)
+              .then(() => {
+                reportNavigationCustomization(core.analytics, {
+                  space_type: solution,
+                  did_customize: false,
+                  ...navProps,
+                });
+              })
+              .catch(() => {
+                // Read-only user: nothing persisted, nothing reported.
+              });
           });
       }
     }
@@ -213,35 +227,42 @@ export class NavigationCustomizationService {
               ? core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY)
               : core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c);
 
-          persist.catch((error: Error) => {
-            // `toastMessage` provides a friendlier, actionable body than the raw
-            // HTTP error (which is just "Internal Server Error"); the underlying
-            // error stays available via the toast's "See the full error" action.
-            core.notifications.toasts.addError(error, {
-              title: i18n.translate('navigation.customization.saveErrorTitle', {
-                defaultMessage: 'Unable to save navigation customization',
-              }),
-              toastMessage: i18n.translate('navigation.customization.saveErrorMessage', {
-                defaultMessage:
-                  'Your navigation customization could not be saved. You might not have permission to save preferences in this space.',
-              }),
+          persist
+            .then(() => {
+              // Report only persisted customizations, gated on the write
+              // succeeding. A read-only user whose write fails sees the toast
+              // below instead, so this avoids over-counting `did_customize` for
+              // a save that never landed. Mirrors the baseline-detection event,
+              // which is likewise emitted only after its write resolves.
+              if (!this.activeSolution) return;
+              const hiddenSet = new Set(hiddenIds);
+              // A save with no moves and nothing hidden is equivalent to the
+              // default layout — e.g. the user clicked "Reset to default" and
+              // applied — so it does not count as a customization.
+              const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
+              reportNavigationCustomization(core.analytics, {
+                space_type: this.activeSolution,
+                did_customize: didCustomize,
+                ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),
+              });
+            })
+            .catch((error: Error) => {
+              // `toastMessage` provides a friendlier, actionable body than the raw
+              // HTTP error (which is just "Internal Server Error"); the underlying
+              // error stays available via the toast's "See the full error" action.
+              core.notifications.toasts.addError(error, {
+                title: i18n.translate('navigation.customization.saveErrorTitle', {
+                  defaultMessage: 'Unable to save navigation customization',
+                }),
+                toastMessage: i18n.translate('navigation.customization.saveErrorMessage', {
+                  defaultMessage:
+                    'Your navigation customization could not be saved. You might not have permission to save preferences in this space.',
+                }),
+              });
             });
-          });
 
-          if (this.activeSolution) {
-            const hiddenSet = new Set(hiddenIds);
-            // A save with no moves and nothing hidden is equivalent to the
-            // default layout — e.g. the user clicked "Reset to default" and
-            // applied — so it does not count as a customization. Mirrors the
-            // baseline-detection check above.
-            const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
-            reportNavigationCustomization(core.analytics, {
-              space_type: this.activeSolution,
-              did_customize: didCustomize,
-              ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),
-            });
-          }
-
+          // Close synchronously — the live nav was already updated optimistically
+          // via onChange, so there's no reason to block the modal on the write.
           closeModal();
         },
         onReset: () => {
