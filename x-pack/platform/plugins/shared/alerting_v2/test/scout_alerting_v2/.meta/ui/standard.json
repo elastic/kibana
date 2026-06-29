@@ -1,5 +1,5 @@
 {
-  "sha1": "ec3509ccc8f2e510378fc999edda687dfd810f63",
+  "sha1": "ba80ea4015289dec6d6f5e74ac659f3dea8092a5",
   "tests": [
     {
       "id": "a3a9f820a79c452-b8b452a1ef0f11e",
@@ -183,6 +183,45 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
         "line": 21,
         "column": 7
+      }
+    },
+    {
+      "id": "5fab9ce5af52ac7-21909d01f6a3e51",
+      "title": "Rule Builder — threshold create and edit flows create flow: configure threshold builder and submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "5fab9ce5af52ac7-241c0182ad4356a",
+      "title": "Rule Builder — threshold create and edit flows edit flow: open builder-created rule and modify",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 130,
+        "column": 9
+      }
+    },
+    {
+      "id": "5fab9ce5af52ac7-cb0291d735f9ca6",
+      "title": "Rule Builder — threshold create and edit flows permissions: viewer role cannot access create flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 189,
+        "column": 9
       }
     },
     {
