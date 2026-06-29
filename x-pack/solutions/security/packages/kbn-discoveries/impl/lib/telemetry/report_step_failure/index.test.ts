@@ -225,6 +225,36 @@ describe('classifyErrorCategory', () => {
     );
   });
 
+  it('returns interrupted when a prior run was interrupted (server restart/crash)', () => {
+    expect(
+      classifyErrorCategory(
+        new Error(
+          "Marked workflow execution 'abc' as FAILED after workflow:run retry (attempts=2) - prior run was interrupted"
+        )
+      )
+    ).toBe('interrupted');
+  });
+
+  it('returns interrupted for a generic interrupted message', () => {
+    expect(classifyErrorCategory(new Error('execution was interrupted'))).toBe('interrupted');
+  });
+
+  it('returns timeout when the pipeline budget is exceeded before generation', () => {
+    expect(
+      classifyErrorCategory(
+        new Error('Pipeline budget exceeded (1800000ms) before starting generation phase')
+      )
+    ).toBe('timeout');
+  });
+
+  it('returns timeout when the pipeline budget is exceeded before validation', () => {
+    expect(
+      classifyErrorCategory(
+        new Error('Pipeline budget exceeded (1800000ms) before starting validation phase')
+      )
+    ).toBe('timeout');
+  });
+
   it('returns unknown for unrecognized errors', () => {
     expect(classifyErrorCategory(new Error('Something went wrong'))).toBe('unknown');
   });
