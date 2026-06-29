@@ -43,7 +43,7 @@ export function getParamDefsAtPosition(
       continue;
     }
 
-    const key = `${param.type}-${param.constantOnly}`;
+    const key = `${param.type}-${param.hint?.kind === 'constant'}`;
 
     if (!seen.has(key)) {
       seen.add(key);

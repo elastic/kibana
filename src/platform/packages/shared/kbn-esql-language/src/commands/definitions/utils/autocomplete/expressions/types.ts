@@ -20,6 +20,7 @@ import type {
   FunctionDefinitionTypes,
   FunctionParameter,
   FunctionParameterType,
+  ParameterHint,
   Signature,
   SupportedDataType,
 } from '../../../types';
@@ -93,8 +94,7 @@ export interface PartialOperatorDetection {
 
 export interface ParamDefinition {
   type: FunctionParameterType;
-  constantOnly?: boolean;
-  suggestedValues?: string[];
+  hint?: ParameterHint;
   fieldsOnly?: boolean;
   name?: string;
 }
