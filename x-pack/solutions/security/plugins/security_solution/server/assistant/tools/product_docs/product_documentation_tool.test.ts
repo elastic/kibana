@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_documentation_tool';
 import type {
@@ -96,7 +97,7 @@ describe('ProductDocumentationTool', () => {
       const tool = await PRODUCT_DOCUMENTATION_TOOL.getTool({
         ...defaultArgs,
         esClient: undefined,
-      });
+      } as unknown as AssistantToolParams);
 
       expect(tool).toBeNull();
     });
