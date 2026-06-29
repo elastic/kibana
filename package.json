@@ -1164,6 +1164,7 @@
     "@kbn/shared-ux-toolbar-selector": "link:src/platform/packages/shared/shared-ux/toolbar_selector",
     "@kbn/shared-ux-utility": "link:src/platform/packages/shared/kbn-shared-ux-utility",
     "@kbn/sidebar-examples-plugin": "link:examples/sidebar_examples",
+    "@kbn/significant-events-plugin": "link:x-pack/platform/plugins/shared/significant_events",
     "@kbn/siem-readiness": "link:x-pack/solutions/security/packages/siem-readiness",
     "@kbn/slo-plugin": "link:x-pack/solutions/observability/plugins/slo",
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
