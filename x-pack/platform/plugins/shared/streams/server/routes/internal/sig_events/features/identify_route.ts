@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
+  getStreamSamplingSource,
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -26,6 +27,7 @@ import {
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/sig_events/features/should_identify_features';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -124,9 +126,11 @@ const identifyInferredFeaturesRoute = createServerRoute({
             },
           },
         }),
+        connectorId,
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
+        samplingSource: getStreamSamplingSource(stream),
         streamType,
         start,
         end,
@@ -155,6 +159,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         buildTelemetry(
           {
             run_id: runId,
+            connector_id: connectorId,
             iteration: iteration ?? 1,
             stream_name: streamName,
             stream_type: streamType,
@@ -192,6 +197,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Generate and persist computed KI features for a stream',
+    timeout: { idleSocket: 300_000 },
   },
   security: {
     authz: {
@@ -209,7 +215,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const {
       scopedClusterClient,
       getKnowledgeIndicatorClient,
@@ -230,6 +236,13 @@ const identifyComputedFeaturesRoute = createServerRoute({
       streamsClient.getStream(streamName),
     ]);
 
+    // Enable code_analysis grounding only when the feature flag is on and Agent
+    // Builder is available; otherwise the provider is omitted and the computed
+    // feature is skipped.
+    const codeGroundingEnabled =
+      Boolean(server.agentBuilder?.tools) &&
+      (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
+
     try {
       const computedFeatures = await identifyComputedFeatures({
         stream,
@@ -240,6 +253,9 @@ const identifyComputedFeaturesRoute = createServerRoute({
         kiClient,
         logger: routeLogger,
         runId,
+        ...(codeGroundingEnabled
+          ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
+          : {}),
       });
 
       return {

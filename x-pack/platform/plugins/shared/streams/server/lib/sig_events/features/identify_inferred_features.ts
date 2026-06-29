@@ -17,6 +17,7 @@ import {
   type IterationResult,
   isComputedFeature,
   isFeatureWithFilter,
+  normalizeFeatureSlug,
 } from '@kbn/streams-schema';
 import {
   EMPTY_TOKENS,
@@ -60,6 +61,7 @@ type IterationTuningParams = Partial<
 
 export interface FeaturesIdentifiedTelemetry {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -82,6 +84,7 @@ export interface FeaturesIdentifiedTelemetry {
 
 export interface TelemetryContext {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -178,6 +181,7 @@ async function tryIdentifyFeatures(
 interface RunInferredIterationOptions {
   esClient: ElasticsearchClient;
   streamName: string;
+  samplingSource: string;
   start: number;
   end: number;
   runId: string;
@@ -217,6 +221,7 @@ type InferredIterationResult =
 async function runInferredIteration({
   esClient,
   streamName,
+  samplingSource,
   start,
   end,
   runId,
@@ -243,7 +248,7 @@ async function runInferredIteration({
 
   const batchResult = await fetchSampleDocuments({
     esClient,
-    index: streamName,
+    index: samplingSource,
     start,
     end,
     features: discoveredFeatures.filter(isFeatureWithFilter),
@@ -343,9 +348,11 @@ export interface IdentifyInferredFeaturesOptions {
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
+  connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
+  samplingSource: string;
   streamType: StreamType;
   start: number;
   end: number;
@@ -370,9 +377,11 @@ export async function identifyInferredFeatures({
   kiClient,
   soClient,
   inferenceClient,
+  connectorId,
   logger,
   signal,
   streamName,
+  samplingSource,
   streamType,
   start,
   end,
@@ -399,6 +408,7 @@ export async function identifyInferredFeatures({
   const iterationResult = await runInferredIteration({
     esClient,
     streamName,
+    samplingSource,
     start,
     end,
     runId,
@@ -439,6 +449,7 @@ export async function identifyInferredFeatures({
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,
+    connector_id: connectorId,
     iteration,
     stream_name: streamName,
     stream_type: streamType,
@@ -476,9 +487,14 @@ export async function identifyInferredFeatures({
 
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
+    const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
     await kiClient.bulk(
       streamName,
-      allChanged.map((feature) => ({ index: { feature } }))
+      allChanged.map((feature) => {
+        const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
+        const expiresAt = !prior || prior.expires_at ? kiClient.getDefaultExpiresAt() : undefined;
+        return { index: { feature: { ...feature, expires_at: expiresAt } } };
+      })
     );
   }
 

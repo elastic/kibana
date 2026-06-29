@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -65,6 +66,7 @@ import type { z } from '@kbn/zod/v4';
 
 import type { StepExecutionListResult } from './lib/search_step_executions';
 
+import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
@@ -73,9 +75,9 @@ import type {
   SearchStepExecutionsParams,
 } from './workflows_management_api';
 
+import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
-import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
@@ -85,7 +87,6 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
-import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
@@ -93,6 +94,7 @@ export interface SearchExecutionsViewParams {
   from?: number;
   size?: number;
   trackTotalHits?: boolean;
+  includeManagedExecutions?: boolean;
 }
 
 export interface SearchWorkflowExecutionsParams {
@@ -129,7 +131,6 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
-  private workflowVersioningEnabled!: boolean;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
@@ -200,9 +201,9 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+    const workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart, this.logger);
 
-    if (this.workflowVersioningEnabled) {
+    if (workflowVersioningEnabled) {
       await this.initializeChangeHistoryService(coreStart);
     } else {
       this.logger.debug(
@@ -221,13 +222,14 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowVersioningEnabled: this.workflowVersioningEnabled,
+      workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
       logger: this.logger,
+      audit: new WorkflowManagementAuditLog({ service: this }),
     });
   }
 
@@ -270,7 +272,7 @@ export class WorkflowsService {
       {
         changeHistoryService: this.changeHistoryService,
         getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
-        workflowVersioningEnabled: this.workflowVersioningEnabled,
+        workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
       },
       { workflowId: id, spaceId, ...options }
     );
@@ -361,7 +363,7 @@ export class WorkflowsService {
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean }
+    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
     await this.ensureInitialized();
     return this.searchService.getWorkflows(params, spaceId, options);
@@ -369,7 +371,7 @@ export class WorkflowsService {
 
   public async getWorkflowStats(
     spaceId: string,
-    options?: { includeExecutionStats?: boolean }
+    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
     await this.ensureInitialized();
     return this.searchService.getWorkflowStats(spaceId, options);
