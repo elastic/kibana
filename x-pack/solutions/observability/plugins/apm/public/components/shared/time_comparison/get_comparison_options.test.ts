@@ -71,6 +71,24 @@ describe('getComparisonOptions - expected bounds', () => {
     expect(expectedBoundsOption?.['data-test-subj']).toBe(EXPECTED_BOUNDS_TEST_SUBJ.enabled);
   });
 
+  it('disables the option when a kuery filter is active', () => {
+    const options = getComparisonOptions({
+      start,
+      end,
+      showSelectedBoundsOption: true,
+      anomalyDetectionSetupState: AnomalyDetectionSetupState.UpToDate,
+      preferredEnvironment: PROD,
+      kuery: 'service.name: my-service',
+    });
+
+    const expectedBoundsOption = options.find(
+      (option) => option.value === TimeRangeComparisonEnum.ExpectedBounds
+    );
+
+    expect(expectedBoundsOption?.disabled).toBe(true);
+    expect(expectedBoundsOption?.['data-test-subj']).toBe(EXPECTED_BOUNDS_TEST_SUBJ.kueryDisabled);
+  });
+
   it('disables the option when a specific environment without an ML job is selected', () => {
     const options = getComparisonOptions({
       start,
