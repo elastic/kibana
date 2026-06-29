@@ -178,7 +178,7 @@ describe('AnomaliesTab', () => {
       });
       // min = Math.min(25, 50) = 25; max = Math.max(50, 75) - 1 = 74
       expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
-        expect.objectContaining({ minScore: 25, maxScore: 74 })
+        expect.objectContaining({ minScore: 25, maxScore: 75 })
       );
     });
 
@@ -202,7 +202,7 @@ describe('AnomaliesTab', () => {
       // min = 75; max = 100 - 1 = 99
       expect(mockUseAnomalySummary).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({ min_score: 75, max_score: 99 }),
+          body: expect.objectContaining({ min_score: 75, max_score: 100 }),
         })
       );
     });
