@@ -134,6 +134,9 @@ function replaceProperties(obj: object, replacement: object): void {
 
 /**
  * Unwraps expression-only parentheses from the AST, mutating the provided root in place.
+ * @elastic/esql parser emits explicit parens nodes in the AST for grouping parentheses in expressions.
+ * With the new behavior, command validators and autocomplete readers, which access expression arguments positionally, would see a parens wrapper node instead of the inner expression
+ *
  */
 export function unwrapExpressionParens(root: ESQLAstQueryExpression) {
   const parensNodes = Walker.findAll(root, (node) => isParens(node) && !isSubQuery(node), {
