@@ -21,8 +21,10 @@ jest.mock('@kbn/agent-builder-workflow-gen', () => ({
 const generateWorkflowMock = generateWorkflow as jest.MockedFunction<typeof generateWorkflow>;
 
 describe('generateWorkflowTool', () => {
+  const validateWorkflowMock = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
+
   const workflowsManagement = {
-    management: { __mock: 'workflowsApi' },
+    management: { validateWorkflow: validateWorkflowMock },
   } as any;
 
   const aiTelemetryClient = {
@@ -73,6 +75,8 @@ describe('generateWorkflowTool', () => {
   beforeEach(() => {
     generateWorkflowMock.mockReset();
     aiTelemetryClient.reportEditResult.mockReset();
+    validateWorkflowMock.mockReset();
+    validateWorkflowMock.mockResolvedValue({ valid: true, diagnostics: [] });
   });
 
   it('creates a new workflow: adds diff attachment, adds workflow attachment, sends UI event, reports telemetry', async () => {
@@ -242,6 +246,76 @@ describe('generateWorkflowTool', () => {
     expect(generateWorkflowMock).not.toHaveBeenCalled();
     expect((out as { results: Array<{ type: string }> }).results[0].type).toBe(
       ToolResultType.error
+    );
+  });
+
+  it('passes a compact validation result to telemetry when the generated YAML is valid', async () => {
+    generateWorkflowMock.mockResolvedValueOnce({
+      workflow: generatedWorkflow,
+      response: 'created',
+    } as any);
+    validateWorkflowMock.mockResolvedValueOnce({ valid: true, diagnostics: [] });
+
+    const context = buildContext();
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+    await tool.handler({ query: 'q' } as any, context);
+
+    expect(validateWorkflowMock).toHaveBeenCalledWith(
+      expect.stringContaining('name: foo'),
+      'default',
+      expect.objectContaining({ __mock: 'request' })
+    );
+    expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        editSuccess: true,
+        isCreation: true,
+        validation: { valid: true },
+      })
+    );
+  });
+
+  it('passes compact errors to telemetry when the generated YAML fails validation', async () => {
+    generateWorkflowMock.mockResolvedValueOnce({
+      workflow: generatedWorkflow,
+      response: 'created',
+    } as any);
+    validateWorkflowMock.mockResolvedValueOnce({
+      valid: false,
+      diagnostics: [
+        { severity: 'error', source: 'schema', message: 'missing field', path: ['steps', 0] },
+        { severity: 'warning', source: 'schema', message: 'soft warning' },
+        { severity: 'error', source: 'liquid', message: 'bad template' },
+      ],
+    });
+
+    const context = buildContext();
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+    await tool.handler({ query: 'q' } as any, context);
+
+    expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        editSuccess: true,
+        validation: {
+          valid: false,
+          errors: ['[schema] missing field (at steps.0)', '[liquid] bad template'],
+        },
+      })
+    );
+  });
+
+  it('omits validation in telemetry when validateWorkflow throws', async () => {
+    generateWorkflowMock.mockResolvedValueOnce({
+      workflow: generatedWorkflow,
+      response: 'created',
+    } as any);
+    validateWorkflowMock.mockRejectedValueOnce(new Error('validator down'));
+
+    const context = buildContext();
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+    await tool.handler({ query: 'q' } as any, context);
+
+    expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
+      expect.objectContaining({ editSuccess: true, validation: undefined })
     );
   });
 
