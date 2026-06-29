@@ -16,13 +16,14 @@ import type { WorkflowsService } from '../../workflows_management_service';
 
 async function createAuditHarness() {
   const log = jest.fn();
+  const systemLog = jest.fn();
   const audit = new WorkflowManagementAuditLog({
     service: {
       getCoreStart: jest.fn().mockResolvedValue({
         security: {
           audit: {
             asScoped: jest.fn().mockReturnValue({ log }),
-            withoutRequest: jest.fn(),
+            withoutRequest: { log: systemLog },
           },
           authc: { getCurrentUser: jest.fn() },
         },
@@ -30,7 +31,7 @@ async function createAuditHarness() {
     } as unknown as WorkflowsService,
   });
   const request = {} as KibanaRequest;
-  return { audit, request, log };
+  return { audit, request, log, systemLog };
 }
 
 describe('WorkflowManagementAuditLog', () => {
@@ -114,6 +115,28 @@ describe('WorkflowManagementAuditLog', () => {
           error: { code: 'Error', message: 'boom' },
         })
       );
+    });
+
+    it('logs managed workflow fields and uses the system logger without a request', async () => {
+      const { audit, systemLog } = await createAuditHarness();
+      audit.logWorkflowUpdated(undefined, {
+        id: 'managed-doc',
+        managed: true,
+        originalWorkflowId: 'registry-id',
+        ownerPlugin: 'ownerPlugin',
+        spaceId: 'default',
+        reason: 'reinstall',
+      });
+
+      expect(systemLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'System updated workflow [id=managed-doc] [managed=true] ' +
+            '[originalWorkflowId=registry-id] [ownerPlugin=ownerPlugin] [space=default] ' +
+            '[reason=reinstall]',
+        })
+      );
+      expect(systemLog.mock.calls[0][0]).not.toHaveProperty('labels');
     });
 
     it('logWorkflowDeleted (success and failure)', async () => {
