@@ -71,7 +71,7 @@ export interface RawQuerySource<T> {
   /** Whether the underlying request is still in flight. */
   isLoading: boolean;
   /** The raw source data. `undefined` while loading. */
-  value: T | undefined;
+  state: T | undefined;
   /** The error, if the request failed. A missing profile (HTTP 404) is NOT an error. */
   error?: Error;
 }

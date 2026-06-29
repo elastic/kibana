@@ -22,7 +22,7 @@ export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
   const { rawAuthQuery, rawProfileQuery } = useCurrentUser({ includeRawQuerySource: true });
-  const user = rawAuthQuery.value;
+  const user = rawAuthQuery.state;
   const authError = rawAuthQuery.error;
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed
@@ -36,7 +36,7 @@ export const AccountManagementPage: FunctionComponent = () => {
     return <EuiEmptyPrompt iconType="warning" title={<h2>{error.message}</h2>} />;
   }
 
-  if (!user || (canUserHaveProfile(user) && !rawProfileQuery.value)) {
+  if (!user || (canUserHaveProfile(user) && !rawProfileQuery.state)) {
     return null;
   }
 
@@ -47,7 +47,7 @@ export const AccountManagementPage: FunctionComponent = () => {
       })}
       href={services.http.basePath.prepend('/security/account')}
     >
-      <UserProfile user={user} data={rawProfileQuery.value?.data} />
+      <UserProfile user={user} data={rawProfileQuery.state?.data} />
     </Breadcrumb>
   );
 };

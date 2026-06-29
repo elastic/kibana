@@ -97,17 +97,12 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     [user]
   );
 
-  const avatar = rawProfileQuery.value ? (
+  const avatarUser = rawProfileQuery.state?.user ?? rawAuthQuery.state;
+
+  const avatar = avatarUser ? (
     <UserAvatar
-      user={rawProfileQuery.value?.user}
+      user={avatarUser}
       avatar={user?.avatar}
-      size={avatarSize}
-      data-test-subj="userMenuAvatar"
-    />
-  ) : user && rawProfileQuery.error ? (
-    <UserAvatar
-      user={rawAuthQuery.value}
-      avatar={user.avatar}
       size={avatarSize}
       data-test-subj="userMenuAvatar"
     />

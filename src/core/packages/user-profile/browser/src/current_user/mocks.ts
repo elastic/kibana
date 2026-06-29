@@ -34,8 +34,8 @@ const createResultWithRaw = (
 ): UseCurrentUserResultWithRaw => ({
   user: createCurrentUser(),
   isLoading: false,
-  rawAuthQuery: { isLoading: false, data: undefined, error: undefined },
-  rawProfileQuery: { isLoading: false, data: null, error: undefined },
+  rawAuthQuery: { isLoading: false, state: undefined, error: undefined },
+  rawProfileQuery: { isLoading: false, state: null, error: undefined },
   ...overrides,
 });
 

@@ -35,8 +35,8 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
       user: { displayName: 'full name', isAnonymous: false, avatar: undefined },
-      rawAuthQuery: { isLoading: false, data: mockAuthenticatedUser(), error: undefined },
-      rawProfileQuery: { isLoading: false, data: undefined, error: undefined },
+      rawAuthQuery: { isLoading: false, state: mockAuthenticatedUser(), error: undefined },
+      rawProfileQuery: { isLoading: false, state: undefined, error: undefined },
     });
 
     useObservableMock.mockReset();
@@ -99,8 +99,8 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      rawAuthQuery: { isLoading: true, data: undefined, error: undefined },
-      rawProfileQuery: { isLoading: true, data: undefined, error: undefined },
+      rawAuthQuery: { isLoading: true, state: undefined, error: undefined },
+      rawProfileQuery: { isLoading: true, state: undefined, error: undefined },
     });
 
     renderWithIntl(
@@ -154,8 +154,8 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      rawAuthQuery: { isLoading: true, data: undefined, error: undefined },
-      rawProfileQuery: { isLoading: true, data: undefined, error: undefined },
+      rawAuthQuery: { isLoading: true, state: undefined, error: undefined },
+      rawProfileQuery: { isLoading: true, state: undefined, error: undefined },
     });
 
     renderWithIntl(
@@ -508,8 +508,8 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
       user: { displayName: 'full name', isAnonymous: true, avatar: undefined },
-      rawAuthQuery: { isLoading: false, data: anonymousUser, error: undefined },
-      rawProfileQuery: { isLoading: false, data: undefined, error: undefined },
+      rawAuthQuery: { isLoading: false, state: anonymousUser, error: undefined },
+      rawProfileQuery: { isLoading: false, state: undefined, error: undefined },
     });
 
     renderWithIntl(
