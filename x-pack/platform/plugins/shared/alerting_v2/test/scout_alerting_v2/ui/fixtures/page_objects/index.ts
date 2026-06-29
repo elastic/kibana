@@ -11,23 +11,29 @@ import { AlertingNavigation } from './alerting_navigation';
 import { ComposeDiscoverPage } from './compose_discover_page';
 import { DiscoverAppMenu } from './discover_app_menu';
 import { ExecutionHistoryPage } from './execution_history_page';
+import { RuleBuilderPage } from './rule_builder_page';
 import { RuleFormPage } from './rule_form_page';
 import { RulesListPage } from './rules_list_page';
+import { ThresholdBuilderPage } from './threshold_builder_page';
 
 export { AlertingNavigation } from './alerting_navigation';
 export { ComposeDiscoverPage } from './compose_discover_page';
 export { DiscoverAppMenu } from './discover_app_menu';
 export { ExecutionHistoryPage } from './execution_history_page';
+export { RuleBuilderPage } from './rule_builder_page';
 export { RuleFormPage } from './rule_form_page';
 export { RulesListPage } from './rules_list_page';
+export { ThresholdBuilderPage } from './threshold_builder_page';
 
 export type AlertingPageObjects = PageObjects & {
   alertingNavigation: AlertingNavigation;
   composeDiscover: ComposeDiscoverPage;
   discoverAppMenu: DiscoverAppMenu;
   executionHistory: ExecutionHistoryPage;
+  ruleBuilder: RuleBuilderPage;
   ruleForm: RuleFormPage;
   rulesList: RulesListPage;
+  thresholdBuilder: ThresholdBuilderPage;
 };
 
 export const extendPageObjects = (
@@ -42,7 +48,9 @@ export const extendPageObjects = (
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),
     discoverAppMenu,
     executionHistory: createLazyPageObject(ExecutionHistoryPage, page),
+    ruleBuilder: createLazyPageObject(RuleBuilderPage, page),
     ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
     rulesList: createLazyPageObject(RulesListPage, page),
+    thresholdBuilder: createLazyPageObject(ThresholdBuilderPage, page),
   };
 };
