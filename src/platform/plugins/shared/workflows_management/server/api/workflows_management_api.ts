@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
-  pickManagedWorkflowFields,
+  toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import type {
@@ -546,13 +546,7 @@ export class WorkflowsManagementApi {
       throw new Error(`Workflow '${workflowId}' has no definition and cannot be executed.`);
     }
 
-    return {
-      id: workflow.id,
-      name: workflow.name,
-      enabled: workflow.enabled,
-      definition: workflow.definition,
-      yaml: workflow.yaml,
-    };
+    return toWorkflowExecutionEngineModel(workflow);
   }
 
   private async waitForWorkflowExecution({
@@ -690,34 +684,23 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
     };
-    const managedVersion =
-      existingWorkflow &&
-      'managedVersion' in existingWorkflow &&
-      typeof existingWorkflow.managedVersion === 'number'
-        ? existingWorkflow.managedVersion
-        : null;
-    const managedWorkflowFields = pickManagedWorkflowFields(
-      existingWorkflow
-        ? {
-            managed: existingWorkflow.managed,
-            managedBy: existingWorkflow.managedBy,
-            originManagedWorkflowId: existingWorkflow.originManagedWorkflowId,
-            managedVersion,
-          }
-        : null
-    );
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
-      {
-        id: resolvedWorkflowId,
-        name: workflowJson.name,
-        enabled: workflowJson.enabled,
-        definition: workflowJson.definition,
-        yaml: resolvedYaml,
-        isTestRun: true,
-        isEphemeral: true,
-        ...managedWorkflowFields,
-      },
+      toWorkflowExecutionEngineModel(
+        {
+          id: resolvedWorkflowId,
+          name: workflowJson.name,
+          enabled: workflowJson.enabled,
+          definition: workflowJson.definition,
+          yaml: resolvedYaml,
+          version: existingWorkflow?.version,
+          managed: existingWorkflow?.managed,
+          managedBy: existingWorkflow?.managedBy,
+          originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
+          managedVersion: existingWorkflow?.managedVersion,
+        },
+        { isTestRun: true, isEphemeral: true }
+      ),
       context,
       request
     );

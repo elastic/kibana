@@ -329,6 +329,7 @@ export function useOnSubmit({
   const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -535,14 +536,13 @@ export function useOnSubmit({
     // For single-input agentless integrations the simplified UX shows no enable/disable
     // toggle, so if the input is disabled by default the user has no way to enable it or
     // see any configuration fields.  Auto-enable it when switching to agentless.
+    const inputs = packagePolicy.inputs ?? [];
     const agentlessAllowedInputCount = isAgentlessSelected
-      ? packagePolicy.inputs.filter((i) =>
-          isInputAllowedForDeploymentMode(i, 'agentless', packageInfo)
-        ).length
+      ? inputs.filter((i) => isInputAllowedForDeploymentMode(i, 'agentless', packageInfo)).length
       : 0;
     const isSingleAgentlessInput = agentlessAllowedInputCount === 1;
 
-    return packagePolicy.inputs.map((input) => {
+    return inputs.map((input) => {
       const allowedForDeploymentMode = isInputAllowedForDeploymentMode(
         input,
         isAgentlessSelected ? 'agentless' : 'default',
@@ -575,8 +575,9 @@ export function useOnSubmit({
   // when a var_group selection actually hides or reveals an input, preventing
   // infinite update loops from new array references.
   const inputsEnablingDiffer = useMemo(() => {
-    if (packagePolicy.inputs.length !== newInputs.length) return true;
-    return packagePolicy.inputs.some((input, i) => input.enabled !== newInputs[i]?.enabled);
+    const inputs = packagePolicy.inputs ?? [];
+    if (inputs.length !== newInputs.length) return true;
+    return inputs.some((input, i) => input.enabled !== newInputs[i]?.enabled);
   }, [packagePolicy.inputs, newInputs]);
 
   useEffect(() => {
@@ -626,6 +627,7 @@ export function useOnSubmit({
       force?: boolean;
       skipConfirmModal?: boolean;
     } = {}) => {
+      setSubmitAttempted(true);
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -914,6 +916,7 @@ export function useOnSubmit({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
   };

@@ -24,10 +24,10 @@
 import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowsService } from './workflows_management_service';
-import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -36,9 +36,13 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 jest.mock('../services/workflow_change_history_service');
-jest.mock('../lib/is_workflow_versioning_enabled', () => ({
-  readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
-}));
+jest.mock('@kbn/workflows/server', () => {
+  const actual = jest.requireActual('@kbn/workflows/server');
+  return {
+    ...actual,
+    readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
+  };
+});
 
 const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
   typeof WorkflowChangeHistoryService
@@ -184,9 +188,10 @@ describe('WorkflowsService (facade)', () => {
 
       const esClient = makeEsClient();
       const coreStart = makeCoreStart(esClient);
+      const logger = loggerMock.create();
       const service = await (async () => {
         const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+        const svc = new WorkflowsService(startServices as any, logger, '9.0.0');
         await Promise.resolve();
         await Promise.resolve();
         return svc;
@@ -194,7 +199,7 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflow('wf-1', 'default');
 
-      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart);
+      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart, logger);
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
@@ -214,9 +219,10 @@ describe('WorkflowsService (facade)', () => {
 
       const esClient = makeEsClient();
       const coreStart = makeCoreStart(esClient);
+      const logger = loggerMock.create();
       const service = await (async () => {
         const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+        const svc = new WorkflowsService(startServices as any, logger, '9.0.0');
         await Promise.resolve();
         await Promise.resolve();
         return svc;
@@ -224,7 +230,7 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflow('wf-1', 'default');
 
-      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart);
+      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart, logger);
       expect(changeHistoryInstance.initialize).not.toHaveBeenCalled();
     });
 
