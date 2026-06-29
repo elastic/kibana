@@ -31,8 +31,6 @@ describe('transformFindMutedAlertInstancesBody', () => {
   });
 
   it('omits falsy values', () => {
-    expect(
-      transformFindMutedAlertInstancesBody({ per_page: 0, page: 0, filter: '' })
-    ).toEqual({});
+    expect(transformFindMutedAlertInstancesBody({ per_page: 0, page: 0, filter: '' })).toEqual({});
   });
 });
