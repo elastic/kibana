@@ -459,7 +459,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
@@ -3038,7 +3037,8 @@ module.exports = {
      * portable outside Kibana (e.g. Cloud UI). They may only import from the
      * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
      * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
-     * and stories are excluded because they reference Kibana-only tooling.
+     * stories, and Storybook config are excluded because they reference
+     * Kibana-only tooling.
      */
     {
       files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
@@ -3048,6 +3048,7 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/storybook-config/**',
         'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
