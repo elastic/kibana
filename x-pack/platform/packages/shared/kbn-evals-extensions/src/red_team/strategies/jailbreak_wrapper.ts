@@ -35,7 +35,7 @@ export const createJailbreakWrapperStrategy = (): SingleTurnStrategy => {
       // same input always pick the same wrapper (reproducible CI results).
       let hash = 0;
       for (let i = 0; i < prompt.length; i++) {
-        hash = (hash * 31 + prompt.charCodeAt(i)) >>> 0;
+        hash = (hash * 31 + prompt.charCodeAt(i)) % 2147483647;
       }
       const idx = hash % WRAPPER_TEMPLATES.length;
       return WRAPPER_TEMPLATES[idx](prompt);
