@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -29,6 +30,7 @@ import {
   draftToAnswer,
   isDraftAnswerable,
   isCustomTextMissing,
+  useAskUserQuestionTelemetry,
 } from './ask_user_question_prompt_utils';
 import type { AnswerDraft, AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
 
@@ -41,11 +43,21 @@ export const AskUserQuestionPrompt = ({
   isLoading = false,
   isDisabled = false,
 }: AskUserQuestionPromptProps) => {
+  const { euiTheme } = useEuiTheme();
   const totalQuestions = questions.length;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [drafts, setDrafts] = useState<AnswerDraft[]>(() => questions.map(() => ({})));
   const [showCustomError, setShowCustomError] = useState(false);
   const baseId = useGeneratedHtmlId({ prefix: 'askUserQuestionPrompt' });
+
+  const { reportPromptShown, reportQuestionAnswered } = useAskUserQuestionTelemetry({
+    promptId,
+    questions,
+  });
+
+  useEffect(() => {
+    reportPromptShown();
+  }, [reportPromptShown]);
 
   const currentQuestion = questions[currentIndex];
   const currentDraft = drafts[currentIndex];
@@ -81,23 +93,32 @@ export const AskUserQuestionPrompt = ({
       setShowCustomError(true);
       return;
     }
+    reportQuestionAnswered(currentIndex, currentDraft, 'answered');
     if (isFinalQuestion) {
       handleSubmit();
       return;
     }
     setShowCustomError(false);
     setCurrentIndex((idx) => idx + 1);
-  }, [canConfirm, currentDraft, handleSubmit, isFinalQuestion]);
+  }, [
+    canConfirm,
+    currentDraft,
+    currentIndex,
+    handleSubmit,
+    isFinalQuestion,
+    reportQuestionAnswered,
+  ]);
 
   const handleSkip = useCallback(() => {
     const skippedDraft: AnswerDraft = { skipped: true };
+    reportQuestionAnswered(currentIndex, skippedDraft, 'skipped');
     if (isFinalQuestion) {
       handleSubmit(skippedDraft);
       return;
     }
     updateDraft(skippedDraft);
     setCurrentIndex((idx) => idx + 1);
-  }, [handleSubmit, isFinalQuestion, updateDraft]);
+  }, [currentIndex, handleSubmit, isFinalQuestion, reportQuestionAnswered, updateDraft]);
 
   const handleBack = useCallback(() => {
     setShowCustomError(false);
@@ -105,8 +126,9 @@ export const AskUserQuestionPrompt = ({
   }, []);
 
   const handleSkipAll = useCallback(() => {
+    reportQuestionAnswered(currentIndex, {}, 'skipped_all');
     onSubmit({ answers: questions.map(() => ({ skipped: true })) });
-  }, [onSubmit, questions]);
+  }, [currentIndex, onSubmit, questions, reportQuestionAnswered]);
 
   const handleOptionPick = useCallback(
     (optionIndex: number, checked: boolean) => {
@@ -168,7 +190,7 @@ export const AskUserQuestionPrompt = ({
     <EuiFlexGroup
       direction="column"
       responsive={false}
-      gutterSize="m"
+      gutterSize="none"
       css={containerStyles}
       data-test-subj="agentBuilderAskUserQuestionPrompt"
     >
@@ -208,7 +230,14 @@ export const AskUserQuestionPrompt = ({
       </EuiFlexItem>
 
       {/* Options */}
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        responsive={false}
+        css={css`
+          margin-top: ${euiTheme.size.s};
+        `}
+      >
         {currentQuestion.options.map((option, optionIndex) => {
           const inputId = `${baseId}-q${currentIndex}-opt${optionIndex}`;
           const checked = (currentDraft.choice ?? []).includes(optionIndex);
@@ -297,6 +326,9 @@ export const AskUserQuestionPrompt = ({
         justifyContent="spaceBetween"
         alignItems="center"
         responsive={false}
+        css={css`
+          margin-top: ${euiTheme.size.base};
+        `}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
