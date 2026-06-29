@@ -95,28 +95,35 @@ export const bulkCreatePrebuiltRules = async ({
 
   if (bulkInputs.length === 0) return { results, errors };
 
-  const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
-    rules: bulkInputs,
-    changeTracking: {
-      action: SecurityRuleChangeTrackingAction.ruleInstall,
-      metadata: { bulkCount: rules.length },
-    },
-  });
+  try {
+    const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
+      rules: bulkInputs,
+      changeTracking: {
+        action: SecurityRuleChangeTrackingAction.ruleInstall,
+        metadata: { bulkCount: rules.length },
+      },
+    });
 
-  for (const id of successfulIds) {
-    const asset = itemById.get(id);
-    if (asset) {
-      results.push({ result: { id, rule_id: asset.rule_id, version: asset.version } });
+    for (const id of successfulIds) {
+      const asset = itemById.get(id);
+      if (asset) {
+        results.push({ result: { id, rule_id: asset.rule_id, version: asset.version } });
+      }
     }
-  }
 
-  for (const err of bulkErrors) {
-    const item = itemById.get(err.rule.id);
-    if (item) {
-      errors.push({
-        item,
-        error: Object.assign(new Error(err.message), { statusCode: err.status }),
-      });
+    for (const err of bulkErrors) {
+      const item = itemById.get(err.rule.id);
+      if (item) {
+        errors.push({
+          item,
+          error: Object.assign(new Error(err.message), { statusCode: err.status }),
+        });
+      }
+    }
+  } catch (err) {
+    const wrappedError = err instanceof Error ? err : new Error(String(err));
+    for (const asset of itemById.values()) {
+      errors.push({ item: asset, error: wrappedError });
     }
   }
 

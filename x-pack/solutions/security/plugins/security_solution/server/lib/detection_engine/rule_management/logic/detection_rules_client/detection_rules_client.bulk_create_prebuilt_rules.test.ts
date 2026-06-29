@@ -215,6 +215,24 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect(rulesClient.bulkCreateRules).not.toHaveBeenCalled();
   });
 
+  it('returns structured errors when bulkCreateRules rejects', async () => {
+    (throwAuthzError as jest.Mock).mockImplementation(() => {});
+
+    const rules = [
+      { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
+      { ...getCreateRulesSchemaMock(), version: 2, rule_id: 'rule-2' },
+    ];
+
+    rulesClient.bulkCreateRules.mockRejectedValue(new Error('bulk authorization failure'));
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules });
+
+    expect(result.results).toEqual([]);
+    expect(result.errors).toHaveLength(2);
+    expect(result.errors[0].error.message).toBe('bulk authorization failure');
+    expect(result.errors[1].error.message).toBe('bulk authorization failure');
+  });
+
   it('includes bulkCount in changeTracking metadata', async () => {
     (throwAuthzError as jest.Mock).mockImplementation(() => {});
 
