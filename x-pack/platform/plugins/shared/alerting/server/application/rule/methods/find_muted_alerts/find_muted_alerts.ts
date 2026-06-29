@@ -29,9 +29,7 @@ export async function findMutedAlerts(
   context: RulesClientContext,
   params?: FindMutedAlertsParams
 ): Promise<FindMutedAlertsResult> {
-  const { options } = params || {};
-
-  const restOptions = options || {};
+  const { options = {} } = params || {};
 
   try {
     if (params) {
@@ -59,7 +57,7 @@ export async function findMutedAlerts(
   }
 
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-  const filterKueryNode = buildKueryNodeFilter(restOptions.filter as string | KueryNode);
+  const filterKueryNode = buildKueryNodeFilter(options.filter as string | KueryNode);
 
   const finalFilter = combineFilterWithAuthorizationFilter(
     filterKueryNode ?? undefined,
@@ -74,7 +72,7 @@ export async function findMutedAlerts(
   } = await findRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
-      ...restOptions,
+      ...options,
       filter: finalFilter,
       fields: ['alertTypeId', 'consumer', 'name', 'mutedInstanceIds'],
     },
