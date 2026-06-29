@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
 
 export const TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.timelineAriaLabel',
@@ -23,35 +20,16 @@ export const N_CHANGES = (count: number): string =>
     values: { count },
   });
 
-export const RULE_REVISION_AND_VERSION = ({
-  revision,
-  version,
-}: {
-  revision: number;
-  version?: number;
-}): React.ReactNode =>
-  version != null ? (
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevisionAndVersion"
-      defaultMessage="R{revision} <strong>V{version}</strong>: "
-      values={{
-        strong: (chunks: React.ReactNode) => (
-          <EuiText component="span" color="accent" size="relative">
-            {chunks}
-          </EuiText>
-        ),
-        revision,
-        version,
-      }}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevision"
-      defaultMessage="R{revision}: "
-      values={{
-        revision,
-      }}
-    />
+export const RULE_REVISION_BADGE = (revision: number): string =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevisionBadge',
+    { defaultMessage: 'R{revision}', values: { revision } }
+  );
+
+export const RULE_VERSION_BADGE = (version: number): string =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleVersionBadge',
+    { defaultMessage: 'V{version}', values: { version } }
   );
 
 export const ACTION_LABEL_ENABLED = i18n.translate(

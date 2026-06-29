@@ -41,13 +41,10 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
 
     case RuleChangeTrackingAction.ruleCreate:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_CREATED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_CREATED}
         />
       );
 
@@ -56,91 +53,100 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
 
     case SecurityRuleChangeTrackingAction.ruleInstall:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_INSTALLED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_INSTALLED}
         />
       );
 
     case SecurityRuleChangeTrackingAction.ruleUpgrade:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_UPGRADED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_UPGRADED}
         />
       );
 
     case SecurityRuleChangeTrackingAction.ruleDuplicate:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_DUPLICATED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_DUPLICATED}
         />
       );
 
     case SecurityRuleChangeTrackingAction.ruleImport:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_IMPORTED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_IMPORTED}
         />
       );
 
     case SecurityRuleChangeTrackingAction.ruleRevert:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_REVERTED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_REVERTED}
         />
       );
 
     case SecurityRuleChangeTrackingAction.ruleRestore:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_RESTORED_FROM_HISTORY(
-                item.metadata?.restored_from_revision as number | undefined
-              )}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_RESTORED_FROM_HISTORY(
+            item.metadata?.restored_from_revision as number | undefined
+          )}
         />
       );
 
     default:
       return (
-        <ChangeActionBadge
-          text={
-            <>
-              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
-              {i18n.ACTION_LABEL_EDITED}
-            </>
-          }
+        <RevisionVersionActionBadges
+          revision={revision}
+          version={version}
+          actionText={i18n.ACTION_LABEL_EDITED}
         />
       );
   }
 });
+
+interface RevisionVersionActionBadgesProps {
+  revision: number;
+  version?: number;
+  actionText: React.ReactNode;
+}
+
+function RevisionVersionActionBadges({
+  revision,
+  version,
+  actionText,
+}: RevisionVersionActionBadgesProps): JSX.Element {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="primary">{i18n.RULE_REVISION_BADGE(revision)}</EuiBadge>
+      </EuiFlexItem>
+
+      {version != null && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="default">{i18n.RULE_VERSION_BADGE(version)}</EuiBadge>
+        </EuiFlexItem>
+      )}
+
+      <EuiFlexItem grow={false}>
+        <ChangeActionBadge text={actionText} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 interface ChangeActionBadgeProps {
   icon?: IconType;
