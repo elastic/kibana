@@ -118,10 +118,7 @@ export class DiscoverApp {
     const editor = new DataViewEditorPage(this.page);
     await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
 
-    // FTR passes the base name and relies on the editor auto-appending `*` as the
-    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
-    // here to preserve that contract (`name`, `* will be added automatically`).
-    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
+    await editor.setTitleWithAutoWildcard(name);
 
     // wait for timestamp options; default @timestamp applies.
     await editor.timestampField

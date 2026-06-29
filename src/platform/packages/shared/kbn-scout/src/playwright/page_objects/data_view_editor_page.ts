@@ -38,14 +38,24 @@ export class DataViewEditorPage {
 
   // Fills the title field and waits for async validation to settle.
   async setTitle(title: string): Promise<void> {
-    await expect(async () => {
-      await this.titleInput.fill('');
-      await this.titleInput.fill(title);
-      await expect(this.titleInput).toHaveValue(title);
-      await expect(this.titleInput).toHaveAttribute('data-is-validating', '0');
-      await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true');
-      await expect(this.form).toHaveAttribute('data-validation-error', '0');
-    }).toPass({ timeout: 30_000 });
+    await this.titleInput.fill(title);
+    await this.waitForValidTitle(title);
+  }
+
+  async setTitleWithAutoWildcard(title: string): Promise<void> {
+    const titleWithoutWildcard = title.endsWith('*') ? title.slice(0, -1) : title;
+    const expectedTitle = `${titleWithoutWildcard}*`;
+
+    await this.titleInput.click();
+    await this.titleInput.pressSequentially(titleWithoutWildcard, { delay: 50 });
+    await this.waitForValidTitle(expectedTitle);
+  }
+
+  private async waitForValidTitle(title: string): Promise<void> {
+    await expect(this.titleInput).toHaveValue(title);
+    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout: 30_000 });
+    await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true');
+    await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout: 30_000 });
   }
 
   // Returns the timestamp field combo box value after the field finishes loading.
@@ -58,7 +68,6 @@ export class DataViewEditorPage {
   }
 
   async save(): Promise<void> {
-    await expect(this.form).toHaveAttribute('data-validation-error', '0');
     await expect(this.saveButton).toBeEnabled({ timeout: 30_000 });
     await this.saveButton.click();
     await this.flyout.waitFor({ state: 'hidden' });
