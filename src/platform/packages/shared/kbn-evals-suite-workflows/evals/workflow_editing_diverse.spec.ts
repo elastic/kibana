@@ -428,10 +428,13 @@ evaluate.describe(
                     'The log_done step is byte-identical to the original and is still the last step in the workflow.',
                     'No new top-level workflow fields were introduced (no extra triggers, no extra consts).',
                   ],
-                  expectedStepTypes: [
-                    'email',
-                    'servicenow-itsm.pushToService|servicenow-sir.pushToService',
-                  ],
+                  // ServiceNow has two valid step variants (-itsm and -sir) and the
+                  // agent is free to pick either; we can't assert structurally without
+                  // accepting alternatives, and StructuralCorrectness no longer accepts
+                  // pipe-splits. The criteria line above (judged by the LLM) already
+                  // covers "a new servicenow step exists" — keep the structural
+                  // assertion to the unambiguous email step.
+                  expectedStepTypes: ['email'],
                   preservedStepNames: ['enrich_alert', 'post_to_slack', 'log_done'],
                   expectedMaxToolCalls: 3,
                   expectedToolSequence: ['platform.core.generate_workflow'],
