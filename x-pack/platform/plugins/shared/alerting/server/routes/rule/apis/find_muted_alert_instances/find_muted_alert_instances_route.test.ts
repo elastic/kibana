@@ -117,4 +117,44 @@ describe('findMutedAlertInstancesRoute', () => {
       body: { page: 1, per_page: 10, total: 0, data: [] },
     });
   });
+
+  it('does not leak extra rule fields if the rules client returns more data than expected', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findMutedAlertInstancesRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    // Simulate a bug where the rules client leaks sensitive rule attributes beyond
+    // the id + muted instance ids contract. The route must not forward them.
+    rulesClient.findMutedAlerts.mockResolvedValueOnce({
+      page: 1,
+      perPage: 10,
+      total: 1,
+      data: [
+        {
+          id: 'rule-1',
+          mutedInstanceIds: ['instance-1'],
+          name: 'super secret rule name',
+          consumer: 'siem',
+          alertTypeId: '.es-query',
+          apiKey: 'should-never-be-exposed',
+        },
+      ],
+    } as unknown as FindMutedAlertsResult);
+
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: {} }, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        page: 1,
+        per_page: 10,
+        total: 1,
+        data: [{ id: 'rule-1', muted_alert_ids: ['instance-1'] }],
+      },
+    });
+  });
 });
