@@ -950,5 +950,25 @@ describe('CreateConnectorFlyout', () => {
         expect(docsBtn).toHaveAttribute('href', connectorDocsUrl);
       });
     });
+
+    it('falls back to generic connectors docs when a connector type with no docsUrl is selected', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+
+      await waitFor(() => {
+        const docsBtn = screen.getByTestId('create-connector-flyout-header-docs-link');
+        expect(docsBtn).toHaveAttribute(
+          'href',
+          appMockRenderer.coreStart.docLinks.links.alerting.connectors
+        );
+      });
+    });
   });
 });

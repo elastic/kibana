@@ -46,10 +46,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
     docLinks: { links },
   } = useKibana().services;
 
-  const documentationUrl =
-    actionTypeName && actionTypeMessage
-      ? docsUrl
-      : selectConnectorDocsUrl ?? links.alerting.connectors;
+  const documentationUrl = docsUrl || selectConnectorDocsUrl || links.alerting.connectors;
 
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -116,16 +113,14 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
               )}
             </>
           ) : (
-            <>
-              <EuiTitle size="s">
-                <h3 id="selectConnectorFlyoutTitle">
-                  <FormattedMessage
-                    defaultMessage="Select a connector"
-                    id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
-                  />
-                </h3>
-              </EuiTitle>
-            </>
+            <EuiTitle size="s">
+              <h3 id="selectConnectorFlyoutTitle">
+                <FormattedMessage
+                  defaultMessage="Select a connector"
+                  id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
+                />
+              </h3>
+            </EuiTitle>
           )}
         </EuiFlexItem>
         {documentationUrl && (
