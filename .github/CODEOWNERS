@@ -143,6 +143,7 @@ src/core/packages/chrome/app-menu/core-chrome-app-menu-components @elastic/appex
 src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-components @elastic/appex-sharedux
 src/core/packages/chrome/browser-context @elastic/appex-sharedux
+src/core/packages/chrome/browser-context-mocks @elastic/appex-sharedux
 src/core/packages/chrome/browser-hooks @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal-types @elastic/appex-sharedux
@@ -151,6 +152,8 @@ src/core/packages/chrome/feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
+src/core/packages/chrome/navigation-customization @elastic/appex-sharedux
+src/core/packages/chrome/navigation-utils @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-components @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-context @elastic/appex-sharedux
@@ -735,6 +738,7 @@ src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-engineering
+src/platform/packages/shared/navigation-customization-components @elastic/appex-sharedux
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-presentation
@@ -1434,6 +1438,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_pending_invalidation @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_to_invalidate @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/cases @elastic/kibana-cases
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/config @elastic/appex-sharedux
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/connector_token @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_connector @elastic/kibana-core
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_stream-config @elastic/integration-experience
@@ -2600,6 +2605,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
@@ -3533,9 +3539,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 # Changes to translation files should not ping code reviewers
 x-pack/platform/plugins/private/translations/translations
 
-# Profiling api integration testing
-x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-presentation-team
-
 # Observability shared profiling
 x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-presentation-team
 
@@ -3595,6 +3598,9 @@ oas_docs/scripts                              @elastic/kibana-core
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
+docs/release-notes                            @elastic/experience-docs
+docs/docset.yml                               @elastic/experience-docs
+docs/redirects.yml                            @elastic/experience-docs
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
@@ -3689,6 +3695,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/agents/scout-reviewer.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
+/.github/workflows/label-scout-prs.yml @elastic/appex-qa
+/.github/labeler-scout.yml @elastic/appex-qa
 
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
