@@ -334,10 +334,17 @@ describe('WorkflowExecutionRepository', () => {
         });
       esClient.update
         .mockRejectedValueOnce({
-          type: 'version_conflict_engine_exception',
-          reason:
-            '[exec-1]: version conflict, required seqNo [7], primary term [2]. current document has seqNo [8] and primary term [2]',
-          index: TEST_BACKING_INDEX,
+          meta: {
+            statusCode: 409,
+            body: {
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason:
+                  '[exec-1]: version conflict, required seqNo [7], primary term [2]. current document has seqNo [8] and primary term [2]',
+                index: TEST_BACKING_INDEX,
+              },
+            },
+          },
         })
         .mockResolvedValueOnce({
           _index: TEST_BACKING_INDEX,

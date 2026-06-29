@@ -18,11 +18,19 @@ export interface IdentifiedDocument {
 }
 
 export const isVersionConflictError = (error: unknown): boolean => {
+  const maybeError = error as {
+    type?: string;
+    body?: { error?: { type?: string } };
+    meta?: { body?: { error?: { type?: string } }; statusCode?: number };
+    statusCode?: number;
+  };
+
   return (
-    error !== null &&
-    typeof error === 'object' &&
-    'type' in error &&
-    (error as { type?: string }).type === 'version_conflict_engine_exception'
+    maybeError?.type === 'version_conflict_engine_exception' ||
+    maybeError?.body?.error?.type === 'version_conflict_engine_exception' ||
+    maybeError?.meta?.body?.error?.type === 'version_conflict_engine_exception' ||
+    maybeError?.statusCode === 409 ||
+    maybeError?.meta?.statusCode === 409
   );
 };
 

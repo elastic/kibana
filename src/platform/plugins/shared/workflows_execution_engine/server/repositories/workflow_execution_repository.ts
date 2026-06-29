@@ -16,6 +16,7 @@ import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
 import { bulkUpdateDocuments, isVersionConflictError } from './bulk_update_documents';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { delayMs } from '@kbn/occ';
 
 const UPDATE_RETRY_ATTEMPTS = 3;
 
@@ -201,8 +202,11 @@ export class WorkflowExecutionRepository {
         return;
       } catch (error) {
         if (!isVersionConflictError(error) || attempt === UPDATE_RETRY_ATTEMPTS) {
+          console.log('UPDATE_WORKFLOW_EXECUTION: error', error);
           throw error;
         }
+
+        await delayMs(1000);
       }
     }
   }
