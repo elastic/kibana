@@ -18,6 +18,10 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
+  timestamp?: string;
+  // When true, only `steps` are fetched and the server skips the journey
+  // details (prev/next sibling) lookup. Used by screenshot-only consumers.
+  stepsOnly?: boolean;
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
@@ -33,9 +37,13 @@ export async function fetchScreenshotBlockSet(params: string[]): Promise<Screens
 export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
+  const query = {
+    ...(params.timestamp ? { timestamp: params.timestamp } : {}),
+    ...(params.stepsOnly ? { stepsOnly: true } : {}),
+  };
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    undefined,
+    Object.keys(query).length ? query : undefined,
     SyntheticsJourneyApiResponseType
   );
 }

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getJourneyScreenshot } from './api';
+import { fetchBrowserJourney, getJourneyScreenshot } from './api';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { apiService } from '../../../../utils/api_service';
+
+jest.mock('../../../../utils/api_service', () => ({
+  apiService: { get: jest.fn(), post: jest.fn() },
+}));
 
 describe('getJourneyScreenshot', () => {
   const url = 'http://localhost:5601/internal/uptime/journey/screenshot/checkgroup/step';
@@ -153,5 +159,54 @@ describe('getJourneyScreenshot', () => {
     });
     expect(result).toBeNull();
     expect(mockFetch).toBeCalledTimes(maxRetry + 1);
+  });
+});
+
+describe('fetchBrowserJourney timestamp plumbing', () => {
+  const mockGet = apiService.get as jest.Mock;
+
+  beforeEach(() => {
+    mockGet.mockReset();
+    mockGet.mockResolvedValue({});
+  });
+
+  it('omits the query param for local monitors', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1' });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      undefined,
+      expect.anything()
+    );
+  });
+
+  it('forwards the run timestamp to apiService.get when present', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', timestamp: '2023-01-01T00:00:00.000Z' });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { timestamp: '2023-01-01T00:00:00.000Z' },
+      expect.anything()
+    );
+  });
+
+  it('forwards stepsOnly to apiService.get when set', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', stepsOnly: true });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { stepsOnly: true },
+      expect.anything()
+    );
+  });
+
+  it('omits stepsOnly when not set', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', timestamp: '2023-01-01T00:00:00.000Z' });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { timestamp: '2023-01-01T00:00:00.000Z' },
+      expect.anything()
+    );
   });
 });
