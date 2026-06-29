@@ -34,10 +34,10 @@ export interface RiskInputsProps {
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
   /** Opens the originating host flyout as a child. */
-  onOpenHost?: () => void;
+  onShowHost: () => void;
 }
 
-export const RiskInputs = memo(({ entityName, entityId, onOpenHost }: RiskInputsProps) => {
+export const RiskInputs = memo(({ entityName, entityId, onShowHost }: RiskInputsProps) => {
   const { services } = useKibana();
   const store = useStore();
   const history = useHistory();
@@ -76,7 +76,7 @@ export const RiskInputs = memo(({ entityName, entityId, onOpenHost }: RiskInputs
       <EuiFlyoutHeader hasBorder>
         <ToolsFlyoutHeader
           title={TITLE}
-          onTitleClick={onOpenHost}
+          onTitleClick={onShowHost}
           label={entityName}
           iconType="storage"
         />

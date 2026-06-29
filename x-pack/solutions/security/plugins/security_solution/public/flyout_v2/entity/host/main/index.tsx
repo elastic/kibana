@@ -263,7 +263,7 @@ export const Host: FC<HostProps> = memo(function Host({
     />
   ) : undefined;
 
-  const onOpenHost = useCallback(() => {
+  const onShowHost = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
         services,
@@ -302,7 +302,7 @@ export const Host: FC<HostProps> = memo(function Host({
             <RiskInputs
               entityName={hostName}
               entityId={entityStoreEntityId}
-              onOpenHost={onOpenHost}
+              onShowHost={onShowHost}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
@@ -312,7 +312,7 @@ export const Host: FC<HostProps> = memo(function Host({
                 <VulnerabilityInsights
                   value={hostName}
                   entityId={panelDisplayEntityId}
-                  onOpenHost={onOpenHost}
+                  onShowHost={onShowHost}
                 />
               );
             case CspInsightLeftPanelSubTab.ALERTS:
@@ -320,7 +320,7 @@ export const Host: FC<HostProps> = memo(function Host({
                 <AlertsInsights
                   value={hostName}
                   entityId={panelDisplayEntityId}
-                  onOpenHost={onOpenHost}
+                  onShowHost={onShowHost}
                 />
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
@@ -328,7 +328,7 @@ export const Host: FC<HostProps> = memo(function Host({
                 <MisconfigurationInsights
                   value={hostName}
                   entityId={panelDisplayEntityId}
-                  onOpenHost={onOpenHost}
+                  onShowHost={onShowHost}
                 />
               );
           }
@@ -343,7 +343,7 @@ export const Host: FC<HostProps> = memo(function Host({
       hostName,
       panelDisplayEntityId,
       entityStoreEntityId,
-      onOpenHost,
+      onShowHost,
     ]
   );
 

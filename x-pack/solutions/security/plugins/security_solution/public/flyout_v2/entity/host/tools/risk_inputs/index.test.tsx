@@ -105,7 +105,7 @@ describe('<RiskInputs />', () => {
   });
 
   it('renders the header with the "Risk score" title and host label', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" />);
+    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={jest.fn()} />);
     const header = getByTestId('mockToolsFlyoutHeader');
     expect(header).toHaveAttribute('data-title', 'Risk score');
     expect(header).toHaveAttribute('data-label', 'my-host');
@@ -113,27 +113,29 @@ describe('<RiskInputs />', () => {
   });
 
   it('renders the risk inputs body container', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" />);
+    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={jest.fn()} />);
     expect(getByTestId(RISK_INPUTS_TOOL_TEST_ID)).toBeInTheDocument();
   });
 
   it('passes entity context to the underlying RiskInputsTab', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" entityId="euid-123" />);
+    const { getByTestId } = render(
+      <RiskInputs entityName="my-host" entityId="euid-123" onShowHost={jest.fn()} />
+    );
     const tab = getByTestId('mockRiskInputsTab');
     expect(tab).toHaveAttribute('data-entity-type', 'host');
     expect(tab).toHaveAttribute('data-entity-name', 'my-host');
     expect(tab).toHaveAttribute('data-entity-id', 'euid-123');
   });
 
-  it('forwards onOpenHost to the header click handler', () => {
-    const onOpenHost = jest.fn();
-    const { getByTestId } = render(<RiskInputs entityName="my-host" onOpenHost={onOpenHost} />);
+  it('forwards onShowHost to the header click handler', () => {
+    const onShowHost = jest.fn();
+    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={onShowHost} />);
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenHost).toHaveBeenCalledTimes(1);
+    expect(onShowHost).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when a risk-input alert is expanded', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" />);
+    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={jest.fn()} />);
     getByTestId('mockRiskInputsTab').click();
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(

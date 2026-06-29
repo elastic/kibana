@@ -110,7 +110,7 @@ describe('<AlertsInsights />', () => {
   });
 
   it('renders the header with the title, host label and entity icon', () => {
-    const { getByTestId } = render(<AlertsInsights value="my-host" />);
+    const { getByTestId } = render(<AlertsInsights value="my-host" onShowHost={jest.fn()} />);
     const header = getByTestId('mockToolsFlyoutHeader');
     expect(header).toHaveAttribute('data-title', 'Alerts');
     expect(header).toHaveAttribute('data-label', 'my-host');
@@ -118,14 +118,16 @@ describe('<AlertsInsights />', () => {
   });
 
   it('renders the table inside a scrollable flyout body', () => {
-    const { getByTestId } = render(<AlertsInsights value="my-host" />);
+    const { getByTestId } = render(<AlertsInsights value="my-host" onShowHost={jest.fn()} />);
     const body = getByTestId(ALERTS_INSIGHTS_TOOL_TEST_ID);
     expect(body).toBeInTheDocument();
     expect(body).toContainElement(getByTestId('mockAlertsDetailsTable'));
   });
 
   it('forwards the host name and entity id to the alerts table', () => {
-    const { getByTestId } = render(<AlertsInsights value="my-host" entityId="euid-123" />);
+    const { getByTestId } = render(
+      <AlertsInsights value="my-host" entityId="euid-123" onShowHost={jest.fn()} />
+    );
     const table = getByTestId('mockAlertsDetailsTable');
     expect(table).toHaveAttribute('data-field', 'host.name');
     expect(table).toHaveAttribute('data-value', 'my-host');
@@ -133,15 +135,15 @@ describe('<AlertsInsights />', () => {
     expect(table).toHaveAttribute('data-entity-type', 'host');
   });
 
-  it('forwards onOpenHost to the header click handler', () => {
-    const onOpenHost = jest.fn();
-    const { getByTestId } = render(<AlertsInsights value="my-host" onOpenHost={onOpenHost} />);
+  it('forwards onShowHost to the header click handler', () => {
+    const onShowHost = jest.fn();
+    const { getByTestId } = render(<AlertsInsights value="my-host" onShowHost={onShowHost} />);
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenHost).toHaveBeenCalledTimes(1);
+    expect(onShowHost).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when an alert row is expanded', () => {
-    const { getByTestId } = render(<AlertsInsights value="my-host" />);
+    const { getByTestId } = render(<AlertsInsights value="my-host" onShowHost={jest.fn()} />);
     getByTestId('mockAlertsDetailsTable').click();
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(

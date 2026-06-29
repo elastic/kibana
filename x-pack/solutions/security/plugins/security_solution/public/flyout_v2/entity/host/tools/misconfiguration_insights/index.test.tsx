@@ -78,6 +78,10 @@ jest.mock('../../../../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
 }));
 
+jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => true,
+}));
+
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useStore: () => ({}),
@@ -102,7 +106,9 @@ describe('<MisconfigurationInsights />', () => {
   });
 
   it('renders the header with the title, host label and entity icon', () => {
-    const { getByTestId } = render(<MisconfigurationInsights value="my-host" />);
+    const { getByTestId } = render(
+      <MisconfigurationInsights value="my-host" onShowHost={jest.fn()} />
+    );
     const header = getByTestId('mockToolsFlyoutHeader');
     expect(header).toHaveAttribute('data-title', 'Misconfigurations');
     expect(header).toHaveAttribute('data-label', 'my-host');
@@ -110,7 +116,9 @@ describe('<MisconfigurationInsights />', () => {
   });
 
   it('renders the table inside a scrollable flyout body', () => {
-    const { getByTestId } = render(<MisconfigurationInsights value="my-host" />);
+    const { getByTestId } = render(
+      <MisconfigurationInsights value="my-host" onShowHost={jest.fn()} />
+    );
     const body = getByTestId(MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID);
     expect(body).toBeInTheDocument();
     expect(body).toContainElement(getByTestId('mockMisconfigurationFindingsDetailsTable'));
@@ -118,7 +126,7 @@ describe('<MisconfigurationInsights />', () => {
 
   it('forwards the host name and entity id to the findings table', () => {
     const { getByTestId } = render(
-      <MisconfigurationInsights value="my-host" entityId="euid-123" />
+      <MisconfigurationInsights value="my-host" entityId="euid-123" onShowHost={jest.fn()} />
     );
     const table = getByTestId('mockMisconfigurationFindingsDetailsTable');
     expect(table).toHaveAttribute('data-field', 'host.name');
@@ -127,17 +135,19 @@ describe('<MisconfigurationInsights />', () => {
     expect(table).toHaveAttribute('data-entity-type', 'host');
   });
 
-  it('forwards onOpenHost to the header click handler', () => {
-    const onOpenHost = jest.fn();
+  it('forwards onShowHost to the header click handler', () => {
+    const onShowHost = jest.fn();
     const { getByTestId } = render(
-      <MisconfigurationInsights value="my-host" onOpenHost={onOpenHost} />
+      <MisconfigurationInsights value="my-host" onShowHost={onShowHost} />
     );
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenHost).toHaveBeenCalledTimes(1);
+    expect(onShowHost).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when a finding row is expanded', () => {
-    const { getByTestId } = render(<MisconfigurationInsights value="my-host" />);
+    const { getByTestId } = render(
+      <MisconfigurationInsights value="my-host" onShowHost={jest.fn()} />
+    );
     getByTestId('mockMisconfigurationFindingsDetailsTable').click();
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(

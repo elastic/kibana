@@ -38,13 +38,13 @@ export interface AlertsInsightsProps {
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
   /** Opens the originating host flyout as a child. */
-  onOpenHost?: () => void;
+  onShowHost: () => void;
 }
 
 /**
  * Tool flyout displaying alert findings for a host entity.
  */
-export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsightsProps) => {
+export const AlertsInsights = memo(({ value, entityId, onShowHost }: AlertsInsightsProps) => {
   const { services } = useKibana();
   const store = useStore();
   const history = useHistory();
@@ -83,7 +83,7 @@ export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsig
       <EuiFlyoutHeader hasBorder>
         <ToolsFlyoutHeader
           title={TITLE}
-          onTitleClick={onOpenHost}
+          onTitleClick={onShowHost}
           label={value}
           iconType="storage"
         />
