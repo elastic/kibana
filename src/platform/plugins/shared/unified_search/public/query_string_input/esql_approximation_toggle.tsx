@@ -100,7 +100,7 @@ export const EsqlApproximationToggle = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<IUnifiedSearchPluginServices>();
-  const learnMoreUrl = services.docLinks.links.query.queryESQLKibana;
+  const learnMoreUrl = services.docLinks.links.query.queryESQLApproximateResults;
 
   const { tooltipContent, ariaLabel, switchLabel } = getLabels(
     disabled,

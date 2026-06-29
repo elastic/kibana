@@ -23,7 +23,7 @@ const mockServices = {
   docLinks: {
     links: {
       query: {
-        queryESQLKibana: 'https://elastic.co/docs/esql-kibana',
+        queryESQLApproximateResults: 'https://elastic.co/docs/esql-kibana',
       },
     },
   },
