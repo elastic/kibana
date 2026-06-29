@@ -154,7 +154,6 @@ test.describe(
       pageObjects,
       logsSynthtraceEsClient,
       apiServices,
-      config,
     }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
@@ -173,9 +172,7 @@ test.describe(
 
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      await setCustomRetention(page, '7', 'd', {
-        expectOverrideConfirmation: config.serverless,
-      });
+      await setCustomRetention(page, '7', 'd');
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
     });
 

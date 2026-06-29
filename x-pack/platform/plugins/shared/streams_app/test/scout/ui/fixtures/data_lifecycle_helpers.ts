@@ -70,20 +70,6 @@ async function confirmOverride(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Confirms the "This will override index template settings" modal when it is
- * shown. Whether the modal appears depends on the current persisted lifecycle
- * (it is skipped when the stream already has an explicit override), so this
- * helper tolerates its absence.
- */
-async function confirmOverrideIfPresent(page: ScoutPage): Promise<void> {
-  const overrideButton = page.getByTestId('overrideSettingsModal-overrideButton');
-  if (await overrideButton.isVisible().catch(() => false)) {
-    await overrideButton.click();
-    await overrideButton.waitFor({ state: 'hidden' });
-  }
-}
-
-/**
  * Opens the "edit lifecycle method" flyout (inherit + DLM/ILM) for successful data.
  */
 export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locator> {
@@ -202,7 +188,7 @@ export async function setCustomRetention(
 
   await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseApplyButton).click();
   if (expectOverrideConfirmation) {
-    await confirmOverrideIfPresent(page);
+    await confirmOverride(page);
   }
   await page
     .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
@@ -219,7 +205,7 @@ export async function removeDeletePhase(
   await openDeletePhaseFlyout(page, { existing: true });
   await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton).click();
   if (expectOverrideConfirmation) {
-    await confirmOverrideIfPresent(page);
+    await confirmOverride(page);
   }
   await page
     .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
@@ -227,16 +213,14 @@ export async function removeDeletePhase(
 }
 
 /**
- * Closes toasts if they exist (safe cleanup helper).
+ * Closes any currently visible toasts.
  */
 export async function closeToastsIfPresent(page: ScoutPage): Promise<void> {
-  const toasts = page.locator('.euiToast');
-  if ((await toasts.count()) > 0) {
-    await page
-      .locator('.euiToast__closeButton')
-      .click({ timeout: 1000 })
-      .catch(() => {});
+  const toastCloseButtons = page.getByTestId('toastCloseButton');
+  for (const button of await toastCloseButtons.all()) {
+    await button.click();
   }
+  await expect(toastCloseButtons).toHaveCount(0);
 }
 
 // ---------------------------------------------------------------------------
@@ -280,11 +264,16 @@ export async function saveFailureStoreChanges(page: ScoutPage): Promise<void> {
 /**
  * Saves the streams "edit failed data lifecycle" flyout (Apply) and waits for it to close.
  */
-export async function applyFailedLifecycleFlyout(page: ScoutPage): Promise<void> {
+export async function applyFailedLifecycleFlyout(
+  page: ScoutPage,
+  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+): Promise<void> {
   const saveButton = page.getByTestId(RETENTION_TEST_IDS.failedFlyoutApplyButton);
   await expect(saveButton).toBeEnabled();
   await saveButton.click();
-  await confirmOverrideIfPresent(page);
+  if (expectOverrideConfirmation) {
+    await confirmOverride(page);
+  }
   await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden();
 }
 
@@ -295,7 +284,11 @@ export async function applyFailedLifecycleFlyout(page: ScoutPage): Promise<void>
  * deterministic: enabling starts from the disabled panel ("Enable failure
  * store"), disabling starts from the edit button on the enabled panel.
  */
-export async function setFailureStoreEnabled(page: ScoutPage, enabled: boolean): Promise<void> {
+export async function setFailureStoreEnabled(
+  page: ScoutPage,
+  enabled: boolean,
+  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+): Promise<void> {
   if (enabled) {
     await openDisabledFailureStoreFlyout(page);
   } else {
@@ -310,7 +303,7 @@ export async function setFailureStoreEnabled(page: ScoutPage, enabled: boolean):
     await checkbox.uncheck();
   }
 
-  await applyFailedLifecycleFlyout(page);
+  await applyFailedLifecycleFlyout(page, { expectOverrideConfirmation });
 }
 
 /**
@@ -321,21 +314,24 @@ export async function setFailureStoreEnabled(page: ScoutPage, enabled: boolean):
 export async function setFailureStoreRetention(
   page: ScoutPage,
   value: string,
-  unit: 'd' | 'h' | 'm' | 's' = 'd'
+  unit: 'd' | 'h' | 'm' | 's' = 'd',
+  {
+    existingDeletePhase = false,
+    expectOverrideConfirmation = false,
+  }: { existingDeletePhase?: boolean; expectOverrideConfirmation?: boolean } = {}
 ): Promise<void> {
   const flyout = page.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseFlyout);
 
   const addDeletePhaseButton = page.getByTestId(
     RETENTION_TEST_IDS.failureStoreAddDeletePhaseButton
   );
-  const canAddDeletePhase = await addDeletePhaseButton.isEnabled().catch(() => false);
-  if (canAddDeletePhase) {
-    await addDeletePhaseButton.click();
-  } else {
-    // Serverless always materializes a delete phase for the failure store, so tests may need to edit
-    // the existing delete phase instead of adding a new one.
+
+  if (existingDeletePhase) {
     await page.getByTestId('failureStore-lifecyclePhase-delete-button').click();
     await page.getByTestId('lifecyclePhase-delete-editButton').click();
+  } else {
+    await expect(addDeletePhaseButton).toBeEnabled();
+    await addDeletePhaseButton.click();
   }
   await expect(flyout).toBeVisible();
 
@@ -346,7 +342,9 @@ export async function setFailureStoreRetention(
   await flyout.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseUnit).click();
 
   await page.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseApplyButton).click();
-  await confirmOverrideIfPresent(page);
+  if (expectOverrideConfirmation) {
+    await confirmOverride(page);
+  }
   await expect(flyout).toBeHidden();
 }
 
@@ -354,8 +352,13 @@ export async function setFailureStoreRetention(
  * Removes the failure store delete phase (sets retention to indefinite / disables lifecycle)
  * via the phase popover remove action. Requires the failure store to be enabled with a delete phase.
  */
-export async function removeFailureStoreDeletePhase(page: ScoutPage): Promise<void> {
+export async function removeFailureStoreDeletePhase(
+  page: ScoutPage,
+  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+): Promise<void> {
   await page.getByTestId('failureStore-lifecyclePhase-delete-button').click();
   await page.getByTestId('lifecyclePhase-delete-removeButton').click();
-  await confirmOverrideIfPresent(page);
+  if (expectOverrideConfirmation) {
+    await confirmOverride(page);
+  }
 }

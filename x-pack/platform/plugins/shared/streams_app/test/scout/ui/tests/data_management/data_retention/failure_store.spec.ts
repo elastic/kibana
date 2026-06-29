@@ -91,7 +91,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
-        await setFailureStoreRetention(page, '7', 'd');
+        await setFailureStoreRetention(page, '7', 'd', { existingDeletePhase: config.serverless });
         await expect(
           page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)
         ).toContainText('7 days');
@@ -117,35 +117,11 @@ test.describe('Stream data retention - updating failure store', () => {
       }
     );
 
-    // Enabling the failure store without a custom retention persists an empty
-    // enabled lifecycle. The effective retention differs per deployment, so each
-    // case is its own test (no conditional assertions):
-    // - Serverless: Elasticsearch enforces a default failure store retention, so a
-    //   delete phase (2 data phases) with that default is shown.
-    // - Stateful: Elasticsearch may materialize a default failure store retention depending on
-    //   cluster configuration; assert the effective UI state per environment.
+    // Enabling the failure store without a custom retention persists an empty enabled lifecycle.
+    // In our supported deployments, a default delete phase is materialized and shown in the UI.
     test(
-      `should enable failure store with the cluster default delete phase for ${label} (serverless)`,
-      { tag: tags.serverless.observability.complete },
-      async ({ page, pageObjects, apiServices }) => {
-        // Pin the starting state: failure store disabled.
-        await pinFailureStore(apiServices, streamName, { disabled: {} });
-
-        await pageObjects.streams.gotoDataRetentionTab(streamName);
-
-        await setFailureStoreEnabled(page, true);
-        await expect(
-          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)
-        ).toContainText('30 days');
-        await expect(
-          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
-        ).toContainText('2 data phases');
-      }
-    );
-
-    test(
-      `should enable failure store with the effective default retention for ${label} (stateful)`,
-      { tag: tags.stateful.classic },
+      `should enable failure store with the default delete phase for ${label}`,
+      { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
       async ({ page, pageObjects, apiServices }) => {
         // Pin the starting state: failure store disabled.
         await pinFailureStore(apiServices, streamName, { disabled: {} });
@@ -259,7 +235,7 @@ test.describe('Stream data retention - updating failure store', () => {
       await expect(page.getByTestId('retention-metric')).toContainText('30 days');
 
       // Set failure store retention to 7 days
-      await setFailureStoreRetention(page, '7', 'd');
+      await setFailureStoreRetention(page, '7', 'd', { existingDeletePhase: config.serverless });
 
       // Verify both are set correctly
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
@@ -282,7 +258,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      await setFailureStoreRetention(page, '21', 'd');
+      await setFailureStoreRetention(page, '21', 'd', { existingDeletePhase: config.serverless });
 
       // Reload page
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
