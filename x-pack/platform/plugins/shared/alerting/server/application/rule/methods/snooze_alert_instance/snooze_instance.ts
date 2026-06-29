@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { MAX_SNOOZED_ALERT_INSTANCES } from '../../../../../common/max_alert_limit';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import {
@@ -101,15 +102,6 @@ async function snoozeAlertInstanceWithOCC(
     throw error;
   }
 
-  context.auditLogger?.log(
-    alertAuditEvent({
-      action: AlertAuditAction.SNOOZE,
-      outcome: 'unknown',
-      id: alertInstanceId,
-      ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
-    })
-  );
-
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (
@@ -172,6 +164,27 @@ async function snoozeAlertInstanceWithOCC(
     snoozeSnapshot,
   });
 
+  const snoozedInstances = upsertPerAlertSnoozeEntry({
+    snoozedInstances: attributes.snoozedInstances,
+    snoozedInstance,
+  });
+
+  if (snoozedInstances.length > MAX_SNOOZED_ALERT_INSTANCES) {
+    throw Boom.badRequest(
+      `Cannot snooze more than ${MAX_SNOOZED_ALERT_INSTANCES} alert instances for rule with id "${ruleId}"`
+    );
+  }
+
+  // Audit the successful snooze only once all validation and guards have passed.
+  context.auditLogger?.log(
+    alertAuditEvent({
+      action: AlertAuditAction.SNOOZE,
+      outcome: 'unknown',
+      id: alertInstanceId,
+      ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+    })
+  );
+
   // Only the rule saved object is updated here. The `kibana.alert.snoozed` field
   // in alert-as-data documents is eventually consistent: it is written by the task
   // runner on each execution using the rule SO as its source of truth, so it will
@@ -183,10 +196,7 @@ async function snoozeAlertInstanceWithOCC(
     savedObjectsUpdateOptions: { version },
     id: ruleId,
     updateRuleAttributes: updateMeta(context, {
-      snoozedInstances: upsertPerAlertSnoozeEntry({
-        snoozedInstances: attributes.snoozedInstances,
-        snoozedInstance,
-      }),
+      snoozedInstances,
       updatedBy,
       updatedAt,
     }),

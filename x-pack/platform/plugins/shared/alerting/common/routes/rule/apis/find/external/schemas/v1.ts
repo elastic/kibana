@@ -121,7 +121,8 @@ export const findRulesRequestQuerySchema = schema.object({
       }),
       {
         meta: {
-          description: 'A list of consumers to use for filtering rules.',
+          description:
+            'Filters the returned rules by the consumer (Kibana application) that owns them, for example: `siem`, `apm`, `infrastructure`.',
         },
       }
     )

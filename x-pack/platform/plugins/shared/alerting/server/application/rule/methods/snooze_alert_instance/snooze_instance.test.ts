@@ -10,6 +10,7 @@ import { snoozeAlertInstance } from './snooze_instance';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AlertAuditAction } from '../../../../lib/alert_audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { MAX_SNOOZED_ALERT_INSTANCES } from '../../../../../common/max_alert_limit';
 
 describe('snooze alert instance', () => {
   const loggerErrorMock = jest.fn();
@@ -519,6 +520,46 @@ describe('snooze alert instance', () => {
       })
     ).rejects.toThrow(
       'Alert instance with id "this-id-does-not-exist" does not exist for rule with id "1"'
+    );
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 400 when snoozing a new instance would exceed the max snoozed instances limit', async () => {
+    const existingSnoozedInstances = Array.from(
+      { length: MAX_SNOOZED_ALERT_INSTANCES },
+      (_, i) => ({
+        instanceId: `instance-${i}`,
+        snoozedAt: '2026-04-14T10:00:00.000Z',
+        snoozedBy: 'elastic',
+      })
+    );
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        snoozedInstances: existingSnoozedInstances,
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'new-instance' },
+        query: { validateAlertsExistence: false },
+        body: { expiresAt: '2099-12-31T23:59:59.000Z' },
+      })
+    ).rejects.toThrow(
+      `Cannot snooze more than ${MAX_SNOOZED_ALERT_INSTANCES} alert instances for rule with id "1"`
     );
 
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();

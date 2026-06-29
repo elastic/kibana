@@ -48,7 +48,7 @@ export const unsnoozeAlertRoute = (
             description: 'Indicates that this call is forbidden.',
           },
           404: {
-            description: 'Indicates a rule or alert with the given ID does not exist.',
+            description: `Indicates the specified rule or alert doesn't exist.`,
           },
         },
       },

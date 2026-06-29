@@ -67,15 +67,6 @@ async function unsnoozeInstanceWithOCC(
     throw error;
   }
 
-  context.auditLogger?.log(
-    alertAuditEvent({
-      action: AlertAuditAction.UNSNOOZE,
-      outcome: 'unknown',
-      id: alertInstanceId,
-      ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
-    })
-  );
-
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (
@@ -86,6 +77,16 @@ async function unsnoozeInstanceWithOCC(
       `Per-alert unsnooze is not supported for rule type "${attributes.alertTypeId}"`
     );
   }
+
+  // Audit the successful unsnooze only once all validation and guards have passed.
+  context.auditLogger?.log(
+    alertAuditEvent({
+      action: AlertAuditAction.UNSNOOZE,
+      outcome: 'unknown',
+      id: alertInstanceId,
+      ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+    })
+  );
 
   const snoozedInstances = removePerAlertSnoozeEntry({
     snoozedInstances: attributes.snoozedInstances,

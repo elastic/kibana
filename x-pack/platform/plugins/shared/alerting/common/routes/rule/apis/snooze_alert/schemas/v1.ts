@@ -27,16 +27,25 @@ const snoozeConditionSchema = schema.oneOf([
       type: schema.literal('field_change'),
       field: schema.string({
         maxLength: MAX_SNOOZED_CONDITION_FIELD_LENGTH,
-        meta: { description: 'The alert field path (dot-notation) to watch for changes.' },
+        meta: {
+          description:
+            'The alert field to watch, written as a dot-notation path. When the value of the specified alert field changes, the snooze expires',
+        },
       }),
     },
-    { meta: { description: 'Expires the snooze when a specific alert field changes value.' } }
+    {
+      meta: {
+        description: 'Expires the snooze when the value of the specified alert field changes.',
+      },
+    }
   ),
   schema.object(
     {
       type: schema.literal('severity_change'),
     },
-    { meta: { description: 'Expires the snooze when the alert severity changes.' } }
+    {
+      meta: { description: 'Expires the snooze when the severity of the specified alert changes.' },
+    }
   ),
   schema.object(
     {
@@ -51,12 +60,17 @@ const snoozeConditionSchema = schema.oneOf([
         ],
         {
           meta: {
-            description: 'The severity level to match: critical, high, medium, low, or info.',
+            description: 'The target severity level: critical, high, medium, low, or info.',
           },
         }
       ),
     },
-    { meta: { description: 'Expires the snooze when the alert severity equals a specific level.' } }
+    {
+      meta: {
+        description:
+          'Expires the snooze when the severity of the specified alert equals a target level.',
+      },
+    }
   ),
 ]);
 
@@ -81,7 +95,8 @@ export const snoozeAlertQuerySchema = schema.maybe(
       schema.boolean({
         defaultValue: true,
         meta: {
-          description: 'Whether to validate the existence of the alert before snoozing.',
+          description:
+            'Set to `true` to validate that the specified alert exists. If a `400` error is returned, the specified alert does not exist. Defaults to `true`.',
         },
       })
     ),
@@ -96,9 +111,7 @@ export const snoozeAlertBodySchema = schema.object(
         validate: (value) => validateIsoDate(value),
         meta: {
           description:
-            'The datetime at which the snooze expires, in ISO 8601 format ' +
-            'YYYY-MM-DDTHH:mm:ss.sssZ. When omitted the snooze ' +
-            'persists until it is explicitly removed or a matching condition fires.',
+            'The datetime at which the snooze expires, in ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`). When omitted, the snooze persists indefinitely unless manually removed or a defined condition is met.',
         },
       })
     ),
@@ -107,8 +120,7 @@ export const snoozeAlertBodySchema = schema.object(
         maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS,
         meta: {
           description:
-            'One or more conditions that, when met, automatically expire the snooze. ' +
-            'Supported types: field_change, severity_change, severity_equals.',
+            'One or more conditions that, when met, automatically expire the snooze. Supported types: `field_change`, `severity_change`, `severity_equals`.',
         },
       })
     ),
