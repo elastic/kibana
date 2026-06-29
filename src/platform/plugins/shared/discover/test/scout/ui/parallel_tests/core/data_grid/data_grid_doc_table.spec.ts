@@ -39,7 +39,6 @@ spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all },
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Viewer is sufficient for read-only grid interactions.
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.dataGrid.waitForLoad();
     // Search can finish before the grid leaves "Loading documents" (histogram may

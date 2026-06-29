@@ -36,7 +36,6 @@ spaceTest.describe('Discover data grid footer', { tag: '@local-stateful-classic'
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.dataGrid.waitForLoad();
     await pageObjects.dataGrid.waitForDocTableRendered();
