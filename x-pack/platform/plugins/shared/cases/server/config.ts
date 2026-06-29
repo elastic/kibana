@@ -67,7 +67,7 @@ export const ConfigSchema = schema.object({
   // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
   // Once the redesigned UI fully replaces the current one, this config block will be removed.
   casesRedesign: schema.object({
-    list: schema.boolean({ defaultValue: true }),
+    list: schema.boolean({ defaultValue: false }),
     details: schema.boolean({ defaultValue: false }),
     settings: schema.boolean({ defaultValue: false }),
   }),

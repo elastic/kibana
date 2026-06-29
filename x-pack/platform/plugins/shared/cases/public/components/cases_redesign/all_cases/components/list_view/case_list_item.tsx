@@ -51,6 +51,9 @@ export const CaseListItem: React.FC<{
     (e: React.MouseEvent | React.KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest('button')) {
+        if ('button' in e) {
+          e.preventDefault();
+        }
         return;
       }
       if ('key' in e && e.key !== 'Enter' && e.key !== ' ') {
