@@ -568,10 +568,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   });
                                 }}
                                 name="dataStreamType"
-                            />
-                          </EuiFormRow>
-                        </EuiFlexItem>
-                      )}
+                              />
+                            </EuiFormRow>
+                          </EuiFlexItem>
+                        )}
                       {advancedVars.map((varDef) => {
                         if (!packagePolicyInputStream.vars) return null;
                         const { name: varName, type: varType } = varDef;
