@@ -271,7 +271,20 @@ async function runIntegration(
       namespace,
       config.validateTargetIds
     );
-    const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
+    // When target validation ran, restrict the metadata write to the same
+    // validated target set so the history stream stays consistent with the
+    // latest-index write (no dangling targets in either store).
+    const metadataRecords = write.validTargetIds
+      ? records.flatMap((r) => {
+          const filteredRels: Record<string, string[]> = {};
+          for (const [relType, targetEuids] of Object.entries(r.relationships)) {
+            const valid = targetEuids.filter((id) => write.validTargetIds!.has(id));
+            if (valid.length > 0) filteredRels[relType] = valid;
+          }
+          return Object.keys(filteredRels).length > 0 ? [{ ...r, relationships: filteredRels }] : [];
+        })
+      : records;
+    const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, metadataRecords, {
       scanId: metadataContext.scanId,
       lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
       entitySource: config.id,
