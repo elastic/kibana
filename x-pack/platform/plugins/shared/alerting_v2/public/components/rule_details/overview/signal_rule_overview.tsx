@@ -66,7 +66,7 @@ export const SignalRuleOverview: React.FC = () => {
 
   const [refreshTick, setRefreshTick] = useState(0);
 
-  const { gteMs, lteMs } = useMemo(() => {
+  const { windowStartMs: gteMs, windowEndMs: lteMs } = useMemo(() => {
     void refreshTick;
     return resolveGteLte(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
