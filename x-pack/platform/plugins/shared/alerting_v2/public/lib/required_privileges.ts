@@ -5,31 +5,23 @@
  * 2.0.
  */
 
-import {
-  ALERTING_V2_FEATURES,
-  ALERTING_V2_UI_CAPABILITIES,
-  type AlertingV2Feature,
-} from '../../common/feature_privileges';
+import { ALERTING_V2_FEATURES, type AlertingV2Feature } from '../../common/feature_privileges';
 
 type AlertingCapability = 'read' | 'all';
 
 /**
  * Describes a single privilege a user must hold to view a gated page, surfaced
  * in the "Privileges required" interstitial so the user can tell their admin
- * exactly what to grant.
+ * exactly what to grant. Deliberately omits the underlying UI capability id,
+ * which is an implementation detail users do not recognise.
  */
 export interface AlertingRequiredPrivilege {
   /** Kibana feature id backing the capability, e.g. "alerting_v2_rules". */
   featureId: string;
   /** Feature name as it appears in role management, e.g. "Rules". */
   featureName: string;
-  /** Minimum feature privilege that grants the capability, e.g. "read". */
+  /** Minimum feature privilege that grants access, e.g. "read". */
   privilege: AlertingCapability;
-  /**
-   * Fully-qualified UI capability the page checks, e.g.
-   * "alerting_v2_rules.read".
-   */
-  capability: string;
 }
 
 /**
@@ -47,6 +39,5 @@ export const getAlertingRequiredPrivileges = (
       featureId: id,
       featureName: name,
       privilege: capability,
-      capability: `${id}.${ALERTING_V2_UI_CAPABILITIES[feature][capability]}`,
     };
   });

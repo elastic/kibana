@@ -8,13 +8,12 @@
 import { getAlertingRequiredPrivileges } from './required_privileges';
 
 describe('getAlertingRequiredPrivileges', () => {
-  it('maps a feature to its id, name, privilege level, and fully-qualified capability', () => {
+  it('maps a feature to its id, name, and privilege level', () => {
     expect(getAlertingRequiredPrivileges(['rules'])).toEqual([
       {
         featureId: 'alerting_v2_rules',
         featureName: 'Rules',
         privilege: 'read',
-        capability: 'alerting_v2_rules.read',
       },
     ]);
   });
@@ -27,13 +26,12 @@ describe('getAlertingRequiredPrivileges', () => {
     ]);
   });
 
-  it('reflects the requested capability in the privilege level and capability id', () => {
+  it('reflects the requested capability in the privilege level', () => {
     expect(getAlertingRequiredPrivileges(['executionHistory'], 'all')).toEqual([
       {
         featureId: 'alerting_v2_execution_history',
         featureName: 'Execution history',
         privilege: 'all',
-        capability: 'alerting_v2_execution_history.all',
       },
     ]);
   });

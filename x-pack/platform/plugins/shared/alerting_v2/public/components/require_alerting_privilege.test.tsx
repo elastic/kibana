@@ -48,7 +48,6 @@ describe('RequireAlertingPrivilege', () => {
     expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
     expect(screen.getByText('Privileges required')).toBeInTheDocument();
     expect(screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules')).toBeInTheDocument();
-    expect(screen.getByText('alerting_v2_rules.read')).toBeInTheDocument();
   });
 
   it('passes a single-feature set to the privileges hook', () => {

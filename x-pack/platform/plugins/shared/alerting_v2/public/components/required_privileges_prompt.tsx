@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertingRequiredPrivilege } from '../lib/required_privileges';
@@ -31,7 +31,7 @@ const PRIVILEGE_LABELS: Record<AlertingRequiredPrivilege['privilege'], string> =
  * Full-page interstitial shown when a user navigates to an alerting_v2
  * management page without the required feature privileges. Follows the
  * standard Kibana "Privileges required" empty-prompt pattern and lists the
- * concrete feature privileges (and the capabilities they grant) the user needs.
+ * feature privileges the user needs so they can request access.
  */
 export const RequiredPrivilegesPrompt = ({
   pageName,
@@ -62,15 +62,14 @@ export const RequiredPrivilegesPrompt = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s">
-          {requiredPrivileges.map(({ featureId, featureName, privilege, capability }) => (
+          {requiredPrivileges.map(({ featureId, featureName, privilege }) => (
             <p key={featureId} data-test-subj={`alertingRequiredPrivilege-${featureId}`}>
               <FormattedMessage
                 id="xpack.alertingV2.requiredPrivileges.privilegeItem"
-                defaultMessage="{featureName}: {privilege} - grants the {capability} capability"
+                defaultMessage="{featureName}: {privilege}"
                 values={{
                   featureName: <strong>{featureName}</strong>,
                   privilege: <strong>{PRIVILEGE_LABELS[privilege]}</strong>,
-                  capability: <EuiCode>{capability}</EuiCode>,
                 }}
               />
             </p>

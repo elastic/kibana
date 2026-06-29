@@ -7,14 +7,14 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
-import { AlertingAccessPage } from './alerting_access_page';
+import { AlertingNavigation } from './alerting_navigation';
 import { ComposeDiscoverPage } from './compose_discover_page';
 import { DiscoverAppMenu } from './discover_app_menu';
 import { ExecutionHistoryPage } from './execution_history_page';
 import { RuleFormPage } from './rule_form_page';
 import { RulesListPage } from './rules_list_page';
 
-export { AlertingAccessPage } from './alerting_access_page';
+export { AlertingNavigation } from './alerting_navigation';
 export { ComposeDiscoverPage } from './compose_discover_page';
 export { DiscoverAppMenu } from './discover_app_menu';
 export { ExecutionHistoryPage } from './execution_history_page';
@@ -22,7 +22,7 @@ export { RuleFormPage } from './rule_form_page';
 export { RulesListPage } from './rules_list_page';
 
 export type AlertingPageObjects = PageObjects & {
-  alertingAccess: AlertingAccessPage;
+  alertingNavigation: AlertingNavigation;
   composeDiscover: ComposeDiscoverPage;
   discoverAppMenu: DiscoverAppMenu;
   executionHistory: ExecutionHistoryPage;
@@ -38,7 +38,7 @@ export const extendPageObjects = (
 
   return {
     ...pageObjects,
-    alertingAccess: createLazyPageObject(AlertingAccessPage, page),
+    alertingNavigation: createLazyPageObject(AlertingNavigation, page),
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),
     discoverAppMenu,
     executionHistory: createLazyPageObject(ExecutionHistoryPage, page),

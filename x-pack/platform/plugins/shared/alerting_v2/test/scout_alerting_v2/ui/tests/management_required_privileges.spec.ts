@@ -7,10 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import type {
-  AlertingAccessPage,
-  AlertingApp,
-} from '../fixtures/page_objects/alerting_access_page';
+import type { AlertingApp, AlertingNavigation } from '../fixtures/page_objects/alerting_navigation';
 import {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
@@ -30,7 +27,7 @@ const ALL_APPS: readonly AlertingApp[] = ['rules', 'alerts', 'actionPolicies', '
  * hiding the role-level cases behind a data-driven `test()` title.
  */
 async function expectAccess(
-  pageObjects: { alertingAccess: AlertingAccessPage },
+  pageObjects: { alertingNavigation: AlertingNavigation },
   allowed: readonly AlertingApp[]
 ) {
   for (const app of ALL_APPS) {
@@ -38,14 +35,14 @@ async function expectAccess(
     await test.step(
       isAllowed ? `${app} is accessible` : `${app} shows the privileges interstitial`,
       async () => {
-        await pageObjects.alertingAccess.goto(app);
+        await pageObjects.alertingNavigation.goto(app);
         if (isAllowed) {
-          await expect(pageObjects.alertingAccess.pageHeading(app)).toBeVisible();
-          await expect(pageObjects.alertingAccess.requiredPrivilegesPrompt).toBeHidden();
+          await expect(pageObjects.alertingNavigation.pageHeading(app)).toBeVisible();
+          await expect(pageObjects.alertingNavigation.requiredPrivilegesPrompt).toBeHidden();
         } else {
-          await expect(pageObjects.alertingAccess.requiredPrivilegesPrompt).toBeVisible();
-          await expect(pageObjects.alertingAccess.requiredPrivilegeItem(app)).toBeVisible();
-          await expect(pageObjects.alertingAccess.pageHeading(app)).toBeHidden();
+          await expect(pageObjects.alertingNavigation.requiredPrivilegesPrompt).toBeVisible();
+          await expect(pageObjects.alertingNavigation.requiredPrivilegeItem(app)).toBeVisible();
+          await expect(pageObjects.alertingNavigation.pageHeading(app)).toBeHidden();
         }
       }
     );

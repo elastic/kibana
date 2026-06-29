@@ -46,7 +46,7 @@ export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
  * "Privileges required" interstitial locators, so specs can assert which pages
  * a given role can view.
  */
-export class AlertingAccessPage {
+export class AlertingNavigation {
   public readonly requiredPrivilegesPrompt: Locator;
 
   constructor(private readonly page: ScoutPage) {

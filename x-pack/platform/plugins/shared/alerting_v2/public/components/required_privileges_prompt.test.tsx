@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RequiredPrivilegesPrompt } from './required_privileges_prompt';
 
 describe('RequiredPrivilegesPrompt', () => {
-  it('lists each required privilege with its concrete feature privilege and capability', () => {
+  it('lists each required privilege with its feature name and privilege level', () => {
     render(
       <I18nProvider>
         <RequiredPrivilegesPrompt
@@ -21,13 +21,11 @@ describe('RequiredPrivilegesPrompt', () => {
               featureId: 'alerting_v2_alerts',
               featureName: 'Alerts',
               privilege: 'read',
-              capability: 'alerting_v2_alerts.read',
             },
             {
               featureId: 'alerting_v2_rules',
               featureName: 'Rules',
               privilege: 'read',
-              capability: 'alerting_v2_rules.read',
             },
           ]}
         />
@@ -37,10 +35,27 @@ describe('RequiredPrivilegesPrompt', () => {
     const alertsItem = screen.getByTestId('alertingRequiredPrivilege-alerting_v2_alerts');
     expect(within(alertsItem).getByText('Alerts')).toBeInTheDocument();
     expect(within(alertsItem).getByText('Read')).toBeInTheDocument();
-    expect(within(alertsItem).getByText('alerting_v2_alerts.read')).toBeInTheDocument();
 
-    const rulesItem = screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules');
-    expect(within(rulesItem).getByText('alerting_v2_rules.read')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules')).toBeInTheDocument();
+  });
+
+  it('does not surface the underlying UI capability id', () => {
+    render(
+      <I18nProvider>
+        <RequiredPrivilegesPrompt
+          pageName="Rules"
+          requiredPrivileges={[
+            {
+              featureId: 'alerting_v2_rules',
+              featureName: 'Rules',
+              privilege: 'read',
+            },
+          ]}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText(/alerting_v2_rules\.read/)).not.toBeInTheDocument();
   });
 
   it('renders the All privilege label', () => {
@@ -53,7 +68,6 @@ describe('RequiredPrivilegesPrompt', () => {
               featureId: 'alerting_v2_rules',
               featureName: 'Rules',
               privilege: 'all',
-              capability: 'alerting_v2_rules.all',
             },
           ]}
         />
