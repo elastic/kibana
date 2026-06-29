@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -145,6 +146,9 @@ export class Home extends Component<HomeProps, State> {
         pageHeader={{
           bottomBorder: false,
           pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
+          pageTitleProps: {
+            css: css({ textAlign: 'center' }),
+          },
         }}
         panelled={false}
       >
