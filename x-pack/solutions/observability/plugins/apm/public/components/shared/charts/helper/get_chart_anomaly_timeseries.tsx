@@ -75,7 +75,7 @@ export function getChartAnomalyTimeseries({
       yAccessors: ['y1'],
       y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,
-      key: 'expected_bounds',
+      id: 'expected_bounds',
     },
   ];
 
@@ -109,20 +109,22 @@ export function getChartAnomalyTimeseries({
       },
     };
 
-    const data = anomalyTimeseries.anomalies.map((anomaly) => ({
-      ...anomaly,
-      y: getSeverity(anomaly.y ?? 0).id === severity ? anomaly.actual : null,
-    }));
+    const data = anomalyTimeseries.anomalies
+      .map((anomaly) => ({
+        ...anomaly,
+        y: getSeverity(anomaly.y ?? 0).id === severity ? anomaly.actual : null,
+      }))
+      .filter((datum) => datum.y !== null);
 
     // Only show the legend for a severity when this chart actually contains an
     // anomaly of that severity, otherwise the legend would advertise (e.g.)
     // "Critical anomaly" on a chart that has none.
-    const hasAnomalies = data.some(({ y }) => y !== null && y !== undefined);
+    const hasAnomalies = data.length > 0;
 
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
-          '{severity, select, low {Low} warning {Warning} minor {Minor} major {Major} critical {Critical} other {unknown severity}} anomaly',
+          '{severity, select, low {Low} warning {Warning} minor {Minor} major {Major} critical {Critical} other {Unknown severity}} anomaly',
         values: {
           severity,
         },
@@ -132,6 +134,7 @@ export function getChartAnomalyTimeseries({
       lineSeriesStyle: style,
       data,
       color,
+      id: `anomaly_score_${severity}`,
     };
   });
 
