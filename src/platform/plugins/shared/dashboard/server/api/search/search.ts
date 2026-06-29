@@ -28,9 +28,11 @@ export async function search(
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  // Fallback is `true` so the on-prem stack (which has no remote feature-flag service and so uses
+  // this default) ships the GA schemas. Serverless sets the flag explicitly via phased rollout.
   const useAsCodeSearchSchemas = await core.featureFlags.getBooleanValue(
     AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-    false
+    true
   );
   const normalizeToArray = (value?: string | string[]) => {
     if (value === undefined) return undefined;
@@ -58,56 +60,33 @@ export async function search(
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
   });
 
-  if (useAsCodeSearchSchemas) {
+  const dashboards = soResponse.saved_objects.map((so) => {
+    const {
+      dashboardState: { description, tags, time_range, title },
+    } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
+
     return {
-      data: soResponse.saved_objects.map((so) => {
-        const {
-          dashboardState: { description, tags, time_range, title },
-        } = transformDashboardOut(so.attributes, so.references);
-
-        return {
-          id: so.id,
-          data: {
-            ...(description && { description }),
-            ...(tags && { tags }),
-            ...(time_range && { time_range }),
-            ...(so?.accessControl && {
-              access_control: {
-                access_mode: so.accessControl.accessMode,
-              },
-            }),
-            title: title ?? '',
+      id: so.id,
+      data: {
+        ...(description && { description }),
+        ...(tags && { tags }),
+        ...(time_range && { time_range }),
+        ...(so?.accessControl && {
+          access_control: {
+            access_mode: so.accessControl.accessMode,
           },
-          meta: getMeta(so),
-        };
-      }),
-      meta: { total: soResponse.total, page: soResponse.page, per_page: soResponse.per_page },
-    } as DashboardSearchResponseBody;
-  }
+        }),
+        title: title ?? '',
+      },
+      meta: getMeta(so),
+    };
+  });
 
-  return {
-    dashboards: soResponse.saved_objects.map((so) => {
-      const {
-        dashboardState: { description, tags, time_range, title },
-      } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
+  const { total, page, per_page } = soResponse;
 
-      return {
-        id: so.id,
-        data: {
-          ...(description && { description }),
-          ...(tags && { tags }),
-          ...(time_range && { time_range }),
-          ...(so?.accessControl && {
-            access_control: {
-              access_mode: so.accessControl.accessMode,
-            },
-          }),
-          title: title ?? '',
-        },
-        meta: getMeta(so),
-      };
-    }),
-    page: soResponse.page,
-    total: soResponse.total,
-  } as LegacyDashboardSearchResponseBody;
+  // The dashboard summaries are identical across schemas; only the response envelope differs.
+  // The legacy branch can be removed once the `asCode.useGASchemas` flag is gone.
+  return useAsCodeSearchSchemas
+    ? ({ data: dashboards, meta: { total, page, per_page } } as DashboardSearchResponseBody)
+    : ({ dashboards, page, total } as LegacyDashboardSearchResponseBody);
 }

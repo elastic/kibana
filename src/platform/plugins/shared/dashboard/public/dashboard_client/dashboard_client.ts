@@ -13,10 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import {
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-  PAGINATION_DEFAULT_PER_PAGE,
-} from '@kbn/as-code-shared-schemas';
+import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
 
 import type { LegacyDashboardSearchResponseBody } from '../../server/api/search/types';
 import type {
@@ -115,12 +112,9 @@ export const dashboardClient = {
   search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
     const { query, ...params } = searchParams;
 
-    const useAsCodeSearchSchemas = await coreServices.featureFlags.getBooleanValue(
-      AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-      false
-    );
-
-    const response = await coreServices.http.get<DashboardSearchResponseBody>(DASHBOARD_API_PATH, {
+    const response = await coreServices.http.get<
+      DashboardSearchResponseBody | LegacyDashboardSearchResponseBody
+    >(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
         ...params,
@@ -128,16 +122,17 @@ export const dashboardClient = {
       },
     });
 
-    if (!useAsCodeSearchSchemas) {
-      const legacyResponse = response as unknown as LegacyDashboardSearchResponseBody;
+    // Normalize the legacy response shape to the GA shape so callers always receive `{ data, meta }`,
+    // regardless of whether the server has the `asCode.useGASchemas` feature flag enabled.
+    if ('dashboards' in response) {
       return {
-        data: legacyResponse.dashboards,
+        data: response.dashboards,
         meta: {
-          page: legacyResponse.page,
-          per_page: params.per_page || PAGINATION_DEFAULT_PER_PAGE,
-          total: legacyResponse.total,
+          page: response.page,
+          per_page: params.per_page ?? PAGINATION_DEFAULT_PER_PAGE,
+          total: response.total,
         },
-      } as DashboardSearchResponseBody;
+      };
     }
 
     return response;

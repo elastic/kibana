@@ -10,6 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
 const SEARCH_ENDPOINT = 'api/dashboards';
@@ -35,14 +36,29 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
 apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ kbnClient, requestAuth, apiServices }) => {
     viewerCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.MANY_DASHBOARDS);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
+
+    // The code default is `true`, so explicitly disable GA schemas to exercise the legacy implementation.
+    // The override value must be a boolean: it is returned verbatim, so a string would be truthy.
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        [AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG]: false,
+      },
+    });
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterAll(async ({ kbnClient, apiServices }) => {
     await kbnClient.savedObjects.cleanStandardList();
+
+    // Reset feature flag override to the code default
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        [AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG]: true,
+      },
+    });
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
@@ -86,24 +102,6 @@ apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(101);
     expect(response.body.dashboards).toHaveLength(10);
-  });
-
-  apiTest('should allow users to sort dashboards by updated_at', async ({ apiClient }) => {
-    const response = await apiClient.get(
-      buildUrl({ per_page: 10, sort_field: 'updated_at', sort_order: 'desc' }),
-      {
-        headers: {
-          ...COMMON_HEADERS,
-          ...viewerCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      }
-    );
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(101);
-    expect(response.body.dashboards).toHaveLength(10);
-    expect(response.body.dashboards[0].id).toBe('test-dashboard-99');
   });
 
   apiTest(

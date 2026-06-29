@@ -10,7 +10,6 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
 const SEARCH_ENDPOINT = 'api/dashboards';
@@ -35,28 +34,16 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
 apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth, apiServices }) => {
+  // The `asCode.useGASchemas` flag defaults to `true`, so this suite exercises the GA schemas
+  // without an explicit override.
+  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.MANY_DASHBOARDS);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
-
-    // Enable GA schemas to ensure the search endpoint is tested with the GA implementation of the API
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        [AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG]: 'true',
-      },
-    });
   });
 
-  apiTest.afterAll(async ({ kbnClient, apiServices }) => {
+  apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
-
-    // Reset feature flag override
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        [AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG]: 'false',
-      },
-    });
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
