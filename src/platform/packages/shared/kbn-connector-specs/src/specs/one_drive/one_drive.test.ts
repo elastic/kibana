@@ -286,7 +286,9 @@ describe('OneDrive', () => {
 
       expect(mockGet).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/drive/items/item-1',
-        expect.objectContaining({ params: expect.objectContaining({ $select: expect.any(String) }) })
+        expect.objectContaining({
+          params: expect.objectContaining({ $select: expect.any(String) }),
+        })
       );
       expect(result).toEqual({ id: 'item-1', name: 'report.pdf' });
     });
@@ -301,7 +303,9 @@ describe('OneDrive', () => {
 
       expect(mockGet).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/drives/drive-abc/items/remote-item-1',
-        expect.objectContaining({ params: expect.objectContaining({ $select: expect.any(String) }) })
+        expect.objectContaining({
+          params: expect.objectContaining({ $select: expect.any(String) }),
+        })
       );
     });
   });
