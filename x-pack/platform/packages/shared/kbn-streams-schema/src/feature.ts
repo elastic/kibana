@@ -10,18 +10,20 @@ import { isEqual, uniq } from 'lodash';
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
-import { MAX_ID_LENGTH } from './sig_events/constants';
+import { MAX_ID_LENGTH } from './significant_events/constants';
 
 export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
 export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
 export const ERROR_LOGS_FEATURE_TYPE = 'error_logs' as const;
+export const CODE_ANALYSIS_FEATURE_TYPE = 'code_analysis' as const;
 
 export const COMPUTED_FEATURE_TYPES = [
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+  CODE_ANALYSIS_FEATURE_TYPE,
 ] as const;
 
 export const INFERRED_FEATURE_TYPES = [

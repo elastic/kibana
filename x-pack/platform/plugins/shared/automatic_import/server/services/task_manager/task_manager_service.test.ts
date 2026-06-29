@@ -128,6 +128,7 @@ describe('runTask abort handling', () => {
 
     mockSavedObjectService = {
       updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
+      updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
 
     const mockTaskManagerSetup = {
@@ -179,6 +180,10 @@ describe('runTask abort handling', () => {
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.completed);
+    expect(mockSavedObjectService.updateDataStreamSavedObjectAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({ status: TASK_STATUSES.processing })
+    );
+    expect(mockSavedObjectService.updateDataStreamPhase).toHaveBeenCalled();
     expect(mockSavedObjectService.updateDataStreamSavedObjectAttributes).toHaveBeenCalledWith(
       expect.objectContaining({ status: TASK_STATUSES.completed }),
       abortController.signal
@@ -348,8 +353,12 @@ describe('runTask abort handling', () => {
       }),
     }));
 
-    mockSavedObjectService.updateDataStreamSavedObjectAttributes.mockRejectedValue(
-      new Error('SO update failed')
+    mockSavedObjectService.updateDataStreamSavedObjectAttributes.mockImplementation(
+      async (params: { status: string }) => {
+        if (params.status === TASK_STATUSES.cancelled) {
+          throw new Error('SO update failed');
+        }
+      }
     );
 
     const service = new TaskManagerService(
@@ -735,6 +744,7 @@ describe('runTask error edge cases', () => {
 
     mockSavedObjectService = {
       updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
+      updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
 
     AgentService.mockImplementation(() => ({
