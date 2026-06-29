@@ -65,7 +65,13 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
     return '| EVAL pinned = TO_STRING(null)';
   }
   const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
-  return `| EVAL pinned = CASE(actorId IN (${pinnedParamsStr}), actorId, null)`;
+  // A pinned entity is isolated whether it appears as the actor OR the target of a
+  // relationship, so it always renders as its own node (never merged into a same-type group).
+  return `| EVAL pinned = CASE(
+    actorId IN (${pinnedParamsStr}), actorId,
+    targetId IN (${pinnedParamsStr}), targetId,
+    null
+  )`;
 };
 
 const buildRelationshipsEsqlQuery = ({
