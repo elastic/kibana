@@ -58,6 +58,7 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { DashboardChromeAppHeader, useIsChromeNextProjectHeader } from './chrome_app_header';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -136,6 +137,7 @@ export function InternalDashboardTopNav({
     return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
 
+  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const styles = useMemoCss(topNavStyles);
 
   /**
@@ -172,6 +174,10 @@ export function InternalDashboardTopNav({
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
    */
   useEffect(() => {
+    if (isChromeNextProjectHeader) {
+      return;
+    }
+
     const dashboardTitleBreadcrumbs = [
       {
         text:
@@ -229,6 +235,7 @@ export function InternalDashboardTopNav({
     viewMode,
     customLeadingBreadCrumbs,
     styles.updateEditButton,
+    isChromeNextProjectHeader,
   ]);
 
   /**
@@ -363,18 +370,26 @@ export function InternalDashboardTopNav({
   }, [isPopoverOpen, dashboardApi, maybeRedirect]);
 
   useEffect(() => {
+    if (isChromeNextProjectHeader) {
+      return;
+    }
+
     coreServices.chrome.setBreadcrumbsBadges(badges);
     return () => {
       coreServices.chrome.setBreadcrumbsBadges([]);
     };
-  }, [badges]);
+  }, [badges, isChromeNextProjectHeader]);
 
   useEffect(() => {
+    if (isChromeNextProjectHeader) {
+      return;
+    }
+
     return coreServices.chrome.setBreadcrumbsAppendExtension({
       content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
       order: 0,
     });
-  }, [lastSavedId]);
+  }, [lastSavedId, isChromeNextProjectHeader]);
 
   return (
     <div css={styles.container}>
@@ -384,16 +399,36 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
-        }
-      />
+      {isChromeNextProjectHeader ? (
+        <DashboardChromeAppHeader
+          dashboardTitle={dashboardTitle}
+          viewMode={viewMode}
+          lastSavedId={lastSavedId}
+          redirectTo={redirectTo}
+          customLeadingBreadCrumbs={customLeadingBreadCrumbs}
+          menu={
+            visibilityProps.showTopNavMenu
+              ? viewMode === 'edit'
+                ? editModeTopNavConfig
+                : viewModeTopNavConfig
+              : undefined
+          }
+          badges={badges}
+          dashboardApi={dashboardApi}
+          updateEditButtonCss={styles.updateEditButton}
+        />
+      ) : (
+        <AppMenu
+          setAppMenu={coreServices.chrome.setAppMenu}
+          config={
+            visibilityProps.showTopNavMenu
+              ? viewMode === 'edit'
+                ? editModeTopNavConfig
+                : viewModeTopNavConfig
+              : undefined
+          }
+        />
+      )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
