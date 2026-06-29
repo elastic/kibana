@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Get Attack Discovery Schedule Internal API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/attack_discovery/schedules/{id}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetAttackDiscoverySchedule
+      x-state: Technical Preview
+      summary: Get an attack discovery schedule by ID
+      description: >-
+        Internal API that retrieves a specific attack discovery schedule by its unique
+        identifier. Returns complete schedule configuration including parameters,
+        interval settings, associated actions, and execution history.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the schedule to retrieve
+          schema:
+            $ref: '../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        '200':
+          description: Schedule retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common/schedules/schedule_types.schema.yaml#/components/schemas/AttackDiscoverySchedule'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status_code
+                  - error
+                  - message
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  x-codegen-enabled: true

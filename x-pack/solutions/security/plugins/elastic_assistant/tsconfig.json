@@ -108,6 +108,7 @@
     "@kbn/controls-constants",
     "@kbn/core-spaces-common",
     "@kbn/ai-assistant-common",
+    "@kbn/discoveries"
   ],
   "exclude": [
     "target/**/*",

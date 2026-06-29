@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Create Attack Discovery Schedule Internal API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/attack_discovery/schedules:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CreateAttackDiscoverySchedule
+      x-state: Technical Preview
+      summary: Create an attack discovery schedule
+      description: >-
+        Internal API that creates a new attack discovery schedule for analyzing security
+        alerts at specified intervals. The schedule defines when and how analysis
+        should run, including workflow configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../../common/schedules/schedule_types.schema.yaml#/components/schemas/AttackDiscoveryScheduleCreateProps'
+      responses:
+        '200':
+          description: Schedule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common/schedules/schedule_types.schema.yaml#/components/schemas/AttackDiscoverySchedule'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status_code
+                  - error
+                  - message
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  x-codegen-enabled: true

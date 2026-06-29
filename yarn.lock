@@ -4865,6 +4865,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/attack-discovery-schedules-common@link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -6677,6 +6681,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discoveries-schemas@link:x-pack/solutions/security/packages/kbn-discoveries-schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discoveries@link:x-pack/solutions/security/packages/kbn-discoveries":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dissect-heuristics@link:x-pack/platform/packages/shared/kbn-dissect-heuristics":
   version "0.0.0"
   uid ""
@@ -7065,9 +7077,12 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-plugin@link:x-pack/platform/plugins/shared/event_log":
+"@kbn/event-log-plugin@link:x-pack/platform/plugins/event_log":
   version "0.0.0"
   uid ""
+
+"@kbn/event-log-plugin@link:x-pack/platform/plugins/shared/event_log":
+  version "0.0.0"
 
 "@kbn/event-stacktrace@link:x-pack/platform/packages/shared/kbn-event-stacktrace":
   version "0.0.0"
@@ -10147,7 +10162,7 @@
   optionalDependencies:
     langsmith ">=0.4.0 <1.0.0"
 
-"@langchain/core@1.1.31":
+"@langchain/core@1.1.31", "@langchain/core@^0.3.26":
   version "1.1.31"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-1.1.31.tgz#81882c7be8dfe138015da67b93aa73c6ab0f6962"
   integrity sha512-FxsgIUONjKaRpjx59sISgmb0OMCbAetPGyhzjGa2kX0y1f8LZ5xm9VB2db7W9HYWyLvzRWcMA51Uu4OSTJmtZQ==
@@ -10193,6 +10208,23 @@
   dependencies:
     uuid "^10.0.0"
 
+"@langchain/langgraph-checkpoint@~0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-checkpoint/-/langgraph-checkpoint-0.0.17.tgz#d0a8824eb0769567da54262adebe65db4ee6d58f"
+  integrity sha512-6b3CuVVYx+7x0uWLG+7YXz9j2iBa+tn2AXvkLxzEvaAsLE6Sij++8PPbS2BZzC+S/FPJdWsz6I5bsrqL0BYrCA==
+  dependencies:
+    uuid "^10.0.0"
+
+"@langchain/langgraph-sdk@~0.0.32":
+  version "0.0.42"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-sdk/-/langgraph-sdk-0.0.42.tgz#401363ac74532b14e36ba94e5ebe7fb6ce287fe7"
+  integrity sha512-seOcLN6+MWxCGEVfKY2pFcFpJB56DZq7iXhe5Br/xF7Uxspm1e50Z8f0k21XOJFQyMheR6AZ9zXEBVeX1ZsDMg==
+  dependencies:
+    "@types/json-schema" "^7.0.15"
+    p-queue "^6.6.2"
+    p-retry "4"
+    uuid "^9.0.0"
+
 "@langchain/langgraph-sdk@~1.6.5":
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/@langchain/langgraph-sdk/-/langgraph-sdk-1.6.5.tgz#1a089f7412239ffad1c3b52364ba6af694966424"
@@ -10212,6 +10244,16 @@
     "@langchain/langgraph-sdk" "~1.6.5"
     "@standard-schema/spec" "1.1.0"
     uuid "^10.0.0"
+
+"@langchain/langgraph@^0.2.20":
+  version "0.2.74"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.2.74.tgz#37367a1e8bafda3548037a91449a69a84f285def"
+  integrity sha512-oHpEi5sTZTPaeZX1UnzfM2OAJ21QGQrwReTV6+QnX7h8nDCBzhtipAw1cK616S+X8zpcVOjgOtJuaJhXa4mN8w==
+  dependencies:
+    "@langchain/langgraph-checkpoint" "~0.0.17"
+    "@langchain/langgraph-sdk" "~0.0.32"
+    uuid "^10.0.0"
+    zod "^3.23.8"
 
 "@langchain/openai@1.2.12":
   version "1.2.12"
@@ -29833,7 +29875,7 @@ p-queue@^9.0.1:
     eventemitter3 "^5.0.1"
     p-timeout "^7.0.0"
 
-p-retry@4.6.2:
+p-retry@4, p-retry@4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.6.2.tgz#9baae7184057edd4e17231cee04264106e092a16"
   integrity sha512-312Id396EbJdvRONlngUx0NydfrIQ5lsYu0znKVUzVvArzEIt08V1qhtyESbGVd1FGX7UKtiFp5uwKZdM8wIuQ==
@@ -37758,7 +37800,7 @@ zod-to-json-schema@^3.24.3, zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.25.1.tgz#7f24962101a439ddade2bf1aeab3c3bfec7d84ba"
   integrity sha512-pM/SU9d3YAggzi6MtR4h7ruuQlqKtad8e9S0fmxcMi+ueAK5Korys/aWcV9LIIHTVbj01NdzxcnXSN+O74ZIVA==
 
-zod@4.4.3, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.1.11, zod@^4.3.6:
+zod@4.4.3, zod@^3.23.8, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.1.11, zod@^4.3.6:
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
   integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==

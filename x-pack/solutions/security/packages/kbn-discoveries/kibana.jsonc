@@ -1,0 +1,13 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/discoveries",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "shared"
+}
+
+
+
+
