@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import { getApplicationWorkspaceMountElement } from '../../agent_workspace/agent_workspace_flyout_defaults';
+import { applicationWorkspaceFixedOverlayStyles } from '../../agent_workspace/application_workspace_fixed_overlay_styles';
 import { headerHeight } from '../../application/components/conversations/conversation.styles';
 import { useIsAgentWorkspaceMount } from '../../application/hooks/use_navigation';
 import { useOptionalConversationSpineContext } from './conversation_spine_context';
@@ -81,12 +81,7 @@ export const AttachmentsEmptyOverlayMount: React.FC = () => {
   }
 
   const overlayStyles = css`
-    position: absolute;
-    inset: 0;
-    z-index: ${layoutLevels.applicationTopBar + 1};
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    ${applicationWorkspaceFixedOverlayStyles};
     background: ${euiTheme.colors.backgroundBasePlain};
     animation: ${overlayEntrance} 200ms ease-out;
   `;

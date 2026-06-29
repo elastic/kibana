@@ -9,8 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { applicationWorkspaceFixedOverlayStyles } from '../../../../../../agent_workspace/application_workspace_fixed_overlay_styles';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
@@ -193,12 +193,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
       : `opacity ${ENTRY_DURATION_MS}ms ease-out, transform ${ENTRY_DURATION_MS}ms ease-out`;
 
   const overlayStyles = css`
-    position: absolute;
-    inset: 0;
-    z-index: ${layoutLevels.applicationTopBar + 1};
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    ${applicationWorkspaceFixedOverlayStyles};
     background: ${euiTheme.colors.backgroundBasePlain};
     opacity: ${isVisible ? 1 : 0};
     transform: translateY(${isEntering ? `${ENTRY_TRANSLATE_Y_PX}px` : '0'});
