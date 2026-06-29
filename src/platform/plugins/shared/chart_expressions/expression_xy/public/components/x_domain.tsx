@@ -67,7 +67,7 @@ const getBucketBounds = (
     if (dropPartials) {
       return bucketStart > from && bucketEnd <= to;
     }
-    return bucketEnd > from && bucketStart <= to;
+    return bucketEnd > from && bucketStart < to;
   });
 
   if (valid.length === 0) return undefined;
