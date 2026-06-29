@@ -9,6 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { resolveDefaultInferenceId } from '@kbn/product-doc-common';
 import { ResourceTypes, type ResourceType } from '@kbn/product-doc-common';
 import type {
   InstallationStatusResponse,
@@ -65,14 +66,7 @@ export const registerInstallationRoutes = ({
       const result = await esClient.inference.get({});
       const endpointIds = new Set((result.endpoints ?? []).map((e) => e.inference_id));
 
-      let inferenceId: string;
-      if (endpointIds.has(defaultInferenceEndpoints.JINAv5)) {
-        inferenceId = defaultInferenceEndpoints.JINAv5;
-      } else if (endpointIds.has(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)) {
-        inferenceId = defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
-      } else {
-        inferenceId = defaultInferenceEndpoints.ELSER;
-      }
+      const inferenceId = resolveDefaultInferenceId(endpointIds);
 
       return res.ok<DefaultInferenceIdResponse>({ body: { inferenceId } });
     }
