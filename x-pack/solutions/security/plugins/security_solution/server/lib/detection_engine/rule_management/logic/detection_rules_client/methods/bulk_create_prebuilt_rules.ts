@@ -17,21 +17,10 @@ import type { RuleParams } from '../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth } from '../utils';
-
-export interface BulkCreatePrebuiltRulesArgs {
-  rules: PrebuiltRuleAsset[];
-}
-
-export interface BulkCreatePrebuiltRulesResultItem {
-  id: string;
-  rule_id: string;
-  version: number;
-}
-
-export interface BulkCreatePrebuiltRulesResult {
-  results: Array<{ result: BulkCreatePrebuiltRulesResultItem }>;
-  errors: Array<{ item: PrebuiltRuleAsset; error: Error }>;
-}
+import type {
+  BulkCreatePrebuiltRulesArgs,
+  BulkCreatePrebuiltRulesResult,
+} from '../detection_rules_client_interface';
 
 interface BulkCreatePrebuiltRulesOptions {
   actionsClient: ActionsClient;

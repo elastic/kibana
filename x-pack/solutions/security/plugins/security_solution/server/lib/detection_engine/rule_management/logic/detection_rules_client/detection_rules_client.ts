@@ -34,13 +34,11 @@ import type {
   RevertPrebuiltRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
+  BulkCreatePrebuiltRulesArgs,
 } from './detection_rules_client_interface';
 import type { RestoreRuleFromHistoryResponse } from '../../../../../../common/api/detection_engine/rule_management';
 import { createRule } from './methods/create_rule';
-import {
-  bulkCreatePrebuiltRules,
-  type BulkCreatePrebuiltRulesArgs,
-} from './methods/bulk_create_prebuilt_rules';
+import { bulkCreatePrebuiltRules } from './methods/bulk_create_prebuilt_rules';
 import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
