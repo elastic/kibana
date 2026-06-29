@@ -24,8 +24,8 @@ if (!Object.hasOwn(global, 'TextEncoder')) {
   global.TextDecoder = customTextEncoding.TextDecoder;
 }
 
-// JSDOM 20's Blob lacks .arrayBuffer()/.text()/.stream() (jsdom#2555).
-// Patch the missing methods using the blob's internal data rather than pulling in blob-polyfill.
+// JSDOM 20's Blob lacks .arrayBuffer() and .text() (jsdom#2555).
+// Patch the missing methods with a FileReader rather than pulling in blob-polyfill.
 if (typeof Blob !== 'undefined') {
   if (!Blob.prototype.arrayBuffer) {
     Blob.prototype.arrayBuffer = function () {
