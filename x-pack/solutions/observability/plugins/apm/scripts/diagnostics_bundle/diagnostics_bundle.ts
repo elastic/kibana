@@ -11,7 +11,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import type { APIReturnType } from '@kbn/apm-api-shared';
+import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import type {
   APMIndices,
   APIReturnType as SourcesAPIReturnType,

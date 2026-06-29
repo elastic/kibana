@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import type { APIReturnType } from '@kbn/apm-api-shared';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';

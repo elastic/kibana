@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import { routeDefinitions, type DiagnosticsResponse } from '@kbn/apm-api-shared';
-import type { ServiceMapDiagnosticResponse } from '@kbn/apm-types';
+import type {
+  FieldCapsResponse,
+  IndicesDataStream,
+  IndicesGetIndexTemplateIndexTemplateItem,
+  IndicesGetResponse,
+  IngestGetPipelineResponse,
+  SecurityHasPrivilegesPrivileges,
+} from '@elastic/elasticsearch/lib/api/types';
+
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import type { ApmEvent } from '@kbn/apm-types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { rangeRt } from '../default_api_types';
 import { getTraceSampleIds } from '../service_map/get_trace_sample_ids';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
@@ -19,11 +32,78 @@ import {
   getSourceSpanIds,
 } from './service_map/get_exit_spans_from_samples';
 import { getTraceCorrelation } from './service_map/get_trace_correlation';
+export interface IndiciesItem {
+  index: string;
+  fieldMappings: {
+    isValid: boolean;
+    invalidType?: string;
+  };
+  ingestPipeline: {
+    isValid?: boolean;
+    id?: string;
+  };
+  dataStream?: string;
+  isValid: boolean;
+}
+
+export type DiagnosticsBundle = Promise<{
+  esResponses: {
+    existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];
+    fieldCaps: FieldCapsResponse;
+    indices: IndicesGetResponse;
+    ingestPipelines: IngestGetPipelineResponse;
+  };
+  diagnosticsPrivileges: {
+    index: Record<string, SecurityHasPrivilegesPrivileges>;
+    cluster: Record<string, boolean>;
+    hasAllClusterPrivileges: boolean;
+    hasAllIndexPrivileges: boolean;
+    hasAllPrivileges: boolean;
+  };
+  apmIndices: APMIndices;
+  apmIndexTemplates: Array<{
+    name: string;
+    isNonStandard: boolean;
+    exists: boolean;
+  }>;
+  fleetPackageInfo: {
+    isInstalled: boolean;
+    version?: string;
+  };
+  kibanaVersion: string;
+  elasticsearchVersion: string;
+  apmEvents: ApmEvent[];
+  invalidIndices: IndiciesItem[];
+  validIndices: IndiciesItem[];
+  dataStreams: IndicesDataStream[];
+  nonDataStreamIndices: string[];
+  indexTemplatesByIndexPattern: Array<{
+    indexPattern: string;
+    indexTemplates: Array<{
+      priority: number | undefined;
+      isNonStandard: boolean;
+      templateIndexPatterns: string[];
+      templateName: string;
+    }>;
+  }>;
+  params: { start: number; end: number };
+}>;
 
 const getServiceMapDiagnosticsRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
-  endpoint: routeDefinitions.diagnostics.serviceMap.endpoint,
-  params: routeDefinitions.diagnostics.serviceMap.params,
+  endpoint: 'POST /internal/apm/diagnostics/service-map',
+  params: t.type({
+    body: t.intersection([
+      rangeRt,
+      t.type({
+        sourceNode: t.string,
+        destinationNode: t.string,
+      }),
+      t.partial({
+        traceId: t.string,
+      }),
+    ]),
+  }),
   handler: async (resources): Promise<ServiceMapDiagnosticResponse> => {
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
@@ -110,10 +190,59 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
 });
 
 const getDiagnosticsRoute = createApmServerRoute({
-  endpoint: routeDefinitions.diagnostics.getDiagnostics.endpoint,
-  params: routeDefinitions.diagnostics.getDiagnostics.params,
+  endpoint: 'GET /internal/apm/diagnostics',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<DiagnosticsResponse> => {
+  params: t.partial({
+    query: t.partial({
+      kuery: t.string,
+      start: isoToEpochRt,
+      end: isoToEpochRt,
+    }),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    esResponses: {
+      existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];
+      fieldCaps?: FieldCapsResponse;
+      indices?: IndicesGetResponse;
+      ingestPipelines?: IngestGetPipelineResponse;
+    };
+    diagnosticsPrivileges: {
+      index: Record<string, SecurityHasPrivilegesPrivileges>;
+      cluster: Record<string, boolean>;
+      hasAllClusterPrivileges: boolean;
+      hasAllIndexPrivileges: boolean;
+      hasAllPrivileges: boolean;
+    };
+    apmIndices: APMIndices;
+    apmIndexTemplates: Array<{
+      name: string;
+      isNonStandard: boolean;
+      exists: boolean;
+    }>;
+    fleetPackageInfo: {
+      isInstalled: boolean;
+      version?: string;
+    };
+    kibanaVersion: string;
+    elasticsearchVersion: string;
+    apmEvents: ApmEvent[];
+    invalidIndices?: IndiciesItem[];
+    validIndices?: IndiciesItem[];
+    dataStreams: IndicesDataStream[];
+    nonDataStreamIndices: string[];
+    indexTemplatesByIndexPattern: Array<{
+      indexPattern: string;
+      indexTemplates: Array<{
+        priority: number | undefined;
+        isNonStandard: boolean;
+        templateIndexPatterns: string[];
+        templateName: string;
+      }>;
+    }>;
+    params: { start: number; end: number; kuery?: string };
+  }> => {
     const { start, end, kuery } = resources.params.query;
     const coreContext = await resources.context.core;
     const apmIndices = await resources.getApmIndices();

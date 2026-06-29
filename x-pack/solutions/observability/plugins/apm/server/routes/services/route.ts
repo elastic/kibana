@@ -775,8 +775,8 @@ const serviceAlertsRoute = createApmServerRoute({
 });
 
 const serviceAnomalyScoreRoute = createApmServerRoute({
-  endpoint: routeDefinitions.services.annotationsScore.endpoint,
-  params: routeDefinitions.services.annotationsScore.params,
+  endpoint: routeDefinitions.services.anomalyScore.endpoint,
+  params: routeDefinitions.services.anomalyScore.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAnomalyScoreResponse> => {
     const mlClient = await getMlClient(resources);

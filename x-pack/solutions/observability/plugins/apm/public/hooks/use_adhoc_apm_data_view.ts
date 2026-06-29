@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
-import { getApmInternalServices, type ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginStartDeps } from '../plugin';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export async function getApmDataViewIndexPattern() {
-  const { callApmApi } = getApmInternalServices();
   return callApmApi('GET /internal/apm/data_view/index_pattern', {
     signal: null,
   });

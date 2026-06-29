@@ -36,7 +36,7 @@ export function ServiceGroupsList() {
     data = { serviceGroups: [] },
     status,
     refetch,
-  } = useFetcher((callApmApi) => callApmApi('GET /internal/apm/service-groups'), [], {});
+  } = useFetcher((callApmApi) => callApmApi('GET /internal/apm/service-groups'), []);
 
   const { serviceGroups } = data;
 
