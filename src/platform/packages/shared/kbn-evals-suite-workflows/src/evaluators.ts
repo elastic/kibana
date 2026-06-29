@@ -451,10 +451,15 @@ export function createStructuralCorrectnessEvaluator() {
       if (expectedStepTypes && expectedStepTypes.length > 0) {
         const actualTypes = new Set(workflow.steps.map((s) => s.type).filter(Boolean));
         for (const requiredType of expectedStepTypes) {
-          const alternatives = requiredType.split('|');
-          const pass = alternatives.some((alt) => actualTypes.has(alt));
+          // Strict equality — `|`-alternatives are deprecated. Pinning one
+          // exact step type per assertion forces case authors to commit to
+          // the correct connector / step shape, otherwise the suite can
+          // hide ambiguity behind a forgiving regex-of-alternatives.
+          // Lingering "a|b" strings still resolve as one literal type — they
+          // will fail-loud and need to be split into one assertion per case.
+          const pass = actualTypes.has(requiredType);
           checks.push({
-            name: `stepType:${alternatives[0]}`,
+            name: `stepType:${requiredType}`,
             pass,
             detail: pass ? 'present' : `missing (found: ${[...actualTypes].join(', ')})`,
           });
@@ -477,6 +482,148 @@ export function createStructuralCorrectnessEvaluator() {
       return {
         score: checks.length > 0 ? totalScore / checks.length : 1,
         metadata: { checks },
+      };
+    },
+  };
+}
+
+/**
+ * Asserts the produced YAML's bulk-indexing step has a valid `operations` shape.
+ *
+ * Real-world failure mode this catches: agents producing
+ * `elasticsearch.bulk` with `operations:` set to a flat array of documents
+ * (causing `operations.every is not a function` at runtime) or
+ * `elasticsearch.request` to `_bulk` with a stringified JSON body instead of
+ * the NDJSON action+document pair format the API actually requires.
+ *
+ * Opt-in per case via `expectsBulkOperationShape: true`.
+ */
+export function createBulkOperationsShapeEvaluator() {
+  return {
+    name: 'BulkOperationsShape',
+    kind: 'CODE' as const,
+    evaluate: async ({
+      output,
+      expected,
+    }: {
+      output: WorkflowTaskOutput;
+      expected: StructuralExpectations;
+    }) => {
+      if (!expected.expectsBulkOperationShape) {
+        return {
+          score: null,
+          label: 'N/A' as const,
+          explanation: 'Case did not opt in to BulkOperationsShape',
+        };
+      }
+      if (!output.resultYaml) {
+        return { score: 0, metadata: { reason: 'No result YAML to check bulk shape on' } };
+      }
+      const workflow = parseWorkflowYaml(output.resultYaml);
+      if (!workflow) {
+        return { score: 0, metadata: { reason: 'Failed to parse result YAML' } };
+      }
+
+      const bulkSteps = workflow.steps.filter((s) => s.type === 'elasticsearch.bulk');
+      const bulkRequestSteps = workflow.steps.filter((s) => {
+        if (s.type !== 'elasticsearch.request') return false;
+        const params =
+          (s as { with?: Record<string, unknown>; params?: Record<string, unknown> }).with ??
+          (s as { params?: Record<string, unknown> }).params;
+        const path = params?.path;
+        return typeof path === 'string' && /\/_bulk\b/.test(path);
+      });
+
+      if (bulkSteps.length === 0 && bulkRequestSteps.length === 0) {
+        return {
+          score: 0,
+          label: 'FAIL' as const,
+          explanation:
+            'Case expected a bulk-indexing step (elasticsearch.bulk or elasticsearch.request → _bulk) but none was found.',
+          metadata: { foundBulk: 0 },
+        };
+      }
+
+      const issues: string[] = [];
+
+      for (const step of bulkSteps) {
+        const params =
+          (step as { with?: Record<string, unknown>; params?: Record<string, unknown> }).with ??
+          (step as { params?: Record<string, unknown> }).params;
+        const ops = params?.operations;
+        if (ops === undefined) {
+          issues.push(`elasticsearch.bulk step "${step.name ?? '?'}" missing operations field`);
+          continue;
+        }
+        // Liquid reference resolving at runtime is fine — `{{ steps.x.output.y }}`
+        if (typeof ops === 'string') {
+          if (!/{{.+}}/.test(ops)) {
+            issues.push(
+              `elasticsearch.bulk step "${
+                step.name ?? '?'
+              }" has operations as a plain string (must be an array or Liquid reference)`
+            );
+          }
+          continue;
+        }
+        if (!Array.isArray(ops)) {
+          issues.push(
+            `elasticsearch.bulk step "${
+              step.name ?? '?'
+            }" has operations of type ${typeof ops} (expected array)`
+          );
+        }
+        // Array is acceptable — the step handles NDJSON serialization. We do NOT
+        // require the agent to manually interleave action+doc pairs here.
+      }
+
+      for (const step of bulkRequestSteps) {
+        const params =
+          (step as { with?: Record<string, unknown>; params?: Record<string, unknown> }).with ??
+          (step as { params?: Record<string, unknown> }).params;
+        const body = params?.body;
+        if (body === undefined) {
+          issues.push(`elasticsearch.request → _bulk step "${step.name ?? '?'}" missing body`);
+          continue;
+        }
+        // Either NDJSON string with action+doc lines, or Liquid template that resolves to one.
+        if (typeof body === 'string') {
+          const lines = body.split('\n').filter((l) => l.trim().length > 0);
+          if (lines.length < 2 && !/{{.+}}/.test(body)) {
+            issues.push(
+              `elasticsearch.request → _bulk step "${
+                step.name ?? '?'
+              }" body is not NDJSON-shaped (need ≥2 lines of action+document pairs)`
+            );
+          }
+        } else if (Array.isArray(body)) {
+          issues.push(
+            `elasticsearch.request → _bulk step "${
+              step.name ?? '?'
+            }" body is an array — must be an NDJSON string`
+          );
+        } else {
+          issues.push(
+            `elasticsearch.request → _bulk step "${
+              step.name ?? '?'
+            }" body is of type ${typeof body} (expected NDJSON string or Liquid reference)`
+          );
+        }
+      }
+
+      const totalSteps = bulkSteps.length + bulkRequestSteps.length;
+      const failingSteps = issues.length;
+      const passingSteps = totalSteps - failingSteps;
+      const score = totalSteps === 0 ? 0 : passingSteps / totalSteps;
+
+      return {
+        score,
+        label: score === 1 ? ('PASS' as const) : ('FAIL' as const),
+        explanation:
+          issues.length === 0
+            ? `All ${totalSteps} bulk step(s) have a valid operations/body shape.`
+            : issues.join(' | '),
+        metadata: { totalBulkSteps: totalSteps, issues },
       };
     },
   };
@@ -859,21 +1006,17 @@ const isLookupCall = (toolId: string | undefined): boolean =>
   LOOKUP_TOOL_PATTERNS.some((p) => toolId?.includes(p));
 
 /**
- * Budget-based efficiency: tiered penalty when total tool calls exceed the budget.
- * Mirrors the approach used by kbn-evals-suite-streams's stepEfficiency.
+ * Linear budget penalty: full marks at or under budget, then decays as
+ * `budget / actualCalls` so a 2× overshoot already drops to 0.5 and a 5×
+ * overshoot to 0.2. No plateau — earlier tier-based scoring let chatty
+ * agents (e.g. the 47-call indexing-loop seen in real conversations) stay
+ * around 0.7 instead of clearly tanking.
  */
 const calculateBudgetScore = (totalCalls: number, budget: number): number => {
   if (totalCalls <= budget) {
     return 1.0;
   }
-  const overshoot = totalCalls / budget;
-  if (overshoot <= 1.5) {
-    return 0.7;
-  }
-  if (overshoot <= 2.0) {
-    return 0.4;
-  }
-  return 0.1;
+  return Math.max(0, budget / totalCalls);
 };
 
 /**
@@ -902,11 +1045,14 @@ const calculateRedundantLookupScore = (
   return { score, redundantCount, uniqueLookups };
 };
 
-const FAILED_CALL_WEIGHT = 0.4;
-const BUDGET_WEIGHT = 0.35;
-const REDUNDANT_LOOKUP_WEIGHT = 0.25;
+const FAILED_CALL_WEIGHT = 0.3;
+const BUDGET_WEIGHT = 0.5;
+const REDUNDANT_LOOKUP_WEIGHT = 0.2;
 
-const DEFAULT_TOOL_CALL_BUDGET = 6;
+// Tightened from 6 → 4. A well-trajectoried single-workflow generation needs
+// at most: get_step_definitions → get_connectors → generate_workflow → (optional
+// re-attempt). Cases that legitimately need more must declare expectedMaxToolCalls.
+const DEFAULT_TOOL_CALL_BUDGET = 4;
 
 export function createEfficiencyEvaluator() {
   return {
@@ -1106,14 +1252,32 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       // criteria (e.g. "the agent diagnosed the indent issue before fixing it",
       // "acknowledged the conflict between turn 2 and turn 3") can actually be
       // scored — without this, the judge sees only the YAML and has to guess.
-      return evaluateWithCriteria({
+      const judgeResult = await evaluateWithCriteria({
         input: cleanInput,
         expected,
         output: { resultYaml: output.resultYaml, response: responseText },
         metadata: undefined,
       });
+      return applyNearPerfectPenalty(judgeResult);
     },
   };
+}
+
+/**
+ * Discourage "almost-right" outputs from coasting at 0.85–0.95 by clipping any
+ * non-perfect Criteria score by a flat 0.15. Tracks the observation that
+ * top-tier models cluster at 0.90 on the current rubric: most of those 0.90s
+ * are a single failing criterion out of many, which is still a real defect on
+ * a workflow that has to run for real.
+ *
+ * Net effect on the matrix (Sonnet/Opus/Gemini Pro currently ~0.90) lands them
+ * around 0.75 — the band requested for the GA hardening pass. Perfect runs
+ * (`score === 1`) stay at 1.0; infra-error N/A pass-through stays untouched.
+ */
+function applyNearPerfectPenalty<R extends { score?: number | null }>(result: R): R {
+  if (result.score == null) return result;
+  if (result.score >= 1) return result;
+  return { ...result, score: Math.max(0, result.score - 0.15) };
 }
 
 /**

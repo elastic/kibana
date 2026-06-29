@@ -16,6 +16,7 @@ import {
   createCriteriaEvaluator,
   createEditPreservationEvaluator,
   createStructuralCorrectnessEvaluator,
+  createBulkOperationsShapeEvaluator,
   createLiquidCorrectnessEvaluator,
   createLiquidPresenceEvaluator,
   createRejectionEvaluator,
@@ -93,6 +94,133 @@ describe('EditToolSuccess evaluator', () => {
   });
 });
 
+describe('BulkOperationsShape evaluator', () => {
+  const evaluator = createBulkOperationsShapeEvaluator();
+
+  const buildOutput = (yaml: string): WorkflowTaskOutput => ({
+    messages: [],
+    steps: [],
+    errors: [],
+    resultYaml: yaml,
+  });
+
+  it('returns N/A when case did not opt in', async () => {
+    const result = await evaluator.evaluate({
+      output: buildOutput('name: x\nsteps: []'),
+      expected: {},
+    });
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('scores 1 when elasticsearch.bulk operations is a Liquid reference', async () => {
+    const yaml = `
+name: bulk
+steps:
+  - name: load
+    type: elasticsearch.bulk
+    with:
+      operations: "{{ steps.fetch.output.body }}"
+`;
+    const result = await evaluator.evaluate({
+      output: buildOutput(yaml),
+      expected: { expectsBulkOperationShape: true },
+    });
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 1 when elasticsearch.bulk operations is an array', async () => {
+    const yaml = `
+name: bulk
+steps:
+  - name: load
+    type: elasticsearch.bulk
+    with:
+      operations:
+        - id: a
+        - id: b
+`;
+    const result = await evaluator.evaluate({
+      output: buildOutput(yaml),
+      expected: { expectsBulkOperationShape: true },
+    });
+    expect(result.score).toBe(1);
+  });
+
+  it('fails when elasticsearch.bulk operations is a plain (non-Liquid) string', async () => {
+    const yaml = `
+name: bulk
+steps:
+  - name: load
+    type: elasticsearch.bulk
+    with:
+      operations: "this is not valid"
+`;
+    const result = await evaluator.evaluate({
+      output: buildOutput(yaml),
+      expected: { expectsBulkOperationShape: true },
+    });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('FAIL');
+  });
+
+  it('fails when no bulk step is present at all', async () => {
+    const yaml = `
+name: nobulk
+steps:
+  - name: log
+    type: console
+`;
+    const result = await evaluator.evaluate({
+      output: buildOutput(yaml),
+      expected: { expectsBulkOperationShape: true },
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('fails when elasticsearch.request _bulk body is an array', async () => {
+    const yaml = `
+name: bulk_via_request
+steps:
+  - name: load
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /my-index/_bulk
+      body:
+        - id: a
+        - id: b
+`;
+    const result = await evaluator.evaluate({
+      output: buildOutput(yaml),
+      expected: { expectsBulkOperationShape: true },
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('passes when elasticsearch.request _bulk body is NDJSON string', async () => {
+    const yaml = `
+name: bulk_via_request
+steps:
+  - name: load
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /my-index/_bulk
+      body: |
+        {"index":{}}
+        {"id":"a"}
+        {"index":{}}
+        {"id":"b"}
+`;
+    const result = await evaluator.evaluate({
+      output: buildOutput(yaml),
+      expected: { expectsBulkOperationShape: true },
+    });
+    expect(result.score).toBe(1);
+  });
+});
+
 describe('Efficiency evaluator', () => {
   const evaluator = createEfficiencyEvaluator();
 
@@ -109,11 +237,26 @@ describe('Efficiency evaluator', () => {
       toolCall('generate_workflow', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output, expected: {} });
-    // 0.4 * failedCallScore (0.5) + 0.35 * budgetScore (1) + 0.25 * redundantLookupScore (1)
-    expect(result.score).toBe(0.4 * 0.5 + 0.35 * 1 + 0.25 * 1);
+    // 0.3 * failedCallScore (0.5) + 0.5 * budgetScore (1) + 0.2 * redundantLookupScore (1) = 0.85
+    expect(result.score).toBe(0.85);
     expect(result.metadata.failedCalls).toBe(1);
     expect(result.metadata.failedCallScore).toBe(0.5);
     expect(result.metadata.budgetScore).toBe(1);
+  });
+
+  it('linear-penalizes a chatty agent that overshoots the budget by 4×', async () => {
+    // Default budget is 4; simulate 16 generate_workflow calls (the 47-call
+    // real-world rampage was even worse, but 16 keeps the test concise).
+    const steps = Array.from({ length: 16 }, () =>
+      toolCall('generate_workflow', { success: true })
+    );
+    const output = mockOutput(steps);
+    const result = await evaluator.evaluate({ output, expected: {} });
+    // budget / actual = 4 / 16 = 0.25. failed = 1, redundant lookups = 1.
+    // 0.3 * 1 + 0.5 * 0.25 + 0.2 * 1 = 0.3 + 0.125 + 0.2 = 0.625
+    expect(result.metadata.budget).toBe(4);
+    expect(result.metadata.budgetScore).toBe(0.25);
+    expect(result.score).toBeLessThan(0.65);
   });
 
   it('excludes lookup calls from waste calculation', async () => {
@@ -131,7 +274,8 @@ describe('Efficiency evaluator', () => {
   it('penalizes heavily when all workflow calls fail', async () => {
     const output = mockOutput([toolCall('generate_workflow', { success: false, error: 'error' })]);
     const result = await evaluator.evaluate({ output, expected: {} });
-    expect(result.score).toBe(0.6);
+    // 0.3 * 0 (failed) + 0.5 * 1 (under budget) + 0.2 * 1 (no redundant lookups) = 0.7
+    expect(result.score).toBe(0.7);
     expect(result.metadata.failedCalls).toBe(1);
     expect(result.metadata.failedCallScore).toBe(0);
     expect(result.metadata.budgetScore).toBe(1);

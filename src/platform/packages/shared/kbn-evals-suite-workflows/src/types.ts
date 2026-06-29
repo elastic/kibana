@@ -33,6 +33,16 @@ export interface StructuralExpectations {
   expectedStepNames?: string[];
   /** Liquid template chains to validate for correctness (field resolution), not just presence. */
   expectedLiquidChains?: LiquidExpectation[];
+  /**
+   * Opt-in shape assertion for cases that should produce a bulk-indexing step.
+   * When set, `BulkOperationsShape` checks that an `elasticsearch.bulk` step's
+   * `operations` is an array (or a Liquid reference), or that an
+   * `elasticsearch.request` step pointing at `_bulk` uses NDJSON-shaped body.
+   * Catches the real-world failure of agents shipping a flat array of docs to
+   * `elasticsearch.bulk` (`operations.every is not a function`) or stringified
+   * JSON bodies to `_bulk`.
+   */
+  expectsBulkOperationShape?: boolean;
 }
 
 export interface EfficiencyExpectations {
