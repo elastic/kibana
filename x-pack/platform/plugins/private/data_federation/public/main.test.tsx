@@ -53,7 +53,7 @@ describe('Main', () => {
     });
   });
 
-  it('disables "Add data set" when there are no data sources', async () => {
+  it('disables "Add dataset" when there are no data sources', async () => {
     const http = createHttpMock();
     (http.get as jest.Mock).mockImplementation(async (path: string) => {
       if (path === DATA_SOURCES_LIST_ROUTE_PATH) {

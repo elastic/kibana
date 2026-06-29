@@ -283,7 +283,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudIn
     );
     if (hasRelatedDataSets) {
       setDeleteDataSourcesError(
-        'Unable to delete one or more data sources because they have related data sets.'
+        'Unable to delete one or more data sources because they have related datasets.'
       );
       return;
     }

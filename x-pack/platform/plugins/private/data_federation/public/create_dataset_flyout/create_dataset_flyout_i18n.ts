@@ -7,21 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** Localized strings for the create / edit data set flyout. */
+/** Localized strings for the create / edit dataset flyout. */
 export const createDatasetFlyoutStrings = {
   createTitle: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.createTitle', {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add dataset',
     }),
 
   editTitle: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.editTitle', {
-      defaultMessage: 'Edit data set',
+      defaultMessage: 'Edit dataset',
     }),
 
   editTitleWithId: (id: string) =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.editTitleWithId', {
-      defaultMessage: 'Edit data set: {id}',
+      defaultMessage: 'Edit dataset: {id}',
       values: { id },
     }),
 
@@ -32,7 +32,7 @@ export const createDatasetFlyoutStrings = {
 
   nameAlreadyExists: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.nameAlreadyExists', {
-      defaultMessage: 'A data set with this name already exists.',
+      defaultMessage: 'A dataset with this name already exists.',
     }),
 
   dataSourceRequired: () =>
@@ -72,12 +72,12 @@ export const createDatasetFlyoutStrings = {
 
   dataSourceEmptyHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceEmptyHelp', {
-      defaultMessage: 'Create a data source on the Sources tab before adding a data set.',
+      defaultMessage: 'Create a data source on the Sources tab before adding a dataset.',
     }),
 
   dataSourceHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceHelp', {
-      defaultMessage: 'Select the external connection this data set belongs to.',
+      defaultMessage: 'Select the external connection this dataset belongs to.',
     }),
 
   resourceLabel: () =>
@@ -92,7 +92,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsSectionHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSectionHelp', {
-      defaultMessage: 'Optional format and parsing settings for this data set.',
+      defaultMessage: 'Optional format and parsing settings for this dataset.',
     }),
 
   optionalSettingsShow: () =>
