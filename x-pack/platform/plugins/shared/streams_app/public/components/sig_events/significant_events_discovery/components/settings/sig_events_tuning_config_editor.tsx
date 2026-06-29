@@ -78,9 +78,14 @@ function parseSimpleYaml(input: string): Record<string, unknown> {
 export interface SigEventsTuningConfigEditorProps {
   value: string;
   onChange: (yaml: string, parsed: SigEventsTuningConfig | null) => void;
+  isReadOnly?: boolean;
 }
 
-export function SigEventsTuningConfigEditor({ value, onChange }: SigEventsTuningConfigEditorProps) {
+export function SigEventsTuningConfigEditor({
+  value,
+  onChange,
+  isReadOnly = false,
+}: SigEventsTuningConfigEditorProps) {
   const handleChange = useCallback(
     (yaml: string) => {
       let parsed: SigEventsTuningConfig | null = null;
@@ -119,6 +124,7 @@ export function SigEventsTuningConfigEditor({ value, onChange }: SigEventsTuning
         onChange={handleChange}
         height={350}
         options={{
+          readOnly: isReadOnly,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           wordWrap: 'off',

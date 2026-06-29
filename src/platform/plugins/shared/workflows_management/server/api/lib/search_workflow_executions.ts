@@ -15,6 +15,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 
 interface SearchWorkflowExecutionsParams {
   esClient: ElasticsearchClient;
@@ -43,6 +44,7 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
   'executedBy',
   'createdBy',
   'concurrencyGroupKey',
+  'version',
 ] as const;
 
 export const searchWorkflowExecutions = async ({
@@ -102,6 +104,10 @@ function transformToWorkflowExecutionListModel(
         acc.push({
           spaceId: source.spaceId,
           id,
+          managed: source.managed,
+          managedBy: source.managedBy,
+          originManagedWorkflowId: source.originManagedWorkflowId,
+          managedVersion: source.managedVersion,
           stepId: source.stepId,
           status: source.status,
           error: source.error || null,
@@ -113,6 +119,7 @@ function transformToWorkflowExecutionListModel(
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
           concurrencyGroupKey: source.concurrencyGroupKey,
+          ...pickWorkflowDocumentVersion(source),
         });
       }
       return acc;
