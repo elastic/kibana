@@ -15,9 +15,15 @@ export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_a
 
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
+export const SAVED_SEARCH_TITLE = 'A Saved Search';
+
 /**
  * Default time range that covers the `logstash_functional` fixture data.
  * Matches the FTR `timePicker.setDefaultAbsoluteRangeViaUiSettings()` values.
+ *
+ * ISO format, for the `uiSettings.setDefaultTime()` API. The date-picker UI
+ * (`datePicker.setAbsoluteRange()`) needs the same instants in the picker's
+ * display format instead, see {@link DEFAULT_TIME_RANGE_DISPLAY}.
  */
 export const DEFAULT_TIME_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
@@ -32,3 +38,16 @@ export const KIBANA_SAMPLE_DATA_FLIGHTS_ARCHIVE =
 
 export const KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
+
+/**
+ * {@link DEFAULT_TIME_RANGE} expressed in the date-picker display format, for
+ * driving the time-picker UI (e.g. resetting a tab's range via the picker).
+ */
+export const DEFAULT_TIME_RANGE_DISPLAY = {
+  from: 'Sep 19, 2015 @ 06:31:44.000',
+  to: 'Sep 23, 2015 @ 18:31:44.000',
+};
+
+export const DEFAULT_ROWS_PER_PAGE = 100;
+
+export const DEFAULT_SAMPLE_SIZE = 500;

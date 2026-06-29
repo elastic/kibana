@@ -11,8 +11,8 @@ import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
-  SigEventsWorkflowStatus,
-  type SigEventsWorkflowStatusResult,
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
   type StreamsKIsOnboardingFeaturesResult,
   type StreamsKIsOnboardingQueriesResult,
   type StreamsKIsOnboardingStatusResult,
@@ -23,6 +23,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WorkflowExecutionService } from './workflow_execution_service';
+import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
@@ -191,13 +192,21 @@ export const MAX_STREAMS_PER_QUERY = 10000;
  */
 export class StreamsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
+  private readonly telemetry: EbtTelemetryClient;
 
-  constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
+  constructor({
+    managementApi,
+    telemetry,
+  }: {
+    managementApi: WorkflowsServerPluginSetup['management'];
+    telemetry: EbtTelemetryClient;
+  }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
       workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+    this.telemetry = telemetry;
   }
 
   /**
@@ -219,6 +228,16 @@ export class StreamsKIsOnboardingClient {
       inputs: toWorkflowInputPayload(inputs),
       request,
     });
+
+    this.telemetry.trackOnboardingScheduled({
+      stream_name: inputs.streamName,
+      execution_id: executionId,
+      workflow_id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      space_id: ONBOARDING_EXECUTIONS_SPACE_ID,
+      skip_features: inputs.features.skip,
+      skip_queries: inputs.queries.skip,
+    });
+
     return { executionId };
   }
 
@@ -239,7 +258,7 @@ export class StreamsKIsOnboardingClient {
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
     });
 
-    if (result.status !== SigEventsWorkflowStatus.Completed) {
+    if (result.status !== SignificantEventsWorkflowStatus.Completed) {
       return result;
     }
 
@@ -268,15 +287,18 @@ export class StreamsKIsOnboardingClient {
     streamNames,
   }: {
     streamNames: string[];
-  }): Promise<Record<string, SigEventsWorkflowStatusResult>> {
+  }): Promise<Record<string, SignificantEventsWorkflowStatusResult>> {
     if (streamNames.length === 0) {
       return {};
     }
 
-    const statuses: Record<string, SigEventsWorkflowStatusResult> = {};
+    const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
 
     for (const streamName of streamNames) {
-      statuses[streamName] = { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
+      statuses[streamName] = {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      };
     }
 
     const requested = new Set(streamNames);

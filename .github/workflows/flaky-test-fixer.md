@@ -47,28 +47,7 @@ tools:
   github:
     toolsets: [default, search]
   web-fetch:
-  bash:
-    [
-      'cat',
-      'head',
-      'tail',
-      'grep',
-      'wc',
-      'sort',
-      'uniq',
-      'date',
-      'yq',
-      'jq',
-      'echo',
-      'ls',
-      'pwd',
-      'git:*',
-      'gh:*',
-      'bk:*',
-      'node scripts/:*',
-      'yarn kbn:*',
-    ]
-
+  bash: true
 network:
   allowed:
     - defaults
