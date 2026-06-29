@@ -96,14 +96,11 @@ async function ensureOtelDemoAtVersion(version: string, log: ToolingLog): Promis
 
 async function chunksIndexHasDocs(esHosts: string, username: string, password: string) {
   try {
-    const res = await fetch(
-      `${esHosts}/code-open-telemetry_opentelemetry-demo_chunks/_count`,
-      {
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-        },
-      }
-    );
+    const res = await fetch(`${esHosts}/code-open-telemetry_opentelemetry-demo_chunks/_count`, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      },
+    });
     if (!res.ok) return false;
     const body = (await res.json()) as { count?: number };
     return (body.count ?? 0) > 0;
@@ -154,14 +151,7 @@ export async function seedCodeSearch({
 
   await execa(
     exe,
-    [
-      ...prefixArgs,
-      'index',
-      repoDir,
-      '--clean',
-      '--repository',
-      OTEL_DEMO_REPOSITORY,
-    ],
+    [...prefixArgs, 'index', repoDir, '--clean', '--repository', OTEL_DEMO_REPOSITORY],
     { stdio: 'inherit', env }
   );
 
