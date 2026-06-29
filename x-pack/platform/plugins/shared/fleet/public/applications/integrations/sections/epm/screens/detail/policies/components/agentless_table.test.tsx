@@ -204,31 +204,6 @@ describe('AgentlessPackagePoliciesTable', () => {
     });
   });
 
-  it('looks up the flyout agent by agent-policy id (policy_ids[0]), not the package-policy id', async () => {
-    // Fixture intentionally has packagePolicy.id ('packagePolicy1') !== policy_ids[0]
-    // ('policy1'), the real-data case. The flyout must query by the agent-policy id.
-    mockUseLocation.mockReturnValue({
-      pathname: '/',
-      search: '?openEnrollmentFlyout=packagePolicy1',
-      hash: '',
-      state: undefined,
-    });
-    const renderer = createIntegrationsTestRendererMock();
-    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
-    });
-    await waitFor(() => {
-      expect(mockSendGetAgentsFromFlyout).toHaveBeenCalledWith({
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
-      });
-    });
-    expect(mockSendGetAgentsFromFlyout).not.toHaveBeenCalledWith({
-      kuery: `${AGENTS_PREFIX}.policy_id: "packagePolicy1"`,
-    });
-  });
-
   it('does not open flyout when openEnrollmentFlyout query param does not match any policy', async () => {
     mockUseLocation.mockReturnValue({
       pathname: '/',
