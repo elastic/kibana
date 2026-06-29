@@ -15,7 +15,7 @@ import type { KnowledgeIndicatorClient } from '../streams/ki';
 import { identifyKIQueries } from './identify_ki_queries';
 
 jest.mock('@kbn/streams-ai', () => ({
-  generateSignificantEvents: jest.fn(),
+  identifyKIQueries: jest.fn(),
 }));
 
 const generateSignificantEventsMock = identifyKIQueriesThroughAgent as jest.MockedFunction<
