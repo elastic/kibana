@@ -16,7 +16,9 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
+import { prepareNativeAppAttachmentNavigation } from '../../../../../../agent_first/prepare_native_app_attachment_navigation';
 import { useOptionalConversationSpineContext } from '../../../../../../agent_first/conversation_spine/conversation_spine_context';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { useCanvasContext } from './canvas_context';
 
 const GROUP_ATTACHMENT_TYPE = 'group';
@@ -35,6 +37,9 @@ export const pickCartActivationButton = (buttons: ActionButton[]): ActionButton 
 };
 
 export const useAttachmentCartActivation = () => {
+  const {
+    services: { chrome },
+  } = useKibana();
   const { openCanvas, closeCanvas } = useCanvasContext();
   const spineContext = useOptionalConversationSpineContext();
   const { conversationActions, isEmbeddedContext } = useConversationContext();
@@ -131,8 +136,16 @@ export const useAttachmentCartActivation = () => {
 
         const activationButton = pickCartActivationButton(buttons);
         if (activationButton) {
+          prepareNativeAppAttachmentNavigation({
+            chrome,
+            closeOverlay: isSpineGridOverlay
+              ? () => {
+                  closeSpineOverlayIfActive();
+                }
+              : undefined,
+          });
+
           await activationButton.handler();
-          closeSpineOverlayIfActive();
           return;
         }
       }
@@ -143,6 +156,7 @@ export const useAttachmentCartActivation = () => {
     },
     [
       attachmentsService,
+      chrome,
       closeCanvas,
       conversationActions,
       conversationId,

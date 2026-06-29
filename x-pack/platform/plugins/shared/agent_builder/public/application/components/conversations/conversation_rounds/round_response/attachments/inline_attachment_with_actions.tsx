@@ -127,6 +127,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         openCanvas,
         openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
         isCanvas: false,
+        openTarget: useOverlayPreview ? 'nativeApp' : undefined,
         setPreviewBadgeState: useOverlayPreview
           ? undefined
           : (nextPreviewState) => {

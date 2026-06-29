@@ -58,6 +58,8 @@ export const DashboardCanvasContent = ({
   data,
   checkSavedDashboardExist,
   canWriteDashboards,
+  openApplicationWorkspace,
+  showNavigationError,
 }: AttachmentRenderProps<DashboardAttachment> & {
   dashboardState: DashboardState;
   registerActionButtons: (buttons: ActionButton[]) => void;
@@ -69,6 +71,8 @@ export const DashboardCanvasContent = ({
   data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
+  openApplicationWorkspace?: () => void;
+  showNavigationError?: (error: Error) => void;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
@@ -145,6 +149,11 @@ export const DashboardCanvasContent = ({
     dashboardLocatorParams,
     getExistingDashboardId,
     closeCanvas,
+    onBeforeEditInDashboard: () => {
+      openApplicationWorkspace?.();
+      closeCanvas();
+    },
+    showNavigationError,
   });
 
   return (
