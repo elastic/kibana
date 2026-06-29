@@ -10,7 +10,7 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
-  resolveDefaultInferenceId,
+  resolveDefaultInferenceIdFromInferenceGet,
   ResourceTypes,
   type ResourceType,
 } from '@kbn/product-doc-common';
@@ -70,11 +70,12 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-      const result = await esClient.inference.get({});
-      const endpointIds = new Set((result.endpoints ?? []).map((e) => e.inference_id));
       const resourceType = req.query?.resourceType as ResourceType;
 
-      const inferenceId = resolveDefaultInferenceId(endpointIds, { resourceType });
+      const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
+        () => esClient.inference.get({}),
+        { resourceType }
+      );
 
       return res.ok<DefaultInferenceIdResponse>({ body: { inferenceId } });
     }
