@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, useIntl } from '@kbn/i18n-react';
 import React, { useState, type FC } from 'react';
 
 import { useEuiTheme, EuiAccordion, EuiPagination, EuiCallOut } from '@elastic/eui';
@@ -26,6 +26,7 @@ const containerStyle = css({
 
 export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
   const { euiTheme } = useEuiTheme();
+  const intl = useIntl();
 
   const [page, setPage] = useState(0);
 
@@ -69,6 +70,10 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
         <div css={containerStyle}>
           {failedDocs.length > PAGE_SIZE && (
             <EuiPagination
+              aria-label={intl.formatMessage({
+                id: 'xpack.fileUpload.importSummary.failedDocumentsPaginationAriaLabel',
+                defaultMessage: 'Failed documents pagination',
+              })}
               pageCount={Math.ceil(failedDocs.length / PAGE_SIZE)}
               activePage={page}
               onPageClick={(newPage) => setPage(newPage)}

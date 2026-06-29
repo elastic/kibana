@@ -57,6 +57,12 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
     <>
       <EuiFormRow
         fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.dstEventsLabel"
+            defaultMessage="Time zone"
+          />
+        }
         helpText={
           <FormattedMessage
             id="xpack.ml.calendarsEdit.calendarForm.dstEventsHelpText"
