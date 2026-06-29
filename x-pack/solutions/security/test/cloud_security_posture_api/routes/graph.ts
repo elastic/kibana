@@ -3218,7 +3218,6 @@ export default function (providerContext: FtrProviderContext) {
               expect(communicatesWithNode).not.to.be(undefined);
               expect(communicatesWithNode.label).to.equal('Communicates with');
 
-
               expect(allNodes.length).to.equal(5);
               expect(allEdges.length).to.equal(4);
 
