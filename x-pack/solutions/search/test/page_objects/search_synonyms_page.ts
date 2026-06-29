@@ -205,13 +205,14 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           throw new Error(`Badge with index ${index} not found`);
         }
         const expectedCount = initialBadges.length - 1;
+        const deleteButton = await initialBadges[index].findByTagName('button');
+        await deleteButton.click();
 
         const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
         if (badges.length === expectedCount) {
           return;
         }
-        const deleteButton = await badges[index].findByTagName('button');
-        await deleteButton.click();
+
         throw new Error(
           `Clicked remove on badge ${index}, waiting for badge count to drop to ${expectedCount}`
         );
