@@ -25,11 +25,7 @@ const formatMonitorAttachmentDescription = (
 ): string => {
   const isPersisted = Boolean(savedObjectId);
   const isEnabled = data.enabled ?? true;
-  const status = isPersisted
-    ? isEnabled
-      ? 'enabled'
-      : 'disabled'
-    : 'draft (not yet saved)';
+  const status = isPersisted ? (isEnabled ? 'enabled' : 'disabled') : 'draft (not yet saved)';
   const schedule = `every ${data.schedule.number}${data.schedule.unit}`;
   const locations = data.locations.map((l) => l.label ?? l.id).join(', ') || 'none';
 
@@ -66,11 +62,7 @@ export const createMonitorAttachmentType = ({
   format: (attachment) => ({
     getRepresentation: () => ({
       type: 'text',
-      value: formatMonitorAttachmentDescription(
-        attachment.id,
-        attachment.data,
-        attachment.origin
-      ),
+      value: formatMonitorAttachmentDescription(attachment.id, attachment.data, attachment.origin),
     }),
   }),
 
