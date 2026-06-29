@@ -108,6 +108,29 @@ export const hasFieldsWithUnsupportedEsqlTypes = async ({
 };
 
 /**
+ * Returns true if any of the new terms fields is a data view runtime field.
+ *
+ * Data view runtime fields are defined in the data view's `runtimeFieldMap` (surfaced here as
+ * `runtimeMappings`) rather than in the index mapping. ES|QL can only read runtime fields that are
+ * part of the index mapping; it has no way to accept request-level runtime definitions, so such a
+ * field resolves to an `Unknown column` error. When one is used as a new terms field we must run
+ * the aggregation approach, which injects `runtimeMappings` into every search.
+ */
+export const hasDataViewRuntimeFields = ({
+  fields,
+  runtimeMappings,
+}: {
+  fields: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+}): boolean => {
+  if (!runtimeMappings) {
+    return false;
+  }
+
+  return fields.some((field) => field in runtimeMappings);
+};
+
+/**
  * Takes a list of buckets and creates value from them to be used in 'include' clause of terms aggregation.
  * For a single new terms field, value equals to bucket name
  * Otherwise throws error

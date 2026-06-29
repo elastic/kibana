@@ -40,18 +40,21 @@ const createExecOptions = ({
   licensing,
   newTermsFields = ['user.name'],
   fieldCapsResponse = { fields: {} },
+  runtimeMappings,
 }: {
   inputIndex: string[];
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
   newTermsFields?: string[];
   fieldCapsResponse?: Record<string, unknown>;
+  runtimeMappings?: Record<string, unknown>;
 }) =>
   ({
     sharedParams: {
       inputIndex,
       experimentalFeatures,
       licensing,
+      runtimeMappings,
       ruleExecutionLogger: {
         debug: jest.fn(),
         warn: jest.fn(),
@@ -159,6 +162,43 @@ describe('createNewTermsAlertType executor approach selection', () => {
 
       expect(aggregationMock).toHaveBeenCalledWith(execOptions);
       expect(esqlMock).not.toHaveBeenCalled();
+    });
+
+    it('falls back to aggregation when a new terms field is a data view runtime field', async () => {
+      const licensing = createLicensingMock(() => false);
+      const execOptions = createExecOptions({
+        inputIndex: ['logs-*'],
+        experimentalFeatures: features,
+        licensing,
+        newTermsFields: ['host_name_runtime'],
+        runtimeMappings: {
+          host_name_runtime: { type: 'keyword', script: { source: `emit('x')` } },
+        },
+      });
+
+      await ruleType.executor(execOptions);
+
+      expect(aggregationMock).toHaveBeenCalledWith(execOptions);
+      expect(esqlMock).not.toHaveBeenCalled();
+    });
+
+    it('does not call field_caps when a new terms field is a data view runtime field', async () => {
+      const licensing = createLicensingMock(() => false);
+      const execOptions = createExecOptions({
+        inputIndex: ['logs-*'],
+        experimentalFeatures: features,
+        licensing,
+        newTermsFields: ['host_name_runtime'],
+        runtimeMappings: {
+          host_name_runtime: { type: 'keyword', script: { source: `emit('x')` } },
+        },
+      });
+
+      await ruleType.executor(execOptions);
+
+      const fieldCapsMock = execOptions.services.scopedClusterClient.asCurrentUser
+        .fieldCaps as jest.Mock;
+      expect(fieldCapsMock).not.toHaveBeenCalled();
     });
 
     it('falls back to aggregation when field_caps throws', async () => {

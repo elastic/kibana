@@ -11,6 +11,7 @@ import {
   validateHistoryWindowStart,
   transformBucketsToValues,
   hasCrossClusterIndices,
+  hasDataViewRuntimeFields,
   hasFieldsWithUnsupportedEsqlTypes,
 } from './utils';
 
@@ -241,5 +242,31 @@ describe('hasFieldsWithUnsupportedEsqlTypes', () => {
     });
 
     expect(result).toBe(true);
+  });
+});
+
+describe('hasDataViewRuntimeFields', () => {
+  const runtimeMappings = {
+    host_name_runtime: { type: 'keyword' as const, script: { source: `emit('x')` } },
+  };
+
+  it('returns false when there are no runtime mappings', () => {
+    expect(
+      hasDataViewRuntimeFields({ fields: ['host_name_runtime'], runtimeMappings: undefined })
+    ).toBe(false);
+  });
+
+  it('returns false when no new terms field is a runtime field', () => {
+    expect(hasDataViewRuntimeFields({ fields: ['host.name'], runtimeMappings })).toBe(false);
+  });
+
+  it('returns true when a new terms field is a runtime field', () => {
+    expect(hasDataViewRuntimeFields({ fields: ['host_name_runtime'], runtimeMappings })).toBe(true);
+  });
+
+  it('returns true when any new terms field in a combination is a runtime field', () => {
+    expect(
+      hasDataViewRuntimeFields({ fields: ['host.name', 'host_name_runtime'], runtimeMappings })
+    ).toBe(true);
   });
 });

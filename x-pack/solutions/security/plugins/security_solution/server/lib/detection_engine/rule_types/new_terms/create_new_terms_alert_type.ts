@@ -17,6 +17,7 @@ import type { SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 import {
   hasCrossClusterIndices,
+  hasDataViewRuntimeFields,
   hasFieldsWithUnsupportedEsqlTypes,
   validateHistoryWindowStart,
 } from './utils';
@@ -75,7 +76,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const { licensing, inputIndex, experimentalFeatures, ruleExecutionLogger } =
+      const { licensing, inputIndex, runtimeMappings, experimentalFeatures, ruleExecutionLogger } =
         execOptions.sharedParams;
       const { newTermsFields } = execOptions.params;
 
@@ -90,6 +91,13 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       if (!hasEnterpriseLicense && hasCrossClusterIndices(inputIndex)) {
         ruleExecutionLogger.debug(
           'New Terms: using aggregation approach (cross-cluster indices without enterprise license)'
+        );
+        return executeNewTermsAggregationApproach(execOptions);
+      }
+
+      if (hasDataViewRuntimeFields({ fields: newTermsFields, runtimeMappings })) {
+        ruleExecutionLogger.debug(
+          'New Terms: using aggregation approach (data view runtime field used as a new terms field)'
         );
         return executeNewTermsAggregationApproach(execOptions);
       }
