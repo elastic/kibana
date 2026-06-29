@@ -237,8 +237,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/191806
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
     let synthtraceApmClient: ApmSynthtraceEsClient;
@@ -329,6 +328,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Tabs', () => {
           before(async () => {
+            await retry.waitFor(
+              'date picker to be visible before setting range',
+              async () => await pageObjects.timePicker.timePickerExists()
+            );
             await pageObjects.timePicker.setAbsoluteRange(
               START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
               END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
@@ -340,13 +343,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           after(async () => {
-            await retry.tryForTime(5000, async () => {
-              await pageObjects.infraHome.clickCloseFlyoutButton();
-            });
+            await pageObjects.infraHome.closeFlyoutWithEscape();
           });
 
           describe('Overview Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickOverviewTab();
             });
 
@@ -413,6 +416,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Metadata Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickMetadataTab();
             });
 
@@ -442,6 +447,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Metrics Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickMetricsTab();
             });
 
@@ -452,6 +459,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Processes Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickProcessesTab();
             });
 
@@ -462,6 +471,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           describe('Logs Tab', () => {
             before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
               await pageObjects.assetDetails.clickLogsTab();
             });
 
@@ -470,7 +481,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
+          describe('Dashboards Tab', () => {
+            before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+              await pageObjects.assetDetails.clickDashboardsTab();
+            });
+
+            it('should render dashboards tab splash screen with option to add dashboard', async () => {
+              await pageObjects.assetDetails.addDashboardExists();
+            });
+          });
+
           describe('Flyout links', () => {
+            before(async () => {
+              await pageObjects.infraHome.closeFlyoutWithEscape();
+              await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+            });
+
             it('should navigate to Host Details page after click', async () => {
               await pageObjects.assetDetails.clickOpenAsPageLink();
               const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
