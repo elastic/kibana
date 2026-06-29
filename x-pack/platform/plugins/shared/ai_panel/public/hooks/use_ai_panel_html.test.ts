@@ -40,6 +40,7 @@ const baseParams = {
   timeRange: undefined,
   generationVersion: 0,
   savedTemplate: undefined,
+  colorMode: 'LIGHT' as const,
   onTemplateChange: jest.fn(),
 };
 

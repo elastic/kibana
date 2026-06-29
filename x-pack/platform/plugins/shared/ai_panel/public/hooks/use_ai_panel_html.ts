@@ -24,6 +24,7 @@ export interface UseAiPanelHtmlParams {
   timeRange: { from: string; to: string } | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
+  colorMode: 'LIGHT' | 'DARK';
   onTemplateChange: (template: string) => void;
 }
 
@@ -41,6 +42,7 @@ export function useAiPanelHtml({
   timeRange,
   generationVersion,
   savedTemplate,
+  colorMode,
   onTemplateChange,
 }: UseAiPanelHtmlParams): UseAiPanelHtmlResult {
   const [html, setHtml] = useState('');
@@ -168,7 +170,7 @@ export function useAiPanelHtml({
 
     streamGenerate(
       core.http,
-      { prompt, esqlQuery, timeRange },
+      { prompt, esqlQuery, timeRange, colorMode },
       (token) => {
         accRef.current += token;
       },
@@ -197,7 +199,7 @@ export function useAiPanelHtml({
       stopInterval();
       controller.abort();
     };
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate]);
+  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate, colorMode]);
 
   return { html, isLoading, error, isAiUnavailable };
 }

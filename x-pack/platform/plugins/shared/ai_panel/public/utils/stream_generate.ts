@@ -67,6 +67,7 @@ interface GenerateParams {
   prompt: string;
   esqlQuery?: string;
   timeRange?: { from: string; to: string };
+  colorMode: 'LIGHT' | 'DARK';
 }
 
 export async function streamGenerate(

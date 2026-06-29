@@ -36,9 +36,10 @@ export function injectCsp(html: string): string {
 }
 
 // Sanitizes HTML and injects the CSP meta tag — the two steps always go together
-// before an HTML string is set as iframe srcDoc.
+// before an HTML string is set as iframe srcDoc. Also strips markdown fences in
+// case the LLM wraps its output in ```html...```.
 export function prepareHtml(html: string): string {
-  return injectCsp(sanitizeHtml(html));
+  return injectCsp(sanitizeHtml(stripMarkdownFences(html)));
 }
 
 // Strips <a> anchor tags and other unsafe elements before the HTML reaches the iframe.
@@ -51,12 +52,17 @@ export function sanitizeHtml(html: string): string {
   }) as string;
 }
 
-export function sanitizeTemplate(raw: string): string {
+export function stripMarkdownFences(raw: string): string {
   let s = raw.trim();
-  s = s
-    .replace(/^```(?:html|HTML)?\s*\n?/, '')
-    .replace(/\n?```\s*$/, '')
-    .trim();
+  // Strip leading and trailing fences (the common wrapping case)
+  s = s.replace(/^```(?:html|HTML)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+  // Strip any residual fence markers embedded inside the HTML (e.g. inside <body>)
+  s = s.replace(/```(?:html|HTML)?/g, '').replace(/```/g, '');
+  return s.trim();
+}
+
+export function sanitizeTemplate(raw: string): string {
+  let s = stripMarkdownFences(raw);
   const idx = s.indexOf(TEMPLATE_SENTINEL);
   if (idx > 0) {
     s = s.slice(idx);

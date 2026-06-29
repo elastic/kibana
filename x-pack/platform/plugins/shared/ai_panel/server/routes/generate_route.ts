@@ -19,7 +19,29 @@ const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 const MAX_HTML_BYTES = 500_000;
 
-const SYSTEM_PROMPT_STATIC = `You are a data visualization assistant embedded in a Kibana dashboard panel.
+const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
+
+type ColorMode = 'LIGHT' | 'DARK';
+
+function colorSection(colorMode: ColorMode): string {
+  if (colorMode === 'DARK') {
+    return `VISUAL DESIGN — DARK MODE (apply these colors exactly, do not substitute):
+- IMPORTANT: body background MUST be #1D1E24. Text color: #D4DAE5.
+- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #D4DAE5; background: #1D1E24; }
+- Card/surface backgrounds: #25262E. Borders: #3C3D4A.
+- Accent colors: #36A2EF (blue), #2EC4B6 (teal), #FF6B9D (pink), #FFD166 (yellow), #5BC0F8, #E87DA8.
+- Clean, modern design. Comfortable padding. No harsh borders.`;
+  }
+  return `VISUAL DESIGN — LIGHT MODE (apply these colors exactly, do not substitute):
+- IMPORTANT: body background MUST be transparent — do NOT set background on <html> or <body>. Text color: #343741.
+- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #343741; }
+- Accent colors: #0077CC (blue), #00BFB3 (teal), #F04E98 (pink), #FEC514 (yellow), #1BA9F5, #D36086.
+- Card/surface backgrounds: #FFFFFF. Borders: #D3DAE6.
+- Clean, modern design. Comfortable padding. No harsh borders.`;
+}
+
+function buildSystemPromptStatic(colorMode: ColorMode): string {
+  return `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
 Your job is to generate a single self-contained HTML document that presents the user's data or answers their prompt in the most appropriate visual form.
 
@@ -31,22 +53,18 @@ OUTPUT RULES — follow these exactly:
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no images from URLs.
 - For charts and diagrams, use pure CSS (bar charts with div widths, progress bars, etc.) or inline SVG.
 
-VISUAL DESIGN:
-- Body background MUST be transparent — do NOT set any background color on <html> or <body>. The panel background is handled by the container.
-- Text color: #343741 (dark gray). NEVER use #1a1a2e as a background — it is a text color only.
-- Use clean, modern design. Comfortable padding. No harsh borders.
-- Accent colors for data elements only: #0077CC (blue), #00BFB3 (teal), #F04E98 (pink), #FEC514 (yellow), #1BA9F5, #D36086.
-- Make it look like a polished dashboard widget, not a raw HTML page.
-- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #343741; }
+${colorSection(colorMode)}
 
 CONTENT RULES:
 - Pick the visualization type that best fits the data and the prompt. Do NOT default to charts when a table, list, KPI card, or status board is more appropriate.
 - Fill the full panel width. Height should fit the content naturally.
 - Do not add a title — the dashboard panel has its own title.
-- For bar charts: use a div with a colored background and width set to the percentage value inline style. Example: <div style="width: 42%; background: #0077CC; height: 20px;"></div>
+- For bar charts: use a div with a colored background and width set to the percentage value inline style.
 - For status indicators: use colored badges/pills with CSS background-color.`;
+}
 
-const SYSTEM_PROMPT_TEMPLATE = `You are a data visualization assistant embedded in a Kibana dashboard panel.
+function buildSystemPromptTemplate(colorMode: ColorMode): string {
+  return `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
 Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
@@ -75,24 +93,17 @@ OUTPUT RULES:
 - No external resources (no CDN, no Google Fonts, no image URLs).
 - For charts use pure CSS or inline SVG.
 
-VISUAL DESIGN:
-- Body background MUST be transparent — do NOT set background on <html> or <body>.
-- Text: #343741 (dark gray).
-- Required reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #343741; }
-- Accent colors: #0077CC (blue), #00BFB3 (teal), #F04E98 (pink), #FEC514 (yellow), #1BA9F5, #D36086.
-- Polished, modern dashboard widget style.
+${colorSection(colorMode)}
 
 CONTENT RULES:
-- Pick the best visualization for the schema and prompt.
-- Full panel width; height fits content naturally. No title.
+- Pick the best visualization for the schema and prompt. Full panel width; height fits content naturally. No title.
 - Status board example:
   {% for row in rows %}
   <div class="card {% if row.revenue >= 10000 %}card-green{% elsif row.revenue >= 5000 %}card-yellow{% else %}card-red{% endif %}">
     <span>{{ row.category }}</span><span>{{ row.revenue }}</span>
   </div>
   {% endfor %}`;
-
-const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
+}
 
 function formatSampleTable(columns: EsqlColumn[], rows: unknown[][]): string {
   const header = columns.map((c) => c.name.replace(/[<>]/g, '')).join(' | ');
@@ -153,12 +164,15 @@ export function registerGenerateRoute(
           prompt: schema.string({ minLength: 1, maxLength: 10_000 }),
           esqlQuery: schema.maybe(schema.string({ maxLength: 1_000_000 })),
           timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
+          colorMode: schema.oneOf([schema.literal('LIGHT'), schema.literal('DARK')], {
+            defaultValue: 'LIGHT',
+          }),
         }),
       },
     },
     async (context, request, response) => {
       const [, { inference }] = await getStartServices();
-      const { prompt, esqlQuery, timeRange } = request.body;
+      const { prompt, esqlQuery, timeRange, colorMode } = request.body;
       const core = await context.core;
 
       const connectorId = await resolveConnectorId({
@@ -178,7 +192,7 @@ export function registerGenerateRoute(
       let systemPrompt: string;
 
       if (esqlQuery) {
-        systemPrompt = SYSTEM_PROMPT_TEMPLATE;
+        systemPrompt = buildSystemPromptTemplate(colorMode);
 
         let columns: EsqlColumn[] = [];
         let sampleRows: unknown[][] = [];
@@ -213,7 +227,7 @@ export function registerGenerateRoute(
           userMessage = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
         }
       } else {
-        systemPrompt = SYSTEM_PROMPT_STATIC;
+        systemPrompt = buildSystemPromptStatic(colorMode);
         userMessage = prompt;
       }
 

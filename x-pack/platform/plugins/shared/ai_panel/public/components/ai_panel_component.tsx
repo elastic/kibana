@@ -45,7 +45,7 @@ export const AiPanelComponent = ({
   savedTemplate,
   onTemplateChange,
 }: AiPanelComponentProps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, isAiUnavailable } = useAiPanelHtml({
     embeddableId,
     prompt,
@@ -53,6 +53,7 @@ export const AiPanelComponent = ({
     timeRange,
     generationVersion,
     savedTemplate,
+    colorMode,
     onTemplateChange,
   });
 
