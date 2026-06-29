@@ -85,10 +85,7 @@ export const useFetchQueryOccurrenceStats = (
     );
 
     return await requestPromise.then(
-      ({
-        queries: queryOccurrenceSeries,
-        aggregated_occurrences: aggregatedOccurrences,
-      }) => {
+      ({ queries: queryOccurrenceSeries, aggregated_occurrences: aggregatedOccurrences }) => {
         return {
           queries: queryOccurrenceSeries.map((series) => {
             const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;

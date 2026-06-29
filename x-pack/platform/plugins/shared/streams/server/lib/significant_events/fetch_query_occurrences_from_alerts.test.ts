@@ -113,9 +113,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, scopedClusterClient }
     );
 
-    const ruleA = result.queries.find(
-      (e) => e.stream_name === 'logs.test' && e.id === 'qa'
-    )!;
+    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
     const ruleB = result.queries.find((e) => e.id === 'qb')!;
 
     // 6 buckets at 1m across [00:00, 00:05] inclusive
