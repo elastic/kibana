@@ -19,7 +19,7 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { EventKind } from '../../main/constants/event_kinds';
@@ -214,7 +214,7 @@ export const GraphDetails = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <ToolsFlyoutHeader
+          <DocumentToolsFlyoutHeader
             hit={hit}
             title={TITLE}
             renderCellActions={renderCellActions}
