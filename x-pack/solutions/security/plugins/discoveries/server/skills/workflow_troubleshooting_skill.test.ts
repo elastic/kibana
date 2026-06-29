@@ -168,6 +168,71 @@ describe('createWorkflowTroubleshootingSkill', () => {
     it('provides connector model guidance for model-specific advice', () => {
       expect(skill.content).toContain('connector model');
     });
+
+    it('describes the always-on ground-truthing gate', () => {
+      expect(skill.content).toContain('always-on');
+      expect(skill.content.toLowerCase()).toContain('ground-truth');
+    });
+
+    it('describes the gate as a separate workflow that runs during the generation phase', () => {
+      expect(skill.content).toContain('separate workflow');
+    });
+
+    it('notes the gate is fail-closed', () => {
+      expect(skill.content).toContain('fail-closed');
+    });
+
+    it('notes the gate is skipped for the agent_builder trigger (recursion break)', () => {
+      expect(skill.content).toContain('agent_builder');
+    });
+
+    it('notes exactly two skill runs per gated run (gate + report)', () => {
+      expect(skill.content).toContain('exactly 2');
+    });
+
+    it('mentions the 30-minute total pipeline budget', () => {
+      expect(skill.content).toContain('30');
+    });
+
+    it('classifies a pipeline budget-exceeded error as a timeout (not permission/validation)', () => {
+      expect(skill.content).toContain('Pipeline budget exceeded');
+      expect(skill.content).toMatch(/budget exceeded[\s\S]*timeout/i);
+    });
+
+    it('describes interrupted runs (server restart/crash) as a recoverable failure mode', () => {
+      expect(skill.content).toContain('Interrupted Runs');
+      expect(skill.content.toLowerCase()).toContain('prior run was interrupted');
+    });
+
+    it('lists the interrupted error category in the Response Format', () => {
+      expect(skill.content).toContain('interrupted');
+    });
+
+    it('describes how to diagnose a missing skill report (4th, fire-and-forget run)', () => {
+      expect(skill.content).toContain('Missing Report');
+      expect(skill.content).toContain('system-attack-discovery-skill-report');
+    });
+
+    it('notes the report phase is not represented in the execution-details flyout', () => {
+      expect(skill.content.toLowerCase()).toContain('not shown in the execution');
+    });
+
+    it('describes the gate-returned-no-alerts failure mode (skill additional retrieval was the sole source)', () => {
+      expect(skill.content).toContain('Gate Returned No Alerts');
+      expect(skill.content).toContain('sole source');
+    });
+
+    it('classifies the gate-returned-no-alerts failure as validation_error (not timeout/permission)', () => {
+      expect(skill.content).toMatch(/Gate Returned No Alerts[\s\S]*validation_error/i);
+    });
+
+    it('notes the gate-returned-no-alerts failure surfaces under the alert_retrieval phase', () => {
+      expect(skill.content).toMatch(/Gate Returned No Alerts[\s\S]*alert_retrieval/i);
+    });
+
+    it('lists the validation_error error category in the Response Format', () => {
+      expect(skill.content).toContain('validation_error');
+    });
   });
 
   describe('referencedContent', () => {
@@ -276,6 +341,26 @@ describe('createWorkflowTroubleshootingSkill', () => {
         const { content } = getExpandedErrorCategoriesContent() ?? {};
 
         expect(content).toContain('Not a permission issue');
+      });
+
+      it('documents the interrupted error category and its remediation', () => {
+        const { content } = getExpandedErrorCategoriesContent() ?? {};
+
+        expect(content).toContain('### interrupted');
+        expect(content?.toLowerCase()).toContain('re-run');
+      });
+
+      it('documents the validation_error error category and its remediation', () => {
+        const { content } = getExpandedErrorCategoriesContent() ?? {};
+
+        expect(content).toContain('### validation_error');
+        expect(content?.toLowerCase()).toContain('added_alert_ids');
+      });
+
+      it('explains the gate sole-source zero-alerts case under validation_error', () => {
+        const { content } = getExpandedErrorCategoriesContent() ?? {};
+
+        expect(content).toContain('sole source');
       });
     });
   });

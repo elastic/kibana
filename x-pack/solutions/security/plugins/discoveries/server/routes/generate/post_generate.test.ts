@@ -10,6 +10,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
+import { AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE } from '@kbn/discoveries-schemas';
+
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { registerGenerateRoute } from './post_generate';
@@ -343,7 +345,7 @@ describe('registerGenerateRoute', () => {
   });
 
   describe('workflow_config validation', () => {
-    it('returns bad request when neither default retrieval nor workflow IDs are provided', async () => {
+    it('returns bad request when no retrieval toggle is enabled', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',
         api_config: {
@@ -352,9 +354,9 @@ describe('registerGenerateRoute', () => {
         },
         type: 'attack_discovery',
         workflow_config: {
-          alert_retrieval_workflow_ids: [],
-          alert_retrieval_mode: 'custom_only' as const,
-          validation_workflow_id: 'default',
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: false,
+          skill_enabled: false,
         },
       };
 
@@ -390,8 +392,7 @@ describe('registerGenerateRoute', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
-          message:
-            'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+          message: AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
         },
       });
     });
@@ -458,7 +459,9 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
-          alert_retrieval_mode: 'custom_only' as const,
+          alert_retrieval_workflows_enabled: true,
+          default_retrieval_enabled: false,
+          skill_enabled: false,
           validation_workflow_id: 'custom-validation',
         },
       };
@@ -835,8 +838,11 @@ describe('registerGenerateRoute', () => {
           executionUuid: 'test-execution-uuid',
           type: 'attack_discovery',
           workflowConfig: {
-            alert_retrieval_workflow_ids: [],
             alert_retrieval_mode: 'custom_query' as const,
+            alert_retrieval_workflow_ids: [],
+            alert_retrieval_workflows_enabled: false,
+            default_retrieval_enabled: false,
+            skill_enabled: true,
             validation_workflow_id: 'default',
           },
         })
