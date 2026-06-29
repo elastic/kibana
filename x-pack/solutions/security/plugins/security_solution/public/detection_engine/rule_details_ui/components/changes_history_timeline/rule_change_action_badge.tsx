@@ -20,6 +20,9 @@ interface RuleChangeActionBadgeProps {
 export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
   item,
 }: RuleChangeActionBadgeProps): JSX.Element | null {
+  const { revision, rule_source: ruleSource, version: prebuiltRuleVersion } = item.rule;
+  const version = ruleSource.type === 'external' ? prebuiltRuleVersion : undefined;
+
   switch (item.action) {
     case RuleChangeTrackingAction.ruleEnable:
       return <ChangeActionBadge icon="dot" iconColor="success" text={i18n.ACTION_LABEL_ENABLED} />;
@@ -37,71 +40,133 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
       return <ChangeActionBadge text={i18n.ACTION_LABEL_API_KEY_UPDATED} />;
 
     case RuleChangeTrackingAction.ruleCreate:
-      return <ChangeActionBadge text={i18n.ACTION_LABEL_CREATED} />;
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_CREATED}
+            </>
+          }
+        />
+      );
 
     case RuleChangeTrackingAction.ruleDelete:
-      return <ChangeActionBadge icon="trash" text={i18n.ACTION_LABEL_DELETED} />;
+      return <ChangeActionBadge text={i18n.ACTION_LABEL_DELETED} />;
 
     case SecurityRuleChangeTrackingAction.ruleInstall:
-      return <ChangeActionBadge icon="plus" text={i18n.ACTION_LABEL_INSTALLED} />;
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_INSTALLED}
+            </>
+          }
+        />
+      );
 
     case SecurityRuleChangeTrackingAction.ruleUpgrade:
-      return <ChangeActionBadge icon="refresh" text={i18n.ACTION_LABEL_UPGRADED} />;
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_UPGRADED}
+            </>
+          }
+        />
+      );
 
     case SecurityRuleChangeTrackingAction.ruleDuplicate:
-      return <ChangeActionBadge icon="copy" text={i18n.ACTION_LABEL_DUPLICATED} />;
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_DUPLICATED}
+            </>
+          }
+        />
+      );
 
     case SecurityRuleChangeTrackingAction.ruleImport:
-      return <ChangeActionBadge icon="download" text={i18n.ACTION_LABEL_IMPORTED} />;
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_IMPORTED}
+            </>
+          }
+        />
+      );
 
     case SecurityRuleChangeTrackingAction.ruleRevert:
-      return <ChangeActionBadge icon="framePrevious" text={i18n.ACTION_LABEL_REVERTED} />;
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_REVERTED}
+            </>
+          }
+        />
+      );
 
     case SecurityRuleChangeTrackingAction.ruleRestore:
       return (
         <ChangeActionBadge
-          icon="upload"
-          text={i18n.ACTION_LABEL_RESTORED_FROM_HISTORY(
-            item.metadata?.restored_to_revision as number | undefined
-          )}
-        />
-      );
-
-    default: {
-      const isPrebuiltRule = item.rule.rule_source.type === 'external';
-
-      return (
-        <ChangeActionBadge
           text={
-            isPrebuiltRule
-              ? `R${item.rule.revision} • V${item.rule.version}`
-              : `R${item.rule.revision}`
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_RESTORED_FROM_HISTORY(
+                item.metadata?.restored_to_revision as number | undefined
+              )}
+            </>
           }
         />
       );
-    }
+
+    default:
+      return (
+        <ChangeActionBadge
+          text={
+            <>
+              {i18n.RULE_REVISION_AND_VERSION({ revision, version })}
+              {i18n.ACTION_LABEL_EDITED}
+            </>
+          }
+        />
+      );
   }
 });
 
 interface ChangeActionBadgeProps {
   icon?: IconType;
   iconColor?: IconColor;
-  text: string;
+  text: React.ReactNode;
 }
 
 function ChangeActionBadge({ icon, iconColor, text }: ChangeActionBadgeProps): JSX.Element {
-  return (
-    <EuiBadge color="hollow">
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {icon && (
+  if (icon) {
+    return (
+      <EuiBadge color="hollow">
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={icon} color={iconColor} size="s" aria-hidden={true} />
           </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{text}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{text}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBadge>
+    );
+  }
+
+  return (
+    <EuiBadge color="hollow">
+      <EuiText size="xs">{text}</EuiText>
     </EuiBadge>
   );
 }

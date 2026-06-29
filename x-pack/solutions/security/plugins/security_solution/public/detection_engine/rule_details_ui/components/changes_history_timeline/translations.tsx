@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText } from '@elastic/eui';
 
 export const TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.timelineAriaLabel',
@@ -20,75 +23,136 @@ export const N_CHANGES = (count: number): string =>
     values: { count },
   });
 
+export const RULE_REVISION_AND_VERSION = ({
+  revision,
+  version,
+}: {
+  revision: number;
+  version?: number;
+}): React.ReactNode =>
+  version != null ? (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevisionAndVersion"
+      defaultMessage="R{revision} <strong>V{version}</strong>: "
+      values={{
+        strong: (chunks: React.ReactNode) => (
+          <EuiText component="span" color="accent" size="relative">
+            {chunks}
+          </EuiText>
+        ),
+        revision,
+        version,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevision"
+      defaultMessage="R{revision}: "
+      values={{
+        revision,
+      }}
+    />
+  );
+
 export const ACTION_LABEL_ENABLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelEnabled',
-  { defaultMessage: 'Enabled the rule' }
+  { defaultMessage: 'Enabled' }
 );
 
 export const ACTION_LABEL_DISABLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelDisabled',
-  { defaultMessage: 'Disabled the rule' }
+  { defaultMessage: 'Disabled' }
 );
 
 export const ACTION_LABEL_SNOOZED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelSnoozed',
-  { defaultMessage: 'Snoozed notifications' }
+  { defaultMessage: 'Snoozed' }
 );
 
 export const ACTION_LABEL_UNSNOOZED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUnsnoozed',
-  { defaultMessage: 'Unsnoozed notifications' }
+  { defaultMessage: 'Unsnoozed' }
 );
 
 export const ACTION_LABEL_API_KEY_UPDATED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelApiKeyUpdated',
-  { defaultMessage: 'Updated API key' }
+  {
+    defaultMessage: 'Updated API key',
+  }
 );
 
 export const ACTION_LABEL_CREATED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelCreated',
-  { defaultMessage: 'Created the rule' }
+  {
+    defaultMessage: 'Created',
+  }
 );
 
 export const ACTION_LABEL_DELETED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelDeleted',
-  { defaultMessage: 'Deleted the rule' }
+  {
+    defaultMessage: 'Deleted',
+  }
 );
 
 export const ACTION_LABEL_INSTALLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelInstalled',
-  { defaultMessage: 'Installed the rule' }
+  {
+    defaultMessage: 'Installed',
+  }
 );
 
 export const ACTION_LABEL_UPGRADED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelUpdated',
-  { defaultMessage: 'Updated the rule' }
+  {
+    defaultMessage: 'Updated',
+  }
 );
 
 export const ACTION_LABEL_DUPLICATED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelDuplicated',
-  { defaultMessage: 'Duplicated the rule' }
+  {
+    defaultMessage: 'Duplicated',
+  }
 );
 
 export const ACTION_LABEL_IMPORTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelImported',
-  { defaultMessage: 'Imported the rule' }
+  {
+    defaultMessage: 'Imported',
+  }
 );
 
 export const ACTION_LABEL_REVERTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelReverted',
-  { defaultMessage: 'Reverted the rule' }
+  {
+    defaultMessage: 'Reverted',
+  }
 );
 
-export const ACTION_LABEL_RESTORED_FROM_HISTORY = (revision?: number): string =>
-  revision != null
+export const ACTION_LABEL_EDITED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelEdited',
+  {
+    defaultMessage: 'Edited',
+  }
+);
+
+export const ACTION_LABEL_RESTORED_FROM_HISTORY = (restoredRevision?: number): string =>
+  restoredRevision != null
     ? i18n.translate(
         'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelRestoredFromHistory',
-        { defaultMessage: 'Restored R{revision}', values: { revision } }
+        {
+          defaultMessage: 'Restored R{restoredRevision}',
+          values: {
+            restoredRevision,
+          },
+        }
       )
     : i18n.translate(
         'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.actionLabelRestoredFromHistoryUnknown',
-        { defaultMessage: 'Restored' }
+        {
+          defaultMessage: 'Restored',
+        }
       );
 
 export const SYSTEM_USER_LABEL = i18n.translate(
