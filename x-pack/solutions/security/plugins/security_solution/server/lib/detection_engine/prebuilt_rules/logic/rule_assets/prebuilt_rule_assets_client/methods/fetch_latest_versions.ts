@@ -23,6 +23,7 @@ import {
   getPrebuiltRuleAssetSoId,
   getPrebuiltRuleAssetsSearchNamespace,
 } from '../utils';
+import { fetchDeprecatedRules } from './fetch_deprecated_rules';
 
 /**
  * Fetches the BasicRuleInfo for prebuilt rule assets: rule_id, version and type.
@@ -71,13 +72,23 @@ async function fetchLatestVersionSpecifiers(
   ruleIds?: string[],
   filter?: string
 ) {
+  /**
+   * Fetches deprecated rule assets in order to filter out all versions of the deprecated rules
+   * in the latest version query. Since we fetch the most recent version of the asset, if we filter
+   * out assets using the `type` field, the query would still return the deprecated asset, just one
+   * version older. This filter ensures all rule assets fetched will not contain any rule ids that
+   * have been labeled as deprecated.
+   */
+  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient, ruleIds);
+  const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
+
   const latestVersionSpecifiersResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
     {
       rules: AggregationsMultiBucketAggregateBase<{
         latest_version: {
           hits: SearchHitsMetadata<{
-            [PREBUILT_RULE_ASSETS_SO_TYPE]: RuleVersionSpecifier & { deprecated?: boolean };
+            [PREBUILT_RULE_ASSETS_SO_TYPE]: RuleVersionSpecifier;
           }>;
         };
       }>;
@@ -88,9 +99,7 @@ async function fetchLatestVersionSpecifiers(
     _source: false,
     size: 0,
     query: {
-      bool: {
-        filter: prepareQueryDslFilter(ruleIds, filter),
-      },
+      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds, filter }),
     },
     aggs: {
       rules: {
@@ -110,7 +119,6 @@ async function fetchLatestVersionSpecifiers(
               _source: [
                 `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
                 `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
-                `${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`,
               ],
             },
           },
@@ -126,7 +134,7 @@ async function fetchLatestVersionSpecifiers(
     'fetchLatestVersionSpecifiers: expected buckets to be an array'
   );
 
-  const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.flatMap((bucket) => {
+  const latestVersionSpecifiers: RuleVersionSpecifier[] = buckets.map((bucket) => {
     const hit = bucket.latest_version.hits.hits[0];
     const hitSource = hit?._source;
 
@@ -134,19 +142,10 @@ async function fetchLatestVersionSpecifiers(
 
     const soAttributes = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
 
-    // Drop buckets whose latest version is a deprecated asset stub.
-    // Deprecation is monotonic per rule_id, so a deprecated top hit means the
-    // whole rule_id is deprecated
-    if (soAttributes.deprecated === true) {
-      return [];
-    }
-
-    return [
-      {
-        rule_id: soAttributes.rule_id,
-        version: soAttributes.version,
-      },
-    ];
+    return {
+      rule_id: soAttributes.rule_id,
+      version: soAttributes.version,
+    };
   });
   return latestVersionSpecifiers;
 }

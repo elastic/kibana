@@ -15,6 +15,7 @@ import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_r
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
+import { fetchDeprecatedRules } from './fetch_deprecated_rules';
 
 export interface FetchLatestAssetsOptions {
   size: number;
@@ -22,6 +23,15 @@ export interface FetchLatestAssetsOptions {
 
 /**
  * Fetches the latest version of each prebuilt rule asset.
+ *
+ * Rule_ids that have any deprecated asset are excluded from the search
+ * via a `NOT (rule_id: ...)` KQL filter that is built from the result of
+ * `fetchDeprecatedRules`. Deprecation is monotonic per rule_id, so the
+ * presence of a deprecated stub means the whole rule_id is deprecated
+ * and must not flow into `validatePrebuiltRuleAssets` (the deprecated
+ * stub schema is a strict subset of `PrebuiltRuleAsset` and would fail
+ * validation). The deprecated rule_id lookup runs first so its result
+ * can scope the main aggregation.
  *
  * @param savedObjectsClient - The saved objects client used to query the saved objects store
  * @returns A promise that resolves to an array of prebuilt rule assets.
@@ -32,6 +42,9 @@ export async function fetchLatestAssets(
     size: MAX_PREBUILT_RULES_COUNT,
   }
 ): Promise<PrebuiltRuleAsset[]> {
+  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient);
+  const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
+
   const findResult = await savedObjectsClient.find<
     PrebuiltRuleAsset,
     {
@@ -41,6 +54,11 @@ export async function fetchLatestAssets(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
+    ...(deprecatedRuleIds.length > 0 && {
+      filter: `NOT (${deprecatedRuleIds
+        .map((id) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: "${id}"`)
+        .join(' OR ')})`,
+    }),
     aggs: {
       rules: {
         terms: {
@@ -64,19 +82,9 @@ export async function fetchLatestAssets(
   const buckets = findResult.aggregations?.rules?.buckets ?? [];
   invariant(Array.isArray(buckets), 'fetchLatestAssets: expected buckets to be an array');
 
-  const ruleAssets = buckets.flatMap((bucket) => {
+  const ruleAssets = buckets.map((bucket) => {
     const hit = bucket.latest_version.hits.hits[0];
-    const source = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
-
-    // Drop buckets whose latest version is a deprecated asset stub.
-    // Deprecation is monotonic per rule_id, so a deprecated top hit means the
-    // whole rule_id is deprecated and must not flow into
-    // validatePrebuiltRuleAssets as it would throw an error.
-    if (source.deprecated === true) {
-      return [];
-    }
-
-    return [source];
+    return hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
   });
 
   return validatePrebuiltRuleAssets(ruleAssets);

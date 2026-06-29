@@ -1188,6 +1188,42 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(ruleIds).not.toContain('rule-going-away');
         expect(response.stats.num_rules_to_install).toBe(1);
       });
+
+      it('excludes a rule_id whose latest version is a deprecated stub even when a user KQL filter is applied that the stub does not match', async () => {
+        // Deprecated stubs carry only a minimal schema (no `tags`,
+        // `severity`, etc.), so a naive single-query approach that
+        // excludes deprecated SOs via the search filter would leak the
+        // older non-deprecated SO whenever a user filter targets fields
+        // the stub doesn't carry. The deprecated rule_id lookup runs as a
+        // separate query that ignores the user filter, which keeps this
+        // case correct.
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({
+            rule_id: 'rule-going-away',
+            version: 1,
+            name: 'Deprecated - Going Away',
+            tags: ['Tactic: Collection'],
+          }),
+          createRuleAssetSavedObject({
+            rule_id: 'active-rule',
+            version: 1,
+            name: 'Active rule',
+            tags: ['Tactic: Collection'],
+          }),
+        ]);
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'rule-going-away', version: 3, name: 'Deprecated - Going Away' },
+        ]);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          filter: { term: 'security-rule.tags: "Tactic: Collection"', mode: 'KQL' },
+        });
+
+        const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+        expect(ruleIds).toContain('active-rule');
+        expect(ruleIds).not.toContain('rule-going-away');
+        expect(response.stats.num_rules_to_install).toBe(1);
+      });
     });
   });
 };
