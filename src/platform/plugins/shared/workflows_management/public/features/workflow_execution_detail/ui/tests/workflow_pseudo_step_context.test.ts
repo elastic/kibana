@@ -247,13 +247,44 @@ describe('buildTriggerStepExecutionFromContext', () => {
           stepExecutionIndex: 0,
         },
       ],
-      context: { event: { alerts: [{ id: 'alert-1' }] } },
+      // The server always persists an `inputs` key (empty object when no manual inputs
+      // were supplied alongside the event), so the realistic persisted shape includes it.
+      context: { event: { alerts: [{ id: 'alert-1' }] }, inputs: {} },
     });
 
     const result = buildTriggerStepExecutionFromContext(execution);
 
     expect(result).not.toBeNull();
     expect(result?.input).toEqual({ alerts: [{ id: 'alert-1' }] });
+    expect(result?.output).toBeUndefined();
+  });
+
+  it('should not set output when inputs is an empty object alongside an event', () => {
+    const execution = createWorkflowExecution({
+      status: ExecutionStatus.COMPLETED,
+      stepExecutions: [
+        {
+          id: 'step-1',
+          stepId: 'action-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [],
+          workflowRunId: 'exec-1',
+          workflowId: 'wf-1',
+          startedAt: '',
+          topologicalIndex: 0,
+          globalExecutionIndex: 0,
+          stepExecutionIndex: 0,
+        },
+      ],
+      // An empty `inputs` object must not be surfaced as output, otherwise a spurious
+      // empty "Input" tab is rendered for the common automated (event-driven) path.
+      context: { event: { type: 'other', data: {} }, inputs: {} },
+    });
+
+    const result = buildTriggerStepExecutionFromContext(execution);
+
+    expect(result).not.toBeNull();
     expect(result?.output).toBeUndefined();
   });
 });
