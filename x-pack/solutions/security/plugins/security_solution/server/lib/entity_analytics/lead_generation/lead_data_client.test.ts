@@ -305,7 +305,7 @@ describe('LeadDataClient', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: allIndices,
-          query: { term: { id: 'lead-1' } },
+          query: { ids: { values: ['lead-1'] } },
         })
       );
     });
