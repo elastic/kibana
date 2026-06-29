@@ -8,12 +8,12 @@
 import React from 'react';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
-import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
+import { useChangeHistoryState } from '../../provider/use_change_history_state';
 import { ChangeHistoryRestoreButton } from './change_history_restore_button';
 
 export function ChangeHistoryDefaultPreviewHeaderActions(): JSX.Element | null {
   const { adapter, objectId, supports } = useChangeHistoryConfig();
-  const { selectedChangeId } = useChangeHistoryInternalConfig();
+  const { selectedChangeId } = useChangeHistoryState();
   const { change, isLoading } = useChangeHistoryDetail({
     adapter,
     objectId,

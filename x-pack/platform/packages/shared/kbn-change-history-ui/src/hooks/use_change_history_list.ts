@@ -26,7 +26,7 @@ export interface UseChangeHistoryListResult {
   error?: Error;
   hasMore: boolean;
   loadMore: () => void;
-  refetch: () => Promise<void>;
+  refetch: () => Promise<ListChangeHistoryResult | undefined>;
 }
 
 export const useChangeHistoryList = ({
@@ -93,9 +93,10 @@ export const useChangeHistoryList = ({
     [adapter, objectId, pageSize]
   );
 
-  const refetch = useCallback(async (): Promise<void> => {
-    await fetchPage(0, false);
-  }, [fetchPage]);
+  const refetch = useCallback(
+    (): Promise<ListChangeHistoryResult | undefined> => fetchPage(0, false),
+    [fetchPage]
+  );
 
   const loadMore = useCallback(() => {
     if (!enabled || isLoading || isLoadingMore || !hasMore) {

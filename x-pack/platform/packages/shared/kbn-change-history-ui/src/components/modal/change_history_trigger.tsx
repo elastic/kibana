@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
+import { useChangeHistoryState } from '../../provider/use_change_history_state';
 import * as i18n from '../timeline/translations';
 
 export function ChangeHistoryTrigger(): JSX.Element {
-  const { openModal } = useChangeHistoryInternalConfig();
+  const { openModal } = useChangeHistoryState();
 
   return (
     <EuiButton iconType="clock" onClick={openModal} data-test-subj="changeHistoryTrigger">

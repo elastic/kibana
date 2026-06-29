@@ -6,13 +6,13 @@
  */
 
 import { useContext } from 'react';
-import { ChangeHistoryInternalConfigContext } from './change_history_internal_config_context';
+import { ChangeHistoryStateContext } from './change_history_state_context';
 
-export const useChangeHistoryInternalConfig = () => {
-  const context = useContext(ChangeHistoryInternalConfigContext);
+export const useChangeHistoryState = () => {
+  const context = useContext(ChangeHistoryStateContext);
 
   if (!context) {
-    throw new Error('useChangeHistoryInternalConfig must be used within ChangeHistoryProvider');
+    throw new Error('useChangeHistoryState must be used within ChangeHistoryProvider');
   }
 
   return context;

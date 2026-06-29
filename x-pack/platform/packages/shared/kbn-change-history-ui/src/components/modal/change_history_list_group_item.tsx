@@ -7,11 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
-import { useChangeHistoryInternalConfig } from '../../provider/use_change_history_internal_config';
+import { useChangeHistoryState } from '../../provider/use_change_history_state';
 import * as i18n from '../timeline/translations';
 
 export function ChangeHistoryListGroupItem(): JSX.Element {
-  const { openModal } = useChangeHistoryInternalConfig();
+  const { openModal } = useChangeHistoryState();
 
   const handleClick = useCallback(() => {
     openModal();

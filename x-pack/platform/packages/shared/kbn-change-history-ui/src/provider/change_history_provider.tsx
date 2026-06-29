@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type {
   ChangeHistoryFeatures,
@@ -14,8 +14,9 @@ import type {
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import { useChangeHistoryList } from '../hooks/use_change_history_list';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
-import { ChangeHistoryInternalConfigContext } from './change_history_internal_config_context';
+import { ChangeHistoryStateContext } from './change_history_state_context';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
 import * as i18n from '../components/timeline/translations';
 
@@ -40,12 +41,17 @@ export const ChangeHistoryProvider = ({
   permissions,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
-  const listRefetchRef = useRef<(() => Promise<void>) | undefined>();
-  const selectCurrentAfterRefetchRef = useRef(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
-  const [isListRefreshPending, setIsListRefreshPending] = useState(false);
   const [prevObjectId, setPrevObjectId] = useState(objectId);
+
+  // The provider owns the list query so the list, its refetch, and selection
+  // live in one place — no cross-subtree ref plumbing required.
+  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList({
+    adapter,
+    objectId,
+    enabled: isModalOpen,
+  });
 
   if (objectId !== prevObjectId) {
     setPrevObjectId(objectId);
@@ -62,32 +68,27 @@ export const ChangeHistoryProvider = ({
     setSelectedChangeId(undefined);
   }, []);
 
-  const handleSelectChangeId = useCallback((changeId: string | undefined) => {
-    setSelectedChangeId(changeId);
-  }, []);
+  const refetchAndSelectCurrent = useCallback(async (): Promise<void> => {
+    const result = await refetch();
+    const currentChangeId = result?.items[0]?.id;
+    if (currentChangeId) {
+      setSelectedChangeId(currentChangeId);
+    }
+  }, [refetch]);
+
+  // Auto-select the most recent change when the modal opens with no selection.
+  useEffect(() => {
+    if (!isModalOpen || selectedChangeId || isLoading || items.length === 0) {
+      return;
+    }
+
+    setSelectedChangeId(items[0]?.id);
+  }, [isModalOpen, isLoading, items, selectedChangeId]);
 
   const supports = useMemo(
     () => resolveChangeHistorySupports(adapter, { features, permissions }),
     [adapter, features, permissions]
   );
-
-  const registerListRefetch = useCallback((refetch: (() => Promise<void>) | undefined) => {
-    listRefetchRef.current = refetch;
-  }, []);
-
-  const consumeSelectCurrentAfterRefetch = useCallback((): boolean => {
-    if (!selectCurrentAfterRefetchRef.current) {
-      return false;
-    }
-
-    selectCurrentAfterRefetchRef.current = false;
-    return true;
-  }, []);
-
-  const refetchList = useCallback(async (): Promise<void> => {
-    selectCurrentAfterRefetchRef.current = true;
-    await listRefetchRef.current?.();
-  }, []);
 
   const configValue = useMemo(
     () => ({
@@ -114,37 +115,41 @@ export const ChangeHistoryProvider = ({
     ]
   );
 
-  const internalConfigValue = useMemo(
+  const stateValue = useMemo(
     () => ({
-      refetchList,
-      registerListRefetch,
-      consumeSelectCurrentAfterRefetch,
-      isListRefreshPending,
-      setListRefreshPending: setIsListRefreshPending,
       isModalOpen,
       openModal,
       closeModal,
       selectedChangeId,
-      setSelectedChangeId: handleSelectChangeId,
+      setSelectedChangeId,
+      items,
+      total,
+      isLoading,
+      isLoadingMore,
+      error,
+      loadMore,
+      refetchAndSelectCurrent,
     }),
     [
-      closeModal,
-      handleSelectChangeId,
-      isListRefreshPending,
       isModalOpen,
       openModal,
-      refetchList,
-      registerListRefetch,
-      consumeSelectCurrentAfterRefetch,
+      closeModal,
       selectedChangeId,
+      items,
+      total,
+      isLoading,
+      isLoadingMore,
+      error,
+      loadMore,
+      refetchAndSelectCurrent,
     ]
   );
 
   return (
     <ChangeHistoryConfigContext.Provider value={configValue}>
-      <ChangeHistoryInternalConfigContext.Provider value={internalConfigValue}>
+      <ChangeHistoryStateContext.Provider value={stateValue}>
         {children}
-      </ChangeHistoryInternalConfigContext.Provider>
+      </ChangeHistoryStateContext.Provider>
     </ChangeHistoryConfigContext.Provider>
   );
 };

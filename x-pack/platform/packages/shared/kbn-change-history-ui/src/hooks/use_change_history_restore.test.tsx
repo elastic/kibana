@@ -8,35 +8,21 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React, { useLayoutEffect } from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
-import { useChangeHistoryInternalConfig } from '../provider/use_change_history_internal_config';
+import { useChangeHistoryState } from '../provider/use_change_history_state';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
 import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../test_utils/change_history_test_fixtures';
 
 const createAdapter = (
-  restoreChange: ChangeHistoryAdapter['restoreChange']
+  restoreChange: ChangeHistoryAdapter['restoreChange'],
+  listChanges: ChangeHistoryAdapter['listChanges'] = jest
+    .fn()
+    .mockResolvedValue({ items: [], total: 0 })
 ): ChangeHistoryAdapter => ({
-  listChanges: jest.fn(),
+  listChanges,
   getChange: jest.fn(),
   restoreChange,
 });
-
-const ListRefetchRegistrar = ({
-  refetch,
-  children,
-}: {
-  refetch: jest.Mock;
-  children: React.ReactNode;
-}) => {
-  const { registerListRefetch } = useChangeHistoryInternalConfig();
-
-  useLayoutEffect(() => {
-    registerListRefetch(refetch);
-    return () => registerListRefetch(undefined);
-  }, [refetch, registerListRefetch]);
-
-  return <>{children}</>;
-};
 
 const wrapper =
   (
@@ -63,7 +49,7 @@ const SelectionTracker = ({
 }: {
   onChange: (selectedChangeId: string | undefined) => void;
 }) => {
-  const { selectedChangeId } = useChangeHistoryInternalConfig();
+  const { selectedChangeId } = useChangeHistoryState();
 
   useLayoutEffect(() => {
     onChange(selectedChangeId);
@@ -73,7 +59,7 @@ const SelectionTracker = ({
 };
 
 const SelectChangeOnMount = ({ changeId }: { changeId: string }) => {
-  const { setSelectedChangeId } = useChangeHistoryInternalConfig();
+  const { setSelectedChangeId } = useChangeHistoryState();
 
   useLayoutEffect(() => {
     setSelectedChangeId(changeId);
@@ -85,22 +71,11 @@ const SelectChangeOnMount = ({ changeId }: { changeId: string }) => {
 describe('useChangeHistoryRestore', () => {
   it('calls adapter.restoreChange and refetches the history list after success', async () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const refetchList = jest.fn().mockResolvedValue(undefined);
-    const adapter = createAdapter(restoreChange);
+    const listChanges = jest.fn().mockResolvedValue({ items: [], total: 0 });
+    const adapter = createAdapter(restoreChange, listChanges);
 
     const { result } = renderHook(() => useChangeHistoryRestore(), {
-      wrapper: ({ children }) => (
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          features={{ restore: true }}
-          permissions={{ canRestore: true }}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          renderPreview={() => null}
-        >
-          <ListRefetchRegistrar refetch={refetchList}>{children}</ListRefetchRegistrar>
-        </ChangeHistoryProvider>
-      ),
+      wrapper: wrapper(adapter),
     });
 
     await act(async () => {
@@ -116,7 +91,43 @@ describe('useChangeHistoryRestore', () => {
       changeId: 'evt-3',
       signal: expect.any(AbortSignal),
     });
-    expect(refetchList).toHaveBeenCalledTimes(1);
+    expect(listChanges).toHaveBeenCalledTimes(1);
+  });
+
+  it('selects the current change after a successful restore', async () => {
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const listChanges = jest.fn().mockResolvedValue({
+      items: [
+        { id: 'evt-9', timestamp: '2026-06-17T12:00:00.000Z', actor: { name: 'Alice' }, action: 'Restored', isCurrent: true },
+      ],
+      total: 1,
+    });
+    const adapter = createAdapter(restoreChange, listChanges);
+    const selectedIds: Array<string | undefined> = [];
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), {
+      wrapper: ({ children }) => (
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID}
+          adapter={adapter}
+          features={{ restore: true }}
+          permissions={{ canRestore: true }}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
+        >
+          <SelectionTracker onChange={(id) => selectedIds.push(id)} />
+          {children}
+        </ChangeHistoryProvider>
+      ),
+    });
+
+    await act(async () => {
+      await result.current.restoreChange({ objectId: TEST_OBJECT_ID, changeId: 'evt-3' });
+    });
+
+    await waitFor(() => {
+      expect(selectedIds.at(-1)).toBe('evt-9');
+    });
   });
 
   it('maps structured restore errors', async () => {

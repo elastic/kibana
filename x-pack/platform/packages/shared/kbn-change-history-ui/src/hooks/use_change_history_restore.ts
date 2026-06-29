@@ -9,7 +9,7 @@ import { useCallback, useRef, useState } from 'react';
 import type { ChangeHistoryError } from '../types/change_history_error';
 import type { RestoreChangeParams } from '../types/restore_change_params';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
-import { useChangeHistoryInternalConfig } from '../provider/use_change_history_internal_config';
+import { useChangeHistoryState } from '../provider/use_change_history_state';
 import { mapChangeHistoryRestoreError } from '../utils/map_change_history_restore_error';
 
 export interface UseChangeHistoryRestoreResult {
@@ -22,7 +22,7 @@ export interface UseChangeHistoryRestoreResult {
 
 export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
   const { adapter, supports } = useChangeHistoryConfig();
-  const { refetchList, setListRefreshPending } = useChangeHistoryInternalConfig();
+  const { refetchAndSelectCurrent } = useChangeHistoryState();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
   const abortControllerRef = useRef<AbortController | undefined>();
@@ -43,7 +43,6 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
 
       setIsRestoring(true);
       setError(undefined);
-      setListRefreshPending(true);
 
       try {
         await adapter.restoreChange({
@@ -55,7 +54,7 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
           return false;
         }
 
-        await refetchList();
+        await refetchAndSelectCurrent();
 
         if (abortController.signal.aborted) {
           return false;
@@ -70,13 +69,12 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
         setError(mapChangeHistoryRestoreError(restoreError));
         return false;
       } finally {
-        setListRefreshPending(false);
         if (!abortController.signal.aborted) {
           setIsRestoring(false);
         }
       }
     },
-    [adapter, refetchList, setListRefreshPending, supports.restore]
+    [adapter, refetchAndSelectCurrent, supports.restore]
   );
 
   return {
