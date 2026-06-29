@@ -46,7 +46,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
 
       // Navigate to Discover
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       // Select the data view for our test stream
       await pageObjects.discover.selectDataView('logs.otel.child');
       await pageObjects.discover.waitUntilSearchingHasFinished();
@@ -92,7 +92,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
 
       // Navigate to Discover
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilFieldListHasCountOfFields();
       await pageObjects.discover.selectDataView('logs.otel.child');
       await expect(pageObjects.discover.getSelectedDataView()).toHaveText('logs.otel.child');

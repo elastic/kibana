@@ -43,7 +43,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
 
       // Navigate to Discover and wait for the page to be ready
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForHistogramRendered();
 
@@ -86,7 +86,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
 
       // Navigate to Discover and wait for the page to be ready
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForHistogramRendered();
 

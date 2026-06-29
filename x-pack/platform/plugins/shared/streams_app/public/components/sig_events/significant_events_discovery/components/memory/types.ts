@@ -46,6 +46,8 @@ export interface MemoryVersionRecord {
   name: string;
   title: string;
   content: string;
+  tags: string[];
+  categories: string[];
   change_type: 'create' | 'update' | 'delete' | 'rename';
   change_summary: string;
   created_at: string;
