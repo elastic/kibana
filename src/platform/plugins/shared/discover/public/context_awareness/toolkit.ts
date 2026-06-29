@@ -55,7 +55,7 @@ export interface ContextAwarenessToolkit {
    */
   readonly actions: ContextAwarenessToolkitActions;
   /**
-   * Returns tab-scoped profile state for the requested definition.
+   * Returns host-scoped profile state for the requested definition.
    */
   readonly getStateAdapter: <TState extends object>(
     definition: ProfileStateDefinition<TState>
