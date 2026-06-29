@@ -8,8 +8,10 @@
  */
 
 import type { McpClient } from '@kbn/mcp-client';
+import type { MongoClient } from 'mongodb';
 import type { ClientTypeSpec } from './client_type_spec';
 import { mcpClientType } from './mcp_client_type';
+import { mongodbClientType } from './mongodb_client_type';
 
 /**
  * Maps each client-type id in the registry to the client instance its `build()`
@@ -23,6 +25,7 @@ import { mcpClientType } from './mcp_client_type';
  */
 export interface ClientRegistry {
   mcp: McpClient;
+  mongodb: MongoClient;
 }
 
 /** The set of valid client-type ids, derived from {@link ClientRegistry}. */
@@ -30,6 +33,7 @@ export type ClientTypeId = keyof ClientRegistry;
 
 export const clientTypes: Readonly<Record<ClientTypeId, ClientTypeSpec<unknown>>> = {
   mcp: mcpClientType,
+  mongodb: mongodbClientType,
 };
 
 export type {
