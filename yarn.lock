@@ -6597,6 +6597,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dependency-injection-a@link:examples/dependency_injection_isolation/a":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dependency-injection-b@link:examples/dependency_injection_isolation/b":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dependency-injection-c@link:examples/dependency_injection_isolation/c":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dependency-injection-example-plugin@link:examples/dependency_injection":
   version "0.0.0"
   uid ""
