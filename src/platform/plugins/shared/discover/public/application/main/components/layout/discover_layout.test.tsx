@@ -38,12 +38,6 @@ const setup = async ({
   hideTable?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
-  if (typeof prevSidebarClosed === 'boolean') {
-    localStorage.setItem('discover:sidebarClosed', String(prevSidebarClosed));
-  } else {
-    localStorage.removeItem('discover:sidebarClosed');
-  }
-
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
 
@@ -62,6 +56,7 @@ const setup = async ({
       appState: {
         dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
         hideTable,
+        hideSidebar: prevSidebarClosed,
         query: { query: '', language: 'kuery' },
       },
     })

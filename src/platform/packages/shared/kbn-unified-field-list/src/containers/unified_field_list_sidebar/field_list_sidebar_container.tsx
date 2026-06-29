@@ -168,6 +168,17 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   onInitialStateChange?: UnifiedFieldListSidebarContainerPropsWithRestorableState['onInitialStateChange'];
 
   /**
+   * Opt-in controlled mode for the sidebar collapse state. When provided, `isCollapsed`
+   * becomes the source of truth and `onCollapsedChange` is called on every toggle, making
+   * the consumer responsible for persisting the value (e.g. in app state). The built-in
+   * localStorage persistence is disabled in this mode.
+   */
+  controlledSidebarState?: {
+    isCollapsed: boolean;
+    onCollapsedChange: (isCollapsed: boolean) => void;
+  };
+
+  /**
    * Custom container for existing fields info map
    */
   initialExistingFieldsInfo?: ExistingFieldsFetcherParams['initialExistingFieldsInfo'];
@@ -183,7 +194,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps
 >(function UnifiedFieldListSidebarContainer(
-  { initialState, onInitialStateChange, ...props },
+  { initialState, onInitialStateChange, controlledSidebarState, ...props },
   componentRef
 ) {
   const {
@@ -207,16 +218,32 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const [sidebarVisibility] = useState(() =>
     getSidebarVisibility({
-      localStorageKey: stateService.creationOptions.localStorageKeyPrefix
-        ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
-        : undefined,
-      isInitiallyCollapsed: initialState?.isCollapsed,
+      // In controlled mode the consumer owns persistence, so skip the built-in localStorage
+      localStorageKey:
+        !controlledSidebarState && stateService.creationOptions.localStorageKeyPrefix
+          ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
+          : undefined,
+      isInitiallyCollapsed: controlledSidebarState
+        ? controlledSidebarState.isCollapsed
+        : initialState?.isCollapsed,
+      onToggle: controlledSidebarState?.onCollapsedChange,
     })
   );
   const isSidebarCollapsed = useObservable(
     sidebarVisibility.isCollapsed$,
     sidebarVisibility.initialValue
   );
+
+  // Keep the observable in sync with the controlled value coming from the consumer
+  const controlledIsCollapsed = controlledSidebarState?.isCollapsed;
+  useEffect(() => {
+    if (
+      typeof controlledIsCollapsed === 'boolean' &&
+      controlledIsCollapsed !== sidebarVisibility.isCollapsed$.getValue()
+    ) {
+      sidebarVisibility.isCollapsed$.next(controlledIsCollapsed);
+    }
+  }, [controlledIsCollapsed, sidebarVisibility]);
 
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||

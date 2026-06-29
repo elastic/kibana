@@ -18,16 +18,23 @@ export interface SidebarVisibility {
 export interface GetSidebarStateParams {
   localStorageKey?: string;
   isInitiallyCollapsed?: boolean;
+  /**
+   * Called whenever the sidebar is toggled. Used by consumers running in
+   * controlled mode to persist the collapse state themselves (e.g. in app state).
+   */
+  onToggle?: (isCollapsed: boolean) => void;
 }
 
 /**
  * For managing sidebar visibility state
  * @param localStorageKey
  * @param isInitiallyCollapsed
+ * @param onToggle
  */
 export const getSidebarVisibility = ({
   localStorageKey,
   isInitiallyCollapsed,
+  onToggle,
 }: GetSidebarStateParams): SidebarVisibility => {
   const isCollapsedBasedOnLocalStorage = localStorageKey ? getIsCollapsed(localStorageKey) : false;
   const initialValue =
@@ -45,6 +52,7 @@ export const getSidebarVisibility = ({
       if (localStorageKey) {
         setIsCollapsed(localStorageKey, isCollapsed);
       }
+      onToggle?.(isCollapsed);
     },
   };
 };

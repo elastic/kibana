@@ -247,6 +247,7 @@ describe('tab_state actions', () => {
         columns: ['field1', 'field2'],
         hideChart: false,
         hideTable: false,
+        hideSidebar: false,
         rowHeight: undefined,
       });
 
@@ -280,6 +281,7 @@ describe('tab_state actions', () => {
         columns: [],
         hideChart: false,
         hideTable: false,
+        hideSidebar: false,
         rowHeight: undefined,
       });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);

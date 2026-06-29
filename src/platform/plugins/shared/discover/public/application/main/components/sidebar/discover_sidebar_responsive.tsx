@@ -31,6 +31,7 @@ import {
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
+import { setSidebarClosed } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { PLUGIN_ID } from '../../../../../common';
@@ -48,6 +49,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentTabSelector,
   useDataViewsForPicker,
@@ -382,6 +384,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
   const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const hideSidebar = useAppStateSelector((state) => state.hideSidebar ?? false);
+  const onSidebarCollapsedChange = useCallback(
+    (isCollapsed: boolean) => {
+      setSidebarClosed(services.storage, 'discover', isCollapsed);
+      dispatch(updateAppState({ appState: { hideSidebar: isCollapsed } }));
+    },
+    [dispatch, services.storage, updateAppState]
+  );
+  const controlledSidebarState = useMemo(
+    () => ({ isCollapsed: hideSidebar, onCollapsedChange: onSidebarCollapsedChange }),
+    [hideSidebar, onSidebarCollapsedChange]
+  );
   const fieldListUiState = useCurrentTabSelector((state) => state.uiState.fieldList);
   const setFieldListUiState = useCurrentTabAction(internalStateActions.setFieldListUiState);
   const onInitialStateChange = useCallback(
@@ -447,6 +462,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             workspaceSelectedFieldNames={columns}
             initialState={fieldListUiState}
             onInitialStateChange={onInitialStateChange}
+            controlledSidebarState={controlledSidebarState}
             initialExistingFieldsInfo={fieldListExistingFieldsInfoUiState}
             onInitialExistingFieldsInfoChange={onInitialExistingFieldsInfoChange}
           />

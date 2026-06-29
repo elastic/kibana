@@ -53,6 +53,7 @@ export interface SavedSearchAttributes {
   grid: DiscoverGridSettings;
   hideChart: boolean;
   hideTable: boolean;
+  hideSidebar: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
@@ -115,6 +116,7 @@ export interface DiscoverSessionTab {
   grid: DiscoverGridSettings;
   hideChart: boolean;
   hideTable: boolean;
+  hideSidebar: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   serializedSearchSource: SerializedSearchSourceFields;
