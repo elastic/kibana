@@ -59,7 +59,10 @@ export const buildEntityPreviewPanel = ({
       scopeId,
       isPreviewMode: true,
       banner: GENERIC_ENTITY_PREVIEW_BANNER,
-      isEngineMetadataExist: true,
+      // Only the generic entity panel reads this — when the engine type is missing it should
+      // surface the "EngineMetadata.Type is missing" error rather than attempt to load.
+      // Mirrors the asset-inventory flyout (`Boolean(entityType)`).
+      isEngineMetadataExist: Boolean(engineType),
       ...nameParam,
     },
   };

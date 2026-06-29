@@ -59,16 +59,16 @@ describe('buildEntityPreviewPanel', () => {
     });
   });
 
-  it('falls back to the generic panel (no name param) when engineType is undefined', () => {
+  it('falls back to the generic panel with isEngineMetadataExist false when engineType is undefined', () => {
     expect(
       buildEntityPreviewPanel({ engineType: undefined, entityId, entityName: undefined, scopeId })
     ).toEqual({
       id: GenericEntityPanelKey,
-      params: commonParams,
+      params: { ...commonParams, isEngineMetadataExist: false },
     });
   });
 
-  it('falls back to the generic panel for an unknown engineType', () => {
+  it('falls back to the generic panel with isEngineMetadataExist true for an unknown engineType', () => {
     expect(
       buildEntityPreviewPanel({ engineType: 'unknown', entityId, entityName: 'x', scopeId })
     ).toEqual({
