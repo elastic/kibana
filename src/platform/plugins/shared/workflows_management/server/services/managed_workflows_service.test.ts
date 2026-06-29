@@ -1458,7 +1458,7 @@ describe('ManagedWorkflowsService', () => {
     it('deletes managed docs whose owner or definition is no longer registered', async () => {
       const knownDefinition = createDefinition({ id: 'system-known' });
       mockManagedWorkflowDefinitions = [knownDefinition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
       crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
         {
           id: 'system-known',
@@ -1515,6 +1515,24 @@ describe('ManagedWorkflowsService', () => {
         'other-space',
         { force: true }
       );
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: 'system-missing-owner',
+        force: true,
+        managed: true,
+        originalWorkflowId: knownDefinition.id,
+        ownerPlugin: null,
+        spaceId: 'other-space',
+        reason: 'orphan_cleanup',
+      });
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: 'system-missing-definition',
+        force: true,
+        managed: true,
+        originalWorkflowId: null,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: 'other-space',
+        reason: 'orphan_cleanup',
+      });
     });
 
     it('does not delete managed docs for registered owners with known definitions', async () => {
