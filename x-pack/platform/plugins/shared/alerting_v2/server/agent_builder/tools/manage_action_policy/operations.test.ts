@@ -206,9 +206,7 @@ describe('executeActionPolicyOperations', () => {
         name: 'Existing Policy',
         tags: ['oncall'],
       };
-      const ops: ActionPolicyOperation[] = [
-        { operation: 'set_metadata', description: 'updated' },
-      ];
+      const ops: ActionPolicyOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
 
       const result = executeActionPolicyOperations(existing, ops, { isNew: false });
 

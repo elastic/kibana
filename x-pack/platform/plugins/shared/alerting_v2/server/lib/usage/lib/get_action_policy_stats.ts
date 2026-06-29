@@ -118,8 +118,7 @@ export async function getActionPolicyStats(
     action_policies_count: total,
     action_policies_unique_workflow_count: aggs?.unique_workflow_count.value ?? 0,
     action_policies_count_with_matcher: aggs?.count_with_matcher.doc_count ?? 0,
-    action_policies_count_agent_builder_assisted:
-      aggs?.count_agent_builder_assisted.doc_count ?? 0,
+    action_policies_count_agent_builder_assisted: aggs?.count_agent_builder_assisted.doc_count ?? 0,
     action_policies_count_with_group_by: aggs?.count_with_group_by.doc_count ?? 0,
     action_policies_avg_group_by_fields_count: aggs?.avg_group_by_fields_count.value ?? null,
     action_policies_count_by_throttle_interval: bucketsToArray(
