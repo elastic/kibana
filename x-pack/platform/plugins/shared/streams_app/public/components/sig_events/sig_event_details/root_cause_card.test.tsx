@@ -135,9 +135,7 @@ describe('RootCauseCard', () => {
     const assessmentNote = 'Judge confirmed primary signal; budget exhausted on entry #3.';
 
     it('renders the Assessment accordion and its note when assessment_note is set', () => {
-      renderWithI18n(
-        <RootCauseCard event={{ ...baseEvent, assessment_note: assessmentNote }} />
-      );
+      renderWithI18n(<RootCauseCard event={{ ...baseEvent, assessment_note: assessmentNote }} />);
 
       expect(screen.getByText('Assessment')).toBeInTheDocument();
       expect(screen.getByText(assessmentNote)).toBeInTheDocument();
@@ -161,9 +159,7 @@ describe('RootCauseCard', () => {
 
     it('renders the Evidence trail label and a count badge of evidences', () => {
       renderWithI18n(
-        <RootCauseCard
-          event={{ ...baseEvent, evidences: [evidence, { rule_name: 'r2' }] }}
-        />
+        <RootCauseCard event={{ ...baseEvent, evidences: [evidence, { rule_name: 'r2' }] }} />
       );
 
       expect(screen.getByText('Evidence trail')).toBeInTheDocument();
@@ -183,9 +179,7 @@ describe('RootCauseCard', () => {
     });
 
     it('falls back to "Unnamed evidence" when rule_name and description are missing', () => {
-      renderWithI18n(
-        <RootCauseCard event={{ ...baseEvent, evidences: [{ confirmed: false }] }} />
-      );
+      renderWithI18n(<RootCauseCard event={{ ...baseEvent, evidences: [{ confirmed: false }] }} />);
 
       expect(screen.getByText('Unnamed evidence')).toBeInTheDocument();
     });
