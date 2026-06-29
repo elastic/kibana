@@ -340,6 +340,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
         return request;
       };
+      console.log('input?.useApproximation', input?.useApproximation);
 
       try {
         const { rawResponse, requestParams, warning } = await searchService.esql(
@@ -355,6 +356,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
+            approximation: input?.useApproximation,
             dropNullColumns: true,
             includeExecutionMetadata: true,
           }
