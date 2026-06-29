@@ -67,7 +67,6 @@ jest.mock('../../../../../../utils/is_attack_discovery_alert', () => ({
 
 describe('SharedBadge', () => {
   const defaultProps = { attackDiscovery: mockAttackDiscoveryAlert };
-  const user = userEvent.setup({ pointerEventsCheck: 0 });
 
   let user: UserEvent;
 

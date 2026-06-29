@@ -33,6 +33,7 @@ const mockTrackingResponse: WorkflowTrackingResponse = {
       workflow_run_id: 'legacy-run-id',
     },
   ],
+  gate: null,
   generation: {
     workflow_id: 'workflow-generation',
     workflow_run_id: 'generation-run-id',

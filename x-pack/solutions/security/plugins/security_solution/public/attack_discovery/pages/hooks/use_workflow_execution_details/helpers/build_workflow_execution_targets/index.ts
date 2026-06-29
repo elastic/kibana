@@ -43,6 +43,17 @@ export const buildWorkflowExecutionTargets = ({
         .map((ref) => toTarget(ref, 'retrieve_alerts'))
     : [];
 
+  // The generation-phase gate (skill) runs during the Generation phase, so its
+  // executions are tagged with the `generate_discoveries` pipeline phase and
+  // placed before the generation workflow so they render as sub-steps under
+  // "Generation" rather than "Alert retrieval".
+  const gateRefs = workflowExecutions?.gate;
+  const gateTargets: WorkflowExecutionTarget[] = Array.isArray(gateRefs)
+    ? gateRefs
+        .filter((ref): ref is WorkflowExecutionReference => ref != null)
+        .map((ref) => toTarget(ref, 'generate_discoveries'))
+    : [];
+
   const generationTarget: WorkflowExecutionTarget[] =
     workflowExecutions?.generation != null
       ? [toTarget(workflowExecutions.generation, 'generate_discoveries')]
@@ -53,7 +64,12 @@ export const buildWorkflowExecutionTargets = ({
       ? [toTarget(workflowExecutions.validation, 'validate_discoveries')]
       : [];
 
-  const baseTargets = [...alertRetrievalTargets, ...generationTarget, ...validationTarget];
+  const baseTargets = [
+    ...alertRetrievalTargets,
+    ...gateTargets,
+    ...generationTarget,
+    ...validationTarget,
+  ];
 
   const fallbackTarget: WorkflowExecutionTarget[] =
     workflowRunId != null && !baseTargets.some((target) => target.workflowRunId === workflowRunId)

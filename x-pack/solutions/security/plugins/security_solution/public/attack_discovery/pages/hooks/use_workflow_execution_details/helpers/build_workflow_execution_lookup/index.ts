@@ -30,6 +30,13 @@ export const buildWorkflowExecutionLookup = (
     }
   }
 
+  const gateRefs = workflowExecutions?.gate;
+  if (Array.isArray(gateRefs)) {
+    for (const ref of gateRefs) {
+      addExecution(ref);
+    }
+  }
+
   addExecution(workflowExecutions?.generation);
   addExecution(workflowExecutions?.validation);
 
