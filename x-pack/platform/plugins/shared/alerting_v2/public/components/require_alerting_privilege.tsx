@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { useService } from '@kbn/core-di-browser';
 import type { AlertingV2Feature } from '../../common/feature_privileges';
-import { useHasAllAlertingPrivileges } from '../hooks/use_has_alerting_privilege';
+import { UserCapabilities } from '../services/user_capabilities';
 import { getAlertingRequiredPrivileges } from '../lib/required_privileges';
 import { RequiredPrivilegesPrompt } from './required_privileges_prompt';
 
@@ -33,7 +34,8 @@ export const RequireAlertingPrivilege = ({
   pageName,
   children,
 }: RequireAlertingPrivilegeProps) => {
-  const hasPrivilege = useHasAllAlertingPrivileges(features);
+  const userCapabilities = useService(UserCapabilities);
+  const hasPrivilege = features.every((feature) => userCapabilities.canRead(feature));
 
   if (!hasPrivilege) {
     return (

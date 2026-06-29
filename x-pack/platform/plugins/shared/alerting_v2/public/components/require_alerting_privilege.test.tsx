@@ -8,15 +8,21 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useHasAllAlertingPrivileges } from '../hooks/use_has_alerting_privilege';
+import { useService } from '@kbn/core-di-browser';
+import type { AlertingV2Feature } from '../../common/feature_privileges';
+import { UserCapabilities } from '../services/user_capabilities';
 import { RequireAlertingPrivilege } from './require_alerting_privilege';
 import type { RequireAlertingPrivilegeProps } from './require_alerting_privilege';
 
-jest.mock('../hooks/use_has_alerting_privilege');
+jest.mock('@kbn/core-di-browser');
 
-const mockUseHasAllAlertingPrivileges = useHasAllAlertingPrivileges as jest.MockedFunction<
-  typeof useHasAllAlertingPrivileges
->;
+const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockCanRead = jest.fn<boolean, [AlertingV2Feature]>();
+
+const mockReadableFeatures = (readable: (feature: AlertingV2Feature) => boolean) => {
+  mockCanRead.mockImplementation(readable);
+  mockUseService.mockReturnValue({ canRead: mockCanRead } as unknown as UserCapabilities);
+};
 
 const renderGate = (features: RequireAlertingPrivilegeProps['features'] = ['rules']) =>
   render(
@@ -32,8 +38,8 @@ describe('RequireAlertingPrivilege', () => {
     jest.clearAllMocks();
   });
 
-  it('renders children when the user has the required privilege', () => {
-    mockUseHasAllAlertingPrivileges.mockReturnValue(true);
+  it('renders children when the user can read every required feature', () => {
+    mockReadableFeatures(() => true);
     renderGate();
 
     expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
@@ -41,7 +47,7 @@ describe('RequireAlertingPrivilege', () => {
   });
 
   it('renders the interstitial listing the required privileges when access is denied', () => {
-    mockUseHasAllAlertingPrivileges.mockReturnValue(false);
+    mockReadableFeatures(() => false);
     renderGate(['rules']);
 
     expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
@@ -50,17 +56,18 @@ describe('RequireAlertingPrivilege', () => {
     expect(screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules')).toBeInTheDocument();
   });
 
-  it('passes a single-feature set to the privileges hook', () => {
-    mockUseHasAllAlertingPrivileges.mockReturnValue(true);
+  it('checks read access for the requested feature', () => {
+    mockReadableFeatures(() => true);
     renderGate(['alerts']);
 
-    expect(mockUseHasAllAlertingPrivileges).toHaveBeenCalledWith(['alerts']);
+    expect(mockCanRead).toHaveBeenCalledWith('alerts');
   });
 
-  it('passes a multi-feature set through unchanged (AND semantics)', () => {
-    mockUseHasAllAlertingPrivileges.mockReturnValue(true);
+  it('denies access when any feature in the set is not readable (AND semantics)', () => {
+    mockReadableFeatures((feature) => feature === 'alerts');
     renderGate(['alerts', 'rules']);
 
-    expect(mockUseHasAllAlertingPrivileges).toHaveBeenCalledWith(['alerts', 'rules']);
+    expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
   });
 });
