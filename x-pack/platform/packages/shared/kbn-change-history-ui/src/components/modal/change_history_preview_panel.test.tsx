@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
-import { useChangeHistoryListItems } from '../../provider/change_history_list_items_context';
+import { useChangeHistoryPreviewCompare } from '../../hooks/use_change_history_preview_compare';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
@@ -19,17 +19,17 @@ jest.mock('../../provider/use_change_history_config', () => ({
   useChangeHistoryConfig: jest.fn(),
 }));
 
-jest.mock('../../provider/change_history_list_items_context', () => ({
-  useChangeHistoryListItems: jest.fn(),
-}));
-
 jest.mock('../../hooks/use_change_history_detail', () => ({
   useChangeHistoryDetail: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_change_history_preview_compare', () => ({
+  useChangeHistoryPreviewCompare: jest.fn(),
+}));
+
 const mockUseChangeHistoryConfig = useChangeHistoryConfig as jest.Mock;
-const mockUseChangeHistoryListItems = useChangeHistoryListItems as jest.Mock;
 const mockUseChangeHistoryDetail = useChangeHistoryDetail as jest.Mock;
+const mockUseChangeHistoryPreviewCompare = useChangeHistoryPreviewCompare as jest.Mock;
 
 const listItems: ChangeHistoryListItem[] = [
   {
@@ -67,83 +67,60 @@ describe('ChangeHistoryPreviewPanel', () => {
     mockUseChangeHistoryConfig.mockReturnValue({
       adapter: {},
       objectId: 'workflow-1',
-      selectedChangeId: 'evt-current',
-      renderPreview: jest.fn(({ compareChange }) => (
+      renderPreview: jest.fn(({ previousChange: compareChange }) => (
         <div data-test-subj="previewRender">
           {compareChange ? 'with-compare' : 'without-compare'}
         </div>
       )),
     });
-    mockUseChangeHistoryListItems.mockReturnValue(listItems);
   });
 
   it('passes the chronologically previous change to renderPreview', () => {
-    mockUseChangeHistoryDetail.mockImplementation(({ changeId, enabled }) => {
-      if (!enabled) {
-        return { change: undefined, isLoading: false, error: undefined };
-      }
-
-      if (changeId === 'evt-current') {
-        return { change: currentChange, isLoading: false, error: undefined };
-      }
-
-      if (changeId === 'evt-previous') {
-        return { change: previousChange, isLoading: false, error: undefined };
-      }
-
-      return { change: undefined, isLoading: false, error: undefined };
+    mockUseChangeHistoryDetail.mockReturnValue({
+      change: currentChange,
+      isLoading: false,
+      error: undefined,
+    });
+    mockUseChangeHistoryPreviewCompare.mockReturnValue({
+      currentChange,
+      previousChange,
+      isLoadingCompareContext: false,
     });
 
-    render(<ChangeHistoryPreviewPanel />);
+    render(<ChangeHistoryPreviewPanel selectedChangeId="evt-current" listItems={listItems} />);
 
     expect(screen.getByTestId('changeHistoryPreviewFrame')).toBeInTheDocument();
     expect(screen.getByTestId('previewRender')).toHaveTextContent('with-compare');
-    expect(mockUseChangeHistoryDetail).toHaveBeenCalledWith(
-      expect.objectContaining({
-        changeId: 'evt-previous',
-        enabled: true,
-      })
-    );
     expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenCalledWith(
       expect.objectContaining({
         change: currentChange,
-        compareChange: previousChange,
+        previousChange,
         objectId: 'workflow-1',
+        isLoadingCompareContext: false,
       })
     );
   });
 
-  it('does not fetch compare change for the oldest loaded list item', () => {
-    mockUseChangeHistoryConfig.mockReturnValue({
-      adapter: {},
-      objectId: 'workflow-1',
-      selectedChangeId: 'evt-previous',
-      renderPreview: jest.fn(({ compareChange }) => (
-        <div data-test-subj="previewRender">
-          {compareChange ? 'with-compare' : 'without-compare'}
-        </div>
-      )),
+  it('does not pass compare change for the oldest loaded list item', () => {
+    mockUseChangeHistoryDetail.mockReturnValue({
+      change: previousChange,
+      isLoading: false,
+      error: undefined,
+    });
+    mockUseChangeHistoryPreviewCompare.mockReturnValue({
+      currentChange,
+      previousChange: undefined,
+      isLoadingCompareContext: false,
     });
 
-    mockUseChangeHistoryDetail.mockImplementation(({ changeId, enabled }) => {
-      if (!enabled) {
-        return { change: undefined, isLoading: false, error: undefined };
-      }
-
-      if (changeId === 'evt-previous') {
-        return { change: previousChange, isLoading: false, error: undefined };
-      }
-
-      return { change: undefined, isLoading: false, error: undefined };
-    });
-
-    render(<ChangeHistoryPreviewPanel />);
+    render(<ChangeHistoryPreviewPanel selectedChangeId="evt-previous" listItems={listItems} />);
 
     expect(screen.getByTestId('previewRender')).toHaveTextContent('without-compare');
-    expect(mockUseChangeHistoryDetail).toHaveBeenCalledWith(
+    expect(mockUseChangeHistoryConfig().renderPreview).toHaveBeenCalledWith(
       expect.objectContaining({
-        changeId: undefined,
-        enabled: false,
+        change: previousChange,
+        previousChange: undefined,
+        objectId: 'workflow-1',
       })
     );
   });

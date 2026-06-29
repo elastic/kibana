@@ -14,10 +14,15 @@ import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_mo
 
 export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({
   change,
-  compareChange,
+  previousChange,
+  isLoadingCompareContext,
 }) => (
   <WorkflowChangeHistoryMonacoPreview
     yaml={getWorkflowYamlFromSnapshot(change.snapshot)}
-    compareYaml={compareChange ? getWorkflowYamlFromSnapshot(compareChange.snapshot) : undefined}
+    compareYaml={
+      !isLoadingCompareContext && previousChange
+        ? getWorkflowYamlFromSnapshot(previousChange.snapshot)
+        : undefined
+    }
   />
 );
