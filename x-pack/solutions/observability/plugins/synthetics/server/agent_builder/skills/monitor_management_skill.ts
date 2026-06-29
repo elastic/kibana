@@ -57,17 +57,21 @@ Always include \`{ operation: "validate" }\` as the **last operation** in the fi
 
 ## Rendering Attachments
 
-After calling \`${syntheticsTools.manageMonitor}\`, **always** render the monitor attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
+After **every** call to \`${syntheticsTools.manageMonitor}\` you **MUST** render the monitor attachment inline in your response using the \`<render_attachment>\` tag:
 
 \`\`\`
 <render_attachment id="<monitorAttachment.id>" version="<version>" />
 \`\`\`
 
-This displays the interactive monitor card for the user to review.
+where \`<monitorAttachment.id>\` and \`<version>\` come from the tool result.
+
+This renders the interactive monitor card with the **Save monitor** / **Update monitor** action buttons. **Do not** summarise the monitor in a markdown table or bulleted list instead — without the \`<render_attachment>\` tag the user has no way to save the monitor and your turn is incomplete.
 
 ## Persistence
 
 The \`${syntheticsTools.manageMonitor}\` tool only manages the **in-memory attachment** — it never writes to Elasticsearch. Tell the user to persist their changes by clicking the **Save monitor** button on the rendered attachment (or **Update monitor** if it has already been saved). Do not attempt to create, update, delete, enable, or disable Synthetics monitors directly via API calls.
+
+Reminder: every turn that calls \`${syntheticsTools.manageMonitor}\` MUST end with a \`<render_attachment id="{monitorAttachment.id}" version="{version}"/>\` tag — the **Save monitor** button only exists on that rendered card.
 
 ## Discovering Existing Locations
 

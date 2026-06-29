@@ -37,6 +37,15 @@ describe('createMonitorManagementSkill', () => {
     expect(skill.content).toContain('HTTP');
   });
 
+  // The LLM (especially GPT-4) tends to summarise tool results in markdown
+  // tables when the instruction appears only once. Repeating the render
+  // contract under both Rendering and Persistence keeps the Save monitor
+  // button visible after every manage_monitor call.
+  it('repeats the <render_attachment> instruction so the LLM does not skip it', () => {
+    const occurrences = skill.content.match(/<render_attachment/g) ?? [];
+    expect(occurrences.length).toBeGreaterThanOrEqual(2);
+  });
+
   it('passes the agent-builder skillDefinition schema (length limits, regexes, tool count)', async () => {
     await expect(validateSkillDefinition(skill)).resolves.toBe(skill);
   });

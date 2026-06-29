@@ -41,9 +41,13 @@ export const manageMonitorTool = (): BuiltinSkillBoundedTool<typeof manageMonito
   description: `Compose or update a Synthetics HTTP monitor draft in the conversation.
 
 This tool only mutates the monitor attachment shown in the conversation. It
-does NOT create or modify any saved Synthetics monitor — for that, direct the
-user to the "Save monitor" or "Update monitor" button in the rendered
-attachment.
+does NOT create or modify any saved Synthetics monitor — that is the job of
+the **Save monitor** / **Update monitor** action buttons on the rendered card.
+
+After this tool returns, you **MUST** render the resulting attachment in your
+reply with \`<render_attachment id="<monitorAttachment.id>" version="<version>"/>\`
+(values come from the tool result). Do not summarise the monitor in a markdown
+table or bulleted list — the user cannot save without the rendered card.
 
 Use operations[] to:
 1. set_metadata — set name (required for new monitors), description, and tags
