@@ -13,13 +13,14 @@ import type {
 } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
-import { registerGetPipelineDataRoute } from './get_pipeline_data';
+import { registerGetPipelineDataRoute, type GetPipelineDataResponse } from './get_pipeline_data';
 import { getWorkflowExecutionsTracking } from './helpers/get_workflow_executions_tracking';
 
 jest.mock('../../../lib/assert_workflows_enabled', () => ({
   assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
 }));
 import { extractPipelineAlertData } from './helpers/extract_pipeline_alert_data';
+import { extractPipelineGateData } from './helpers/extract_pipeline_gate_data';
 import { extractPipelineGenerationData } from './helpers/extract_pipeline_generation_data';
 import { extractPipelineValidationData } from './helpers/extract_pipeline_validation_data';
 import { computeCombinedAlerts } from './helpers/compute_combined_alerts';
@@ -31,6 +32,10 @@ jest.mock('./helpers/get_workflow_executions_tracking', () => ({
 
 jest.mock('./helpers/extract_pipeline_alert_data', () => ({
   extractPipelineAlertData: jest.fn(),
+}));
+
+jest.mock('./helpers/extract_pipeline_gate_data', () => ({
+  extractPipelineGateData: jest.fn(),
 }));
 
 jest.mock('./helpers/extract_pipeline_generation_data', () => ({
@@ -54,6 +59,9 @@ const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as jest.
 >;
 const mockExtractPipelineAlertData = extractPipelineAlertData as jest.MockedFunction<
   typeof extractPipelineAlertData
+>;
+const mockExtractPipelineGateData = extractPipelineGateData as jest.MockedFunction<
+  typeof extractPipelineGateData
 >;
 const mockExtractPipelineGenerationData = extractPipelineGenerationData as jest.MockedFunction<
   typeof extractPipelineGenerationData
@@ -254,6 +262,7 @@ describe('registerGetPipelineDataRoute', () => {
               workflow_run_id: 'alert-retrieval-run-id',
             },
           ],
+          gate: null,
           generation: {
             workflow_id: 'workflow-generation',
             workflow_run_id: 'generation-run-id',
@@ -265,6 +274,213 @@ describe('registerGetPipelineDataRoute', () => {
         },
       }),
     });
+  });
+
+  it('surfaces gate-bucket runs in alert_retrieval with a gate-aware (kept + added) count', async () => {
+    const trackingWithGate: WorkflowExecutionsTracking = {
+      alertRetrieval: [
+        {
+          workflowId: 'workflow-default-alert-retrieval',
+          workflowRunId: 'alert-retrieval-run-id',
+        },
+      ],
+      gate: [
+        {
+          workflowId: 'system-attack-discovery-skill-alert-retrieval',
+          workflowRunId: 'gate-run-id',
+        },
+      ],
+      generation: {
+        workflowId: 'workflow-generation',
+        workflowRunId: 'generation-run-id',
+      },
+      validation: null,
+    };
+
+    const handler = registerAndGetHandler();
+
+    mockGetWorkflowExecutionsTracking.mockResolvedValue(trackingWithGate);
+    mockGetWorkflowExecution.mockResolvedValue({ stepExecutions: [] });
+    mockExtractPipelineAlertData.mockReturnValue({
+      alerts: ['alert-1', 'alert-2'],
+      alerts_context_count: 2,
+      extraction_strategy: 'default_esql' as const,
+    });
+    mockExtractPipelineGateData.mockReturnValue({
+      alerts: [],
+      alerts_context_count: 5,
+      extraction_strategy: 'skill' as const,
+    });
+    mockExtractPipelineGenerationData.mockReturnValue(null);
+    mockExtractPipelineValidationData.mockReturnValue(null);
+    mockComputeCombinedAlerts.mockReturnValue({
+      alerts: ['alert-1', 'alert-2'],
+      alerts_context_count: 2,
+    });
+
+    const responseMock = httpServerMock.createResponseFactory();
+    await handler(
+      {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      createRequest(),
+      responseMock
+    );
+
+    const body = responseMock.ok.mock.calls[0]?.[0]?.body as GetPipelineDataResponse;
+
+    // gate run is surfaced in alert_retrieval, keyed by its run id, with the gate-aware count
+    expect(body.alert_retrieval).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          alerts: [],
+          alerts_context_count: 5,
+          extraction_strategy: 'skill',
+          workflow_id: 'system-attack-discovery-skill-alert-retrieval',
+          workflow_run_id: 'gate-run-id',
+        }),
+      ])
+    );
+
+    // gate runs are excluded from the combined alert-retrieval computation
+    expect(mockComputeCombinedAlerts).toHaveBeenCalledWith([
+      expect.objectContaining({ workflow_run_id: 'alert-retrieval-run-id' }),
+    ]);
+
+    // gate bucket is surfaced in the snake_case tracking response
+    expect(body.workflow_executions_tracking.gate).toEqual([
+      {
+        workflow_id: 'system-attack-discovery-skill-alert-retrieval',
+        workflow_run_id: 'gate-run-id',
+      },
+    ]);
+  });
+
+  it('surfaces the real alerts passed to generation on the gate (skill) entry (enables inspect)', async () => {
+    const trackingWithGate: WorkflowExecutionsTracking = {
+      alertRetrieval: null,
+      gate: [
+        {
+          workflowId: 'system-attack-discovery-skill-alert-retrieval',
+          workflowRunId: 'gate-run-id',
+        },
+      ],
+      generation: {
+        workflowId: 'workflow-generation',
+        workflowRunId: 'generation-run-id',
+      },
+      validation: null,
+    };
+
+    // The real events passed to generation live in the generate_discoveries
+    // step's input.alerts (kept candidates pass through as-is + any net-new).
+    const generationInputAlerts = ['_id,a1\nhost.name,web-01', '_id,a2\nhost.name,web-02'];
+
+    const handler = registerAndGetHandler();
+
+    mockGetWorkflowExecutionsTracking.mockResolvedValue(trackingWithGate);
+    mockGetWorkflowExecution.mockImplementation((runId: string) =>
+      runId === 'generation-run-id'
+        ? Promise.resolve({
+            stepExecutions: [
+              { input: { alerts: generationInputAlerts }, stepId: 'generate_discoveries' },
+            ],
+          })
+        : Promise.resolve({ stepExecutions: [] })
+    );
+    // The gate emits ids only, so extractPipelineGateData carries no raw alerts.
+    mockExtractPipelineGateData.mockReturnValue({
+      alerts: [],
+      alerts_context_count: 2,
+      extraction_strategy: 'skill' as const,
+    });
+    mockExtractPipelineGenerationData.mockReturnValue({
+      attack_discoveries: [],
+      execution_uuid: 'test-uuid',
+      replacements: {},
+    });
+    mockExtractPipelineValidationData.mockReturnValue(null);
+
+    const responseMock = httpServerMock.createResponseFactory();
+    await handler(
+      {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      createRequest(),
+      responseMock
+    );
+
+    const body = responseMock.ok.mock.calls[0]?.[0]?.body as GetPipelineDataResponse;
+
+    // The gate (skill) entry now carries the real alerts passed to generation so
+    // its inspect button is enabled and shows exactly what generation received.
+    expect(body.alert_retrieval).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          alerts: generationInputAlerts,
+          alerts_context_count: 2,
+          extraction_strategy: 'skill',
+          workflow_run_id: 'gate-run-id',
+        }),
+      ])
+    );
+  });
+
+  it('falls back to standard alert extraction for non-gate-decision runs in the gate bucket', async () => {
+    const trackingWithGateRefetch: WorkflowExecutionsTracking = {
+      alertRetrieval: null,
+      gate: [
+        {
+          workflowId: 'workflow-default-alert-retrieval',
+          workflowRunId: 'gate-refetch-run-id',
+        },
+      ],
+      generation: {
+        workflowId: 'workflow-generation',
+        workflowRunId: 'generation-run-id',
+      },
+      validation: null,
+    };
+
+    const handler = registerAndGetHandler();
+
+    mockGetWorkflowExecutionsTracking.mockResolvedValue(trackingWithGateRefetch);
+    mockGetWorkflowExecution.mockResolvedValue({ stepExecutions: [] });
+    // not a gate decision → extractPipelineGateData returns null
+    mockExtractPipelineGateData.mockReturnValue(null);
+    mockExtractPipelineAlertData.mockReturnValue({
+      alerts: ['_id,added-1\nx'],
+      alerts_context_count: 1,
+      extraction_strategy: 'default_esql' as const,
+    });
+    mockExtractPipelineGenerationData.mockReturnValue(null);
+    mockExtractPipelineValidationData.mockReturnValue(null);
+
+    const responseMock = httpServerMock.createResponseFactory();
+    await handler(
+      {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      createRequest(),
+      responseMock
+    );
+
+    const body = responseMock.ok.mock.calls[0]?.[0]?.body as GetPipelineDataResponse;
+
+    expect(body.alert_retrieval).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          alerts_context_count: 1,
+          workflow_run_id: 'gate-refetch-run-id',
+        }),
+      ])
+    );
   });
 
   it('returns 404 when execution not found in event log', async () => {
@@ -502,8 +718,11 @@ describe('registerGetPipelineDataRoute', () => {
       includeOutput: true,
     });
 
+    // Generation is always fetched with includeInput so the generate step's
+    // input.alerts (the real events passed to generation) can be surfaced on the
+    // gate (skill) inspect and used for provided-mode reconstruction.
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('generation-run-id', 'default', {
-      includeInput: false,
+      includeInput: true,
       includeOutput: true,
     });
 

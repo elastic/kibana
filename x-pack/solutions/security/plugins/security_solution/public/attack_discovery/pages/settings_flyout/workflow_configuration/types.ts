@@ -15,12 +15,27 @@ export interface WorkflowItem {
   tags?: string[];
 }
 
-export type AlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql';
+/**
+ * Query mode for the built-in default alert retrieval workflow. Only meaningful
+ * when {@link WorkflowConfiguration.defaultRetrievalEnabled} is `true`.
+ */
+export type AlertRetrievalMode = 'custom_query' | 'esql';
 
+/**
+ * Composite workflow configuration for alert retrieval and validation.
+ *
+ * Three independent retrieval toggles compose the alert set; at least one must be enabled:
+ * - {@link skillEnabled} (Toggle 1): the attack discovery skill performs its own additional retrieval.
+ * - {@link defaultRetrievalEnabled} (Toggle 2): the built-in default alert retrieval workflow runs.
+ * - {@link alertRetrievalWorkflowsEnabled} (Toggle 3): user-created alert retrieval workflows run.
+ */
 export interface WorkflowConfiguration {
   alertRetrievalMode: AlertRetrievalMode;
   alertRetrievalWorkflowIds: string[];
+  alertRetrievalWorkflowsEnabled: boolean;
+  defaultRetrievalEnabled: boolean;
   esqlQuery?: string;
+  skillEnabled: boolean;
   validationWorkflowId: string;
 }
 

@@ -11,8 +11,11 @@ import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/gene
 const DEFAULT_VALIDATION_WORKFLOW_ID = 'default-validation-workflow-id';
 
 const baseWorkflowConfig: WorkflowConfig = {
-  alert_retrieval_workflow_ids: ['alert-retrieval-1'],
   alert_retrieval_mode: 'custom_query',
+  alert_retrieval_workflow_ids: ['alert-retrieval-1'],
+  alert_retrieval_workflows_enabled: false,
+  default_retrieval_enabled: true,
+  skill_enabled: true,
   validation_workflow_id: '',
 };
 
@@ -22,7 +25,7 @@ describe('getInferredPrebuiltStepTypes', () => {
       defaultValidationWorkflowId: DEFAULT_VALIDATION_WORKFLOW_ID,
       workflowConfig: {
         ...baseWorkflowConfig,
-        alert_retrieval_mode: 'custom_only',
+        default_retrieval_enabled: false,
         validation_workflow_id: 'custom-validation',
       },
     });
@@ -30,7 +33,7 @@ describe('getInferredPrebuiltStepTypes', () => {
     expect(result).toContain('security.attack-discovery.generate');
   });
 
-  it('includes alert retrieval step type when alert_retrieval_mode is not custom_only', () => {
+  it('includes alert retrieval step type when default_retrieval_enabled is true', () => {
     const result = getInferredPrebuiltStepTypes({
       defaultValidationWorkflowId: DEFAULT_VALIDATION_WORKFLOW_ID,
       workflowConfig: baseWorkflowConfig,
@@ -39,12 +42,25 @@ describe('getInferredPrebuiltStepTypes', () => {
     expect(result).toContain('security.attack-discovery.defaultAlertRetrieval');
   });
 
-  it('excludes alert retrieval step type when alert_retrieval_mode is custom_only', () => {
+  it('excludes alert retrieval step type when default_retrieval_enabled is false', () => {
     const result = getInferredPrebuiltStepTypes({
       defaultValidationWorkflowId: DEFAULT_VALIDATION_WORKFLOW_ID,
       workflowConfig: {
         ...baseWorkflowConfig,
-        alert_retrieval_mode: 'custom_only',
+        default_retrieval_enabled: false,
+      },
+    });
+
+    expect(result).not.toContain('security.attack-discovery.defaultAlertRetrieval');
+  });
+
+  it('excludes alert retrieval step type when only the skill toggle is enabled', () => {
+    const result = getInferredPrebuiltStepTypes({
+      defaultValidationWorkflowId: DEFAULT_VALIDATION_WORKFLOW_ID,
+      workflowConfig: {
+        ...baseWorkflowConfig,
+        default_retrieval_enabled: false,
+        skill_enabled: true,
       },
     });
 
@@ -115,12 +131,12 @@ describe('getInferredPrebuiltStepTypes', () => {
     ]);
   });
 
-  it('returns only the generate step type when all optional features are custom_only or custom', () => {
+  it('returns only the generate step type when default retrieval is off and validation is custom', () => {
     const result = getInferredPrebuiltStepTypes({
       defaultValidationWorkflowId: DEFAULT_VALIDATION_WORKFLOW_ID,
       workflowConfig: {
         ...baseWorkflowConfig,
-        alert_retrieval_mode: 'custom_only',
+        default_retrieval_enabled: false,
         validation_workflow_id: 'custom-validation',
       },
     });

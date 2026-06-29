@@ -28,6 +28,7 @@ export interface ExecutionTrackingWorkflow {
 
 export interface GetExecutionTrackingResponse {
   alert_retrieval: ExecutionTrackingWorkflow[] | null;
+  gate: ExecutionTrackingWorkflow[] | null;
   generation: ExecutionTrackingWorkflow | null;
   validation: ExecutionTrackingWorkflow | null;
 }
@@ -93,6 +94,11 @@ export const registerGetExecutionTrackingRoute = (
           const responseBody: GetExecutionTrackingResponse = {
             alert_retrieval:
               tracking.alertRetrieval?.map((entry) => ({
+                workflow_id: entry.workflowId,
+                workflow_run_id: entry.workflowRunId,
+              })) ?? null,
+            gate:
+              tracking.gate?.map((entry) => ({
                 workflow_id: entry.workflowId,
                 workflow_run_id: entry.workflowRunId,
               })) ?? null,

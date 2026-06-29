@@ -227,9 +227,11 @@ describe('extractPipelineValidationData', () => {
             stepType: 'security.attack-discovery.defaultValidation',
           },
           {
+            // persisted_discoveries holds existing + new (the re-queried set): one
+            // pre-existing duplicate plus one net-new discovery.
             output: {
               duplicates_dropped_count: 1,
-              persisted_discoveries: [mockValidatedDiscovery],
+              persisted_discoveries: [mockValidatedDiscovery, mockValidatedDiscoveryTwo],
             },
             stepType: 'security.attack-discovery.persistDiscoveries',
           },

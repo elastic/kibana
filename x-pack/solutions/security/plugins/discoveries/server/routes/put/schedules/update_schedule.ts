@@ -85,15 +85,13 @@ export const registerUpdateScheduleRoute = (
           });
 
           const existingSchedule = await dataClient.getSchedule(id);
-          // `workflowConfig` is added to AttackDiscoveryScheduleParams by a
-          // later PR in the stack (PR10 — Schedule Integration). PR3 routes
-          // need to read it here for partial-merge semantics; the cast
-          // is FF-off safe because this route is FF-gated at registration.
-          const existingWorkflowConfig = (existingSchedule.params as { workflowConfig?: unknown })
-            .workflowConfig;
+          // `workflowConfig` is added to the schedule params schema in PR10
+          // (Schedule Integration). Until then the inferred params type does
+          // not declare it, so we read it through a narrow cast. FF-off safe:
+          // this route is only reachable when the feature flag is ON.
           const internalUpdateProps = transformUpdatePropsFromApi(
             request.body,
-            existingWorkflowConfig
+            (existingSchedule.params as { workflowConfig?: unknown }).workflowConfig
           );
           const schedule = await dataClient.updateSchedule({
             id,

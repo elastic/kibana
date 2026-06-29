@@ -62,13 +62,35 @@ export interface ParsedApiConfig {
   provider?: string;
 }
 
-export type AlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql' | 'provided';
+export type AlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql' | 'provided' | 'skill';
 
+/**
+ * Query mode for the built-in default alert retrieval workflow (the Toggle 2 sub-field).
+ * Only meaningful when `default_retrieval_enabled` is `true`.
+ */
+export type AlertRetrievalQueryMode = 'custom_query' | 'esql';
+
+/**
+ * Composite workflow configuration. Three independent retrieval toggles
+ * (`skill_enabled`, `default_retrieval_enabled`, `alert_retrieval_workflows_enabled`) compose
+ * the candidate alert set; at least one must be enabled.
+ */
 export interface WorkflowConfig {
+  /** Additional free-text context supplied by the gate skill at runtime. */
   additional_context?: string;
-  alert_retrieval_mode: AlertRetrievalMode;
+  /** Toggle 2 sub-field: query mode for the built-in default alert retrieval workflow. */
+  alert_retrieval_mode: AlertRetrievalQueryMode;
+  /** Toggle 3 sub-field: user-created alert retrieval workflow IDs to execute. */
   alert_retrieval_workflow_ids: string[];
+  /** Toggle 3: whether the user-created alert retrieval workflows run. */
+  alert_retrieval_workflows_enabled: boolean;
+  /** Toggle 2: whether the built-in default alert retrieval workflow runs. */
+  default_retrieval_enabled: boolean;
+  /** Toggle 2 sub-field: ES|QL query (required when `alert_retrieval_mode` is `'esql'`). */
   esql_query?: string;
+  /** Toggle 1: whether the attack discovery skill performs its own additional alert retrieval. */
+  skill_enabled: boolean;
+  /** ID of the validation workflow to use (or `'default'` for built-in). */
   validation_workflow_id: string;
 }
 
@@ -81,6 +103,12 @@ export interface WorkflowExecutionTracking {
 
 export interface WorkflowExecutionsTracking {
   alertRetrieval: WorkflowExecutionTracking[] | null;
+  /**
+   * Generation-phase gate (skill) executions, including any net-new alert
+   * re-fetch the skill triggers. Surfaced under the Generation phase in the
+   * monitoring UI rather than Alert retrieval.
+   */
+  gate?: WorkflowExecutionTracking[] | null;
   generation: WorkflowExecutionTracking | null;
   validation: WorkflowExecutionTracking | null;
 }
@@ -144,6 +172,15 @@ export interface ExecuteGenerationWorkflowParams {
   logger: Logger;
   request: KibanaRequest;
   scheduleInfo?: { actions: string[]; id: string; interval: string };
+  /**
+   * Optional cancellation probe supplied by the alerting framework's rule executor
+   * (`services.shouldStopExecution`). The orchestration (skill gate + generation +
+   * validation) can run longer than the rule task's timeout; when the task has been
+   * cancelled, any alerts reported afterwards are silently discarded by the framework.
+   * Checking this after the orchestration completes lets us fail loudly (and write a
+   * terminal generation-failed event) instead of surfacing a misleading success.
+   */
+  shouldStopExecution?: () => boolean;
   size?: number;
   source?: AttackDiscoverySource;
   sourceMetadata?: SourceMetadata;

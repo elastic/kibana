@@ -29,6 +29,12 @@ const validTracking: WorkflowExecutionsTracking = {
       workflowRunId: 'alert-retrieval-run-id',
     },
   ],
+  gate: [
+    {
+      workflowId: 'workflow-gate',
+      workflowRunId: 'gate-run-id',
+    },
+  ],
   generation: {
     workflowId: 'workflow-generation',
     workflowRunId: 'generation-run-id',
@@ -52,6 +58,12 @@ describe('getExecutionTracking response transformation', () => {
           workflow_run_id: 'alert-retrieval-run-id',
         },
       ],
+      gate: [
+        {
+          workflow_id: 'workflow-gate',
+          workflow_run_id: 'gate-run-id',
+        },
+      ],
       generation: {
         workflow_id: 'workflow-generation',
         workflow_run_id: 'generation-run-id',
@@ -65,6 +77,11 @@ describe('getExecutionTracking response transformation', () => {
     const result: GetExecutionTrackingResponse = {
       alert_retrieval:
         validTracking.alertRetrieval?.map((entry) => ({
+          workflow_id: entry.workflowId,
+          workflow_run_id: entry.workflowRunId,
+        })) ?? null,
+      gate:
+        validTracking.gate?.map((entry) => ({
           workflow_id: entry.workflowId,
           workflow_run_id: entry.workflowRunId,
         })) ?? null,
@@ -87,9 +104,10 @@ describe('getExecutionTracking response transformation', () => {
     expect(result).toEqual(expected);
   });
 
-  it('handles null alertRetrieval, generation, and validation', () => {
+  it('handles null alertRetrieval, gate, generation, and validation', () => {
     const trackingWithNulls: WorkflowExecutionsTracking = {
       alertRetrieval: null,
+      gate: null,
       generation: null,
       validation: null,
     };
@@ -100,12 +118,18 @@ describe('getExecutionTracking response transformation', () => {
           workflow_id: entry.workflowId,
           workflow_run_id: entry.workflowRunId,
         })) ?? null,
+      gate:
+        trackingWithNulls.gate?.map((entry) => ({
+          workflow_id: entry.workflowId,
+          workflow_run_id: entry.workflowRunId,
+        })) ?? null,
       generation: null,
       validation: null,
     };
 
     expect(result).toEqual({
       alert_retrieval: null,
+      gate: null,
       generation: null,
       validation: null,
     });
