@@ -19,8 +19,6 @@ spaceTest.describe(
   'Discover data grid - document navigation',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);

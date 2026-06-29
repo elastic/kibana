@@ -17,8 +17,6 @@ const BREAKDOWN_SELECTED_LABEL = `Breakdown by ${BREAKDOWN_FIELD}`;
 const BREAKDOWN_NONE_LABEL = 'No breakdown';
 
 spaceTest.describe('Discover tabs - tab duplication', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.use({ viewport: { width: 1920, height: 1080 } });
-
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

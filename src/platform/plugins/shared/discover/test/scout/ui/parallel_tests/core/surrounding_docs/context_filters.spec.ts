@@ -27,8 +27,6 @@ const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
 const TEST_COLUMN_NAMES = testData.FILTER_COLUMNS;
 
 spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   let dataViewId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
