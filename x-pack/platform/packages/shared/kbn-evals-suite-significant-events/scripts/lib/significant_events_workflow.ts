@@ -109,15 +109,15 @@ export async function configureModelSelectionSettings(
     {
       features: [
         {
-          feature_id: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          feature_id: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
           endpoints: [{ id: connectorId }],
         },
         {
-          feature_id: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+          feature_id: STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
           endpoints: [{ id: connectorId }],
         },
         {
-          feature_id: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+          feature_id: STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
           endpoints: [{ id: connectorId }],
         },
       ],
