@@ -8,7 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { distinctUntilChanged, from, map } from 'rxjs';
+import { distinctUntilChanged, from, map, shareReplay } from 'rxjs';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import {
   createProfileStateAdapterFactory,
@@ -67,7 +67,11 @@ export const createContextAwarenessToolkit = ({
           return (tabState.profileState[definition.key] ?? definition.defaultState) as TState;
         };
 
-        const state$ = from(internalState).pipe(map(getState), distinctUntilChanged(isEqual));
+        const state$ = from(internalState).pipe(
+          map(getState),
+          distinctUntilChanged(isEqual),
+          shareReplay({ bufferSize: 1, refCount: true })
+        );
 
         return {
           getState,
