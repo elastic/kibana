@@ -8,42 +8,15 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import {
-  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
-  ExecutionStatus,
-} from '@kbn/workflows';
-import { isEnterStepTimeoutZone, isWaitForApproval, isWaitForInput } from '@kbn/workflows/graph';
+import { ExecutionStatus } from '@kbn/workflows';
+import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
+import { getHitlIdleDeadlineMsForStep } from '../step/wait_for_input_step/hitl_timeout_helpers';
 import { abortableTimeout, parseDuration, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
-
-function getWaitForApprovalIdleDeadlineMs(
-  stepExecutionRuntime: StepExecutionRuntime
-): number | undefined {
-  const { node, stepExecution } = stepExecutionRuntime;
-  if (!isWaitForApproval(node) || !stepExecution?.startedAt) {
-    return undefined;
-  }
-
-  const timeout = node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
-  return new Date(stepExecution.startedAt).getTime() + parseDuration(timeout);
-}
-
-function getWaitForInputIdleDeadlineMs(
-  stepExecutionRuntime: StepExecutionRuntime
-): number | undefined {
-  const { node, stepExecution } = stepExecutionRuntime;
-  if (!isWaitForInput(node) || !stepExecution?.startedAt) {
-    return undefined;
-  }
-
-  const timeout = node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
-  return new Date(stepExecution.startedAt).getTime() + parseDuration(timeout);
-}
 
 function getIdleTimeoutResumeDeadlineMs(
   params: WorkflowExecutionLoopParams,
@@ -52,14 +25,9 @@ function getIdleTimeoutResumeDeadlineMs(
 ): number | undefined {
   const deadlineMs: number[] = [];
 
-  const approvalDeadlineMs = getWaitForApprovalIdleDeadlineMs(stepExecutionRuntime);
-  if (approvalDeadlineMs !== undefined) {
-    deadlineMs.push(approvalDeadlineMs);
-  }
-
-  const inputDeadlineMs = getWaitForInputIdleDeadlineMs(stepExecutionRuntime);
-  if (inputDeadlineMs !== undefined) {
-    deadlineMs.push(inputDeadlineMs);
+  const hitlDeadlineMs = getHitlIdleDeadlineMsForStep(stepExecutionRuntime);
+  if (hitlDeadlineMs !== undefined) {
+    deadlineMs.push(hitlDeadlineMs);
   }
 
   const workflowTimeoutStr = params.workflowExecutionGraph.getWorkflowLevelTimeout();

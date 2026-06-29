@@ -14,20 +14,24 @@ import {
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
-import { createExternalResumeApiKey, ExecutionError } from '@kbn/workflows/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
   hasExternalApprovalChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
-import { parseDuration } from '../../utils';
 import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
+import {
+  invalidateHitlExternalResumeApiKeyIfPresent,
+  mintHitlExternalResumeApiKey,
+} from '../wait_for_input_step/hitl_external_resume_helpers';
+import { hasHitlWaitExpired } from '../wait_for_input_step/hitl_timeout_helpers';
 import {
   resumeHitlWaitStep,
   shouldSkipHitlWaitEntry,
@@ -96,8 +100,10 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       }
 
       const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
-      const apiKey = await this.mintExternalResumeApiKey({
+      const apiKey = await mintHitlExternalResumeApiKey({
+        stepExecutionRuntime: this.stepExecutionRuntime,
         execution,
+        stepId: this.node.stepId,
         spaceId,
         timeout,
       });
@@ -119,26 +125,6 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
 
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for approval`, {
       event: { action: 'hitl:waiting' },
-    });
-  }
-
-  private async mintExternalResumeApiKey({
-    execution,
-    spaceId,
-    timeout,
-  }: {
-    execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
-    spaceId: string;
-    timeout: string;
-  }): Promise<{ id: string; encoded: string }> {
-    const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
-    return createExternalResumeApiKey({
-      esClient,
-      executionId: execution.id,
-      stepId: this.node.stepId,
-      workflowId: execution.workflowId,
-      spaceId,
-      expiration: timeout,
     });
   }
 
@@ -183,9 +169,15 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     const execution = this.workflowRuntime.getWorkflowExecution();
     const resumeInput = execution.context?.resumeInput as Record<string, unknown> | undefined;
 
-    if (resumeInput == null && this.hasApprovalWaitExpired()) {
-      await this.invalidateExternalResumeApiKeyIfPresent();
-      const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+    const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
+
+    if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
+      await invalidateHitlExternalResumeApiKeyIfPresent({
+        stepExecutionRuntime: this.stepExecutionRuntime,
+        dependencies: this.dependencies,
+        workflowLogger: this.workflowLogger,
+      });
       this.stepExecutionRuntime.failStep(
         new ExecutionError({
           type: 'TimeoutError',
@@ -195,7 +187,11 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       return;
     }
 
-    await this.invalidateExternalResumeApiKeyIfPresent();
+    await invalidateHitlExternalResumeApiKeyIfPresent({
+      stepExecutionRuntime: this.stepExecutionRuntime,
+      dependencies: this.dependencies,
+      workflowLogger: this.workflowLogger,
+    });
 
     resumeHitlWaitStep({
       stepExecutionRuntime: this.stepExecutionRuntime,
@@ -210,40 +206,5 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
         };
       },
     });
-  }
-
-  private hasApprovalWaitExpired(): boolean {
-    const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
-    if (!startedAt) {
-      return false;
-    }
-
-    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
-    const deadlineMs = new Date(startedAt).getTime() + parseDuration(timeout);
-    return Date.now() >= deadlineMs;
-  }
-
-  private async invalidateExternalResumeApiKeyIfPresent(): Promise<void> {
-    const input = this.stepExecutionRuntime.stepExecution?.input;
-    if (input == null || typeof input !== 'object' || !('externalResumeApiKeyId' in input)) {
-      return;
-    }
-
-    const apiKeyId = (input as { externalResumeApiKeyId?: unknown }).externalResumeApiKeyId;
-    if (typeof apiKeyId !== 'string' || apiKeyId.length === 0) {
-      return;
-    }
-
-    try {
-      await this.dependencies.coreStart.security.authc.apiKeys.invalidateAsInternalUser({
-        ids: [apiKeyId],
-      });
-    } catch (error) {
-      this.workflowLogger.logWarn(
-        `Failed to invalidate external resume API key (${apiKeyId}): ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
   }
 }
