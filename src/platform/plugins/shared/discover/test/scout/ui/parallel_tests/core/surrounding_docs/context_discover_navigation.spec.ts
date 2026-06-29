@@ -46,7 +46,7 @@ spaceTest.describe(
           await page.testSubj.fill('fieldListFiltersFieldSearch', columnName);
           await page.testSubj.click(`fieldToggle-${columnName}`);
         }
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await navigateToFirstDocContext(pageObjects);
 
@@ -86,7 +86,7 @@ spaceTest.describe(
       async ({ page, pageObjects, browserAuth }) => {
         await loginAndGoToDiscover({ browserAuth, pageObjects });
         await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await navigateToFirstDocContext(pageObjects);
 
@@ -115,7 +115,7 @@ spaceTest.describe(
       async ({ browserAuth, page, pageObjects }) => {
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.dataGrid.waitForDocTableRendered();
         const savedSearchName = 'my search';
         await pageObjects.discover.saveSearch(savedSearchName);

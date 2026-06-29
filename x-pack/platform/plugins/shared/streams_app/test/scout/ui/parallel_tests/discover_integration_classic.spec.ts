@@ -44,11 +44,11 @@ test.describe(
 
       // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.selectDataView('All logs');
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
@@ -87,17 +87,17 @@ test.describe(
 
       // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.selectDataView('All logs');
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
 
       // Switch to ES|QL mode by clicking the button
       await pageObjects.discover.selectTextBaseLang();
 
       // Wait for ES|QL results to load
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });

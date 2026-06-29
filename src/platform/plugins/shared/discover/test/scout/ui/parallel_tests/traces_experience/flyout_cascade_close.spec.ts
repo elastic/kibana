@@ -71,7 +71,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('open the Document Viewer and Trace Timeline flyouts', async () => {
-          await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
           await openDocViewerAndTraceTimeline(pageObjects);
         });
 

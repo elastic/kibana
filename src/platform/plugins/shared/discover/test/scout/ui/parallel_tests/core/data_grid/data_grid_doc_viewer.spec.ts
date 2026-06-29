@@ -36,7 +36,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
-    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitForLoad();
     await pageObjects.dataGrid.waitForDocTableRendered();
   });
 
@@ -77,7 +77,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addSavedSearch('expand-cell-search');
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForLoad();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       await expect(pageObjects.dataGrid.getCell(0, '@timestamp')).toContainText(

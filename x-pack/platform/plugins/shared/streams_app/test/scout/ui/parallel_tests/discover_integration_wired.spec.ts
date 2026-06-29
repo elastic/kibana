@@ -49,12 +49,12 @@ test.describe(
       await pageObjects.discover.goto();
       // Select the data view for our test stream
       await pageObjects.discover.selectDataView('logs.otel.child');
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       // Refresh and wait for the row — stream routing may take time
       await page.testSubj.click('querySubmitButton');
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });

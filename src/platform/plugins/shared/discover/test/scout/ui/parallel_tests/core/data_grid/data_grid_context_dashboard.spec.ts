@@ -30,7 +30,7 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForLoad();
       await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
@@ -54,12 +54,12 @@ spaceTest.describe(
           operator: 'is',
           value: 'jpg',
         });
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForLoad();
         await pageObjects.discover.saveSearch(searchName);
 
         await pageObjects.dashboard.openNewDashboard();
         await pageObjects.dashboard.addSavedSearch(searchName);
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForLoad();
         await pageObjects.dataGrid.waitForDocTableRendered();
         await pageObjects.dashboard.saveDashboard(dashboardName);
 

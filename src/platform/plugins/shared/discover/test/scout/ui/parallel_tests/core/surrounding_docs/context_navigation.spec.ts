@@ -48,7 +48,7 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
     await loginAndGoToDiscover({ browserAuth, pageObjects });
 
     await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
     initialHitCount = await pageObjects.discover.getHitCountInt();
 
@@ -66,7 +66,7 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
     await pageObjects.contextPage.clickSuccessorLoadMoreButton();
 
     await page.goBack();
-    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+    await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.dataGrid.waitForDocTableRendered();
 
     const hitCount = await pageObjects.discover.getHitCountInt();

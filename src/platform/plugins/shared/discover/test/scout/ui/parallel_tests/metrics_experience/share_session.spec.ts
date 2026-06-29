@@ -48,7 +48,7 @@ spaceTest.describe(
     spaceTest(
       'should preserve metrics view state through a shared URL',
       async ({ pageObjects, page }) => {
-        const { dataGrid, metricsExperience, discover } = pageObjects;
+        const { metricsExperience, discover } = pageObjects;
 
         await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         await expect(metricsExperience.grid).toBeVisible();
@@ -59,7 +59,7 @@ spaceTest.describe(
           await expect(
             metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
           ).toBeVisible();
-          await dataGrid.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
         });
 
         const cardCountBefore = await metricsExperience.getVisibleCardCount();
@@ -76,7 +76,7 @@ spaceTest.describe(
 
         await spaceTest.step('navigate to shared URL', async () => {
           await page.goto(sharedUrl!);
-          await dataGrid.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
         });
 
         await spaceTest.step('metrics grid should be restored with same state', async () => {

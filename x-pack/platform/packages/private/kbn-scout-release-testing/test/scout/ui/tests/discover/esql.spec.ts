@@ -67,7 +67,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify histogram and document grid are rendered for the sample query', async () => {
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await expect(page.testSubj.locator('unifiedHistogramRendered')).toBeVisible();
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
     });
@@ -119,7 +119,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       const updatedQuery = await pageObjects.discover.getEsqlQueryValue();
       expect(updatedQuery).toContain(`agent.keyword == ${variableName}`);
 
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
     });
   });

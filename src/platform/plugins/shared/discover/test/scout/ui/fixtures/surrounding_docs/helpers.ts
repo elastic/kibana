@@ -94,7 +94,7 @@ export const loginAndGoToDiscover = async ({
 }: Pick<ScoutParallelTestFixtures, 'browserAuth' | 'pageObjects'>) => {
   await browserAuth.loginAsViewer();
   await pageObjects.discover.goto({ queryMode: 'classic' });
-  await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+  await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.dataGrid.waitForDocTableRendered();
 };
 

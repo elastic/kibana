@@ -32,7 +32,7 @@ async function waitForTracesProfileApplied(
   }
 
   // Ensure the in-flight search / column swap finished
-  await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+  await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.dataGrid.waitForDocTableRendered();
 }
 
