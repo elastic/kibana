@@ -16,6 +16,10 @@ export const mainTranslations = {
     defaultMessage: 'Manage data sources and data sets to query external data with ES|QL.',
   }),
 
+  technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
+    defaultMessage: 'Technical Preview',
+  }),
+
   docsLink: i18n.translate('xpack.dataFederation.docsLink', {
     defaultMessage: 'Learn more',
   }),

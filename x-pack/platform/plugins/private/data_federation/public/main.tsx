@@ -9,6 +9,7 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -711,9 +712,16 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
   return (
     <>
       <EuiPageSection paddingSize="m">
-        <EuiTitle size="l">
-          <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={mainTranslations.technicalPreview} size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <p>
