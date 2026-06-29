@@ -88,6 +88,7 @@ export const registerUISettings = (
       experimental: true,
       requiresPageReload: true,
       readonly: false,
+      category: ['workflows'],
     },
   });
 
