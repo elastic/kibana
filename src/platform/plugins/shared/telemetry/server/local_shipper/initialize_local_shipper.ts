@@ -32,12 +32,13 @@ export function initializeLocalShipper(logger: Logger, { analytics, http }: Core
     getElasticsearchClient: getElasticsearchClientWithDelay,
   });
 
-  registerRoute(http, getElasticsearchClientWithDelay);
+  registerRoute(http, getElasticsearchClientWithDelay, logger.get('ebt-route'));
 }
 
 function registerRoute(
   http: CoreSetup['http'],
-  getElasticsearchClient: () => Promise<ElasticsearchClient>
+  getElasticsearchClient: () => Promise<ElasticsearchClient>,
+  logger: Logger
 ) {
   http
     .createRouter()
@@ -68,13 +69,29 @@ function registerRoute(
         const esClient = await getElasticsearchClient();
 
         try {
-          await esClient.bulk({
+          const result = await esClient.bulk({
             index: TELEMETRY_LOCAL_EBT_INDICES.BROWSER,
             operations: request.body.events.flatMap((doc) => [{ create: {} }, doc]),
           });
 
+          // A bulk request returns HTTP 200 with `errors: true` when individual
+          // documents are rejected (e.g. a mapping mismatch) while the request
+          // itself is well-formed. Without this check those events would be
+          // silently dropped. Log the per-item reasons so the cause is visible.
+          if (result.errors) {
+            const reasons = result.items
+              .map((item) => item.create?.error ?? item.index?.error)
+              .filter(Boolean);
+            logger.error(
+              `Local EBT shipper failed to index ${reasons.length} event(s): ${JSON.stringify(
+                reasons
+              )}`
+            );
+          }
+
           return response.ok();
         } catch (error) {
+          logger.error(error);
           return response.customError({ statusCode: 500, body: error });
         }
       }

@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReplaySubject, firstValueFrom, of, take, takeUntil, timeout } from 'rxjs';
+import { ReplaySubject, filter, firstValueFrom, of, take, takeUntil, timeout } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type {
   ChromeProjectNavigationNode,
   NavigationCustomization,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
+import {
+  NAV_CUSTOMIZATION_STORAGE_KEY,
+  NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY,
+} from '../../common/constants';
+import { buildNavItemsProperties, reportNavigationCustomization } from './telemetry';
 
 /**
  * Upper bound for waiting on the first navigation snapshot when the modal is opened.
@@ -36,6 +41,9 @@ export interface NavigationCustomizationServiceUiDeps {
   core: CoreStart;
   chrome: InternalChromeStart;
   security?: SecurityPluginStart;
+  /** The resolved solution type for the current space. Required for EBT; absent on the
+   *  synchronous handler-only registration call that fires before the space resolves. */
+  solution?: SolutionId;
 }
 
 /**
@@ -54,6 +62,9 @@ export class NavigationCustomizationService {
   private readonly stop$ = new ReplaySubject<void>(1);
   private handlerRegistered = false;
   private menuLinkAdded = false;
+  private activeSolution?: SolutionId;
+  /** Guards the baseline detection event so it fires at most once per lifecycle. */
+  private detectionReported = false;
 
   /**
    * Applies the stored customization to the project navigation. Must be called
@@ -91,10 +102,61 @@ export class NavigationCustomizationService {
    *   project-nav solution; in serverless mode both capabilities are enabled
    *   together inside the `getNavigation$` subscription.
    */
-  enableUi({ core, chrome, security }: NavigationCustomizationServiceUiDeps): void {
+  enableUi({ core, chrome, security, solution }: NavigationCustomizationServiceUiDeps): void {
     if (!this.handlerRegistered) {
       this.handlerRegistered = true;
       chrome.project.registerCustomizeNavigationHandler(() => this.openModal(core, chrome));
+    }
+
+    // Keep track of the resolved solution so the save handler can stamp it on events.
+    if (solution) {
+      this.activeSolution = solution;
+    }
+
+    // Fire the baseline detection event once, the first time the solution is known,
+    // deferred until the nav tree has emitted at least one item. getNavigationItems()
+    // reads a synchronous snapshot that is empty when enableUi fires (the solution
+    // plugin calls initNavigation independently and the two events race), so we
+    // subscribe to getNavigation$ and act on the first emission that has items.
+    if (solution && !this.detectionReported) {
+      this.detectionReported = true;
+      const savedCustomization = core.userStorage.get<NavigationCustomization>(
+        NAV_CUSTOMIZATION_STORAGE_KEY
+      );
+      const hasSavedCustomization =
+        savedCustomization !== undefined &&
+        (savedCustomization.moves.length > 0 || savedCustomization.hidden.length > 0);
+      const baselineAlreadyReported = core.userStorage.get<boolean>(
+        NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY
+      );
+      if (!hasSavedCustomization && !baselineAlreadyReported) {
+        chrome.project
+          .getNavigation$()
+          .pipe(
+            filter((nav) => nav.renderableNodes.length > 0),
+            take(1),
+            takeUntil(this.stop$)
+          )
+          .subscribe((nav) => {
+            const overflowSet = new Set(nav.overflowItemIds);
+            const itemsPayload = nav.renderableNodes.map((node) => ({
+              id: node.id,
+              hidden: overflowSet.has(node.id),
+            }));
+            const navProps = buildNavItemsProperties(itemsPayload);
+            reportNavigationCustomization(core.analytics, {
+              space_type: solution,
+              did_customize: false,
+              ...navProps,
+            });
+            core.userStorage.set(NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY, true).catch(() => {
+              // Persisting the "reported" flag can fail for read-only users. Swallow it
+              // silently — unlike a save, this is passive bookkeeping, not a user action,
+              // so no error toast is warranted. The cost is that the baseline event then
+              // re-fires on subsequent page loads, mildly inflating its count.
+            });
+          });
+      }
     }
 
     if (!this.menuLinkAdded && security) {
@@ -135,7 +197,7 @@ export class NavigationCustomizationService {
         defaultItemIds,
         computeMoves,
         onChange: (c) => chrome.project.setNavigationCustomization(c),
-        onSave: (c) => {
+        onSave: (c, order, hiddenIds) => {
           // The live nav was already updated optimistically via onChange. The
           // server write can still fail (e.g. a read-only user lacks write
           // access to the user-storage saved object), so surface a toast rather
@@ -165,6 +227,21 @@ export class NavigationCustomizationService {
               }),
             });
           });
+
+          if (this.activeSolution) {
+            const hiddenSet = new Set(hiddenIds);
+            // A save with no moves and nothing hidden is equivalent to the
+            // default layout — e.g. the user clicked "Reset to default" and
+            // applied — so it does not count as a customization. Mirrors the
+            // baseline-detection check above.
+            const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
+            reportNavigationCustomization(core.analytics, {
+              space_type: this.activeSolution,
+              did_customize: didCustomize,
+              ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),
+            });
+          }
+
           closeModal();
         },
         onReset: () => {

@@ -30,6 +30,7 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { NavigationCustomizationService } from './navigation_customization';
+import { registerNavigationCustomizationEvents } from './navigation_customization/telemetry';
 
 export class NavigationPublicPlugin
   implements
@@ -52,6 +53,8 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
+    registerNavigationCustomizationEvents(core.analytics);
+
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -107,8 +110,9 @@ export class NavigationPublicPlugin
       // confirms a project-nav solution. The handler may have already been
       // registered synchronously below; enableUi's per-capability idempotency
       // guards prevent double-registration.
-      if (security && !isServerless && getIsProjectNav(activeSpace?.solution)) {
-        this.customizationService.enableUi({ core, chrome, security });
+      const solutionView = activeSpace?.solution;
+      if (security && !isServerless && isKnownSolutionView(solutionView)) {
+        this.customizationService.enableUi({ core, chrome, security, solution: solutionView });
       }
     };
 
@@ -139,7 +143,7 @@ export class NavigationPublicPlugin
         .pipe(take(1))
         .subscribe(({ solutionId }) => {
           this.activeSolutionId = solutionId;
-          this.customizationService.enableUi({ core, chrome, security });
+          this.customizationService.enableUi({ core, chrome, security, solution: solutionId });
         });
     }
 
