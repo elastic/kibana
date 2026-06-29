@@ -35,12 +35,8 @@ const toNsOrZero = (value: unknown): string | number => {
   return 0;
 };
 
-/**
- * `event.outcome` values our domain enum recognizes. Anything outside
- * the set (a hypothetical ECS / Task Manager extension) collapses to
- * `'unknown'` at projection time — see {@link toOutcome}.
- */
-const KNOWN_OUTCOMES = new Set<RuleExecutionOutcome>(['success', 'failure', 'unknown']);
+const isRuleExecutionOutcome = (value: unknown): value is RuleExecutionOutcome =>
+  value === 'success' || value === 'failure';
 
 /**
  * Projects a raw `task-run` event into a {@link RuleExecution}.
@@ -50,16 +46,24 @@ const KNOWN_OUTCOMES = new Set<RuleExecutionOutcome>(['success', 'failure', 'unk
  * does not pass one to `eventLogger.logEvent`), so it is unique per run,
  * opaque, and stable across reads — properties a per-run identifier
  * needs without us inventing one. When the rule executor eventually
- * emits its own provider events, this
- * function will switch to reading the executor-assigned UUID from the
- * document body without changing the public shape.
+ * emits its own provider events, this function will switch to reading
+ * the executor-assigned UUID from the document body without changing
+ * the public shape.
  *
- * Returns `null` only when the event is *structurally* unfit (missing
- * hit id, malformed `kibana.task.id`, missing `event.start` /
- * `event.end`). `event.outcome` is **not** treated as structural —
- * out-of-set values map to `'unknown'` rather than dropping the row, so
- * a future ECS / Task Manager outcome value cannot silently disappear
- * from the user's execution history.
+ * Returns `null` when the event is unfit for projection:
+ *
+ *  - **Structural**: missing hit id, malformed `kibana.task.id`,
+ *    missing `event.start` / `event.end`. These should not occur in
+ *    practice given the upstream ES filters.
+ *  - **Out-of-contract `event.outcome`**: rows that don't satisfy
+ *    `isRuleExecutionOutcome` are dropped. The ES query in
+ *    `rule_executions_query.ts` already pins `event.outcome` to the
+ *    structurally-valid set, so this branch is defence-in-depth —
+ *    it should not fire in steady state. If it does, the
+ *    `EventLogService` drop counter emits
+ *    `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS`, signalling that
+ *    the ES filter, this check, the public schema, and Task Manager's
+ *    source enum have fallen out of lock-step.
  */
 export const normalizeRuleExecution = (
   id: string | undefined,
@@ -97,6 +101,12 @@ export const normalizeRuleExecution = (
     return null;
   }
 
+  const outcome = raw.event?.outcome;
+
+  if (!isRuleExecutionOutcome(outcome)) {
+    return null;
+  }
+
   return {
     id,
     rule: { id: ruleId, version: null },
@@ -107,21 +117,10 @@ export const normalizeRuleExecution = (
       duration: nanosToMillis(toNsOrZero(raw.event?.duration)),
       scheduledDelay: nanosToMillis(toNsOrZero(raw.kibana?.task?.schedule_delay)),
     },
-    outcome: toOutcome(raw.event?.outcome),
+    outcome,
     reason: raw.event?.reason ?? null,
     error: toError(raw),
   };
-};
-
-/**
- * Projects the raw ECS `event.outcome` into the domain enum. Falls back
- * to `'unknown'` rather than rejecting so we don't lose execution rows
- * if Task Manager / ECS ever broaden the vocabulary.
- */
-const toOutcome = (raw: unknown): RuleExecutionOutcome => {
-  return KNOWN_OUTCOMES.has(raw as RuleExecutionOutcome)
-    ? (raw as RuleExecutionOutcome)
-    : 'unknown';
 };
 
 /**

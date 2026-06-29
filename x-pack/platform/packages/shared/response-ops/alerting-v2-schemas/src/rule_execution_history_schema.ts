@@ -27,17 +27,17 @@ export const RULE_EXECUTIONS_MAX_RULE_ID_FILTER = 10;
 /**
  * Coarse ECS-aligned outcome (`event.outcome`) for a single rule execution.
  *
- * Pinned to the full ECS enum so the API contract is forward-compatible
- * with anything Task Manager emits today: `success` and `failure` cover
- * the classified cases, `unknown` covers in-flight or unclassified runs.
- * Values outside this set are mapped to `unknown`.
+ * Pinned to Task Manager's actual contract for `task-run` events: the
+ * `EventLogOutcomes` enum in `task_manager/server/constants.ts` only
+ * emits `success` and `failure`, and no other producer writes
+ * `event.action: 'task-run'`.
  *
  * The fine-grained product taxonomy
  * (`success | warning | failed | timeout | skipped`) sourced from
- * `kibana.alerting_v2.rule_executor.execution.status` will land later as
- * a separate field so cross-platform ECS consumers stay unaffected.
+ * `kibana.alerting_v2.rule_executor.execution.status` will land later
+ * as a separate field so cross-platform ECS consumers stay unaffected.
  */
-export const ruleExecutionOutcomeSchema = z.enum(['success', 'failure', 'unknown']);
+export const ruleExecutionOutcomeSchema = z.enum(['success', 'failure']);
 export type RuleExecutionOutcome = z.infer<typeof ruleExecutionOutcomeSchema>;
 
 /**

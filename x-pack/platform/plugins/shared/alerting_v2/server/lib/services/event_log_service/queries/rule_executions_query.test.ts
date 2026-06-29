@@ -108,23 +108,27 @@ describe('buildRuleExecutionsQuery', () => {
     expect(filters.find(hasTermsOn('kibana.task.id'))).toBeUndefined();
   });
 
-  it('adds a terms filter on event.outcome when outcomes are provided', () => {
-    const filters = filtersOf(
-      buildRuleExecutionsQuery({ ...baseQuery, outcomes: ['success', 'failure'] })
-    );
-    expect(filters).toEqual(
-      expect.arrayContaining([{ terms: { 'event.outcome': ['success', 'failure'] } }])
-    );
-  });
+  describe('outcome filter', () => {
+    it('pins event.outcome to the structurally-valid set when no caller filter is given', () => {
+      const filters = filtersOf(buildRuleExecutionsQuery(baseQuery));
+      expect(filters.find(hasTermsOn('event.outcome'))).toEqual({
+        terms: { 'event.outcome': ['success', 'failure'] },
+      });
+    });
 
-  it('omits the outcome filter when outcomes is an empty array', () => {
-    const filters = filtersOf(buildRuleExecutionsQuery({ ...baseQuery, outcomes: [] }));
-    expect(filters.find(hasTermsOn('event.outcome'))).toBeUndefined();
-  });
+    it('pins event.outcome to the structurally-valid set when outcomes is an empty array', () => {
+      const filters = filtersOf(buildRuleExecutionsQuery({ ...baseQuery, outcomes: [] }));
+      expect(filters.find(hasTermsOn('event.outcome'))).toEqual({
+        terms: { 'event.outcome': ['success', 'failure'] },
+      });
+    });
 
-  it('omits the outcome filter when outcomes is not defined', () => {
-    const filters = filtersOf(buildRuleExecutionsQuery(baseQuery));
-    expect(filters.find(hasTermsOn('event.outcome'))).toBeUndefined();
+    it('forwards the caller outcomes verbatim when narrower than the structurally-valid set', () => {
+      const filters = filtersOf(buildRuleExecutionsQuery({ ...baseQuery, outcomes: ['success'] }));
+      expect(filters.find(hasTermsOn('event.outcome'))).toEqual({
+        terms: { 'event.outcome': ['success'] },
+      });
+    });
   });
 
   it('adds a range filter on event.start when from/to are provided', () => {

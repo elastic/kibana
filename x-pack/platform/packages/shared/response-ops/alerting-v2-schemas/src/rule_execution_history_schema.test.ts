@@ -38,11 +38,8 @@ describe('rule_execution_history_schema', () => {
       expect(ruleExecutionOutcomeSchema.parse('failure')).toBe('failure');
     });
 
-    it('accepts unknown so we can surface in-flight / unclassified runs', () => {
-      expect(ruleExecutionOutcomeSchema.parse('unknown')).toBe('unknown');
-    });
-
-    it('rejects values outside the ECS outcome enum', () => {
+    it('rejects anything Task Manager does not emit today (incl. the ECS `unknown` value)', () => {
+      expect(ruleExecutionOutcomeSchema.safeParse('unknown').success).toBe(false);
       expect(ruleExecutionOutcomeSchema.safeParse('cancelled').success).toBe(false);
       expect(ruleExecutionOutcomeSchema.safeParse('partial').success).toBe(false);
       expect(ruleExecutionOutcomeSchema.safeParse('').success).toBe(false);
@@ -152,23 +149,19 @@ describe('rule_execution_history_schema', () => {
         expect(getRuleExecutionsQuerySchema.safeParse({ outcome: [] }).success).toBe(false);
       });
 
-      it('rejects outcome values outside the ECS enum', () => {
+      it('rejects outcome values Task Manager does not emit (incl. ECS `unknown`)', () => {
         expect(getRuleExecutionsQuerySchema.safeParse({ outcome: ['skipped'] }).success).toBe(
           false
         );
-      });
-
-      it('accepts an array spanning the full ECS outcome enum (success | failure | unknown)', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({
-          outcome: ['success', 'failure', 'unknown'],
-        });
-        expect(parsed.outcome).toEqual(['success', 'failure', 'unknown']);
+        expect(getRuleExecutionsQuerySchema.safeParse({ outcome: ['unknown'] }).success).toBe(
+          false
+        );
       });
 
       it('rejects arrays longer than the number of distinct outcomes', () => {
         expect(
           getRuleExecutionsQuerySchema.safeParse({
-            outcome: ['success', 'failure', 'unknown', 'success'],
+            outcome: ['success', 'failure', 'success'],
           }).success
         ).toBe(false);
       });
@@ -364,14 +357,13 @@ describe('rule_execution_history_schema', () => {
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('accepts the unknown outcome (in-flight or unclassified run)', () => {
-      const row = { ...validView, outcome: 'unknown' as const };
-      expect(ruleExecutionViewSchema.parse(row).outcome).toBe('unknown');
-    });
-
-    it('rejects outcomes outside the ECS enum', () => {
-      const row = { ...validView, outcome: 'skipped' };
-      expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
+    it('rejects outcomes Task Manager does not emit (incl. ECS `unknown`)', () => {
+      expect(ruleExecutionViewSchema.safeParse({ ...validView, outcome: 'unknown' }).success).toBe(
+        false
+      );
+      expect(ruleExecutionViewSchema.safeParse({ ...validView, outcome: 'skipped' }).success).toBe(
+        false
+      );
     });
 
     it('requires error.message when error is present', () => {

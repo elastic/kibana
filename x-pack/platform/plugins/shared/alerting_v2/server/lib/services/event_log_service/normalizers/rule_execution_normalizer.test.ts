@@ -212,62 +212,70 @@ describe('normalizeRuleExecution', () => {
     ).toBeNull();
   });
 
-  it('passes the ECS unknown outcome through verbatim (in-flight / unclassified runs)', () => {
-    const result = normalizeRuleExecution(
-      HIT_ID,
-      buildRawEvent({
-        event: {
-          provider: 'taskManager',
-          action: 'task-run',
-          outcome: 'unknown',
-          start: '2026-06-23T09:59:50.000Z',
-          end: '2026-06-23T10:00:00.000Z',
-          duration: 1_000_000_000,
-        },
-      })
-    );
-    expect(result?.outcome).toBe('unknown');
-  });
-
   /**
-   * Forward-compatibility guard: if Task Manager or ECS ever broaden
-   * `event.outcome` beyond the current enum, we want the row to keep
-   * flowing through with a sentinel value rather than vanish from the
-   * user's execution history. The mapping is documented in
-   * `normalizeRuleExecution`'s docstring.
+   * Defensive checks against an internal-consistency bug.
+   *
+   * The ES query pins `event.outcome` to the structurally-valid set
+   * (see `rule_executions_query.ts`), so rows whose outcome doesn't
+   * pass `isRuleExecutionOutcome` cannot reach the normalizer in
+   * steady state. If they ever do, it means the ES filter and this
+   * check have drifted out of sync — the `EventLogService` drop log
+   * (`EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS`) surfaces it. The
+   * cases below pin the projection-safe behaviour: drop the row
+   * rather than emitting a `RuleExecution` with an out-of-schema
+   * outcome.
    */
-  it('maps out-of-enum outcomes to "unknown" instead of dropping the row', () => {
-    const result = normalizeRuleExecution(
-      HIT_ID,
-      buildRawEvent({
-        event: {
-          provider: 'taskManager',
-          action: 'task-run',
-          outcome: 'partial',
-          start: '2026-06-23T09:59:50.000Z',
-          end: '2026-06-23T10:00:00.000Z',
-          duration: 1_000_000_000,
-        },
-      })
-    );
-    expect(result).not.toBeNull();
-    expect(result?.outcome).toBe('unknown');
+  it('returns null when event.outcome is the ECS `unknown` value (Task Manager does not emit it)', () => {
+    expect(
+      normalizeRuleExecution(
+        HIT_ID,
+        buildRawEvent({
+          event: {
+            provider: 'taskManager',
+            action: 'task-run',
+            outcome: 'unknown',
+            start: '2026-06-23T09:59:50.000Z',
+            end: '2026-06-23T10:00:00.000Z',
+            duration: 1_000_000_000,
+          },
+        })
+      )
+    ).toBeNull();
   });
 
-  it('maps a missing event.outcome to "unknown" (Task Manager omits the field on some runs)', () => {
-    const result = normalizeRuleExecution(
-      HIT_ID,
-      buildRawEvent({
-        event: {
-          provider: 'taskManager',
-          action: 'task-run',
-          start: '2026-06-23T09:59:50.000Z',
-          end: '2026-06-23T10:00:00.000Z',
-          duration: 1_000_000_000,
-        },
-      })
-    );
-    expect(result?.outcome).toBe('unknown');
+  it('returns null on an out-of-contract event.outcome (contract drift surfaces as a drop)', () => {
+    expect(
+      normalizeRuleExecution(
+        HIT_ID,
+        buildRawEvent({
+          event: {
+            provider: 'taskManager',
+            action: 'task-run',
+            outcome: 'partial',
+            start: '2026-06-23T09:59:50.000Z',
+            end: '2026-06-23T10:00:00.000Z',
+            duration: 1_000_000_000,
+          },
+        })
+      )
+    ).toBeNull();
+  });
+
+  it('returns null when event.outcome is missing (defensive — Task Manager always sets it today)', () => {
+    expect(
+      normalizeRuleExecution(
+        HIT_ID,
+        buildRawEvent({
+          event: {
+            provider: 'taskManager',
+            action: 'task-run',
+            start: '2026-06-23T09:59:50.000Z',
+            end: '2026-06-23T10:00:00.000Z',
+            duration: 1_000_000_000,
+          },
+        })
+      )
+    ).toBeNull();
   });
 
   it('handles event.duration encoded as a string', () => {

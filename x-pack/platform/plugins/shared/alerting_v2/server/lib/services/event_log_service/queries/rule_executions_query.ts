@@ -7,9 +7,20 @@
 
 import type { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '@kbn/task-manager-plugin/server';
+import { ruleExecutionOutcomeSchema } from '@kbn/alerting-v2-schemas';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../../rule_executor/constants';
 import { getRuleExecutorTaskId } from '../../../rule_executor/schedule';
 import type { FindRuleExecutionsQuery, RuleExecutionSortField } from '../types';
+
+/**
+ * `event.outcome` values that round-trip 1:1 to ES under Task Manager's
+ * current contract (`success | failure`). Sourced from the public
+ * schema so the four layers — TM source, ES filter, normalizer, public
+ * schema — move in lock-step: widening any one of them without the
+ * others triggers the
+ * `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` drop log.
+ */
+const STRUCTURALLY_VALID_OUTCOMES: string[] = [...ruleExecutionOutcomeSchema.options];
 
 /**
  * ES sort fields keyed by the public {@link RuleExecutionSortField} values.
@@ -40,23 +51,22 @@ const SORT_FIELD_TO_ES: Record<RuleExecutionSortField, string> = {
  *     `ruleIds` is also provided, an additional `terms` clause narrows
  *     further within the same prefix.
  *  3. **Structural-fit filters** — `exists` on `event.start` /
- *     `event.end`. These mirror the structural prerequisites for
- *     building a {@link RuleExecution}, so any hit ES returns is
- *     guaranteed to normalize successfully. That keeps `hits.total`
- *     consistent with the items the API returns — `total` and pagination
- *     are drift-free instead of slowly diverging by the count of
- *     malformed rows. `event.outcome` is intentionally **not** pinned
- *     here even though our public enum is narrow: the normalizer maps
- *     out-of-set values to `'unknown'` rather than rejecting them, so
- *     we want every row through and we want the count to include them.
- *     This avoids cat-and-mouse with Task Manager / ECS if the outcome
- *     vocabulary ever grows.
- *     Emission of the
- *     `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` log code from
- *     `EventLogService.findRuleExecutions` should therefore never fire
- *     in steady state; if it does, either the upstream contract changed
- *     (Task Manager schema drift) or a filter here has fallen out of
- *     sync with the normalizer.
+ *     `event.end`, plus an unconditional `terms` pin on
+ *     `event.outcome` to the {@link STRUCTURALLY_VALID_OUTCOMES} set.
+ *     These mirror what the normalizer needs to project a
+ *     {@link RuleExecution}, so every hit ES returns is guaranteed to
+ *     normalize successfully — `hits.total` equals `items.length` by
+ *     construction, with no drift between page totals and rendered
+ *     rows. The four layers move in lock-step: Task Manager's
+ *     `EventLogOutcomes` source enum, this ES filter, the normalizer's
+ *     `isRuleExecutionOutcome` check, and the public
+ *     `ruleExecutionOutcomeSchema`. Widening any one of them without
+ *     the others surfaces immediately via the
+ *     `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` drop log — which
+ *     therefore should not fire in steady state. The caller-supplied
+ *     outcome filter, when present, is a subset of the structurally
+ *     valid set (enforced by the public schema) and is forwarded
+ *     verbatim.
  *
  * `track_total_hits` is intentionally not set. The schema caps the
  * paginatable window via {@link RULE_EXECUTIONS_MAX_RESULT_WINDOW}
@@ -98,9 +108,11 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
     });
   }
 
-  if (outcomes && outcomes.length > 0) {
-    filters.push({ terms: { 'event.outcome': outcomes } });
-  }
+  filters.push({
+    terms: {
+      'event.outcome': outcomes && outcomes.length > 0 ? outcomes : STRUCTURALLY_VALID_OUTCOMES,
+    },
+  });
 
   if (from || to) {
     filters.push({
