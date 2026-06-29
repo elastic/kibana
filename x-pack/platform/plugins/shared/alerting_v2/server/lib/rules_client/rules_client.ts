@@ -453,10 +453,6 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    if (existingAttrs.enabled) {
-      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
-    }
-
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
@@ -464,8 +460,10 @@ export class RulesClient {
       updatedAt: nowIso,
     };
 
-    // The rule is transitioning to enabled, so it does not yet contribute to
-    // the scheduled total; no previous schedule is added back.
+    // Re-enabling an already-enabled rule is intentionally not short-circuited:
+    // it re-writes the SO and re-ensures the executor task (self-heal), and still
+    // emits `ruleEnabled`. Only count new scheduled load on an actual transition —
+    // an already-enabled rule already contributes to the total.
     if (!existingAttrs.enabled) {
       await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
     }
@@ -496,10 +494,9 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    if (!existingAttrs.enabled) {
-      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
-    }
-
+    // Disabling an already-disabled rule is intentionally not short-circuited: it
+    // re-writes the SO and removes the executor task (self-heal), and still emits
+    // `ruleDisabled`.
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
