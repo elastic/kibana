@@ -93,7 +93,7 @@ EXPOSE 5601
 
 {{#ubi}}
 RUN microdnf install --setopt=tsflags=nodocs -y \
-      fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
+      fontconfig liberation-fonts-common freetype shadow-utils nss findutils iptables && \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
@@ -101,7 +101,7 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
 ENV GLIBC_TUNABLES=glibc.malloc.hugetlb=0
 
 RUN for iter in 1 2 3 4 5; do \
-      apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}} && break; \
+      apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates iptables{{#serverless}} libjemalloc2 mimalloc2{{/serverless}} && break; \
       echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
       sleep $((iter * 10)); \
       [ $iter -eq 5 ] && exit 1; \
