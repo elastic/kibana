@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/inference-common'
   - '@kbn/test'
+  - '@kbn/kbn-client'
 tags:
   - functional-tests
   - package
