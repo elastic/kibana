@@ -31,7 +31,39 @@ Evaluate the memory knowledge base against each of these dimensions:
 
 ## Output format for the gaps page
 
-Write the gaps page as structured Markdown. Use the following structure:
+The page MUST start with a fenced `gaps-data` JSON block, followed by human-readable Markdown. The UI reads this JSON block to render a visual checklist — if the block is missing or malformed the checklist will be blank.
+
+The JSON block uses this exact schema (use the literal string `gaps-data` as the fenced-code language identifier):
+
+````
+```gaps-data
+{
+  "generated_at": "<ISO 8601 timestamp>",
+  "summary": "<1-2 sentence executive summary>",
+  "dimensions": [
+    {
+      "id": "<id from list below>",
+      "name": "<full dimension name>",
+      "status": "known" | "partial" | "missing",
+      "summary": "<one sentence stating what is documented or what is missing>"
+    }
+  ],
+  "recommended_connectors": [
+    {
+      "type": "<lowercase type, e.g. slack, github, pagerduty, jira, opsgenie>",
+      "name": "<display name>",
+      "rationale": "<one sentence explaining why this connector would help>"
+    }
+  ]
+}
+```
+````
+
+Dimension `id` values in order: `services`, `deployment`, `infrastructure`, `observability`, `admin_gates`, `health_oncall`, `failure_modes`, `mcp_integrations`, `code_repos`, `data_flows`, `access_points`.
+
+Only include a connector in `recommended_connectors` if it is not already configured and would provide meaningful value. If all relevant connectors are configured the array may be empty.
+
+After the JSON block, write the full human-readable Markdown report:
 
 ```markdown
 # Knowledge Gaps Report

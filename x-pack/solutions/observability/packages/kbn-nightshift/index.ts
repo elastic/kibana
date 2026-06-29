@@ -6,4 +6,9 @@
  */
 
 export { NightshiftApp } from './components/nightshift_app';
-export type { NightshiftAppProps } from './components/nightshift_app';
+export type {
+  NightshiftAppProps,
+  GapsOverview,
+  GapsDimension,
+  RecommendedConnector,
+} from './components/nightshift_app';

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
 import { NightshiftApp } from '@kbn/nightshift';
+import type { GapsOverview } from '@kbn/nightshift';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
@@ -24,13 +25,7 @@ const ONBOARDING_INITIAL_MESSAGE = i18n.translate(
 );
 
 export function NightshiftPage() {
-  const {
-    http,
-    uiSettings,
-    serverless,
-    notifications: { toasts },
-    agentBuilder,
-  } = useKibana().services;
+  const { http, uiSettings, serverless, agentBuilder } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
@@ -60,27 +55,20 @@ export function NightshiftPage() {
     });
   }, [agentBuilder]);
 
-  const [isDetectingGaps, setIsDetectingGaps] = useState(false);
+  const [gapsOverview, setGapsOverview] = useState<GapsOverview | null>(null);
 
-  const handleDetectGaps = useCallback(async () => {
-    setIsDetectingGaps(true);
-    try {
-      await http.post('/internal/streams/memory/_detect_gaps', { body: JSON.stringify({}) });
-      toasts.addSuccess(
-        i18n.translate('xpack.observability.nightshift.detectGapsQueued', {
-          defaultMessage: 'Gap detection queued. Results will appear once the workflow completes.',
-        })
-      );
-    } catch (error) {
-      toasts.addError(error instanceof Error ? error : new Error(String(error)), {
-        title: i18n.translate('xpack.observability.nightshift.detectGapsError', {
-          defaultMessage: 'Failed to trigger gap detection.',
-        }),
+  useEffect(() => {
+    http
+      .get<{ available: boolean; data?: GapsOverview }>('/internal/streams/memory/_gaps_overview')
+      .then((response) => {
+        if (response.available && response.data) {
+          setGapsOverview(response.data);
+        }
+      })
+      .catch(() => {
+        // gaps overview not yet available — keep null so empty state is shown
       });
-    } finally {
-      setIsDetectingGaps(false);
-    }
-  }, [http, toasts]);
+  }, [http]);
 
   if (!isEnabled) {
     history.replace(OVERVIEW_PATH);
@@ -92,8 +80,7 @@ export function NightshiftPage() {
       <NightshiftApp
         agentBuilderAvailable={!!agentBuilder}
         onStartOnboarding={handleStartOnboarding}
-        onDetectGaps={handleDetectGaps}
-        isDetectingGaps={isDetectingGaps}
+        gapsOverview={gapsOverview}
       />
     </ObservabilityPageTemplate>
   );
