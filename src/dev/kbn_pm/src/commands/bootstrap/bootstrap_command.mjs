@@ -122,7 +122,7 @@ export const command = {
       log.info('skipping pre-built webpack bundles (--no-prebuilt)');
     }
 
-    if (shouldInstall) {
+    if (await areNodeModulesPresent()) {
       await time('apply node_modules patches', async () => {
         log.info('applying node_modules patches via patch-package');
         // The patch-package command is used to apply patches to the node_modules directory.
