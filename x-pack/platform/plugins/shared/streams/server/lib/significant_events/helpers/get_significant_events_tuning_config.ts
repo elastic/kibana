@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   validateSignificantEventsTuningConfig,
   type SignificantEventsTuningConfig,
 } from '@kbn/streams-schema';
@@ -38,7 +39,14 @@ export async function getSignificantEventsTuningConfig(
     return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG };
   }
 
-  const merged = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...stored };
+  // Silently drop unknown keys from stored config (e.g. renamed fields from a
+  // previous version) so they don't trigger a full reset via validateSignificantEventsTuningConfig.
+  const knownKeys = new Set(Object.keys(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS));
+  const safeStored = Object.fromEntries(
+    Object.entries(stored).filter(([key]) => knownKeys.has(key))
+  ) as Partial<SignificantEventsTuningConfig>;
+
+  const merged = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...safeStored };
 
   // semantic_min_score changed from a raw model-specific scale (0-100) to a
   // minmax-normalized scale (0-1). Override any persisted out-of-range value.

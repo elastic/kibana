@@ -14,30 +14,20 @@ export interface TuningConfigFieldBounds {
   integer?: boolean;
 }
 
-export const significantEventsTuningConfigSchema = z
-  .object({
-    sample_size: z.number().int().min(1).max(100),
-    max_iterations: z.number().int().min(1).max(20),
-    feature_ttl_days: z.number().int().min(1),
-    entity_filtered_ratio: z.number().min(0).max(1),
-    diverse_ratio: z.number().min(0).max(1),
-    max_excluded_features_in_prompt: z.number().int().min(0).max(50),
-    max_entity_filters: z.number().int().min(1).max(50),
-    semantic_min_score: z.number().min(0).max(1),
-    rrf_rank_constant: z.number().int().min(1).max(100),
-  })
-  .superRefine((v, ctx) => {
-    if (v.entity_filtered_ratio + v.diverse_ratio > 1.0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          `entity_filtered_ratio (${v.entity_filtered_ratio}) + diverse_ratio (${v.diverse_ratio}) must be <= 1.0 ` +
-          `(remainder ${(1 - v.entity_filtered_ratio - v.diverse_ratio).toFixed(
-            2
-          )} is used for random sampling)`,
-      });
-    }
-  });
+// Shape-only schema — no bounds or cross-field checks. Bounds and validation
+// logic live exclusively in SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS and
+// validateSignificantEventsTuningConfig to avoid drift between two sources.
+export const significantEventsTuningConfigSchema = z.object({
+  sample_size: z.number(),
+  max_iterations: z.number(),
+  feature_ttl_days: z.number(),
+  entity_filtered_ratio: z.number(),
+  diverse_ratio: z.number(),
+  max_excluded_features_in_prompt: z.number(),
+  max_entity_filters: z.number(),
+  semantic_min_score: z.number(),
+  rrf_rank_constant: z.number(),
+});
 
 export type SignificantEventsTuningConfig = z.infer<typeof significantEventsTuningConfigSchema>;
 
