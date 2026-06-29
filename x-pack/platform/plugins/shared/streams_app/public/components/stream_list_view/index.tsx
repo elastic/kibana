@@ -183,17 +183,6 @@ export function StreamListView() {
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
-                size="s"
-                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
-              >
-                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
-                  defaultMessage: 'Create classic stream',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
             {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -208,6 +197,17 @@ export function StreamListView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                size="s"
+                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+              >
+                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                  defaultMessage: 'Create classic stream',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
             {queryStreams?.enabled && (
               <EuiFlexItem grow={false}>
                 <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
