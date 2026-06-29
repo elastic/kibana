@@ -6,14 +6,26 @@
  */
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import type {
-  InstallationStatusResponse,
-  PerformInstallResponse,
-} from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
+
+/** Minimal HTTP shapes for product-doc install polling (avoid plugin type imports in eval suite). */
+interface ProductInstallState {
+  status: string;
+  failureReason?: string;
+}
+
+interface InstallationStatusResponse {
+  overall: 'installed' | 'uninstalled' | 'installing' | 'uninstalling' | string;
+  perProducts?: Record<string, ProductInstallState>;
+}
+
+interface PerformInstallResponse {
+  installed: boolean;
+  failureReason?: string;
+}
 
 /** Product doc + ELSER cold start on serverless Scout can exceed a single install POST. */
 const INSTALL_WAIT_TIMEOUT_MS = 15 * 60 * 1000;

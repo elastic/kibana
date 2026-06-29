@@ -638,7 +638,6 @@ evaluate.describe(
           [...(turn1.messages ?? []), ...(turn2.messages ?? [])],
           [...turn1FindRulesCalls, ...turn2FindRulesCalls]
         );
-        const turn2Text = stringifyMultiTurnEvidence(turn2.messages, turn2FindRulesCalls);
 
         const turn2ResponseText = (turn2.messages ?? []).map((msg) => msg.message ?? '').join('\n');
         const mediumRulesInTurn2 = countMentionedMediumRules(turn2ResponseText);
@@ -650,17 +649,16 @@ evaluate.describe(
         const mentionedMediumRulesInConversation = countMentionedMediumRules(conversationText);
         const hasGroundedMediumAnswer =
           mentionedMediumRulesInConversation >= 2 ||
-          (mentionedMediumRulesInConversation >= 1 &&
-            mentionsMediumSeverity(conversationText)) ||
+          (mentionedMediumRulesInConversation >= 1 && mentionsMediumSeverity(conversationText)) ||
           (mediumRulesInTurn2 >= 1 && mentionsMediumSeverity(turn2ResponseText)) ||
           (turn2FindRulesCalls.length > 0 && mentionsMediumSeverity(conversationText));
 
         // Multi-turn contract: turn 2 must answer the medium-severity ask without errors.
         // Ideal: a fresh security.find_rules call scoped to medium severity (params or results).
         // Acceptable: any fresh find_rules call, or grounded answer citing seeded medium rules.
-        expect(
-          hasFreshMediumToolCall || hasGroundedMediumAnswer || hasAnyFreshFindRulesCall
-        ).toBe(true);
+        expect(hasFreshMediumToolCall || hasGroundedMediumAnswer || hasAnyFreshFindRulesCall).toBe(
+          true
+        );
         expect(turn2ResponseText.trim().length).toBeGreaterThan(0);
       }
     );
