@@ -182,6 +182,27 @@ export async function syncAgentBuilderOverviewDashboard(
 }
 
 /**
+ * Sync the dashboard for a single space. Installs when tracing is enabled,
+ * removes otherwise.
+ */
+export async function syncAgentBuilderOverviewDashboardForSpace(
+  coreStart: Pick<CoreStart, 'savedObjects'>,
+  tracingEnabled: boolean,
+  spaceId: string,
+  logger: Logger
+): Promise<void> {
+  const client = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+  const importer = coreStart.savedObjects.createImporter(client);
+  const namespace = spaceId === 'default' ? undefined : spaceId;
+
+  if (tracingEnabled) {
+    await installAgentBuilderOverviewDashboard(client, importer, logger, spaceId, namespace);
+  } else {
+    await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
+  }
+}
+
+/**
  * fetch the ids of every space, paging through the (hidden) `space` saved objects.
  */
 async function getAllSpaceIds(spaceRepo: ISavedObjectsRepository): Promise<string[]> {

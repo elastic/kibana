@@ -41,7 +41,10 @@ import { createModelProviderFactory } from './services/execution/runner/model_pr
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
-import { syncAgentBuilderOverviewDashboard } from './dashboard';
+import {
+  syncAgentBuilderOverviewDashboard,
+  syncAgentBuilderOverviewDashboardForSpace,
+} from './dashboard';
 import { registerInferenceFeatures } from './inference_features';
 
 export class AgentBuilderPlugin
@@ -323,6 +326,13 @@ export class AgentBuilderPlugin
       dashboard: {
         syncOverview: (tracingEnabled: boolean) =>
           syncAgentBuilderOverviewDashboard(coreStart, tracingEnabled, this.logger),
+        syncOverviewForSpace: (tracingEnabled: boolean, spaceId: string) =>
+          syncAgentBuilderOverviewDashboardForSpace(
+            coreStart,
+            tracingEnabled,
+            spaceId,
+            this.logger
+          ),
       },
     };
   }

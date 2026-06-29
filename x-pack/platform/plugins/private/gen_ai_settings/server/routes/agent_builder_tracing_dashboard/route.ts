@@ -39,7 +39,7 @@ const syncAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
     const enabled = tracingEnabled && experimentalFeaturesEnabled;
 
     const agentBuilderStart = await plugins.agentBuilder.start();
-    await agentBuilderStart.dashboard.syncOverview(enabled);
+    await agentBuilderStart.dashboard.syncOverviewForSpace(enabled, request.spaceId);
 
     return { installed: enabled };
   },

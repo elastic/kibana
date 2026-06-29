@@ -198,6 +198,11 @@ export interface DashboardStart {
    * Installs when `tracingEnabled` is true, removes otherwise.
    */
   syncOverview: (tracingEnabled: boolean) => Promise<void>;
+  /**
+   * Syncs the Agent Builder overview dashboard for a single space.
+   * Installs when `tracingEnabled` is true, removes otherwise.
+   */
+  syncOverviewForSpace: (tracingEnabled: boolean, spaceId: string) => Promise<void>;
 }
 
 /**
