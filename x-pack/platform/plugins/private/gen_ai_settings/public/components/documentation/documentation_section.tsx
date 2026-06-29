@@ -22,7 +22,6 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
@@ -36,7 +35,6 @@ import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
 import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
-import { enableProductDocumentationToolOnDefaultAgent } from './enable_product_documentation_tool_on_agent';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -269,29 +267,11 @@ const DocumentationRowActions: React.FC<{
   onRefetch: () => void;
 }> = ({ item, productDocBase, hasManagePrivilege, onRefetch }) => {
   const { services } = useKibana();
-  const { application, http, notifications, rendering, docLinks } = services;
+  const { notifications, rendering, docLinks } = services;
 
   const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
       notifications.toasts.addSuccess({ title: i18n.getInstallSuccessTitle(item.name) });
-
-      enableProductDocumentationToolOnDefaultAgent({ http }).catch(() => {
-        const toolsUrl = application.getUrlForApp('agent_builder', {
-          path: `/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}/tools`,
-        });
-        notifications.toasts.addWarning({
-          title: i18n.getInstallSuccessTitle(item.name),
-          text: toMountPoint(
-            <EuiText size="s">
-              <p>{i18n.TOOL_AUTO_ENABLE_FAILED_DESCRIPTION}</p>
-              <p>
-                <EuiLink href={toolsUrl}>{i18n.TOOL_AUTO_ENABLE_FAILED_LINK}</EuiLink>
-              </p>
-            </EuiText>,
-            rendering
-          ),
-        });
-      });
     },
     onError: (error) => {
       const message = error.body?.message ?? error.message;
