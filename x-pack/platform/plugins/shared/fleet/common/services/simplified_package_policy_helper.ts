@@ -365,6 +365,7 @@ export const toNewAgentlessPolicy = (
       'force',
       'create_dataset_templates',
       'global_data_tags',
+      'var_group_selections',
     ]),
     package: omit(packagePolicy.package, 'title'),
     id: packagePolicy.id ? String(packagePolicy.id) : undefined,

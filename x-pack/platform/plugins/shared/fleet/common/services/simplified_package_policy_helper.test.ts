@@ -710,7 +710,6 @@ describe('toNewAgentlessPolicy', () => {
     expect(result).not.toHaveProperty('is_managed');
     expect(result).not.toHaveProperty('overrides');
     expect(result).not.toHaveProperty('elasticsearch');
-    expect(result).not.toHaveProperty('var_group_selections');
   });
 
   describe('cloud_connector', () => {
