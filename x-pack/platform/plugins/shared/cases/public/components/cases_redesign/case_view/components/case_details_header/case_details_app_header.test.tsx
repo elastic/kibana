@@ -25,30 +25,6 @@ jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../case_view/use_on_refresh_case_view_page');
 
-jest.mock('@kbn/app-header', () => ({
-  APP_HEADER_TEST_SUBJECTS: {
-    root: 'app-header',
-    title: 'app-header-title',
-  },
-  AppHeader: ({
-    title,
-    badges,
-    metadata,
-  }: {
-    title: string | { text: string };
-    badges: unknown[];
-    metadata: unknown;
-  }) => (
-    <div data-test-subj="app-header">
-      <span data-test-subj="app-header-title">
-        {typeof title === 'string' ? title : title.text}
-      </span>
-      <span data-test-subj="app-header-badges">{JSON.stringify(badges)}</span>
-      <span data-test-subj="app-header-metadata">{JSON.stringify(metadata)}</span>
-    </div>
-  ),
-}));
-
 jest.mock('../../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
@@ -91,7 +67,7 @@ describe('CaseDetailsAppHeader', () => {
   it('renders metadata with reporter name', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    const metadata = await screen.findByTestId('app-header-metadata');
+    const metadata = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
     expect(metadata.textContent).toContain('Reported by');
     expect(metadata.textContent).toContain(basicCase.createdBy.fullName!);
   });
@@ -99,9 +75,8 @@ describe('CaseDetailsAppHeader', () => {
   it('renders badges in the header', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    const badgesEl = await screen.findByTestId('app-header-badges');
-    expect(badgesEl.textContent).toContain('case-view-severity-badge');
-    expect(badgesEl.textContent).toContain('case-view-status-badge');
+    expect(await screen.findByTestId('case-view-severity-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-status-badge')).toBeInTheDocument();
   });
 
   it('does not render delete modal by default', async () => {
