@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/as-code-shared-telemetry'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -62,6 +63,7 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
