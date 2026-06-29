@@ -11,6 +11,9 @@ import type { ManagedWorkflowDefinition } from '../types';
 
 export const ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID =
   'system-attack-discovery-alert-retrieval';
+export const ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID =
+  'system-attack-discovery-skill-alert-retrieval';
+export const ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID = 'system-attack-discovery-skill-report';
 export const ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID = 'system-attack-discovery-generation';
 export const ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID = 'system-attack-discovery-validate';
 export const ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID = 'system-attack-discovery-run-example';
@@ -113,6 +116,325 @@ steps:
       start: \${{ inputs.start }}`,
 } as const satisfies ManagedWorkflowDefinition;
 
+export const ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW = {
+  id: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: 'discoveries',
+  version: 10,
+  yaml: `version: '1'
+name: Security - Attack discovery - Skill
+description: |
+  The always-on Attack Discovery generation-phase GATE. Runs the
+  attack-discovery-generator skill in its ground-truth mode (Mode C) via a
+  native \`ai.agent\` step: the skill receives the deterministic retrieval
+  phase's candidate alerts, ground-truths them, and returns a DECISION (not
+  data) — a keep-set of candidate \`_id\`s, any net-new alerts it retrieved
+  itself (when the skill toggle is on), and corroboration context. It does NOT
+  generate discoveries and NEVER invokes the attack-discovery.run tool; the
+  generation pipeline runs separately and unconditionally after the gate.
+
+  Per Constraint B the gate emits decisions only and never echoes the candidate
+  bytes it received — the orchestration forwards the original kept candidate
+  bytes by \`_id\` (no re-fetch, no distillation).
+
+  The \`ai.agent\` step runs with \`create-conversation: true\` so the underlying
+  Agent Builder conversation is persisted; the conversation id is surfaced as
+  workflow output so the report phase can resume that conversation to render the
+  Attack Discovery Report.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - AI Agent
+  - attackDiscovery:gate
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    alerts_index_pattern:
+      description: >
+        Elasticsearch index pattern for security alerts. When not provided,
+        defaults to .alerts-security.alerts-<spaceId> using the current
+        Kibana space (via workflow.spaceId). Used only when the skill performs
+        its own additional retrieval (skill_enabled).
+      type: string
+    candidate_alerts:
+      default: []
+      description: >
+        The candidate alert strings produced by the deterministic retrieval
+        phase, for the gate to ground-truth. Each candidate embeds its backing
+        document _id. The gate keeps a subset by _id (it never echoes these
+        bytes back); the orchestration forwards the original kept bytes.
+      items:
+        type: string
+      type: array
+    connector_id:
+      description: >
+        GenAI connector id used by the gate \`ai.agent\` step's model routing.
+        Per Constraint A this is the same (or a larger-context) connector used
+        for the generation request, so the gate never fails on inputs the
+        generate step would accept. When omitted (or empty), the step falls
+        back to the Agent Builder default model.
+      type: string
+    end:
+      default: now
+      description: Time range end (date math, e.g., now)
+      type: string
+    size:
+      default: 100
+      description: >
+        Maximum number of alerts the skill should retrieve when it performs its
+        own additional retrieval (skill_enabled).
+      type: integer
+    skill_enabled:
+      default: false
+      description: >
+        Skill toggle (Toggle 1). When true, the gate may retrieve net-new
+        alerts of its own (in addition to ground-truthing the candidates) and
+        return their _id values in added_alert_ids. When false, the gate only ground-truths
+        the candidate set and adds none.
+      type: boolean
+    start:
+      default: now-24h
+      description: Time range start (date math, e.g., now-24h, now-7d)
+      type: string
+
+steps:
+  # Invoke the attack-discovery-generator skill in its ground-truth mode (Mode C).
+  #
+  # The skill is referenced via a markdown skill mention
+  # ([/name](skill://skill-id)); the default Elastic AI agent loads it and
+  # follows its Mode C guidance: ground-truth the candidate alerts and return a
+  # DECISION as typed \`structured_output\` (keep_alert_ids / added_alert_ids /
+  # additional_context).
+  #
+  # \`create-conversation: true\` persists the conversation so its id can be
+  # surfaced (and later resumed by the report phase).
+  - name: gate
+    type: ai.agent
+    timeout: '10m'
+    create-conversation: true
+    # Route the skill's model calls through the connector selected for this
+    # generation (Constraint A). When the input is empty/omitted, this renders
+    # to undefined and the step falls back to the Agent Builder default model.
+    connector-id: '\${{ inputs.connector_id }}'
+    with:
+      message: >
+        Use the [/attack-discovery-generator](skill://attack-discovery-generator)
+        skill in Mode C (ground-truth gate). You are the generation-phase gate:
+        ground-truth the candidate alerts below and return a DECISION, not data,
+        and not a report.
+
+        Candidate alerts to ground-truth (each line is one candidate; its backing
+        document _id is embedded in the line):
+        {% for alert in inputs.candidate_alerts %}
+        - {{ alert }}
+        {% endfor %}
+
+        Decide which candidates to KEEP. DEFAULT to keeping every candidate; only
+        remove one when you have concrete justification that it is a false
+        positive or not attack-relevant. Favor recall — the downstream Attack
+        Discovery pipeline does the attack-chain analysis and false-positive
+        filtering and cannot analyze any alert you remove.
+        {% if inputs.skill_enabled %}
+        Additional retrieval is ENABLED: you MUST also retrieve net-new alerts of
+        your own. Run the space-aware default ES|QL query (call the
+        get_default_esql_query tool to obtain the baseline query, then run it via
+        execute_esql) against the
+        {%- if inputs.alerts_index_pattern %} {{ inputs.alerts_index_pattern }}
+        {%- else %} .alerts-security.alerts-{{ workflow.spaceId }}
+        {%- endif %} index for the time window {{ inputs.start }} to {{ inputs.end }}
+        (up to {{ inputs.size }} alerts), adapting it only when the investigation
+        warrants. The baseline query selects the backing document _id (METADATA
+        _id); record the _id value of EVERY alert you retrieve in
+        \`added_alert_ids\` IMMEDIATELY, BEFORE you run any corroboration — ids
+        ONLY, never the alert contents (the orchestration re-fetches the full
+        alerts by _id). Corroboration is best-effort CONTEXT only: it informs
+        \`additional_context\` and MUST NOT remove or shrink \`added_alert_ids\`.
+        NEVER drop a self-retrieved alert because a raw-log / threat-hunting /
+        entity pivot came back empty or inconclusive — absence of corroborating
+        telemetry is NOT evidence of a false positive, and the downstream Attack
+        Discovery generation pipeline performs the attack-chain analysis and
+        false-positive filtering and CANNOT see any alert you omit. Apply the same
+        recall-first, default-to-INCLUDE rule to \`added_alert_ids\` that you apply
+        to \`keep_alert_ids\`. When there are no candidate alerts above, this
+        retrieval is the ONLY source of alerts for the run — returning an empty
+        \`added_alert_ids\` is a failure; broaden the time window and retry before
+        giving up rather than returning nothing.
+        {% else %}
+        Additional retrieval is DISABLED: ground-truth ONLY the candidates above
+        and add none — leave \`added_alert_ids\` empty.
+        {% endif %}
+        Corroboration is best-effort and BOUNDED multi-skill: load the core
+        corroboration skills — threat-hunting (pivot into raw telemetry),
+        entity-analytics (host/user risk and asset criticality), and
+        alert-analysis (drill into the alerts behind each candidate) — and run
+        them against the alerts you are keeping. Three HARD guardrails keep
+        this inside the gate's 10m timeout and token budget: (a) the output stays
+        DECISION-ONLY / IDS-ONLY — corroboration feeds the short
+        \`additional_context\` summary, never a report or raw data; (b)
+        corroboration is NEVER a reason to drop an alert from \`keep_alert_ids\` or
+        \`added_alert_ids\` — recall wins, and an inconclusive or empty pivot
+        leaves the keep/added sets untouched; and (c) a budget cap — scope
+        corroboration to the kept candidates, summarize findings, never dump raw
+        telemetry, and skip a skill rather than blow the turn (skip gracefully
+        when a skill is unavailable). Summarize any
+        corroboration findings (entity risk and asset criticality, telemetry
+        pivots, false-positive triage, threat-intel hits) into
+        \`additional_context\`.
+
+        OUTPUT CONTRACT (decision only): return the _id values of the candidates
+        you keep in \`keep_alert_ids\` — ids ONLY, do NOT re-emit, paraphrase, or
+        echo the candidate alert contents (the orchestration forwards the original
+        kept bytes by _id). Put the _id values of any net-new alerts you retrieved
+        yourself in \`added_alert_ids\` — ids ONLY, same contract as
+        \`keep_alert_ids\` (the orchestration re-fetches the full alerts by _id).
+        Put corroboration insight in \`additional_context\`.
+
+        Do NOT generate attack discoveries, do NOT render an Attack Discovery
+        Report, and do NOT invoke the attack-discovery.run tool.
+      schema:
+        type: object
+        properties:
+          keep_alert_ids:
+            type: array
+            items:
+              type: string
+            description: >
+              The backing document _id values of the candidate alerts to KEEP (a
+              subset of the candidate _ids). Default to keeping all; remove only
+              with concrete justification. Return ids ONLY — do NOT echo the
+              candidate alert contents.
+          added_alert_ids:
+            type: array
+            items:
+              type: string
+            description: >
+              The backing document _id values of any NET-NEW alerts the skill
+              retrieved itself (only when additional retrieval is enabled). Ids
+              ONLY — same contract as keep_alert_ids; the orchestration re-fetches
+              the full alerts by _id. Empty when the gate added none.
+          additional_context:
+            type: string
+            description: >
+              A concise summary of the corroboration findings gathered via the
+              Cross-Skill Corroboration loop (entity risk and asset criticality,
+              telemetry pivots, false-positive triage, threat-intel hits) —
+              surfaced to the downstream generation LLM as extra signal.
+        required:
+          - keep_alert_ids
+    # NOTE: deliberately no \`on-failure: retry\`. The \`ai.agent\` step is
+    # conversation-stateful and long-running; a retry restarts it from scratch
+    # (discarding all prior progress) and, on a timeout, simply burns the
+    # remaining pipeline budget — guaranteeing failure rather than recovering.
+    # Surfacing the failure immediately is the correct behavior (fail-closed).
+
+  # Emit the gate DECISION plus the persisted conversation id as the workflow
+  # output. Downstream orchestration consumes \`keep_alert_ids\` (forwarding the
+  # original kept candidate bytes by _id), \`added_alert_ids\` (the skill's own
+  # net-new additions), \`additional_context\`, and \`conversation_id\` for the
+  # resumable report phase.
+  - name: emit_decision
+    type: workflow.output
+    status: completed
+    with:
+      keep_alert_ids: '\${{ steps.gate.output.structured_output.keep_alert_ids | default: [] }}'
+      added_alert_ids: '\${{ steps.gate.output.structured_output.added_alert_ids | default: [] }}'
+      additional_context: "\${{ steps.gate.output.structured_output.additional_context | default: '' }}"
+      conversation_id: '\${{ steps.gate.output.conversation_id }}'`,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW = {
+  id: ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: 'discoveries',
+  version: 1,
+  yaml: `version: '1'
+name: Security - Attack discovery - Skill report
+description: |
+  Phase 2 of skill-driven Attack Discovery 2.0: after generation and validation
+  have produced an \`execution_uuid\` and persisted discoveries, this workflow
+  RESUMES the Agent Builder conversation that was persisted by the skill alert
+  retrieval workflow (Phase 1) so the attack-discovery-generator skill renders
+  the full Attack Discovery Report into that same conversation.
+
+  The \`ai.agent\` step continues the existing conversation via the
+  \`conversation_id\` input (no \`create-conversation\`) and drives the skill's
+  status-only path (Mode B): the skill calls the
+  \`security.attack-discovery.get_status\` tool with the supplied
+  \`execution_uuid\` and renders the report for the returned discoveries.
+
+  This workflow is invoked fire-and-forget by the AD 2.0 orchestration after
+  validation succeeds, so report failures never affect the generation outcome.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - AI Agent
+  - attackDiscovery:skill_report
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    conversation_id:
+      description: >
+        Identifier of the persisted Agent Builder conversation created by the
+        skill alert retrieval workflow. The report is rendered into this same
+        conversation.
+      type: string
+    execution_uuid:
+      description: >
+        The Attack Discovery 2.0 generation \`execution_uuid\` whose persisted
+        discoveries should be rendered as the report (via the status-only path).
+      type: string
+  required:
+    - conversation_id
+    - execution_uuid
+
+steps:
+  # Resume the persisted conversation and drive the skill's status-only path
+  # (Mode B). Passing \`conversation_id\` (without \`create-conversation\`)
+  # continues the existing conversation instead of creating a new one, so the
+  # rendered report lands in the same thread the alert retrieval phase started.
+  - name: render_report
+    type: ai.agent
+    timeout: '10m'
+    with:
+      conversation_id: \${{ inputs.conversation_id }}
+      message: >
+        The Attack Discovery generation for execution_uuid
+        {{ inputs.execution_uuid }} has completed. Use the
+        [/attack-discovery-generator](skill://attack-discovery-generator) skill
+        in status-only mode (Mode B): call the
+        \`security.attack-discovery.get_status\` tool with that execution_uuid
+        and render the full Attack Discovery Report for the returned
+        discoveries.
+
+        After rendering the report, perform the Missed Detection Closure pass.
+        Because this status-resume path did not run its own upstream
+        investigation, first run a best-effort, lightweight raw-log
+        corroboration of the persisted attack chains to surface malicious
+        actions the curated alert set did not catch. Emit a
+        \`## ⚠️ Missed Detection\` heading for each coverage gap and draft a
+        candidate ES|QL detection rule for each gap.
+
+        Then PAUSE for explicit approval: ask the user to reply with
+        \`create the rule\` before any detection rule is created.
+
+        Do not start a new generation and do not invoke the
+        attack-discovery.run tool. Do NOT auto-create detection rules without
+        the user's \`create the rule\` reply.
+    on-failure:
+      retry:
+        max-attempts: 3`,
+} as const satisfies ManagedWorkflowDefinition;
+
 export const ATTACK_DISCOVERY_GENERATION_WORKFLOW = {
   id: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   management: MANAGEMENT,
@@ -199,11 +521,12 @@ inputs:
       description: |
         Controls how the built-in default alert retrieval workflow operates.
         Values: 'custom_query' (DSL-based), 'esql' (ES|QL query), 'custom_only' (skip built-in retrieval),
-        'provided' (alerts supplied directly via the \`alerts\` input; retrieval is skipped).
+        'provided' (alerts supplied directly via the \`alerts\` input; retrieval is skipped),
+        'skill' (alerts retrieved by the attack-discovery-generator skill workflow).
         This field is read but not acted upon by this workflow.
         The _generate endpoint handles retrieval orchestration.
       type: string
-      enum: ['custom_only', 'custom_query', 'esql', 'provided']
+      enum: ['custom_only', 'custom_query', 'esql', 'provided', 'skill']
     esql_query:
       description: |
         ES|QL query for alert retrieval (required when alert_retrieval_mode is 'esql').

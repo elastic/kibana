@@ -10,6 +10,8 @@ import {
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
   ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -41,13 +43,13 @@ describe('installStatic', () => {
       expect(workflowsExtensions.initManagedWorkflowsClient).toHaveBeenCalledWith('discoveries');
     });
 
-    it('installs all 5 AD workflow IDs with GLOBAL_WORKFLOW_SPACE_ID', async () => {
+    it('installs all 7 AD workflow IDs with GLOBAL_WORKFLOW_SPACE_ID', async () => {
       const lifecycleClient = createMockLifecycleClient();
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
 
       await installStatic({ enabled: true, workflowsExtensions });
 
-      expect(lifecycleClient.install).toHaveBeenCalledTimes(5);
+      expect(lifecycleClient.install).toHaveBeenCalledTimes(7);
       expect(lifecycleClient.install).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
         { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
@@ -67,9 +69,17 @@ describe('installStatic', () => {
         ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
         { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
       );
+      expect(lifecycleClient.install).toHaveBeenCalledWith(
+        ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
+      );
+      expect(lifecycleClient.install).toHaveBeenCalledWith(
+        ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
+        { spaceId: GLOBAL_WORKFLOW_SPACE_ID }
+      );
     });
 
-    it('calls ready() exactly once after all 5 installs', async () => {
+    it('calls ready() exactly once after all 7 installs', async () => {
       const callOrder: string[] = [];
       const lifecycleClient = {
         install: jest.fn().mockImplementation(async () => {
@@ -86,7 +96,16 @@ describe('installStatic', () => {
       await installStatic({ enabled: true, workflowsExtensions });
 
       expect(lifecycleClient.ready).toHaveBeenCalledTimes(1);
-      expect(callOrder).toEqual(['install', 'install', 'install', 'install', 'install', 'ready']);
+      expect(callOrder).toEqual([
+        'install',
+        'install',
+        'install',
+        'install',
+        'install',
+        'install',
+        'install',
+        'ready',
+      ]);
     });
 
     it('returns { failedIds: [] } when all installs succeed', async () => {
@@ -108,7 +127,7 @@ describe('installStatic', () => {
       const result = await installStatic({ enabled: true, workflowsExtensions });
 
       expect(result.failedIds).toEqual([failingId]);
-      expect(lifecycleClient.install).toHaveBeenCalledTimes(5);
+      expect(lifecycleClient.install).toHaveBeenCalledTimes(7);
     });
 
     it('continues installing remaining workflows after a failure', async () => {
@@ -121,7 +140,7 @@ describe('installStatic', () => {
 
       await installStatic({ enabled: true, workflowsExtensions });
 
-      expect(lifecycleClient.install).toHaveBeenCalledTimes(5);
+      expect(lifecycleClient.install).toHaveBeenCalledTimes(7);
       expect(lifecycleClient.ready).toHaveBeenCalledTimes(1);
     });
   });

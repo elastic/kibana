@@ -18,17 +18,18 @@ This README is the architecture reference for AD 2.0. Read top-to-bottom for the
 5. [Workflow Steps reference](#workflow-steps-reference)
 6. [Anonymization Boundary](#anonymization-boundary)
 7. [Modes of Execution](#modes-of-execution)
-8. [Internal APIs](#internal-apis)
-9. [Using the `security.attack-discovery.run` Step](#using-the-securityattack-discoveryrun-step)
-10. [Attack Discovery Generator Skill](#attack-discovery-generator-skill)
-11. [Event Logging](#event-logging)
-12. [Observability & Debugging](#observability--debugging)
-13. [Scheduling](#scheduling)
-14. [Schedules & the feature flag](#schedules--the-feature-flag)
-15. [Dependencies](#dependencies)
-16. [Testing](#testing)
-17. [Architecture Decision Records (appendix)](#architecture-decision-records-appendix)
-18. [Glossary](#glossary)
+8. [Timeouts](#timeouts)
+9. [Internal APIs](#internal-apis)
+10. [Using the `security.attack-discovery.run` Step](#using-the-securityattack-discoveryrun-step)
+11. [Attack Discovery Generator Skill](#attack-discovery-generator-skill)
+12. [Event Logging](#event-logging)
+13. [Observability & Debugging](#observability--debugging)
+14. [Scheduling](#scheduling)
+15. [Schedules & the feature flag](#schedules--the-feature-flag)
+16. [Dependencies](#dependencies)
+17. [Testing](#testing)
+18. [Architecture Decision Records (appendix)](#architecture-decision-records-appendix)
+19. [Glossary](#glossary)
 
 ## Status & Feature Flag
 
@@ -96,26 +97,36 @@ Attack Discovery 2.0 has three entry paths, all of which converge on the same ge
 2. **Scheduled** — an Alerting Framework rule fires on its configured cadence. The registered `workflowExecutor` rule executor invokes `executeGenerationWorkflow` directly. (New to AD 2.0 and easy to misread — see [What `Alerting Framework workflowExecutor` means](#what-alerting-framework-workflowexecutor-means).)
 3. **User-authored workflow** — a workflow includes `security.attack-discovery.run` as a step. The step handler calls `executeGenerationWorkflow` internally.
 
-`executeGenerationWorkflow` (in [`@kbn/discoveries`](../../packages/kbn-discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts)) is the single shared entry point. It runs **pre-execution validation** and a **managed-workflow integrity check**, then delegates to [`runManualOrchestration`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts), which chains the three phases with timeout budgets.
+`executeGenerationWorkflow` (in [`@kbn/discoveries`](../../packages/kbn-discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts)) is the single shared entry point. It runs **pre-execution validation** and a **managed-workflow integrity check**, then delegates to [`runManualOrchestration`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts), which chains the phases with timeout budgets.
+
+The generation phase begins with an **always-on ground-truthing gate** — a separate `ai.agent` workflow that runs before the untouched generate workflow. The gate runs for every trigger **except `agent_builder`** (the conversational skill has already ground-truthed its own data — see [`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts)); that skip is also the recursion break. The gate is **fail-closed** (a gate failure fails the run), runs a **bounded multi-skill corroboration** that stays decision-only, decides which candidate alerts to keep (original bytes pass through by `_id`), may add the `_id`s of net-new alerts it retrieved itself (Skill toggle, ids only), and threads a `conversation_id` to a **fire-and-forget report phase** after validation (which renders the report and drafts missed-detection rule proposals behind the verbatim `create the rule` approval gate, never auto-persisting rules). See [Always-on generation-phase gate](#always-on-generation-phase-gate).
 
 ```mermaid
 flowchart TB
   UI["Attack Discovery UI<br/>(Run button)"]
   SCHED["Alerting Framework<br/>workflowExecutor"]
   USER["User-authored workflow<br/>(security.attack-discovery.run step)"]
+  RUNTOOL["Skill run tool<br/>(agent_builder)"]
   HTTP["POST /internal/attack_discovery/_generate"]
   EGW["executeGenerationWorkflow<br/>(pre-exec validation + integrity check)"]
   RMO["runManualOrchestration<br/>(timeout budget per phase)"]
-  R["Phase 1: retrieval_step<br/>(security.attack-discovery.defaultAlertRetrieval)"]
-  G["Phase 2: generation_step<br/>(security.attack-discovery.generate, LangGraph)"]
-  V["Phase 3: validation_step<br/>(security.attack-discovery.defaultValidation<br/>+ security.attack-discovery.persistDiscoveries)"]
+  R["Retrieval phase: retrieval_step<br/>(deterministic toggles only —<br/>esql / query-builder / custom workflows;<br/>may be empty)"]
+  SKIP{"trigger ==<br/>agent_builder?"}
+  GATE["SKILL RUN 1 — Gate (separate ai.agent workflow,<br/>create-conversation; fail-closed):<br/>ground-truth candidates + optional skill retrieval<br/>→ keep_alert_ids + added_alert_ids + conversation_id"]
+  G["Generation phase: generation_step<br/>(security.attack-discovery.generate, LangGraph)"]
+  V["Validation phase: validation_step<br/>(security.attack-discovery.defaultValidation<br/>+ security.attack-discovery.persistDiscoveries)"]
+  REPORT["SKILL RUN 2 — Report phase (fire-and-forget):<br/>resume conversation_id → render report<br/>+ draft missed-detection rules (create the rule gate)"]
   EBT["EBT telemetry"]
   EVL["Event log<br/>(.kibana-event-log-*)"]
 
   UI --> HTTP --> EGW
   SCHED --> EGW
   USER --> EGW
-  EGW --> RMO --> R --> G --> V
+  RUNTOOL --> EGW
+  EGW --> RMO --> R --> SKIP
+  SKIP -->|"no (manual / schedule / workflow)"| GATE --> G
+  SKIP -->|"yes (skill already ground-truthed)"| G
+  G --> V --> REPORT
   EGW --> EBT
   RMO --> EVL
 ```
@@ -284,6 +295,46 @@ A user-authored workflow includes `security.attack-discovery.run` as a step. Thi
 
 See [Using the `security.attack-discovery.run` Step](#using-the-securityattack-discoveryrun-step) for a full guide.
 
+## Timeouts
+
+Attack Discovery generation is bounded by **layered** timeouts (see [ADR-008](#adr-008--layered-timeout-architecture-30-min-total-budget)). Timeouts propagate inside-out: a slow LLM call trips the connector timeout, which fails the workflow step, which `runManualOrchestration` catches against the total pipeline budget. The only **hard wall-clock kill** of an in-flight run is the scheduled rule-task timeout; the ad-hoc route, the run step, and the run tool are fire-and-forget / soft-handoff, so the background pipeline keeps running up to the pipeline budget.
+
+### Per-method entry timeouts
+
+| Method | Timeout | Value | Constant / source | Behavior |
+|---|---|---|---|---|
+| Scheduled (Alerting Framework) | Rule task timeout | **15m** | `ruleTaskTimeout` — [`register_schedule/definition.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/definition.ts) | **Hard kill**: the Alerting Framework cancels the task; `shouldStopExecution()` flips true and the run is reported failed. |
+| Ad hoc (`POST /internal/attack_discovery/_generate`) | Route handler `idleSocket` | **10m** | `DEFAULT_ROUTE_HANDLER_TIMEOUT_MS` — [`routes/constants.ts`](server/routes/constants.ts) | Effectively moot: the route is fire-and-forget and returns `execution_uuid` immediately, so this does not bound the generation. |
+| Run tool (`security.attack-discovery.run`) & run step, sync mode | Soft deadline | **90s** | `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` — [`run_step/constants.ts`](server/workflows/steps/run_step/constants.ts) | **Not a kill**: on deadline the call returns `execution_uuid` and the pipeline keeps running in the background for slow-path resume. |
+| Agent Builder workflow-tool wrapper | Wait-for-completion ceiling | **120s** | `WAIT_FOR_COMPLETION_TIMEOUT_SEC` — `@kbn/agent-builder-common` | External AB ceiling the 90s soft deadline sits safely under. |
+
+### Pipeline (orchestration) layer
+
+| Timeout | Value | Constant / source | Notes |
+|---|---|---|---|
+| Total pipeline budget | **30m** | `DEFAULT_PIPELINE_TIMEOUT_MS` — [`run_manual_orchestration/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts) | Outermost orchestration boundary, shared across gate + generation + validation (the fire-and-forget persist runs outside the budget). Raised from 15m → 30m (ADR-008). |
+| Per-phase consumer poll | **remaining budget** | `maxWaitMs: getRemainingBudgetMs()` — `pollForWorkflowCompletion` | Each phase poll is sized to whatever pipeline budget remains, so it never gives up while the inner workflow step is still legitimately running. |
+| Poll readiness wait | **5s** | `DEFAULT_READINESS_TIMEOUT_MS` — [`poll_for_workflow_completion/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/poll_for_workflow_completion/index.ts) | Initial wait for the execution doc to become queryable before polling begins. |
+
+### Workflow step layer (managed system workflows)
+
+Per-step `timeout` values from the managed definitions ([`kbn-workflows/managed/definitions/discoveries.ts`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries.ts)):
+
+| Step | Timeout |
+|---|---|
+| `security.attack-discovery.defaultAlertRetrieval` | **5m** |
+| Always-on gate (`ai.agent`) | **10m** |
+| `security.attack-discovery.generate` | **10m** |
+| `security.attack-discovery.defaultValidation` | **5m** |
+| `security.attack-discovery.persistDiscoveries` | **5m** |
+| `security.attack-discovery.run` (composite) | **10m** |
+
+### LLM layer
+
+| Timeout | Value | Constant / source | Notes |
+|---|---|---|---|
+| Connector timeout per LLM call | **10m** | `DEFAULT_CONNECTOR_TIMEOUT_MS` — [`server/index.ts`](server/index.ts) | Innermost boundary; bounds each generate-graph LLM call. Configurable via `xpack.discoveries.connectorTimeout`. |
+
 ## Internal APIs
 
 All internal routes are FF-gated (`assertWorkflowsEnabled`) and use **`asCurrentUser` only** — never `asInternalUser`. Privilege escalation is impossible because every ES query inherits the authenticated request's permissions.
@@ -302,10 +353,16 @@ Kicks off the orchestrated pipeline (retrieve → generate → validate → pers
   end?: string,
   replacements?: Replacements,
   size?: number,
+  // Composite config: three independent retrieval toggles compose the alert set;
+  // at least one must be enabled. The always-on gate runs regardless of skill_enabled.
   workflow_config?: {
-    default_alert_retrieval_mode?: 'custom_query' | 'disabled' | 'esql',
-    alert_retrieval_workflow_ids?: string[],
-    validation_workflow_id?: string
+    skill_enabled?: boolean,                          // Toggle 1 (default: true)
+    default_retrieval_enabled?: boolean,              // Toggle 2 (default: false)
+    alert_retrieval_mode?: 'custom_query' | 'esql',   // default-retrieval query mode (default: custom_query)
+    esql_query?: string,                              // required when default_retrieval_enabled + alert_retrieval_mode === 'esql'
+    alert_retrieval_workflows_enabled?: boolean,      // Toggle 3 (default: false)
+    alert_retrieval_workflow_ids?: string[],          // default: []
+    validation_workflow_id?: string                   // default: 'default'
   }
 }
 ```
@@ -334,10 +391,23 @@ Returns the workflow execution tracking data for a given `execution_id` — the 
 ```typescript
 {
   alert_retrieval: Array<{ workflow_id: string; workflow_run_id: string }> | null,
+  // Generation-phase gate (skill) runs, surfaced under the Generation phase.
+  gate: Array<{ workflow_id: string; workflow_run_id: string }> | null,
   generation: { workflow_id: string; workflow_run_id: string } | null,
   validation: { workflow_id: string; workflow_run_id: string } | null
 }
 ```
+
+**Real-time visibility while running.** The `generation` run ID is written to the
+event log (in the `generate-step-started` event) *as soon as the generation
+workflow is scheduled* — i.e. before generation finishes — so the flyout can show
+the **Generation** workflow row the moment generation starts, not only after it
+completes. The flyout polls this route every 2s and keeps polling until both
+`generation` and `validation` are present, or a 10-minute safety window elapses
+(`getTrackingRefetchInterval`). The safety window must outlast a full run: the
+gate (skill) phase alone can take ~45s before the generation run ID is written, so
+a shorter cap would freeze the poller mid-run and the Generation row would not
+appear until the run completed.
 
 ### GET /internal/attack_discovery/workflow/{workflow_id}/execution/{execution_id}
 
@@ -362,21 +432,54 @@ generation_workflow_run_id?: string  // Client fallback run ID for early polling
   alert_retrieval: Array<{
     alerts: string[],
     alerts_context_count: number | null,
+    // Count of `custom_workflow` alerts that lack a recoverable backing `_id`
+    // (C2). When > 0 the UI shows a warning, since such alerts are dropped
+    // before generation. Only set for the `custom_workflow` strategy.
+    alerts_missing_id_count?: number,
     extraction_strategy: string,
     workflow_id: string,
     workflow_run_id: string
-  }> | null,
+  }> | null,                              // includes generation-phase gate runs (see below)
   combined_alerts: { alerts: string[]; alerts_context_count: number } | null,
   diagnostics_context?: DiagnosticsContext,
   generation: PipelineGenerationData | null,
   validated_discoveries: AttackDiscoveryApiAlert[] | null,
   workflow_executions_tracking: {
     alert_retrieval: Array<{ workflow_id: string; workflow_run_id: string }> | null,
+    // Generation-phase gate (skill) runs, surfaced under the Generation phase.
+    gate: Array<{ workflow_id: string; workflow_run_id: string }> | null,
     generation: { workflow_id: string; workflow_run_id: string } | null,
     validation: { workflow_id: string; workflow_run_id: string } | null
   }
 }
 ```
+
+**Generation-phase gate runs.** The `gate` bucket holds a **single entry**: the
+always-on gate (skill) decision run. Any net-new alert re-fetch the gate triggers
+(`retrieveAnonymizedAlertsByIds`) is an internal hydration detail of the skill
+invocation and is **folded into that single entry** (it is *not* surfaced as a
+separate execution) — so a skill-only ad-hoc run shows exactly **one** gate entry
+plus the generate workflow under the **Generation** phase (and one validation
+entry), with **zero** entries under Alert retrieval. The gate run is also merged
+into `alert_retrieval` (keyed by `workflow_run_id`) so its badge/inspect resolve
+under the Generation phase in the UI — but it is excluded from `combined_alerts`,
+which stays scoped to the Alert retrieval phase. The badge count is **gate-aware**:
+the sum of the kept candidate ids (`keep_alert_ids`) and the net-new ids the gate
+retrieved (`added_alert_ids`).
+
+**Inspecting the alerts passed to generation.** The gate emits ids only, so on its
+own the gate entry carries no raw alerts and its inspect would be disabled. The
+authoritative set of alerts generation actually analyzed is the
+`generate_discoveries` step's `input.alerts`, so `get_pipeline_data` attaches those
+to the gate (skill) entry. This guarantees the gate inspect **always reflects the
+real events passed to generation**: the kept candidate alerts forwarded **as-is**
+(original bytes, including any alerts produced by the alert-retrieval workflows that
+survived the gate) plus any net-new alerts the gate added. Alerts the gate dropped
+are intentionally absent (they were not passed to generation) and remain
+inspectable under their own Alert retrieval entries when retrieval ran. Once the
+generate step input is available, the badge count and the inspect both reflect that
+real count; before then, the gate-aware (`keep_alert_ids` + `added_alert_ids`) count
+stands and inspect is disabled.
 
 ### Schedule CRUD routes
 
@@ -534,9 +637,85 @@ The `replacements` map is **excluded by the step's output schema** — not just 
 
 Definition: [`server/skills/attack_discovery_generator_skill.ts`](server/skills/attack_discovery_generator_skill.ts). Registration: [`server/skills/register_skills.ts`](server/skills/register_skills.ts).
 
+The skill plays **two roles**: (1) the conversational front door described in this section (Modes A/B, the `agent_builder` trigger), and (2) the **always-on generation-phase gate** that the orchestration invokes for every other trigger — see [Always-on generation-phase gate](#always-on-generation-phase-gate).
+
+### Skill capabilities and how each path invokes them
+
+Across every execution path the skill provides the same three capabilities; what changes per path is *which mode* delivers them.
+
+#### The three capabilities
+
+- **Reviewing alert data.** The skill is a strict analyst. `Cross-Skill Corroboration` loads the four core corroboration skills (`threat-hunting`, `entity-analytics`, `alert-analysis`, `graph-creation`) with mandatory language, and `Key Principles` / `Analysis Process` enforce default-to-split independent evaluation, entity-correlation hygiene (a shared username/host/IP is necessary but not sufficient), and severity-weighted timeline construction. The Step 0 hard gate keeps the pipeline's returned discoveries as the only set the skill may report.
+- **Retrieving its own alert data.** The `Upfront Pipeline Pattern` has the skill source the alerts it analyzes — call `get_default_esql_query`, run it via `execute_esql`, corroborate, then hand the curated set to the pipeline. Mode A's retrieval-mode preference is `provided > esql > custom_only > custom_query`, and bare (parameter-less) `security.attack-discovery.run` invocations are forbidden.
+- **Reporting on results.** The full Attack Discovery Report renders a header, Summary Statistics, the **seven mandatory per-discovery components** (heading, host/user, Narrative, Raw Log Corroboration, Evidence Table, Attack Chain tactics, Attack Flow Graph, deep link), an Overall Assessment table, and the Insights JSON (which retains the `{{ field uuid }}` tokens the UI and persistence layer consume). The Missed Detection Closure pass then drafts ES|QL rules for any coverage gaps and pauses for the verbatim `create the rule` approval before invoking `detection-rule-edit`.
+
+#### The three modes
+
+| Mode | Invoked by | Role |
+|---|---|---|
+| **A — Generate** | Agent Builder conversation (`agent_builder` trigger) | Corroborate evidence, then delegate to `security.attack-discovery.run` |
+| **B — Status-only** | Agent Builder conversation, or the fire-and-forget report workflow | Look up a prior run by `execution_uuid` and render the report |
+| **C — Ground-truth gate** | The generation-phase gate, for every non-`agent_builder` trigger | Curate the candidate alert set and return a decision (`keep_alert_ids` / `added_alert_ids` / `additional_context`) — never a report, never `attack-discovery.run` |
+
+#### How each generation path invokes the skill
+
+All four entry points converge on `executeGenerationWorkflow` → `runManualOrchestration`; the `trigger` string is the only switch that decides whether the gate (Mode C) runs ([`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts) returns `true` for everything except `agent_builder`).
+
+```mermaid
+flowchart TD
+  subgraph entries [Four invocation methods]
+    UI["1. Ad hoc / manual<br/>POST _generate<br/>trigger=manual"]
+    SCHED["2. Scheduled<br/>AD 2.0 schedule executor<br/>trigger=schedule"]
+    AB["3. Agent Builder skill<br/>trigger=agent_builder"]
+    STEP["4. Workflow run step<br/>security.attack-discovery.run<br/>trigger=workflow"]
+  end
+
+  EGW["executeGenerationWorkflow()"]
+  RMO["runManualOrchestration()"]
+  RET["Retrieval step<br/>(deterministic ES|QL / DSL / custom workflows)"]
+  GATECHECK{"shouldRunGate(trigger)?"}
+  GATE["Gate = Mode C<br/>runGatePhase -> invokeGateWorkflow<br/>ai.agent skill mention"]
+  GEN["Generation step<br/>invokeGenerationWorkflow()"]
+  VAL["Validation step<br/>invokeValidationWorkflow() (persists)"]
+  RPTCHECK{"gate persisted conversation_id?"}
+  RPT["invokeSkillReportWorkflow()<br/>Mode B report + missed-detection closure<br/>into gate conversation"]
+  ABREPORT["Skill renders report inline<br/>(Mode A / Mode B)"]
+
+  UI --> EGW
+  SCHED --> EGW
+  STEP --> EGW
+  AB -->|"Phase 1: corroborate (Mode A)"| AB
+  AB -->|"Phase 2: run tool"| EGW
+  EGW --> RMO --> RET --> GATECHECK
+  GATECHECK -->|"manual / schedule / workflow"| GATE --> GEN
+  GATECHECK -->|"agent_builder (skipped)"| GEN
+  GEN --> VAL --> RPTCHECK
+  RPTCHECK -->|"yes: paths 1, 2, 4"| RPT
+  RPTCHECK -->|"path 3"| ABREPORT
+```
+
+- **Ad hoc / manual** (`POST /internal/attack_discovery/_generate`, `trigger: 'manual'`) — retrieval → **gate (Mode C)** reviews the candidates and (with the Skill toggle on) retrieves additional alerts → generate → validate → persist. The rich report is delivered afterward by the fire-and-forget Mode B report workflow when the gate persisted a `conversation_id`; that report also runs the Missed Detection Closure pass — drafting candidate ES|QL rules for any coverage gaps and pausing at the verbatim `create the rule` approval gate (never auto-persisting rules).
+- **Scheduled** (`trigger: 'schedule'`) — identical gated pipeline; discoveries are also reported back to the Alerting Framework, and the Mode B report (including the Missed Detection Closure pass) is fire-and-forget into the gate's conversation. That conversation is the **canonical surface for reviewing the report and its missed-detection rule proposals** — the schedule execution flyout's `ConversationLink` is the entry point. Conversations are owned by the schedule's API-key owner and ACL-filtered by username, so visibility is **single-owner**; cross-user sharing is not currently supported (out of scope).
+- **Skill via Agent Builder** (`trigger: 'agent_builder'`) — the gate is **skipped**; the conversational skill itself performs Mode A corroboration/retrieval and renders the report inline (and Mode B via `get_status`), including the Missed Detection Closure pass — the same closure the gated paths now run during their fire-and-forget Mode B report.
+- **Workflow `attack-discovery.run` step** (`trigger: 'workflow'`) — the same gated pipeline as manual.
+
+Capability → pipeline embodiment for the gated paths: *review alert data* → Mode C `keep_alert_ids` decision (informed by the gate's bounded multi-skill corroboration); *retrieve own alert data* → Mode C `added_alert_ids` when the Skill toggle is on; *report on results* → persisted discoveries in the AD UI plus the Mode B skill report, which renders the rich report and drafts missed-detection rule proposals behind the `create the rule` gate.
+
+### Always-on generation-phase gate
+
+Every non-`agent_builder` generation (`manual`, `schedule`, `workflow`) runs the skill as an **always-on ground-truthing gate** during the generation phase. The gate is a **separate workflow** executed before the untouched generate workflow — the generation workflow YAML and the `generate` step's LangGraph logic are not modified. Orchestration: [`run_gate_phase/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_gate_phase/index.ts), invoked from [`run_manual_orchestration/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts).
+
+- **Single chokepoint, universal gate.** All four entry points (`_generate` manual, scheduled, run step `workflow`, the `agent_builder` run tool) flow through the same `executeGenerationWorkflow` → `runManualOrchestration` path. The gate is invoked from that single TS path and **skipped only for `agent_builder`** ([`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts)) — the conversational skill has already ground-truthed its own data before delegating to the pipeline, so re-running the gate would double-invoke the skill. That trigger check is also the **recursion break**: if the gate's `ai.agent` ever called `security.attack-discovery.run`, the re-entry carries `trigger === 'agent_builder'` and skips the gate instead of recursing.
+- **Skill invocation count per gated run = exactly 2.** (1) the generation-phase gate `ai.agent` — one turn that ground-truths the candidates and, when the Skill toggle is on, retrieves its own additional alerts — and (2) the fire-and-forget **report** phase `ai.agent` (a resume of the gate's `conversation_id`) that renders the Attack Discovery Report after validation and then runs the **Missed Detection Closure pass** — a best-effort raw-log corroboration of the persisted chains that emits a `## ⚠️ Missed Detection` heading per coverage gap, drafts a candidate ES|QL detection rule for each, and pauses at the verbatim `create the rule` approval (it never auto-persists a rule). The `generate` step is a separate LLM call, not a skill run. The report phase runs for all gated runs (including scheduled) and is fire-and-forget, so a report failure never affects the generation outcome.
+- **Bounded multi-skill corroboration.** Before deciding, the gate loads the core corroboration skills — `threat-hunting` (raw-telemetry pivots), `entity-analytics` (host/user risk, asset criticality), and `alert-analysis` (alert drill-down) — best-effort against the candidates it is keeping, folding the findings into `additional_context`. Two hard guardrails keep this inside the gate's 10m timeout and token budget: (a) the output stays **decision-only / ids-only** (corroboration may only inform `keep_alert_ids` / `added_alert_ids` / a short `additional_context` summary — never a report or raw data), and (b) a **budget cap** (scope corroboration to the kept candidates, summarize findings, never dump raw telemetry, and skip a skill rather than blow the turn). The deeper corroboration trades additional gate latency/token use for stronger ground-truthing; the budget cap mitigates but does not eliminate that cost.
+- **Fail-closed.** If the gate errors or times out, the run fails loudly — there is no silent pass-through of un-ground-truthed candidates. The always-on gate is therefore a hard dependency of every `manual` / `schedule` / `workflow` generation.
+- **Decision-only output, ids-only contract.** The gate returns *decisions*, not rewritten data: a keep-set of candidate `_id`s (`keep_alert_ids`) + the `_id`s of any net-new alerts it retrieved itself (`added_alert_ids`) + `additional_context` (Constraint B — the gate never echoes the candidate bytes it received). Both id sets follow the **same ids-only contract** — the gate never emits raw alert strings. The orchestration forwards the **original** candidate alert strings for the kept `_id`s unchanged — it does **not** re-fetch or distill kept candidates. The retrieve-by-ids path (`retrieveAnonymizedAlertsByIds`) re-fetches + anonymizes **only** the gate's net-new `added_alert_ids` (Skill toggle on), which have no anonymized upstream form; that re-fetch is an internal hydration detail of the skill invocation and is **folded into the single gate entry** (never surfaced as a separate execution). The gate run is recorded as one entry under the event-log `gate` bucket (not `alertRetrieval`) so the monitoring UI surfaces it as a **single** sub-step under the **Generation** phase, with a gate-aware badge count of `keep_alert_ids` + `added_alert_ids`.
+- **`_id` contract + richest-wins dedup.** Before the gate, candidates lacking a recoverable backing `_id` are rejected loudly ([`validate_candidate_alert_ids`](../../packages/kbn-discoveries/impl/attack_discovery/generation/validate_candidate_alert_ids/index.ts)), and duplicate `_id`s from multiple sources collapse to the richest copy ([`dedupe_candidates_by_id`](../../packages/kbn-discoveries/impl/attack_discovery/generation/dedupe_candidates_by_id/index.ts)).
+- **Timeouts.** The gate `ai.agent` (10m) plus generate (10m) plus validate (5m) share the 30m pipeline budget — see [ADR-008](#adr-008--layered-timeout-architecture-30-min-total-budget).
+
 ### What it does
 
-The skill registers a single Agent Builder skill that supports two modes:
+The skill registers a single Agent Builder skill. In its conversational role it supports two modes (Mode C, the always-on gate, is covered in [Always-on generation-phase gate](#always-on-generation-phase-gate)):
 
 1. **Loads the analyst prompt** — same "world-class cyber security analyst" framing used by the LangGraph generate node, plus stricter rules layered on top: a Validation Standard ("when in doubt, discard"), a default-to-split independent-evaluation rule, and Entity Correlation Hygiene guidance that calls out service accounts, shared infrastructure, and same-tactic-different-host coincidence as **not** sufficient correlation evidence.
 2. **Tells the agent to corroborate before deciding** — the skill content intentionally does not enumerate which tools to use. It instructs the agent to *enumerate the tools available in this conversation* and call those that gather supporting evidence (threat hunting, threat intelligence, entity context, knowledge base, etc.). The skill exposes a small set of platform tools (`execute_esql`, `generate_esql`, `search`, `get_document_by_id`, `get_index_mapping`, `get_workflow_execution_status`) plus the inline `get_default_esql_query` and `security.attack-discovery.get_status` tools, but other tools active in the session are also fair game.
@@ -646,6 +825,12 @@ Rather than create a new inline tool, the skill calls `getDefaultEsqlQueryTool()
 #### 5. Registration alongside the existing two skills, FF-gated by the plugin
 
 The skill is registered in [`register_skills.ts`](server/skills/register_skills.ts) unconditionally — the FF gate sits one level up at the plugin's setup site (the same gate that controls every other surface in this plugin). When the FF is OFF the discoveries plugin's setup short-circuits, so the skill is never registered and Agent Builder users do not see it.
+
+#### 6. Gate output is ids-only, so the connector response stays small
+
+The gate `ai.agent` step emits **decisions only** (Constraint B): a keep-set of candidate `_id`s (`keep_alert_ids`), the `_id`s of any net-new alerts the skill retrieved itself (`added_alert_ids` — Skill toggle on, up to `size`), and a short `additional_context` summary. It **never** echoes alert bytes — neither the candidates it received nor the net-new alerts it found. The orchestration forwards the original kept candidate strings by `_id`, and re-fetches the net-new alerts server-side by `_id` ([`retrieveAnonymizedAlertsByIds`](../../packages/kbn-discoveries/impl/attack_discovery/generation/retrieve_anonymized_alerts_by_ids/index.ts)).
+
+Because the gate response carries only id arrays plus a short summary, it stays well under the actions framework's response-size cap (`xpack.actions.maxResponseContentLength`, applied at the axios layer — [`actions/server/lib/axios_utils.ts`](../../../../platform/plugins/shared/actions/server/lib/axios_utils.ts)). This ids-only contract is what removes any dependency on that setting: full alert content never rides the connector response, so AD 2.0 requires **no** change to `xpack.actions.maxResponseContentLength`. (An earlier design echoed the full net-new alert strings through this response and could exceed the 1mb default; the ids-only contract replaced it precisely to avoid that.)
 
 ### Verification
 
@@ -865,7 +1050,10 @@ event.provider : "securitySolution.attackDiscovery" and event.outcome : "failure
 | Symptom | Likely cause | Where to look |
 |---------|--------------|---------------|
 | UI shows 404 on `_generate` | FF is OFF | Verify `securitySolution.attackDiscoveryWorkflowsEnabled` in `kibana.dev.yml`; check startup health check in server logs |
-| Orchestrator times out (10 min budget exceeded) | Stuck LLM call or slow retrieval | Workflows app → execution details → identify which phase exceeded its sub-budget; check connector accessibility |
+| Orchestrator times out (30 min budget exceeded) | Stuck LLM call or slow gate/retrieval | Workflows app → execution details → identify which phase exceeded its sub-budget (gate `ai.agent`, generate, or validate); check connector accessibility |
+| Generation phase fails before the `generate` step | The always-on gate `ai.agent` failed (fail-closed) | The gate runs before the LLM generate step; inspect the gate workflow execution (`ai.agent` step) — a gate error/timeout fails the whole run. Verify the gate connector and `create-conversation` work headless (scheduled/run-step contexts) |
+| Run fails with `prior run was interrupted` | Kibana restarted, crashed, or shut down mid-execution (in dev, the file-watcher restarting the server) | Error category `interrupted` (distinct from `timeout`/`concurrent_conflict`) — not a config/model/RBAC issue. Simply re-run. If interruptions recur in production, investigate Kibana restarts (deploys, OOM kills, node rollovers) |
+| Run succeeds but no Attack Discovery Report appears in the conversation | The fire-and-forget `system-attack-discovery-skill-report` run failed or was interrupted — it is independent of the three pipeline phases and **not shown in the execution-details flyout** | Check the `system-attack-discovery-skill-report` workflow execution status for the run's `execution_uuid` / `conversationId`; a report failure never fails generation. Re-running generation re-schedules the report |
 | Pipeline aborts with `repair_failed` | A required managed workflow is missing, unmanaged, or disabled | Server log around `checkManagedWorkflowIntegrity`; navigate to `http://localhost:5601/app/workflows/system-attack-discovery-generation` and confirm the workflow exists and is enabled; restart Kibana to trigger platform reconciliation |
 | Schedule fires but no discoveries appear | Tag-based isolation drift | Confirm the schedule was created via the internal API (carries the `attack-discovery-schedule` tag); compare with `find` / `get` route output |
 | EBT events missing from analytics | Either FF is OFF or `core.analytics` is unavailable | Verify FF; check `core.analytics.registerEventType` calls in `discoveries/server/plugin.ts` |
@@ -996,11 +1184,16 @@ Creates a new workflow-tagged attack discovery schedule. The schedule is registe
     filters?: unknown[],
     query?: { query: string | object; language: string },
     combined_filter?: object,
+    // Composite config: three independent retrieval toggles compose the alert set;
+    // at least one must be enabled. The always-on gate runs regardless of skill_enabled.
     workflow_config?: {
-      alert_retrieval_workflow_ids?: string[],
-      alert_retrieval_mode?: 'custom_only' | 'esql' | 'custom_query',
-      esql_query?: string,
-      validation_workflow_id?: string
+      skill_enabled?: boolean,                          // Toggle 1 (default: true)
+      default_retrieval_enabled?: boolean,              // Toggle 2 (default: false)
+      alert_retrieval_mode?: 'custom_query' | 'esql',   // default-retrieval query mode (default: custom_query)
+      esql_query?: string,                              // required when default_retrieval_enabled + alert_retrieval_mode === 'esql'
+      alert_retrieval_workflows_enabled?: boolean,      // Toggle 3 (default: false)
+      alert_retrieval_workflow_ids?: string[],          // default: []
+      validation_workflow_id?: string                   // default: 'default'
     }
   },
   schedule: { interval: string },
@@ -1299,31 +1492,37 @@ The records below preserve the historical rationale behind each load-bearing des
 4. **Retry safety** — if the browser disconnects, the pipeline still runs server-side to completion.
 5. **Scheduling parity** — the alerting-framework scheduler invokes the same `executeGenerationWorkflow`. A sync `_generate` would need a separate code path.
 
-### ADR-008 — Layered timeout architecture (10-min total budget)
+### ADR-008 — Layered timeout architecture (30-min total budget)
 
-**Context.** Generation spans three workflow executions (retrieval, generation, validation), each with its own timeout. The HTTP layer also has a timeout. Connector calls have a timeout per call.
+**Context.** A gated generation now spans four workflow executions — the always-on gate (`ai.agent`), generation, validation, and the fire-and-forget report — plus a consumer-side poll (`pollForWorkflowCompletion`) that waits for each workflow execution to finish. The gate and the generate workflow are two separately-bounded `ai.agent`/LLM phases that both run inside the generation phase. `runManualOrchestration` enforces a single total pipeline budget (`DEFAULT_PIPELINE_TIMEOUT_MS`) shared across the gate, generation, and validation (the report phase is fire-and-forget and runs outside the budget).
 
-**Decision.** Each layer's timeout is strictly less than or equal to the layer above it. The HTTP route handler timeout is the outermost boundary; individual LLM calls are the innermost.
+**Decision.** Each layer's timeout is strictly less than or equal to the layer above it. The total pipeline budget is the outermost boundary; individual LLM calls are the innermost. Critically, **each phase's consumer-side poll is bounded by the remaining pipeline budget** (`maxWaitMs: getRemainingBudgetMs()`) and must be ≥ that phase's inner workflow step timeout — otherwise the poll gives up while the workflow step is still legitimately running. This applies to the **always-on gate** `ai.agent` step (10m timeout), generation (10m), and validation (5m). The budget was raised from 15m to 30m so the gate plus generation plus validation comfortably fit on every gated run (the gate is a full extra inference pass that the 15m budget left no room for once the gate approached its own timeout).
 
 ```mermaid
 gantt
-    title Attack Discovery Timeout Budget (10 min total)
+    title Attack Discovery Timeout Budget (30 min total)
     dateFormat X
     axisFormat %M:%S
 
-    section HTTP Layer
-    Route handler idle socket   :a1, 0, 600
+    section Pipeline Layer
+    Total pipeline budget        :a1, 0, 1800
 
     section Workflow Layer
-    Alert retrieval (5 min max)  :a2, 0, 300
-    Generation (10 min max)      :a3, 300, 600
-    Validation (2 min max)       :a4, 600, 720
+    Always-on gate (10m)         :a2, 0, 600
+    Generation (10 min max)      :a3, 600, 1200
+    Validation (5 min max)       :a4, 1200, 1500
 
     section LLM Layer
-    Connector timeout per call   :a5, 300, 540
+    Connector timeout per call   :a5, 0, 300
 ```
 
-**Consequence.** Timeouts propagate inside-out: a slow LLM call triggers a connector timeout, which triggers a step failure, which `runManualOrchestration` catches and reports — rather than the HTTP connection silently closing.
+**Consequence.** Timeouts propagate inside-out: a slow LLM call triggers a connector timeout, which triggers a step failure, which `runManualOrchestration` catches and reports. Because each phase poll is sized to the remaining budget (rather than a hard-coded 5m), the gate `ai.agent` step gets the time it needs while generation and validation still share whatever budget remains. Because the gate is **fail-closed**, a gate timeout fails the whole run loudly rather than passing un-ground-truthed candidates through.
+
+> **Regression guarded against.** Before the remaining-budget threading, a phase poll defaulted to a hard-coded 5m while the `ai.agent` step allowed 10m, so the consumer-side poll threw `Workflow timed out after 300000ms` even though the workflow step was still running. The fix threads the remaining pipeline budget into every phase poll.
+
+**No retry-on-timeout for the gate `ai.agent` step.** The gate step deliberately omits `on-failure: retry`. The `ai.agent` step is conversation-stateful and long-running; the workflow engine enforces its 10m timeout by aborting the underlying agent execution (`Converse request was aborted`). A retry would restart the agent **from scratch** — discarding all prior ground-truthing progress — and, on a timeout, simply burn the remaining pipeline budget, guaranteeing failure rather than recovering. Surfacing the timeout immediately is the correct behavior.
+
+**Gate connector (Constraint A).** The gate `ai.agent` step routes its model calls through the connector selected for the generation: `apiConfig.connector_id` is threaded into the gate workflow as the `connector_id` input and rendered into the step's `connector-id` config. The gate must run on the same connector as the generation request (or a larger-context one) so it never fails on inputs the generate step would have accepted. When the input is empty/omitted (e.g. a manual workflow run with no connector), `connector-id` renders to `undefined` and the step falls back to the Agent Builder default model.
 
 ### ADR-009 — `string[]` alert contract on `generate`
 
