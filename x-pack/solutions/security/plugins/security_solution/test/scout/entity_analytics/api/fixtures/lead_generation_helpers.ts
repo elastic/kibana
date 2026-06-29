@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
-import { getLeadsIndexName } from '../../../../common/entity_analytics/lead_generation/constants';
+import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
 
 export const DEFAULT_SPACE_ID = 'default';
 
