@@ -65,7 +65,7 @@ describe('region_policy lib', () => {
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
         path: '/_inference/_region_policy',
-        body,
+        body: { region_policy: body },
       });
       expect(result).toEqual(response);
     });

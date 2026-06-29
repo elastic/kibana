@@ -108,7 +108,7 @@ describe('Region Policy Routes', () => {
       expect(mockEsClient.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
         path: '/_inference/_region_policy',
-        body: requestBody,
+        body: { region_policy: requestBody },
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith(
         expect.objectContaining({ body: mockPolicy })

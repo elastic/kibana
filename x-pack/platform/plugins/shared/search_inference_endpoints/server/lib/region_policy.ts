@@ -26,7 +26,7 @@ export const putRegionPolicy = async (
   return client.transport.request<RegionPolicyResponse>({
     method: 'PUT',
     path: REGION_POLICY_PATH,
-    body,
+    body: { region_policy: body },
   });
 };
 

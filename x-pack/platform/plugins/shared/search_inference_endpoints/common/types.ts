@@ -115,8 +115,10 @@ export interface RegionPolicyBody {
 
 export interface RegionPolicyResponse {
   region_policy: RegionPolicyBody;
-  created_at?: string;
+  created_at: string;
+  created_by?: string;
   updated_at?: string;
+  updated_by?: string;
 }
 
 export enum EisModelStatus {
