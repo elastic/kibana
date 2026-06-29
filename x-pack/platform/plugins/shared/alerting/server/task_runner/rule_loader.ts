@@ -188,8 +188,10 @@ export function getFakeKibanaRequest(
 
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-      effectiveApiKey = apiKey;
+      if (apiKey) {
+        requestHeaders.authorization = `ApiKey ${apiKey}`;
+        effectiveApiKey = apiKey;
+      }
       if (apiKeyCreatedByUser && apiKey) {
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',

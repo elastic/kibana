@@ -71,6 +71,11 @@ apiTest.describe(
     apiTest(
       'index connector scheduled by a UIAM rule writes its document end-to-end',
       async ({ apiClient, esClient, samlAuth }) => {
+        // Scout's default per-test timeout (60s) is below POLL_TIMEOUT_MS, so we
+        // lift it just above the polling ceiling to leave room for connector +
+        // rule creation and the sanity check.
+        apiTest.setTimeout(POLL_TIMEOUT_MS + 30_000);
+
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         // The .index connector requires the target index to exist.

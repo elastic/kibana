@@ -358,12 +358,22 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      getFakeKibanaRequest(uiamContext, 'default', null, undefined, true);
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        uiamContext,
+        'default',
+        null,
+        undefined,
+        true
+      );
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
         expect.objectContaining({ tags: expect.any(Array) })
       );
+      // No credential is available, so the request must stay unauthenticated
+      // rather than carry a literal `ApiKey null` header.
+      expect(fakeRequest.headers).toEqual({});
+      expect(effectiveApiKey).toBeNull();
     });
 
     test('logs a warning when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is null', () => {
