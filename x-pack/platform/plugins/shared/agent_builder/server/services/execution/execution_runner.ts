@@ -21,9 +21,6 @@ import {
   AgentBuilderErrorCode,
   AgentExecutionMode,
   createInternalError,
-  createBadRequestError,
-  ConversationAccessControlMode,
-  AgentAccessControlMode,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -147,13 +144,6 @@ const handleConversationExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
-  });
-
-  await validatePublicConversationCreation({
-    agentId,
-    conversation,
-    agentService,
-    request,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -395,45 +385,6 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
   return typeof candidate === 'number' && candidate >= 400 && candidate < 600
     ? candidate
     : undefined;
-};
-
-/**
- * Enforces the public-conversation creation guard after conversation resolution.
- *
- * The request-level `access_control` field is ignored for existing conversations, so this runs
- * only when the resolved operation is `CREATE` and the new conversation is public. Public
- * conversations may only be created for public or shared agents; private agents are rejected even
- * if the caller can use the agent.
- */
-export const validatePublicConversationCreation = async ({
-  agentId,
-  conversation,
-  agentService,
-  request,
-}: {
-  agentId: string;
-  conversation: ConversationWithOperation;
-  agentService: AgentsServiceStart;
-  request: KibanaRequest;
-}): Promise<void> => {
-  if (
-    conversation.operation !== 'CREATE' ||
-    conversation.access_control?.access_mode !== ConversationAccessControlMode.Public
-  ) {
-    return;
-  }
-
-  const agentRegistry = await agentService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId, { access: 'use' });
-  const agentAccessMode = agent.access_control?.access_mode ?? AgentAccessControlMode.Public;
-
-  if (agentAccessMode !== AgentAccessControlMode.Private) {
-    return;
-  }
-
-  throw createBadRequestError(
-    `Cannot create a public conversation for agent ${agentId} because the agent is private.`
-  );
 };
 
 const buildPersistenceEvents = ({
