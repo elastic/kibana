@@ -117,6 +117,9 @@ export const performRuleInstallationHandler = async (
       ...results.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
     );
     ruleErrors.push(...errors);
+    logger.debug(
+      `bulkCreatePrebuiltRules: ${results.length} created, ${errors.length} failed out of ${ruleAssets.length} total`
+    );
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(
       ctx.securitySolution
