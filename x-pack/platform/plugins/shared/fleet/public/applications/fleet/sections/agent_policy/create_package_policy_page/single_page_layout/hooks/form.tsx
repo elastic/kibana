@@ -317,12 +317,13 @@ export function useOnSubmit({
     // For single-input agentless integrations the simplified UX shows no enable/disable
     // toggle, so if the input is disabled by default the user has no way to enable it or
     // see any configuration fields.  Auto-enable it when switching to agentless.
+    const inputs = packagePolicy.inputs ?? [];
     const agentlessAllowedInputCount = isAgentlessSelected
-      ? packagePolicy.inputs.filter((inp) => !AGENTLESS_DISABLED_INPUTS.includes(inp.type)).length
+      ? inputs.filter((inp) => !AGENTLESS_DISABLED_INPUTS.includes(inp.type)).length
       : 0;
     const isSingleAgentlessInput = agentlessAllowedInputCount === 1;
 
-    return packagePolicy.inputs.map((input, i) => {
+    return inputs.map((input) => {
       if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
         return { ...input, enabled: false };
       }
@@ -333,7 +334,7 @@ export function useOnSubmit({
           streams: input.streams.map((stream) => ({ ...stream, enabled: true })),
         };
       }
-      return packagePolicy.inputs[i];
+      return input;
     });
   }, [packagePolicy.inputs, isAgentlessSelected]);
 
