@@ -47,11 +47,13 @@ export const ChangeHistoryProvider = ({
 
   // The provider owns the list query so the list, its refetch, and selection
   // live in one place — no cross-subtree ref plumbing required.
-  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList({
-    adapter,
-    objectId,
-    enabled: isModalOpen,
-  });
+  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList(
+    {
+      adapter,
+      objectId,
+      enabled: isModalOpen,
+    }
+  );
 
   if (objectId !== prevObjectId) {
     setPrevObjectId(objectId);

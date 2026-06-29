@@ -98,7 +98,13 @@ describe('useChangeHistoryRestore', () => {
     const restoreChange = jest.fn().mockResolvedValue(undefined);
     const listChanges = jest.fn().mockResolvedValue({
       items: [
-        { id: 'evt-9', timestamp: '2026-06-17T12:00:00.000Z', actor: { name: 'Alice' }, action: 'Restored', isCurrent: true },
+        {
+          id: 'evt-9',
+          timestamp: '2026-06-17T12:00:00.000Z',
+          actor: { name: 'Alice' },
+          action: 'Restored',
+          isCurrent: true,
+        },
       ],
       total: 1,
     });
