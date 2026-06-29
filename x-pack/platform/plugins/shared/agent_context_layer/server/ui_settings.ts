@@ -21,7 +21,7 @@ export const registerUISettings = ({
         defaultMessage: 'Context Engine',
       }),
       description: i18n.translate('xpack.agentContextLayer.uiSettings.contextEngine.description', {
-        defaultMessage: 'Enables the Context Engine (private preview) for Elastic Agent Builder.',
+        defaultMessage: 'Enables the Context Engine.',
       }),
       schema: schema.boolean(),
       value: false,
