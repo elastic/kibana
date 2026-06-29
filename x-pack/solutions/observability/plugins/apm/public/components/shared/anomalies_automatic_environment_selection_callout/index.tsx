@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEnvironmentLabel } from '@kbn/apm-types';
+import { isEmpty } from 'lodash';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useShouldShowAnomalyUi } from '../../../hooks/use_should_show_anomaly_ui';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -22,8 +24,15 @@ export function AnomaliesAutomaticEnvironmentSelectionCallout() {
     false
   );
 
+  const {
+    query: { kuery },
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
+
   const shouldRender =
-    environment !== preferredEnvironment && shouldShowAnomalyUi && !calloutDismissed;
+    environment !== preferredEnvironment &&
+    shouldShowAnomalyUi &&
+    !calloutDismissed &&
+    isEmpty(kuery);
 
   if (!shouldRender) {
     return null;
