@@ -55,6 +55,7 @@ kibana_vars=(
     data.search.sessions.notTouchedTimeout
     data.search.sessions.pageSize
     data.search.sessions.trackingInterval
+    designerToolbar.enabled
     unifiedSearch.autocomplete.valueSuggestions.terminateAfter
     unifiedSearch.autocomplete.valueSuggestions.timeout
     unifiedSearch.autocomplete.querySuggestions.enabled

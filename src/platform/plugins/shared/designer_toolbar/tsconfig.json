@@ -1,0 +1,18 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-chrome-browser-internal-types",
+    "@kbn/core-chrome-layout-components",
+    "@kbn/designer-toolbar",
+    "@kbn/saved-objects-plugin"
+  ]
+}
