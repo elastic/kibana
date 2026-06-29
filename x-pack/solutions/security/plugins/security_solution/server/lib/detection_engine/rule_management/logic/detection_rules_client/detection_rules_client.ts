@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings, type RuleType } from '@kbn/securitysolution-rules';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
@@ -179,7 +179,7 @@ export const createDetectionRulesClient = ({
             const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
             const data = {
               ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
-              alertTypeId: ruleTypeMappings[rule.type],
+              alertTypeId: ruleTypeMappings[rule.type as RuleType],
               consumer: SERVER_APP_ID,
               enabled: false,
             };
