@@ -40,7 +40,7 @@ export const AgentFirstProjectSideNav = () => {
         isCollapsed={isCollapsed || isAutoCollapsed}
         setWidth={setWidth}
         onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}
-        navTopControls={<AgentFirstNavTopControls />}
+        navTopControls={<AgentFirstNavTopControls isCollapsed={isCollapsed || isAutoCollapsed} />}
         navFooterControls={<AgentFirstNavFooterControls />}
         showTopSeparator={false}
       />
