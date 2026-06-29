@@ -132,10 +132,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.evals.enabled=true',
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'dexAiSkillFindRules',
-        'investigateRuleSkill',
-      ])}`,
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [
