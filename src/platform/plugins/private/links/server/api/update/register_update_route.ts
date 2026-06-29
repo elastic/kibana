@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_UPDATE_DESCRIPTION } from '../constants';
+import { logRequest } from '../log_request';
+import { updateLinksOASOperationObject } from '../oas_examples';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
-import { updateLinksOASOperationObject } from '../oas_examples';
-import { logRequest } from '../log_request';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   logger: Logger
 ) {
   const updateRoute = router.put({
@@ -61,20 +64,22 @@ export function registerUpdateRoute(
         },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await update(ctx, req.params.id, req.body);
-        return result.meta.created_at === result.meta.updated_at
-          ? res.created({ body: result })
-          : res.ok({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await update(ctx, req.params.id, req.body);
+          return result.meta.created_at === result.meta.updated_at
+            ? res.created({ body: result })
+            : res.ok({ body: result });
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
+            return res.forbidden({ body: { message: e.message } });
+          }
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          throw e;
         }
-        const message = e.stack ?? e.message;
-        logRequest(logger, req, 'error', message);
-        throw e;
-      }
-    }
+      })
   );
 }

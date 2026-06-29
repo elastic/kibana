@@ -8,18 +8,23 @@
  */
 
 import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { registerCreateRoute } from './create';
-import { registerReadRoute } from './read';
-import { registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
+import { registerReadRoute } from './read';
 import { registerSearchRoute } from './search';
+import { registerUpdateRoute } from './update';
 
-export function registerRoutes(http: HttpServiceSetup, logger: Logger) {
+export function registerRoutes(
+  http: HttpServiceSetup,
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
+) {
   const { versioned: versionedRouter } = http.createRouter<RequestHandlerContext>();
-  registerCreateRoute(versionedRouter, logger);
-  registerReadRoute(versionedRouter, logger);
-  registerUpdateRoute(versionedRouter, logger);
-  registerDeleteRoute(versionedRouter, logger);
-  registerSearchRoute(versionedRouter, logger);
+  registerCreateRoute(versionedRouter, usageCounter, logger);
+  registerReadRoute(versionedRouter, usageCounter, logger);
+  registerUpdateRoute(versionedRouter, usageCounter, logger);
+  registerDeleteRoute(versionedRouter, usageCounter, logger);
+  registerSearchRoute(versionedRouter, usageCounter, logger);
 }

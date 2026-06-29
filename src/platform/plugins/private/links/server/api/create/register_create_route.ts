@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_CREATE_DESCRIPTION } from '../constants';
+import { logRequest } from '../log_request';
 import { createLinksOASOperationObject } from '../oas_examples';
 import { create } from './create';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
-import { logRequest } from '../log_request';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   logger: Logger
 ) {
   const createRoute = router.post({
@@ -52,18 +55,19 @@ export function registerCreateRoute(
         },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await create(ctx, req.body);
-        return res.created({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await create(ctx, req.body);
+          return res.created({ body: result });
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          throw e;
         }
-        const message = e.stack ?? e.message;
-        logRequest(logger, req, 'error', message);
-        throw e;
-      }
-    }
+      })
   );
 }

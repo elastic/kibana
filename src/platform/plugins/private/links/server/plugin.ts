@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { LINKS_EMBEDDABLE_TYPE } from '../common';
 import { transforms } from '../common/embeddable/transforms/transforms';
@@ -26,6 +27,7 @@ import type { LinksByValueState } from './types';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -36,6 +38,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     plugins: {
       contentManagement: ContentManagementServerSetup;
       embeddable: EmbeddableSetup;
+      usageCollection?: UsageCollectionSetup;
     }
   ) {
     core.savedObjects.registerType<LinksByValueState>(linksSavedObjectDefinition);
@@ -45,7 +48,10 @@ export class LinksServerPlugin implements Plugin<object, object> {
       getSchema: () => linksEmbeddableSchema,
     });
 
-    registerRoutes(core.http, this.logger);
+    if (plugins.usageCollection) {
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('dashboard_api');
+    }
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
 
     return {};
   }

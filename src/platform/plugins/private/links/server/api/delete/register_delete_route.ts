@@ -6,19 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_DELETE_DESCRIPTION, LINKS_ID_DESCRIPTION } from '../constants';
+import { logRequest } from '../log_request';
 import { deleteLinksOASOperationObject } from '../oas_examples';
 import { deleteLinks } from './delete';
-import { logRequest } from '../log_request';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   logger: Logger
 ) {
   const deleteRoute = router.delete({
@@ -61,25 +64,30 @@ export function registerDeleteRoute(
         },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        await deleteLinks(ctx, req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A links library item with ID ${req.params.id} was not found.`,
-            },
-          });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          await deleteLinks(ctx, req.params.id);
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 404) {
+            const message = `A links library item with ID [${req.params.id}] was not found.`;
+            logRequest(logger, req, 'debug', message);
+            return res.notFound({
+              body: {
+                message,
+              },
+            });
+          }
+          if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
+            return res.forbidden({ body: { message: e.message } });
+          }
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          throw e;
         }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
-        }
-        const message = e.stack ?? e.message;
-        logRequest(logger, req, 'error', message);
-        throw e;
-      }
-      return res.noContent();
-    }
+
+        return res.noContent();
+      })
   );
 }

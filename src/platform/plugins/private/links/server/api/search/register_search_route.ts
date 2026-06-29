@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
-import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_SEARCH_DESCRIPTION } from '../constants';
+import { logRequest } from '../log_request';
 import { searchLinksOASOperationObject } from '../oas_examples';
 import { searchResponseBodySchema } from './schemas';
 import { search } from './search';
-import { logRequest } from '../log_request';
 
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   logger: Logger
 ) {
   const searchRoute = router.get({
@@ -48,19 +51,21 @@ export function registerSearchRoute(
         },
       },
     },
-    async (ctx, req, res) => {
-      let result;
-      try {
-        result = await search(ctx, req.query);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        let result;
+        try {
+          result = await search(ctx, req.query);
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
+            return res.forbidden({ body: { message: e.message } });
+          }
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          throw e;
         }
-        const message = e.stack ?? e.message;
-        logRequest(logger, req, 'error', message);
-        throw e;
-      }
-      return res.ok({ body: result });
-    }
+        return res.ok({ body: result });
+      })
   );
 }
