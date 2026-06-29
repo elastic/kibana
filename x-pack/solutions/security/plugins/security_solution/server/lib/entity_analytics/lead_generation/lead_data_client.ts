@@ -353,7 +353,7 @@ export const createLeadDataClient = ({
 
     const resp = await esClient.updateByQuery({
       index: allIndices,
-      query: { terms: { id: [...ids] } },
+      query: { ids: { values: [...ids] } },
       script: {
         source: `ctx._source['status'] = params.status`,
         lang: 'painless',
