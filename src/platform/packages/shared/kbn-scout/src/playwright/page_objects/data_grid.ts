@@ -105,21 +105,24 @@ export class DataGrid {
   async clickFieldActionInDocViewer(fieldName: string, actionTestSubj: string) {
     await this.openDocViewerTab('doc_view_table');
 
+    const isValueAction = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(
+      actionTestSubj
+    );
+    const cellTestSubj = isValueAction
+      ? `tableDocViewRow-${fieldName}-value`
+      : `tableDocViewRow-${fieldName}-name`;
+    const actionSelector = `[data-test-subj="${actionTestSubj}-${fieldName}"]:visible`;
+
     const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const cell = flyout.locator(`[data-test-subj="${cellTestSubj}"]`);
+    await cell.waitFor({ state: 'visible' });
+    await cell.scrollIntoViewIfNeeded();
+    await cell.hover();
+    await cell.click();
 
-    await expect(async () => {
-      const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-      await nameCell.waitFor({ state: 'visible' });
-      await nameCell.evaluate((el) => {
-        el.scrollIntoView({ block: 'center', inline: 'nearest' });
-      });
-      await nameCell.hover();
-
-      const action = flyout.locator(`[data-test-subj="${actionTestSubj}-${fieldName}"]`);
-      await action.waitFor({ state: 'visible' });
-      await action.scrollIntoViewIfNeeded();
-      await action.click();
-    }).toPass({ timeout: 15_000 });
+    const action = this.page.locator(actionSelector);
+    await action.waitFor({ state: 'visible' });
+    await action.click();
   }
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
