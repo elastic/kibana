@@ -1,0 +1,125 @@
+version: '1'
+name: Security - Attack discovery - Agent builder alert retrieval (Test)
+description: |
+  Test workflow that uses the native `ai.agent` step type to invoke the
+  Agent Builder and retrieve security alerts for Attack Discovery analysis.
+  The AI agent determines the best approach to find and return the alerts,
+  so the response format is not known in advance.
+
+  This demonstrates using the `ai.agent` step type (the idiomatic way to
+  call Agent Builder from workflows) as an alternative alert retrieval
+  mechanism for Attack Discovery workflows. No `agent_id` input is needed
+  because `ai.agent` defaults to the built-in `elastic-ai-agent`.
+
+  PROMPT NOTES:
+  - The `platform.core.search` tool used by the default Elastic AI agent
+    accepts natural language queries, NOT Elasticsearch DSL.
+  - Prompts that include DSL-like instructions (field lists, query JSON,
+    `_source: false`) cause the agent to DESCRIBE the query instead of
+    EXECUTING it.
+  - The phrase "Show me the N most recent ... from <index>" reliably
+    triggers tool use. Adding filter/sort constraints (e.g., "riskiest",
+    "open or acknowledged") makes tool invocation UNRELIABLE.
+  - Asking for "all available fields" or "raw results" causes the agent
+    to return truncated placeholders or hit content management filters.
+  - Requesting a specific short list of fields (timestamp, rule name,
+    risk score, severity, host, user, process) produces the most useful
+    output: a clean markdown table with real data and no abbreviations.
+  - The prompt asks the agent to exclude building block alerts (alerts
+    where `kibana.alert.building_block_type` is set). This is consistent
+    with all other attack discovery alert retrieval workflows, which
+    exclude building blocks to avoid noise from low-level signal alerts.
+
+  TOKEN LIMIT NOTE: Each search-tool invocation returns full alert documents
+  into the conversation context. Even 10 alerts consume ~140K input tokens
+  across multiple LLM calls. Requesting 100 alerts with all fields (~184K
+  tokens) exceeds the model's context window. The default size is 10.
+
+  SINGLE STEP NOTE: This workflow uses a single step to avoid data loss
+  from multi-step workflows. `extractCustomWorkflowResult` takes the LAST
+  step's output; a followup step that loses conversation context would
+  overwrite the real alert data. A single step is the most reliable
+  approach since specific step outputs cannot be referenced.
+
+  NORMALIZATION NOTE: The `ai.agent` step returns
+  `{ message, structured_output?, conversation_id? }`. Since
+  `normalizeLastStepOutput` does not recognize this shape as ES|QL
+  (`{ columns, values }`) or as an array, it falls through to the
+  "plain object" fallback and JSON.stringifies the entire response as
+  ONE alert string. The actual alerts are in the `message` text as a
+  markdown table, not as structured data. This tests the "unknown output
+  format" edge case in the extraction pipeline.
+
+  NOTE: This is a TEST workflow. It is NOT registered at startup.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - Test
+  - AI Agent
+  - attackDiscovery:agent_builder_alert_retrieval
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: alerts_index_pattern
+    type: string
+    required: false
+    description: >
+      Elasticsearch index pattern for security alerts. When not provided,
+      defaults to .alerts-security.alerts-<spaceId> using the current
+      Kibana space (via workflow.spaceId).
+  - name: size
+    type: number
+    default: 10
+    description: >
+      Maximum alerts to retrieve. Kept low (default 10) because each alert
+      returned by the search tool consumes significant tokens in the agent
+      conversation context (~14K tokens per alert). Values above ~20 risk
+      exceeding the model context window.
+  - name: start
+    type: string
+    required: false
+    default: now-24h
+    description: Time range start (date math, e.g., now-24h, now-7d)
+  - name: end
+    type: string
+    required: false
+    default: now
+    description: Time range end (date math, e.g., now)
+
+steps:
+  # Ask the Agent Builder to retrieve the most recent alerts.
+  #
+  # Uses the native `ai.agent` step type which automatically invokes
+  # the default Elastic AI agent (elastic-ai-agent) without requiring
+  # an explicit agent_id. The agent has the `platform.core.search` tool
+  # which allows it to search Elasticsearch indices directly.
+  #
+  # CRITICAL: The prompt must be simple natural language. The
+  # `platform.core.search` tool is a natural language search tool --
+  # DSL-like instructions cause the agent to describe the query rather
+  # than execute it.
+  #
+  # RELIABILITY: Through iterative API testing, the phrasing
+  # "Show me the N most recent ... from <index>" was validated as the
+  # most reliable trigger for tool use (3/3 success rate). Adding
+  # filter/sort constraints like "riskiest" or "open or acknowledged"
+  # reduced tool invocation to <50%. Requesting specific fields
+  # (timestamp, rule name, risk score, etc.) produces clean tabular
+  # output without abbreviations like "Same as above".
+  - name: ask_agent_for_alerts
+    type: ai.agent
+    timeout: 10m
+    with:
+      message: >
+        Show me the {{ inputs.size }} most recent security alerts from the
+        {%- if inputs.alerts_index_pattern %} {{ inputs.alerts_index_pattern }}
+        {%- else %} .alerts-security.alerts-{{ workflow.spaceId }}
+        {%- endif %} index that are not building block
+        alerts. Include the timestamp, rule name, risk score, severity, host,
+        user, and process for each.
+    on-failure:
+      retry:
+        max-attempts: 3

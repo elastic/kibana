@@ -8,6 +8,15 @@
  */
 
 import {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
+} from './discoveries';
+import {
   SIGEVENTS_DETECTION_WORKFLOW,
   SIGEVENTS_DISCOVERY_WORKFLOW,
   SIGEVENTS_ORCHESTRATOR_WORKFLOW,
@@ -28,6 +37,15 @@ import {
 } from './streams_memory';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
 
+export {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+} from './discoveries';
 export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
 export {
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
@@ -49,7 +67,22 @@ export {
 } from './sig_events';
 export { STREAMS_INVESTIGATION_WORKFLOW_ID } from './streams_investigation';
 
+// Registering the AD workflow definitions in the managed-workflows registry is
+// FF-off safe: definitions in this list are only INSTALLED into Elasticsearch
+// when a registered owner plugin calls `installManagedWorkflow`. The discoveries
+// plugin (the owner of these definitions) is itself gated by the
+// `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag, so with the
+// FF off the discoveries plugin does not load and none of these workflows get
+// installed. Adding them to the registry only makes them *discoverable* by id
+// (which the discoveries plugin's integrity check exercises in tests).
 export const managedWorkflowDefinitions = [
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
   EXAMPLE_MANAGED_WORKFLOW,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW,

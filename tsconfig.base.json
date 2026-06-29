@@ -1100,6 +1100,8 @@
       "@kbn/discover-utils/*": ["src/platform/packages/shared/kbn-discover-utils/*"],
       "@kbn/discoveries": ["x-pack/solutions/security/packages/kbn-discoveries"],
       "@kbn/discoveries/*": ["x-pack/solutions/security/packages/kbn-discoveries/*"],
+      "@kbn/discoveries-plugin": ["x-pack/solutions/security/plugins/discoveries"],
+      "@kbn/discoveries-plugin/*": ["x-pack/solutions/security/plugins/discoveries/*"],
       "@kbn/discoveries-schemas": ["x-pack/solutions/security/packages/kbn-discoveries-schemas"],
       "@kbn/discoveries-schemas/*": ["x-pack/solutions/security/packages/kbn-discoveries-schemas/*"],
       "@kbn/dissect-heuristics": ["x-pack/platform/packages/shared/kbn-dissect-heuristics"],
