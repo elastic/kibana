@@ -167,10 +167,13 @@ export async function ingestEntities({
     {
       datasource: documentGenerator(),
       index: targetIndex,
-      refresh,
+      // Single refresh after all batches complete 
+      refreshOnCompletion: refresh !== false ? targetIndex : false,
       flushBytes: BATCH_SIZE,
       concurrency: 1,
-      retries: 2,
+      retries: 3,
+      // Give ES time to drain in-flight operations before retrying a rejected batch.
+      wait: 1000,
       onDocument: (doc) => {
         if (useUpsertById) {
           const { _id, ...document } = doc as { _id: string; [k: string]: unknown };
