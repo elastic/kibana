@@ -7,6 +7,7 @@
 
 import { css } from '@emotion/react';
 import { layoutLevels, layoutVar } from '@kbn/ui-chrome-layout-constants';
+import { ROUNDED_BORDER_RADIUS_LARGE } from '../common.styles';
 
 /** Fixed overlay shell covering the application workspace column (not the scroll container). */
 export const applicationWorkspaceFixedOverlayStyles = css`
@@ -19,4 +20,6 @@ export const applicationWorkspaceFixedOverlayStyles = css`
   display: flex;
   flex-direction: column;
   min-height: 0;
+  border-radius: ${ROUNDED_BORDER_RADIUS_LARGE};
+  overflow: hidden;
 `;

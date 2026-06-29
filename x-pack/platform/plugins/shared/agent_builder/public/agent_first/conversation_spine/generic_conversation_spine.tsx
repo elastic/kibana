@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../services/attachments/attachements_service';
 import { useConversationSpineContext } from './conversation_spine_context';
 import { SpineHeader } from './components/spine_header';
 import { SpineTabs } from './components/spine_tabs';
+import { useEscapeKeyHandler } from './hooks/use_escape_key_handler';
 import type { SpineHeaderSlots, SpineTabDefinition } from './types';
 
 export interface GenericConversationSpineProps {
@@ -26,8 +27,24 @@ export const GenericConversationSpine: React.FC<GenericConversationSpineProps> =
   additionalTabs,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { closeSpine } = useConversationSpineContext();
+  const { closeSpine, closeAttachmentPreview, spineState } = useConversationSpineContext();
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const onEscape = useCallback(() => {
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      return;
+    }
+
+    if (spineState?.attachmentsView.mode === 'attachment') {
+      closeAttachmentPreview();
+      return;
+    }
+
+    closeSpine();
+  }, [closeAttachmentPreview, closeSpine, isFullscreen, spineState?.attachmentsView.mode]);
+
+  useEscapeKeyHandler(onEscape);
 
   const rootStyles = css`
     display: flex;
