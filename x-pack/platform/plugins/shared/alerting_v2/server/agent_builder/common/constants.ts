@@ -22,4 +22,4 @@ export const alertingTools = {
  * an entity, so a tag the user removes is restored the next time the agent
  * touches it.
  */
-export const AGENT_BUILDER_TAG = 'agent-builder';
+export const AGENT_BUILDER_TAG = 'agent-builder-assisted';
