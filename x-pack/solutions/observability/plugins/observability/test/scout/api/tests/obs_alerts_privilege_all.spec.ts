@@ -170,7 +170,7 @@ apiTest.describe(
         body: {
           status: 'acknowledged',
           ids: [state.realAlertId],
-          index: '.alerts-stack.alerts-default',
+          index: state.realAlertIndex,
         },
         responseType: 'json',
       });
