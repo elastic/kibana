@@ -53,6 +53,8 @@ interface ListTemplateAddItemConfig {
 }
 
 export type ListTemplateConfig<Data = SerializableRecord> = {
+  /** Message shown when the data source emits no rows. */
+  emptyMessage?: string;
   /**
    * Optional function to map the data to a normalized row.
    * If provided, the function will be called for each data item and the result will be used to render the list.
@@ -120,7 +122,12 @@ const getListTemplateStyles = ({ euiTheme }: UseEuiTheme) => ({
       lineHeight: euiTheme.size.xl,
     });
   },
-  get headingContainerModifier() {
+  get headerContainer() {
+    return css({
+      padding: `0 ${euiTheme.size.s}`,
+    });
+  },
+  get headerTextModifier() {
     return css`
       ${this.topBarLeftContainer}[data-search-text-field-open="true"] & {
         display: none;
@@ -198,20 +205,16 @@ export function ListTemplate<Data extends SerializableRecord = SerializableRecor
     ) : null;
   }, [context.extensionId, context.slotId, listConfig?.actions, popoverRowData]);
 
-  if (!rows.size) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="xs"
       data-test-subj={`nav-extension-${context.slotId}-list-template`}
     >
       {renderRowActionPopover()}
       {listConfig.heading && (
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" css={listTemplateStyles.headerContainer}>
             <EuiFlexItem
               css={listTemplateStyles.topBarLeftContainer}
               data-search-text-field-open={searchTextFieldOpen}
@@ -219,9 +222,9 @@ export function ListTemplate<Data extends SerializableRecord = SerializableRecor
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem
                   grow={!searchTextFieldOpen}
-                  css={listTemplateStyles.headingContainerModifier}
+                  css={listTemplateStyles.headerTextModifier}
                 >
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="xs" color="subdued">
                     <h4>{listConfig.heading}</h4>
                   </EuiText>
                 </EuiFlexItem>
@@ -301,45 +304,60 @@ export function ListTemplate<Data extends SerializableRecord = SerializableRecor
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiListGroup maxWidth={false}>
-            {filteredRows.length === 0 ? (
+            {rows.size ? (
+              <>
+                {filteredRows.length === 0 ? (
+                  <EuiListGroupItem
+                    data-test-subj={`nav-extension-${context.slotId}-no-results`}
+                    label={
+                      listConfig.search?.noSearchResultsMessage ??
+                      i18n.translate(
+                        'sharedUXPackages.navigationExtensionTemplates.listTemplate.noSearchResultsMessage',
+                        { defaultMessage: 'No search results found' }
+                      )
+                    }
+                  />
+                ) : (
+                  filteredRows.map((row) => (
+                    <EuiListGroupItem
+                      key={row.id}
+                      label={row.label}
+                      href={row.href}
+                      iconType={row.iconType}
+                      extraAction={
+                        (listConfig?.actions?.length ?? 0) > 0
+                          ? {
+                              iconType: 'boxesVertical',
+                              onClick: (evt) => {
+                                evt.preventDefault();
+                                popoverRef.current = evt.currentTarget;
+                                setPopoverRowData(data[row.index]);
+                              },
+                              ['data-test-subj']: `nav-extension-${context.slotId}-action-menu-${row.id}`,
+                              ['aria-label']: i18n.translate(
+                                'sharedUXPackages.navigationExtensionTemplates.listTemplate.actionButtonAriaLabel',
+                                {
+                                  defaultMessage: 'Open actions menu',
+                                }
+                              ),
+                            }
+                          : undefined
+                      }
+                    />
+                  ))
+                )}
+              </>
+            ) : (
               <EuiListGroupItem
                 data-test-subj={`nav-extension-${context.slotId}-empty`}
                 label={
-                  listConfig.search?.noSearchResultsMessage ??
+                  listConfig?.emptyMessage ??
                   i18n.translate(
-                    'sharedUXPackages.navigationExtensionTemplates.listTemplate.noSearchResultsMessage',
-                    { defaultMessage: 'No search results found' }
+                    'sharedUXPackages.navigationExtensionTemplates.listTemplate.emptyMessage',
+                    { defaultMessage: 'No items found' }
                   )
                 }
               />
-            ) : (
-              filteredRows.map((row) => (
-                <EuiListGroupItem
-                  key={row.id}
-                  label={row.label}
-                  href={row.href}
-                  iconType={row.iconType}
-                  extraAction={
-                    (listConfig?.actions?.length ?? 0) > 0
-                      ? {
-                          iconType: 'boxesVertical',
-                          onClick: (evt) => {
-                            evt.preventDefault();
-                            popoverRef.current = evt.currentTarget;
-                            setPopoverRowData(data[row.index]);
-                          },
-                          ['data-test-subj']: `nav-extension-${context.slotId}-action-menu-${row.id}`,
-                          ['aria-label']: i18n.translate(
-                            'sharedUXPackages.navigationExtensionTemplates.listTemplate.actionButtonAriaLabel',
-                            {
-                              defaultMessage: 'Open actions menu',
-                            }
-                          ),
-                        }
-                      : undefined
-                  }
-                />
-              ))
             )}
           </EuiListGroup>
         </EuiFlexGroup>

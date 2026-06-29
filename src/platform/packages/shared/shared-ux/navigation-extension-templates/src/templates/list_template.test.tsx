@@ -97,12 +97,14 @@ describe('ListTemplate', () => {
     expect(screen.queryByRole('link', { name: 'Missing href' })).not.toBeInTheDocument();
   });
 
-  it('does not render the template when there are no rows', () => {
+  it('renders the empty message when there are no rows', () => {
     renderListTemplate({
       data: [],
     });
 
-    expect(screen.queryByTestId(`nav-extension-${SLOT_ID}-list-template`)).not.toBeInTheDocument();
+    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-empty`)).toHaveTextContent(
+      'No items found'
+    );
   });
 
   it('renders the heading when configured', () => {
@@ -136,7 +138,7 @@ describe('ListTemplate', () => {
     });
   });
 
-  it('renders the empty message when searching yields no results', async () => {
+  it('renders the configured no search results message when searching yields no results', async () => {
     const user = userEvent.setup();
 
     renderListTemplate({
@@ -156,7 +158,7 @@ describe('ListTemplate', () => {
 
     await user.type(searchInput, 'kibanana');
 
-    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-empty`)).toHaveTextContent(
+    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-no-results`)).toHaveTextContent(
       'No matching dashboards for query'
     );
   });
