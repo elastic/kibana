@@ -6,16 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-const MAX_FILTER_LENGTH = 8192;
+import { MAX_KQL_FILTER_LENGTH } from '../../../../../../common/max_alert_limit';
 
 export const findMutedAlertsOptionsSchema = schema.object({
   perPage: schema.maybe(schema.number()),
   page: schema.maybe(schema.number()),
   filter: schema.maybe(
     schema.oneOf([
-      schema.string({ maxLength: MAX_FILTER_LENGTH }),
-      schema.recordOf(schema.string({ maxLength: MAX_FILTER_LENGTH }), schema.any()),
+      schema.string({ maxLength: MAX_KQL_FILTER_LENGTH }),
+      schema.recordOf(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH }), schema.any()),
     ])
   ),
 });
