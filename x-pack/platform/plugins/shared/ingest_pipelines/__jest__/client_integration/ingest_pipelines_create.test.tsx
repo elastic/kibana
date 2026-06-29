@@ -141,8 +141,8 @@ describe('<PipelinesCreate />', () => {
         body: JSON.stringify({
           name: 'my_pipeline',
           description: 'pipeline description',
-          field_access_pattern: 'classic',
           _meta: metaData,
+          field_access_pattern: 'classic',
           processors: [],
         }),
       })
