@@ -161,7 +161,7 @@ export interface FeatureKibanaPrivileges {
        * ability to mute or unmute. This allows reading muted alert instances without requiring full
        * rule `read`. The broader `mute_alerts` privilege also grants this operation.
        */
-      find_muted_alerts?: AlertingKibanaPrivilege;
+      read_muted_alerts?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
