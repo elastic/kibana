@@ -18,7 +18,7 @@ const TITLE_CASE_GLOSSARY = [
   'Snapshot and Restore',
   'Rollup Jobs',
   'Data Set Quality',
-  'ES|QL Data federation',
+  'ES|QL Data Federation',
   'Ingest Pipelines',
   'Logstash Pipelines',
   'Content Connectors',

@@ -157,7 +157,6 @@ export const createNavigationTree = (
             children: [
               { link: 'streams' },
               { link: 'management:index_management' },
-              { link: 'management:data_source_management' },
               { link: 'management:index_lifecycle_management' },
               { link: 'management:snapshot_restore' },
               { link: 'management:transform' },
@@ -274,6 +273,7 @@ export const createNavigationTree = (
           {
             title: i18nStrings.stackManagementV2.data.title,
             children: [
+              { badgeType: 'techPreview', link: 'management:data_source_management' },
               { link: 'management:cross_cluster_replication' },
               { link: 'management:remote_clusters' },
               { link: 'management:migrate_data' },

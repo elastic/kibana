@@ -455,7 +455,6 @@ export const createNavigationTree = ({
             ),
             children: [
               { link: 'management:index_management' },
-              { link: 'management:data_source_management' },
               { link: 'management:index_lifecycle_management' },
               { link: 'management:snapshot_restore' },
               { link: 'management:transform' },
@@ -602,6 +601,14 @@ export const createNavigationTree = ({
                   ]
                 : []),
             ],
+          },
+          {
+            id: 'data',
+            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.data', {
+              defaultMessage: 'Data',
+            }),
+            breadcrumbStatus: 'hidden',
+            children: [{ badgeType: 'techPreview', link: 'management:data_source_management' }],
           },
           {
             id: 'content',

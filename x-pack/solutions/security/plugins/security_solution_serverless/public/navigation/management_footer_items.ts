@@ -58,10 +58,6 @@ export const createManagementFooterItemsTree = (
             },
             {
               breadcrumbStatus: 'hidden',
-              link: 'management:data_source_management',
-            },
-            {
-              breadcrumbStatus: 'hidden',
               link: 'management:transform',
             },
             {
@@ -240,6 +236,11 @@ export const createManagementFooterItemsTree = (
           title: i18nStrings.stackManagementV2.data.title,
           breadcrumbStatus: 'hidden',
           children: [
+            {
+              badgeType: 'techPreview',
+              breadcrumbStatus: 'hidden',
+              link: 'management:data_source_management',
+            },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:data_usage',

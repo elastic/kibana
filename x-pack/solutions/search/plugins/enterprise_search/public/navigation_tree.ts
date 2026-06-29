@@ -169,7 +169,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:index_management' },
-                    { link: 'management:data_source_management' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -357,6 +356,7 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    { badgeType: 'techPreview', link: 'management:data_source_management' },
                     { link: 'management:cross_cluster_replication' },
                     { link: 'management:remote_clusters' },
                   ],

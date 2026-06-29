@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonGroup,
   type EuiButtonGroupOptionProps,
@@ -62,6 +63,18 @@ const DATA_SOURCE_STATUS_LABELS: Record<DataSourceConnectionStatus, string> = {
     defaultMessage: 'Disconnected',
   }),
 };
+
+const TECH_PREVIEW_LABEL = i18n.translate('dataSourceManagement.technicalPreviewBadgeLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+const TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'dataSourceManagement.technicalPreviewBadgeDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
 
 const renderDataSourceConnectionStatus = (status: DataSourceConnectionStatus) => (
   <EuiHealth
@@ -1166,10 +1179,27 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const dataSourcesTabLabel = i18n.translate('dataSourceManagement.tabs.dataSourcesTitle', {
     defaultMessage: 'Data sources',
   });
-  const pageHeaderDescription = i18n.translate('dataSourceManagement.pageHeaderDescription', {
-    defaultMessage:
-      'Register external connections and organize them into datasets for use in ES|QL.',
-  });
+  const pageHeaderDescription = (
+    <FormattedMessage
+      id="dataSourceManagement.pageHeaderDescription"
+      defaultMessage="Register datasets from your external data sources to query with ES|QL, alongside your indexed data. {learnMoreLink}"
+      values={{
+        learnMoreLink: (
+          <EuiLink
+            href="#"
+            external
+            target="_blank"
+            data-test-subj="dataSourceManagementPageHeaderLearnMore"
+          >
+            <FormattedMessage
+              id="dataSourceManagement.pageHeaderDescription.learnMore"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
   const addDataSetTableButtonLabel = i18n.translate(
     'dataSourceManagement.datasetsTab.addDataSetButton',
     {
@@ -1256,7 +1286,20 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           bottomBorder
           data-test-subj="dataSourceManagementPageHeader"
           description={pageHeaderDescription}
-          pageTitle={<span data-test-subj="dataSourceManagementPageTitle">{pageTitle}</span>}
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="baseline">
+              <EuiFlexItem grow={false}>
+                <span data-test-subj="dataSourceManagementPageTitle">{pageTitle}</span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  data-test-subj="dataSourceManagementTechnicalPreviewBadge"
+                  label={TECH_PREVIEW_LABEL}
+                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           tabs={pageHeaderTabs}
           tabsProps={{
             'data-test-subj': 'dataSourceManagementTabs',

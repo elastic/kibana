@@ -59,8 +59,12 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             }),
             breadcrumbStatus: 'hidden',
             children: [
+              {
+                badgeType: 'techPreview',
+                breadcrumbStatus: 'hidden',
+                link: 'management:data_source_management',
+              },
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_source_management', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
               { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
               { link: 'management:dataViews', breadcrumbStatus: 'hidden' },

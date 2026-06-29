@@ -497,9 +497,6 @@ function createNavTree({
                 link: 'management:index_management',
               },
               {
-                link: 'management:data_source_management',
-              },
-              {
                 link: 'management:index_lifecycle_management',
               },
               {
@@ -670,6 +667,10 @@ function createNavTree({
             }),
             renderAs: 'panelOpener',
             children: [
+              {
+                badgeType: 'techPreview',
+                link: 'management:data_source_management',
+              },
               {
                 link: 'management:cross_cluster_replication',
               },

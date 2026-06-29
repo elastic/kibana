@@ -137,7 +137,6 @@ export const createAiNavigationTree = (
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           children: [
             { link: 'management:index_management' },
-            { link: 'management:data_source_management' },
             { link: 'management:transform' },
             { link: 'management:data_quality' },
           ],
@@ -213,6 +212,7 @@ export const createAiNavigationTree = (
         {
           title: i18nStrings.stackManagementV2.data.title,
           children: [
+            { badgeType: 'techPreview', link: 'management:data_source_management' },
             { link: 'management:cross_cluster_replication' },
             { link: 'management:remote_clusters' },
             { link: 'management:migrate_data' },

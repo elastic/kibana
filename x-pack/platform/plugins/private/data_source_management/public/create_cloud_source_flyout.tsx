@@ -8,7 +8,6 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -28,8 +27,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSuperSelect,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -44,15 +41,12 @@ import { useDataSourceManagementAppContext } from './data_source_management_app_
 // ---------------------------------------------------------------------------
 
 type CloudProvider = 'aws' | 'gcp' | 'azure';
-type FederatedMode = 'new' | 'existing';
 
 interface FormState {
   provider: CloudProvider;
   name: string;
   description: string;
   credentialType: string;
-  federatedMode: FederatedMode;
-  federatedName: string;
   // AWS
   roleArn: string;
   externalId: string;
@@ -79,8 +73,6 @@ const initialState = (): FormState => ({
   name: '',
   description: '',
   credentialType: 'federated_identity',
-  federatedMode: 'new',
-  federatedName: '',
   roleArn: '',
   externalId: '',
   accessKeyId: '',
@@ -333,56 +325,6 @@ const ReadDocumentationLink: FunctionComponent<{ url: string }> = ({ url }) => (
 );
 
 // ---------------------------------------------------------------------------
-// Shared federated identity name field
-// ---------------------------------------------------------------------------
-
-const FederatedIdentityNameField: FunctionComponent<{
-  value: string;
-  onChange: (v: string) => void;
-}> = ({ value, onChange }) => (
-  <EuiFormRow
-    label={i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.name', {
-      defaultMessage: 'Federated Identity Name',
-    })}
-    fullWidth
-  >
-    <EuiFieldText
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      data-test-subj="cloudSourceFlyoutFederatedName"
-      fullWidth
-      autoComplete="off"
-    />
-  </EuiFormRow>
-);
-
-// ---------------------------------------------------------------------------
-// Existing Identity placeholder (no backend API yet)
-// ---------------------------------------------------------------------------
-
-const ExistingIdentityPlaceholder: FunctionComponent = () => (
-  <EuiFormRow
-    label={i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.name', {
-      defaultMessage: 'Federated Identity Name',
-    })}
-    fullWidth
-  >
-    <EuiSuperSelect
-      options={[]}
-      valueOfSelected=""
-      onChange={() => {}}
-      placeholder={i18n.translate(
-        'dataSourceManagement.cloudSourceFlyout.existingIdentity.selectPlaceholder',
-        { defaultMessage: 'Select a Federated Identity' }
-      )}
-      disabled
-      fullWidth
-      data-test-subj="cloudSourceFlyoutExistingIdentitySelect"
-    />
-  </EuiFormRow>
-);
-
-// ---------------------------------------------------------------------------
 // AWS New Identity fields
 // ---------------------------------------------------------------------------
 
@@ -391,53 +333,6 @@ const AwsNewIdentityFields: FunctionComponent<{
   onChange: (field: keyof FormState, value: string) => void;
 }> = ({ state, onChange }) => (
   <>
-    <FederatedIdentityNameField
-      value={state.federatedName}
-      onChange={(v) => onChange('federatedName', v)}
-    />
-    <EuiSpacer size="m" />
-    <EuiAccordion
-      id="cloudSourceFlyoutAwsSteps"
-      buttonContent={i18n.translate(
-        'dataSourceManagement.cloudSourceFlyout.federated.aws.stepsTitle',
-        { defaultMessage: 'Steps to assume role' }
-      )}
-      data-test-subj="cloudSourceFlyoutAwsSteps"
-    >
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        <ol>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.aws.step1', {
-              defaultMessage: 'Open the AWS Management Console and navigate to IAM.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.aws.step2', {
-              defaultMessage: 'Create or select an IAM role with permissions to access your data.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.aws.step3', {
-              defaultMessage:
-                'Edit the trust policy to allow Elastic\u2019s AWS account to assume this role.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.aws.step4', {
-              defaultMessage: 'Copy the Role ARN and paste it in the field below.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.aws.step5', {
-              defaultMessage:
-                'Optionally provide an External ID to further restrict role assumption.',
-            })}
-          </li>
-        </ol>
-      </EuiText>
-    </EuiAccordion>
-    <EuiSpacer size="m" />
     <ReadDocumentationLink url={DOCS_URLS.aws} />
     <EuiSpacer size="m" />
     <EuiFormRow
@@ -489,55 +384,6 @@ const GcpNewIdentityFields: FunctionComponent<{
   onChange: (field: keyof FormState, value: string) => void;
 }> = ({ state, onChange }) => (
   <>
-    <FederatedIdentityNameField
-      value={state.federatedName}
-      onChange={(v) => onChange('federatedName', v)}
-    />
-    <EuiSpacer size="m" />
-    <EuiAccordion
-      id="cloudSourceFlyoutGcpSteps"
-      buttonContent={i18n.translate(
-        'dataSourceManagement.cloudSourceFlyout.federated.gcp.stepsTitle',
-        { defaultMessage: 'Steps to generate GCP Service Account' }
-      )}
-      data-test-subj="cloudSourceFlyoutGcpSteps"
-    >
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        <ol>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.gcp.step1', {
-              defaultMessage: 'Open the Google Cloud Console and select your project.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.gcp.step2', {
-              defaultMessage:
-                'Navigate to IAM & Admin > Service Accounts and create a new service account.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.gcp.step3', {
-              defaultMessage:
-                'Grant the service account the required roles (e.g. Storage Object Viewer).',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.gcp.step4', {
-              defaultMessage:
-                'Configure Workload Identity Federation to allow Elastic to impersonate the service account.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.gcp.step5', {
-              defaultMessage:
-                'Copy the service account email and audience URL into the fields below.',
-            })}
-          </li>
-        </ol>
-      </EuiText>
-    </EuiAccordion>
-    <EuiSpacer size="m" />
     <ReadDocumentationLink url={DOCS_URLS.gcp} />
     <EuiSpacer size="m" />
     <EuiFormRow
@@ -613,55 +459,6 @@ const AzureNewIdentityFields: FunctionComponent<{
   onChange: (field: keyof FormState, value: string) => void;
 }> = ({ state, onChange }) => (
   <>
-    <FederatedIdentityNameField
-      value={state.federatedName}
-      onChange={(v) => onChange('federatedName', v)}
-    />
-    <EuiSpacer size="m" />
-    <EuiAccordion
-      id="cloudSourceFlyoutAzureSteps"
-      buttonContent={i18n.translate(
-        'dataSourceManagement.cloudSourceFlyout.federated.azure.stepsTitle',
-        { defaultMessage: 'Steps to create Managed User Identity in Azure' }
-      )}
-      data-test-subj="cloudSourceFlyoutAzureSteps"
-    >
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        <ol>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.azure.step1', {
-              defaultMessage: 'Open the Azure Portal and navigate to Azure Active Directory.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.azure.step2', {
-              defaultMessage:
-                'Register a new application or select an existing one to use as the service principal.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.azure.step3', {
-              defaultMessage:
-                'Add a Federated Identity Credential to the app registration pointing to Elastic\u2019s OIDC issuer.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.azure.step4', {
-              defaultMessage:
-                'Assign the necessary roles (e.g. Storage Blob Data Reader) to the service principal.',
-            })}
-          </li>
-          <li>
-            {i18n.translate('dataSourceManagement.cloudSourceFlyout.federated.azure.step5', {
-              defaultMessage:
-                'Copy the Tenant ID and Client ID from the app registration into the fields below.',
-            })}
-          </li>
-        </ol>
-      </EuiText>
-    </EuiAccordion>
-    <EuiSpacer size="m" />
     <ReadDocumentationLink url={DOCS_URLS.azure} />
     <EuiSpacer size="m" />
     <EuiFormRow
@@ -712,48 +509,18 @@ const AzureNewIdentityFields: FunctionComponent<{
 );
 
 // ---------------------------------------------------------------------------
-// FederatedIdentityForm — tabs + provider-specific content
+// FederatedIdentityForm — provider-specific content
 // ---------------------------------------------------------------------------
 
 const FederatedIdentityForm: FunctionComponent<{
   provider: CloudProvider;
   state: FormState;
   onChange: (field: keyof FormState, value: string) => void;
-  onModeChange: (mode: FederatedMode) => void;
-}> = ({ provider, state, onChange, onModeChange }) => (
+}> = ({ provider, state, onChange }) => (
   <>
-    <EuiTabs>
-      <EuiTab
-        isSelected={state.federatedMode === 'new'}
-        onClick={() => onModeChange('new')}
-        data-test-subj="cloudSourceFlyoutFederatedTabNew"
-      >
-        <FormattedMessage
-          id="dataSourceManagement.cloudSourceFlyout.federated.tabNew"
-          defaultMessage="New Identity"
-        />
-      </EuiTab>
-      <EuiTab
-        isSelected={state.federatedMode === 'existing'}
-        onClick={() => onModeChange('existing')}
-        data-test-subj="cloudSourceFlyoutFederatedTabExisting"
-      >
-        <FormattedMessage
-          id="dataSourceManagement.cloudSourceFlyout.federated.tabExisting"
-          defaultMessage="Existing Identity"
-        />
-      </EuiTab>
-    </EuiTabs>
-    <EuiSpacer size="m" />
-    {state.federatedMode === 'existing' ? (
-      <ExistingIdentityPlaceholder />
-    ) : (
-      <>
-        {provider === 'aws' && <AwsNewIdentityFields state={state} onChange={onChange} />}
-        {provider === 'gcp' && <GcpNewIdentityFields state={state} onChange={onChange} />}
-        {provider === 'azure' && <AzureNewIdentityFields state={state} onChange={onChange} />}
-      </>
-    )}
+    {provider === 'aws' && <AwsNewIdentityFields state={state} onChange={onChange} />}
+    {provider === 'gcp' && <GcpNewIdentityFields state={state} onChange={onChange} />}
+    {provider === 'azure' && <AzureNewIdentityFields state={state} onChange={onChange} />}
   </>
 );
 
@@ -765,17 +532,9 @@ const AwsCredentialFields: FunctionComponent<{
   credentialType: string;
   state: FormState;
   onChange: (field: keyof FormState, value: string) => void;
-  onModeChange: (mode: FederatedMode) => void;
-}> = ({ credentialType, state, onChange, onModeChange }) => {
+}> = ({ credentialType, state, onChange }) => {
   if (credentialType === 'federated_identity') {
-    return (
-      <FederatedIdentityForm
-        provider="aws"
-        state={state}
-        onChange={onChange}
-        onModeChange={onModeChange}
-      />
-    );
+    return <FederatedIdentityForm provider="aws" state={state} onChange={onChange} />;
   }
 
   const methodDescription = AWS_CREDENTIAL_METHOD_DESCRIPTIONS[credentialType];
@@ -827,17 +586,9 @@ const GcpCredentialFields: FunctionComponent<{
   credentialType: string;
   state: FormState;
   onChange: (field: keyof FormState, value: string) => void;
-  onModeChange: (mode: FederatedMode) => void;
-}> = ({ credentialType, state, onChange, onModeChange }) => {
+}> = ({ credentialType, state, onChange }) => {
   if (credentialType === 'federated_identity') {
-    return (
-      <FederatedIdentityForm
-        provider="gcp"
-        state={state}
-        onChange={onChange}
-        onModeChange={onModeChange}
-      />
-    );
+    return <FederatedIdentityForm provider="gcp" state={state} onChange={onChange} />;
   }
 
   const methodDescription = GCP_CREDENTIAL_METHOD_DESCRIPTIONS[credentialType];
@@ -890,17 +641,9 @@ const AzureCredentialFields: FunctionComponent<{
   credentialType: string;
   state: FormState;
   onChange: (field: keyof FormState, value: string) => void;
-  onModeChange: (mode: FederatedMode) => void;
-}> = ({ credentialType, state, onChange, onModeChange }) => {
+}> = ({ credentialType, state, onChange }) => {
   if (credentialType === 'federated_identity') {
-    return (
-      <FederatedIdentityForm
-        provider="azure"
-        state={state}
-        onChange={onChange}
-        onModeChange={onModeChange}
-      />
-    );
+    return <FederatedIdentityForm provider="azure" state={state} onChange={onChange} />;
   }
 
   const methodDescription = AZURE_CREDENTIAL_METHOD_DESCRIPTIONS[credentialType];
@@ -994,16 +737,11 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
       ...prev,
       provider,
       credentialType: DEFAULT_CREDENTIAL_TYPE[provider],
-      federatedMode: 'new',
     }));
   }, []);
 
   const handleCredentialTypeChange = useCallback((credentialType: string) => {
-    setState((prev) => ({ ...prev, credentialType, federatedMode: 'new' }));
-  }, []);
-
-  const handleFederatedModeChange = useCallback((mode: FederatedMode) => {
-    setState((prev) => ({ ...prev, federatedMode: mode }));
+    setState((prev) => ({ ...prev, credentialType }));
   }, []);
 
   const handleTestConnection = useCallback(async () => {
@@ -1071,17 +809,10 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
           <h2 id="createCloudSourceFlyoutTitle">
             <FormattedMessage
               id="dataSourceManagement.cloudSourceFlyout.title"
-              defaultMessage="Configure cloud data source"
+              defaultMessage="Connect external data source"
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="dataSourceManagement.cloudSourceFlyout.description"
-            defaultMessage="Select your cloud service provider and configure how Elastic will authenticate to access your data."
-          />
-        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -1148,7 +879,7 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
               onChange={(e) => setField('description', e.target.value)}
               data-test-subj="cloudSourceFlyoutDescription"
               fullWidth
-              rows={3}
+              rows={1}
             />
           </EuiFormRow>
 
@@ -1183,7 +914,6 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
               credentialType={state.credentialType}
               state={state}
               onChange={setField}
-              onModeChange={handleFederatedModeChange}
             />
           )}
           {state.provider === 'gcp' && (
@@ -1191,7 +921,6 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
               credentialType={state.credentialType}
               state={state}
               onChange={setField}
-              onModeChange={handleFederatedModeChange}
             />
           )}
           {state.provider === 'azure' && (
@@ -1199,7 +928,6 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
               credentialType={state.credentialType}
               state={state}
               onChange={setField}
-              onModeChange={handleFederatedModeChange}
             />
           )}
 
@@ -1213,7 +941,12 @@ export const CreateCloudSourceFlyout: FunctionComponent<CreateCloudSourceFlyoutP
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" data-test-subj="cloudSourceFlyoutClose" onClick={onClose} disabled={isSaving || isTestingConnection}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="cloudSourceFlyoutClose"
+              onClick={onClose}
+              disabled={isSaving || isTestingConnection}
+            >
               <FormattedMessage
                 id="dataSourceManagement.cloudSourceFlyout.closeButton"
                 defaultMessage="Close"
