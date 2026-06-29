@@ -646,12 +646,14 @@ export const WorkflowYAMLEditor = ({
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
+    const yamlLines = workflowYaml.split('\n');
     return Object.entries(workflowLookup.steps).map(([stepId, stepInfo]) => ({
       id: stepId,
       label: `#${stepId}`,
       lineStart: stepInfo.lineStart,
+      yaml: yamlLines.slice(stepInfo.lineStart - 1, stepInfo.lineEnd).join('\n'),
     }));
-  }, [workflowLookup]);
+  }, [workflowLookup, workflowYaml]);
 
   const handleCommandSelected = useCallback(
     (commandId: string) => {

@@ -21,6 +21,7 @@ export interface JumpToStepEntry {
   id: string;
   label: string;
   lineStart: number;
+  yaml?: string;
 }
 
 export type MenuItemData =

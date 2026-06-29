@@ -29,7 +29,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
-import type { ActionOptionData } from '../types';
+import type { ActionOptionData, JumpToStepEntry } from '../types';
 import {
   isActionConnectorGroup,
   isActionConnectorOption,
@@ -41,11 +41,13 @@ type TabId = 'inputs' | 'outputs' | 'yaml';
 
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
+  hoveredJumpEntry?: JumpToStepEntry | null;
   onStepSelected: (action: ActionOptionData) => void;
 }
 
 export function ActionsMenuPreviewPanel({
   hoveredOption,
+  hoveredJumpEntry,
   onStepSelected,
 }: ActionsMenuPreviewPanelProps) {
   const styles = useMemoCss(panelStyles);
@@ -116,6 +118,9 @@ export function ActionsMenuPreviewPanel({
   }, [hoveredOption, isLeaf, inputFields]);
 
   if (!hoveredOption) {
+    if (hoveredJumpEntry) {
+      return <JumpStepPanel entry={hoveredJumpEntry} />;
+    }
     return <DefaultPanel />;
   }
 
@@ -232,6 +237,35 @@ function ResourceCard({
           <EuiIcon type={iconType} color="primary" size="m" />
         </EuiFlexItem>
       </EuiFlexGroup>
+    </div>
+  );
+}
+
+/* ── Jump step YAML preview ── */
+
+function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
+  const styles = useMemoCss(panelStyles);
+  return (
+    <div css={styles.panel}>
+      <div css={styles.titleBlock}>
+        <p css={styles.titleBlockText}>
+          {entry.id}
+          <br />
+          <FormattedMessage
+            id="workflows.actionsMenu.preview.jumpStep.subtitle"
+            defaultMessage="Existing step in this workflow"
+          />
+        </p>
+      </div>
+      {entry.yaml && (
+        <div css={styles.tabsAndFields}>
+          <div css={styles.fieldList}>
+            <div css={styles.yamlPreview}>
+              <pre css={styles.codeText}>{entry.yaml}</pre>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

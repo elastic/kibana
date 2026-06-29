@@ -75,6 +75,7 @@ export function ActionsMenu({
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
+  const [hoveredJumpEntry, setHoveredJumpEntry] = useState<JumpToStepEntry | null>(null);
 
   useEffect(() => {
     if (currentPath.length === 0) {
@@ -107,6 +108,7 @@ export function ActionsMenu({
 
   const handleMouseLeave = useCallback(() => {
     setHoveredOption(null);
+    setHoveredJumpEntry(null);
   }, []);
 
   const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
@@ -117,9 +119,22 @@ export function ActionsMenu({
       ? searchValue.slice(1).trim()
       : searchValue;
 
-    if (itemData?.kind === 'command' || itemData?.kind === 'jump') {
+    if (itemData?.kind === 'command') {
       return (
         <div css={styles.compactOptionWrapper}>
+          <EuiText size="s">
+            <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
+          </EuiText>
+        </div>
+      );
+    }
+
+    if (itemData?.kind === 'jump') {
+      return (
+        <div
+          css={styles.compactOptionWrapper}
+          onMouseEnter={() => setHoveredJumpEntry(itemData.entry)}
+        >
           <EuiText size="s">
             <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
           </EuiText>
@@ -447,6 +462,7 @@ export function ActionsMenu({
             <EuiFlexItem css={styles.rightColumn}>
               <ActionsMenuPreviewPanel
                 hoveredOption={hoveredOption}
+                hoveredJumpEntry={hoveredJumpEntry}
                 onStepSelected={handleStepOrGroupSelected}
               />
             </EuiFlexItem>
