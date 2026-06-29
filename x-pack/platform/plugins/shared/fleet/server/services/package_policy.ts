@@ -3816,6 +3816,14 @@ function _compilePackageStream(
 
   const datasetPath = packageDataStream.path;
   const templateVars = Object.assign({}, vars, input.vars, stream.vars);
+
+  // Inject data_stream.dataset for composable integrations: the dataset is fixed by the
+  // integration (not user-configurable) so it is absent from stream.vars, but input-package
+  // HBS templates reference {{data_stream.dataset}} and need the value to render correctly.
+  if (!templateVars['data_stream.dataset']) {
+    templateVars['data_stream.dataset'] = { value: stream.data_stream.dataset, type: 'text' };
+  }
+
   const metaVars = getMetaVariables(pkgInfo, input, streamIn, agentVersion);
 
   if (streamFromPkg.template_paths?.length) {
