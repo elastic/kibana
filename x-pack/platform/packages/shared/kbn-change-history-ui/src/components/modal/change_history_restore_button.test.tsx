@@ -13,6 +13,11 @@ import { ChangeHistoryProvider } from '../../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
 import { ChangeHistoryRestoreButton } from './change_history_restore_button';
+import {
+  TEST_OBJECT_ID,
+  TEST_OBJECT_TITLE,
+  TEST_SNAPSHOT_OLD,
+} from '../../test_utils/change_history_test_fixtures';
 
 const historicalChange: ChangeHistoryDetail = {
   id: 'evt-3',
@@ -20,7 +25,7 @@ const historicalChange: ChangeHistoryDetail = {
   actor: { name: 'Alice' },
   action: 'Updated',
   metadata: { version: 3 },
-  snapshot: { workflow: { yaml: 'name: old\n' } },
+  snapshot: TEST_SNAPSHOT_OLD,
 };
 
 const currentChange: ChangeHistoryDetail = {
@@ -33,10 +38,12 @@ const currentChange: ChangeHistoryDetail = {
 const renderButton = ({
   change = historicalChange,
   features = { restore: true },
+  permissions = { canRestore: true },
   restoreChange = jest.fn().mockResolvedValue(undefined),
 }: {
   change?: ChangeHistoryDetail;
   features?: { restore?: boolean };
+  permissions?: { canRestore?: boolean };
   restoreChange?: ChangeHistoryAdapter['restoreChange'];
 } = {}) => {
   const adapter: ChangeHistoryAdapter = {
@@ -48,10 +55,11 @@ const renderButton = ({
   return render(
     <I18nProvider>
       <ChangeHistoryProvider
-        objectId="workflow-1"
+        objectId={TEST_OBJECT_ID}
         adapter={adapter}
-        labels={{ previewTitle: 'Test workflow' }}
+        labels={{ previewTitle: TEST_OBJECT_TITLE }}
         features={features}
+        permissions={permissions}
         renderPreview={() => null}
       >
         <ChangeHistoryRestoreButton change={change} />
@@ -85,7 +93,7 @@ describe('ChangeHistoryRestoreButton', () => {
 
     await waitFor(() => {
       expect(restoreChange).toHaveBeenCalledWith({
-        objectId: 'workflow-1',
+        objectId: TEST_OBJECT_ID,
         changeId: 'evt-3',
         signal: expect.any(AbortSignal),
       });
@@ -100,7 +108,7 @@ describe('ChangeHistoryRestoreButton', () => {
     const restoreChange = jest.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_VALIDATION',
-        message: 'YAML validation failed.',
+        message: 'Validation failed.',
       },
     });
 
@@ -110,7 +118,7 @@ describe('ChangeHistoryRestoreButton', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
-      expect(screen.getByText('YAML validation failed.')).toBeInTheDocument();
+      expect(screen.getByText('Validation failed.')).toBeInTheDocument();
     });
     expect(screen.getByTestId('changeHistoryRestoreConfirmModal')).toBeInTheDocument();
   });

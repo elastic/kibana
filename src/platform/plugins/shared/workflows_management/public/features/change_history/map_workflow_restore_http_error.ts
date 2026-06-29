@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ChangeHistoryErrorCode } from '@kbn/change-history-ui';
+import {
+  getChangeHistoryErrorCodeFromBody,
+  isChangeHistoryErrorCode,
+} from '@kbn/change-history-ui';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-
-type WorkflowRestoreErrorCode =
-  | 'FORBIDDEN'
-  | 'NOT_FOUND'
-  | 'RESTORE_CONFLICT'
-  | 'RESTORE_VALIDATION'
-  | 'UNKNOWN';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -47,7 +45,10 @@ const getMessage = (error: unknown): string => {
   return String(error);
 };
 
-const mapStatusToCode = (status: number | undefined): WorkflowRestoreErrorCode | undefined => {
+const mapStatusToCode = (
+  status: number | undefined,
+  body?: Record<string, unknown>
+): ChangeHistoryErrorCode | undefined => {
   switch (status) {
     case 403:
       return 'FORBIDDEN';
@@ -56,7 +57,10 @@ const mapStatusToCode = (status: number | undefined): WorkflowRestoreErrorCode |
     case 409:
       return 'RESTORE_CONFLICT';
     case 400:
-      return 'RESTORE_VALIDATION';
+      if (body && Array.isArray(body.validationErrors)) {
+        return 'RESTORE_VALIDATION';
+      }
+      return undefined;
     default:
       return undefined;
   }
@@ -96,13 +100,14 @@ export const mapWorkflowRestoreHttpError = (error: unknown): Error => {
     return error instanceof Error ? error : new Error(String(error));
   }
 
-  const structuredBody = getHttpBody(error);
-  if (structuredBody && typeof structuredBody.code === 'string') {
-    return error instanceof Error ? error : new Error(getMessage(error));
-  }
-
   const message = getMessage(error);
-  const code = mapStatusToCode(getHttpStatus(error)) ?? 'UNKNOWN';
+  const structuredBody = getHttpBody(error);
+  const structuredCode = getChangeHistoryErrorCodeFromBody(structuredBody);
+  const code =
+    structuredCode && isChangeHistoryErrorCode(structuredCode)
+      ? structuredCode
+      : mapStatusToCode(getHttpStatus(error), structuredBody) ?? 'UNKNOWN';
+
   const mappedError = new Error(message);
   Object.assign(mappedError, { body: { code, message } });
 

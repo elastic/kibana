@@ -45,6 +45,14 @@ describe('resolveChangeHistorySupports', () => {
     ).toEqual({ restore: false });
   });
 
+  it('disables restore when permissions are omitted', () => {
+    expect(
+      resolveChangeHistorySupports(adapterWithRestore, {
+        features: { restore: true },
+      })
+    ).toEqual({ restore: false });
+  });
+
   it('disables restore when permissions deny it', () => {
     expect(
       resolveChangeHistorySupports(adapterWithRestore, {

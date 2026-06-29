@@ -8,6 +8,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChangeHistoryList } from './use_change_history_list';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import { TEST_OBJECT_ID } from '../test_utils/change_history_test_fixtures';
 
 describe('useChangeHistoryList', () => {
   it('loads paginated changes and appends on loadMore', async () => {
@@ -169,7 +170,7 @@ describe('useChangeHistoryList', () => {
     const { result } = renderHook(() =>
       useChangeHistoryList({
         adapter,
-        objectId: 'workflow-1',
+        objectId: TEST_OBJECT_ID,
       })
     );
 

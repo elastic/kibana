@@ -98,10 +98,10 @@ export const logWorkflowChanges = async ({
 
   const changes = toObjectChanges(workflows, timestamp, logger);
 
-  const logOpts = {
+  const logOpts: ScopedLogChangeHistoryOptions = {
     action,
     spaceId,
-    ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: true as const } : {}),
+    ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: true } : {}),
     ...(correlationId ? { correlationId } : {}),
     ...(restoreMetadata
       ? {
@@ -123,7 +123,7 @@ export const logWorkflowChanges = async ({
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await scopedChangeHistory.logBulk(changes, logOpts as ScopedLogChangeHistoryOptions);
+      await scopedChangeHistory.logBulk(changes, logOpts);
       return;
     } catch (error) {
       if (!isRetryableChangeHistoryError(error) || attempt >= maxAttempts) {

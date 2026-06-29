@@ -14,6 +14,12 @@ import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
 import { ChangeHistoryModal } from './change_history_modal';
 import { ChangeHistoryTrigger } from './change_history_trigger';
+import {
+  TEST_OBJECT_ID,
+  TEST_OBJECT_TITLE,
+  TEST_SNAPSHOT,
+  TEST_SNAPSHOT_OLDER,
+} from '../../test_utils/change_history_test_fixtures';
 
 const listItem = {
   id: 'evt-1',
@@ -25,7 +31,7 @@ const listItem = {
 
 const detail: ChangeHistoryDetail = {
   ...listItem,
-  snapshot: { workflow: { yaml: 'name: test\n' } },
+  snapshot: TEST_SNAPSHOT,
 };
 
 const createAdapter = (overrides?: Partial<ChangeHistoryAdapter>): ChangeHistoryAdapter => ({
@@ -45,9 +51,9 @@ const renderModal = ({
   render(
     <I18nProvider>
       <ChangeHistoryProvider
-        objectId="workflow-1"
+        objectId={TEST_OBJECT_ID}
         adapter={adapter}
-        labels={{ previewTitle: 'Test workflow' }}
+        labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={({ change }) => (
           <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
         )}
@@ -112,7 +118,7 @@ describe('ChangeHistoryModal', () => {
     };
     const secondDetail: ChangeHistoryDetail = {
       ...secondItem,
-      snapshot: { workflow: { yaml: 'name: older\n' } },
+      snapshot: TEST_SNAPSHOT_OLDER,
     };
 
     const adapter = createAdapter({
@@ -170,7 +176,7 @@ describe('ChangeHistoryModal', () => {
     };
     const historicalDetail: ChangeHistoryDetail = {
       ...historicalItem,
-      snapshot: { workflow: { yaml: 'name: older\n' } },
+      snapshot: TEST_SNAPSHOT_OLDER,
     };
 
     const adapter = createAdapter({
@@ -190,10 +196,11 @@ describe('ChangeHistoryModal', () => {
     render(
       <I18nProvider>
         <ChangeHistoryProvider
-          objectId="workflow-1"
+          objectId={TEST_OBJECT_ID}
           adapter={adapter}
           features={{ restore: true }}
-          labels={{ previewTitle: 'Test workflow' }}
+          permissions={{ canRestore: true }}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
           renderPreview={({ change }) => (
             <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
           )}
@@ -225,10 +232,11 @@ describe('ChangeHistoryModal', () => {
     render(
       <I18nProvider>
         <ChangeHistoryProvider
-          objectId="workflow-1"
+          objectId={TEST_OBJECT_ID}
           adapter={adapter}
           features={{ restore: true }}
-          labels={{ previewTitle: 'Test workflow' }}
+          permissions={{ canRestore: true }}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
           renderPreview={({ change }) => (
             <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
           )}

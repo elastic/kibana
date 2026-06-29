@@ -9,6 +9,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useChangeHistoryDetail } from './use_change_history_detail';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
+import { TEST_SNAPSHOT } from '../test_utils/change_history_test_fixtures';
 
 describe('useChangeHistoryDetail', () => {
   it('does not show loading for synchronously resolved cache hits', async () => {
@@ -17,7 +18,7 @@ describe('useChangeHistoryDetail', () => {
       timestamp: '2026-01-01T00:00:00Z',
       actor: { name: 'Alice' },
       action: 'Updated',
-      snapshot: { workflow: { yaml: 'name: test\n' } },
+      snapshot: TEST_SNAPSHOT,
     };
 
     const adapter: ChangeHistoryAdapter = {

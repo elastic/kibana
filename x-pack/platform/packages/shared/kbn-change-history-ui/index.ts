@@ -21,6 +21,11 @@ export type { ChangeHistoryRestoreButtonProps } from './src/components/modal';
 export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
 export type { ChangeHistoryProviderProps, ChangeHistoryConfigValue } from './src/provider';
 export { useChangeHistoryList, useChangeHistoryDetail, useChangeHistoryRestore } from './src/hooks';
+export {
+  getChangeHistoryErrorCode,
+  getChangeHistoryErrorCodeFromBody,
+} from './src/utils/get_change_history_error_code';
+export { isChangeHistoryErrorCode } from './src/utils/change_history_error_codes';
 export type {
   UseChangeHistoryListArgs,
   UseChangeHistoryListResult,

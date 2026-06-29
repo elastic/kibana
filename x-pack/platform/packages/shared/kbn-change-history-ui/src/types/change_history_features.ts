@@ -13,6 +13,7 @@ export interface ChangeHistoryFeatures {
 
 /** Optional privilege hints supplied by the host application. */
 export interface ChangeHistoryPermissions {
+  /** Must be `true` to enable restore when `features.restore` is on. */
   canRestore?: boolean;
 }
 

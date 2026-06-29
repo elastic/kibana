@@ -5,7 +5,8 @@ Shared browser package for **change history** UI in Kibana. Domains integrate vi
 ## Integration (3 steps)
 
 1. **Implement `ChangeHistoryAdapter`** — `listChanges` and `getChange`, optional `restoreChange`.
-2. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, `labels.previewTitle`, optional `renderBadge` and `features`.
+2. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, `labels.previewTitle`, optional `renderBadge`, `features`, and `permissions`.
+   Enable restore with **both** `features={{ restore: true }}` and `permissions={{ canRestore: true }}`.
 3. **Render `ChangeHistoryTrigger` + `ChangeHistoryModal`** — modal overlay; no dedicated route required.
 
 ```tsx

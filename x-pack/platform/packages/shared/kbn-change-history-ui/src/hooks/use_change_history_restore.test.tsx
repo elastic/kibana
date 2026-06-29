@@ -11,6 +11,7 @@ import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import { useChangeHistoryInternalConfig } from '../provider/use_change_history_internal_config';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
+import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../test_utils/change_history_test_fixtures';
 
 const createAdapter = (
   restoreChange: ChangeHistoryAdapter['restoreChange']
@@ -38,14 +39,19 @@ const ListRefetchRegistrar = ({
 };
 
 const wrapper =
-  (adapter: ChangeHistoryAdapter, features: { restore?: boolean } = { restore: true }) =>
+  (
+    adapter: ChangeHistoryAdapter,
+    features: { restore?: boolean } = { restore: true },
+    permissions: { canRestore?: boolean } = { canRestore: true }
+  ) =>
   ({ children }: { children: React.ReactNode }) =>
     (
       <ChangeHistoryProvider
-        objectId="workflow-1"
+        objectId={TEST_OBJECT_ID}
         adapter={adapter}
         features={features}
-        labels={{ previewTitle: 'Test workflow' }}
+        permissions={permissions}
+        labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => null}
       >
         {children}
@@ -61,28 +67,28 @@ describe('useChangeHistoryRestore', () => {
     const { result } = renderHook(() => useChangeHistoryRestore(), {
       wrapper: ({ children }) => (
         <ChangeHistoryProvider
-          objectId="workflow-1"
+          objectId={TEST_OBJECT_ID}
           adapter={adapter}
           features={{ restore: true }}
-          labels={{ previewTitle: 'Test workflow' }}
-        renderPreview={() => null}
+          permissions={{ canRestore: true }}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={() => null}
         >
-          <ListRefetchRegistrar refetch={refetchList} />
-          {children}
+          <ListRefetchRegistrar refetch={refetchList}>{children}</ListRefetchRegistrar>
         </ChangeHistoryProvider>
       ),
     });
 
     await act(async () => {
       const succeeded = await result.current.restoreChange({
-        objectId: 'workflow-1',
+        objectId: TEST_OBJECT_ID,
         changeId: 'evt-3',
       });
       expect(succeeded).toBe(true);
     });
 
     expect(restoreChange).toHaveBeenCalledWith({
-      objectId: 'workflow-1',
+      objectId: TEST_OBJECT_ID,
       changeId: 'evt-3',
       signal: expect.any(AbortSignal),
     });
@@ -93,7 +99,7 @@ describe('useChangeHistoryRestore', () => {
     const restoreChange = jest.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_CONFLICT',
-        message: 'Workflow was updated by another user.',
+        message: 'Object was updated by another user.',
       },
     });
     const adapter = createAdapter(restoreChange);
@@ -104,7 +110,7 @@ describe('useChangeHistoryRestore', () => {
 
     await act(async () => {
       const succeeded = await result.current.restoreChange({
-        objectId: 'workflow-1',
+        objectId: TEST_OBJECT_ID,
         changeId: 'evt-3',
       });
       expect(succeeded).toBe(false);
@@ -113,7 +119,7 @@ describe('useChangeHistoryRestore', () => {
     await waitFor(() => {
       expect(result.current.error).toEqual({
         code: 'RESTORE_CONFLICT',
-        message: 'Workflow was updated by another user.',
+        message: 'Object was updated by another user.',
       });
     });
   });
@@ -128,7 +134,7 @@ describe('useChangeHistoryRestore', () => {
 
     await act(async () => {
       const succeeded = await result.current.restoreChange({
-        objectId: 'workflow-1',
+        objectId: TEST_OBJECT_ID,
         changeId: 'evt-3',
       });
       expect(succeeded).toBe(false);

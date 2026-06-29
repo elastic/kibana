@@ -96,6 +96,9 @@ export function handleRouteError(
     return response.badRequest({
       body: {
         message: error.message,
+        attributes: {
+          code: 'HISTORY_DISABLED',
+        },
       },
     });
   }

@@ -11,6 +11,7 @@ import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { UpdatedWorkflowResponseDto, WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -71,6 +72,76 @@ type RestoreTestDepsOverrides = Omit<Partial<WorkflowCrudDeps>, 'changeHistorySe
   changeHistoryService?: Partial<IWorkflowChangeHistoryService>;
 };
 
+const makeWorkflowDetailDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+  id: 'wf-1',
+  name: 'Restored workflow',
+  enabled: true,
+  yaml: 'name: Restored workflow',
+  valid: true,
+  createdAt: '2024-01-01T00:00:00.000Z',
+  createdBy: 'alice',
+  lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+  lastUpdatedBy: 'alice',
+  definition: null,
+  ...overrides,
+});
+
+const makeFinalWorkflowProperties = (
+  overrides: Partial<WorkflowProperties> = {}
+): WorkflowProperties => ({
+  name: 'Restored workflow',
+  description: '',
+  enabled: true,
+  tags: [],
+  triggerTypes: [],
+  yaml: 'name: Restored workflow',
+  definition: null,
+  createdBy: 'alice',
+  lastUpdatedBy: 'alice',
+  spaceId: 'default',
+  valid: true,
+  deleted_at: null,
+  created_at: '2024-01-01T00:00:00.000Z',
+  updated_at: '2026-01-02T00:00:00.000Z',
+  version: 8,
+  ...overrides,
+});
+
+interface ApplyWorkflowUpdateResult {
+  response: UpdatedWorkflowResponseDto;
+  finalData: WorkflowProperties;
+  timestamp: Date;
+}
+
+const makeApplyWorkflowUpdateResult = (
+  overrides: {
+    response?: Partial<UpdatedWorkflowResponseDto>;
+    finalData?: WorkflowProperties;
+    timestamp?: Date;
+  } = {}
+): ApplyWorkflowUpdateResult => ({
+  response: {
+    id: 'wf-1',
+    lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+    lastUpdatedBy: 'alice',
+    enabled: true,
+    valid: true,
+    validationErrors: [],
+    ...overrides.response,
+  },
+  finalData: overrides.finalData ?? makeFinalWorkflowProperties(),
+  timestamp: overrides.timestamp ?? new Date('2026-01-02T00:00:00.000Z'),
+});
+
+interface WorkflowCrudServiceWithApplyUpdate {
+  applyWorkflowUpdate: (
+    id: string,
+    workflow: Partial<{ yaml: string }>,
+    spaceId: string,
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>
+  ) => Promise<ApplyWorkflowUpdateResult>;
+}
+
 describe('WorkflowCrudService.restoreWorkflowVersion', () => {
   const request = httpServerMock.createKibanaRequest();
 
@@ -86,21 +157,10 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     } as WorkflowCrudDeps;
 
     const service = new WorkflowCrudService(deps);
-    jest.spyOn(service, 'getWorkflow').mockResolvedValue({ id: 'wf-1' } as any);
+    jest.spyOn(service, 'getWorkflow').mockResolvedValue(makeWorkflowDetailDto());
     const applyWorkflowUpdate = jest
-      .spyOn(service as any, 'applyWorkflowUpdate')
-      .mockResolvedValue({
-        response: {
-          id: 'wf-1',
-          lastUpdatedAt: '2026-01-02T00:00:00.000Z',
-          lastUpdatedBy: 'alice',
-          enabled: true,
-          valid: true,
-          validationErrors: [],
-        },
-        finalData: { version: 8 } as any,
-        timestamp: new Date('2026-01-02T00:00:00.000Z'),
-      });
+      .spyOn(service as unknown as WorkflowCrudServiceWithApplyUpdate, 'applyWorkflowUpdate')
+      .mockResolvedValue(makeApplyWorkflowUpdateResult());
     const logWorkflowChangesAfterWrite = jest
       .spyOn(service, 'logWorkflowChangesAfterWrite')
       .mockResolvedValue();
@@ -125,7 +185,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
       request
     );
     expect(logWorkflowChangesAfterWrite).toHaveBeenCalledWith({
-      workflows: [{ id: 'wf-1', document: { version: 8 } }],
+      workflows: [{ id: 'wf-1', document: makeFinalWorkflowProperties() }],
       action: WorkflowChangeHistoryAction.workflowRestore,
       spaceId: 'default',
       timestamp: new Date('2026-01-02T00:00:00.000Z'),
@@ -324,7 +384,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
     });
 
     const service = new WorkflowCrudService(deps);
-    jest.spyOn(service, 'getWorkflow').mockResolvedValue({ id: 'wf-1' } as any);
+    jest.spyOn(service, 'getWorkflow').mockResolvedValue(makeWorkflowDetailDto());
 
     return { service, client, scopedChangeHistory };
   };

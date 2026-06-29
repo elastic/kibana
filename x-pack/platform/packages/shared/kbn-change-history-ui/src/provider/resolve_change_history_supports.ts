@@ -24,7 +24,7 @@ export const resolveChangeHistorySupports = (
   const restore =
     features?.restore === true &&
     typeof adapter.restoreChange === 'function' &&
-    permissions?.canRestore !== false;
+    permissions?.canRestore === true;
 
   return { restore };
 };
