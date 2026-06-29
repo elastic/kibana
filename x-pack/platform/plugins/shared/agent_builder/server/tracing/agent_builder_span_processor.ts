@@ -146,6 +146,26 @@ function stripToolCallsFromEventAttributes(eventAttributes: api.Attributes): api
   );
 }
 
+// Matches `tool_calls.0.function.name` and `message.tool_calls.0.function.name`
+const TOOL_NAME_KEY_RE = /^(?:message\.)?tool_calls\.\d+\.function\.name$/;
+
+function anonymizeToolNamesInEventAttributes(eventAttributes: api.Attributes): api.Attributes {
+  const result: api.Attributes = {};
+  for (const [key, value] of Object.entries(eventAttributes)) {
+    if (
+      TOOL_NAME_KEY_RE.test(key) &&
+      typeof value === 'string' &&
+      !BUILTIN_TOOL_IDS.has(value) &&
+      !isInternalTool(value)
+    ) {
+      result[key] = 'custom';
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 /**
  * Filters and sanitizes span events based on privacy settings.
  * Drops entire events whose content category is disabled, and strips
@@ -166,13 +186,21 @@ function applyEventPrivacyFilters(
     }
     if (!settings.includeToolDetails && event.name === 'gen_ai.tool.message') return acc;
 
-    if (
-      !settings.includeToolDetails &&
-      (event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice')
-    ) {
+    const isAssistantOrChoice =
+      event.name === 'gen_ai.assistant.message' || event.name === 'gen_ai.choice';
+
+    if (!settings.includeToolDetails && isAssistantOrChoice) {
       acc.push({
         ...event,
         attributes: stripToolCallsFromEventAttributes(event.attributes ?? {}),
+      });
+      return acc;
+    }
+
+    if (!settings.includeRealNames && isAssistantOrChoice) {
+      acc.push({
+        ...event,
+        attributes: anonymizeToolNamesInEventAttributes(event.attributes ?? {}),
       });
       return acc;
     }

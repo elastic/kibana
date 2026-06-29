@@ -930,5 +930,182 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.attributes[GenAISemanticConventions.GenAIToolName]).toBe(builtinToolName);
       expect(exported.name).toBe(`execute_tool ${builtinToolName}`);
     });
+
+    it('anonymizes custom tool names in assistant event attributes when includeRealNames is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () =>
+          createSettings({
+            includeRealNames: false,
+            includeToolDetails: true,
+            includeLlmResponses: true,
+          }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true }),
+        events: [
+          {
+            name: 'gen_ai.assistant.message',
+            time: [0, 0],
+            attributes: {
+              content: 'hello',
+              role: 'assistant',
+              'tool_calls.0.function.name': 'my-secret-tool',
+              'tool_calls.0.function.arguments': '{"q":"value"}',
+              'tool_calls.1.function.name': 'another-custom-tool',
+              'tool_calls.1.function.arguments': '{}',
+            },
+          },
+        ],
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      const event = exported.events[0];
+      expect(event.attributes?.['tool_calls.0.function.name']).toBe('custom');
+      expect(event.attributes?.['tool_calls.1.function.name']).toBe('custom');
+      expect(event.attributes?.['tool_calls.0.function.arguments']).toBe('{"q":"value"}');
+      expect(event.attributes?.content).toBe('hello');
+    });
+
+    it('anonymizes custom tool names in choice event attributes when includeRealNames is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () =>
+          createSettings({
+            includeRealNames: false,
+            includeToolDetails: true,
+            includeLlmResponses: true,
+          }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true }),
+        events: [
+          {
+            name: 'gen_ai.choice',
+            time: [0, 0],
+            attributes: {
+              finish_reason: 'tool_calls',
+              'message.tool_calls.0.function.name': 'my-secret-tool',
+              'message.tool_calls.0.function.arguments': '{"q":"value"}',
+            },
+          },
+        ],
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      const event = exported.events[0];
+      expect(event.attributes?.['message.tool_calls.0.function.name']).toBe('custom');
+      expect(event.attributes?.['message.tool_calls.0.function.arguments']).toBe('{"q":"value"}');
+      expect(event.attributes?.finish_reason).toBe('tool_calls');
+    });
+
+    it('preserves built-in tool names in event attributes when includeRealNames is false', () => {
+      const builtinToolName = AGENT_BUILDER_BUILTIN_TOOLS[0];
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () =>
+          createSettings({
+            includeRealNames: false,
+            includeToolDetails: true,
+            includeLlmResponses: true,
+          }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true }),
+        events: [
+          {
+            name: 'gen_ai.assistant.message',
+            time: [0, 0],
+            attributes: {
+              'tool_calls.0.function.name': builtinToolName,
+              'tool_calls.0.function.arguments': '{}',
+            },
+          },
+        ],
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      const event = exported.events[0];
+      expect(event.attributes?.['tool_calls.0.function.name']).toBe(builtinToolName);
+    });
+
+    it('does not anonymize event tool names when includeRealNames is true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () =>
+          createSettings({
+            includeRealNames: true,
+            includeToolDetails: true,
+            includeLlmResponses: true,
+          }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true }),
+        events: [
+          {
+            name: 'gen_ai.assistant.message',
+            time: [0, 0],
+            attributes: {
+              'tool_calls.0.function.name': 'my-secret-tool',
+            },
+          },
+        ],
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.events[0].attributes?.['tool_calls.0.function.name']).toBe('my-secret-tool');
+    });
+
+    it('strips tool_calls entirely when includeToolDetails is false, even if includeRealNames is also false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () =>
+          createSettings({
+            includeRealNames: false,
+            includeToolDetails: false,
+            includeLlmResponses: true,
+          }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true }),
+        events: [
+          {
+            name: 'gen_ai.assistant.message',
+            time: [0, 0],
+            attributes: {
+              content: 'hello',
+              'tool_calls.0.function.name': 'my-secret-tool',
+              'tool_calls.0.function.arguments': '{"q":"secret"}',
+            },
+          },
+        ],
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      const event = exported.events[0];
+      expect(event.attributes?.content).toBe('hello');
+      expect('tool_calls.0.function.name' in (event.attributes ?? {})).toBe(false);
+      expect('tool_calls.0.function.arguments' in (event.attributes ?? {})).toBe(false);
+    });
   });
 });
