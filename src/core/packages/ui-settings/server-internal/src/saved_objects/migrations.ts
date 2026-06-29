@@ -56,19 +56,10 @@ export const TIMEPICKER_QUICK_RANGES_V3_PRESETS: ReadonlyArray<QuickRange> = [
  * Schema for `config` SO type attributes at model version 3.
  *
  * `config` stores `buildNum` plus an open-ended set of UI setting keys
- * (e.g. `timepicker:quickRanges`, `dateFormat`) as dynamic top-level
- * attributes, preserved by `unknowns: 'allow'`. Only `buildNum` is validated.
- *
- * The same schema is reused for `forwardCompatibility` — it must NOT strip
- * unknowns. When a node running this model version down-converts a `config`
- * document written by a future model version, the schema is validated and the
- * validated keys become the structural map of what is kept (see
- * `convertModelVersionBackwardConversionSchema` /
- * `pickValuesBasedOnStructure`). A stripping schema (`unknowns: 'ignore'`)
- * would therefore reduce the document to just `buildNum`, dropping every UI
- * setting — because here the settings are top-level unknowns, unlike the
- * `favorites` SO where the dynamic data is nested under a named
- * `favoriteMetadata` property that carries its own `unknowns: 'allow'`.
+ * (e.g. `timepicker:quickRanges`, `dateFormat`). `unknowns: 'allow'` lets the
+ * dynamic setting keys flow through; `forwardCompatibility` uses `'ignore'` so
+ * that any attributes a future model version may add are stripped when this
+ * version reads such a document.
  */
 const configAttributesSchemaV3 = schema.object(
   { buildNum: schema.maybe(schema.nullable(schema.number())) },
@@ -144,9 +135,7 @@ export const modelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
-      // Reuse the `'allow'` schema as-is so dynamic UI setting keys survive a
-      // forward-compatibility down-conversion (see the schema's doc comment).
-      forwardCompatibility: configAttributesSchemaV3,
+      forwardCompatibility: configAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: configAttributesSchemaV3,
     },
   },

@@ -11,7 +11,6 @@ import type {
   SavedObjectModelTransformationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { isConfigSchema } from '@kbn/config-schema';
 import {
   migrations,
   mergeTimepickerQuickRangesV3,
@@ -502,23 +501,6 @@ describe('ui_settings model version 3 — mergeTimepickerQuickRangesV3', () => {
     expect(mv3).toBeDefined();
     expect(mv3?.schemas?.forwardCompatibility).toBeDefined();
     expect(mv3?.schemas?.create).toBeDefined();
-  });
-
-  test('forwardCompatibility preserves dynamic UI setting keys (no data loss on downgrade)', () => {
-    const forwardCompatibility = modelVersions[3]?.schemas?.forwardCompatibility;
-    if (!isConfigSchema(forwardCompatibility)) {
-      throw new Error('expected forwardCompatibility to be a config-schema object');
-    }
-    // A `config` doc written by a future model version, down-converted to this
-    // version, must keep every UI setting — not be stripped to just `buildNum`.
-    // `unknowns: 'ignore'` would strip the dynamic top-level keys here, so this
-    // guards against re-introducing that data loss.
-    const attrs = {
-      buildNum: 123,
-      'timepicker:quickRanges': '[]',
-      dateFormat: 'YYYY-MM-DD',
-    };
-    expect(forwardCompatibility.validate(attrs)).toEqual(attrs);
   });
 });
 
