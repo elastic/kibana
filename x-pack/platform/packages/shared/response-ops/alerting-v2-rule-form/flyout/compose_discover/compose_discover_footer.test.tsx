@@ -11,11 +11,17 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createInitialState } from './use_compose_discover_state';
 import type { ComposeDiscoverState, StepDefinition } from './types';
-import type { ComposeFormValues } from './compose_form_types';
+import type { FormValues } from '../../form/types';
 import { ComposeDiscoverFooter, type ComposeDiscoverFooterProps } from './compose_discover_footer';
 
 const ALERT_CONDITION_STEP: StepDefinition = {
   id: 'alertCondition',
+  title: 'Alert Condition',
+  render: () => null,
+};
+
+const BUILDER_CONDITION_STEP: StepDefinition = {
+  id: 'builderCondition',
   title: 'Alert Condition',
   render: () => null,
 };
@@ -35,10 +41,10 @@ const Wrapper = ({
   formValues,
   children,
 }: {
-  formValues: Partial<ComposeFormValues>;
+  formValues: Partial<FormValues>;
   children: React.ReactNode;
 }) => {
-  const defaults: ComposeFormValues = {
+  const defaults: FormValues = {
     kind: 'alert',
     metadata: { name: '', enabled: true },
     timeField: '@timestamp',
@@ -48,7 +54,7 @@ const Wrapper = ({
     stateTransitionRecoveryDelayMode: 'immediate',
     ...formValues,
   };
-  const form = useForm<ComposeFormValues>({ defaultValues: defaults });
+  const form = useForm<FormValues>({ defaultValues: defaults });
   return (
     <IntlProvider locale="en">
       <FormProvider {...form}>{children}</FormProvider>
@@ -62,7 +68,7 @@ const renderFooter = ({
   propsOverrides = {},
 }: {
   stateOverrides?: Partial<ComposeDiscoverState>;
-  formValues?: Partial<ComposeFormValues>;
+  formValues?: Partial<FormValues>;
   propsOverrides?: Partial<ComposeDiscoverFooterProps>;
 } = {}) => {
   const onNext = jest.fn();
@@ -81,6 +87,8 @@ const renderFooter = ({
     isCreate: true,
     hasValidationErrors: false,
     yamlHasErrors: false,
+    isBuilderMode: false,
+    isBuilderStepValid: true,
     isSaving: false,
     onNext,
     onFinalSubmit,
@@ -159,7 +167,7 @@ describe('ComposeDiscoverFooter', () => {
     it('dispatches GO_BACK when Back is clicked', () => {
       const { dispatch } = renderFooter({ stateOverrides: { step: 1 } });
       fireEvent.click(screen.getByTestId('composeDiscoverBack'));
-      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK' });
+      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK', isBuilderMode: false });
     });
   });
 
@@ -349,6 +357,50 @@ describe('ComposeDiscoverFooter', () => {
     it('disables Back when child flyout is open', () => {
       renderFooter({ stateOverrides: { step: 1, childOpen: true } });
       expect(screen.getByTestId('composeDiscoverBack')).toBeDisabled();
+    });
+
+    it('does not disable Back when child flyout is open in builder mode', () => {
+      renderFooter({
+        stateOverrides: { step: 1, childOpen: true },
+        propsOverrides: { isBuilderMode: true },
+      });
+      expect(screen.getByTestId('composeDiscoverBack')).not.toBeDisabled();
+    });
+  });
+
+  describe('Builder mode validation', () => {
+    it('disables Next when isBuilderStepValid is false', () => {
+      renderFooter({
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: false,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('enables Next when isBuilderStepValid is true', () => {
+      renderFooter({
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: true,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not block Next due to childOpen in builder mode', () => {
+      renderFooter({
+        stateOverrides: { childOpen: true },
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: true,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
   });
 
