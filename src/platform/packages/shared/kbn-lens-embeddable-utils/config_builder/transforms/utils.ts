@@ -171,7 +171,10 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   };
 }
 
-export const getAdhocDataviews = (dataviews: Record<string, APIDataView | APIAdHocDataView>) => {
+export const getAdhocDataviews = (
+  dataviews: Record<string, APIDataView | APIAdHocDataView>,
+  annotationLayerIds: ReadonlySet<string> = new Set()
+) => {
   // filter out ad hoc dataViews only
   const adHocDataViewsFiltered = Object.entries(dataviews).filter(
     ([_layerId, dataViewEntry]) => dataViewEntry.type === 'adHocDataView'
@@ -196,7 +199,14 @@ export const getAdhocDataviews = (dataviews: Record<string, APIDataView | APIAdH
   for (const [baseSpec, { layerIds, id }] of Array.from(internalReferencesMap.entries())) {
     adHocDataViews[id] = getAdHocDataViewSpec(baseSpec);
     for (const layerId of layerIds) {
-      internalReferences.push(createDataViewReference(id, layerId));
+      // XY annotation layers reference their data view (ad hoc included) under the
+      // `xy-visualization-layer-` name, matching Lens's own persistence logic, so
+      // the runtime can resolve it. Other layers use the default datasource name.
+      internalReferences.push(
+        annotationLayerIds.has(layerId)
+          ? createAnnotationLayerDataViewReference(id, layerId)
+          : createDataViewReference(id, layerId)
+      );
     }
   }
 

@@ -37,7 +37,26 @@ export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilte
     getValueColumns
   );
 
-  const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
+  // By-value annotation layers persist their data view under the
+  // `xy-visualization-layer-` reference name (regular and ad hoc alike), matching
+  // Lens's own persistence logic so the XY runtime can resolve it. A manual-only
+  // layer carries no data view at all and emits no such reference; the runtime
+  // then falls back to the first index-pattern reference at load time (see
+  // x-pack/.../lens/public/visualizations/xy/persistence.ts).
+  const annotationLayerIds = new Set(
+    config.layers
+      .map((layer, index) =>
+        isAPIAnnotationLayer(layer) && !('group_id' in layer)
+          ? getIdForLayer(layer, index)
+          : undefined
+      )
+      .filter((id): id is string => id != null)
+  );
+
+  const { adHocDataViews, internalReferences } = getAdhocDataviews(
+    usedDataviews,
+    annotationLayerIds
+  );
 
   const regularDataViews = Object.entries(usedDataviews).filter(
     (v): v is [string, { id: string; type: 'dataView' }] => v[1].type === 'dataView'
@@ -50,22 +69,6 @@ export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilte
   const annotationGroupReferences: SavedObjectReference[] = [];
 
   const visualizationState = buildVisualizationState(config, annotationGroupReferences);
-
-  // By-value annotation layers persist their data view under the
-  // `xy-visualization-layer-` reference name. A layer that omits its own
-  // data_source carries no entry in `regularDataViewsMap`, so it emits no such
-  // reference and the Lens XY runtime resolves it by falling back to the first
-  // index-pattern reference at load time (see
-  // x-pack/.../lens/public/visualizations/xy/persistence.ts).
-  const annotationLayerIds = new Set(
-    config.layers
-      .map((layer, index) =>
-        isAPIAnnotationLayer(layer) && !('group_id' in layer)
-          ? getIdForLayer(layer, index)
-          : undefined
-      )
-      .filter((id): id is string => id != null)
-  );
 
   const references = [
     ...annotationGroupReferences,

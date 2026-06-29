@@ -8,7 +8,7 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYConfig } from '../../schema/charts/xy';
+import type { XYConfig, XYConfigNoESQL } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -243,18 +243,79 @@ describe('XY', () => {
       // an index to query.
       it('throws when a query annotation layer is missing its data_source', () => {
         const builder = new LensConfigBuilder(undefined, true);
-        const api = builder.toAPIFormat(annotationXY) as XYConfig;
+        // annotationXY is a DSL chart, so narrow to the concrete (non-ES|QL)
+        // config to keep the spread within a single union member.
+        const api = builder.toAPIFormat(annotationXY) as XYConfigNoESQL;
 
-        const apiWithoutAnnotationDataSource: XYConfig = {
+        // Strip data_source from the annotation layer to simulate a query
+        // annotation arriving without an index to query. data_source is optional
+        // in the schema, so the resulting config is still a valid XYConfig.
+        const apiWithoutAnnotationDataSource: XYConfigNoESQL = {
           ...api,
-          layers: api.layers.map((layer) =>
-            layer.type === 'annotations' ? { ...layer, data_source: undefined } : layer
-          ),
+          layers: api.layers.map((layer) => {
+            if (layer.type !== 'annotations') {
+              return layer;
+            }
+            const { data_source: _, ...rest } = layer;
+            return rest;
+          }),
         };
 
         expect(() => builder.fromAPIFormat(apiWithoutAnnotationDataSource)).toThrow(
           'A data source is required for annotation layers with query events'
         );
+      });
+
+      // A query annotation layer can reference its own ad hoc data view (inline
+      // spec). It must round-trip as an `xy-visualization-layer-` reference (type
+      // index-pattern) pointing at the ad hoc data view id, matching Lens's own
+      // persistence, so the runtime resolves the correct data view instead of
+      // falling back to the data layers' one.
+      it('round-trips an ad hoc data view for a query annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        // annotationXY is a DSL chart with a query annotation layer; reuse it so
+        // every defaulted field is present, then point the annotation layer at its
+        // own ad hoc data view.
+        const api = builder.toAPIFormat(annotationXY) as XYConfigNoESQL;
+
+        const apiConfig: XYConfigNoESQL = {
+          ...api,
+          layers: api.layers.map((layer) =>
+            layer.type === 'annotations'
+              ? {
+                  ...layer,
+                  data_source: {
+                    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+                    index_pattern: 'annotations-*',
+                    time_field: '@timestamp',
+                  },
+                }
+              : layer
+          ),
+        };
+
+        const lensState = builder.fromAPIFormat(apiConfig);
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const annotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+        expect(annotationLayer).toBeDefined();
+
+        // Ad hoc data view references are stored in internalReferences.
+        const internalReferences = lensState.state.internalReferences ?? [];
+        const annotationReference = internalReferences.find(
+          (ref) => ref.name === `xy-visualization-layer-${annotationLayer?.layerId}`
+        );
+        expect(annotationReference).toBeDefined();
+        expect(annotationReference?.type).toBe('index-pattern');
+
+        // The reference must point at the ad hoc data view present in adHocDataViews.
+        const adHocDataViews = lensState.state.adHocDataViews ?? {};
+        expect(annotationReference?.id).toBeDefined();
+        expect(Object.keys(adHocDataViews)).toContain(annotationReference?.id);
       });
     });
 
