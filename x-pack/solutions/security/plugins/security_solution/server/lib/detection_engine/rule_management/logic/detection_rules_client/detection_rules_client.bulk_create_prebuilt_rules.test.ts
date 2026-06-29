@@ -233,6 +233,39 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect(result.errors[1].error.message).toBe('bulk authorization failure');
   });
 
+  it('returns error for unsupported rule type', async () => {
+    const validRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'valid-rule' };
+    const badRule = {
+      ...getCreateRulesSchemaMock(),
+      type: 'not_a_real_type' as never,
+      version: 1,
+      rule_id: 'bad-rule',
+    };
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [expect.any(String)],
+      errors: [],
+      total: 1,
+    });
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [validRule, badRule],
+    });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].item.rule_id).toBe('bad-rule');
+    expect(result.errors[0].error.message).toBe('Unsupported rule type: not_a_real_type');
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rules: expect.arrayContaining([
+          expect.objectContaining({
+            data: expect.objectContaining({ name: validRule.name }),
+          }),
+        ]),
+      })
+    );
+  });
+
   it('includes bulkCount in changeTracking metadata', async () => {
     (throwAuthzError as jest.Mock).mockImplementation(() => {});
 

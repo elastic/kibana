@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { ruleTypeMappings, type RuleType } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -79,13 +79,19 @@ export const bulkCreatePrebuiltRules = async ({
     const mlError = mlAuthErrorByType.get(rule.type);
     if (mlError) {
       errors.push({ item: rule, error: mlError });
+    } else if (!(rule.type in ruleTypeMappings)) {
+      errors.push({
+        item: rule,
+        error: new Error(`Unsupported rule type: ${rule.type}`),
+      });
     } else {
       const id = uuidv4();
       itemById.set(id, rule);
+      const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
       const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
       const data = {
         ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
-        alertTypeId: ruleTypeMappings[rule.type as RuleType],
+        alertTypeId,
         consumer: SERVER_APP_ID,
         enabled: false,
       };
