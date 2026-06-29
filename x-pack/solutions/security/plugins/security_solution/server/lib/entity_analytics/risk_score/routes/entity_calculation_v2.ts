@@ -164,6 +164,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
 
     await scoreBaseEntities({
       esClient,
+      lookupIndex,
       crudClient,
       logger,
       entityType: identifierType as EntityType,
