@@ -30,7 +30,6 @@ apiTest.describe(
   () => {
     let llmProxy: LlmProxy;
     let connectorId: string;
-    const createdConversationIds: string[] = [];
 
     apiTest.beforeAll(async ({ log, kbnClient }) => {
       llmProxy = await createLlmProxy(log);
@@ -38,13 +37,7 @@ apiTest.describe(
       connectorId = id;
     });
 
-    apiTest.afterAll(async ({ asAdmin, kbnClient, esClient }) => {
-      for (const conversationId of createdConversationIds) {
-        await asAdmin.delete(
-          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-          { responseType: 'json' }
-        );
-      }
+    apiTest.afterAll(async ({ kbnClient, esClient }) => {
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
       await esClient.deleteByQuery({
@@ -80,7 +73,6 @@ apiTest.describe(
       expect(res).toHaveStatusCode(200);
       const body = res.body as ChatResponse;
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-      createdConversationIds.push(body.conversation_id);
       return body;
     }
 
@@ -91,13 +83,6 @@ apiTest.describe(
     ): Promise<string> {
       const body = await createConversationWithResponse(asAdmin, input, title);
       return body.conversation_id;
-    }
-
-    function removeTrackedConversationId(conversationId: string): void {
-      const index = createdConversationIds.indexOf(conversationId);
-      if (index > -1) {
-        createdConversationIds.splice(index, 1);
-      }
     }
 
     apiTest('GET /conversations lists conversations with expected shape', async ({ asAdmin }) => {
@@ -339,7 +324,6 @@ apiTest.describe(
         { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(404);
-      removeTrackedConversationId(conversationToDelete);
     });
 
     apiTest('DELETE /conversations/:id returns 404 when missing', async ({ asAdmin }) => {
@@ -367,7 +351,6 @@ apiTest.describe(
         { responseType: 'json' }
       );
       expect(second).toHaveStatusCode(404);
-      removeTrackedConversationId(conversationToDelete);
     });
 
     apiTest('conversation lifecycle: create, list, get, delete', async ({ asAdmin }) => {
@@ -405,7 +388,6 @@ apiTest.describe(
         { responseType: 'json' }
       );
       expect(get404).toHaveStatusCode(404);
-      removeTrackedConversationId(conversationId);
     });
   }
 );
