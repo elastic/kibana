@@ -156,6 +156,11 @@ const mockEmptyResult = {
   data: [],
 } as ReturnType<typeof useListWorkflows>;
 
+// EuiComboBox no longer sets a `title` attribute on rendered options, so locate
+// an option by the text content it renders (name + optional description).
+const findOptionByName = (name: string): HTMLElement | null =>
+  screen.queryAllByRole('option').find((option) => option.textContent?.includes(name)) ?? null;
+
 describe('WorkflowConfigurationPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -206,10 +211,13 @@ describe('WorkflowConfigurationPanel', () => {
     await userEvent.type(alertRetrievalInput, 'Alert R');
 
     await waitFor(() => {
-      expect(screen.getByTitle('Alert Retrieval Workflow 1')).toBeInTheDocument();
+      expect(findOptionByName('Alert Retrieval Workflow 1')).toBeInTheDocument();
     });
 
-    const option = screen.getByTitle('Alert Retrieval Workflow 1');
+    const option = findOptionByName('Alert Retrieval Workflow 1');
+    if (option == null) {
+      throw new Error('Expected to find the "Alert Retrieval Workflow 1" option');
+    }
     fireEvent.click(option);
 
     await waitFor(() => {
@@ -396,11 +404,11 @@ describe('WorkflowConfigurationPanel', () => {
       await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
+        expect(findOptionByName('My Custom Retrieval')).toBeInTheDocument();
       });
 
       expect(
-        screen.queryByTitle('Attack discovery - Default alert retrieval')
+        findOptionByName('Attack discovery - Default alert retrieval')
       ).not.toBeInTheDocument();
     });
 
@@ -418,10 +426,10 @@ describe('WorkflowConfigurationPanel', () => {
       await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
+        expect(findOptionByName('My Custom Retrieval')).toBeInTheDocument();
       });
 
-      expect(screen.queryByTitle('Attack discovery - Generation')).not.toBeInTheDocument();
+      expect(findOptionByName('Attack discovery - Generation')).not.toBeInTheDocument();
     });
 
     it('excludes the default validation workflow from the picker', async () => {
@@ -438,10 +446,10 @@ describe('WorkflowConfigurationPanel', () => {
       await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
+        expect(findOptionByName('My Custom Retrieval')).toBeInTheDocument();
       });
 
-      expect(screen.queryByTitle('Attack discovery - Default validation')).not.toBeInTheDocument();
+      expect(findOptionByName('Attack discovery - Default validation')).not.toBeInTheDocument();
     });
 
     it('excludes managed workflows owned by other plugins from the picker', async () => {
@@ -458,10 +466,10 @@ describe('WorkflowConfigurationPanel', () => {
       await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
+        expect(findOptionByName('My Custom Retrieval')).toBeInTheDocument();
       });
 
-      expect(screen.queryByTitle('.streams-ki-onboarding')).not.toBeInTheDocument();
+      expect(findOptionByName('.streams-ki-onboarding')).not.toBeInTheDocument();
     });
 
     it('includes custom (user-created) workflows without AD tags', async () => {
@@ -478,7 +486,7 @@ describe('WorkflowConfigurationPanel', () => {
       await userEvent.type(input, 'My');
 
       await waitFor(() => {
-        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
+        expect(findOptionByName('My Custom Retrieval')).toBeInTheDocument();
       });
     });
   });
