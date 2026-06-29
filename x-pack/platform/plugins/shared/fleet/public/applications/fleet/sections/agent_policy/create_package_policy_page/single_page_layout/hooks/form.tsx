@@ -7,8 +7,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
-
 import { isEqual } from 'lodash';
 
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
@@ -29,7 +27,7 @@ import {
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
 } from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy, useYaml } from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -160,6 +158,7 @@ export function useOnSubmit({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { notifications } = useStartServices();
+  const yaml = useYaml();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -205,11 +204,11 @@ export function useOnSubmit({
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
-      if (packageInfo) {
+      if (packageInfo && yaml) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          load,
+          yaml.parse,
           spaceSettings
         );
         setValidationResults(newValidationResult);
@@ -217,7 +216,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo, spaceSettings]
+    [packagePolicy, packageInfo, spaceSettings, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
