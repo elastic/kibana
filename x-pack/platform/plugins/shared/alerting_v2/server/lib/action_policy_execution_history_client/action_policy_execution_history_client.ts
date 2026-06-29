@@ -17,6 +17,7 @@ import {
   type RuleResponse,
   type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
+  SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -29,7 +30,7 @@ import {
 } from '../services/logger_service/logger_service';
 import { ALERTING_V2_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
-import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
+import { collectIdsFromEvents, denormalizeEvent, ResolvedSearchIds, type NameMaps } from './denormalize_event';
 
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
@@ -51,12 +52,6 @@ export interface ListExecutionHistoryParams {
   outcome?: PolicyExecutionOutcomeFilter;
 }
 
-export interface SearchMatchCounts {
-  policies: number;
-  rules: number;
-  cap: number;
-}
-
 export interface ListExecutionHistoryResult {
   items: PolicyExecutionHistoryItem[];
   page: number;
@@ -76,13 +71,6 @@ export interface CountNewEventsSinceResult {
   count: number;
 }
 
-interface ResolvedSearchIds {
-  policyIds: string[];
-  ruleIds: string[];
-  hasMatches: boolean;
-  matches: SearchMatchCounts | null;
-}
-
 @injectable()
 export class ActionPolicyExecutionHistoryClient {
   constructor(
@@ -94,7 +82,7 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+  ) { }
 
   public async listExecutionHistory({
     request,
@@ -105,11 +93,12 @@ export class ActionPolicyExecutionHistoryClient {
   }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
     const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
+    const searchIsActive = search !== undefined && search.trim() !== '';
 
-    const searchIds = await this.resolveSearchIds(search);
+    const matchingSearchIds = await this.resolveSearchIds(search);
 
-    if (search !== undefined && !searchIds.hasMatches) {
-      return { items: [], page, perPage, totalEvents: 0, searchMatches: searchIds.matches };
+    if (searchIsActive && !matchingSearchIds.hasMatches) {
+      return { items: [], page, perPage, totalEvents: 0, searchMatches: matchingSearchIds.matches };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
@@ -118,19 +107,24 @@ export class ActionPolicyExecutionHistoryClient {
       page,
       perPage,
       outcome: toOutcomeForService(outcome),
-      policyIds: searchIds.policyIds,
-      ruleIds: searchIds.ruleIds,
+      policyIds: matchingSearchIds.policyIds,
+      ruleIds: matchingSearchIds.ruleIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
-    const items = result.events.flatMap((event) => denormalizeEvent(event, nameMaps));
+    const items = result.events.flatMap(
+      (event) => denormalizeEvent(
+        event,
+        nameMaps,
+        searchIsActive ? matchingSearchIds : undefined)
+    );
 
     return {
       items,
       page: result.page,
       perPage: result.perPage,
       totalEvents: result.total,
-      searchMatches: searchIds.matches,
+      searchMatches: matchingSearchIds.matches,
     };
   }
 
