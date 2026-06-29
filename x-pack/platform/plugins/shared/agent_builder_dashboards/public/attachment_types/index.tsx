@@ -128,6 +128,10 @@ export const registerDashboardAttachmentUiDefinition = ({
         })
       );
     },
+    getTypeLabel: () =>
+      i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.typeLabel', {
+        defaultMessage: 'Dashboard',
+      }),
     getIcon: () => 'productDashboard',
     renderCanvasContent: (props, callbacks) => (
       <React.Suspense fallback={null}>

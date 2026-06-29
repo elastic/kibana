@@ -6,18 +6,9 @@
  */
 
 import { css } from '@emotion/css';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  EuiIcon,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import type { AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
 
@@ -35,7 +26,9 @@ const removePinnedItemsAriaLabel = i18n.translate(
   }
 );
 
-const DEFAULT_ICON = 'layers';
+const groupTypeLabel = i18n.translate('xpack.agentBuilder.attachmentGroupPill.groupTypeLabel', {
+  defaultMessage: 'Group',
+});
 
 export interface AttachmentGroupPillProps {
   group: AttachmentGroup;
@@ -43,71 +36,48 @@ export interface AttachmentGroupPillProps {
 }
 
 export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group, onRemove }) => {
-  const { euiTheme } = useEuiTheme();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
-  const [isHovered, setIsHovered] = useState(false);
   const removeAriaLabel = isAgentWorkspaceMount
     ? removePinnedItemsAriaLabel
     : removeAttachmentGroupAriaLabel;
 
-  const iconContainerStyles = css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: ${euiTheme.size.xl};
-    height: ${euiTheme.size.xl};
-    border-radius: ${euiTheme.border.radius.small};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
+  const pillLabel = `${groupTypeLabel}: ${group.label}`;
+
+  const handleRemove = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      onRemove?.();
+    },
+    [onRemove]
+  );
+
+  const badgeStyles = css`
+    max-width: 200px;
+
+    .euiBadge__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   `;
 
-  const titleStyles = css`
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-break: break-word;
-  `;
+  const removableBadgeProps = onRemove
+    ? {
+        iconType: 'cross' as const,
+        iconSide: 'right' as const,
+        iconOnClick: handleRemove,
+        iconOnClickAriaLabel: removeAriaLabel,
+      }
+    : {};
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      color="subdued"
-      paddingSize="s"
-      css={css`
-        max-width: 200px;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <EuiBadge
+      color="hollow"
+      className={badgeStyles}
       data-test-subj={`agentBuilderAttachmentGroupPill-${group.id}`}
+      {...removableBadgeProps}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
-            <EuiIcon type={DEFAULT_ICON} size="m" color="primary" aria-hidden={true} />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
-            <strong>{group.label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {onRemove && isHovered && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={removeAriaLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                size="xs"
-                color="text"
-                aria-label={removeAriaLabel}
-                onClick={onRemove}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      {pillLabel}
+    </EuiBadge>
   );
 };

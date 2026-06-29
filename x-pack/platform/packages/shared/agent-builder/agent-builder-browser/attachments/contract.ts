@@ -178,6 +178,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
+   * Returns a short type label for attachment pills (e.g. "Dashboard").
+   * When omitted, the pill falls back to a humanized attachment type string.
+   */
+  getTypeLabel?: () => string;
+  /**
    * Returns header metadata (icon, subtitle, badges) for the attachment header
    * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
    * subtitle, no badges).

@@ -6,23 +6,15 @@
  */
 
 import { css } from '@emotion/css';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
+import { getAttachmentPillLabel } from './get_attachment_pill_label';
 
 const removeAttachmentAriaLabel = i18n.translate(
   'xpack.agentBuilder.attachmentPill.removeAriaLabel',
@@ -43,88 +35,60 @@ export interface AttachmentPillProps {
   onRemoveAttachment?: () => void;
 }
 
-const DEFAULT_ICON = 'document';
-
 export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
-  const { euiTheme } = useEuiTheme();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const [isHovered, setIsHovered] = useState(false);
   const removeAriaLabel = isAgentWorkspaceMount
     ? removePinnedItemAriaLabel
     : removeAttachmentAriaLabel;
 
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
+  const pillLabel = getAttachmentPillLabel(attachment, uiDefinition, displayName);
   const canRemoveAttachment = Boolean(onRemoveAttachment);
-  const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
 
-  const iconContainerStyles = css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: ${euiTheme.size.xl};
-    height: ${euiTheme.size.xl};
-    border-radius: ${euiTheme.border.radius.small};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
+  const handleRemoveAttachment = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      onRemoveAttachment?.();
+    },
+    [onRemoveAttachment]
+  );
+
+  const badgeStyles = css`
+    max-width: 200px;
+
+    .euiBadge__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   `;
 
-  const titleStyles = css`
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-break: break-word;
-  `;
+  const removableBadgeProps = canRemoveAttachment
+    ? {
+        iconType: 'cross' as const,
+        iconSide: 'right' as const,
+        iconOnClick: handleRemoveAttachment,
+        iconOnClickAriaLabel: removeAriaLabel,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+          detail: 'conversation',
+        }),
+      }
+    : {};
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      color="subdued"
-      paddingSize="s"
-      css={css`
-        max-width: 200px;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <EuiBadge
+      className={badgeStyles}
       data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
+      {...removableBadgeProps}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
-            <strong>{displayName}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {canRemoveAttachment && isHovered && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={removeAriaLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                size="xs"
-                color="text"
-                aria-label={removeAriaLabel}
-                onClick={onRemoveAttachment}
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
-                  detail: 'conversation',
-                })}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      {pillLabel}
+    </EuiBadge>
   );
 };
