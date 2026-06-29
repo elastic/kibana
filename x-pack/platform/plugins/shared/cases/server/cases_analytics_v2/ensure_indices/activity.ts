@@ -18,15 +18,20 @@ import { ACTIVITY_INDEX_MAPPING } from '../mappings/activity';
  * Settings:
  *   - `index.hidden: true` — not surfaced by default in `_cat/indices`
  *     and excluded from queries that don't opt in.
+ *   - `auto_expand_replicas: '0-1'` — 0 replicas on single-node clusters
+ *     (dev/CI), 1 replica on multi-node clusters. Without this, ES
+ *     defaults to `number_of_replicas: 1`, costing 2 shards per index on
+ *     a single-node cluster and triggering `validation_exception` on
+ *     environments already near the 1000-shard default.
  *
  * No `index.mode: lookup`: `.cases-activity` is the fact table in the
  * analytics model. ES|QL queries
  * `FROM .cases-activity | LOOKUP JOIN .cases ON cases.id`; the
  * lookup-mode index is on the `.cases` side.
  *
- * Failure policy: log, don't throw. Bootstrap failure must not block
- * plugin start; administrators see ERROR logs and can re-trigger via
- * `/reset`.
+ * Failure policy: throws on unexpected errors so callers can decide how
+ * to handle them. See `ensureCaseIndex` for the full rationale — the
+ * same plugin-start vs `/reset` split applies here.
  */
 export async function ensureActivityIndex({
   esClient,
@@ -46,6 +51,7 @@ export async function ensureActivityIndex({
       index: ACTIVITY_INDEX_NAME,
       settings: {
         'index.hidden': true,
+        'index.auto_expand_replicas': '0-1',
       },
       mappings: ACTIVITY_INDEX_MAPPING,
     });
@@ -62,8 +68,6 @@ export async function ensureActivityIndex({
       return;
     }
 
-    // Anything else: log and continue. Bootstrap can be re-attempted via
-    // the administrator `/reset` endpoint; the plugin must still start.
-    logger.error(`failed to bootstrap ${ACTIVITY_INDEX_NAME}: ${err.message}`, { error: err });
+    throw err;
   }
 }

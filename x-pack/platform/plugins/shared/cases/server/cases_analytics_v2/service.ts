@@ -349,12 +349,21 @@ export class CasesAnalyticsV2Service {
 
     // Bootstrap the cases + activity indices. Idempotent and
     // independent; running them in parallel halves first-start latency
-    // on a fresh cluster. Per-index errors are logged inside
-    // `ensure*Index` and never thrown.
-    await Promise.all([
-      ensureCaseIndex({ esClient: deps.esClient, logger: this.logger }),
-      ensureActivityIndex({ esClient: deps.esClient, logger: this.logger }),
-    ]);
+    // on a fresh cluster. Errors are caught here (not inside ensure*)
+    // so the plugin still starts even when ES is temporarily at the
+    // shard limit — analytics is a downstream feature, not core.
+    // Administrators can trigger a re-bootstrap via the /reset route.
+    try {
+      await Promise.all([
+        ensureCaseIndex({ esClient: deps.esClient, logger: this.logger }),
+        ensureActivityIndex({ esClient: deps.esClient, logger: this.logger }),
+      ]);
+    } catch (err) {
+      this.logger.error(
+        `cases-analyticsV2: index bootstrap failed at plugin start: ${err?.message ?? err}`,
+        { error: err }
+      );
+    }
 
     // Swap the no-op writers for the real ones. From this point, every
     // call through `writerProxy` / `activityWriterProxy` reaches
