@@ -10,9 +10,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { resolveDocumentVersionsByIds } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
+import { bulkUpdateDocuments } from './bulk_update_documents';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
@@ -161,30 +161,9 @@ export class StepExecutionRepository {
       }
     });
 
-    const writeIndex = await resolveWriteIndex({
-      esClient: this.esClient,
-      dataStreamName: this.dataStreamName,
-    });
-
-    const updateVersions = await resolveDocumentVersionsByIds<EsWorkflowStepExecution>({
-      esClient: this.esClient,
-      ids: writes
-        .filter(
-          (write): write is Extract<StepExecutionWrite, { operation: 'update' }> =>
-            write.operation === 'update'
-        )
-        .map((write) => write.doc.id as string),
-      writeIndex,
-      dataStreamName: this.dataStreamName,
-      entityName: 'step execution',
-    });
-
-    const operations: object[] = [];
-    for (const write of writes) {
-      const { doc } = write;
-      if (!doc.id) {
-        throw new Error('Step execution ID is required for upsert');
-      }
+    const updateDocs: Array<Partial<EsWorkflowStepExecution>> = [];
+    const createOperations: object[] = [];
+    for (const { doc, operation } of writes) {
       const id = doc.id;
       const timestamp = doc.startedAt ?? new Date().toISOString();
       const document = {
@@ -192,23 +171,10 @@ export class StepExecutionRepository {
         '@timestamp': timestamp,
       };
 
-      if (write.operation === 'update') {
-        const version = updateVersions[id];
-        operations.push(
-          {
-            update: {
-              _index: version.index,
-              _id: id,
-              if_seq_no: version.seqNo,
-              if_primary_term: version.primaryTerm,
-            },
-          },
-          {
-            doc: document,
-          }
-        );
+      if (operation === 'update') {
+        updateDocs.push(document);
       } else {
-        operations.push(
+        createOperations.push(
           {
             create: {
               _index: this.dataStreamName,
@@ -220,22 +186,33 @@ export class StepExecutionRepository {
       }
     }
 
-    const bulkResponse = await this.esClient.bulk({
+    await bulkUpdateDocuments<Partial<EsWorkflowStepExecution>>({
+      esClient: this.esClient,
+      dataStreamName: this.dataStreamName,
+      docs: updateDocs,
+      entityName: 'step execution',
       refresh: false,
-      operations,
+      idRequiredMessage: 'Step execution ID is required for upsert',
+      failureVerb: 'upsert',
     });
+
+    if (createOperations.length === 0) {
+      return;
+    }
+
+    const bulkResponse = await this.esClient.bulk({ refresh: false, operations: createOperations });
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error || item.create?.error)
+        .filter((item) => item.create?.error)
         .map((item) => ({
-          id: item.update?._id ?? item.create?._id,
-          error: item.update?.error ?? item.create?.error,
-          status: item.update?.status ?? item.create?.status,
+          id: item.create?._id,
+          error: item.create?.error,
+          status: item.create?.status,
         }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
+        `Failed to create ${erroredDocuments.length} step executions: ${JSON.stringify(
           erroredDocuments
         )}`
       );

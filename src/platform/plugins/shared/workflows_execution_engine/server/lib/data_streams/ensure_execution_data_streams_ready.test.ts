@@ -34,6 +34,8 @@ const { initializeStepExecutionsClient } = jest.requireMock(
 );
 
 describe('ensureExecutionDataStreamsReady', () => {
+  const dataRetention = '7d';
+
   beforeEach(() => {
     resetEnsureExecutionDataStreamsReadyForTests();
     jest.clearAllMocks();
@@ -53,7 +55,7 @@ describe('ensureExecutionDataStreamsReady', () => {
       initializeClient: jest.fn(),
     };
 
-    await ensureExecutionDataStreamsReady(dataStreams as any, esClient);
+    await ensureExecutionDataStreamsReady(dataStreams as any, esClient, dataRetention);
 
     expect(initializeWorkflowExecutionsClient).toHaveBeenCalledWith(dataStreams);
     expect(initializeStepExecutionsClient).toHaveBeenCalledWith(dataStreams);
@@ -62,6 +64,16 @@ describe('ensureExecutionDataStreamsReady', () => {
     });
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
       name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    });
+    expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: WORKFLOWS_EXECUTIONS_INDEX,
+      enabled: true,
+      data_retention: dataRetention,
+    });
+    expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      enabled: true,
+      data_retention: dataRetention,
     });
   });
 
@@ -74,8 +86,8 @@ describe('ensureExecutionDataStreamsReady', () => {
     };
 
     await Promise.all([
-      ensureExecutionDataStreamsReady(dataStreams as any, esClient),
-      ensureExecutionDataStreamsReady(dataStreams as any, esClient),
+      ensureExecutionDataStreamsReady(dataStreams as any, esClient, dataRetention),
+      ensureExecutionDataStreamsReady(dataStreams as any, esClient, dataRetention),
     ]);
 
     expect(initializeWorkflowExecutionsClient).toHaveBeenCalledTimes(1);

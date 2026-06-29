@@ -14,7 +14,10 @@ import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { resolveDocumentVersionsByIds } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
+import { bulkUpdateDocuments, isVersionConflictError } from './bulk_update_documents';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+
+const UPDATE_RETRY_ATTEMPTS = 3;
 
 export class WorkflowExecutionRepository {
   private dataStreamName = WORKFLOWS_EXECUTIONS_INDEX;
@@ -171,28 +174,37 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    const writeIndex = await resolveWriteIndex({
-      esClient: this.esClient,
-      dataStreamName: this.dataStreamName,
-    });
+    for (let attempt = 1; attempt <= UPDATE_RETRY_ATTEMPTS; attempt++) {
+      const writeIndex = await resolveWriteIndex({
+        esClient: this.esClient,
+        dataStreamName: this.dataStreamName,
+      });
 
-    const versions = await resolveDocumentVersionsByIds<EsWorkflowExecution>({
-      esClient: this.esClient,
-      ids: [workflowExecution.id],
-      writeIndex,
-      dataStreamName: this.dataStreamName,
-      entityName: 'workflow execution',
-    });
-    const version = versions[workflowExecution.id];
+      const versions = await resolveDocumentVersionsByIds<EsWorkflowExecution>({
+        esClient: this.esClient,
+        ids: [workflowExecution.id],
+        writeIndex,
+        dataStreamName: this.dataStreamName,
+        entityName: 'workflow execution',
+      });
+      const version = versions[workflowExecution.id];
 
-    await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: version.index,
-      id: workflowExecution.id,
-      refresh: false,
-      doc: workflowExecution,
-      if_seq_no: version.seqNo,
-      if_primary_term: version.primaryTerm,
-    });
+      try {
+        await this.esClient.update<Partial<EsWorkflowExecution>>({
+          index: version.index,
+          id: workflowExecution.id,
+          refresh: false,
+          doc: workflowExecution,
+          if_seq_no: version.seqNo,
+          if_primary_term: version.primaryTerm,
+        });
+        return;
+      } catch (error) {
+        if (!isVersionConflictError(error) || attempt === UPDATE_RETRY_ATTEMPTS) {
+          throw error;
+        }
+      }
+    }
   }
 
   /**
@@ -206,63 +218,14 @@ export class WorkflowExecutionRepository {
   public async bulkUpdateWorkflowExecutions(
     writes: Array<Partial<EsWorkflowExecution>>
   ): Promise<void> {
-    if (writes.length === 0) {
-      return;
-    }
-
-    writes.forEach((update) => {
-      if (!update.id) {
-        throw new Error('Workflow execution ID is required for bulk update');
-      }
-    });
-
-    const writeIndex = await resolveWriteIndex({
+    await bulkUpdateDocuments<Partial<EsWorkflowExecution>>({
       esClient: this.esClient,
       dataStreamName: this.dataStreamName,
-    });
-
-    const versions = await resolveDocumentVersionsByIds<EsWorkflowExecution>({
-      esClient: this.esClient,
-      ids: writes.map((update) => update.id as string),
-      writeIndex,
-      dataStreamName: this.dataStreamName,
+      docs: writes,
       entityName: 'workflow execution',
-    });
-
-    const operations = writes.flatMap((update) => {
-      const version = versions[update.id as string];
-      return [
-        {
-          update: {
-            _index: version.index,
-            _id: update.id,
-            if_seq_no: version.seqNo,
-            if_primary_term: version.primaryTerm,
-          },
-        },
-        { doc: update },
-      ];
-    });
-    const bulkResponse = await this.esClient.bulk({
       refresh: true,
-      operations,
+      idRequiredMessage: 'Workflow execution ID is required for bulk update',
     });
-
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
-      throw new Error(
-        `Failed to update ${erroredDocuments.length} workflow executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
-      );
-    }
   }
 
   /**

@@ -116,9 +116,12 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
 
-const ensureExecutionWriteDataStreamsReady = async (coreStart: CoreStart): Promise<void> => {
+const ensureExecutionWriteDataStreamsReady = async (
+  coreStart: CoreStart,
+  dataRetention: string
+): Promise<void> => {
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
+  await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient, dataRetention);
 };
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
@@ -540,7 +543,10 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
-              await ensureExecutionWriteDataStreamsReady(coreStart);
+              await ensureExecutionWriteDataStreamsReady(
+                coreStart,
+                config.executionDataStreamRetention
+              );
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
@@ -639,7 +645,11 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    void ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient).catch((error) => {
+    void ensureExecutionDataStreamsReady(
+      coreStart.dataStreams,
+      esClient,
+      this.config.executionDataStreamRetention
+    ).catch((error) => {
       this.logger.error(
         `Failed to initialize workflow execution data streams on startup: ${
           error instanceof Error ? error.message : String(error)
@@ -697,7 +707,10 @@ export class WorkflowsExecutionEnginePlugin
       const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
-      await ensureExecutionWriteDataStreamsReady(coreStart);
+      await ensureExecutionWriteDataStreamsReady(
+        coreStart,
+        this.config.executionDataStreamRetention
+      );
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const eventPayload = context.event as Record<string, unknown> | undefined;
       let rootEventChainDepth: number | undefined;
@@ -987,7 +1000,10 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
-      await ensureExecutionWriteDataStreamsReady(coreStart);
+      await ensureExecutionWriteDataStreamsReady(
+        coreStart,
+        this.config.executionDataStreamRetention
+      );
 
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
@@ -1133,7 +1149,10 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      await ensureExecutionWriteDataStreamsReady(coreStart);
+      await ensureExecutionWriteDataStreamsReady(
+        coreStart,
+        this.config.executionDataStreamRetention
+      );
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
@@ -1385,7 +1404,11 @@ export class WorkflowsExecutionEnginePlugin
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
+    await ensureExecutionDataStreamsReady(
+      coreStart.dataStreams,
+      esClient,
+      this.config.executionDataStreamRetention
+    );
   }
 
   /**

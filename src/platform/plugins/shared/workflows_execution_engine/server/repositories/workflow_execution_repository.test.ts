@@ -293,6 +293,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.mget).toHaveBeenCalledWith({
         index: TEST_BACKING_INDEX,
         ids: ['exec-1'],
+        _source_includes: ['id'],
       });
       expect(esClient.update).toHaveBeenCalledWith({
         index: TEST_BACKING_INDEX,
@@ -302,6 +303,58 @@ describe('WorkflowExecutionRepository', () => {
         if_seq_no: 7,
         if_primary_term: 2,
       });
+    });
+
+    it('retries update after version conflict with a fresh document version', async () => {
+      const workflowExecution = { id: 'exec-1', status: ExecutionStatus.RUNNING };
+      esClient.mget
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 7,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 8,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        });
+      esClient.update
+        .mockRejectedValueOnce({
+          type: 'version_conflict_engine_exception',
+          reason:
+            '[exec-1]: version conflict, required seqNo [7], primary term [2]. current document has seqNo [8] and primary term [2]',
+          index: TEST_BACKING_INDEX,
+        })
+        .mockResolvedValueOnce({
+          _index: TEST_BACKING_INDEX,
+          _seq_no: 9,
+          _primary_term: 2,
+        });
+
+      await repository.updateWorkflowExecution(workflowExecution);
+
+      expect(esClient.update).toHaveBeenCalledTimes(2);
+      expect(esClient.update).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          if_seq_no: 8,
+          if_primary_term: 2,
+        })
+      );
     });
 
     it('should throw an error if ID is missing during update', async () => {
@@ -881,6 +934,83 @@ describe('WorkflowExecutionRepository', () => {
               cancelRequested: true,
             },
           },
+        ],
+      });
+    });
+
+    it('retries conflicted bulk update items with fresh document versions', async () => {
+      const workflowExecution = {
+        id: 'exec-1',
+        status: ExecutionStatus.CANCELLED,
+        cancelRequested: true,
+      };
+      esClient.mget
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 10,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              found: true,
+              _id: 'exec-1',
+              _index: TEST_BACKING_INDEX,
+              _seq_no: 11,
+              _primary_term: 2,
+              _source: { id: 'exec-1' },
+            },
+          ],
+        });
+      esClient.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
+                status: 409,
+              },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          errors: false,
+          items: [
+            {
+              update: {
+                _id: 'exec-1',
+                _index: TEST_BACKING_INDEX,
+                _seq_no: 12,
+                _primary_term: 2,
+              },
+            },
+          ],
+        });
+
+      await repository.bulkUpdateWorkflowExecutions([workflowExecution]);
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk).toHaveBeenNthCalledWith(2, {
+        refresh: true,
+        operations: [
+          {
+            update: {
+              _index: TEST_BACKING_INDEX,
+              _id: 'exec-1',
+              if_seq_no: 11,
+              if_primary_term: 2,
+            },
+          },
+          { doc: workflowExecution },
         ],
       });
     });

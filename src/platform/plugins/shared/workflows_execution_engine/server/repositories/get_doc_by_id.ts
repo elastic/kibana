@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsDocumentVersion } from './document_version';
 
 export interface VersionedDocument<TDocument> {
+  id: string;
   doc: TDocument;
   version: EsDocumentVersion;
 }
@@ -65,7 +66,7 @@ export const getDocumentsById = async <TDocument extends { id?: string }>({
     if (docsById.has(id)) {
       throw new Error(`Found duplicate ${entityName} ID ${id} in multiple backing indices`);
     }
-    docsById.set(id, { doc, version });
+    docsById.set(id, { id, doc, version });
   };
 
   const mgetResponse = await esClient.mget<TDocument>({

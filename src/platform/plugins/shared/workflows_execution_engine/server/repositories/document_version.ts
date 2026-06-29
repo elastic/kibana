@@ -65,7 +65,7 @@ export const resolveDocumentVersionsByIds = async <TDocument extends { id?: stri
     sourceIncludes: ['id'],
   });
 
-  const versions = Object.fromEntries(docs.map(({ doc, version }) => [doc.id as string, version]));
+  const versions = Object.fromEntries(docs.map(({ id, version }) => [id, version]));
   const unresolvedIds = uniqueIds.filter((id) => !versions[id]);
   if (unresolvedIds.length > 0) {
     throw new Error(`${entityName}(s) not found for update: ${unresolvedIds.join(', ')}`);

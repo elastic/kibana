@@ -114,6 +114,7 @@ describe('StepExecutionRepository', () => {
       expect(esClient.mget).toHaveBeenCalledWith({
         index: NEXT_INDEX,
         ids: ['step-1'],
+        _source_includes: ['id'],
       });
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
