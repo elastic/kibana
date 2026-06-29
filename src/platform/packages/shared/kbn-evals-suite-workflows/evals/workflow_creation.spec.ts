@@ -201,7 +201,7 @@ evaluate.describe(
                   'There is a loop that iterates over the items.',
                   'Inside the loop, each item is logged to the console.',
                 ],
-                expectedStepTypes: ['data.set|foreach', 'console'],
+                expectedStepTypes: ['foreach', 'console'],
                 expectedStepCount: { min: 2, max: 5 },
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: ['platform.core.generate_workflow'],

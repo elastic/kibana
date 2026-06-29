@@ -256,5 +256,54 @@ steps:
         });
       }
     );
+
+    evaluate(
+      'recovers when the workflow "succeeds" but writes nothing (missing index-create step)',
+      async ({ evaluateSelfCorrectionDataset }) => {
+        await evaluateSelfCorrectionDataset({
+          dataset: {
+            name: 'workflow-self-correction: success-without-data',
+            description:
+              'A workflow that runs to "completed" status while no documents land in the target index because the index was never created. Recovery should add an indices.create step (or equivalent) before the write step.',
+            examples: [
+              {
+                input: {
+                  brokenYaml: `name: Silent Drop
+triggers:
+  - type: manual
+steps:
+  - name: fetch_payload
+    type: http
+    with:
+      method: GET
+      url: "https://api.example.com/payload"
+  - name: store_payload
+    type: elasticsearch.index
+    on-failure: continue
+    with:
+      index: missing-index
+      document: "{{ steps.fetch_payload.output.body }}"
+`,
+                  brokenKind: 'semantic',
+                  instruction:
+                    'This workflow reports successful completion every run, but when I look in Elasticsearch the missing-index index is empty and nothing is being stored. Figure out why and fix it so the data actually lands.',
+                },
+                output: {
+                  maxTurns: 3,
+                  criteria: [
+                    'The fixed workflow contains an elasticsearch.indices.create step (or an equivalent guarded create) that ensures the missing-index index exists before store_payload runs.',
+                    'The create step is ordered BEFORE the store_payload step in the workflow.',
+                    'store_payload is no longer silently swallowing failures: either on-failure: continue is removed or the conditional explicitly skips on success only, so a future indexing error surfaces.',
+                    'The agent diagnosed the missing-index root cause itself (its messages should mention the missing index / silent failure / index_not_found before fixing) — not just blindly rewrite the workflow.',
+                    'The fetch_payload step itself is unchanged.',
+                  ],
+                },
+                metadata: { category: 'self-correction-side-effect' },
+              },
+            ],
+          },
+        });
+      }
+    );
   }
 );
