@@ -20,7 +20,7 @@ jest.mock('uuid', () => ({ v4: () => 'generated-uuid' }));
 const definition = { name: 'logs.test' } as Streams.all.Definition;
 
 const makeLink = (
-  overrides: { id?: string; esql?: string; ruleBacked?: boolean } = {}
+  overrides: { id?: string; esql?: string; ruleBacked?: boolean; expiresAt?: string } = {}
 ): QueryLink => ({
   query: {
     id: overrides.id ?? 'q1',
@@ -33,6 +33,7 @@ const makeLink = (
   stream_name: 'logs.test',
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
+  ...(overrides.expiresAt ? { expires_at: overrides.expiresAt } : {}),
 });
 
 const makeGeneratedQuery = (
@@ -47,9 +48,12 @@ const makeGeneratedQuery = (
   ...overrides,
 });
 
+const MOCK_DEFAULT_EXPIRES_AT = '2099-01-01T00:00:00.000Z';
+
 const createMocks = (existingLinks: QueryLink[] = []) => {
   const kiClient = {
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
+    getDefaultExpiresAt: jest.fn().mockReturnValue(MOCK_DEFAULT_EXPIRES_AT),
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
     replaceStreamQueries: jest.fn(
@@ -219,6 +223,54 @@ describe('persistQueries', () => {
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
+  });
+
+  describe('resolveExpiresAt invariant', () => {
+    it('assigns defaultExpiresAt to brand-new queries', async () => {
+      const { kiClient, streamsClient } = createMocks();
+      const query = makeGeneratedQuery({ severity_score: 30 });
+
+      await persistQueries('logs.test', [query], { kiClient, streamsClient });
+
+      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      expect(ops[0].index.query.expires_at).toBe(MOCK_DEFAULT_EXPIRES_AT);
+    });
+
+    it('assigns defaultExpiresAt when replacing a managed (expiring) prior', async () => {
+      const managedPrior = makeLink({
+        id: 'q1',
+        ruleBacked: false,
+        expiresAt: '2025-01-01T00:00:00.000Z',
+      });
+      const { kiClient, streamsClient } = createMocks([managedPrior]);
+
+      const replacement = makeGeneratedQuery({
+        replaces: 'q1',
+        severity_score: 30,
+        esql: { query: 'FROM logs | WHERE body.text:"new"' },
+      });
+
+      await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
+
+      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      expect(ops[0].index.query.expires_at).toBe(MOCK_DEFAULT_EXPIRES_AT);
+    });
+
+    it('preserves durable status when replacing a prior with no expiry', async () => {
+      const durablePrior = makeLink({ id: 'q1', ruleBacked: false });
+      const { kiClient, streamsClient } = createMocks([durablePrior]);
+
+      const replacement = makeGeneratedQuery({
+        replaces: 'q1',
+        severity_score: 30,
+        esql: { query: 'FROM logs | WHERE body.text:"new"' },
+      });
+
+      await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
+
+      const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
+      expect(ops[0].index.query.expires_at).toBeUndefined();
+    });
   });
 
   describe('rule-eligible queries (severity >= 60, non-STATS)', () => {
