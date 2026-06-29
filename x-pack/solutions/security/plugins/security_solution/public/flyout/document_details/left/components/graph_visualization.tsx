@@ -20,15 +20,8 @@ import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_g
 import { GraphVisualization as SharedGraphVisualization } from '../../../../flyout_v2/document/tools/graph/components/graph_visualization';
 import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import {
-  EntityPanelKeyByType,
-  GenericEntityPanelKey,
-} from '../../../entity_details/shared/constants';
-import {
-  ALERT_PREVIEW_BANNER,
-  EVENT_PREVIEW_BANNER,
-  GENERIC_ENTITY_PREVIEW_BANNER,
-} from '../../preview/constants';
+import { buildEntityPreviewPanel } from '../../../entity_details/shared/utils/build_entity_preview_panel';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 export { GRAPH_ID } from '../../../../flyout_v2/document/tools/graph/components/graph_visualization';
@@ -67,41 +60,15 @@ export const GraphVisualization: React.FC = memo(() => {
   );
 
   const onShowEntity = useCallback(
-    ({
-      engineType,
-      entityId,
-      entityName,
-    }: {
+    (entity: {
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
     }) => {
-      const panelId =
-        engineType && engineType in EntityPanelKeyByType
-          ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
-          : GenericEntityPanelKey;
-      if (!panelId) {
-        return;
+      const panel = buildEntityPreviewPanel({ ...entity, scopeId });
+      if (panel) {
+        openPreviewPanel(panel);
       }
-      const nameParam =
-        engineType === 'host'
-          ? { hostName: entityName }
-          : engineType === 'user'
-          ? { userName: entityName }
-          : engineType === 'service'
-          ? { serviceName: entityName }
-          : {};
-      openPreviewPanel({
-        id: panelId,
-        params: {
-          entityId,
-          scopeId,
-          isPreviewMode: true,
-          banner: GENERIC_ENTITY_PREVIEW_BANNER,
-          isEngineMetadataExist: true,
-          ...nameParam,
-        },
-      });
     },
     [openPreviewPanel, scopeId]
   );

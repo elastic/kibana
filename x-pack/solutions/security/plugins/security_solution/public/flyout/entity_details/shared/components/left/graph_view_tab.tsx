@@ -16,11 +16,10 @@ import {
 } from '@kbn/cloud-security-posture-graph';
 import { GraphVisualization } from '../../../../../flyout_v2/document/tools/graph/components/graph_visualization';
 import { DocumentDetailsPreviewPanelKey } from '../../../../document_details/shared/constants/panel_keys';
-import { EntityPanelKeyByType, GenericEntityPanelKey } from '../../constants';
+import { buildEntityPreviewPanel } from '../../utils/build_entity_preview_panel';
 import {
   ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
-  GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../../../document_details/preview/constants';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 
@@ -56,41 +55,15 @@ export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) 
   );
 
   const onShowEntity = useCallback(
-    ({
-      engineType,
-      entityId: previewEntityId,
-      entityName,
-    }: {
+    (entity: {
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
     }) => {
-      const panelId =
-        engineType && engineType in EntityPanelKeyByType
-          ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
-          : GenericEntityPanelKey;
-      if (!panelId) {
-        return;
+      const panel = buildEntityPreviewPanel({ ...entity, scopeId });
+      if (panel) {
+        openPreviewPanel(panel);
       }
-      const nameParam =
-        engineType === 'host'
-          ? { hostName: entityName }
-          : engineType === 'user'
-          ? { userName: entityName }
-          : engineType === 'service'
-          ? { serviceName: entityName }
-          : {};
-      openPreviewPanel({
-        id: panelId,
-        params: {
-          entityId: previewEntityId,
-          scopeId,
-          isPreviewMode: true,
-          banner: GENERIC_ENTITY_PREVIEW_BANNER,
-          isEngineMetadataExist: true,
-          ...nameParam,
-        },
-      });
     },
     [openPreviewPanel, scopeId]
   );
