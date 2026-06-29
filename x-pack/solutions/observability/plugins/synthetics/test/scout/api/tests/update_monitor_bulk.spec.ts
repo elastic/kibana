@@ -223,12 +223,9 @@ apiTest.describe(
           uniform([monitor.config_id], { enabled: false })
         );
 
-        const { body: refreshed } = await getMonitor(
-          apiClient,
-          editorHeaders,
-          monitor.config_id,
-          { internal: true }
-        );
+        const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id, {
+          internal: true,
+        });
 
         const decrypted = refreshed as {
           enabled: boolean;
