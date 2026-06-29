@@ -53,7 +53,7 @@ export function AnomalyDetectionSetupLink() {
   const element = (
     <EuiHeaderLink
       color={color}
-      iconType={icon ? icon : undefined}
+      iconType={icon}
       isLoading={anomalyDetectionSetupState === AnomalyDetectionSetupState.Loading}
       href={getLegacyApmHref({ basePath, path: '/settings/anomaly-detection' })}
       data-test-subj="apmAnomalyDetectionHeaderLink"

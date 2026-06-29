@@ -15,11 +15,11 @@ import { useEnvironmentsContext } from '../../../../context/environments_context
 import type { AnomalyThresholdDisabledReason } from '../../../../hooks/use_anomaly_threshold';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
-const getOptions = (): Array<{ value: AnomalyThreshold; text: string }> => [
+const options = [
   {
     value: ML_ANOMALY_SEVERITY.CRITICAL,
     text: i18n.translate('xpack.apm.anomalyThresholdSelect.criticalLabel', {
-      defaultMessage: 'Critical',
+      defaultMessage: 'Critical', // Critical is the highest severity level, we omit "or above" in this case on purpose
     }),
   },
   {
@@ -100,7 +100,7 @@ export function AnomalyThresholdSelect({
           prepend={i18n.translate('xpack.apm.anomalyThresholdSelect.prepend', {
             defaultMessage: 'Anomalies',
           })}
-          options={getOptions()}
+          options={options}
           value={anomalyThreshold}
           onChange={(nextOption) => onChange(nextOption.target.value as AnomalyThreshold)}
           disabled={isDisabled}

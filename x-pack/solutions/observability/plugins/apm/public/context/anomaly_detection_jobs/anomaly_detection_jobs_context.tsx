@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactChild } from 'react';
 import React, { createContext } from 'react';
 import type { AnomalyDetectionSetupState } from '../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getAnomalyDetectionSetupState } from '../../../common/anomaly_detection/get_anomaly_detection_setup_state';
@@ -25,7 +24,7 @@ export interface AnomalyDetectionJobsContextValue {
 
 export const AnomalyDetectionJobsContext = createContext({} as AnomalyDetectionJobsContextValue);
 
-export function AnomalyDetectionJobsContextProvider({ children }: { children: ReactChild }) {
+export function AnomalyDetectionJobsContextProvider({ children }: React.PropsWithChildren) {
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();
