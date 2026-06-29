@@ -14,7 +14,7 @@ export const sha256 = (text: string) => crypto.createHash('sha256').update(text)
 /** Placeholder stored in place of a redacted value. */
 export const REDACTED = '[redacted]';
 
-export interface ProcessFieldsOpts {
+export interface SanitizeFieldsOpts {
   fieldsToHash?: ChangeHistoryFieldsToMask;
   fieldsToRedact?: ChangeHistoryFieldsToMask;
   salt?: string;
@@ -26,7 +26,7 @@ const hasFields = (fields?: ChangeHistoryFieldsToMask) =>
 const matcher = (fields: ChangeHistoryFieldsToMask) => {
   const flat = flatten(fields);
   return (key: string) =>
-    Object.entries(flat).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
+    Object.entries(flat).some(([k, v]) => Boolean(v) && (key === k || key.startsWith(`${k}.`)));
 };
 
 /**
@@ -40,7 +40,7 @@ const matcher = (fields: ChangeHistoryFieldsToMask) => {
  * @returns The flattened paths that were hashed/redacted and the masked snapshot.
  * @example
  *   const snapshot = { api: { key: 'sk-9f8a7b6c5d4e' }, owner: { email: 'bob@example.com' } };
- *   const result = processFields(snapshot, {
+ *   const result = sanitizeFields(snapshot, {
  *     fieldsToHash: { api: { key: true } },
  *     fieldsToRedact: { owner: { email: true } },
  *     salt: 'rule-id-123',
@@ -50,9 +50,9 @@ const matcher = (fields: ChangeHistoryFieldsToMask) => {
  *   //  snapshot: { api: { key: '2da53d7f04d1' }, owner: { email: '[redacted]' } }
  *   // }
  */
-export function processFields(
+export function sanitizeFields(
   snapshot: Record<string, any>,
-  { fieldsToHash, fieldsToRedact, salt }: ProcessFieldsOpts = {}
+  { fieldsToHash, fieldsToRedact, salt }: SanitizeFieldsOpts = {}
 ): { fields: { hashed: string[]; redacted: string[] }; snapshot: Record<string, any> } {
   const hashed: string[] = [];
   const redacted: string[] = [];
@@ -62,7 +62,7 @@ export function processFields(
     return { fields: { hashed, redacted }, snapshot };
   }
   if (shouldHash && !salt) {
-    throw new Error('processFields: salt missing when hashing fields, please use the object.id');
+    throw new Error('sanitizeFields: salt missing when hashing fields, please use the object.id');
   }
   const flatSnapshot = flatten(snapshot);
   const matchHash = fieldsToHash ? matcher(fieldsToHash) : () => false;

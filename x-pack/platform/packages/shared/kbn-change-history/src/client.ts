@@ -32,7 +32,7 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, processFields } from './utils';
+import { sha256, sanitizeFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -212,7 +212,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       // Create document and populate
       const { objectType, objectId, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.snapshot));
-      const processsed = processFields(change.snapshot, {
+      const sanitized = sanitizeFields(change.snapshot, {
         fieldsToHash,
         fieldsToRedact,
         salt: objectId,
@@ -237,8 +237,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           type: objectType,
           hash,
           sequence,
-          fields: processsed.fields,
-          snapshot: processsed.snapshot,
+          fields: sanitized.fields,
+          snapshot: sanitized.snapshot,
         },
         tags,
         metadata,

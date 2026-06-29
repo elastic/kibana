@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { sha256, processFields, REDACTED } from './utils';
+import { sha256, sanitizeFields, REDACTED } from './utils';
 
-describe('#processFields', () => {
+describe('#sanitizeFields', () => {
   describe('when fieldsToHash is not provided', () => {
     it('should return snapshot unchanged and empty hashed paths', () => {
       const snapshot = { api: { key: 'sk-9f8a7b6c5d4e3f2a1b0c' } };
-      const result = processFields(snapshot);
+      const result = sanitizeFields(snapshot);
 
       expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
@@ -21,7 +21,7 @@ describe('#processFields', () => {
   describe('when fieldsToHash is undefined', () => {
     it('should return snapshot unchanged and empty hashed paths', () => {
       const snapshot = { secret: 'sensitive' };
-      const result = processFields(snapshot, { fieldsToHash: undefined });
+      const result = sanitizeFields(snapshot, { fieldsToHash: undefined });
 
       expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
@@ -30,8 +30,8 @@ describe('#processFields', () => {
 
   describe('when fieldsToHash is provided without a salt', () => {
     it('should throw', () => {
-      expect(() => processFields({ apiKey: 'abc' }, { fieldsToHash: { apiKey: true } })).toThrow(
-        'processFields: salt missing when hashing fields, please use the object.id'
+      expect(() => sanitizeFields({ apiKey: 'abc' }, { fieldsToHash: { apiKey: true } })).toThrow(
+        'sanitizeFields: salt missing when hashing fields, please use the object.id'
       );
     });
   });
@@ -40,7 +40,7 @@ describe('#processFields', () => {
     it('should hash a top-level string field and list its path', () => {
       const snapshot = { api: { key: 'sk-9f8a7b6c5d4e3f2a1b0c' } };
       const fieldsToHash = { api: true };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['api.key']);
       expect(result.snapshot.api.key).toBe(sha256('obj-id' + 'sk-9f8a7b6c5d4e3f2a1b0c').slice(-12));
@@ -52,7 +52,7 @@ describe('#processFields', () => {
         api: { key: 'sk-9f8a7b6c5d4e3f2a1b0c', endpoint: 'https://api.example.com' },
       };
       const fieldsToHash = { api: { key: true } };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['api.key']);
       expect(result.snapshot.api.key).toBe(sha256('obj-id' + 'sk-9f8a7b6c5d4e3f2a1b0c').slice(-12));
@@ -67,7 +67,7 @@ describe('#processFields', () => {
         password: 'pw-7g8h9i0j1k2l3m4n',
       };
       const fieldsToHash = { api: true, password: true };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       // Using `.sort()` below because we're not depending on array order.
       // @see https://stackoverflow.com/questions/40135684
@@ -82,7 +82,7 @@ describe('#processFields', () => {
     it('should not hash non-string values even when key is in fieldsToHash', () => {
       const snapshot = { config: { count: 42, enabled: true, nested: { id: 1 } } };
       const fieldsToHash = { config: true };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
@@ -93,7 +93,7 @@ describe('#processFields', () => {
         api: { key: 'sk-9f8a7b6c5d4e3f2a1b0c', count: 5, active: true },
       };
       const fieldsToHash = { api: true };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['api.key']);
       expect(result.snapshot.api.key).toBe(sha256('obj-id' + 'sk-9f8a7b6c5d4e3f2a1b0c').slice(-12));
@@ -109,7 +109,7 @@ describe('#processFields', () => {
         title: 'My Dashboard',
       };
       const fieldsToHash = { api: { key: true } };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(result.snapshot.api.endpoint).toBe('https://api.example.com');
       expect(result.snapshot.title).toBe('My Dashboard');
@@ -120,7 +120,7 @@ describe('#processFields', () => {
     it('should hash keyed by salt', () => {
       const snapshot = { apiKey: 'sk-3c4d5e6f7a8b9c0d' };
       const fieldsToHash = { apiKey: true };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'rule-id-xyz' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'rule-id-xyz' });
 
       expect(result.snapshot.apiKey).toBe(sha256('rule-id-xyz' + 'sk-3c4d5e6f7a8b9c0d').slice(-12));
     });
@@ -128,8 +128,8 @@ describe('#processFields', () => {
     it('should produce deterministic output for the same value and salt', () => {
       const snapshot = { apiKey: 'sk-3c4d5e6f7a8b9c0d' };
       const fieldsToHash = { apiKey: true };
-      const result1 = processFields(snapshot, { fieldsToHash, salt: 'same-id' });
-      const result2 = processFields(snapshot, { fieldsToHash, salt: 'same-id' });
+      const result1 = sanitizeFields(snapshot, { fieldsToHash, salt: 'same-id' });
+      const result2 = sanitizeFields(snapshot, { fieldsToHash, salt: 'same-id' });
 
       expect(result1.snapshot.apiKey).toBe(result2.snapshot.apiKey);
     });
@@ -137,8 +137,8 @@ describe('#processFields', () => {
     it('should produce different hashes for different salts', () => {
       const snapshot = { apiKey: 'sk-3c4d5e6f7a8b9c0d' };
       const fieldsToHash = { apiKey: true };
-      const result1 = processFields(snapshot, { fieldsToHash, salt: 'rule-id-1' });
-      const result2 = processFields(snapshot, { fieldsToHash, salt: 'rule-id-2' });
+      const result1 = sanitizeFields(snapshot, { fieldsToHash, salt: 'rule-id-1' });
+      const result2 = sanitizeFields(snapshot, { fieldsToHash, salt: 'rule-id-2' });
 
       expect(result1.snapshot.apiKey).not.toBe(result2.snapshot.apiKey);
     });
@@ -148,7 +148,7 @@ describe('#processFields', () => {
     it('should redact a string field with the placeholder and list its path', () => {
       const snapshot = { owner: { email: 'bob@example.com' } };
       const fieldsToRedact = { owner: { email: true } };
-      const result = processFields(snapshot, { fieldsToRedact });
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
 
       expect(result.fields.redacted).toEqual(['owner.email']);
       expect(result.snapshot.owner.email).toBe(REDACTED);
@@ -160,7 +160,7 @@ describe('#processFields', () => {
         source: { ip: '10.0.0.4' },
       };
       const fieldsToRedact = { user: true, source: { ip: true } };
-      const result = processFields(snapshot, { fieldsToRedact });
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
 
       expect(result.fields.redacted.sort()).toEqual(
         ['source.ip', 'user.email', 'user.name'].sort()
@@ -174,13 +174,13 @@ describe('#processFields', () => {
       const snapshot = { user: { email: 'bob@example.com' } };
       const fieldsToRedact = { user: { email: true } };
 
-      expect(() => processFields(snapshot, { fieldsToRedact })).not.toThrow();
+      expect(() => sanitizeFields(snapshot, { fieldsToRedact })).not.toThrow();
     });
 
     it('should only redact string values', () => {
       const snapshot = { user: { age: 42, active: true, email: 'bob@example.com' } };
       const fieldsToRedact = { user: true };
-      const result = processFields(snapshot, { fieldsToRedact });
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
 
       expect(result.fields.redacted).toEqual(['user.email']);
       expect(result.snapshot.user.age).toBe(42);
@@ -191,7 +191,7 @@ describe('#processFields', () => {
     it('should leave paths outside fieldsToRedact unchanged', () => {
       const snapshot = { user: { email: 'bob@example.com', name: 'Bob' } };
       const fieldsToRedact = { user: { email: true } };
-      const result = processFields(snapshot, { fieldsToRedact });
+      const result = sanitizeFields(snapshot, { fieldsToRedact });
 
       expect(result.snapshot.user.email).toBe(REDACTED);
       expect(result.snapshot.user.name).toBe('Bob');
@@ -206,7 +206,7 @@ describe('#processFields', () => {
       };
       const fieldsToHash = { api: { key: true } };
       const fieldsToRedact = { owner: { email: true } };
-      const result = processFields(snapshot, { fieldsToHash, fieldsToRedact, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, fieldsToRedact, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['api.key']);
       expect(result.fields.redacted).toEqual(['owner.email']);
@@ -218,7 +218,7 @@ describe('#processFields', () => {
       const snapshot = { token: 'tok-1a2b3c4d5e6f7a8b' };
       const fieldsToHash = { token: true };
       const fieldsToRedact = { token: true };
-      const result = processFields(snapshot, { fieldsToHash, fieldsToRedact, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, fieldsToRedact, salt: 'obj-id' });
 
       expect(result.fields.redacted).toEqual(['token']);
       expect(result.fields.hashed).toEqual([]);
@@ -227,17 +227,17 @@ describe('#processFields', () => {
 
     it('should still require a salt when hashing even if redaction is also requested', () => {
       expect(() =>
-        processFields(
+        sanitizeFields(
           { api: { key: 'sk-x' }, owner: { email: 'bob@example.com' } },
           { fieldsToHash: { api: { key: true } }, fieldsToRedact: { owner: { email: true } } }
         )
-      ).toThrow('processFields: salt missing when hashing fields, please use the object.id');
+      ).toThrow('sanitizeFields: salt missing when hashing fields, please use the object.id');
     });
   });
 
   describe('edge cases', () => {
     it('should handle empty snapshot', () => {
-      const result = processFields({}, { fieldsToHash: { api: true }, salt: 'obj-id' });
+      const result = sanitizeFields({}, { fieldsToHash: { api: true }, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual({});
@@ -246,7 +246,7 @@ describe('#processFields', () => {
     it('should handle empty string value', () => {
       const snapshot = { secret: '' };
       const fieldsToHash = { secret: true };
-      const result = processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      const result = sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['secret']);
       expect(result.snapshot.secret).toBe(sha256('obj-id' + '').slice(-12));
@@ -256,7 +256,7 @@ describe('#processFields', () => {
       const api = { key: 'sk-9f8a7b6c5d4e3f2a1b0c' };
       const snapshot = { api };
       const fieldsToHash = { api: true };
-      processFields(snapshot, { fieldsToHash, salt: 'obj-id' });
+      sanitizeFields(snapshot, { fieldsToHash, salt: 'obj-id' });
 
       expect(snapshot.api).toBe(api);
     });
