@@ -292,7 +292,7 @@ describe('rule_loader', () => {
         { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
         'default',
         null,
-        Buffer.from('456:essu_uiam_api_key').toString('base64')
+        { uiamApiKey: Buffer.from('456:essu_uiam_api_key').toString('base64') }
       );
       expect(fakeRequest.headers).toEqual({
         authorization: `ApiKey essu_uiam_api_key`,
@@ -308,7 +308,7 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, false);
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, { apiKeyCreatedByUser: false });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
@@ -324,7 +324,10 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, false, 'elastic');
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, {
+        apiKeyCreatedByUser: false,
+        apiKeyOwner: 'elastic',
+      });
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -341,7 +344,7 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, true);
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, { apiKeyCreatedByUser: true });
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -362,8 +365,7 @@ describe('rule_loader', () => {
         uiamContext,
         'default',
         null,
-        undefined,
-        true
+        { apiKeyCreatedByUser: true }
       );
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -384,7 +386,7 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, null);
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, { apiKeyCreatedByUser: null });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
@@ -400,7 +402,10 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, false, undefined, ruleId);
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, {
+        apiKeyCreatedByUser: false,
+        ruleId,
+      });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',

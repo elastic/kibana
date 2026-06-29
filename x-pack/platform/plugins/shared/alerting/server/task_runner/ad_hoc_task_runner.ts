@@ -469,15 +469,9 @@ export class AdHocTaskRunner implements CancellableTask {
       }
 
       // Generate fake request with API key
-      const { fakeRequest } = getFakeKibanaRequest(
-        this.context,
-        spaceId,
-        apiKeyToUse,
-        undefined,
-        undefined,
-        undefined,
-        rule.id
-      );
+      const { fakeRequest } = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse, {
+        ruleId: rule.id,
+      });
 
       return {
         adHocRunData,
@@ -705,10 +699,7 @@ export class AdHocTaskRunner implements CancellableTask {
       this.context,
       this.taskInstance.params.spaceId,
       this.apiKeyToUse,
-      undefined,
-      undefined,
-      undefined,
-      this.ruleId
+      { ruleId: this.ruleId }
     );
 
     const eventLogClient = await this.context.getEventLogClient(fakeRequest);

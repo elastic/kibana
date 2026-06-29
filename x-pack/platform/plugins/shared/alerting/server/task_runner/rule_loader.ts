@@ -76,15 +76,12 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
-    context,
-    spaceId,
-    apiKey,
+  const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, spaceId, apiKey, {
     uiamApiKey,
     apiKeyCreatedByUser,
     apiKeyOwner,
-    ruleId
-  );
+    ruleId,
+  });
   const rule = getAlertFromRaw({
     id: ruleId,
     isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
@@ -171,15 +168,20 @@ export async function getDecryptedRule(
  * header — the base64 `id:secret` for ES rules, or the decoded raw `essu_…`
  * UIAM secret for UIAM rules.
  */
+export interface GetFakeKibanaRequestOptions {
+  uiamApiKey?: RawRule['uiamApiKey'];
+  apiKeyCreatedByUser?: RawRule['apiKeyCreatedByUser'];
+  apiKeyOwner?: RawRule['apiKeyOwner'];
+  ruleId?: string;
+}
+
 export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
   apiKey: RawRule['apiKey'],
-  uiamApiKey?: RawRule['uiamApiKey'],
-  apiKeyCreatedByUser?: RawRule['apiKeyCreatedByUser'],
-  apiKeyOwner?: RawRule['apiKeyOwner'],
-  ruleId?: string
+  options: GetFakeKibanaRequestOptions = {}
 ): { fakeRequest: KibanaRequest; effectiveApiKey: string | null } {
+  const { uiamApiKey, apiKeyCreatedByUser, apiKeyOwner, ruleId } = options;
   const requestHeaders: Headers = {};
   let effectiveApiKey: string | null = null;
 
