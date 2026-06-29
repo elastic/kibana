@@ -62,6 +62,10 @@ export interface GenericMatchers {
   toThrow(expected?: unknown): void;
   /** An alias for `toThrow` */
   toThrowError(expected?: unknown): void;
+  /** Asserts the value matches a stored snapshot. Creates the snapshot on first run */
+  toMatchSnapshot(nameOrOptions?: string | { name?: string }): void;
+  /** Retries the async function until it passes without assertion errors */
+  toPass(options?: { intervals?: number[]; timeout?: number }): Promise<void>;
 
   /** Async matchers for promises that are expected to reject */
   rejects: {

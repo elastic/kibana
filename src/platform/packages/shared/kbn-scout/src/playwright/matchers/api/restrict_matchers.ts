@@ -32,6 +32,8 @@ const allowedMatchers = new Set([
   'toBeInstanceOf',
   'toThrow',
   'toThrowError',
+  'toMatchSnapshot',
+  'toPass',
   // Custom response matchers
   'toHaveStatusCode',
   'toHaveStatusText',
