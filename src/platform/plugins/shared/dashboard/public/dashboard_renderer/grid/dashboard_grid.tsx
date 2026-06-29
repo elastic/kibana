@@ -189,6 +189,16 @@ export const DashboardGrid = () => {
     topOffset,
   ]);
 
+  const maximizedPanelStyle = useMemo(
+    () =>
+      expandedPanelId !== undefined
+        ? {
+            minHeight: `calc(100vh - ${topOffset}px)`,
+          }
+        : undefined,
+    [expandedPanelId, topOffset]
+  );
+
   useEffect(() => {
     // update `data-grid-row` attribute for all panels because it is used for some styling
     Object.values(layout).forEach((widget) => {
@@ -208,6 +218,7 @@ export const DashboardGrid = () => {
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
       })}
+      style={maximizedPanelStyle}
       css={styles.dashboard}
     >
       {memoizedGridLayout}
