@@ -20,5 +20,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./search_attacks'));
     loadTestFile(require.resolve('./set_workflow_status'));
+    loadTestFile(require.resolve('./set_tags'));
   });
 }
