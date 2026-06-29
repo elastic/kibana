@@ -105,7 +105,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Include user prompts in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.userPrompts.description', {
-        defaultMessage: 'Record user messages.',
+        defaultMessage: 'User messages are not captured by default.',
       }),
       schema: schema.boolean(),
       value: false,
@@ -120,7 +120,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       description: i18n.translate(
         'xpack.agentBuilder.uiSettings.tracing.systemPrompt.description',
         {
-          defaultMessage: 'Record the agent instructions.',
+          defaultMessage: 'Agent instructions are not captured by default.',
         }
       ),
       schema: schema.boolean(),
@@ -136,7 +136,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       description: i18n.translate(
         'xpack.agentBuilder.uiSettings.tracing.llmResponses.description',
         {
-          defaultMessage: 'Record assistant responses.',
+          defaultMessage: 'Agent responses are not captured by default.',
         }
       ),
       schema: schema.boolean(),
@@ -150,7 +150,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Include tool call details in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.toolDetails.description', {
-        defaultMessage: 'Record tool call arguments and tool call results.',
+        defaultMessage: 'Tool call arguments and results are not captured by default.',
       }),
       schema: schema.boolean(),
       value: false,
@@ -164,7 +164,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Include real tool and agent names in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.description', {
-        defaultMessage: 'Store actual names instead of anonymized identifiers.',
+        defaultMessage: 'Tool and agent names are anonymized by default.',
       }),
       schema: schema.boolean(),
       value: false,
@@ -177,7 +177,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Include real conversation and workflow IDs in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realIds.description', {
-        defaultMessage: 'Store actual IDs instead of anonymized identifiers.',
+        defaultMessage: 'Conversation and workflow IDs are anonymized by default.',
       }),
       schema: schema.boolean(),
       value: false,

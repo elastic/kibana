@@ -92,7 +92,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                     <h4>
                       <FormattedMessage
                         id="xpack.genAiSettings.agentBuilderTracing.aboutTitle"
-                        defaultMessage="About trace access and storage"
+                        defaultMessage="Trace access and storage"
                       />
                     </h4>
                   </EuiTitle>
@@ -101,7 +101,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                     <p>
                       <FormattedMessage
                         id="xpack.genAiSettings.agentBuilderTracing.accessControl"
-                        defaultMessage="Trace data is readable by anyone with index access. To restrict it, configure index-level permissions in {rolesLink}."
+                        defaultMessage="Any user with index access can read trace data. To restrict access, configure index-level permissions in {rolesLink}."
                         values={{
                           rolesLink: (
                             <EuiLink href={rolesUrl}>
