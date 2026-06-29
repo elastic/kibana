@@ -99,8 +99,9 @@ describe('CaseDetailsAppHeader', () => {
   it('renders badges in the header', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    expect(await screen.findByTestId('case-view-severity-badge')).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-status-badge')).toBeInTheDocument();
+    const badgesEl = await screen.findByTestId('app-header-badges');
+    expect(badgesEl.textContent).toContain('case-view-severity-badge');
+    expect(badgesEl.textContent).toContain('case-view-status-badge');
   });
 
   it('does not render delete modal by default', async () => {
