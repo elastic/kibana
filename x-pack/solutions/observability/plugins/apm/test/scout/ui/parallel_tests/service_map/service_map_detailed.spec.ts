@@ -178,20 +178,17 @@ test.describe(
       await expect(page).toHaveURL(new RegExp(`/app/slos`));
     });
 
-    test('navigates to Service Details from flyout title via new tab', async ({
-      context,
+    test('navigates to Service Details from flyout title', async ({
+      page,
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
 
-      const waitForNewPage = context.waitForEvent('page');
       await serviceMapPage.serviceMapFlyoutTitle.click();
 
-      const newPage = await waitForNewPage;
-
-      await expect(newPage).toHaveURL(
+      await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
     });
