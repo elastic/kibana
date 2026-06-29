@@ -361,12 +361,9 @@ describe('rule_loader', () => {
         logger: mockLogger,
       } as unknown as TaskRunnerContext;
 
-      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
-        uiamContext,
-        'default',
-        null,
-        { apiKeyCreatedByUser: true }
-      );
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(uiamContext, 'default', null, {
+        apiKeyCreatedByUser: true,
+      });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
