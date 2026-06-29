@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EXAMPLE_MANAGED_WORKFLOW_ID } from '@kbn/workflows/managed';
+export {
+  EXAMPLE_ENABLED_SCHEDULED_MANAGED_WORKFLOW_ID,
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 
 export const EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID = 'workflowsExtensionsExample';

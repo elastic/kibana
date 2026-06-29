@@ -10,6 +10,8 @@
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
+export const EXAMPLE_ENABLED_SCHEDULED_MANAGED_WORKFLOW_ID =
+  'system-example-enabled-scheduled-greeting';
 
 export interface ExampleManagedWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   recipient: string;
@@ -38,3 +40,26 @@ steps:
     enablement: 'restorable',
   },
 } as const satisfies ManagedWorkflowDefinition<ExampleManagedWorkflowTemplateValues>;
+
+export const EXAMPLE_ENABLED_SCHEDULED_MANAGED_WORKFLOW = {
+  id: EXAMPLE_ENABLED_SCHEDULED_MANAGED_WORKFLOW_ID,
+  pluginId: 'workflowsExtensionsExample',
+  version: 1,
+  yaml: `name: Example Enabled Scheduled Greeting
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: 1m
+steps:
+  - name: greet
+    type: console
+    with:
+      message: "executedBy: {{ execution.executedBy }}"
+`,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;

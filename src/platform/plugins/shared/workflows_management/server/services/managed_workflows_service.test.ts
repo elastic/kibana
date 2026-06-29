@@ -191,6 +191,49 @@ const mockPrepareReturnsInitialVersion = (
   );
 };
 
+const mockPrepareReturnsScheduledWorkflow = (
+  crudService: ReturnType<typeof createCrudServiceMock>,
+  overrides: Partial<WorkflowProperties> = {}
+) => {
+  crudService.prepareWorkflowDocumentForStorage.mockImplementation(
+    async ({
+      id,
+      yaml,
+      actor,
+      now,
+      spaceId,
+    }: {
+      id: string;
+      yaml: string;
+      actor: string;
+      now: Date;
+      spaceId: string;
+    }) => {
+      const enabled = getYamlEnabled(yaml);
+      return {
+        workflowData: createWorkflowSource({
+          name: id,
+          enabled,
+          yaml,
+          definition: {
+            name: id,
+            enabled,
+            version: '1',
+            triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+            steps: [],
+          } as WorkflowYaml,
+          createdBy: actor,
+          lastUpdatedBy: actor,
+          spaceId,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+          ...overrides,
+        }),
+      };
+    }
+  );
+};
+
 const createCrudServiceMock = () => {
   const crudService = {
     getWorkflowDocumentWithVersion: jest.fn(),
@@ -345,19 +388,47 @@ const createExecutionEngineMock = () =>
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
   } as unknown as WorkflowsExecutionEnginePluginStart);
 
+const createCoreStartMock = () =>
+  ({
+    elasticsearch: {
+      client: {
+        asInternalUser: {
+          security: {
+            createApiKey: jest.fn().mockResolvedValue({
+              id: 'system-api-key-id',
+              api_key: 'system-api-key',
+            }),
+          },
+        },
+      },
+    },
+  } as any);
+
+const createTaskSchedulerMock = () => ({
+  getScheduledWorkflowTask: jest.fn().mockResolvedValue(undefined),
+  scheduleWorkflowTask: jest.fn().mockResolvedValue('workflow:scheduled-task'),
+  unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+});
+
 const createService = () => {
   const crudService = createCrudServiceMock();
   const workflowsExecutionEngine = createExecutionEngineMock();
+  const coreStart = createCoreStartMock();
+  const taskScheduler = createTaskSchedulerMock();
   const logger = loggerMock.create();
   const service = new ManagedWorkflowsService({
     crudService: crudService as unknown as WorkflowCrudService,
     workflowsExecutionEngine,
+    coreStart,
+    taskScheduler: taskScheduler as any,
     logger,
   });
 
   return {
     crudService,
     workflowsExecutionEngine,
+    coreStart,
+    taskScheduler,
     logger,
     service,
   };
@@ -427,6 +498,59 @@ describe('ManagedWorkflowsService', () => {
           definitionHash: definitionHash(definition.yaml),
         })
       );
+    });
+
+    it('schedules newly installed enabled scheduled managed workflows with Kibana system credentials', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { coreStart, crudService, service, taskScheduler } = createService();
+      mockPrepareReturnsScheduledWorkflow(crudService);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(
+        coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: `Managed workflow scheduled task: ${WORKFLOW_ID}`,
+          metadata: expect.objectContaining({
+            managed: true,
+            kibana: expect.objectContaining({
+              type: 'managed_workflow_scheduled_task',
+              workflowId: WORKFLOW_ID,
+            }),
+          }),
+        })
+      );
+      expect(taskScheduler.scheduleWorkflowTask).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ type: 'scheduled' }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: `ApiKey ${Buffer.from('system-api-key-id:system-api-key').toString(
+              'base64'
+            )}`,
+          }),
+        }),
+        { updateExecutionCredentials: true }
+      );
+    });
+
+    it('does not schedule newly installed disabled scheduled managed workflows', async () => {
+      const definition = createDefinition({ yaml: workflowYaml({ enabled: false }) });
+      mockManagedWorkflowDefinitions = [definition];
+      const { coreStart, crudService, service, taskScheduler } = createService();
+      mockPrepareReturnsScheduledWorkflow(crudService);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(
+        coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+      ).not.toHaveBeenCalled();
+      expect(taskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
     });
 
     it('sets document.version to 1 on managed create when versioning is enabled', async () => {
@@ -525,6 +649,42 @@ describe('ManagedWorkflowsService', () => {
             }),
           ],
         })
+      );
+    });
+
+    it('updates managed workflow task schedules without replacing existing execution credentials', async () => {
+      const definition = createDefinition({ version: 2 });
+      mockManagedWorkflowDefinitions = [definition];
+      const { coreStart, crudService, service, taskScheduler } = createService();
+      mockPrepareReturnsScheduledWorkflow(crudService);
+      taskScheduler.getScheduledWorkflowTask.mockResolvedValue({
+        id: `workflow:${WORKFLOW_ID}:scheduled`,
+        apiKey: 'existing-user-api-key',
+      });
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(
+        coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+      ).not.toHaveBeenCalled();
+      expect(taskScheduler.scheduleWorkflowTask).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ type: 'scheduled' }),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: 'ApiKey existing-user-api-key',
+          }),
+        }),
+        { updateExecutionCredentials: false }
       );
     });
 
@@ -636,6 +796,46 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.enabled).toBe(true);
       expect(indexedDocument.definition).toEqual(expect.objectContaining({ enabled: true }));
       expect(indexedDocument.yaml).toContain('enabled: true');
+    });
+
+    it('schedules an enforced scheduled workflow that was previously disabled by a user', async () => {
+      const definition = createDefinition({
+        yaml: workflowYaml({ enabled: true }),
+        management: { enablement: 'enforced', versionStrategy: 'auto' },
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service, taskScheduler } = createService();
+      mockPrepareReturnsScheduledWorkflow(crudService, {
+        enabled: false,
+        definition: {
+          name: WORKFLOW_ID,
+          enabled: true,
+          version: '1',
+          triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+          steps: [],
+        } as WorkflowYaml,
+      });
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            enabled: false,
+            yaml: workflowYaml({ enabled: false }),
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(taskScheduler.scheduleWorkflowTask).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ type: 'scheduled' }),
+        expect.any(Object),
+        { updateExecutionCredentials: false }
+      );
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalledWith(WORKFLOW_ID);
     });
 
     it('skips on_adopt updates during the startup window', async () => {

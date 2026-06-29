@@ -25,6 +25,7 @@ import { registerEmitLoopRoute } from './routes/emit_loop';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
 import {
+  EXAMPLE_ENABLED_SCHEDULED_MANAGED_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './managed_workflows';
@@ -98,6 +99,9 @@ export class WorkflowsExtensionsExamplePlugin
       await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
         values: { recipient: 'World' },
+      });
+      await client.install(EXAMPLE_ENABLED_SCHEDULED_MANAGED_WORKFLOW_ID, {
+        spaceId: 'default',
       });
 
       await client.ready();

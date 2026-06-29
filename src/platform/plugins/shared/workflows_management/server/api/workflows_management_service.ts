@@ -227,6 +227,8 @@ export class WorkflowsService {
     this.managedWorkflowsService = new ManagedWorkflowsService({
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
+      coreStart: this.coreStart,
+      taskScheduler: this.taskScheduler,
       logger: this.logger,
     });
   }
