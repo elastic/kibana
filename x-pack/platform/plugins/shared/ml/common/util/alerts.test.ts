@@ -96,6 +96,8 @@ describe('getResultJobsHealthRuleConfig', () => {
         docsCount: 1,
         enabled: true,
         timeInterval: null,
+        thresholdType: 'count',
+        docsCountPercentage: 20,
       },
       errorMessages: {
         enabled: true,
@@ -123,10 +125,34 @@ describe('getResultJobsHealthRuleConfig', () => {
         docsCount: 1,
         enabled: true,
         timeInterval: null,
+        thresholdType: 'count',
+        docsCountPercentage: 20,
       },
       errorMessages: {
         enabled: true,
       },
+    });
+  });
+  test('returns config with percentage threshold mode when provided', () => {
+    expect(
+      getResultJobsHealthRuleConfig({
+        delayedData: {
+          enabled: true,
+          thresholdType: 'percentage',
+          docsCountPercentage: 15,
+        },
+      })
+    ).toEqual({
+      datafeed: { enabled: true },
+      mml: { enabled: true },
+      delayedData: {
+        docsCount: 1,
+        enabled: true,
+        timeInterval: null,
+        thresholdType: 'percentage',
+        docsCountPercentage: 15,
+      },
+      errorMessages: { enabled: true },
     });
   });
 });

@@ -174,6 +174,8 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
       | (CommonHealthCheckConfig & {
           docsCount?: number | null;
           timeInterval?: string | null;
+          thresholdType?: 'count' | 'percentage';
+          docsCountPercentage?: number | null;
         })
       | null;
     behindRealtime?:

@@ -70,7 +70,19 @@ export function registerJobsHealthAlertingRule(
         );
       }
 
-      if (resultTestConfig.delayedData.docsCount === 0) {
+      if (resultTestConfig.delayedData.thresholdType === 'percentage') {
+        const pct = resultTestConfig.delayedData.docsCountPercentage;
+        if (pct === null || pct === undefined || pct < 1 || pct > 100) {
+          validationResult.errors.delayedData.push(
+            i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountPercentageErrorMessage',
+              {
+                defaultMessage: 'Percentage must be between 1 and 100',
+              }
+            )
+          );
+        }
+      } else if (resultTestConfig.delayedData.docsCount === 0) {
         validationResult.errors.delayedData.push(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountErrorMessage',
@@ -102,7 +114,8 @@ export function registerJobsHealthAlertingRule(
   '{{/log_time}}{{#failed_category_count}}'Failed category count: '{{failed_category_count}}'
   '{{/failed_category_count}}{{#annotation}}'Annotation: '{{annotation}}'
   '{{/annotation}}{{#missed_docs_count}}'Number of missed documents: '{{missed_docs_count}}'
-  '{{/missed_docs_count}}{{#end_timestamp}}'Latest finalized bucket with missing docs: '{{end_timestamp}}'
+  '{{/missed_docs_count}}{{#missed_docs_percentage}}'Percentage of missed documents: '{{missed_docs_percentage}}'
+  '{{/missed_docs_percentage}}{{#end_timestamp}}'Latest finalized bucket with missing docs: '{{end_timestamp}}'
   '{{/end_timestamp}}{{#errors}}'Error message: '{{message}} {{/errors}}'
 '{{/context.results}}'
 `,

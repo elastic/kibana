@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import {
+  EuiButtonGroup,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiForm,
@@ -16,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
@@ -27,6 +29,12 @@ interface TestsSelectionControlProps {
   onChange: (update: JobsHealthRuleTestsConfig) => void;
   errors?: string[];
 }
+
+type DelayedDataThresholdType = 'count' | 'percentage';
+
+const isDelayedDataThresholdType = (id: string): id is DelayedDataThresholdType => {
+  return id === 'count' || id === 'percentage';
+};
 
 export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
   ({ config, onChange, errors }) => {
@@ -74,43 +82,128 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                   />
                 </EuiFormRow>
 
-                {name === 'delayedData' ? (
+                {name === 'delayedData' && uiConfig.delayedData.enabled ? (
                   <>
                     <EuiSpacer size="m" />
 
-                    <EuiFormRow
-                      label={
-                        <>
-                          <FormattedMessage
-                            id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountLabel"
-                            defaultMessage="Number of documents"
-                          />
-                          <EuiIconTip
-                            position="bottom"
-                            content={
-                              <FormattedMessage
-                                id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountHint"
-                                defaultMessage="The threshold for the amount of missing documents to alert upon."
-                              />
-                            }
-                            type="question"
-                          />
-                        </>
-                      }
-                    >
-                      <EuiFieldNumber
-                        value={uiConfig.delayedData.docsCount}
-                        onChange={(e) => {
-                          updateCallback({
-                            [name]: {
-                              ...uiConfig[name],
-                              docsCount: Number(e.target.value),
-                            },
-                          });
-                        }}
-                        min={1}
-                      />
-                    </EuiFormRow>
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.thresholdTypeLegend',
+                        { defaultMessage: 'Threshold type' }
+                      )}
+                      options={[
+                        {
+                          id: 'count',
+                          label: (
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.thresholdTypeCount"
+                              defaultMessage="Number"
+                            />
+                          ),
+                        },
+                        {
+                          id: 'percentage',
+                          label: (
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.thresholdTypePercentage"
+                              defaultMessage="Percentage"
+                            />
+                          ),
+                        },
+                      ]}
+                      idSelected={uiConfig.delayedData.thresholdType}
+                      onChange={(id: string) => {
+                        if (!isDelayedDataThresholdType(id)) return;
+
+                        updateCallback({
+                          [name]: {
+                            ...uiConfig[name],
+                            thresholdType: id,
+                          },
+                        });
+                      }}
+                    />
+
+                    <EuiSpacer size="m" />
+
+                    {uiConfig.delayedData.thresholdType === 'percentage' ? (
+                      <EuiFormRow
+                        label={
+                          <>
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountPercentageLabel"
+                              defaultMessage="Percentage"
+                            />{' '}
+                            <EuiIconTip
+                              position="bottom"
+                              content={
+                                <FormattedMessage
+                                  id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountPercentageHint"
+                                  defaultMessage="Alert when the datafeed misses at least this percentage of total documents in the delayed window."
+                                />
+                              }
+                              type="question"
+                            />
+                          </>
+                        }
+                      >
+                        <EuiFieldNumber
+                          value={uiConfig.delayedData.docsCountPercentage ?? 20}
+                          onChange={(e) => {
+                            updateCallback({
+                              [name]: {
+                                ...uiConfig[name],
+                                docsCountPercentage: Number(e.target.value),
+                              },
+                            });
+                          }}
+                          min={1}
+                          max={100}
+                          append={i18n.translate(
+                            'xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountPercentageAppend',
+                            { defaultMessage: '% Missing documents' }
+                          )}
+                        />
+                      </EuiFormRow>
+                    ) : (
+                      <EuiFormRow
+                        label={
+                          <>
+                            <FormattedMessage
+                              id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountLabel"
+                              defaultMessage="Number"
+                            />{' '}
+                            <EuiIconTip
+                              position="bottom"
+                              content={
+                                <FormattedMessage
+                                  id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountHint"
+                                  defaultMessage="The threshold for the amount of missing documents to alert upon."
+                                />
+                              }
+                              type="question"
+                            />
+                          </>
+                        }
+                      >
+                        <EuiFieldNumber
+                          value={uiConfig.delayedData.docsCount}
+                          onChange={(e) => {
+                            updateCallback({
+                              [name]: {
+                                ...uiConfig[name],
+                                docsCount: Number(e.target.value),
+                              },
+                            });
+                          }}
+                          min={1}
+                          append={i18n.translate(
+                            'xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountAppend',
+                            { defaultMessage: 'Missing documents' }
+                          )}
+                        />
+                      </EuiFormRow>
+                    )}
 
                     <EuiSpacer size="m" />
 
@@ -120,7 +213,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                           <FormattedMessage
                             id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalLabel"
                             defaultMessage="Time interval"
-                          />
+                          />{' '}
                           <EuiIconTip
                             position="bottom"
                             content={
