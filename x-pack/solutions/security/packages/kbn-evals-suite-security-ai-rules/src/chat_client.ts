@@ -5,15 +5,34 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 // These string literals mirror the constants defined in security_solution/common/constants.
 // They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'security.agent';
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
+
+// The dedicated `security.agent` was removed in https://github.com/elastic/kibana/pull/263996;
+// security capabilities are now skills/tools on the default Agent Builder agent. Allow an env
+// override so a custom agent can still be targeted if needed.
+const AI_RULE_GENERATION_AGENT_ID =
+  process.env.AGENT_BUILDER_AGENT_ID ?? agentBuilderDefaultAgentId;
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
+
+/**
+ * Structured rejection codes emitted by the AI rule-creation graph's rejection path
+ * (introduced in https://github.com/elastic/kibana/pull/270236). The tool returns these
+ * instead of throwing or producing a malformed rule. Mirrored here as a local string union
+ * to avoid a package -> plugin import boundary violation.
+ *
+ * - `NO_DATA`: no relevant index/data source was found for the request (was previously the
+ *   free-text "could not discover a suitable index" error).
+ * - `INCOHERENT` / `NOT_SECURITY_RELEVANT`: reserved for a future pre-flight classifier node.
+ * - `INVALID_OUTPUT`: the assembled rule failed terminal schema validation.
+ */
+export type RejectionCode = 'NO_DATA' | 'INCOHERENT' | 'NOT_SECURITY_RELEVANT' | 'INVALID_OUTPUT';
 
 export type EvalFetch = (path: string, options?: Record<string, unknown>) => Promise<unknown>;
 
@@ -46,9 +65,10 @@ export class SecurityRuleGenerationClient {
   public async generateRule(prompt: string): Promise<{
     generatedRule?: Partial<ReferenceRule>;
     error?: string;
+    rejectionCode?: RejectionCode;
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
+      agent_id: AI_RULE_GENERATION_AGENT_ID,
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
       capabilities: { visualizations: true },
@@ -78,21 +98,29 @@ export class SecurityRuleGenerationClient {
     }
 
     this.log.warning(
-      `Agent returned no rule. Error: ${extracted.error ?? 'unknown'}. Diagnostics: ${
-        extracted.diagnostics
-      }`
+      `Agent returned no rule. ${
+        extracted.rejectionCode ? `Rejection: ${extracted.rejectionCode}. ` : ''
+      }Error: ${extracted.error ?? 'unknown'}. Diagnostics: ${extracted.diagnostics}`
     );
     return {
       error: extracted.error || 'No rule returned from agent',
+      ...(extracted.rejectionCode && { rejectionCode: extracted.rejectionCode }),
     };
   }
 }
+
+const isRejectionCode = (value: unknown): value is RejectionCode =>
+  value === 'NO_DATA' ||
+  value === 'INCOHERENT' ||
+  value === 'NOT_SECURITY_RELEVANT' ||
+  value === 'INVALID_OUTPUT';
 
 const extractRuleDataFromToolResults = (
   results?: ToolResult[]
 ): {
   ruleData?: Record<string, unknown>;
   error?: string;
+  rejectionCode?: RejectionCode;
 } => {
   if (!results?.length) {
     return {};
@@ -112,8 +140,14 @@ const extractRuleDataFromToolResults = (
         return { ruleData: rule };
       }
       if (success === false) {
+        // A deliberate rejection from the graph's rejection path carries a structured
+        // `rejectionCode` (https://github.com/elastic/kibana/pull/270236). Surface it so
+        // evaluators can distinguish a NO_DATA rejection from a model-quality failure.
+        const rawCode = result.data?.rejectionCode;
+        const rejectionCode = isRejectionCode(rawCode) ? rawCode : undefined;
         return {
           error: (result.data?.message as string) || 'Rule generation tool reported failure',
+          ...(rejectionCode && { rejectionCode }),
         };
       }
     }

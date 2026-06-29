@@ -115,7 +115,7 @@ evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete
               category: 'negative',
               prompt: pair.prompt,
             },
-            metadata: pair.metadata,
+            metadata: { ...pair.metadata, expectedRejectionCode: pair.expectedRejectionCode },
           })),
         },
       });

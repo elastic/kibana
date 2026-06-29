@@ -16,7 +16,7 @@ import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReferenceRule } from '../datasets/sample_rules';
-import type { SecurityRuleGenerationClient } from './chat_client';
+import type { RejectionCode, SecurityRuleGenerationClient } from './chat_client';
 import {
   validateEsqlSyntax,
   validateFromClause,
@@ -32,7 +32,25 @@ import {
 export interface RuleGenerationTaskOutput {
   generatedRule?: Partial<ReferenceRule>;
   error?: string;
+  /**
+   * Structured rejection code from the AI rule-creation graph's rejection path
+   * (https://github.com/elastic/kibana/pull/270236). Present only when the tool deliberately
+   * declined to produce a rule. `NO_DATA` is an environment constraint (skipped as N/A);
+   * `INVALID_OUTPUT` is a model-quality failure (scored, not skipped).
+   */
+  rejectionCode?: RejectionCode;
 }
+
+/**
+ * Deliberate rejections that represent the model correctly declining to generate a rule.
+ * `INVALID_OUTPUT` is intentionally excluded: it means the model produced a malformed rule that
+ * failed schema validation, which is a quality failure rather than a deliberate refusal.
+ */
+const DELIBERATE_REJECTION_CODES: readonly RejectionCode[] = [
+  'NO_DATA',
+  'INCOHERENT',
+  'NOT_SECURITY_RELEVANT',
+];
 
 // ---------------------------------------------------------------------------
 // Skip stats registry — accumulated per dataset, consumed by the reporter
@@ -129,18 +147,25 @@ function skipNonEsqlReferences(
 }
 
 /**
- * Wraps an evaluator so it returns N/A when rule generation failed because the
- * required index could not be discovered. This is an environment constraint
- * (no matching data), not a model quality issue, so it should not penalise scores.
+ * Wraps an evaluator so it returns N/A when rule generation failed because no relevant
+ * data/index could be discovered. The rule-creation graph now surfaces this as a structured
+ * `NO_DATA` rejection (https://github.com/elastic/kibana/pull/270236); the legacy free-text
+ * "could not discover a suitable index" message is still matched for backward compatibility.
+ * This is an environment constraint (no matching data), not a model quality issue, so it
+ * should not penalise scores.
  */
+function isMissingDataFailure(output: RuleGenerationTaskOutput | undefined): boolean {
+  if (output?.rejectionCode === 'NO_DATA') return true;
+  return Boolean(output?.error && /could not discover a suitable index/i.test(output.error));
+}
+
 function skipMissingIndexFailures(
   evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
 ): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     ...evaluator,
     evaluate: async (args) => {
-      const error = (args.output as RuleGenerationTaskOutput)?.error;
-      if (error && /could not discover a suitable index/i.test(error)) {
+      if (isMissingDataFailure(args.output as RuleGenerationTaskOutput)) {
         return MISSING_INDEX_NA;
       }
       return evaluator.evaluate(args);
@@ -149,10 +174,13 @@ function skipMissingIndexFailures(
 }
 
 /**
- * Wraps an evaluator so it returns N/A when rule generation failed for any
- * reason other than a missing index. These are agent/environment errors
- * (e.g. "Last action is not a generate_query action") that should not
- * penalise model quality scores.
+ * Wraps an evaluator so it returns N/A when the agent call itself errored for an
+ * uncoded reason (e.g. "Last action is not a generate_query action") — a genuine
+ * agent/environment failure that should not penalise model-quality scores.
+ *
+ * Structured rejections that carry a `rejectionCode` are deliberate model decisions and are
+ * NOT skipped here: `NO_DATA` is handled by `skipMissingIndexFailures`, while `INVALID_OUTPUT`
+ * (and any future deliberate rejection) is a quality signal that should be scored.
  */
 function skipAgentErrors(
   evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
@@ -161,7 +189,11 @@ function skipAgentErrors(
     ...evaluator,
     evaluate: async (args) => {
       const output = args.output as RuleGenerationTaskOutput;
-      if (output?.error && !/could not discover a suitable index/i.test(output.error)) {
+      const isUncodedError =
+        Boolean(output?.error) &&
+        !output?.rejectionCode &&
+        !/could not discover a suitable index/i.test(output?.error ?? '');
+      if (isUncodedError) {
         return AGENT_ERROR_NA;
       }
       return evaluator.evaluate(args);
@@ -355,23 +387,46 @@ function createRiskScoreMatchEvaluator(): Evaluator<RuleExample, RuleGenerationT
 
 /**
  * Scores whether the model correctly refused to generate a rule for a negative case.
+ * A pass now requires a *deliberate* structured rejection (`NO_DATA` / `INCOHERENT` /
+ * `NOT_SECURITY_RELEVANT`) rather than merely the absence of a rule, so accidental failures
+ * (e.g. `INVALID_OUTPUT` schema failures or uncoded agent errors) are not credited as refusals.
  * Returns N/A for positive cases since rule generation is expected there.
  */
 function createRejectionEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     name: 'Rejection',
     kind: 'CODE',
-    evaluate: async ({ output, expected }) => {
+    evaluate: async ({ output, expected, metadata }) => {
       if (expected?.category !== 'negative') {
         return { score: null, label: 'N/A', explanation: 'Not applicable: not a negative case' };
       }
-      const refused = !output?.generatedRule;
+      const expectedRejectionCode = metadata?.expectedRejectionCode as RejectionCode | undefined;
+      const { generatedRule, rejectionCode } = (output as RuleGenerationTaskOutput) ?? {};
+      if (generatedRule) {
+        return {
+          score: 0,
+          label: 'FAIL',
+          explanation: 'Model incorrectly generated a rule for an impossible request',
+          metadata: { expectedRejectionCode, rejectionCode: null },
+        };
+      }
+      const deliberate =
+        rejectionCode != null && DELIBERATE_REJECTION_CODES.includes(rejectionCode);
       return {
-        score: refused ? 1 : 0,
-        label: refused ? 'PASS' : 'FAIL',
-        explanation: refused
-          ? 'Model correctly refused to generate a rule'
-          : 'Model incorrectly generated a rule for an impossible request',
+        score: deliberate ? 1 : 0,
+        label: deliberate ? 'PASS' : 'FAIL',
+        explanation: deliberate
+          ? `Model correctly refused with rejection code ${rejectionCode}${
+              expectedRejectionCode
+                ? ` (expected ${expectedRejectionCode}${
+                    rejectionCode === expectedRejectionCode ? ', match' : ''
+                  })`
+                : ''
+            }`
+          : rejectionCode
+          ? `Model failed with code ${rejectionCode} rather than deliberately refusing`
+          : 'Model produced no rule but did not emit a deliberate rejection',
+        metadata: { expectedRejectionCode, rejectionCode: rejectionCode ?? null },
       };
     },
   };
@@ -463,29 +518,34 @@ export function createEvaluateDataset({
     },
   });
 
+  // skipNegativeCases is applied outermost so negative examples consistently report
+  // NEGATIVE_CASE_NA, while skipMissingIndexFailures / skipAgentErrors handle environment
+  // and agent failures for positive examples.
   const skip = (e: Evaluator<RuleExample, RuleGenerationTaskOutput>) =>
-    skipAgentErrors(skipMissingIndexFailures(e));
+    skipNegativeCases(skipAgentErrors(skipMissingIndexFailures(e)));
 
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    skip(skipNegativeCases(createQuerySyntaxValidityEvaluator())),
-    skip(skipNegativeCases(createFieldCoverageEvaluator())),
-    skip(skipNegativeCases(createRuleTypeLanguageEvaluator())),
-    skip(skipNegativeCases(createMitreAccuracyEvaluator())),
-    skip(skipNegativeCases(createSeverityValidityEvaluator())),
-    skip(skipNegativeCases(createRiskScoreValidityEvaluator())),
-    skip(skipNegativeCases(createIntervalFormatEvaluator())),
-    skip(skipNegativeCases(createLookbackGapEvaluator())),
-    skip(skipNegativeCases(createSeverityMatchEvaluator())),
-    skip(skipNegativeCases(createRiskScoreMatchEvaluator())),
+    skip(createQuerySyntaxValidityEvaluator()),
+    skip(createFieldCoverageEvaluator()),
+    skip(createRuleTypeLanguageEvaluator()),
+    skip(createMitreAccuracyEvaluator()),
+    skip(createSeverityValidityEvaluator()),
+    skip(createRiskScoreValidityEvaluator()),
+    skip(createIntervalFormatEvaluator()),
+    skip(createLookbackGapEvaluator()),
+    skip(createSeverityMatchEvaluator()),
+    skip(createRiskScoreMatchEvaluator()),
     // LLM — ES|QL functional equivalence via @kbn/evals built-in evaluator
-    skip(skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator))),
+    skip(skipNonEsqlReferences(esqlEquivalenceEvaluator)),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
     // Re-enable when running thorough multi-model comparisons.
-    // skip(skipNegativeCases(createRuleNameEvaluator(evaluators))),
-    // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
-    // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
-    skip(createRejectionEvaluator()),
+    // skip(createRuleNameEvaluator(evaluators)),
+    // skip(createRuleDescriptionEvaluator(evaluators)),
+    // Rejection — scores 1 when the model deliberately refuses a negative case, N/A for positive
+    // cases. Wrapped only with skipAgentErrors (NOT skipMissingIndexFailures), because a NO_DATA
+    // rejection IS the correct outcome on a negative case and must be scored, not skipped.
+    skipAgentErrors(createRejectionEvaluator()),
   ];
 
   return async function evaluateDataset({
@@ -511,27 +571,49 @@ export function createEvaluateDataset({
             const taskResult = await chatClient.generateRule(input.prompt);
 
             if (!taskResult.generatedRule) {
+              const rejectionOutput = taskResult.rejectionCode
+                ? { rejectionCode: taskResult.rejectionCode }
+                : {};
+
               if (expected?.category === 'negative') {
                 // Negative-case prompts are expected to be rejected. Treat a refusal as success
                 // so dataset summaries don't misclassify correct behavior as an "agent error".
                 succeeded++;
-                log.info('[Task] Negative case: model refused to generate a rule (expected)');
-                return {};
+                log.info(
+                  `[Task] Negative case: model refused to generate a rule (expected). Rejection code: ${
+                    taskResult.rejectionCode ?? 'none'
+                  }`
+                );
+                return { ...rejectionOutput, error: taskResult.error };
               }
 
               const isMissingIndex =
-                taskResult.error && /could not discover a suitable index/i.test(taskResult.error);
+                taskResult.rejectionCode === 'NO_DATA' ||
+                (taskResult.error && /could not discover a suitable index/i.test(taskResult.error));
               if (isMissingIndex) {
                 missingIndexFailures++;
                 log.warning(
-                  `[Task] Skipped — missing index (all evaluators will return N/A). Error: ${taskResult.error}`
+                  `[Task] Skipped — no data/index (all evaluators will return N/A). Error: ${taskResult.error}`
                 );
               } else {
                 otherFailures++;
-                otherFailureReasons.push(truncate(taskResult.error ?? 'No rule returned'));
-                log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
+                otherFailureReasons.push(
+                  truncate(
+                    taskResult.rejectionCode
+                      ? `${taskResult.rejectionCode}: ${taskResult.error ?? 'rejected'}`
+                      : taskResult.error ?? 'No rule returned'
+                  )
+                );
+                log.warning(
+                  `[Task] No rule generated.${
+                    taskResult.rejectionCode ? ` Rejection: ${taskResult.rejectionCode}.` : ''
+                  } Error: ${taskResult.error}`
+                );
               }
-              return { error: taskResult.error || 'No rule returned from agent' };
+              return {
+                ...rejectionOutput,
+                error: taskResult.error || 'No rule returned from agent',
+              };
             }
 
             if (expected?.category === 'negative') {
