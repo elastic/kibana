@@ -277,10 +277,6 @@ const ParentClassController = ({
     } else {
       wrapper.classList.remove('dshDashboardViewportWrapper');
     }
-
-    return () => {
-      wrapper.classList.remove('dshDashboardViewportWrapper');
-    };
   }, [maximizedPanelId, viewportRef]);
   return null;
 };
