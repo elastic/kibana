@@ -25,10 +25,11 @@ describe('jailbreak_wrapper strategy', () => {
   it('uses different wrapper templates across multiple transform calls', () => {
     const strategy = createJailbreakWrapperStrategy();
     const results = new Set<string>();
+    // Different prompts hash to different wrapper indices — use distinct inputs.
     for (let i = 0; i < 20; i++) {
-      results.add(strategy.transform('test prompt'));
+      results.add(strategy.transform(`test prompt ${i}`));
     }
-    // 20 calls with multiple templates — near-certain to get >1 distinct result
+    // 20 distinct prompts covering 5 templates — expect more than one unique result.
     expect(results.size).toBeGreaterThan(1);
   });
 
@@ -41,12 +42,13 @@ describe('jailbreak_wrapper strategy', () => {
 
   it('produces one of the 5 known wrapper templates across multiple instances', () => {
     const templates = new Set<string>();
-    // Create many instances; statistically all 5 templates should appear
-    for (let i = 0; i < 200; i++) {
+    // These prompts hash (charCode % 5) to indices 0-4 respectively,
+    // giving deterministic full coverage: 'd'→0, 'e'→1, 'a'→2, 'b'→3, 'c'→4.
+    for (const prompt of ['d', 'e', 'a', 'b', 'c']) {
       const s = createJailbreakWrapperStrategy();
-      const result = s.transform('test');
-      // Record the prefix before "test" to identify the template
-      templates.add(result.replace('test', ''));
+      const result = s.transform(prompt);
+      // All templates append the prompt at the end; slice gives the wrapper prefix.
+      templates.add(result.slice(0, result.length - prompt.length));
     }
     expect(templates.size).toBe(5);
   });
