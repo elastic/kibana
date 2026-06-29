@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import type { AlertingApp, AlertingNavigation } from '../fixtures/page_objects/alerting_navigation';
 import {
-  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
-  ALERTING_V2_ALERTS_READ_ROLE,
-  ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
-  ALERTING_V2_RULES_READ_ROLE,
+  ACTION_POLICIES_READ_ROLE,
+  ALERTS_READ_ROLE,
   ALL_ROLE,
+  EXECUTION_HISTORY_READ_ROLE,
   NO_ACCESS_ROLE,
   READ_ROLE,
-} from '../../common/roles';
+  RULES_READ_ROLE,
+} from './management_required_privileges.roles';
 
 const ALL_APPS: readonly AlertingApp[] = ['rules', 'alerts', 'actionPolicies', 'executionHistory'];
 
@@ -49,12 +50,7 @@ async function expectAccess(
   }
 }
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
-test.describe('Management pages - required privileges', { tag: '@local-stateful-classic' }, () => {
+test.describe('Management pages - required privileges', { tag: tags.deploymentAgnostic }, () => {
   test('user with full access can view every management page', async ({
     browserAuth,
     pageObjects,
@@ -83,7 +79,7 @@ test.describe('Management pages - required privileges', { tag: '@local-stateful-
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
+    await browserAuth.loginWithCustomRole(RULES_READ_ROLE);
     await expectAccess(pageObjects, ['rules']);
   });
 
@@ -91,7 +87,7 @@ test.describe('Management pages - required privileges', { tag: '@local-stateful-
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
+    await browserAuth.loginWithCustomRole(ALERTS_READ_ROLE);
     await expectAccess(pageObjects, ['alerts']);
   });
 
@@ -99,7 +95,7 @@ test.describe('Management pages - required privileges', { tag: '@local-stateful-
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
+    await browserAuth.loginWithCustomRole(ACTION_POLICIES_READ_ROLE);
     await expectAccess(pageObjects, ['actionPolicies']);
   });
 
@@ -107,7 +103,7 @@ test.describe('Management pages - required privileges', { tag: '@local-stateful-
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_EXECUTION_HISTORY_READ_ROLE);
+    await browserAuth.loginWithCustomRole(EXECUTION_HISTORY_READ_ROLE);
     await expectAccess(pageObjects, ['executionHistory']);
   });
 });
