@@ -8,13 +8,13 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_CREATE_DESCRIPTION } from '../constants';
-import { logRequest } from '../log_request';
 import { createLinksOASOperationObject } from '../oas_examples';
 import { create } from './create';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';

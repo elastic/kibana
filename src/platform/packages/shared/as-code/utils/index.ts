@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-
-export function logRequest(
-  logger: Logger,
-  req: KibanaRequest,
-  level: 'debug' | 'warn' | 'error',
-  message: string
-) {
-  const method = req.route.method.toUpperCase();
-  const path = req.url.pathname;
-  logger[level](`${method} ${path}: ${message}`);
-}
+export { logRequest } from './src/log_request';
+export { writeErrorHandler } from './src/write_error_handler';

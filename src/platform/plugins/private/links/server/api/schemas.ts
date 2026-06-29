@@ -135,4 +135,7 @@ export const linksEmbeddableSchema = schema.oneOf([linksByValueSchema, linksByRe
   },
 });
 
-export const linksApiStateSchema = linksByValueSchema.extends({ tags: getAsCodeTagsSchema() });
+export const linksApiStateSchema = linksByValueSchema.extends({
+  title: schema.string(), // make title required - all links library items must have a title
+  tags: getAsCodeTagsSchema(),
+});

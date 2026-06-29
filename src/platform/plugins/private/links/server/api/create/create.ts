@@ -16,7 +16,8 @@ import { transformIn } from '../../../common/api/transforms';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  createBody: LinksCreateRequestBody
+  createBody: LinksCreateRequestBody,
+  id?: string
 ): Promise<LinksCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 

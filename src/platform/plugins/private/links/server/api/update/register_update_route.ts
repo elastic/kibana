@@ -8,6 +8,7 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -15,7 +16,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_UPDATE_DESCRIPTION } from '../constants';
-import { logRequest } from '../log_request';
 import { updateLinksOASOperationObject } from '../oas_examples';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
