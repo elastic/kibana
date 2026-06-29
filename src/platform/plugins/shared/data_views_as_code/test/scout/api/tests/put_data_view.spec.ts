@@ -138,6 +138,40 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
     }
   );
 
+  apiTest(
+    'clears fields omitted from PUT body when updating an existing data view',
+    async ({ apiClient, apiServices }) => {
+      const id = `dv-put-replace-${Date.now()}-${Math.random()}`;
+      const initialPattern = `put-replace-initial-${Date.now()}-*`;
+      const nextPattern = `put-replace-next-${Date.now()}-*`;
+
+      await apiServices.dataViews.create({
+        id,
+        title: initialPattern,
+        timeFieldName: 'timestamp',
+        sourceFilters: [{ value: 'agent.*' }],
+      });
+      createdIds.push(id);
+
+      const response = await apiClient.put(`${BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: nextPattern,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.id).toBe(id);
+      expect(response.body.data.index_pattern).toBe(nextPattern);
+      expect(response.body.data.time_field).toBeUndefined();
+      expect(response.body.data.field_filters).toBeUndefined();
+    }
+  );
+
   apiTest('returns 400 when request body contains id', async ({ apiClient }) => {
     const id = `dv-put-body-id-${Date.now()}-${Math.random()}`;
 

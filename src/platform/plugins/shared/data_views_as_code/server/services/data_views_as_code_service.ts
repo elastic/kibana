@@ -66,7 +66,7 @@ export class DataViewsAsCodeService {
       const dataViewInstance = await this.dataViewsService.createFromSpecLazy(dataViewSpec);
 
       // 2. Update the saved object with the new data view instance.
-      const x = await this.savedObjectsClient.update(
+      await this.savedObjectsClient.update(
         DATA_VIEW_SAVED_OBJECT_TYPE,
         id,
         dataViewInstance.getAsSavedObjectBody(),
