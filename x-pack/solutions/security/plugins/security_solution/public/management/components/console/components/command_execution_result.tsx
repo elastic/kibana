@@ -94,6 +94,7 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
         return title;
       }
       if (showAs === 'success') {
+        // FIXME:PT Remove response action specific logic below. `console` is meant to be generic
         return agentType === 'crowdstrike'
           ? COMMAND_EXECUTION_SUBMIT_RESULT_SUCCESS_TITLE
           : COMMAND_EXECUTION_RESULT_SUCCESS_TITLE;
