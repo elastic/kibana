@@ -8,11 +8,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 
 export const serializedTitlesSchema = schema.object({
   description: schema.maybe(
     schema.string({
-      maxLength: 10_000,
+      maxLength: MAX_TITLE_LENGTH,
       meta: {
         description: 'A short description of the panel.',
       },
