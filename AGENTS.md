@@ -34,6 +34,7 @@ Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jes
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
+`node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
 - When iterating, start the stack once with `node scripts/scout start-server --arch stateful --domain classic` and run `run-tests` against it, instead of rebooting ES+Kibana on every run.
 
 ## Code Style Guidelines
