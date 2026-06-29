@@ -13,10 +13,10 @@ import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_
 import { Content } from './content';
 import { mockHostEntityRiskScores } from '../../../../flyout/entity_details/mocks';
 
-const mockResolutionSection = jest.fn(() => (
+const mockResolutionSection = jest.fn((_props: { openDetailsPanel?: unknown }) => (
   <div data-test-subj="securitySolutionFlyoutResolutionSection" />
 ));
-const mockVisualizationsSection = jest.fn(() => null);
+const mockVisualizationsSection = jest.fn((_props: { openDetailsPanel?: unknown }) => null);
 
 jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
   ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
