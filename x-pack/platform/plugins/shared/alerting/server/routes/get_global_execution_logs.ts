@@ -16,10 +16,11 @@ import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 import {
   MAX_PER_PAGE_LOGS,
-  MAX_KQL_FILTER_LENGTH,
+  MAX_EXECUTION_FILTER_LENGTH,
   MAX_NAMESPACES,
   MAX_ID_LENGTH,
   MAX_SORT_FIELDS,
+  ISO_DATE_MAX_LENGTH,
 } from '../../common/constants';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
@@ -43,9 +44,9 @@ const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
 });
 
 const querySchema = schema.object({
-  date_start: schema.string(),
-  date_end: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH })),
+  date_start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+  date_end: schema.maybe(schema.string({ maxLength: ISO_DATE_MAX_LENGTH })),
+  filter: schema.maybe(schema.string({ maxLength: MAX_EXECUTION_FILTER_LENGTH })),
   per_page: schema.number({ defaultValue: 10, min: 1, max: MAX_PER_PAGE_LOGS }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   sort: sortFieldsSchema,

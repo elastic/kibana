@@ -7,12 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { gapFillStatus, gapStatus } from '../../../../../constants';
 import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
-import { MAX_ID_LENGTH } from '../../../../../constants';
+import { MAX_ID_LENGTH, ISO_DATE_MAX_LENGTH } from '../../../../../constants';
 
 export const getRuleIdsWithGapBodySchema = schema.object(
   {
-    end: schema.string(),
-    start: schema.string(),
+    end: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+    start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
     // Filters the underlying gap documents before aggregation. Matches the raw
     // per-gap statuses.
     statuses: schema.maybe(

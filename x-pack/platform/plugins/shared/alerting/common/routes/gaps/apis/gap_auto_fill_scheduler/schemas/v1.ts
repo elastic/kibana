@@ -14,6 +14,7 @@ import {
   MAX_ARRAY_FIELDS,
   MAX_FIELD_NAME_LENGTH,
   MAX_DURATION_STRING_LENGTH,
+  ISO_DATE_MAX_LENGTH,
 } from '../../../../../constants';
 import { parseDuration } from '../../../../../parse_duration';
 import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
@@ -79,7 +80,7 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
     schedule: schema.object({
       interval: schema.string({ maxLength: MAX_DURATION_STRING_LENGTH }),
     }),
-    scope: schema.arrayOf(schema.string({ maxLength: 256 }), {
+    scope: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
       maxSize: MAX_ARRAY_FIELDS,
     }),
     rule_types: schema.arrayOf(
@@ -161,8 +162,8 @@ export const gapAutoFillSchedulerResponseSchema = schema.object({
 
 export const gapAutoFillSchedulerLogsRequestQuerySchema = schema.object(
   {
-    start: schema.string(),
-    end: schema.string(),
+    start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+    end: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
     page: schema.number({ defaultValue: 1, min: 1 }),
     per_page: schema.number({ defaultValue: 50, min: 1, max: 1000 }),
     sort_field: schema.oneOf([schema.literal('@timestamp')], { defaultValue: '@timestamp' }),
