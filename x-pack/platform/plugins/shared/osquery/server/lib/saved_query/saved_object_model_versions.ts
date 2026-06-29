@@ -116,9 +116,7 @@ const backfillScheduleIdFn: SavedObjectModelDataBackfillFn<
 > = ({ attributes }) => {
   const queries = attributes.queries;
   if (!queries?.length) {
-    // Nothing to migrate. `data_backfill` requires an `attributes` object on
-    // the result; an empty patch is the correct no-op (deep-merged into the
-    // existing doc, it changes nothing).
+    // `data_backfill` requires an `attributes` object; an empty patch is the no-op.
     return { attributes: {} };
   }
 

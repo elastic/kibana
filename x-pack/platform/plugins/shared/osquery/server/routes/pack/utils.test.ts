@@ -124,8 +124,8 @@ describe('Pack utils', () => {
     });
   });
 
-  // 3.1.5 — fan-out behavior under the new signature + wire-boundary gate.
-  describe('convertSOQueriesToPackConfig — fan-out (PR C)', () => {
+  // Fan-out behavior under the new signature + wire-boundary gate.
+  describe('convertSOQueriesToPackConfig — fan-out', () => {
     const rrule = {
       rrule: 'FREQ=DAILY',
       start_date: '2024-01-01T00:00:00.000Z',

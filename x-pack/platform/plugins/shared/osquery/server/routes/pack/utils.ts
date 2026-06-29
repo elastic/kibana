@@ -41,6 +41,12 @@ import {
 import { safeDerivePeriodSeconds } from '../../../common/utils/rrule_period';
 
 export interface PackQueryInput {
+  /**
+   * The query's existing stored `id`, optionally sent on an update body so a
+   * rename edit (changed map key) can still resolve the original query and
+   * preserve its `schedule_id`. Not used on create (id derives from the key).
+   */
+  id?: string;
   name?: string;
   query: string;
   interval?: number;

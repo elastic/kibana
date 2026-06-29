@@ -229,7 +229,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const queries = baseQueries
           ? (mapValues(baseQueries, (queryData, queryId) => {
-              const incomingId = (queryData as PackQueryInput & { id?: string }).id;
+              const incomingId = queryData.id;
               const existing =
                 (incomingId ? existingQueriesById[incomingId] : undefined) ??
                 existingQueriesById[queryId];

@@ -38,14 +38,9 @@ export const buildReconcileTaskSchedule = (runAt: Date) => ({
 });
 
 /**
- * Map a reconcile pass outcome to the Task Manager run result for this
- * single-run task:
- *   - clean pass   → `{ state: { completed: true } }`, task ends for good.
- *   - had failures → re-arm with a near-future `runAt` so the unreconciled
- *     packs are retried. A single-run task that returns no `runAt` is never
- *     re-run, so `completed: false` ALONE would silently abandon them.
- * The reconcile pass is idempotent (the SO is the source of truth), so a
- * re-run never double-writes or drifts.
+ * Run result for this single-run task: a failed pass re-arms via a near-future
+ * `runAt` (a single-run task that returns no `runAt` is never re-run, so
+ * `completed: false` alone would abandon it); a clean pass ends the task.
  */
 export const buildReconcileRunResult = (hadFailures: boolean, now: Date) =>
   hadFailures

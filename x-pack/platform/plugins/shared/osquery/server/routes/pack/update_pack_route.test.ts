@@ -12,6 +12,8 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { PackSavedObject } from '../../common/types';
 import { updatePackRoute } from './update_pack_route';
+import { updatePacksRequestBodySchema } from '../../../common/api/packs/update_packs_route';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 
@@ -118,7 +120,7 @@ describe('updatePackRoute', () => {
   });
 
   describe('schedule_type transition', () => {
-    it('B11 — interval → rrule: returns 200, writes rrule_schedule and nulls interval on SO', async () => {
+    it('interval → rrule: returns 200, writes rrule_schedule and nulls interval on SO', async () => {
       const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
       const currentSO = {
         ...basePackSO,
@@ -160,7 +162,7 @@ describe('updatePackRoute', () => {
       expect(patchedAttributes.rrule_schedule).toEqual(rruleValue);
     });
 
-    it('B12 — rrule → interval: returns 200, writes interval and nulls rrule_schedule on SO', async () => {
+    it('rrule → interval: returns 200, writes interval and nulls rrule_schedule on SO', async () => {
       const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
       const currentSO = {
         ...basePackSO,
@@ -736,7 +738,7 @@ describe('updatePackRoute', () => {
       expect(secondGetResult.attributes.rrule_schedule._unknown_subfield).toBe('preserved-value');
     });
 
-    it('partial same-mode rrule update — body sends only `rrule`, merge preserves start_date and splay (regression for PR#270639 r3313372939)', async () => {
+    it('partial same-mode rrule update — body sends only `rrule`, merge preserves start_date and splay (regression for PR#270639)', async () => {
       // A client editing one knob of an existing pack-level RRULE
       // (e.g. bumping `INTERVAL=2 → INTERVAL=3`) must be able to PATCH
       // just `rrule_schedule.rrule` without restating `start_date` /
@@ -1147,7 +1149,7 @@ describe('updatePackRoute', () => {
   });
 
   describe('response contract (PUT/GET parity)', () => {
-    // Regression for CodeRabbit PR#270639 r4381326725 — buildResponseData was
+    // Regression for PR#270639 — buildResponseData was
     // pulling `policy_ids` from `attrs.policy_ids` (always undefined: the route
     // writes policies to `references`, not attributes) and emitting `shards` in
     // the SO array form instead of the public object map. These tests pin the
@@ -1318,10 +1320,10 @@ describe('updatePackRoute', () => {
     });
   });
 
-  // Regression coverage for security-team#17841: the preserve-guard must never
-  // regenerate an existing per-query `schedule_id` on edit-save, and must mint
-  // one only for a query that genuinely lacks it.
-  describe('schedule_id preserve-guard (security-team#17841)', () => {
+  // The preserve-guard must never regenerate an existing per-query
+  // `schedule_id` on edit-save, and must mint one only for a query that
+  // genuinely lacks it.
+  describe('schedule_id preserve-guard', () => {
     const getWrittenQueries = (mockClient: ReturnType<typeof buildMockSavedObjectsClient>) =>
       mockClient.update.mock.calls[0][2].queries as Array<Record<string, unknown>>;
 
@@ -1417,22 +1419,22 @@ describe('updatePackRoute', () => {
       expect(preservedQuery.schedule_id).toBe(mintedScheduleId);
     });
 
-    it('preserves an existing schedule_id when the incoming map key differs from the stored id', async () => {
-      // The stored query id is `stored-id`, but the edit body keys the query
-      // under a different map key while carrying the real id in the payload.
-      // The guard must resolve the stored query by its `id` and preserve the
-      // existing schedule_id rather than minting a new one.
+    it('preserves schedule_id across a query rename via the incoming `id`', async () => {
+      // The stored query id is `old-name`. The edit renames it (new map key
+      // `new-name`) but carries the original `id` in the payload so the guard
+      // resolves the stored query and preserves its schedule_id instead of
+      // minting a fresh one and severing the query's scheduled history.
       const currentSO = {
         ...basePackSO,
         attributes: {
           ...basePackSO.attributes,
           queries: [
             {
-              id: 'stored-id',
-              name: 'stored-id',
+              id: 'old-name',
+              name: 'old-name',
               query: 'SELECT 1',
               interval: 60,
-              schedule_id: 'existing-sched-keymismatch',
+              schedule_id: 'sched-to-preserve',
               start_date: '2025-01-01T00:00:00.000Z',
             },
           ],
@@ -1447,7 +1449,7 @@ describe('updatePackRoute', () => {
         params: { id: 'pack-id' },
         body: {
           queries: {
-            'different-map-key': { id: 'stored-id', query: 'SELECT 1', interval: 60 },
+            'new-name': { id: 'old-name', query: 'SELECT 1', interval: 60 },
           },
         },
       });
@@ -1456,12 +1458,31 @@ describe('updatePackRoute', () => {
       await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
 
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
-      // The SO query id is rebuilt from the incoming map key, but the existing
-      // schedule_id must still be carried over from the stored query matched by
-      // its payload `id`.
       const written = getWrittenQueries(mockClient);
-      const stored = written.find((q) => q.id === 'different-map-key')!;
-      expect(stored.schedule_id).toBe('existing-sched-keymismatch');
+      // The query is written under its new id (rebuilt from the map key)...
+      const renamed = written.find((q) => q.id === 'new-name')!;
+      expect(renamed).toBeDefined();
+      // ...and the original schedule_id survives the rename.
+      expect(renamed.schedule_id).toBe('sched-to-preserve');
+      // No stale `id` from the payload is persisted onto the query value.
+      expect(renamed.id).toBe('new-name');
+    });
+
+    it('route validation accepts a per-query `id` on the update body', () => {
+      // The rename-preservation path above relies on the request body being
+      // allowed to carry a per-query `id`. This pins that the real route
+      // validation (io-ts decode + exactCheck) accepts it rather than 400ing.
+      const validate = buildRouteValidation(updatePacksRequestBodySchema);
+      const ok = jest.fn((value) => ({ value }));
+      const badRequest = jest.fn((error) => ({ error }));
+
+      validate({ queries: { 'new-name': { id: 'old-name', query: 'SELECT 1', interval: 60 } } }, {
+        ok,
+        badRequest,
+      } as never);
+
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(ok).toHaveBeenCalledTimes(1);
     });
   });
 });

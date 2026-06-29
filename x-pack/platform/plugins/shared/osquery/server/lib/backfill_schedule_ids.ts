@@ -37,13 +37,10 @@ import {
  * scheduled-history join key).
  *
  * This is NOT a backfill: minting `schedule_id` is owned by the pack SO
- * `data_backfill` model version (V4), which runs
- * deterministically on every upgrade path. By the time this reconciler runs,
- * the SO is guaranteed to carry `schedule_id` on every query. The reconciler
- * therefore reads the SO as the source of truth and never mints — making it
- * fully idempotent (no per-run uuid drift). The one thing a model version
- * structurally cannot do — write the cross-SO Fleet package policy — is the
- * only job left here.
+ * `data_backfill` model version (V4). By the time this runs, the SO carries
+ * `schedule_id` on every query, so the reconciler reads it as the source of
+ * truth and never mints — making it idempotent (no per-run uuid drift). Writing
+ * the cross-SO Fleet package policy is the one job a model version cannot do.
  *
  * It writes ONLY the osquery pack block of the package policy; all other
  * policy state is preserved.
@@ -153,11 +150,8 @@ export const reconcileScheduleIdsToWire = async ({
           ) as Record<string, unknown> | undefined;
           const existingShard = existingPackBlock?.shard ?? legacyPackBlock?.shard;
 
-          // The pack-config block this reconcile run is about to write onto the
-          // wire. The write below deletes the existing block
-          // (`removePackFromPolicy`) and re-sets exactly this object, so it IS
-          // the post-write state — comparing it against the current wire tells
-          // us whether the write would change anything.
+          // The exact block the write below re-sets, so it IS the post-write
+          // state — used as the diff gate against the current wire.
           const intendedPackBlock = {
             ...(existingShard !== undefined ? { shard: existingShard } : {}),
             pack_id: packSO.id,
