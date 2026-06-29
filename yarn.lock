@@ -19425,10 +19425,10 @@ constants-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha1-wguW2MYXdIqvHBYCF2DNJ/y4y3U=
 
-constate@3.3.3:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/constate/-/constate-3.3.3.tgz#668a4e849986ad68fc4e0e67451e388a1c479e06"
-  integrity sha512-J1P1K/GSB2Bn7uLU9AC9ddJb4PooiMHvektj8PK31Tj6nDWYjnmqVkOajzFp2oT7dpCjE2dL1VXVt/XrNwNwQA==
+constate@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/constate/-/constate-4.0.0.tgz#08439e2ae04da5f6e82a7b02b8c369728f1716c6"
+  integrity sha512-UtqW4acGFSaCk0/2TuzeoS/lWTal+U5Q+oWmcKWQ6/54FwC1iQlurI7BQtHEBTLmzsmaQHkQh8UEackXpP7+7Q==
 
 content-disposition@^1.0.0:
   version "1.0.0"
