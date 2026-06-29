@@ -75,3 +75,10 @@ export type {
   AlertCondition,
   ConditionOperator,
 } from './flyout/compose_discover/rule_builder/threshold/form_types';
+
+export { resolveDashboardsByIds } from './form/field_groups/search_related_dashboards';
+export type {
+  Dashboard,
+  MissingDashboard,
+  ResolveDashboardsResult,
+} from './form/field_groups/search_related_dashboards';
