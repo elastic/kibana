@@ -252,13 +252,16 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
+export const TEST_CONNECTOR_SUB_ACTION = '__test__';
+
+/** Success = return optional data; failure = throw (mapped to error by the executor). */
+export type ConnectorTestHandlerResult = void | Record<string, unknown>;
+
 export interface ConnectorTest {
-  handler: (ctx: ActionContext) => Promise<{
-    ok: boolean;
-    message?: string;
-    [key: string]: unknown;
-  }>;
+  handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
+  /** Transitional per-team consent marker: owning team opted this Test tab into the product UI. */
+  enabled?: boolean;
 }
 
 // ============================================================================

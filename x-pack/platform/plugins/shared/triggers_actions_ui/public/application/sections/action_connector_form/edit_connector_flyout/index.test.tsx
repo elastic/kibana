@@ -376,6 +376,7 @@ describe('EditConnectorFlyout', () => {
           onClose={onClose}
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
+          isTestable={true}
         />
       );
 
@@ -390,6 +391,7 @@ describe('EditConnectorFlyout', () => {
           onClose={onClose}
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
+          isTestable={true}
         />
       );
 
@@ -409,6 +411,7 @@ describe('EditConnectorFlyout', () => {
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
           tab={EditConnectorTabs.Test}
+          isTestable={true}
         />
       );
 
@@ -631,6 +634,7 @@ describe('EditConnectorFlyout', () => {
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
           tab={EditConnectorTabs.Test}
+          isTestable={true}
         />
       );
 
@@ -658,6 +662,7 @@ describe('EditConnectorFlyout', () => {
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
           tab={EditConnectorTabs.Test}
+          isTestable={true}
         />
       );
 
@@ -692,6 +697,7 @@ describe('EditConnectorFlyout', () => {
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
           tab={EditConnectorTabs.Test}
+          isTestable={true}
         />
       );
 
@@ -710,6 +716,7 @@ describe('EditConnectorFlyout', () => {
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
           tab={EditConnectorTabs.Test}
+          isTestable={true}
         />
       );
 
@@ -743,6 +750,7 @@ describe('EditConnectorFlyout', () => {
           onClose={onClose}
           connector={connector}
           onConnectorUpdated={onConnectorUpdated}
+          isTestable={true}
         />
       );
 
@@ -782,17 +790,32 @@ describe('is spec connector', () => {
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });
 
-  it('should not render the test tab', async () => {
+  it('should not render the test tab when isTestable is false', async () => {
     const { getByTestId } = appMockRenderer.render(
       <EditConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
         onClose={onClose}
         connector={connector}
         onConnectorUpdated={onConnectorUpdated}
+        isTestable={false}
       />
     );
 
     expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
     expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
+  });
+
+  it('should render the test tab when isTestable is true', async () => {
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+        isTestable={true}
+      />
+    );
+
+    expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
   });
 });

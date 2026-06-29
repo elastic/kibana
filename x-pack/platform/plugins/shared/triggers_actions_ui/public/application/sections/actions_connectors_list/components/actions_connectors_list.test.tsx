@@ -744,7 +744,7 @@ describe('actions_connectors_list', () => {
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     });
 
-    it('should disable the test play button', async () => {
+    it('should disable the test play button for spec connectors without testable', async () => {
       const actions = [
         {
           id: '1',
@@ -773,6 +773,49 @@ describe('actions_connectors_list', () => {
       expect(await screen.findAllByTestId('connectors-row')).toHaveLength(1);
       const runButtons = await screen.findAllByTestId('runConnector');
       expect(runButtons[0]).toBeDisabled();
+    });
+
+    it('should enable the test play button for testable spec connectors', async () => {
+      loadActionTypes.mockReset();
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: 'spec.connector',
+          name: 'Spec Connector',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          supportedFeatureIds: ['alerting'],
+          source: 'spec',
+          testable: true,
+        },
+      ]);
+
+      const actions = [
+        {
+          id: '1',
+          actionTypeId: 'spec.connector',
+          name: 'Spec Connector 1',
+          referencedByCount: 1,
+          config: {},
+        },
+      ] as ActionConnector[];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      const runButtons = await screen.findAllByTestId('runConnector');
+      expect(runButtons[0]).toBeEnabled();
     });
   });
 

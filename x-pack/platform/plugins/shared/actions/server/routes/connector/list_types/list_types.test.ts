@@ -67,6 +67,7 @@ describe('listTypesRoute', () => {
             "supported_feature_ids": Array [
               "alerting",
             ],
+            "testable": false,
           },
         ],
       }
@@ -86,6 +87,7 @@ describe('listTypesRoute', () => {
           sub_feature: 'endpointSecurity',
           is_deprecated: false,
           source: 'stack',
+          testable: false,
         },
       ],
     });
@@ -142,6 +144,7 @@ describe('listTypesRoute', () => {
             "supported_feature_ids": Array [
               "alerting",
             ],
+            "testable": false,
           },
         ],
       }
@@ -169,6 +172,7 @@ describe('listTypesRoute', () => {
           is_system_action_type: false,
           is_deprecated: false,
           source: 'stack',
+          testable: false,
         },
       ],
     });

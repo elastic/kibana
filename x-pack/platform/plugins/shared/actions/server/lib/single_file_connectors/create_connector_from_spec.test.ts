@@ -6,6 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
@@ -41,6 +42,7 @@ describe('createConnectorTypeFromSpec', () => {
           handler: jest.fn(),
         },
       },
+      ...overrides,
     } as ConnectorSpec);
 
   beforeEach(() => {
@@ -340,6 +342,136 @@ describe('createConnectorTypeFromSpec', () => {
 
       expect(connectorType.validate.secrets).toBeDefined();
       expect(mockActionsConfigUtils.getWebhookSettings).toHaveBeenCalled();
+    });
+  });
+
+  describe('test support', () => {
+    it('sets testable to true when spec defines test', () => {
+      const testHandler = jest.fn();
+      const spec = createMockSpec({
+        test: { handler: testHandler, enabled: true },
+      });
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      expect(connectorType.testable).toBe(true);
+    });
+
+    it('sets testable to false when spec has no test', () => {
+      const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+
+      expect(connectorType.testable).toBe(false);
+    });
+
+    it('does not enable test support when test is present but enabled is falsy', async () => {
+      const testHandler = jest.fn();
+      const specWithOnlyDisabledTest = createMockSpec({
+        actions: {},
+        test: { handler: testHandler },
+      });
+
+      expect(() =>
+        createConnectorTypeFromSpec(specWithOnlyDisabledTest, mockActionsPlugin)
+      ).toThrow('No actions defined');
+
+      const specWithActions = createMockSpec({
+        test: { handler: testHandler },
+      });
+      const connectorType = createConnectorTypeFromSpec(specWithActions, mockActionsPlugin);
+
+      expect(connectorType.testable).toBe(false);
+
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ get: jest.fn() });
+
+      await expect(
+        connectorType.executor!({
+          actionId: 'connector-id',
+          config: {},
+          secrets: {},
+          params: { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} },
+          logger: {
+            error: jest.fn(),
+            debug: jest.fn(),
+            warn: jest.fn(),
+            info: jest.fn(),
+          } as never,
+          services: {} as never,
+          configurationUtilities: mockActionsConfigUtils,
+          connectorUsageCollector: {} as never,
+        })
+      ).rejects.toThrow('Unsupported subAction type __test__');
+
+      expect(testHandler).not.toHaveBeenCalled();
+    });
+
+    it('routes __test__ subAction to spec.test.handler', async () => {
+      const testHandler = jest.fn().mockResolvedValue({ connected: true });
+      const spec = createMockSpec({
+        test: { handler: testHandler, enabled: true },
+      });
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ get: jest.fn() });
+
+      await connectorType.executor!({
+        actionId: 'connector-id',
+        config: {},
+        secrets: {},
+        params: { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} },
+        logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() } as never,
+        services: {} as never,
+        configurationUtilities: mockActionsConfigUtils,
+        connectorUsageCollector: {} as never,
+      });
+
+      expect(testHandler).toHaveBeenCalled();
+    });
+
+    it('throws when spec.actions contains the reserved __test__ key', () => {
+      const spec = createMockSpec({
+        actions: {
+          [TEST_CONNECTOR_SUB_ACTION]: {
+            input: z4.object({ test: z4.string() }),
+            handler: jest.fn(),
+          },
+        },
+        test: { handler: jest.fn(), enabled: true },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
+        TEST_CONNECTOR_SUB_ACTION
+      );
+    });
+
+    it('does not mutate spec.actions when augmenting with test handler', () => {
+      const actions = {
+        testAction: {
+          input: z4.object({ test: z4.string() }),
+          handler: jest.fn(),
+        },
+      };
+      const spec = createMockSpec({
+        actions,
+        test: { handler: jest.fn(), enabled: true },
+      });
+
+      createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      expect(spec.actions).toBe(actions);
+      expect(spec.actions).not.toHaveProperty(TEST_CONNECTOR_SUB_ACTION);
+    });
+
+    it('creates executor and params validator for spec with only test and empty actions', () => {
+      const spec = createMockSpec({
+        actions: {},
+        test: { handler: jest.fn(), enabled: true },
+      });
+
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      expect(connectorType.executor).toBeDefined();
+      expect(connectorType.validate.params).toBeDefined();
+      expect(connectorType.testable).toBe(true);
     });
   });
 

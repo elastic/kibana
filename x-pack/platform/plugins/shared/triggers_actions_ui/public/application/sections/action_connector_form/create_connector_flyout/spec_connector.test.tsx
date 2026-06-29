@@ -51,11 +51,13 @@ describe('spec connector', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'siem'],
+        source: 'spec',
+        testable: false,
       },
     ]);
   });
 
-  it('does not show the save and test', async () => {
+  it('does not show the save and test button for non-testable spec connectors', async () => {
     appMockRenderer.render(
       <CreateConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
@@ -230,7 +232,7 @@ describe('spec connector with API fetch', () => {
     });
   });
 
-  it('does not show save and test button for spec connectors', async () => {
+  it('does not show save and test button for non-testable spec connectors', async () => {
     appMockRenderer.render(
       <CreateConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
@@ -250,6 +252,32 @@ describe('spec connector with API fetch', () => {
     expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
     // But should show the save button
     expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
+  });
+
+  it('shows save and test button for testable spec connectors', async () => {
+    loadActionTypes.mockResolvedValue([
+      {
+        ...specConnectorType,
+        testable: true,
+      },
+    ]);
+
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('create-connector-flyout-save-test-btn')).toBeInTheDocument();
   });
 
   it('navigates back to connector list when pressing back button', async () => {

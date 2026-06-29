@@ -31,7 +31,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import {
   DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
@@ -45,6 +44,7 @@ import {
   useConnectorOAuthDisconnect,
 } from '@kbn/response-ops-oauth-hooks';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
+import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -470,7 +470,7 @@ const ActionsConnectorsList = ({
 
         const actionType = actionTypesIndex[item.actionTypeId];
         const showFixButton = item.isMissingSecrets && actionType?.enabled;
-        const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
+        const isConnectorTestable = isConnectorTypeTestable(actionType);
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
@@ -525,7 +525,7 @@ const ActionsConnectorsList = ({
               <RunOperation
                 canExecute={
                   !isDisabledEarsConnector(item) &&
-                  isStackConnector &&
+                  isConnectorTestable &&
                   hasExecuteActionsCapability(capabilities, actionType?.subFeature)
                 }
                 item={item}

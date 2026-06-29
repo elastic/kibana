@@ -20,8 +20,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
@@ -31,6 +29,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
+import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -74,11 +73,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     http,
     uiSettings,
   } = useKibana().services;
-  const {
-    isLoading: isSavingConnector,
-    createConnector,
-    createConnectorError,
-  } = useCreateConnector();
+  const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -149,8 +144,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const hasConnectorTypeSelected = actionType != null;
   const disabled =
     hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError || !actionTypeModel;
-  // Only stack connectors (not spec-based) support the test tab
-  const isTestable = !actionType?.source || actionType.source === ACTION_TYPE_SOURCES.stack;
+  const isTestable = isConnectorTypeTestable(actionType ?? undefined);
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
@@ -468,22 +462,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                     }
                   )}
                 />
-                <EuiSpacer size="m" />
-              </>
-            )}
-
-            {createConnectorError && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  size="s"
-                  color="danger"
-                  iconType="error"
-                  data-test-subj="create-connector-api-error"
-                  title={createConnectorError.title}
-                >
-                  <p>{createConnectorError.message}</p>
-                </EuiCallOut>
                 <EuiSpacer size="m" />
               </>
             )}

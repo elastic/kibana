@@ -200,6 +200,10 @@ describe('AbuseIPDBConnector', () => {
   });
 
   describe('test handler', () => {
+    it('should be opted in for the Test tab', () => {
+      expect(AbuseIPDBConnector.test?.enabled).toBe(true);
+    });
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -214,27 +218,20 @@ describe('AbuseIPDBConnector', () => {
       if (!AbuseIPDBConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await AbuseIPDBConnector.test.handler(mockContext);
+      await expect(AbuseIPDBConnector.test.handler(mockContext)).resolves.toEqual({});
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/check', {
         params: { ipAddress: '8.8.8.8' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to AbuseIPDB API',
-      });
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw when API is not accessible', async () => {
       mockClient.get.mockRejectedValue(new Error('Network error'));
 
       if (!AbuseIPDBConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await AbuseIPDBConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      await expect(AbuseIPDBConnector.test.handler(mockContext)).rejects.toThrow('Network error');
     });
   });
 });

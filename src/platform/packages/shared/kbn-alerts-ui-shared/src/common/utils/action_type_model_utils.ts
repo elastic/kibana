@@ -114,6 +114,7 @@ export function transformSpecToActionTypeModel(
       }
       return { default: SpecConnectorFormFields };
     }),
+    // Spec-based connectors don't have custom action params UI
     actionParamsFields: lazy(async () => ({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
     connectorForm: {

@@ -157,6 +157,13 @@ export const connectorTypeResponseSchema = schema.object(
         },
       })
     ),
+    testable: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether the connector type supports testing via the Test tab.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_type_response' } }
 );
