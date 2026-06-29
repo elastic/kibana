@@ -25,7 +25,6 @@ import {
   getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
-
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';

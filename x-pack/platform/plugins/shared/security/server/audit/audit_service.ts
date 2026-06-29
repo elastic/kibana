@@ -192,7 +192,10 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
     // Any user-supplied fieldRenames are preserved; audit renames take precedence on conflicts.
     const appender =
       baseAppender.type === 'otel'
-        ? { ...baseAppender, fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES } }
+        ? {
+            ...baseAppender,
+            fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES },
+          }
         : baseAppender;
 
     return {
