@@ -15,7 +15,7 @@ export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scrip
 
 /**
  * Virtual profile: load golden-cluster config from dev Vault at runtime (no config file).
- * Use with `--datasets-profile dev-vault` or `--profile dev-vault`.
+ * Use with `--evals-kbn-profile dev-vault` or `--profile dev-vault`.
  */
 export const DEV_VAULT_PROFILE = 'dev-vault';
 
@@ -39,7 +39,9 @@ export const isExportProfileImplicitLocal = (
 ): boolean => {
   if (exportProfile !== 'local') return false;
   const hasExplicitExport = Boolean(
-    flagsReader.string('export-profile') ?? flagsReader.string('profile')
+    flagsReader.string('tracing-profile') ??
+      flagsReader.string('export-profile') ??
+      flagsReader.string('profile')
   );
   return !hasExplicitExport;
 };

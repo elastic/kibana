@@ -178,7 +178,9 @@ export const startCmd: Command<void> = {
       'repetitions',
       'grep',
       'profile',
+      'evals-kbn-profile',
       'datasets-profile',
+      'tracing-profile',
       'export-profile',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
@@ -329,9 +331,21 @@ export const startCmd: Command<void> = {
     }
 
     const baseProfile = profile;
-    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
+
+    const evalsKbnProfileNew = flagsReader.string('evals-kbn-profile');
+    const evalsKbnProfileOld = flagsReader.string('datasets-profile');
+    if (evalsKbnProfileOld && !evalsKbnProfileNew) {
+      log.warning('--datasets-profile is deprecated; use --evals-kbn-profile instead');
+    }
+    const datasetsProfile = evalsKbnProfileNew ?? evalsKbnProfileOld ?? baseProfile;
+
+    const tracingProfileNew = flagsReader.string('tracing-profile');
+    const tracingProfileOld = flagsReader.string('export-profile');
+    if (tracingProfileOld && !tracingProfileNew) {
+      log.warning('--export-profile is deprecated; use --tracing-profile instead');
+    }
     const exportProfile =
-      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
+      tracingProfileNew ?? tracingProfileOld ?? baseProfile ?? defaultExportProfile(repoRoot);
 
     const profileEnvOverrides: Record<string, string> = {
       ...envFromDatasetsProfile(repoRoot, datasetsProfile),
@@ -340,7 +354,7 @@ export const startCmd: Command<void> = {
       }),
     };
 
-    // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
+    // Best-effort default: if we implicitly resolved a tracing profile, don't fail the run when the
     // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
     // When the user actively chose a profile (via CLI flag or wizard), trust their config.
     const exportProfileIsImplicit =
@@ -354,8 +368,8 @@ export const startCmd: Command<void> = {
 
       if (!tracingReachable) {
         log.warning(
-          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
-            'Continuing without external trace queries. To require export, pass --export-profile local.'
+          `Tracing profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+            'Continuing without external trace queries. To require tracing, pass --tracing-profile local.'
         );
         delete profileEnvOverrides.TRACING_ES_URL;
         delete profileEnvOverrides.TRACING_ES_API_KEY;
@@ -375,7 +389,7 @@ export const startCmd: Command<void> = {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
     log.info(
-      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
+      `Profiles:  evals-kbn=${datasetsProfile ?? 'config'} tracing=${exportProfile ?? 'none'}`
     );
     log.info('');
 
@@ -395,13 +409,15 @@ export const startCmd: Command<void> = {
     if (profile) {
       rerunArgs.push('--profile', profile);
     }
-    const passedDatasetsProfile = flagsReader.string('datasets-profile');
-    const passedExportProfile = flagsReader.string('export-profile');
-    if (passedDatasetsProfile) {
-      rerunArgs.push('--datasets-profile', passedDatasetsProfile);
+    if (evalsKbnProfileNew) {
+      rerunArgs.push('--evals-kbn-profile', evalsKbnProfileNew);
+    } else if (evalsKbnProfileOld) {
+      rerunArgs.push('--evals-kbn-profile', evalsKbnProfileOld);
     }
-    if (passedExportProfile) {
-      rerunArgs.push('--export-profile', passedExportProfile);
+    if (tracingProfileNew) {
+      rerunArgs.push('--tracing-profile', tracingProfileNew);
+    } else if (tracingProfileOld) {
+      rerunArgs.push('--tracing-profile', tracingProfileOld);
     }
 
     const grep = flagsReader.string('grep');

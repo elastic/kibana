@@ -79,7 +79,9 @@ export const runSuiteCmd: Command<void> = {
       'repetitions',
       'grep',
       'profile',
+      'evals-kbn-profile',
       'datasets-profile',
+      'tracing-profile',
       'export-profile',
       'trace-es-url',
       'trace-es-api-key',
@@ -138,9 +140,21 @@ export const runSuiteCmd: Command<void> = {
     }
 
     const baseProfile = flagsReader.string('profile') ?? undefined;
-    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
+
+    const evalsKbnProfileNew = flagsReader.string('evals-kbn-profile');
+    const evalsKbnProfileOld = flagsReader.string('datasets-profile');
+    if (evalsKbnProfileOld && !evalsKbnProfileNew) {
+      log.warning('--datasets-profile is deprecated; use --evals-kbn-profile instead');
+    }
+    const datasetsProfile = evalsKbnProfileNew ?? evalsKbnProfileOld ?? baseProfile;
+
+    const tracingProfileNew = flagsReader.string('tracing-profile');
+    const tracingProfileOld = flagsReader.string('export-profile');
+    if (tracingProfileOld && !tracingProfileNew) {
+      log.warning('--export-profile is deprecated; use --tracing-profile instead');
+    }
     const exportProfile =
-      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
+      tracingProfileNew ?? tracingProfileOld ?? baseProfile ?? defaultExportProfile(repoRoot);
 
     Object.assign(envOverrides, envFromDatasetsProfile(repoRoot, datasetsProfile));
     Object.assign(
@@ -159,15 +173,17 @@ export const runSuiteCmd: Command<void> = {
 
       if (!tracingReachable) {
         log.warning(
-          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
-            'Continuing without external trace queries. To require export, pass --export-profile local.'
+          `Tracing profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+            'Continuing without external trace queries. To require tracing, pass --tracing-profile local.'
         );
         delete envOverrides.TRACING_ES_URL;
         delete envOverrides.TRACING_ES_API_KEY;
       }
     }
 
-    log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
+    log.info(
+      `Profiles: evals-kbn=${datasetsProfile ?? 'config'} tracing=${exportProfile ?? 'none'}`
+    );
 
     if (executor === 'phoenix') {
       envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';

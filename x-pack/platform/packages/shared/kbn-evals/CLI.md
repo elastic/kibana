@@ -78,19 +78,21 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                                  |
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                             |
-| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`)            |
-| `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)                       |
+| `--evals-kbn-profile <name>`     |           | Override Kibana-side settings (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`)        |
+| `--tracing-profile <name>`       |           | Override tracing settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)                     |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                        |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                                      |
 | `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                                         |
 | `--skip-init`                    |           | Skip automatic config and connector setup                                                   |
 | `--dry-run`                      |           | Print configuration and exit without running                                                |
 
-Traces are exported by EDOT to the export cluster (controlled by `--export-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
+Traces are exported by EDOT to the tracing cluster (controlled by `--tracing-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
 
-#### Example: golden datasets + local export
+> **Deprecated flags:** `--datasets-profile` (use `--evals-kbn-profile`) and `--export-profile` (use `--tracing-profile`) still work but emit a deprecation warning.
 
-Use `--profile dev-vault` for datasets and `--export-profile local` to export results locally:
+#### Example: golden datasets + local tracing
+
+Use `--profile dev-vault` for datasets and `--tracing-profile local` to export results locally:
 
 ```bash
 node scripts/evals init config                   # default profile (golden cluster pre-selected)
@@ -100,8 +102,8 @@ node scripts/evals init config --profile local   # local profile (local target p
 Run:
 
 ```bash
-node scripts/evals start --suite attack-discovery --export-profile local
-node scripts/evals start --suite attack-discovery --datasets-profile dev-vault --export-profile local
+node scripts/evals start --suite attack-discovery --tracing-profile local
+node scripts/evals start --suite attack-discovery --evals-kbn-profile dev-vault --tracing-profile local
 ```
 
 ### `stop` -- Stop background services
@@ -159,9 +161,9 @@ node scripts/evals run --suite streams --dry-run
 | `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)          |
 | `--repetitions <n>`               |           | Repeat each example N times                                   |
 | `--executor <name>`               |           | `kibana` (default) or `phoenix`                               |
-| `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json` |
-| `--datasets-profile <name>`       |           | Load dataset settings from `config.<name>.json`               |
-| `--export-profile <name>`         |           | Load export settings from `config.<name>.json`                |
+| `--profile <name>`                |           | Load both evals-kbn + tracing settings from `config.<name>.json` |
+| `--evals-kbn-profile <name>`      |           | Load Kibana-side evals settings from `config.<name>.json`        |
+| `--tracing-profile <name>`        |           | Load tracing settings from `config.<name>.json`                  |
 | `--trace-es-url <url>`            |           | Elasticsearch URL for trace queries                           |
 | `--trace-es-api-key <key>`        |           | API key for trace ES                                          |
 | `--evaluations-kbn-url <url>`     |           | Kibana URL for score ingestion and dataset operations         |

@@ -62,10 +62,10 @@ node scripts/evals init
 
 #### Loading datasets from Golden Cluster
 
-Use `--datasets-profile` when dataset credentials should come from the shared golden cluster:
+Use `--evals-kbn-profile` when Kibana-side credentials (datasets, score ingestion) should come from the shared golden cluster:
 
 ```bash
-node scripts/evals start --suite agent-builder --datasets-profile dev-vault
+node scripts/evals start --suite agent-builder --evals-kbn-profile dev-vault
 ```
 
 #### Filtering, model selection, judge, repetitions
