@@ -12,3 +12,4 @@ export { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 export { ChangeHistoryRestoreButton } from './change_history_restore_button';
 export type { ChangeHistoryRestoreButtonProps } from './change_history_restore_button';
 export { ChangeHistoryDefaultPreviewHeaderActions } from './change_history_default_preview_header_actions';
+export type { ChangeHistoryDefaultPreviewHeaderActionsProps } from './change_history_default_preview_header_actions';

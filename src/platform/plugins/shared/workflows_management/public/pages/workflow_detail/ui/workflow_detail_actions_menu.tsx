@@ -9,7 +9,7 @@
 
 import { EuiButtonIcon, EuiListGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useChangeHistoryConfig } from '@kbn/change-history-ui';
+import { useChangeHistoryModal } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '../../../features/change_history';
 
 const WorkflowDetailActionsMenuContent = (): JSX.Element => {
-  const { isOpen: isChangeHistoryOpen } = useChangeHistoryConfig();
+  const { isOpen: isChangeHistoryOpen } = useChangeHistoryModal();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => {

@@ -15,13 +15,16 @@ import * as i18n from './restore_translations';
 
 export interface ChangeHistoryRestoreButtonProps {
   change: ChangeHistoryDetail;
+  /** Invoked after a successful restore (e.g. to refetch and re-select the current change). */
+  onRestored?: () => Promise<void> | void;
 }
 
 export function ChangeHistoryRestoreButton({
   change,
+  onRestored,
 }: ChangeHistoryRestoreButtonProps): JSX.Element | null {
   const { objectId, supports } = useChangeHistoryConfig();
-  const { restoreChange, isRestoring, error, clearError } = useChangeHistoryRestore();
+  const { restoreChange, isRestoring, error, clearError } = useChangeHistoryRestore({ onRestored });
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
   const versionLabel = getRestoreVersionLabel(change);

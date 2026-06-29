@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
-import { useChangeHistoryState } from '../../provider/use_change_history_state';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryPreviewCompare } from '../../hooks/use_change_history_preview_compare';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
@@ -47,14 +46,15 @@ const PreviewPanelState = ({
 );
 
 export interface ChangeHistoryPreviewPanelProps {
+  selectedChangeId?: string;
   listItems?: ChangeHistoryListItem[];
 }
 
 export function ChangeHistoryPreviewPanel({
+  selectedChangeId,
   listItems = [],
 }: ChangeHistoryPreviewPanelProps): JSX.Element {
   const { adapter, objectId, renderPreview } = useChangeHistoryConfig();
-  const { selectedChangeId } = useChangeHistoryState();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
     objectId,

@@ -17,7 +17,7 @@ export interface ChangeHistoryResolvedLabels {
   previewTitle: string;
 }
 
-/** Host-facing provider configuration exposed via `useChangeHistoryConfig`. */
+/** Stable, host-facing configuration exposed via `useChangeHistoryConfig`. */
 export interface ChangeHistoryConfigValue {
   objectId: string;
   adapter: ChangeHistoryAdapter;
@@ -25,8 +25,6 @@ export interface ChangeHistoryConfigValue {
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryResolvedLabels;
   supports: ChangeHistorySupports;
-  /** Whether the change history modal is open. */
-  isOpen: boolean;
 }
 
 export type { ChangeHistoryLabels };

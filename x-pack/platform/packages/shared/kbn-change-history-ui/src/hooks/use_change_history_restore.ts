@@ -9,8 +9,12 @@ import { useCallback, useRef, useState } from 'react';
 import type { ChangeHistoryError } from '../types/change_history_error';
 import type { RestoreChangeParams } from '../types/restore_change_params';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
-import { useChangeHistoryState } from '../provider/use_change_history_state';
 import { mapChangeHistoryRestoreError } from '../utils/map_change_history_restore_error';
+
+export interface UseChangeHistoryRestoreArgs {
+  /** Invoked after a successful restore (e.g. to refetch and re-select the current change). */
+  onRestored?: () => Promise<void> | void;
+}
 
 export interface UseChangeHistoryRestoreResult {
   canRestore: boolean;
@@ -20,9 +24,10 @@ export interface UseChangeHistoryRestoreResult {
   restoreChange: (params: RestoreChangeParams) => Promise<boolean>;
 }
 
-export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
+export const useChangeHistoryRestore = ({
+  onRestored,
+}: UseChangeHistoryRestoreArgs = {}): UseChangeHistoryRestoreResult => {
   const { adapter, supports } = useChangeHistoryConfig();
-  const { refetchAndSelectCurrent } = useChangeHistoryState();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
   const abortControllerRef = useRef<AbortController | undefined>();
@@ -54,7 +59,7 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
           return false;
         }
 
-        await refetchAndSelectCurrent();
+        await onRestored?.();
 
         if (abortController.signal.aborted) {
           return false;
@@ -74,7 +79,7 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
         }
       }
     },
-    [adapter, refetchAndSelectCurrent, supports.restore]
+    [adapter, onRestored, supports.restore]
   );
 
   return {

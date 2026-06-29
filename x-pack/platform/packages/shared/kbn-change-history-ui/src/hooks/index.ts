@@ -16,7 +16,10 @@ export type {
   UseChangeHistoryDetailResult,
 } from './use_change_history_detail';
 export { useChangeHistoryRestore } from './use_change_history_restore';
-export type { UseChangeHistoryRestoreResult } from './use_change_history_restore';
+export type {
+  UseChangeHistoryRestoreArgs,
+  UseChangeHistoryRestoreResult,
+} from './use_change_history_restore';
 export { useChangeHistoryPreviewCompare } from './use_change_history_preview_compare';
 export type {
   UseChangeHistoryPreviewCompareArgs,

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiModal, EuiModalBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
 import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_error_prompt';
 import { ChangeHistoryTimeline } from '../timeline/change_history_timeline';
+import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
-import { useChangeHistoryState } from '../../provider/use_change_history_state';
+import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
 import * as i18n from '../timeline/translations';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
@@ -30,19 +31,42 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { labels, supports } = useChangeHistoryConfig();
-  const {
-    isModalOpen,
-    closeModal,
-    selectedChangeId,
-    setSelectedChangeId,
-    items,
-    total,
-    isLoading,
-    isLoadingMore,
-    error,
-    loadMore,
-  } = useChangeHistoryState();
+  const { adapter, objectId, labels, supports } = useChangeHistoryConfig();
+  const { isOpen, closeModal } = useChangeHistoryModal();
+
+  // Volatile, modal-internal state lives here (not in context) and flows down by props.
+  const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
+  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList(
+    {
+      adapter,
+      objectId,
+      enabled: isOpen,
+    }
+  );
+
+  const refetchAndSelectCurrent = useCallback(async (): Promise<void> => {
+    const result = await refetch();
+    const currentChangeId = result?.items[0]?.id;
+    if (currentChangeId) {
+      setSelectedChangeId(currentChangeId);
+    }
+  }, [refetch]);
+
+  // Reset the selection whenever the modal closes so a fresh open re-selects the latest change.
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedChangeId(undefined);
+    }
+  }, [isOpen]);
+
+  // Auto-select the most recent change when the modal opens with no selection.
+  useEffect(() => {
+    if (!isOpen || selectedChangeId || isLoading || items.length === 0) {
+      return;
+    }
+
+    setSelectedChangeId(items[0]?.id);
+  }, [isOpen, isLoading, items, selectedChangeId]);
 
   const styles = useMemo(
     () => ({
@@ -95,7 +119,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     [euiTheme]
   );
 
-  if (!isModalOpen) {
+  if (!isOpen) {
     return null;
   }
 
@@ -108,7 +132,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
     : undefined;
 
   const previewHeaderActions = supports.restore ? (
-    <ChangeHistoryDefaultPreviewHeaderActions />
+    <ChangeHistoryDefaultPreviewHeaderActions
+      selectedChangeId={selectedChangeId}
+      onRestored={refetchAndSelectCurrent}
+    />
   ) : undefined;
 
   const renderSidebarContent = () => {
@@ -159,7 +186,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
             onBack={closeModal}
             headerActions={previewHeaderActions}
           >
-            <ChangeHistoryPreviewPanel listItems={items} />
+            <ChangeHistoryPreviewPanel selectedChangeId={selectedChangeId} listItems={items} />
           </ChangeHistoryPreviewShell>
 
           <ChangeHistorySidebarPanel title={i18n.TIMELINE_PANEL_TITLE} onClose={closeModal}>

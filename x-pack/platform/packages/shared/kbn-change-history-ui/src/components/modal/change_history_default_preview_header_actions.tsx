@@ -8,12 +8,18 @@
 import React from 'react';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
-import { useChangeHistoryState } from '../../provider/use_change_history_state';
 import { ChangeHistoryRestoreButton } from './change_history_restore_button';
 
-export function ChangeHistoryDefaultPreviewHeaderActions(): JSX.Element | null {
+export interface ChangeHistoryDefaultPreviewHeaderActionsProps {
+  selectedChangeId?: string;
+  onRestored?: () => Promise<void> | void;
+}
+
+export function ChangeHistoryDefaultPreviewHeaderActions({
+  selectedChangeId,
+  onRestored,
+}: ChangeHistoryDefaultPreviewHeaderActionsProps): JSX.Element | null {
   const { adapter, objectId, supports } = useChangeHistoryConfig();
-  const { selectedChangeId } = useChangeHistoryState();
   const { change, isLoading } = useChangeHistoryDetail({
     adapter,
     objectId,
@@ -27,7 +33,7 @@ export function ChangeHistoryDefaultPreviewHeaderActions(): JSX.Element | null {
 
   return (
     <div data-test-subj="changeHistoryDefaultPreviewHeaderActions">
-      <ChangeHistoryRestoreButton change={change} />
+      <ChangeHistoryRestoreButton change={change} onRestored={onRestored} />
     </div>
   );
 }

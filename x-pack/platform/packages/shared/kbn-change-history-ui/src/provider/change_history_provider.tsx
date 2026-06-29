@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type {
   ChangeHistoryFeatures,
@@ -14,9 +14,8 @@ import type {
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
-import { useChangeHistoryList } from '../hooks/use_change_history_list';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
-import { ChangeHistoryStateContext } from './change_history_state_context';
+import { ChangeHistoryModalContext } from './change_history_modal_context';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
 import * as i18n from '../components/timeline/translations';
 
@@ -41,51 +40,21 @@ export const ChangeHistoryProvider = ({
   permissions,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
+  const [isOpen, setIsOpen] = useState(false);
   const [prevObjectId, setPrevObjectId] = useState(objectId);
-
-  // The provider owns the list query so the list, its refetch, and selection
-  // live in one place — no cross-subtree ref plumbing required.
-  const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList(
-    {
-      adapter,
-      objectId,
-      enabled: isModalOpen,
-    }
-  );
 
   if (objectId !== prevObjectId) {
     setPrevObjectId(objectId);
-    setSelectedChangeId(undefined);
-    setIsModalOpen(false);
+    setIsOpen(false);
   }
 
   const openModal = useCallback(() => {
-    setIsModalOpen(true);
+    setIsOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedChangeId(undefined);
+    setIsOpen(false);
   }, []);
-
-  const refetchAndSelectCurrent = useCallback(async (): Promise<void> => {
-    const result = await refetch();
-    const currentChangeId = result?.items[0]?.id;
-    if (currentChangeId) {
-      setSelectedChangeId(currentChangeId);
-    }
-  }, [refetch]);
-
-  // Auto-select the most recent change when the modal opens with no selection.
-  useEffect(() => {
-    if (!isModalOpen || selectedChangeId || isLoading || items.length === 0) {
-      return;
-    }
-
-    setSelectedChangeId(items[0]?.id);
-  }, [isModalOpen, isLoading, items, selectedChangeId]);
 
   const supports = useMemo(
     () => resolveChangeHistorySupports(adapter, { features, permissions }),
@@ -103,11 +72,9 @@ export const ChangeHistoryProvider = ({
         previewTitle: labels.previewTitle,
       },
       supports,
-      isOpen: isModalOpen,
     }),
     [
       adapter,
-      isModalOpen,
       labels.previewBackLabel,
       labels.previewTitle,
       objectId,
@@ -117,41 +84,16 @@ export const ChangeHistoryProvider = ({
     ]
   );
 
-  const stateValue = useMemo(
-    () => ({
-      isModalOpen,
-      openModal,
-      closeModal,
-      selectedChangeId,
-      setSelectedChangeId,
-      items,
-      total,
-      isLoading,
-      isLoadingMore,
-      error,
-      loadMore,
-      refetchAndSelectCurrent,
-    }),
-    [
-      isModalOpen,
-      openModal,
-      closeModal,
-      selectedChangeId,
-      items,
-      total,
-      isLoading,
-      isLoadingMore,
-      error,
-      loadMore,
-      refetchAndSelectCurrent,
-    ]
+  const modalValue = useMemo(
+    () => ({ isOpen, openModal, closeModal }),
+    [isOpen, openModal, closeModal]
   );
 
   return (
     <ChangeHistoryConfigContext.Provider value={configValue}>
-      <ChangeHistoryStateContext.Provider value={stateValue}>
+      <ChangeHistoryModalContext.Provider value={modalValue}>
         {children}
-      </ChangeHistoryStateContext.Provider>
+      </ChangeHistoryModalContext.Provider>
     </ChangeHistoryConfigContext.Provider>
   );
 };

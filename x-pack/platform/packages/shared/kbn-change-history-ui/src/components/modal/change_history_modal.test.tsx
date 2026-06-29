@@ -224,6 +224,96 @@ describe('ChangeHistoryModal', () => {
     });
   });
 
+  it('refetches and selects the new current version after a successful restore', async () => {
+    const historicalItem = {
+      id: 'evt-2',
+      timestamp: '2026-06-15T12:00:00.000Z',
+      actor: { name: 'Bob' },
+      action: 'Updated',
+      metadata: { version: 3 },
+    };
+    const historicalDetail: ChangeHistoryDetail = {
+      ...historicalItem,
+      snapshot: TEST_SNAPSHOT_OLDER,
+    };
+    const restoredItem = {
+      id: 'evt-9',
+      timestamp: '2026-06-17T12:00:00.000Z',
+      actor: { name: 'Alice' },
+      action: 'Restored',
+      isCurrent: true,
+      metadata: { version: 9 },
+    };
+    const restoredDetail: ChangeHistoryDetail = {
+      ...restoredItem,
+      snapshot: TEST_SNAPSHOT,
+    };
+
+    const listChanges = jest
+      .fn()
+      .mockResolvedValueOnce({ items: [listItem, historicalItem], total: 2 })
+      .mockResolvedValue({ items: [restoredItem, listItem, historicalItem], total: 3 });
+
+    const adapter = createAdapter({
+      listChanges,
+      getChange: jest.fn().mockImplementation(({ changeId }) => {
+        if (changeId === 'evt-2') {
+          return Promise.resolve(historicalDetail);
+        }
+        if (changeId === 'evt-9') {
+          return Promise.resolve(restoredDetail);
+        }
+        return Promise.resolve(detail);
+      }),
+      restoreChange: jest.fn().mockResolvedValue(undefined),
+    });
+
+    render(
+      <I18nProvider>
+        <ChangeHistoryProvider
+          objectId={TEST_OBJECT_ID}
+          adapter={adapter}
+          features={{ restore: true }}
+          permissions={{ canRestore: true }}
+          labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          renderPreview={({ change }) => (
+            <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
+          )}
+        >
+          <ChangeHistoryTrigger />
+          <ChangeHistoryModal />
+        </ChangeHistoryProvider>
+      </I18nProvider>
+    );
+
+    openModal();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryItem-evt-2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-2'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('changeHistoryRestoreButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(adapter.restoreChange).toHaveBeenCalled();
+    });
+
+    // After restore, the list is refetched and the new current version is auto-selected.
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryItem-evt-9')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
+    });
+  });
+
   it('hides restore button for the current version', async () => {
     const adapter = createAdapter({
       restoreChange: jest.fn().mockResolvedValue(undefined),
