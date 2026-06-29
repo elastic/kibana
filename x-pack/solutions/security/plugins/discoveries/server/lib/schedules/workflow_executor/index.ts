@@ -72,6 +72,9 @@ const normalizeAttackDiscovery = (raw: unknown): AttackDiscovery => {
 const getDefaultWorkflowConfig = (): WorkflowConfig => ({
   alert_retrieval_mode: 'custom_query',
   alert_retrieval_workflow_ids: [],
+  alert_retrieval_workflows_enabled: false,
+  default_retrieval_enabled: true,
+  skill_enabled: true,
   validation_workflow_id: 'default',
 });
 
@@ -107,16 +110,31 @@ export const workflowExecutor = async ({
     | {
         alertRetrievalMode?: 'custom_only' | 'custom_query' | 'esql';
         alertRetrievalWorkflowIds?: string[];
+        alertRetrievalWorkflowsEnabled?: boolean;
         defaultAlertRetrievalEnabled?: boolean;
+        defaultRetrievalEnabled?: boolean;
         esqlQuery?: string;
+        skillEnabled?: boolean;
         validationWorkflowId?: string;
       }
     | undefined;
 
-  // Support both new (alertRetrievalMode) and legacy (defaultAlertRetrievalEnabled) formats
-  const alertRetrievalMode =
+  // New composite-persisted schedules carry the three independent toggles directly.
+  // Legacy-persisted schedules only have the single-enum shape; derive the composite
+  // toggles from the legacy fields for backward compatibility. Legacy `custom_only`
+  // meant "default retrieval off, custom workflows only", so it maps to
+  // `default_retrieval_enabled: false` with the query mode falling back to
+  // `custom_query`. The skill toggle is on by default.
+  const isComposite = typeof paramsWorkflowConfig?.skillEnabled === 'boolean';
+  const legacyRetrievalMode =
     paramsWorkflowConfig?.alertRetrievalMode ??
     (paramsWorkflowConfig?.defaultAlertRetrievalEnabled === false ? 'custom_only' : 'custom_query');
+  const isCustomOnly = legacyRetrievalMode === 'custom_only';
+  const alertRetrievalMode =
+    paramsWorkflowConfig?.alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
+  const alertRetrievalWorkflowIds =
+    paramsWorkflowConfig?.alertRetrievalWorkflowIds ??
+    getDefaultWorkflowConfig().alert_retrieval_workflow_ids;
 
   // Use the alerting framework's execution ID so that tracking events
   // written by executeGenerationWorkflow are queryable by the same ID
@@ -167,6 +185,11 @@ export const workflowExecutor = async ({
       logger: tracedLogger,
       request: deps.request,
       scheduleInfo,
+      // The orchestration can outlive the rule task's timeout. Forward the alerting
+      // framework's cancellation probe so executeGenerationWorkflow fails loudly (and
+      // writes a terminal generation-failed event) instead of reporting discoveries
+      // that the framework would silently discard after cancellation.
+      shouldStopExecution: services.shouldStopExecution,
       size,
       source: 'scheduled',
       sourceMetadata,
@@ -175,10 +198,17 @@ export const workflowExecutor = async ({
       type: DEFAULT_INSIGHT_TYPE,
       workflowConfig: {
         alert_retrieval_mode: alertRetrievalMode,
-        alert_retrieval_workflow_ids:
-          paramsWorkflowConfig?.alertRetrievalWorkflowIds ??
-          getDefaultWorkflowConfig().alert_retrieval_workflow_ids,
-        esql_query: paramsWorkflowConfig?.esqlQuery,
+        alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
+        alert_retrieval_workflows_enabled: isComposite
+          ? paramsWorkflowConfig?.alertRetrievalWorkflowsEnabled ?? false
+          : alertRetrievalWorkflowIds.length > 0,
+        default_retrieval_enabled: isComposite
+          ? paramsWorkflowConfig?.defaultRetrievalEnabled ?? false
+          : !isCustomOnly,
+        ...(paramsWorkflowConfig?.esqlQuery != null
+          ? { esql_query: paramsWorkflowConfig.esqlQuery }
+          : {}),
+        skill_enabled: isComposite ? paramsWorkflowConfig?.skillEnabled ?? true : true,
         validation_workflow_id:
           paramsWorkflowConfig?.validationWorkflowId ??
           getDefaultWorkflowConfig().validation_workflow_id,
