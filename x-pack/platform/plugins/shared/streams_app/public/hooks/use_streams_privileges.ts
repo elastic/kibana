@@ -19,6 +19,7 @@ import {
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
@@ -45,10 +46,16 @@ export function useStreamsPrivileges() {
   // Outermost significant events gate: the Technical Preview rollout flag (defaults to false).
   // Mirrors the server-side ordering in `assertSignificantEventsAccess` so entry points stay
   // hidden in deployments where the feature has not been rolled out yet.
-  const significantEventsFeatureFlagEnabled = useObservable(
-    featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
-    false
+  //
+  // The observable is memoized because every flag evaluation POSTs to the feature-flags usage
+  // counter endpoint. `useObservable` resubscribes whenever the observable reference changes, so
+  // recreating it each render (this hook is used by many frequently re-rendering components) would
+  // fire one counter request per render.
+  const significantEventsFeatureFlag$ = useMemo(
+    () => featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
+    [featureFlags]
   );
+  const significantEventsFeatureFlagEnabled = useObservable(significantEventsFeatureFlag$, false);
 
   const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
 
