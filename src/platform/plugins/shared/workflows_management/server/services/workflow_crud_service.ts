@@ -25,7 +25,6 @@ import type {
   WorkflowDetailDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
@@ -918,11 +917,6 @@ export class WorkflowCrudService {
       this.deps.changeHistoryService,
       this.deps.workflowVersioningEnabled
     );
-
-    const workflow = await this.getWorkflow(workflowId, spaceId);
-    if (!workflow) {
-      throw new WorkflowNotFoundError(workflowId);
-    }
 
     const history = await this.deps.changeHistoryService.getHistory(spaceId, workflowId, {
       additionalFilters: [{ term: { 'event.id': eventId } }],

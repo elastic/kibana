@@ -11,8 +11,7 @@ import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { UpdatedWorkflowResponseDto, WorkflowDetailDto } from '@kbn/workflows';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import type { UpdatedWorkflowResponseDto } from '@kbn/workflows';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
@@ -71,20 +70,6 @@ const makeChangeHistoryService = (
 type RestoreTestDepsOverrides = Omit<Partial<WorkflowCrudDeps>, 'changeHistoryService'> & {
   changeHistoryService?: Partial<IWorkflowChangeHistoryService>;
 };
-
-const makeWorkflowDetailDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
-  id: 'wf-1',
-  name: 'Restored workflow',
-  enabled: true,
-  yaml: 'name: Restored workflow',
-  valid: true,
-  createdAt: '2024-01-01T00:00:00.000Z',
-  createdBy: 'alice',
-  lastUpdatedAt: '2026-01-02T00:00:00.000Z',
-  lastUpdatedBy: 'alice',
-  definition: null,
-  ...overrides,
-});
 
 const makeFinalWorkflowProperties = (
   overrides: Partial<WorkflowProperties> = {}
@@ -157,7 +142,6 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     } as WorkflowCrudDeps;
 
     const service = new WorkflowCrudService(deps);
-    jest.spyOn(service, 'getWorkflow').mockResolvedValue(makeWorkflowDetailDto());
     const applyWorkflowUpdate = jest
       .spyOn(service as unknown as WorkflowCrudServiceWithApplyUpdate, 'applyWorkflowUpdate')
       .mockResolvedValue(makeApplyWorkflowUpdateResult());
@@ -204,12 +188,12 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
   });
 
   it('throws when workflow is not found', async () => {
-    const { service } = makeService();
-    jest.spyOn(service, 'getWorkflow').mockResolvedValue(null);
+    const { service, applyWorkflowUpdate } = makeService();
+    applyWorkflowUpdate.mockRejectedValue(new Error('Workflow with id missing not found'));
 
     await expect(
       service.restoreWorkflowVersion('missing', 'event-v3', 'default', request)
-    ).rejects.toThrow(WorkflowNotFoundError);
+    ).rejects.toThrow('Workflow with id missing not found');
   });
 
   it('throws when history event is not found', async () => {
@@ -384,7 +368,6 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
     });
 
     const service = new WorkflowCrudService(deps);
-    jest.spyOn(service, 'getWorkflow').mockResolvedValue(makeWorkflowDetailDto());
 
     return { service, client, scopedChangeHistory };
   };
