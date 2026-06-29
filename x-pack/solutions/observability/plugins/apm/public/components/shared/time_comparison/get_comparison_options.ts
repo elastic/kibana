@@ -8,7 +8,10 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { getIsAnomalyDetectionConfiguredForEnvironment } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
+import {
+  AnomalyDetectionSetupState,
+  getIsAnomalyDetectionConfiguredForEnvironment,
+} from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import type { Environment } from '../../../../common/environment_rt';
 import { ENVIRONMENT_ALL, getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import type { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
@@ -198,8 +201,8 @@ export function getComparisonOptions({
   start?: string;
   end?: string;
   showSelectedBoundsOption: boolean;
-  anomalyDetectionSetupState: AnomalyDetectionJobsContextValue['anomalyDetectionSetupState'];
-  preferredEnvironment: Environment;
+  anomalyDetectionSetupState?: AnomalyDetectionJobsContextValue['anomalyDetectionSetupState'];
+  preferredEnvironment?: Environment;
   kuery?: string;
 }) {
   const momentStart = moment(start);
@@ -230,7 +233,7 @@ export function getComparisonOptions({
   if (showSelectedBoundsOption) {
     const isAllEnvironments = preferredEnvironment === ENVIRONMENT_ALL.value;
     const hasJobForEnvironment = getIsAnomalyDetectionConfiguredForEnvironment(
-      anomalyDetectionSetupState
+      anomalyDetectionSetupState ?? AnomalyDetectionSetupState.Unknown
     );
 
     const disabled = isAllEnvironments || !hasJobForEnvironment || !isEmpty(kuery);
@@ -241,7 +244,7 @@ export function getComparisonOptions({
         isAllEnvironments,
         hasJobForEnvironment,
         kuery,
-        environment: preferredEnvironment,
+        environment: preferredEnvironment ?? ENVIRONMENT_ALL.value,
       }),
       disabled,
       'data-test-subj': getExpectedBoundsTestSubj({
