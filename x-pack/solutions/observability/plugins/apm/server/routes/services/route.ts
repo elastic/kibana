@@ -26,6 +26,7 @@ import {
   type ServiceThroughputRouteResponse,
   type ServiceTransactionDetailedStatPeriodsResponse,
   type ServiceTransactionTypesResponse,
+  type ServiceMixedIngestionResponse,
 } from '@kbn/apm-api-shared';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import {
@@ -54,7 +55,6 @@ import { getServiceAnnotations } from './annotations';
 import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
 import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import { getServiceAgent } from './get_service_agent';
-import type { ServiceMixedIngestionResponse } from './get_service_mixed_ingestion';
 import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
@@ -258,15 +258,9 @@ const serviceAgentRoute = createApmServerRoute({
   },
 });
 
-// TODO: caue fix this
 const serviceMixedIngestionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
-  }),
+  endpoint: routeDefinitions.services.mixedIngestion.endpoint,
+  params: routeDefinitions.services.mixedIngestion.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMixedIngestionResponse> => {
     const apmEventClient = await getApmEventClient(resources);

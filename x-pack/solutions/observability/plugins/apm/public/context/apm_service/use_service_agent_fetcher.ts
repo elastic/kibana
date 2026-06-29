@@ -40,8 +40,7 @@ export function useServiceAgentFetcher({
         });
       }
     },
-    [serviceName, start, end],
-    { useLegacyCallApmApi: true }
+    [serviceName, start, end]
   );
 
   return { ...data, status, error };

@@ -54,8 +54,7 @@ export function JvmMetricsOverview() {
         },
       });
     },
-    [kuery, environment, serviceName, start, end],
-    { useLegacyCallApmApi: true }
+    [kuery, environment, serviceName, start, end]
   );
 
   const items = data?.serviceNodes ?? [];

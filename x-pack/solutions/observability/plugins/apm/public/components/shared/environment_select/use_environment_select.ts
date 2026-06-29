@@ -36,8 +36,7 @@ export function useEnvironmentSelect({
             },
           });
     },
-    [debouncedSearchValue, start, end, serviceName],
-    { useLegacyCallApmApi: true }
+    [debouncedSearchValue, start, end, serviceName]
   );
 
   const onSearchChange = (value: string) => {

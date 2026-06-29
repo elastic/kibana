@@ -31,8 +31,7 @@ export function useServiceMixedIngestionFetcher({
         });
       }
     },
-    [serviceName, environment, kuery, start, end],
-    { useLegacyCallApmApi: true }
+    [serviceName, environment, kuery, start, end]
   );
 
   return { data, status, error };

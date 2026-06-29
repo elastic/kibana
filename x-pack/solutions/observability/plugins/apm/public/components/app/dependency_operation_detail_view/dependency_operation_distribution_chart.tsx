@@ -58,8 +58,7 @@ export function DependencyOperationDistributionChart() {
         },
       });
     },
-    [dependencyName, spanName, environment, kuery, start, end],
-    { useLegacyCallApmApi: true }
+    [dependencyName, spanName, environment, kuery, start, end]
   );
 
   const hasData =

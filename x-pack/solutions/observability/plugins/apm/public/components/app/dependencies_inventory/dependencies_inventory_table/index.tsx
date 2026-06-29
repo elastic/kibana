@@ -65,8 +65,7 @@ export function DependenciesInventoryTable() {
         };
       });
     },
-    [start, end, environment, kuery],
-    { useLegacyCallApmApi: true }
+    [start, end, environment, kuery]
   );
 
   const visibleDependenciesNames = useMemo(
@@ -116,7 +115,7 @@ export function DependenciesInventoryTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data?.requestId, visibleDependenciesNames, comparisonEnabled, offset],
     // Do not invalidate this API call when the refresh button is clicked
-    { skipTimeRangeRefreshUpdate: true, useLegacyCallApmApi: true }
+    { skipTimeRangeRefreshUpdate: true }
   );
 
   useEffect(() => {

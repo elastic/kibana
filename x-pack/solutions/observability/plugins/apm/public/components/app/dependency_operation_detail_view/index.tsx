@@ -78,8 +78,7 @@ export function DependencyOperationDetailView() {
         },
       });
     },
-    [dependencyName, spanName, start, end, environment, kuery, sampleRangeFrom, sampleRangeTo],
-    { useLegacyCallApmApi: true }
+    [dependencyName, spanName, start, end, environment, kuery, sampleRangeFrom, sampleRangeTo]
   );
 
   const samples = useMemo(() => {

@@ -45,7 +45,7 @@ export function AddEnvironments({ currentEnvironments, onCreateJobSuccess, onCan
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => callApmApi(`GET /internal/apm/settings/anomaly-detection/environments`),
     [],
-    { preservePreviousData: false, useLegacyCallApmApi: true }
+    { preservePreviousData: false }
   );
 
   const environmentOptions = data.environments.map((env) => ({

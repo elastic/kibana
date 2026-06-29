@@ -57,8 +57,7 @@ export function DependenciesDetailTable() {
         },
       });
     },
-    [start, end, environment, offset, dependencyName, kuery, comparisonEnabled],
-    { useLegacyCallApmApi: true }
+    [start, end, environment, offset, dependencyName, kuery, comparisonEnabled]
   );
 
   useEffect(() => {
