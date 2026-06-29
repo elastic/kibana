@@ -262,7 +262,9 @@ function configureExperiment({
           };
         }
 
-        const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = domainToolCalls
+          .map((t) => t.tool_id)
+          .filter((id): id is string => Boolean(id));
         const allowedToolIds = allowedDomainToolIdsForExample(metadata) ?? [expectedOnlyToolId];
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
         const allAllowed = usedToolIds.every((id) => allowedToolIds.includes(id));
