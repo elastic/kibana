@@ -38,15 +38,14 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
   const tokens = getEsqlLexerTokens(innerText);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-  const cleanRoot = removeAutocompleteMarkers(root);
-
   const rootWithoutMarkers = removeAutocompleteMarkers(root);
+  const cleanRoot = unwrapExpressionParens(rootWithoutMarkers);
 
   return {
     innerText,
-    root: unwrapExpressionParens(rootWithoutMarkers),
+    root: cleanRoot,
     tokens,
-    commandSegment: resolveCommandSegment(innerText, offset, rootWithoutMarkers, tokens),
+    commandSegment: resolveCommandSegment(innerText, offset, cleanRoot, tokens),
   };
 }
 

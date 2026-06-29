@@ -63,16 +63,18 @@ export async function autocomplete(
   }
 
   const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-  const subCommandContext: ICommandContext | undefined = context
-    ? {
-        ...context,
-        commandSegment: {
-          start: subCommand.location.min,
-          end: cursorPosition,
-          text: innerText.slice(subCommand.location.min),
-        },
-      }
-    : context;
+  if (!context) {
+    return [];
+  }
+
+  const subCommandContext: ICommandContext = {
+    ...context,
+    commandSegment: {
+      start: subCommand.location.min,
+      end: cursorPosition,
+      text: innerText.slice(subCommand.location.min),
+    },
+  };
 
   return (
     subCommandMethods?.autocomplete(
