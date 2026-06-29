@@ -66,6 +66,7 @@ import type { z } from '@kbn/zod/v4';
 
 import type { StepExecutionListResult } from './lib/search_step_executions';
 
+import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
@@ -231,6 +232,7 @@ export class WorkflowsService {
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
       logger: this.logger,
+      audit: new WorkflowManagementAuditLog({ service: this }),
     });
   }
 
