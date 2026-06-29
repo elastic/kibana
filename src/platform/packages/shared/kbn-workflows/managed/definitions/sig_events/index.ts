@@ -31,6 +31,7 @@ export const SIGEVENTS_DETECTION_WORKFLOW = {
   id: SIGEVENTS_DETECTION_WORKFLOW_ID,
   pluginId: 'streams',
   version: 2,
+  billable: false,
   yaml: DETECTION_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
@@ -39,6 +40,7 @@ export const SIGEVENTS_DISCOVERY_WORKFLOW = {
   id: SIGEVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'streams',
   version: 3,
+  billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
@@ -47,6 +49,7 @@ export const SIGEVENTS_ORCHESTRATOR_WORKFLOW = {
   id: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
   pluginId: 'streams',
   version: 1,
+  billable: false,
   yaml: ORCHESTRATOR_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
@@ -55,6 +58,7 @@ export const SIGEVENTS_TRIAGE_WORKFLOW = {
   id: SIGEVENTS_TRIAGE_WORKFLOW_ID,
   pluginId: 'streams',
   version: 4,
+  billable: false,
   yaml: TRIAGE_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
