@@ -70,6 +70,13 @@ export const PROVIDED = i18n.translate(
   }
 );
 
+export const SKILL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.loadingCallout.stepDataModal.skill',
+  {
+    defaultMessage: 'Skill',
+  }
+);
+
 export const NO_DATA = i18n.translate(
   'xpack.securitySolution.attackDiscovery.loadingCallout.stepDataModal.noData',
   {

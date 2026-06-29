@@ -70,6 +70,14 @@ export const useEffectiveWorkflowTracking = ({
               workflowRunId: e.workflow_run_id,
             }))
           : null),
+      gate:
+        workflowExecutions?.gate ??
+        (internalTrackingData.gate != null
+          ? internalTrackingData.gate.map((e) => ({
+              workflowId: e.workflow_id,
+              workflowRunId: e.workflow_run_id,
+            }))
+          : null),
       generation:
         workflowExecutions?.generation ??
         (internalTrackingData.generation != null
