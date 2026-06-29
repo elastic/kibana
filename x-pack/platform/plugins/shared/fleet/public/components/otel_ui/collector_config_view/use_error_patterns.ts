@@ -88,42 +88,42 @@ const buildQuery = (
   // host are never surfaced for the current collector instance.
   const gte = !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeGte ? enrolledAtMs : timeRangeGte;
   return {
-  params: {
-    index: OTEL_LOG_INDEX,
-    track_total_hits: false,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'service.instance.id': serviceInstanceId } },
-            { terms: { 'log.level': LOG_LEVEL_VALUES[level] } },
-            { range: { '@timestamp': { gte, lte: now } } },
-          ],
-        },
-      },
-      aggs: {
-        categories: {
-          categorize_text: {
-            field: 'message',
-            size: 20,
+    params: {
+      index: OTEL_LOG_INDEX,
+      track_total_hits: false,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'service.instance.id': serviceInstanceId } },
+              { terms: { 'log.level': LOG_LEVEL_VALUES[level] } },
+              { range: { '@timestamp': { gte, lte: now } } },
+            ],
           },
-          aggs: {
-            min_timestamp: { min: { field: '@timestamp' } },
-            max_timestamp: { max: { field: '@timestamp' } },
-            sample: {
-              top_hits: {
-                size: 1,
-                _source: { includes: ['component.id'] },
-                fields: ['message'],
-                sort: { _score: { order: 'desc' as const } },
+        },
+        aggs: {
+          categories: {
+            categorize_text: {
+              field: 'message',
+              size: 20,
+            },
+            aggs: {
+              min_timestamp: { min: { field: '@timestamp' } },
+              max_timestamp: { max: { field: '@timestamp' } },
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: { includes: ['component.id'] },
+                  fields: ['message'],
+                  sort: { _score: { order: 'desc' as const } },
+                },
               },
             },
           },
         },
       },
     },
-  },
   };
 };
 

@@ -142,9 +142,7 @@ export const ErrorPatternPanel: React.FC = () => {
       // Use enrolledAt as the lower bound when it's more recent than the selected time range,
       // so the Discover deep-link stays consistent with the query scoping.
       const discoverFrom =
-        !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeFromMs
-          ? enrolledAt!
-          : `now-${timeRange}`;
+        !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeFromMs ? enrolledAt! : `now-${timeRange}`;
       return discoverLocator?.getRedirectUrl({
         dataViewSpec: {
           id: OTEL_LOG_INDEX,
