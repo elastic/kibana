@@ -10,6 +10,7 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
+import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
@@ -108,8 +109,19 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
+    // UIAM API key credentials (e.g. `ApiKey essu_...`) need the UIAM shared secret forwarded to
+    // Elasticsearch via the `x-client-authentication` header so ES can validate the cloud key with
+    // the UIAM service. The Bearer scheme is reserved for the UIAM OAuth path handled above, so it is
+    // excluded here; this targets UIAM API keys. Mirrors the SAML/OAuth providers and `api_keys.validate`.
+    const clientAuthHeaders =
+      this.options.uiam &&
+      authorizationHeader.scheme.toLowerCase() !== 'bearer' &&
+      isUiamCredential(authorizationHeader)
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.options.uiam.getClientAuthentication().value }
+        : undefined;
+
     try {
-      const user = await this.getUser(request);
+      const user = await this.getUser(request, clientAuthHeaders);
       this.logger.debug(
         `Request to ${request.url.pathname}${request.url.search} has been authenticated via authorization header with "${authorizationHeader.scheme}" scheme.`
       );
@@ -133,7 +145,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user, {
         // Even though the `Authorization` header is already present in the HTTP headers of the original request,
         // we still need to expose it to the Core authentication service for consistency.
-        authHeaders: { authorization: authorizationHeader.toString() },
+        authHeaders: { authorization: authorizationHeader.toString(), ...clientAuthHeaders },
       });
     } catch (err) {
       this.logger.debug(
