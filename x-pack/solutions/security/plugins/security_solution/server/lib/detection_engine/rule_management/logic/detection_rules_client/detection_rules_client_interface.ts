@@ -25,21 +25,10 @@ import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
-
-export interface BulkCreatePrebuiltRulesArgs {
-  rules: PrebuiltRuleAsset[];
-}
-
-export interface BulkCreatePrebuiltRulesResultItem {
-  id: string;
-  rule_id: string;
-  version: number;
-}
-
-export interface BulkCreatePrebuiltRulesResult {
-  results: Array<{ result: BulkCreatePrebuiltRulesResultItem }>;
-  errors: Array<{ item: PrebuiltRuleAsset; error: Error }>;
-}
+import type {
+  BulkCreatePrebuiltRulesArgs,
+  BulkCreatePrebuiltRulesResult,
+} from './methods/bulk_create_prebuilt_rules';
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
