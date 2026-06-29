@@ -32,7 +32,9 @@ export const significantEventsTuningConfigSchema = z
         code: z.ZodIssueCode.custom,
         message:
           `entity_filtered_ratio (${v.entity_filtered_ratio}) + diverse_ratio (${v.diverse_ratio}) must be <= 1.0 ` +
-          `(remainder ${(1 - v.entity_filtered_ratio - v.diverse_ratio).toFixed(2)} is used for random sampling)`,
+          `(remainder ${(1 - v.entity_filtered_ratio - v.diverse_ratio).toFixed(
+            2
+          )} is used for random sampling)`,
       });
     }
   });
