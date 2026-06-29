@@ -76,8 +76,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
         };
       });
     },
-    [kuery, environment, serviceName, start, end, serverlessId, preferred],
-    { useCallApmApiV2: true }
+    [kuery, environment, serviceName, start, end, serverlessId, preferred]
   );
 
   return (

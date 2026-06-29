@@ -59,8 +59,7 @@ export function StorageChart() {
         },
       });
     },
-    [indexLifecyclePhase, environment, kuery, start, end],
-    { useCallApmApiV2: true }
+    [indexLifecyclePhase, environment, kuery, start, end]
   );
 
   const trimmedStorageTimeSeries = useMemo(() => {

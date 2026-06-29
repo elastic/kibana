@@ -42,7 +42,7 @@ export function AnomalyDetectionJobsContextProvider({ children }: { children: Re
       return callApmApi(`GET /internal/apm/settings/anomaly-detection/jobs`);
     },
     [isAuthorized],
-    { showToastOnError: false, useCallApmApiV2: true }
+    { showToastOnError: false }
   );
 
   const { query } = useApmParams('/*');

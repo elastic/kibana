@@ -55,8 +55,7 @@ function useAgentInstancesFetcher({
         },
       });
     },
-    [start, end, serviceName, environment, kuery],
-    { useCallApmApiV2: true }
+    [start, end, serviceName, environment, kuery]
   );
 }
 

@@ -39,8 +39,7 @@ export function useInstanceDetailsFetcher({
         }
       );
     },
-    [serviceName, serviceNodeName, start, end],
-    { useCallApmApiV2: true }
+    [serviceName, serviceNodeName, start, end]
   );
 
   return { data, status };

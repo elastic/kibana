@@ -35,8 +35,7 @@ export function TransactionDetailsByNameLink() {
         },
       });
     },
-    [start, end, transactionName, serviceName],
-    { useCallApmApiV2: true }
+    [start, end, transactionName, serviceName]
   );
 
   if (status === FETCH_STATUS.SUCCESS) {

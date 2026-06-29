@@ -56,8 +56,7 @@ export function DependencyContents({ selection, environment, start, end }: Conte
         });
       }
     },
-    [environment, dependencyName, start, end, offset, comparisonEnabled],
-    { useCallApmApiV2: true }
+    [environment, dependencyName, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

@@ -105,8 +105,7 @@ export function ErrorCountChart({
         });
       }
     },
-    [environment, serviceName, start, end, groupId, transactionName, kuery, preferred],
-    { useCallApmApiV2: true }
+    [environment, serviceName, start, end, groupId, transactionName, kuery, preferred]
   );
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;

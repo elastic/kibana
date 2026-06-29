@@ -60,8 +60,7 @@ export function TransactionFlyout({
         params: { path: { traceId, transactionId }, query: { start, end } },
       });
     },
-    [traceId, transactionId, start, end],
-    { useCallApmApiV2: true }
+    [traceId, transactionId, start, end]
   );
 
   const isLoading = isPending(status);

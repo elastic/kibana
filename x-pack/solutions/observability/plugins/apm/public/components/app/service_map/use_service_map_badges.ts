@@ -84,7 +84,7 @@ export function useServiceMapBadges({
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see fetcherDeps memo above
     fetcherDeps,
-    { showToastOnError: false, useCallApmApiV2: true }
+    { showToastOnError: false }
   );
 
   return useMemo(() => {

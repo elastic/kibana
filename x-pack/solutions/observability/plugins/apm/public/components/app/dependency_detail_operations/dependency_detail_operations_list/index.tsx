@@ -96,7 +96,8 @@ export function DependencyDetailOperationsList() {
         },
       });
     },
-    [dependencyName, start, end, environment, kuery, searchServiceDestinationMetrics]
+    [dependencyName, start, end, environment, kuery, searchServiceDestinationMetrics],
+    { useLegacyCallApmApi: true }
   );
 
   const comparisonStatsFetch = useFetcher(
@@ -129,7 +130,8 @@ export function DependencyDetailOperationsList() {
       kuery,
       comparisonEnabled,
       searchServiceDestinationMetrics,
-    ]
+    ],
+    { useLegacyCallApmApi: true }
   );
 
   useEffect(() => {

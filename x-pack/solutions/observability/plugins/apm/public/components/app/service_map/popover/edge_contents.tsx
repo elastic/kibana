@@ -105,8 +105,7 @@ export function EdgeContents({
         });
       }
     },
-    [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled],
-    { useCallApmApiV2: true }
+    [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

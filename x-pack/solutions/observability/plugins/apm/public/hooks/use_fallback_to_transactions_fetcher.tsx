@@ -45,8 +45,7 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
         });
       }
     },
-    [kueryWithFilters, start, end],
-    { useCallApmApiV2: true }
+    [kueryWithFilters, start, end]
   );
 
   return data;

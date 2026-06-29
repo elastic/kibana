@@ -79,8 +79,7 @@ export function ServiceContents({
         });
       }
     },
-    [environment, serviceName, start, end, offset, comparisonEnabled],
-    { useCallApmApiV2: true }
+    [environment, serviceName, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

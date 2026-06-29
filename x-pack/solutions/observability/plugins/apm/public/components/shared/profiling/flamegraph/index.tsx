@@ -51,8 +51,7 @@ export function ProfilingFlamegraph({
         },
       });
     },
-    [serviceName, start, end, kuery, transactionName, transactionType, environment],
-    { useCallApmApiV2: true }
+    [serviceName, start, end, kuery, transactionName, transactionType, environment]
   );
 
   return (

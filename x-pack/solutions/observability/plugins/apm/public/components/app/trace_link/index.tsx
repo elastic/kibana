@@ -40,8 +40,7 @@ export function TraceLink() {
         });
       }
     },
-    [traceId, start, end],
-    { useCallApmApiV2: true }
+    [traceId, start, end]
   );
   if (traceId && status === FETCH_STATUS.SUCCESS) {
     const to = data.transaction

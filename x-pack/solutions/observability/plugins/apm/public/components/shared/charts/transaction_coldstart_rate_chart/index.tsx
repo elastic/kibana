@@ -115,8 +115,7 @@ export function TransactionColdstartRateChart({
       offset,
       endpoint,
       comparisonEnabled,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
   const previousPeriodLabel = usePreviousPeriodLabel();
 

@@ -89,8 +89,7 @@ export function MobileFilters() {
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType],
-    { useCallApmApiV2: true }
+    [start, end, environment, kuery, serviceName, transactionType]
   );
 
   function toSelectOptions(items?: string[]) {

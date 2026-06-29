@@ -161,8 +161,7 @@ export function ErrorGroupDetails() {
           });
         }
       },
-      [environment, kueryWithMobileFilters, serviceName, start, end, groupId],
-      { useCallApmApiV2: true }
+      [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
     );
 
   const { errorDistributionData, errorDistributionStatus: errorDistributionStatus } =

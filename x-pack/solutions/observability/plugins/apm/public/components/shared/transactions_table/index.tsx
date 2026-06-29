@@ -429,8 +429,7 @@ function useTableData({
       shouldUseDurationSummary,
       start,
       transactionType,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   const itemsToFetch = useMemo(() => renderedItems.map(({ name }) => name), [renderedItems]);
@@ -473,7 +472,7 @@ function useTableData({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, itemsToFetch, offset, comparisonEnabled],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   return {

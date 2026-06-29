@@ -135,8 +135,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
       offset,
       comparisonEnabled,
       preferred,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

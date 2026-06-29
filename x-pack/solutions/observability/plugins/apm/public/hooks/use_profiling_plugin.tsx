@@ -13,13 +13,9 @@ export function useProfilingPlugin() {
   const { plugins } = useApmPluginContext();
   const isProfilingPluginEnabled = useProfilingPluginSetting();
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/profiling/status');
-    },
-    [],
-    { useCallApmApiV2: true }
-  );
+  const { data, status } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/profiling/status');
+  }, []);
 
   const isProfilingAvailable = isProfilingPluginEnabled && data?.initialized;
 

@@ -39,8 +39,7 @@ export function TopTracesOverview() {
         });
       }
     },
-    [environment, kuery, start, end],
-    { useCallApmApiV2: true }
+    [environment, kuery, start, end]
   );
 
   return (

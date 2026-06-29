@@ -68,8 +68,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId, comparisonEnabled, offset],
-    { useCallApmApiV2: true }
+    [environment, kuery, serviceName, start, end, groupId, comparisonEnabled, offset]
   );
 
   const loading = isPending(status);

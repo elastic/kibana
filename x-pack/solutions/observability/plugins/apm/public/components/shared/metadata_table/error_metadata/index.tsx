@@ -36,8 +36,7 @@ export function ErrorMetadata({ error }: Props) {
         },
       });
     },
-    [error],
-    { useCallApmApiV2: true }
+    [error]
   );
 
   const sections = useMemo(

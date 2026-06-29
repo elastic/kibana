@@ -38,8 +38,7 @@ export function SpanMetadata({ span }: Props) {
         },
       });
     },
-    [span, spanId],
-    { useCallApmApiV2: true }
+    [span, spanId]
   );
 
   const sections = useMemo(

@@ -70,8 +70,7 @@ export function ServiceDashboards() {
         });
       }
     },
-    [serviceName, start, end],
-    { useCallApmApiV2: true }
+    [serviceName, start, end]
   );
 
   useEffect(() => {

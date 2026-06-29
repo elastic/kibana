@@ -78,8 +78,7 @@ export function useErrorGroupListData({
           });
         }
       },
-      [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery],
-      { useCallApmApiV2: true }
+      [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery]
     );
 
   const itemsToFetch = useMemo(
@@ -121,7 +120,7 @@ export function useErrorGroupListData({
     // only fetches agg results when main statistics are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, itemsToFetch, comparisonEnabled, offset],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   return {

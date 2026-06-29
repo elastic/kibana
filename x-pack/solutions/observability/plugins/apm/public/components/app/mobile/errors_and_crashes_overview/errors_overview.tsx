@@ -132,8 +132,7 @@ export function MobileErrorsOverview() {
       sortDirection,
       page,
       pageSize,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
   const { requestId, mobileErrorGroupMainStatistics, currentPageGroupIds } = errorGroupListData;
   const {
@@ -167,7 +166,7 @@ export function MobileErrorsOverview() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
   const kueryForTreemap = getKueryWithMobileErrorFilter({
     kuery: kueryWithMobileFilters,

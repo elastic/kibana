@@ -35,8 +35,7 @@ export function useEnvironmentsFetcher({
         },
       });
     },
-    [start, end, serviceName],
-    { useCallApmApiV2: true }
+    [start, end, serviceName]
   );
 
   return {

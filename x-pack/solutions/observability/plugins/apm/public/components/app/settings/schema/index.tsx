@@ -43,7 +43,6 @@ export function Schema() {
     status,
   } = useFetcher((callApi) => callApi('GET /internal/apm/fleet/migration_check'), [], {
     preservePreviousData: false,
-    useCallApmApiV2: true,
   });
   const isLoading = status !== FETCH_STATUS.SUCCESS;
   const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;

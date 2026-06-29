@@ -167,8 +167,7 @@ export function CrashGroupDetails() {
           });
         }
       },
-      [environment, kueryWithMobileFilters, serviceName, start, end, groupId],
-      { useCallApmApiV2: true }
+      [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
     );
 
   const { crashDistributionData, status: crashDistributionStatus } =

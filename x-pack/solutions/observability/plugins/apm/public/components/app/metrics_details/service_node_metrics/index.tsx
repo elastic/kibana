@@ -111,8 +111,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
         );
       }
     },
-    [kuery, serviceName, serviceNodeName, start, end, environment, preferred],
-    { useCallApmApiV2: true }
+    [kuery, serviceName, serviceNodeName, start, end, environment, preferred]
   );
 
   const { docLinks } = useApmPluginContext().core;

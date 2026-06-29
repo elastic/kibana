@@ -63,8 +63,7 @@ export function ProfilingHostsTopNFunctions({
         });
       }
     },
-    [dataSource, serviceName, start, end, environment, startIndex, endIndex, kuery],
-    { useCallApmApiV2: true }
+    [dataSource, serviceName, start, end, environment, startIndex, endIndex, kuery]
   );
 
   const profilingKueryFilter =

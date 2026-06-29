@@ -74,24 +74,24 @@ function clientWithProbability(regularCallApmApi: APMClient, probability: number
   };
 }
 
-// Temporary: useCallApmApiV2 overloads exist while migrating APIs.
-// Once all routes are migrated, remove the V1 overload.
+// Temporary: useLegacyCallApmApi overloads exist while migrating APIs.
+// Once all routes are migrated, remove the legacy overload.
 export function useProgressiveFetcher<TReturn>(
   callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
   dependencies: any[],
-  options: UseFetcherOptions & { useCallApmApiV2: true }
+  options: UseFetcherOptions & { useLegacyCallApmApi: true }
 ): FetcherResult<TReturn>;
 
 export function useProgressiveFetcher<TReturn>(
   callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
   dependencies: any[],
-  options?: UseFetcherOptions & { useCallApmApiV2?: false }
+  options?: UseFetcherOptions & { useLegacyCallApmApi?: false }
 ): FetcherResult<TReturn>;
 
 export function useProgressiveFetcher<TReturn>(
   callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
   dependencies: any[],
-  options?: UseFetcherOptions & { useCallApmApiV2?: boolean }
+  options?: UseFetcherOptions & { useLegacyCallApmApi?: boolean }
 ): FetcherResult<TReturn> {
   const {
     services: { uiSettings },
@@ -103,8 +103,8 @@ export function useProgressiveFetcher<TReturn>(
 
   const sampledProbability = getProbabilityFromProgressiveLoadingQuality(progressiveLoadingQuality);
 
-  const fetcherOptions = options?.useCallApmApiV2
-    ? { ...options, useCallApmApiV2: true as const }
+  const fetcherOptions = options?.useLegacyCallApmApi
+    ? { ...options, useLegacyCallApmApi: true as const }
     : options;
 
   const sampledFetch = useFetcher(

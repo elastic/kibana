@@ -49,8 +49,7 @@ export function ServerlessFunctions() {
         }
       );
     },
-    [kuery, environment, serviceName, start, end],
-    { useCallApmApiV2: true }
+    [kuery, environment, serviceName, start, end]
   );
 
   const columns: Array<EuiBasicTableColumn<ServerlessFunctionOverview>> = [

@@ -99,8 +99,7 @@ export function TopErrors() {
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   const { requestId, items } = data;
@@ -136,7 +135,7 @@ export function TopErrors() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   const errorGroupDetailedStatisticsLoading =

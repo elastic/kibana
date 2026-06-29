@@ -135,8 +135,7 @@ export function ServiceOverviewInstancesChartAndTable({
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
       tableOptions.sort,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   const { currentPeriodItems, previousPeriodItems, requestId, currentPeriodItemsCount } =
@@ -188,7 +187,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   return (

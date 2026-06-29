@@ -53,8 +53,7 @@ export function useUnifiedWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, entryTransactionId, serviceName],
-    { useCallApmApiV2: true }
+    [traceId, start, end, entryTransactionId, serviceName]
   );
 
   if (traceId === undefined) {

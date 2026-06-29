@@ -45,8 +45,7 @@ export function DiagnosticsContextProvider({ children }: { children: React.React
         },
       });
     },
-    [start, end, kuery],
-    { useCallApmApiV2: true }
+    [start, end, kuery]
   );
 
   const [importedDiagnosticsBundle, setImportedDiagnosticsBundle] = useState<

@@ -69,8 +69,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
         }
       );
     },
-    [kuery, environment, serviceName, start, end, serverlessId],
-    { useCallApmApiV2: true }
+    [kuery, environment, serviceName, start, end, serverlessId]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

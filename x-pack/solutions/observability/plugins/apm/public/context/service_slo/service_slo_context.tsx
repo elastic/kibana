@@ -58,8 +58,7 @@ export function ServiceSloContextProvider({
         },
       });
     },
-    [serviceName, environment, canReadSlos],
-    { useCallApmApiV2: true }
+    [serviceName, environment, canReadSlos]
   );
 
   const sloTotal = data?.total ?? 0;

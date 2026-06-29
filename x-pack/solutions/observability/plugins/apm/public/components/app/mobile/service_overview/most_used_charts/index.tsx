@@ -78,8 +78,7 @@ export function MostUsedCharts({
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType],
-    { useCallApmApiV2: true }
+    [start, end, environment, kuery, serviceName, transactionType]
   );
 
   const chartWidth = isLarge ? dimensions.width : dimensions.width / MOST_USED_CHARTS.length;

@@ -73,7 +73,7 @@ export function SuggestionsSelect({
       });
     },
     [fieldName, searchValue, start, end, serviceName],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   // Track previous shouldReset to only reset on transition from false to true

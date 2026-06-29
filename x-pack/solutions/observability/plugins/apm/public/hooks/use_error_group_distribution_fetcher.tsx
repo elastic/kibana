@@ -47,8 +47,7 @@ export function useErrorGroupDistributionFetcher({
         });
       }
     },
-    [environment, kuery, serviceName, start, end, offset, groupId, comparisonEnabled],
-    { useCallApmApiV2: true }
+    [environment, kuery, serviceName, start, end, offset, groupId, comparisonEnabled]
   );
 
   return {

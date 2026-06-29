@@ -66,8 +66,7 @@ export function useMobileStatisticsFetcher({
         });
       }
     },
-    [environment, start, end, kuery, serviceName, field],
-    { useCallApmApiV2: true }
+    [environment, start, end, kuery, serviceName, field]
   );
 
   const { mainStatistics, requestId, totalItems } = data;
@@ -98,7 +97,7 @@ export function useMobileStatisticsFetcher({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   return {

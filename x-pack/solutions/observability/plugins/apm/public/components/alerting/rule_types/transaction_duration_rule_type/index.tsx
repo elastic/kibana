@@ -147,8 +147,7 @@ export function TransactionDurationRuleType(props: Props) {
       params.windowUnit,
       params.groupBy,
       params.searchConfiguration,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   const latencyChartPreview = data?.latencyChartPreview;

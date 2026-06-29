@@ -133,8 +133,7 @@ export function MobileCrashesOverview() {
       sortDirection,
       page,
       pageSize,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   const { requestId, mobileCrashGroupMainStatistics, currentPageGroupIds } = crashGroupListData;
@@ -169,7 +168,7 @@ export function MobileCrashesOverview() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   const kueryForTreemap = getKueryWithMobileCrashFilter({

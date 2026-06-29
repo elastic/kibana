@@ -78,8 +78,7 @@ export function SessionsChart({
       transactionName,
       offset,
       comparisonEnabled,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
   const previousPeriodLabel = usePreviousPeriodLabel();
 

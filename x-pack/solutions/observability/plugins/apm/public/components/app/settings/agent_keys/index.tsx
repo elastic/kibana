@@ -48,7 +48,7 @@ export function AgentKeys() {
       return callApmApi('GET /internal/apm/agent_keys/privileges');
     },
     [],
-    { showToastOnError: false, useCallApmApiV2: true }
+    { showToastOnError: false }
   );
 
   const {
@@ -62,7 +62,7 @@ export function AgentKeys() {
       }
     },
     [areApiKeysEnabled, canManageAgentKeys],
-    { showToastOnError: false, useCallApmApiV2: true }
+    { showToastOnError: false }
   );
 
   const canManage = canManageAgentKeys && canSave;

@@ -56,8 +56,7 @@ export function useServiceMetricChartsFetcher({
         });
       }
     },
-    [environment, kuery, serviceName, start, end, agentName, serviceNodeName],
-    { useCallApmApiV2: true }
+    [environment, kuery, serviceName, start, end, agentName, serviceNodeName]
   );
 
   return {

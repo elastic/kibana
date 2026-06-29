@@ -73,8 +73,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
         },
       });
     },
-    [kuery, environment, serviceName, start, end, serverlessId],
-    { useCallApmApiV2: true }
+    [kuery, environment, serviceName, start, end, serverlessId]
   );
 
   const showVerticalRule = !breakpoints.isSmall;

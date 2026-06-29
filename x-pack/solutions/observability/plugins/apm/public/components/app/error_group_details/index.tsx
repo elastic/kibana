@@ -145,8 +145,7 @@ export function ErrorGroupDetails() {
           });
         }
       },
-      [environment, kuery, serviceName, start, end, groupId],
-      { useCallApmApiV2: true }
+      [environment, kuery, serviceName, start, end, groupId]
     );
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({

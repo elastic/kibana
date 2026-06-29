@@ -74,7 +74,8 @@ export function DependencyFailedTransactionRateChart({
       spanName,
       isTimeRangeMetadataLoading,
       searchServiceDestinationMetrics,
-    ]
+    ],
+    { useLegacyCallApmApi: true }
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

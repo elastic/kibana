@@ -107,8 +107,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
       pageSize,
       sortField,
       sortDirection,
-    ],
-    { useCallApmApiV2: true }
+    ]
   );
 
   return { mainStatisticsData: data, mainStatisticsStatus: status };
@@ -164,7 +163,7 @@ function useServicesDetailedStatisticsFetcher({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [itemsToFetch, offset, comparisonEnabled],
-    { preservePreviousData: false, useCallApmApiV2: true }
+    { preservePreviousData: false }
   );
 
   return { comparisonFetch };

@@ -45,8 +45,7 @@ export function AnnotationsContextProvider({
         });
       }
     },
-    [environment, start, end, serviceName],
-    { useCallApmApiV2: true }
+    [environment, start, end, serviceName]
   );
 
   return <AnnotationsContext.Provider value={data} children={children} />;

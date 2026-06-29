@@ -59,13 +59,9 @@ export function StorageExplorer() {
     CALLOUT_DISMISS_INITIAL_STATE
   );
 
-  const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/storage_explorer/privileges');
-    },
-    [],
-    { useCallApmApiV2: true }
-  );
+  const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/storage_explorer/privileges');
+  }, []);
 
   const { data: isCrossClusterSearchData } = useFetcher(
     (callApmApi) => {
@@ -73,8 +69,7 @@ export function StorageExplorer() {
         return callApmApi('GET /internal/apm/storage_explorer/is_cross_cluster_search');
       }
     },
-    [calloutDismissed],
-    { useCallApmApiV2: true }
+    [calloutDismissed]
   );
 
   const { data: summaryStatsData, status: summaryStatsStatus } = useProgressiveFetcher(
@@ -91,8 +86,7 @@ export function StorageExplorer() {
         },
       });
     },
-    [indexLifecyclePhase, environment, kuery, start, end],
-    { useCallApmApiV2: true }
+    [indexLifecyclePhase, environment, kuery, start, end]
   );
 
   const loadingSummaryStats = isPending(summaryStatsStatus);

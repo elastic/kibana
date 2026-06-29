@@ -119,8 +119,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         },
       });
     },
-    [environment, kuery, indexLifecyclePhase, start, end],
-    { useCallApmApiV2: true }
+    [environment, kuery, indexLifecyclePhase, start, end]
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
@@ -137,8 +136,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         },
       });
     },
-    [indexLifecyclePhase, start, end, environment, kuery],
-    { useCallApmApiV2: true }
+    [indexLifecyclePhase, start, end, environment, kuery]
   );
 
   const serviceStatisticsItems = serviceStatisticsFetch.data?.serviceStatistics ?? [];
