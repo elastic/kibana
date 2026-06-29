@@ -61,7 +61,7 @@ export function useAnomalyThreshold(): {
 
   const isAllEnvironments = preferredEnvironment === ENVIRONMENT_ALL.value;
   const hasKueryFilter = !isEmpty(kuery);
-  const isDisabled = isAllEnvironments || hasKueryFilter || !isConfiguredForEnvironment;
+  const isDisabled = isAllEnvironments || !isConfiguredForEnvironment || hasKueryFilter;
 
   return {
     anomalyThreshold: isDisabled ? 'none' : getAnomalyThreshold(anomalyThresholdRaw),

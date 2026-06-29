@@ -19,11 +19,17 @@ export function useShouldShowAnomalyUi() {
 
   const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
   const isProperTab =
-    !matchingRoutes.some((d) => d.path === '/services/{serviceName}/transactions/view') &&
+    !matchingRoutes.some(
+      (d) =>
+        d.path === '/services/{serviceName}/transactions/view' ||
+        d.path === '/mobile-services/{serviceName}/transactions/view'
+    ) &&
     matchingRoutes.some(
       (d) =>
         d.path === '/services/{serviceName}/overview' ||
-        d.path === '/services/{serviceName}/transactions'
+        d.path === '/services/{serviceName}/transactions' ||
+        d.path === '/mobile-services/{serviceName}/overview' ||
+        d.path === '/mobile-services/{serviceName}/transactions'
     );
 
   return isConfigured && isProperTab;
