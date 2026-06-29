@@ -52,9 +52,6 @@ export function ServiceFlyoutHeader({
         <h2 id={titleId} data-test-subj="serviceFlyoutTitle">
           <EuiLink
             href={serviceOverviewHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            external={false}
             data-test-subj="serviceFlyoutTitleLink"
             {...getEbtProps({
               action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
