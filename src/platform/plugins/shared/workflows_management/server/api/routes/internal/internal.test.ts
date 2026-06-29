@@ -531,7 +531,7 @@ describe('Internal Routes', () => {
 
     expect(response.notFound).toHaveBeenCalledWith({
       body: {
-        message: 'Workflow with id missing not found',
+        message: 'Workflow with id "missing" not found.',
       },
     });
   });
