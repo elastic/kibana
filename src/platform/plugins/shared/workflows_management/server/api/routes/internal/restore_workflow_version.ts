@@ -9,14 +9,17 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { INTERNAL_API_VERSION } from '../utils/route_constants';
+import { INTERNAL_API_VERSION, MAX_CHANGE_HISTORY_EVENT_ID_LENGTH } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const paramsSchema = idParamSchema.extends({
-  eventId: schema.string({ meta: { description: 'Change history event ID to restore from.' } }),
+  eventId: schema.string({
+    maxLength: MAX_CHANGE_HISTORY_EVENT_ID_LENGTH,
+    meta: { description: 'Change history event ID to restore from.' },
+  }),
 });
 
 export function registerRestoreWorkflowVersionRoute(deps: RouteDependencies) {
