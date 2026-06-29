@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
   API_VERSIONS,
@@ -21,7 +21,6 @@ import {
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
-import { updateActionTagsResponseSchema } from './response_schemas';
 
 const updateActionTagsRequestParamsSchema = t.type({
   id: t.string,
@@ -63,11 +62,6 @@ export const updateActionTagsRoute = (
               typeof updateActionTagsRequestBodySchema,
               UpdateActionTagsRequestBodySchema
             >(updateActionTagsRequestBodySchema),
-          },
-          response: {
-            200: {
-              body: () => updateActionTagsResponseSchema,
-            },
           },
         },
       },

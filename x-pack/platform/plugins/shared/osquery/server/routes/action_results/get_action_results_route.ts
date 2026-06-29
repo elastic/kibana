@@ -9,7 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import {
   getActionResultsRequestParamsSchema,

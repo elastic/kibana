@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 /**
  * Builds the `space_id` filter clause for osquery ES reads.

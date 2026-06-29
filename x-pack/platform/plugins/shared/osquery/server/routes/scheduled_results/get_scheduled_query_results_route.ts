@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { isFilters } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {

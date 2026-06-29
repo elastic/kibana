@@ -10,7 +10,7 @@ import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX, ACTIONS_INDEX } from '../../../common/constants';
 import { enforceSpaceScope } from './enforce_space_scope';
 import type {
