@@ -13,23 +13,19 @@ export interface UseDeepLinkedPrebuiltRuleParams {
   /** The `rule_id` to resolve, taken from the `/rules/add_rules/:ruleId` deep link. */
   ruleId: string | undefined;
   /** Installable rules already loaded on the current table page — used to skip fetching when
-   *  the target is already in hand. */
+   *  the target rule is already available. */
   currentPageRules: RuleResponse[];
 }
 
 export interface UseDeepLinkedPrebuiltRuleResult {
   /**
-   * The deep-link target rule to surface in the preview flyout: the installable rule fetched by
-   * `rule_id`, or an already-installed fallback. `undefined` when nothing needs resolving — no
-   * `ruleId`, the rule is already on the current page, or it was not found anywhere.
+   * The resolved deep-link target rule.
    */
-  rule: RuleResponse | undefined;
-  /** `true` when `rule` resolved from the installed-rules fallback, i.e. it is already installed
-   *  and install actions should be disabled. */
-  isAlreadyInstalled: boolean;
-  /** `true` once every applicable lookup has settled on fresh data, so a consumer can decide
-   *  whether to open the flyout without acting on a stale cache. */
-  isResolved: boolean;
+  deepLinkedRule: RuleResponse | undefined;
+  /** `true` when the resolved `deepLinkedRule` is already installed */
+  isDeepLinkedRuleInstalled: boolean;
+  /** `true` once every applicable lookup has settled and the result is ready. */
+  isDeepLinkedRuleResolved: boolean;
 }
 
 /**
@@ -47,11 +43,16 @@ export const useDeepLinkedPrebuiltRule = ({
   ruleId,
   currentPageRules,
 }: UseDeepLinkedPrebuiltRuleParams): UseDeepLinkedPrebuiltRuleResult => {
-  const isOnCurrentPage =
-    ruleId != null && currentPageRules.some((rule) => rule.rule_id === ruleId);
+  // Step 1: Check if the rule for this rule_id is already loaded on the current table page. If so,
+  // we reuse it and skip fetching.
+  const hasRuleId = Boolean(ruleId);
+  const loadedRule = hasRuleId
+    ? currentPageRules.find((rule) => rule.rule_id === ruleId)
+    : undefined;
+  const isAlreadyLoaded = Boolean(loadedRule);
 
-  // Step 2: fetch the rule by `rule_id` from the installable catalog. The target may not fall on
-  // the current page, so this is scoped to a single rule and kept separate from the table query.
+  // Step 2: Try to fetch the rule using the "installation review" endpoint. It will succeed if the rule is not yet installed.
+  const shouldSearchPrebuiltRuleAssets = hasRuleId && !isAlreadyLoaded;
   const {
     data: deepLinkReviewResponse,
     isFetching: isFetchingInstallable,
@@ -63,44 +64,37 @@ export const useDeepLinkedPrebuiltRule = ({
       ruleIds: ruleId ? [ruleId] : undefined,
     },
     {
-      enabled: Boolean(ruleId) && !isOnCurrentPage,
+      enabled: shouldSearchPrebuiltRuleAssets,
     }
   );
   const installableRule = deepLinkReviewResponse?.rules?.[0];
+  const installableSettled = isFetchedInstallable && !isFetchingInstallable;
 
-  // Step 3: fall back to the installed alerting rule when the catalog lookup settled empty.
-  const shouldLookupInstalledFallback =
-    Boolean(ruleId) &&
-    !isOnCurrentPage &&
-    isFetchedInstallable &&
-    !isFetchingInstallable &&
-    !installableRule;
+  // Step 3: If the rule is already installed, we fall back to fetching an already installed rule.
+  const shouldSearchInstalledRules =
+    shouldSearchPrebuiltRuleAssets && installableSettled && !installableRule;
+
   const {
     rule: installedFallbackRule,
     isFetching: isFetchingInstalled,
     isFetched: isFetchedInstalled,
   } = useFindInstalledPrebuiltRuleByRuleId(ruleId, {
-    enabled: shouldLookupInstalledFallback,
+    enabled: shouldSearchInstalledRules,
   });
 
-  const installableSettled = isFetchedInstallable && !isFetchingInstallable;
   const fallbackSettled = isFetchedInstalled && !isFetchingInstalled;
 
-  // Resolved when there is nothing to fetch (no `ruleId` or already on the page), or the catalog
-  // lookup settled and — if it found nothing and a fallback ran — the fallback settled too.
-  const isResolved =
-    !ruleId ||
-    isOnCurrentPage ||
-    (installableSettled && (!shouldLookupInstalledFallback || fallbackSettled));
+  // Resolved when there is:
+  const isDeepLinkedRuleResolved =
+    !hasRuleId || // nothing to fetch (no `ruleId` or already loaded), or
+    isAlreadyLoaded || // rule is already fetched, or
+    (installableSettled && (!shouldSearchInstalledRules || fallbackSettled)); // either prebuilt rule asset or installed rule is fetched for this rule_id
 
-  // `undefined` when the target is already on the current page: the caller has it via
-  // `currentPageRules`, and a disabled query keeps its last value, so returning it here would
-  // double-add it to the flyout list.
-  const rule = isOnCurrentPage ? undefined : installableRule ?? installedFallbackRule;
+  const deepLinkedRule = loadedRule ?? installableRule ?? installedFallbackRule;
 
   return {
-    rule,
-    isAlreadyInstalled: rule != null && rule === installedFallbackRule,
-    isResolved,
+    deepLinkedRule,
+    isDeepLinkedRuleInstalled: Boolean(deepLinkedRule) && deepLinkedRule === installedFallbackRule,
+    isDeepLinkedRuleResolved,
   };
 };

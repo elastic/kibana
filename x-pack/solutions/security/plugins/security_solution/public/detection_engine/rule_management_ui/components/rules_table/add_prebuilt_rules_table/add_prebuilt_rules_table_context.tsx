@@ -212,22 +212,16 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
 
-  // When deep-linked to a specific rule (e.g. from a chat recommendation link at
-  // /rules/add_rules/<rule_id>), the target may not fall on the current page of the catalog.
-  // Resolve it by `rule_id` so the preview flyout has data regardless of pagination. Scoped to
-  // the flyout only — the table keeps rendering the paginated `rules`.
-  const {
-    rule: deepLinkRule,
-    isAlreadyInstalled: isDeepLinkRuleInstalled,
-    isResolved: isDeepLinkResolved,
-  } = useDeepLinkedPrebuiltRule({ ruleId: ruleIdFromUrl, currentPageRules: rules });
+  const { deepLinkedRule, isDeepLinkedRuleInstalled, isDeepLinkedRuleResolved } =
+    useDeepLinkedPrebuiltRule({ ruleId: ruleIdFromUrl, currentPageRules: rules });
 
-  // Rules array passed to the preview flyout: the installable rules from the current page plus
-  // the optional deep-link target. The table itself still renders only `rules`.
-  const flyoutRules = useMemo(
-    () => (deepLinkRule ? [...rules, deepLinkRule] : rules),
-    [rules, deepLinkRule]
-  );
+  const flyoutRules = useMemo(() => {
+    // Not adding a deep-linked rule if it's already there.
+    if (!deepLinkedRule || rules.some((rule) => rule.rule_id === deepLinkedRule.rule_id)) {
+      return rules;
+    }
+    return [...rules, deepLinkedRule];
+  }, [rules, deepLinkedRule]);
 
   const rulesMatchingFilterCount = reviewResponse?.total ?? 0;
   const installableRulesCount = reviewResponse?.stats.num_rules_to_install ?? 0;
@@ -295,9 +289,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const ruleActionsFactory = useCallback(
     (rule: RuleResponse, closeRulePreview: () => void) => {
-      const isPreviewRuleAlreadyInstalled =
-        isDeepLinkRuleInstalled && deepLinkRule?.rule_id === rule.rule_id;
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
+
+      const isPreviewRuleAlreadyInstalled =
+        isDeepLinkedRuleInstalled && deepLinkedRule?.rule_id === rule.rule_id;
+
       const canPreviewedRuleBeInstalled =
         canEditRules &&
         !isPreviewRuleAlreadyInstalled &&
@@ -353,8 +349,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       );
     },
     [
-      isDeepLinkRuleInstalled,
-      deepLinkRule,
+      isDeepLinkedRuleInstalled,
+      deepLinkedRule,
       loadingRules,
       canEditRules,
       isRefetching,
@@ -397,12 +393,19 @@ export const AddPrebuiltRulesTableContextProvider = ({
     // Wait for the table query and the by-rule_id deep-link resolution (incl. its fallback) to
     // settle on fresh data before deciding — a stale cache could otherwise surface a rule that
     // was installed in this session and open the install flyout with active install buttons.
-    if (!isFetched || isFetching || !isDeepLinkResolved) return;
+    if (!isFetched || isFetching || !isDeepLinkedRuleResolved) return;
     const found = flyoutRules.find((r) => r.rule_id === ruleIdFromUrl);
     if (!found) return;
     autoOpenedRuleIdRef.current = ruleIdFromUrl;
     openRulePreview(ruleIdFromUrl);
-  }, [ruleIdFromUrl, isFetched, isFetching, isDeepLinkResolved, flyoutRules, openRulePreview]);
+  }, [
+    ruleIdFromUrl,
+    isFetched,
+    isFetching,
+    isDeepLinkedRuleResolved,
+    flyoutRules,
+    openRulePreview,
+  ]);
 
   const actions = useMemo(
     () => ({
