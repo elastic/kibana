@@ -8,6 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -15,8 +16,18 @@ import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
+import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+
+jest.mock('../lib/log_workflow_changes', () => ({
+  logWorkflowChanges: jest.fn().mockResolvedValue(undefined),
+}));
+
+const mockedLogWorkflowChanges = logWorkflowChanges as jest.MockedFunction<
+  typeof logWorkflowChanges
+>;
 
 const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties => ({
   name: 'Test Workflow',
@@ -50,7 +61,8 @@ const makeSecurityMock = (username: string = 'alice') =>
   } as any);
 
 const makeDeps = (
-  clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>
+  clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>,
+  depsOverrides?: Partial<WorkflowCrudDeps>
 ): { deps: WorkflowCrudDeps; client: ReturnType<typeof makeStorageClient> } => {
   const client = { ...makeStorageClient(), ...clientOverrides };
   const executionQueryService = {
@@ -71,9 +83,24 @@ const makeDeps = (
     getTaskScheduler: () => null,
     executionQueryService,
     validationService,
+    getCoreStart: () => ({} as CoreStart),
+    changeHistoryService: {
+      isInitialized: () => false,
+      asScoped: jest.fn(),
+      asSystemUser: jest.fn(),
+    } as any,
+    workflowVersioningEnabled: true,
+    ...depsOverrides,
   };
   return { deps, client };
 };
+
+const makeTaskScheduler = () => ({
+  scheduleWorkflowTasks: jest.fn().mockResolvedValue([]),
+  scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
+  unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+  updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+});
 
 const lightweightWorkflowYaml = [
   'name: My Workflow',
@@ -88,6 +115,39 @@ const lightweightWorkflowYaml = [
 ].join('\n');
 
 describe('WorkflowCrudService', () => {
+  describe('logWorkflowChangesAfterWrite', () => {
+    it('does not touch change history when workflow versioning is disabled', async () => {
+      const asScoped = jest.fn(() => {
+        throw new Error('asScoped should not be called when versioning is disabled');
+      });
+      const asSystemUser = jest.fn(() => {
+        throw new Error('asSystemUser should not be called when versioning is disabled');
+      });
+      const { deps } = makeDeps(undefined, {
+        workflowVersioningEnabled: false,
+        changeHistoryService: {
+          isInitialized: () => false,
+          initialize: jest.fn().mockResolvedValue(undefined),
+          getHistory: jest.fn(),
+          asScoped,
+          asSystemUser,
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+
+      await service.logWorkflowChangesAfterWrite({
+        workflows: [{ id: 'wf-1', document: makeSource() }],
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId: 'default',
+        timestamp: new Date(),
+      });
+
+      expect(asScoped).not.toHaveBeenCalled();
+      expect(asSystemUser).not.toHaveBeenCalled();
+      expect(mockedLogWorkflowChanges).not.toHaveBeenCalled();
+    });
+  });
+
   describe('prepareWorkflowDocumentForStorage', () => {
     it('uses lightweight validation only when explicitly requested', async () => {
       const { deps } = makeDeps();
@@ -368,6 +428,33 @@ describe('WorkflowCrudService', () => {
             name: 'My Workflow',
             spaceId: 'default',
           }),
+        })
+      );
+    });
+
+    it('logs workflow create to change history after a successful index', async () => {
+      const scopedChangeHistory = { logBulk: jest.fn() };
+      const changeHistoryService = {
+        isInitialized: () => true,
+        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+      };
+      const { deps, client } = makeDeps();
+      deps.changeHistoryService = changeHistoryService as any;
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.createWorkflow({ yaml: validYaml }, 'default', request);
+
+      expect(mockedLogWorkflowChanges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowCreate,
+          spaceId: 'default',
+          scopedChangeHistory,
+          workflows: [
+            expect.objectContaining({
+              document: expect.objectContaining({ name: 'My Workflow' }),
+            }),
+          ],
         })
       );
     });
@@ -776,39 +863,43 @@ describe('WorkflowCrudService', () => {
       expect(result.failed[0].id).toBe('same');
     });
 
-    const makeTaskScheduler = () => ({
-      scheduleWorkflowTasks: jest.fn().mockResolvedValue([]),
-      scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
-      unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-      updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-    });
-
     it('overwrite=true unschedules orphaned tasks when the new workflow has no scheduled triggers', async () => {
       const taskScheduler = makeTaskScheduler();
       const { deps, client } = makeDeps();
       (deps as any).getTaskScheduler = () => taskScheduler;
 
       client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
-      // Post-write re-read: persisted document has only a manual trigger.
-      client.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({
-                enabled: true,
-                valid: true,
-                definition: {
-                  name: 'A',
+      // Pre-bulk read for overwrite version bump, then post-write re-read for scheduler sync.
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ version: 4 }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
                   enabled: true,
-                  triggers: [{ type: 'manual' }],
-                  steps: [],
-                } as any,
-              }),
-            },
-          ],
-        },
-      });
+                  valid: true,
+                  definition: {
+                    name: 'A',
+                    enabled: true,
+                    triggers: [{ type: 'manual' }],
+                    steps: [],
+                  } as any,
+                }),
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.bulkCreateWorkflows(
@@ -828,25 +919,36 @@ describe('WorkflowCrudService', () => {
       (deps as any).getTaskScheduler = () => taskScheduler;
 
       client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
-      client.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({
-                enabled: true,
-                valid: true,
-                definition: {
-                  name: 'A',
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ version: 2 }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
                   enabled: true,
-                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
-                  steps: [],
-                } as any,
-              }),
-            },
-          ],
-        },
-      });
+                  valid: true,
+                  definition: {
+                    name: 'A',
+                    enabled: true,
+                    triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                    steps: [],
+                  } as any,
+                }),
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.bulkCreateWorkflows(
@@ -871,25 +973,36 @@ describe('WorkflowCrudService', () => {
       (deps as any).getTaskScheduler = () => taskScheduler;
 
       client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
-      client.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({
-                enabled: false,
-                valid: true,
-                definition: {
-                  name: 'A',
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ version: 1 }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
                   enabled: false,
-                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
-                  steps: [],
-                } as any,
-              }),
-            },
-          ],
-        },
-      });
+                  valid: true,
+                  definition: {
+                    name: 'A',
+                    enabled: false,
+                    triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                    steps: [],
+                  } as any,
+                }),
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.bulkCreateWorkflows(
@@ -1116,6 +1229,45 @@ describe('WorkflowCrudService', () => {
       );
     });
 
+    it('logs workflow update to change history after a successful write', async () => {
+      const scopedChangeHistory = { logBulk: jest.fn() };
+      const changeHistoryService = {
+        isInitialized: () => true,
+        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+      };
+      const { deps, client } = makeDeps();
+      deps.changeHistoryService = changeHistoryService as any;
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ name: 'Before', enabled: true, tags: ['t1'], version: 4 }),
+              _seq_no: 5,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['t1', 't2'] } as any, 'default', request);
+
+      expect(mockedLogWorkflowChanges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowUpdate,
+          spaceId: 'default',
+          scopedChangeHistory,
+          workflows: [
+            expect.objectContaining({
+              id: 'wf-1',
+              document: expect.objectContaining({ tags: ['t1', 't2'], version: 5 }),
+            }),
+          ],
+        })
+      );
+    });
+
     it('records the caller in lastUpdatedBy on every update', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({
@@ -1137,6 +1289,98 @@ describe('WorkflowCrudService', () => {
       expect(client.index.mock.calls[0][0].document.lastUpdatedBy).toBe('alice');
     });
 
+    it('refreshes scheduled task credentials when editing an enabled scheduled workflow', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: existingSource,
+                _seq_no: 2,
+                _primary_term: 1,
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: {
+                  ...existingSource,
+                  tags: ['new'],
+                  lastUpdatedBy: 'alice',
+                },
+              },
+            ],
+          },
+        });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'wf-1', tags: ['new'] }),
+        'default',
+        request
+      );
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    });
+
+    it('warns when an enabled scheduled workflow needs scheduler sync but the scheduler is unavailable', async () => {
+      const { deps, client } = makeDeps();
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: existingSource,
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        'Skipping scheduler sync for workflow wf-1 in space default: task scheduler is unavailable'
+      );
+    });
+
     it('retries after a version conflict and merges against a fresh read', async () => {
       const { deps, client } = makeDeps();
       client.search
@@ -1145,7 +1389,7 @@ describe('WorkflowCrudService', () => {
             hits: [
               {
                 _id: 'wf-1',
-                _source: makeSource({ name: 'Before', tags: ['t1'] }),
+                _source: makeSource({ name: 'Before', tags: ['t1'], version: 5 }),
                 _seq_no: 5,
                 _primary_term: 1,
               },
@@ -1157,7 +1401,11 @@ describe('WorkflowCrudService', () => {
             hits: [
               {
                 _id: 'wf-1',
-                _source: makeSource({ name: 'Concurrent Name', tags: ['t1'] }),
+                _source: makeSource({
+                  name: 'Concurrent Name',
+                  tags: ['t1'],
+                  version: 6,
+                }),
                 _seq_no: 8,
                 _primary_term: 1,
               },
@@ -1193,6 +1441,7 @@ describe('WorkflowCrudService', () => {
           id: 'wf-1',
           if_seq_no: 5,
           if_primary_term: 1,
+          document: expect.objectContaining({ version: 6 }),
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
@@ -1205,7 +1454,58 @@ describe('WorkflowCrudService', () => {
             name: 'Concurrent Name',
             tags: ['t1', 't2'],
             lastUpdatedBy: 'alice',
+            version: 7,
           }),
+        })
+      );
+    });
+
+    it('increments version from the existing document on update', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ version: 12 }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 13, enabled: false }),
+        })
+      );
+    });
+
+    it('does not increment version when workflow versioning uiSetting is disabled', async () => {
+      const { deps, client } = makeDeps(undefined, { workflowVersioningEnabled: false });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ version: 12 }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 12, enabled: false }),
         })
       );
     });
