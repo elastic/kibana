@@ -72,6 +72,9 @@ const baseParams = {
   workflowConfig: {
     alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
+    alert_retrieval_workflows_enabled: false,
+    default_retrieval_enabled: true,
+    skill_enabled: true,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,

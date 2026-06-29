@@ -8,13 +8,18 @@
 import type { WorkflowConfig } from '../types';
 import { getWorkflowLoadingMessage } from '.';
 
+const baseConfig: WorkflowConfig = {
+  alert_retrieval_mode: 'custom_query',
+  alert_retrieval_workflow_ids: [],
+  alert_retrieval_workflows_enabled: false,
+  default_retrieval_enabled: true,
+  skill_enabled: true,
+  validation_workflow_id: 'default',
+};
+
 describe('getWorkflowLoadingMessage', () => {
   describe('custom_query mode only (no custom workflows)', () => {
-    const workflowConfig: WorkflowConfig = {
-      alert_retrieval_workflow_ids: [],
-      alert_retrieval_mode: 'custom_query',
-      validation_workflow_id: 'default',
-    };
+    const workflowConfig: WorkflowConfig = { ...baseConfig, alert_retrieval_mode: 'custom_query' };
 
     it('returns the default 24-hour message when start and end are the defaults', () => {
       const result = getWorkflowLoadingMessage({
@@ -79,10 +84,9 @@ describe('getWorkflowLoadingMessage', () => {
 
   describe('esql mode only (no custom workflows)', () => {
     const workflowConfig: WorkflowConfig = {
-      alert_retrieval_workflow_ids: [],
+      ...baseConfig,
       alert_retrieval_mode: 'esql',
       esql_query: 'FROM .alerts-security.alerts-default | LIMIT 100',
-      validation_workflow_id: 'default',
     };
 
     it('returns the ES|QL message', () => {
@@ -97,12 +101,13 @@ describe('getWorkflowLoadingMessage', () => {
     });
   });
 
-  describe('custom workflows only (default retrieval custom_only)', () => {
+  describe('custom workflows only (default retrieval disabled)', () => {
     it('returns the single workflow message when one workflow is selected', () => {
       const workflowConfig: WorkflowConfig = {
+        ...baseConfig,
         alert_retrieval_workflow_ids: ['workflow-1'],
-        alert_retrieval_mode: 'custom_only',
-        validation_workflow_id: 'default',
+        alert_retrieval_workflows_enabled: true,
+        default_retrieval_enabled: false,
       };
 
       const result = getWorkflowLoadingMessage({
@@ -117,9 +122,10 @@ describe('getWorkflowLoadingMessage', () => {
 
     it('returns the plural workflows message when multiple workflows are selected', () => {
       const workflowConfig: WorkflowConfig = {
+        ...baseConfig,
         alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2', 'workflow-3'],
-        alert_retrieval_mode: 'custom_only',
-        validation_workflow_id: 'default',
+        alert_retrieval_workflows_enabled: true,
+        default_retrieval_enabled: false,
       };
 
       const result = getWorkflowLoadingMessage({
@@ -136,9 +142,10 @@ describe('getWorkflowLoadingMessage', () => {
   describe('custom_query mode with custom workflows (combined)', () => {
     it('combines custom query and single workflow message', () => {
       const workflowConfig: WorkflowConfig = {
-        alert_retrieval_workflow_ids: ['workflow-1'],
+        ...baseConfig,
         alert_retrieval_mode: 'custom_query',
-        validation_workflow_id: 'default',
+        alert_retrieval_workflow_ids: ['workflow-1'],
+        alert_retrieval_workflows_enabled: true,
       };
 
       const result = getWorkflowLoadingMessage({
@@ -155,9 +162,10 @@ describe('getWorkflowLoadingMessage', () => {
 
     it('combines custom query and multiple workflows message', () => {
       const workflowConfig: WorkflowConfig = {
-        alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
+        ...baseConfig,
         alert_retrieval_mode: 'custom_query',
-        validation_workflow_id: 'default',
+        alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
+        alert_retrieval_workflows_enabled: true,
       };
 
       const result = getWorkflowLoadingMessage({
@@ -174,9 +182,10 @@ describe('getWorkflowLoadingMessage', () => {
 
     it('combines custom query range with workflows', () => {
       const workflowConfig: WorkflowConfig = {
-        alert_retrieval_workflow_ids: ['workflow-1'],
+        ...baseConfig,
         alert_retrieval_mode: 'custom_query',
-        validation_workflow_id: 'default',
+        alert_retrieval_workflow_ids: ['workflow-1'],
+        alert_retrieval_workflows_enabled: true,
       };
 
       const result = getWorkflowLoadingMessage({
@@ -195,10 +204,11 @@ describe('getWorkflowLoadingMessage', () => {
   describe('esql mode with custom workflows (combined)', () => {
     it('combines ES|QL and single workflow message', () => {
       const workflowConfig: WorkflowConfig = {
-        alert_retrieval_workflow_ids: ['workflow-1'],
+        ...baseConfig,
         alert_retrieval_mode: 'esql',
+        alert_retrieval_workflow_ids: ['workflow-1'],
+        alert_retrieval_workflows_enabled: true,
         esql_query: 'FROM .alerts | LIMIT 100',
-        validation_workflow_id: 'default',
       };
 
       const result = getWorkflowLoadingMessage({
@@ -215,10 +225,11 @@ describe('getWorkflowLoadingMessage', () => {
 
     it('combines ES|QL and multiple workflows message', () => {
       const workflowConfig: WorkflowConfig = {
-        alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2', 'workflow-3'],
+        ...baseConfig,
         alert_retrieval_mode: 'esql',
+        alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2', 'workflow-3'],
+        alert_retrieval_workflows_enabled: true,
         esql_query: 'FROM .alerts | LIMIT 100',
-        validation_workflow_id: 'default',
       };
 
       const result = getWorkflowLoadingMessage({
@@ -234,16 +245,16 @@ describe('getWorkflowLoadingMessage', () => {
     });
   });
 
-  describe('provided mode (pre-provided alerts)', () => {
+  describe('pre-provided alerts (providedAlertsCount)', () => {
     const workflowConfig: WorkflowConfig = {
-      alert_retrieval_workflow_ids: [],
-      alert_retrieval_mode: 'provided',
-      validation_workflow_id: 'default',
+      ...baseConfig,
+      default_retrieval_enabled: false,
     };
 
     it('returns the pre-provided alerts message with the correct count', () => {
       const result = getWorkflowLoadingMessage({
-        alertsCount: 5,
+        alertsCount: 0,
+        providedAlertsCount: 5,
         workflowConfig,
       });
 
@@ -252,17 +263,19 @@ describe('getWorkflowLoadingMessage', () => {
 
     it('handles singular pre-provided alert count', () => {
       const result = getWorkflowLoadingMessage({
-        alertsCount: 1,
+        alertsCount: 0,
+        providedAlertsCount: 1,
         workflowConfig,
       });
 
       expect(result).toBe('AI is analyzing 1 pre-provided alert to generate discoveries.');
     });
 
-    it('ignores the time range parameters (provided mode does not use them)', () => {
+    it('ignores the time range parameters for the pre-provided message', () => {
       const result = getWorkflowLoadingMessage({
-        alertsCount: 3,
+        alertsCount: 0,
         end: 'now',
+        providedAlertsCount: 3,
         start: 'now-24h',
         workflowConfig,
       });
@@ -271,12 +284,14 @@ describe('getWorkflowLoadingMessage', () => {
     });
   });
 
-  describe('custom_only mode with no custom workflows (edge case)', () => {
-    it('falls back to the default custom_query message', () => {
+  describe('all toggles disabled with no provided alerts (edge case)', () => {
+    it('falls back to the default attack discovery loading message', () => {
       const workflowConfig: WorkflowConfig = {
+        ...baseConfig,
         alert_retrieval_workflow_ids: [],
-        alert_retrieval_mode: 'custom_only',
-        validation_workflow_id: 'default',
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: false,
+        skill_enabled: true,
       };
 
       const result = getWorkflowLoadingMessage({

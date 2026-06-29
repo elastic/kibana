@@ -110,8 +110,11 @@ describe('invokeValidationWorkflow', () => {
     spaceId: 'default',
     withReplacements: true,
     workflowConfig: {
-      alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
       alert_retrieval_mode: 'custom_query' as const,
+      alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
+      alert_retrieval_workflows_enabled: false,
+      default_retrieval_enabled: true,
+      skill_enabled: true,
       validation_workflow_id: 'default',
     },
     workflowsManagementApi: mockWorkflowsManagementApi,

@@ -12,11 +12,18 @@ import { runManualOrchestration } from '.';
 import { PipelineStepError } from './helpers/pipeline_step_error';
 
 const mockRunRetrievalStep = jest.fn();
+const mockRunGatePhase = jest.fn();
 const mockRunGenerationStep = jest.fn();
 const mockRunValidationStep = jest.fn();
+const mockInvokeSkillReportWorkflow = jest.fn();
+const mockHandleNoAlerts = jest.fn();
 
 jest.mock('./steps/retrieval_step', () => ({
   runRetrievalStep: (...args: unknown[]) => mockRunRetrievalStep(...args),
+}));
+
+jest.mock('../run_gate_phase', () => ({
+  runGatePhase: (...args: unknown[]) => mockRunGatePhase(...args),
 }));
 
 jest.mock('./steps/generation_step', () => ({
@@ -25,6 +32,14 @@ jest.mock('./steps/generation_step', () => ({
 
 jest.mock('./steps/validation_step', () => ({
   runValidationStep: (...args: unknown[]) => mockRunValidationStep(...args),
+}));
+
+jest.mock('../invoke_skill_report_workflow', () => ({
+  invokeSkillReportWorkflow: (...args: unknown[]) => mockInvokeSkillReportWorkflow(...args),
+}));
+
+jest.mock('./helpers/handle_no_alerts', () => ({
+  handleNoAlerts: (...args: unknown[]) => mockHandleNoAlerts(...args),
 }));
 
 const mockAnonymizationFields: AnonymizationFieldResponse[] = [
@@ -114,6 +129,9 @@ const baseParams = {
   workflowConfig: {
     alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
+    alert_retrieval_workflows_enabled: false,
+    default_retrieval_enabled: true,
+    skill_enabled: true,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,
@@ -124,8 +142,15 @@ describe('runManualOrchestration', () => {
     jest.clearAllMocks();
 
     mockRunRetrievalStep.mockResolvedValue(mockAlertRetrievalResult);
+    // Default gate behavior: pass the candidate set through unchanged.
+    mockRunGatePhase.mockImplementation(async ({ candidateResult }) => candidateResult);
     mockRunGenerationStep.mockResolvedValue(mockGenerationResult);
     mockRunValidationStep.mockResolvedValue(mockValidationOutcome);
+    mockInvokeSkillReportWorkflow.mockResolvedValue(undefined);
+    mockHandleNoAlerts.mockImplementation(async ({ alertRetrievalResult }) => ({
+      alertRetrievalResult,
+      outcome: 'no_alerts',
+    }));
   });
 
   it('calls runRetrievalStep with the correct params', async () => {
@@ -192,25 +217,270 @@ describe('runManualOrchestration', () => {
     await expect(runManualOrchestration(baseParams)).rejects.toThrow('validation boom');
   });
 
-  describe('provided mode', () => {
+  describe('skill report resume (Phase-2 / Mode B)', () => {
+    const gateResultWithConversation = {
+      ...mockAlertRetrievalResult,
+      conversationId: 'conversation-123',
+      workflowId: 'skill',
+    };
+
+    it('resumes the skill conversation when the gate produced a conversation id', async () => {
+      mockRunGatePhase.mockResolvedValue(gateResultWithConversation);
+
+      await runManualOrchestration(baseParams);
+
+      expect(mockInvokeSkillReportWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          conversationId: 'conversation-123',
+          executionUuid: 'test-execution-uuid',
+        })
+      );
+    });
+
+    it('resumes the skill conversation with the gate conversation id for the schedule trigger', async () => {
+      mockRunGatePhase.mockResolvedValue(gateResultWithConversation);
+
+      await runManualOrchestration({ ...baseParams, trigger: 'schedule' });
+
+      expect(mockInvokeSkillReportWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          conversationId: 'conversation-123',
+          executionUuid: 'test-execution-uuid',
+        })
+      );
+    });
+
+    it('does not resume when the gate produced no conversation id', async () => {
+      await runManualOrchestration(baseParams);
+
+      expect(mockInvokeSkillReportWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('still returns the validation outcome when the report resume throws', async () => {
+      mockRunGatePhase.mockResolvedValue(gateResultWithConversation);
+      mockInvokeSkillReportWorkflow.mockRejectedValue(new Error('report boom'));
+
+      const result = await runManualOrchestration(baseParams);
+
+      expect(result).toEqual(mockValidationOutcome);
+    });
+
+    it('does not resume when the generation step throws', async () => {
+      mockRunGatePhase.mockResolvedValue(gateResultWithConversation);
+      mockRunGenerationStep.mockRejectedValue(new Error('generation boom'));
+
+      await expect(runManualOrchestration(baseParams)).rejects.toThrow('generation boom');
+
+      expect(mockInvokeSkillReportWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('always-on gate', () => {
+    it('runs the gate for a non-agent_builder trigger (undefined)', async () => {
+      await runManualOrchestration(baseParams);
+
+      expect(mockRunGatePhase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          candidateResult: mockAlertRetrievalResult,
+          skillEnabled: true,
+        })
+      );
+    });
+
+    it('skips the gate for the agent_builder trigger', async () => {
+      await runManualOrchestration({ ...baseParams, trigger: 'agent_builder' });
+
+      expect(mockRunGatePhase).not.toHaveBeenCalled();
+    });
+
+    it('forwards the post-gate result to the generation step', async () => {
+      const postGateResult = {
+        ...mockAlertRetrievalResult,
+        alerts: ['kept-alert'],
+        alertsContextCount: 1,
+      };
+      mockRunGatePhase.mockResolvedValue(postGateResult);
+
+      await runManualOrchestration(baseParams);
+
+      expect(mockRunGenerationStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertRetrievalResult: postGateResult,
+        })
+      );
+    });
+
+    it('fails closed and skips generation when the gate throws', async () => {
+      mockRunGatePhase.mockRejectedValue(new Error('gate boom'));
+
+      await expect(runManualOrchestration(baseParams)).rejects.toThrow('gate boom');
+
+      expect(mockRunGenerationStep).not.toHaveBeenCalled();
+      expect(mockRunValidationStep).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('zero-alert guard', () => {
+    const zeroAlertResult = {
+      ...mockAlertRetrievalResult,
+      alerts: [],
+      alertsContextCount: 0,
+    };
+
+    // The fail-closed guard only fires when the skill's additional retrieval was
+    // the sole source (skill enabled + zero deterministic candidates). These
+    // tests cover the legitimate no-alerts short-circuit, so the skill toggle is
+    // off — a clean "no data in range" outcome rather than a gate silent-miss.
+    const noAlertsParams = {
+      ...baseParams,
+      workflowConfig: { ...baseParams.workflowConfig, skill_enabled: false },
+    };
+
+    beforeEach(() => {
+      mockRunRetrievalStep.mockResolvedValue(zeroAlertResult);
+    });
+
+    it('does not call runGenerationStep when retrieval returns zero alerts', async () => {
+      await runManualOrchestration(noAlertsParams);
+
+      expect(mockRunGenerationStep).not.toHaveBeenCalled();
+    });
+
+    it('does not call runValidationStep when retrieval returns zero alerts', async () => {
+      await runManualOrchestration(noAlertsParams);
+
+      expect(mockRunValidationStep).not.toHaveBeenCalled();
+    });
+
+    it('delegates to handleNoAlerts with the retrieval result', async () => {
+      await runManualOrchestration(noAlertsParams);
+
+      expect(mockHandleNoAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertRetrievalResult: zeroAlertResult,
+          generationWorkflowId: 'generation',
+        })
+      );
+    });
+
+    it('returns the no_alerts outcome', async () => {
+      const result = await runManualOrchestration(noAlertsParams);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          alertRetrievalResult: zeroAlertResult,
+          outcome: 'no_alerts',
+        })
+      );
+    });
+
+    it('does not resume the skill report workflow when there are zero alerts', async () => {
+      mockRunRetrievalStep.mockResolvedValue({
+        ...zeroAlertResult,
+        conversationId: 'conversation-123',
+      });
+
+      await runManualOrchestration(noAlertsParams);
+
+      expect(mockInvokeSkillReportWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('logs a succeeded summary with zero alerts and zero discoveries', async () => {
+      await runManualOrchestration(noAlertsParams);
+
+      expect(noAlertsParams.logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Orchestration summary [succeeded]')
+      );
+      expect(noAlertsParams.logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('alerts: 0, discoveries: 0')
+      );
+    });
+
+    it('takes the no-alerts path (not the fail-closed guard) when the gate drops all candidates it was given', async () => {
+      // Deterministic retrieval produced candidates, but the gate kept none.
+      // The skill's additional retrieval was NOT the sole source, so this is a
+      // legitimate "all candidates filtered" no-alerts outcome, not a silent miss.
+      mockRunRetrievalStep.mockResolvedValue(mockAlertRetrievalResult);
+      mockRunGatePhase.mockResolvedValue(zeroAlertResult);
+
+      const result = await runManualOrchestration(baseParams);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          outcome: 'no_alerts',
+        })
+      );
+      expect(mockRunGenerationStep).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('fail-closed gate guard (skill sole-source returns zero)', () => {
+    const zeroAlertResult = {
+      ...mockAlertRetrievalResult,
+      alerts: [],
+      alertsContextCount: 0,
+    };
+
+    beforeEach(() => {
+      // Skill additional retrieval is the SOLE source: no deterministic
+      // candidates, and the gate adds nothing.
+      mockRunRetrievalStep.mockResolvedValue(zeroAlertResult);
+      mockRunGatePhase.mockResolvedValue(zeroAlertResult);
+    });
+
+    it('throws instead of returning a silent no_alerts outcome', async () => {
+      await expect(runManualOrchestration(baseParams)).rejects.toThrow(
+        /sole source.*gate added 0 alerts/i
+      );
+    });
+
+    it('does not delegate to handleNoAlerts', async () => {
+      await expect(runManualOrchestration(baseParams)).rejects.toThrow();
+
+      expect(mockHandleNoAlerts).not.toHaveBeenCalled();
+    });
+
+    it('does not call runGenerationStep or runValidationStep', async () => {
+      await expect(runManualOrchestration(baseParams)).rejects.toThrow();
+
+      expect(mockRunGenerationStep).not.toHaveBeenCalled();
+      expect(mockRunValidationStep).not.toHaveBeenCalled();
+    });
+
+    it('attributes the failure to the retrieval step', async () => {
+      await expect(runManualOrchestration(baseParams)).rejects.toThrow();
+
+      expect(baseParams.logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Orchestration summary [failed]')
+      );
+    });
+
+    it('does not fire when the skill toggle is off (genuine no-alerts)', async () => {
+      const result = await runManualOrchestration({
+        ...baseParams,
+        workflowConfig: { ...baseParams.workflowConfig, skill_enabled: false },
+      });
+
+      expect(result).toEqual(expect.objectContaining({ outcome: 'no_alerts' }));
+    });
+  });
+
+  describe('pre-provided alerts', () => {
     const providedParams = {
       ...baseParams,
       alerts: ['alert-A', 'alert-B'],
-      workflowConfig: {
-        alert_retrieval_mode: 'provided' as const,
-        alert_retrieval_workflow_ids: [],
-        validation_workflow_id: 'default',
-      },
     };
 
-    it('skips runRetrievalStep when mode is provided and alerts are non-empty', async () => {
+    it('skips runRetrievalStep when alerts are pre-provided (non-empty)', async () => {
       await runManualOrchestration(providedParams);
 
       expect(mockRunRetrievalStep).not.toHaveBeenCalled();
     });
 
-    it('passes a synthetic AlertRetrievalResult to runGenerationStep when mode is provided', async () => {
-      await runManualOrchestration(providedParams);
+    it('passes a synthetic AlertRetrievalResult to runGenerationStep when alerts are pre-provided', async () => {
+      // The gate is skipped for pre-provided alerts in practice (agent_builder),
+      // but here the default pass-through gate preserves the synthetic result.
+      await runManualOrchestration({ ...providedParams, trigger: 'agent_builder' });
 
       expect(mockRunGenerationStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -223,7 +493,7 @@ describe('runManualOrchestration', () => {
       );
     });
 
-    it('still calls runRetrievalStep when mode is provided but alerts is empty', async () => {
+    it('still calls runRetrievalStep when pre-provided alerts is empty', async () => {
       await runManualOrchestration({
         ...providedParams,
         alerts: [],
@@ -232,7 +502,7 @@ describe('runManualOrchestration', () => {
       expect(mockRunRetrievalStep).toHaveBeenCalled();
     });
 
-    it('still calls runRetrievalStep when mode is provided but alerts is undefined', async () => {
+    it('still calls runRetrievalStep when alerts is undefined', async () => {
       const { alerts: _alerts, ...paramsWithoutAlerts } = providedParams;
 
       await runManualOrchestration(paramsWithoutAlerts);
@@ -387,15 +657,36 @@ describe('runManualOrchestration', () => {
       );
     });
 
-    it('uses a default pipeline timeout of 10 minutes', async () => {
+    it('uses a default pipeline timeout of 30 minutes (ADR-008)', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(11 * 60 * 1000);
+        jest.advanceTimersByTime(31 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
       await expect(runManualOrchestration(baseParams)).rejects.toThrow(PipelineStepError);
 
       expect(mockRunGenerationStep).not.toHaveBeenCalled();
+    });
+
+    it('does not exceed the budget after 11 minutes of retrieval under the default timeout', async () => {
+      mockRunRetrievalStep.mockImplementation(async () => {
+        jest.advanceTimersByTime(11 * 60 * 1000);
+        return mockAlertRetrievalResult;
+      });
+
+      await runManualOrchestration(baseParams);
+
+      expect(mockRunGenerationStep).toHaveBeenCalled();
+    });
+
+    it('passes the remaining pipeline budget as maxWaitMs to the retrieval step', async () => {
+      await runManualOrchestration({ ...baseParams, pipelineTimeoutMs: 15 * 60 * 1000 });
+
+      expect(mockRunRetrievalStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxWaitMs: 15 * 60 * 1000,
+        })
+      );
     });
 
     it('includes the pipeline timeout in the error message', async () => {

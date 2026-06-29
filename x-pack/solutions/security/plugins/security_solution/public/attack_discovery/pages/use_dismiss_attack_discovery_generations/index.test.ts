@@ -6,14 +6,19 @@
  */
 
 import {
+  ATTACK_DISCOVERY_GENERATIONS,
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
+import type {
+  GetAttackDiscoveryGenerationsResponse,
+  PostAttackDiscoveryGenerationsDismissResponse,
+} from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
-import { useMutation } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider, useMutation } from '@kbn/react-query';
+import React from 'react';
 
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -321,6 +326,92 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       await waitFor(() => expect(result.current.error).toBe(error));
+    });
+  });
+
+  describe('optimistic cache update', () => {
+    const buildResponse = (): GetAttackDiscoveryGenerationsResponse => ({
+      generations: [
+        {
+          connector_id: 'connector1',
+          discoveries: 0,
+          execution_uuid: 'gen1',
+          start: '2026-06-27T00:00:00.000Z',
+          status: 'succeeded',
+        },
+        {
+          connector_id: 'connector1',
+          discoveries: 0,
+          execution_uuid: 'gen2',
+          start: '2026-06-27T00:00:00.000Z',
+          status: 'succeeded',
+        },
+      ],
+    });
+
+    const getStatus = (
+      data: GetAttackDiscoveryGenerationsResponse | undefined,
+      executionUuid: string
+    ) => data?.generations.find((g) => g.execution_uuid === executionUuid)?.status;
+
+    let queryClient: QueryClient;
+    const wrapper: React.FC<React.PropsWithChildren> = ({ children }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    beforeEach(() => {
+      queryClient = new QueryClient();
+      queryClient.setQueryData<GetAttackDiscoveryGenerationsResponse>(
+        ['GET', ATTACK_DISCOVERY_GENERATIONS],
+        buildResponse()
+      );
+    });
+
+    it('optimistically marks the dismissed generation as dismissed before the request resolves', async () => {
+      mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+
+      await waitFor(() =>
+        expect(
+          getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+        ).toBe('dismissed')
+      );
+    });
+
+    it('leaves other generations untouched during the optimistic update', async () => {
+      mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+
+      await waitFor(() =>
+        expect(
+          getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen2')
+        ).toBe('succeeded')
+      );
+    });
+
+    it('rolls back the optimistic update when the request fails', async () => {
+      mockHttpFetch.mockRejectedValue(new Error('Mutation failed'));
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+
+      expect(
+        getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+      ).toBe('succeeded');
     });
   });
 });

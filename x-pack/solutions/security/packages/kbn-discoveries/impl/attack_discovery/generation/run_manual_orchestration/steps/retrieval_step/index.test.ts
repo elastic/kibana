@@ -15,7 +15,7 @@ jest.mock('../../../../../lib/log_health_check', () => ({
   logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
 }));
 
-const mockCreateLegacyRetrievalPromise = jest.fn();
+const mockCreateDefaultRetrievalPromise = jest.fn();
 const mockInvokeCustomAlertRetrievalWorkflows = jest.fn();
 const mockResolveLegacySettledResult = jest.fn();
 const mockResolveCustomSettledResults = jest.fn();
@@ -23,7 +23,7 @@ const mockValidateRetrievalResults = jest.fn();
 const mockCombineAlertRetrievalResults = jest.fn();
 
 jest.mock('./helpers/create_default_retrieval_promise', () => ({
-  createLegacyRetrievalPromise: (...args: unknown[]) => mockCreateLegacyRetrievalPromise(...args),
+  createDefaultRetrievalPromise: (...args: unknown[]) => mockCreateDefaultRetrievalPromise(...args),
 }));
 
 jest.mock('../../../invoke_custom_alert_retrieval_workflows', () => ({
@@ -63,7 +63,7 @@ const baseParams = {
     model: 'gpt-4',
   },
   authenticatedUser: {} as never,
-  defaultAlertRetrievalWorkflowId: 'legacy',
+  defaultAlertRetrievalWorkflowId: 'default',
   eventLogger: {} as never,
   eventLogIndex: '.kibana-event-log-test',
   executionUuid: 'test-execution-uuid',
@@ -73,6 +73,9 @@ const baseParams = {
   workflowConfig: {
     alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
+    alert_retrieval_workflows_enabled: false,
+    default_retrieval_enabled: true,
+    skill_enabled: true,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,
@@ -86,15 +89,15 @@ const mockCombinedResult = {
   connectorName: 'Test Connector',
   replacements: {},
   workflowExecutions: [],
-  workflowId: 'legacy',
-  workflowRunId: 'legacy-run',
+  workflowId: 'default',
+  workflowRunId: 'default-run',
 };
 
 describe('runRetrievalStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockCreateLegacyRetrievalPromise.mockResolvedValue(null);
+    mockCreateDefaultRetrievalPromise.mockResolvedValue(null);
     mockInvokeCustomAlertRetrievalWorkflows.mockResolvedValue([]);
     mockResolveLegacySettledResult.mockReturnValue(null);
     mockResolveCustomSettledResults.mockReturnValue([]);
@@ -109,29 +112,57 @@ describe('runRetrievalStep', () => {
       anonymizationFieldCount: 0,
       connectorId: 'test-connector-id',
       customWorkflowIds: [],
-      defaultAlertRetrievalWorkflowId: 'legacy',
+      defaultAlertRetrievalWorkflowId: 'default',
       retrievalMode: 'custom_query',
     });
   });
 
-  it('calls createLegacyRetrievalPromise with the correct params', async () => {
+  it('calls createDefaultRetrievalPromise with the correct params', async () => {
     await runRetrievalStep(baseParams);
 
-    expect(mockCreateLegacyRetrievalPromise).toHaveBeenCalledWith(
+    expect(mockCreateDefaultRetrievalPromise).toHaveBeenCalledWith(
       expect.objectContaining({
         alertsIndexPattern: '.alerts',
         alertRetrievalMode: 'custom_query' as const,
-        defaultAlertRetrievalWorkflowId: 'legacy',
+        defaultAlertRetrievalWorkflowId: 'default',
+        defaultRetrievalEnabled: true,
       })
     );
   });
 
-  it('calls invokeCustomAlertRetrievalWorkflows with workflow IDs from config', async () => {
+  it('passes maxWaitMs through to createDefaultRetrievalPromise', async () => {
+    await runRetrievalStep({ ...baseParams, maxWaitMs: 15 * 60 * 1000 });
+
+    expect(mockCreateDefaultRetrievalPromise).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxWaitMs: 15 * 60 * 1000,
+      })
+    );
+  });
+
+  it('passes default_retrieval_enabled=false through to createDefaultRetrievalPromise', async () => {
+    await runRetrievalStep({
+      ...baseParams,
+      workflowConfig: {
+        ...baseParams.workflowConfig,
+        default_retrieval_enabled: false,
+      },
+    });
+
+    expect(mockCreateDefaultRetrievalPromise).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultRetrievalEnabled: false,
+      })
+    );
+  });
+
+  it('calls invokeCustomAlertRetrievalWorkflows with workflow IDs when the workflows toggle is enabled', async () => {
     await runRetrievalStep({
       ...baseParams,
       workflowConfig: {
         ...baseParams.workflowConfig,
         alert_retrieval_workflow_ids: ['custom-1', 'custom-2'],
+        alert_retrieval_workflows_enabled: true,
       },
     });
 
@@ -142,12 +173,29 @@ describe('runRetrievalStep', () => {
     );
   });
 
+  it('passes no custom workflow IDs when the workflows toggle is disabled', async () => {
+    await runRetrievalStep({
+      ...baseParams,
+      workflowConfig: {
+        ...baseParams.workflowConfig,
+        alert_retrieval_workflow_ids: ['custom-1', 'custom-2'],
+        alert_retrieval_workflows_enabled: false,
+      },
+    });
+
+    expect(mockInvokeCustomAlertRetrievalWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowIds: [],
+      })
+    );
+  });
+
   it('logs when default retrieval is disabled', async () => {
     await runRetrievalStep({
       ...baseParams,
       workflowConfig: {
         ...baseParams.workflowConfig,
-        alert_retrieval_mode: 'custom_only' as const,
+        default_retrieval_enabled: false,
       },
     });
 
@@ -172,7 +220,24 @@ describe('runRetrievalStep', () => {
     expect(mockValidateRetrievalResults).toHaveBeenCalledWith({
       customResults,
       legacyResult,
+      skillEnabled: true,
     });
+  });
+
+  it('passes skillEnabled=false through to validateRetrievalResults when the skill toggle is disabled', async () => {
+    await runRetrievalStep({
+      ...baseParams,
+      workflowConfig: {
+        ...baseParams.workflowConfig,
+        skill_enabled: false,
+      },
+    });
+
+    expect(mockValidateRetrievalResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skillEnabled: false,
+      })
+    );
   });
 
   it('logs combined retrieval summary', async () => {

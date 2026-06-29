@@ -74,7 +74,7 @@ export const MovingAttacksCallout: React.FC = React.memo(() => {
         <p css={calloutDescriptionWidth}>
           <FormattedMessage
             id="xpack.securitySolution.attackDiscovery.movingAttacksCallout.description"
-            defaultMessage="You can now schedule scans and view promoted attacks from Detections -> Attacks. Manual scans are still available only here, on the legacy page. Attack Discovery will move completely to the Detections section in a future release."
+            defaultMessage="You can now schedule scans and view validated attacks from Detections -> Attacks. Manual scans are still available only here, on the legacy page. Attack Discovery will move completely to the Detections section in a future release."
           />
         </p>
 

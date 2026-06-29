@@ -66,6 +66,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
         },
         ui: { getCasesContext: mockCasesContext },
       },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       theme: {
         getTheme: jest.fn().mockReturnValue({ darkMode: false }),
       },
@@ -122,6 +125,9 @@ jest.mock(
         useCasesAddToNewCaseFlyout: jest.fn(),
       },
       ui: { getCasesContext: mockCasesContext },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockResolvedValue(false),
     },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),
@@ -531,6 +537,125 @@ describe('History', () => {
 
       // Should reset to first page
       expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
+    });
+  });
+
+  describe('scheduled parameter', () => {
+    it('always calls useFindAttackDiscoveries with scheduled: false when workflowsEnabled is false', () => {
+      (mockUseKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true, configurations: true },
+            },
+            navigateToUrl: jest.fn(),
+          },
+          cases: {
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue({
+                all: true,
+                connectors: true,
+                create: true,
+                delete: true,
+                push: true,
+                read: true,
+                settings: true,
+                update: true,
+              }),
+            },
+            hooks: {
+              useCasesAddToExistingCase: jest.fn(),
+              useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+              useCasesAddToNewCaseFlyout: jest.fn(),
+            },
+            ui: { getCasesContext: mockCasesContext },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(false), // workflowsEnabled is false
+          },
+          theme: {
+            getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+          },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <History {...defaultProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      expect(useFindAttackDiscoveries).toHaveBeenCalledWith(
+        expect.objectContaining({ scheduled: false })
+      );
+    });
+
+    it('always calls useFindAttackDiscoveries with scheduled: false when workflowsEnabled is true', () => {
+      (mockUseKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true, configurations: true },
+            },
+            navigateToUrl: jest.fn(),
+          },
+          cases: {
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue({
+                all: true,
+                connectors: true,
+                create: true,
+                delete: true,
+                push: true,
+                read: true,
+                settings: true,
+                update: true,
+              }),
+            },
+            hooks: {
+              useCasesAddToExistingCase: jest.fn(),
+              useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+              useCasesAddToNewCaseFlyout: jest.fn(),
+            },
+            ui: { getCasesContext: mockCasesContext },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(true), // workflowsEnabled is true
+          },
+          theme: {
+            getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+          },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <History {...defaultProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      expect(useFindAttackDiscoveries).toHaveBeenCalledWith(
+        expect.objectContaining({ scheduled: false })
+      );
+    });
+
+    it('never calls useFindAttackDiscoveries with scheduled: undefined', () => {
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <History {...defaultProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      const calls = (useFindAttackDiscoveries as jest.Mock).mock.calls;
+      const hasUndefinedScheduled = calls.some(([args]) => args.scheduled === undefined);
+
+      expect(hasUndefinedScheduled).toBe(false);
     });
   });
 

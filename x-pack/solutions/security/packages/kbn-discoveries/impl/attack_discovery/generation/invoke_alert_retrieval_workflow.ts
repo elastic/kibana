@@ -44,11 +44,32 @@ export interface AnonymizedAlert {
  * Result returned from the alert retrieval workflow.
  */
 export interface AlertRetrievalResult {
+  /**
+   * Corroboration findings gathered during retrieval (present only for the
+   * `skill` retrieval mode, from the skill's Cross-Skill Corroboration loop).
+   * Threaded into the generation step's `additional_context` so the generation
+   * LLM sees the same extra signal `provided` mode passed to the run step.
+   */
+  additionalContext?: string;
   alerts: string[];
   alertsContextCount: number;
   anonymizedAlerts: AnonymizedAlert[];
   apiConfig: ParsedApiConfig;
   connectorName: string;
+  /**
+   * Identifier of the persisted Agent Builder conversation, present only for the
+   * `skill` retrieval mode (the skill workflow runs an `ai.agent` step with
+   * `create-conversation: true`). Downstream phases use it to resume that
+   * conversation to render the Attack Discovery Report.
+   */
+  conversationId?: string;
+  /**
+   * Generation-phase gate (skill) executions, including any net-new alert
+   * re-fetch the skill triggers. Tracked separately from `workflowExecutions`
+   * (the deterministic alert-retrieval executions) so the monitoring UI surfaces
+   * the gate under the Generation phase rather than Alert retrieval.
+   */
+  gateExecutions?: WorkflowExecutionTracking[];
   replacements: Record<string, string>;
   workflowExecutions: WorkflowExecutionTracking[];
   workflowId: string;
@@ -70,6 +91,14 @@ export interface InvokeAlertRetrievalParams {
   executionUuid: string;
   filter?: Record<string, unknown>;
   logger: Logger;
+  /**
+   * Maximum time to wait for the workflow to complete, in milliseconds.
+   * Threaded from the orchestration's remaining pipeline budget so the
+   * consumer-side poll never gives up before the workflow's own step timeout
+   * (the poll is an outer boundary and must be >= the inner step timeout).
+   * When omitted, `pollForWorkflowCompletion` applies its default.
+   */
+  maxWaitMs?: number;
   request: KibanaRequest;
   size?: number;
   source?: AttackDiscoverySource;
@@ -133,6 +162,7 @@ export const invokeAlertRetrievalWorkflow = async ({
   executionUuid,
   filter,
   logger,
+  maxWaitMs,
   request,
   size,
   source,
@@ -226,6 +256,7 @@ export const invokeAlertRetrievalWorkflow = async ({
           (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
         ),
       logger,
+      ...(maxWaitMs != null ? { maxWaitMs } : {}),
       spaceId,
       workflowsManagementApi,
     });
