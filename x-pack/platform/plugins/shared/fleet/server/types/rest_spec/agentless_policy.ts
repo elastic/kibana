@@ -12,6 +12,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { AgentlessPolicySchema } from '../../../common/types/models/agentless_policy_schema';
+import { ListAgentlessPoliciesRequestQuerySchema } from '../../../common/types/rest_spec/agentless_policy';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
@@ -78,34 +79,15 @@ const ALLOWED_FILTER_FIELDS_LIST = ALLOWED_AGENTLESS_POLICY_FILTER_FIELDS.map(
  */
 export const AgentlessPolicyListResponseSchema = ListResponseSchema(AgentlessPolicySchema);
 
-export const GetAgentlessPolicyRequestSchema = {
-  params: schema.object({
-    policyId: schema.string({
-      meta: {
-        description: 'The ID of the agentless policy to retrieve.',
-      },
-    }),
-  }),
-};
-
+/**
+ * Extends the layering-safe base query shape from `common/` with the server-only
+ * `kuery` validator. The base lives in `common/` so the request TypeScript type
+ * can be derived there; only the validation (which depends on `validateKuery`)
+ * lives here. The override replaces the base `kuery` field with a validating one
+ * of the same type, so the derived `ListAgentlessPoliciesRequest` type stays accurate.
+ */
 export const ListAgentlessPoliciesRequestSchema = {
-  query: schema.object({
-    // Paging defaults (page=1, perPage=20) are owned by the service layer
-    // (`listAgentlessPolicies`), which is the single source of truth
-    page: schema.maybe(schema.number({ meta: { description: 'Page number. Defaults to `1`.' } })),
-    perPage: schema.maybe(
-      schema.number({ meta: { description: 'Number of results per page. Defaults to `20`.' } })
-    ),
-    sortField: schema.maybe(
-      schema.string({
-        meta: { description: 'Field to sort results by. Defaults to `updated_at`.' },
-      })
-    ),
-    sortOrder: schema.maybe(
-      schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
-        meta: { description: 'Sort order, ascending or descending. Defaults to `desc`.' },
-      })
-    ),
+  query: ListAgentlessPoliciesRequestQuerySchema.extends({
     kuery: schema.maybe(
       schema.string({
         meta: {

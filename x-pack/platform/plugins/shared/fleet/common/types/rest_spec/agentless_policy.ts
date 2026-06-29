@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -13,7 +13,7 @@ import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/packag
 import type { AgentlessPolicyResponseSchema } from '../models/agentless_policy_schema';
 import type { AgentlessPolicy } from '../models/agentless_policy';
 
-import type { ListResult, ListWithKuery } from './common';
+import type { ListResult } from './common';
 
 export const CreateAgentlessPolicyRequestSchema = {
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends(
@@ -192,32 +192,57 @@ export type GetBulkAgentlessPolicyThroughputResponse = TypeOf<
 >;
 
 /**
- * Params for the GET-by-id endpoint.
+ * Params validation schema for the GET-by-id endpoint.
  *
- * Inline interface following the Fleet convention (see `GetOneAgentPolicyRequest`):
- * request/response types live in `common/` while the runtime validation schema
- * lives in `server/types/rest_spec/agentless_policy.ts`, so `common/` carries no
- * dependency on `server/`. The two are kept in sync by the API integration tests.
+ * Lives here in `common/` (matching the Create/Delete endpoints in this file) so
+ * `server/` imports it for route registration and `common/` carries no dependency
+ * on `server/`.
  */
-export interface GetAgentlessPolicyRequest {
-  params: {
-    policyId: string;
-  };
-}
+export const GetAgentlessPolicyRequestSchema = {
+  params: schema.object({
+    policyId: schema.string({
+      meta: {
+        description: 'The ID of the agentless policy to retrieve.',
+      },
+    }),
+  }),
+};
 
 export type GetAgentlessPolicyResponse = TypeOf<typeof AgentlessPolicyResponseSchema>;
 
 /**
- * Query contract for the LIST endpoint.
+ * Base query shape for the LIST endpoint.
  *
- * Derived from the shared {@link ListWithKuery} contract (the same source the
- * service's `ListAgentlessPoliciesOptions` is built from) rather than the
- * server-side validation schema, so `common/` carries no dependency on
- * `server/`. The runtime schema in `server/types/rest_spec/agentless_policy.ts`
- * only adds the server-only `kuery` validator on top of this exact shape.
+ * Defined here so the {@link ListAgentlessPoliciesRequest} type can be derived from it via `TypeOf`.
+ * The `kuery` validator is intentionally omitted: it depends on the server-only `validateKuery`,
+ * so `server/types/rest_spec/agentless_policy.ts` `.extends()` this schema to attach it.
  */
+export const ListAgentlessPoliciesRequestQuerySchema = schema.object({
+  // Paging defaults (page=1, perPage=20) are owned by the service layer
+  // (`listAgentlessPolicies`), which is the single source of truth
+  page: schema.maybe(schema.number({ meta: { description: 'Page number. Defaults to `1`.' } })),
+  perPage: schema.maybe(
+    schema.number({ meta: { description: 'Number of results per page. Defaults to `20`.' } })
+  ),
+  sortField: schema.maybe(
+    schema.string({
+      meta: { description: 'Field to sort results by. Defaults to `updated_at`.' },
+    })
+  ),
+  sortOrder: schema.maybe(
+    schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
+      meta: { description: 'Sort order, ascending or descending. Defaults to `desc`.' },
+    })
+  ),
+  kuery: schema.maybe(
+    schema.string({
+      meta: { description: 'A KQL query string to filter results.' },
+    })
+  ),
+});
+
 export interface ListAgentlessPoliciesRequest {
-  query: Pick<ListWithKuery, 'page' | 'perPage' | 'sortField' | 'sortOrder' | 'kuery'>;
+  query: TypeOf<typeof ListAgentlessPoliciesRequestQuerySchema>;
 }
 
 export type ListAgentlessPoliciesResponse = ListResult<AgentlessPolicy>;

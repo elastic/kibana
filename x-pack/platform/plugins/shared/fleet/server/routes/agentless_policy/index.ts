@@ -14,15 +14,12 @@ import {
   DeleteAgentlessPolicyResponseSchema,
   GetBulkAgentlessPolicyThroughputRequestSchema,
   GetBulkAgentlessPolicyThroughputResponseSchema,
+  GetAgentlessPolicyRequestSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
 import { AgentlessPolicyResponseSchema } from '../../../common/types/models/agentless_policy_schema';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
-import {
-  AgentlessPolicyListResponseSchema,
-  GetAgentlessPolicyRequestSchema,
-  ListAgentlessPoliciesRequestSchema,
-} from '../../types';
+import { AgentlessPolicyListResponseSchema, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import { genericErrorResponse, notFoundResponse } from '../schema/errors';

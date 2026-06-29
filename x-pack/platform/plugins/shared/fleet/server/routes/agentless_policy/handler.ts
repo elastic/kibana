@@ -12,13 +12,13 @@ import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 import { appContextService, packagePolicyService } from '../../services';
 import type {
   FleetRequestHandler,
-  GetAgentlessPolicyRequestSchema,
   ListAgentlessPoliciesRequestSchema,
 } from '../../types';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
   DeleteAgentlessPolicyRequestSchema,
   GetBulkAgentlessPolicyThroughputRequestSchema,
+  GetAgentlessPolicyRequestSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
 import { syncAgentlessDeployments } from '../../services/agentless/deployment_sync';
 import { agentlessAgentService } from '../../services/agents/agentless_agent';
