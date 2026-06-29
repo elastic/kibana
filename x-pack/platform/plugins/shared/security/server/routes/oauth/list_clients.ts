@@ -16,6 +16,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 export function defineListOAuthClientsRoute({
   router,
   getAuthenticationService,
+  serverlessProjectId,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -48,7 +49,11 @@ export function defineListOAuthClientsRoute({
             });
           }
 
-          const result = await oauth.listClients(request, request.query.client_id);
+          const result = await oauth.listClients(
+            request,
+            request.query.client_id,
+            serverlessProjectId
+          );
           if (!result) {
             return response.notFound({
               body: {
