@@ -24,13 +24,14 @@ import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
   Streams,
-  StreamsKIsOnboardingStatus,
+  SigEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type StreamsKIsOnboardingStatusResult,
+  type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
+import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -67,9 +68,9 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, StreamsKIsOnboardingStatusResult>;
+  streamOnboardingResultMap: Record<string, SigEventsWorkflowStatusResult>;
   loading?: boolean;
-  searchQuery?: Query;
+  searchQuery: Query;
   selection: EuiTableSelectionType<TableRow>;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
@@ -90,8 +91,12 @@ export function StreamsTreeTable({
   // Filter streams by query, including ancestors of matches
   const filteredStreams = React.useMemo(() => {
     return filterStreamsByQuery(
-      streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
-      searchQuery?.text ?? ''
+      streams.filter(
+        (stream) =>
+          Streams.ingest.all.Definition.is(stream.stream) ||
+          Streams.QueryStream.Definition.is(stream.stream)
+      ),
+      searchQuery.text
     );
   }, [streams, searchQuery]);
 
@@ -107,10 +112,9 @@ export function StreamsTreeTable({
 
   const allRows = React.useMemo(() => {
     const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, {});
-    const qualityFiters =
-      searchQuery?.ast?.clauses.filter(
-        (clause) => clause.type === 'field' && clause.field === 'dataQuality'
-      ) ?? [];
+    const qualityFiters = searchQuery.ast.clauses.filter(
+      (clause) => clause.type === 'field' && clause.field === 'dataQuality'
+    );
     return qualityFiters.length > 0
       ? rows.filter((row) =>
           qualityFiters.some(
@@ -121,7 +125,7 @@ export function StreamsTreeTable({
           )
         )
       : rows;
-  }, [enrichedStreams, sortField, sortDirection, searchQuery?.ast?.clauses]);
+  }, [enrichedStreams, sortField, sortDirection, searchQuery.ast.clauses]);
 
   // Only pass filtered rows if tree mode is active
   const items = React.useMemo(
@@ -281,6 +285,7 @@ export function StreamsTreeTable({
                 const treeMode = shouldComposeTree(sortField);
                 const hasChildren = !!item.children && item.children.length > 0;
                 const isCollapsed = collapsed.has(item.stream.name);
+                const isQueryStream = Streams.QueryStream.Definition.is(item.stream);
 
                 return (
                   <EuiFlexGroup
@@ -331,6 +336,11 @@ export function StreamsTreeTable({
                         <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                       </EuiFlexItem>
                     )}
+                    {isQueryStream && (
+                      <EuiFlexItem grow={false}>
+                        <QueryStreamBadge />
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false}>
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
@@ -338,11 +348,14 @@ export function StreamsTreeTable({
                           path: { key: item.stream.name, tab: 'significantEvents' },
                         })}
                       >
-                        <EuiHighlight search={searchQuery?.text ?? ''}>
-                          {item.stream.name}
-                        </EuiHighlight>
+                        <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
                       </EuiLink>
                     </EuiFlexItem>
+                    {isQueryStream && (
+                      <EuiFlexItem grow={false}>
+                        <TechnicalPreviewBadge />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 );
               },
@@ -359,17 +372,17 @@ export function StreamsTreeTable({
                 }
 
                 switch (onboardingResult.status) {
-                  case StreamsKIsOnboardingStatus.InProgress:
-                  case StreamsKIsOnboardingStatus.BeingCanceled:
+                  case SigEventsWorkflowStatus.InProgress:
+                  case SigEventsWorkflowStatus.BeingCanceled:
                     return <EuiLoadingSpinner size="m" />;
-                  case StreamsKIsOnboardingStatus.NotStarted:
-                  case StreamsKIsOnboardingStatus.Canceled:
+                  case SigEventsWorkflowStatus.NotStarted:
+                  case SigEventsWorkflowStatus.Canceled:
                     return '-';
-                  case StreamsKIsOnboardingStatus.Completed:
+                  case SigEventsWorkflowStatus.Completed:
                     return (
                       <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
-                  case StreamsKIsOnboardingStatus.Failed:
+                  case SigEventsWorkflowStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
@@ -442,9 +455,7 @@ export function StreamsTreeTable({
                       <EuiButtonIcon
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={
-                          onboardingResult.status === StreamsKIsOnboardingStatus.BeingCanceled
-                        }
+                        disabled={onboardingResult.status === SigEventsWorkflowStatus.BeingCanceled}
                         onClick={() => onStopOnboardingActionClick(item.stream.name)}
                       />
                     </EuiToolTip>

@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableConfig, DatatableConfigESQL } from '../../../../schema';
-import { buildVisualizationState, getValueColumns } from '.';
+import type {
+  DatatableConfig,
+  DatatableConfigESQL,
+  DatatableConfigNoESQL,
+} from '../../../../schema';
+import type { TermsIndexPatternColumn } from '@kbn/lens-common';
+import { buildFormBasedLayer, buildVisualizationState, getValueColumns } from '.';
+import { DEFAULT_LAYER_ID } from '../../../../constants';
 
 describe('Datatable ES|QL column ordering', () => {
   describe('buildVisualizationState', () => {
@@ -61,8 +67,133 @@ describe('Datatable ES|QL column ordering', () => {
     });
   });
 
+  describe('buildFormBasedLayer', () => {
+    it('should order datasource columnOrder as split_metrics_by, rows, then metrics', () => {
+      const config: DatatableConfigNoESQL = {
+        type: 'data_table',
+        data_source: {
+          type: 'data_view_reference',
+          ref_id: 'logstash-*',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        metrics: [{ operation: 'median', field: 'bytes' }],
+        rows: [
+          {
+            operation: 'terms',
+            fields: ['geo.src'],
+            limit: 7,
+            rank_by: { type: 'metric', metric_index: 0, direction: 'desc' },
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['response.raw'],
+            limit: 3,
+            other_bucket: { include_documents_without_field: false },
+            rank_by: { type: 'metric', metric_index: 0, direction: 'desc' },
+          },
+        ],
+      };
+
+      const layers = buildFormBasedLayer(config);
+      const layer = layers[DEFAULT_LAYER_ID];
+
+      expect(layer.columnOrder).toEqual([
+        'datatable_accessor_split_metric_by_0',
+        'datatable_accessor_row_0',
+        'datatable_accessor_metric_0',
+      ]);
+    });
+
+    it('should place reference columns after all visible metrics in columnOrder', () => {
+      const config: DatatableConfigNoESQL = {
+        type: 'data_table',
+        data_source: {
+          type: 'data_view_reference',
+          ref_id: 'metrics-*',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: 'auto',
+            include_empty_rows: false,
+            use_original_time_range: false,
+          },
+          { operation: 'terms', fields: ['pipeline.name'], limit: 10 },
+        ],
+        metrics: [
+          {
+            operation: 'counter_rate',
+            field: 'elasticsearch.ingest_pipeline.total.count',
+          },
+          {
+            operation: 'counter_rate',
+            field: 'elasticsearch.ingest_pipeline.total.time_in_millis',
+          },
+        ],
+      };
+
+      const layers = buildFormBasedLayer(config);
+      const layer = layers[DEFAULT_LAYER_ID];
+
+      expect(layer.columnOrder).toEqual([
+        'datatable_accessor_row_0',
+        'datatable_accessor_row_1',
+        'datatable_accessor_metric_0',
+        'datatable_accessor_metric_1',
+        'datatable_accessor_metric_ref_0',
+        'datatable_accessor_metric_ref_1',
+      ]);
+    });
+
+    it('should resolve rank_by.metric_index against visible metrics when references exist', () => {
+      const config: DatatableConfigNoESQL = {
+        type: 'data_table',
+        data_source: {
+          type: 'data_view_reference',
+          ref_id: 'metrics-*',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        rows: [
+          {
+            operation: 'terms',
+            fields: ['pipeline.name'],
+            limit: 10,
+            rank_by: { type: 'metric', metric_index: 1, direction: 'desc' },
+          },
+        ],
+        metrics: [
+          {
+            operation: 'counter_rate',
+            field: 'elasticsearch.ingest_pipeline.total.count',
+          },
+          {
+            operation: 'counter_rate',
+            field: 'elasticsearch.ingest_pipeline.total.time_in_millis',
+          },
+        ],
+      };
+
+      const layers = buildFormBasedLayer(config);
+      const layer = layers[DEFAULT_LAYER_ID];
+      const rowColumn = layer.columns.datatable_accessor_row_0 as TermsIndexPatternColumn;
+
+      expect(rowColumn.operationType).toBe('terms');
+      expect(rowColumn.params.orderBy).toEqual({
+        type: 'column',
+        columnId: 'datatable_accessor_metric_1',
+      });
+    });
+  });
+
   describe('getValueColumns', () => {
-    test('returns value columns for rows, split_metrics_by, and metrics', () => {
+    test('returns value columns for split_metrics_by, rows, and metrics', () => {
       const config = {
         type: 'data_table',
         metrics: [{ column: 'bytes' }, { column: 'requests' }],
@@ -74,13 +205,13 @@ describe('Datatable ES|QL column ordering', () => {
 
       expect(result).toEqual([
         {
-          columnId: 'datatable_accessor_row_0',
-          fieldName: 'host',
+          columnId: 'datatable_accessor_split_metric_by_0',
+          fieldName: 'region',
           meta: { type: 'string' },
         },
         {
-          columnId: 'datatable_accessor_split_metric_by_0',
-          fieldName: 'region',
+          columnId: 'datatable_accessor_row_0',
+          fieldName: 'host',
           meta: { type: 'string' },
         },
         {

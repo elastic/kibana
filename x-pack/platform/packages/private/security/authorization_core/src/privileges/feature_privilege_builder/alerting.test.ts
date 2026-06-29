@@ -95,6 +95,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
           ]
         `);
       });
@@ -187,6 +188,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/alert/get",
             "alerting:alert-type/my-consumer/alert/find",
             "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
@@ -314,6 +316,43 @@ describe(`feature_privilege_builder`, () => {
         `);
       });
 
+      test('grants `mute_alerts` privileges to rules under feature consumer', () => {
+        const actions = new Actions();
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: [],
+              mute_alerts: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+          Array [
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+          ]
+        `);
+      });
+
       test('grants `all` privileges to rules under feature consumer', () => {
         const actions = new Actions();
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
@@ -360,6 +399,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -466,6 +506,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -533,6 +574,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -560,6 +602,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-consumer/rule/bulkEditParams",
             "alerting:readonly-alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type/my-consumer/rule/getHistory",
           ]
         `);
       });
@@ -609,6 +652,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -636,6 +680,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-consumer/rule/bulkEditParams",
             "alerting:readonly-alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type/my-consumer/rule/getHistory",
           ]
         `);
       });
@@ -735,6 +780,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -762,6 +808,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-consumer/rule/bulkEditParams",
             "alerting:readonly-alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type/my-consumer/rule/getHistory",
             "alerting:another-alert-type/my-consumer/alert/get",
             "alerting:another-alert-type/my-consumer/alert/find",
             "alerting:another-alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
@@ -825,6 +872,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type/my-consumer/rule/getHistory",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -852,6 +900,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-consumer/rule/bulkEditParams",
             "alerting:readonly-alert-type/my-consumer/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type/my-consumer/rule/getHistory",
             "alerting:another-alert-type/my-consumer/alert/get",
             "alerting:another-alert-type/my-consumer/alert/find",
             "alerting:another-alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
@@ -945,6 +994,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-1/rule/bulkEditParams",
             "alerting:alert-type-1/my-consumer-1/rule/getGapAutoFillScheduler",
             "alerting:alert-type-1/my-consumer-1/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type-1/my-consumer-1/rule/getHistory",
             "alerting:alert-type-1/my-consumer-1/rule/create",
             "alerting:alert-type-1/my-consumer-1/rule/delete",
             "alerting:alert-type-1/my-consumer-1/rule/update",
@@ -972,6 +1022,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-2/rule/bulkEditParams",
             "alerting:alert-type-1/my-consumer-2/rule/getGapAutoFillScheduler",
             "alerting:alert-type-1/my-consumer-2/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type-1/my-consumer-2/rule/getHistory",
             "alerting:alert-type-1/my-consumer-2/rule/create",
             "alerting:alert-type-1/my-consumer-2/rule/delete",
             "alerting:alert-type-1/my-consumer-2/rule/update",
@@ -999,6 +1050,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-2/my-consumer-3/rule/bulkEditParams",
             "alerting:alert-type-2/my-consumer-3/rule/getGapAutoFillScheduler",
             "alerting:alert-type-2/my-consumer-3/rule/findGapAutoFillSchedulerLogs",
+            "alerting:alert-type-2/my-consumer-3/rule/getHistory",
             "alerting:alert-type-2/my-consumer-3/rule/create",
             "alerting:alert-type-2/my-consumer-3/rule/delete",
             "alerting:alert-type-2/my-consumer-3/rule/update",
@@ -1026,6 +1078,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/bulkEditParams",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getHistory",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/get",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/bulkGet",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getRuleState",
@@ -1040,6 +1093,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/bulkEditParams",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getHistory",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/get",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/bulkGet",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getRuleState",
@@ -1054,6 +1108,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/bulkEditParams",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getHistory",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/get",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/bulkGet",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getRuleState",
@@ -1068,6 +1123,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/bulkEditParams",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getGapAutoFillScheduler",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/findGapAutoFillSchedulerLogs",
+            "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getHistory",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/get",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/find",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/getAuthorizedAlertsIndices",

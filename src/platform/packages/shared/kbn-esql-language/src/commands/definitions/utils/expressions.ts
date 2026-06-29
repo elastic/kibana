@@ -19,7 +19,11 @@ import {
 } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { InlineCastingType, PromQLFunctionParamType, SupportedDataType } from '../types';
-import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
+import {
+  getFunctionDefinition,
+  getFunctionForInlineCast,
+  isTypeConversionFunction,
+} from './functions';
 import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
@@ -152,7 +156,7 @@ export function getExpressionType(
       fnDefinition.signatures,
       argTypes,
       literalMask,
-      false
+      isTypeConversionFunction(fnDefinition.name)
     );
 
     if (matchingSignatures.length > 0 && argTypes.includes('null')) {
@@ -199,6 +203,10 @@ export function resolveArgumentTypes(
     argTypes: args.map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy)),
     literalMask: args.map((arg) => {
       const unwrapped = Array.isArray(arg) ? arg[0] : arg;
+
+      if (!Array.isArray(unwrapped) && unwrapped.type === 'list') {
+        return unwrapped.values.length > 0 && unwrapped.values.every(isLiteral);
+      }
 
       return isLiteral(unwrapped);
     }),
