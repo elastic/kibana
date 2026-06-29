@@ -9,11 +9,16 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
 
 import { styles } from './layout_application.styles';
 import { useLayoutConfig } from '../layout_config_context';
+
+const hiddenStyles = css`
+  display: none;
+`;
 
 /**
  * The application slot wrapper
@@ -30,14 +35,15 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const { chromeStyle } = useLayoutConfig();
+  const { chromeStyle, applicationWorkspaceOpen = true } = useLayoutConfig();
 
   return (
     <div
-      css={styles.root(chromeStyle)}
+      css={[styles.root(chromeStyle), !applicationWorkspaceOpen ? hiddenStyles : undefined]}
       id={APP_MAIN_SCROLL_CONTAINER_ID}
       className="kbnChromeLayoutApplication"
       data-test-subj="kbnChromeLayoutApplication"
+      data-application-workspace-open={applicationWorkspaceOpen}
     >
       {topBar && <div css={styles.topBar}>{topBar}</div>}
       <div css={[styles.content]}>{children}</div>

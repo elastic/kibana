@@ -27,6 +27,7 @@ import {
   AgentWorkspaceSlot,
   AgentFirstAttachmentCoordinatorShell,
   ApplicationWorkspaceBootstrap,
+  AgentFirstApplicationWorkspaceBridge,
   useHasAppMenu,
   useHasChromeAppHeaderContent,
   useHasInlineAppHeader,
@@ -38,6 +39,7 @@ import {
   useIsNextChrome,
   useSidebarWidth,
   useSideNavWidth,
+  useApplicationWorkspaceOpen,
 } from '@kbn/core-chrome-browser-hooks';
 import { isAgentFirst } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
@@ -128,6 +130,7 @@ export class GridLayout implements LayoutService {
       const footer = useGlobalFooter();
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
+      const applicationWorkspaceOpen = useApplicationWorkspaceOpen();
 
       const showAgentWorkspace =
         agentFirstEnabled &&
@@ -135,13 +138,22 @@ export class GridLayout implements LayoutService {
         chromeVisible &&
         chromeStyle === 'project';
 
+      const effectiveApplicationWorkspaceOpen = showAgentWorkspace ? applicationWorkspaceOpen : true;
+
       const [agentWorkspaceWidth, setAgentWorkspaceWidth] = useState(DEFAULT_AGENT_WIDTH);
 
       const setAgentWorkspaceWidthClamped = useCallback(
         (width: number) => {
-          setAgentWorkspaceWidth(clampAgentWorkspaceWidth(width, navigationWidth, sidebarWidth));
+          setAgentWorkspaceWidth(
+            clampAgentWorkspaceWidth(
+              width,
+              navigationWidth,
+              sidebarWidth,
+              effectiveApplicationWorkspaceOpen
+            )
+          );
         },
-        [navigationWidth, sidebarWidth]
+        [effectiveApplicationWorkspaceOpen, navigationWidth, sidebarWidth]
       );
 
       useLayoutEffect(() => {
@@ -150,9 +162,19 @@ export class GridLayout implements LayoutService {
         }
 
         setAgentWorkspaceWidth((current) =>
-          clampAgentWorkspaceWidth(current, navigationWidth, sidebarWidth)
+          clampAgentWorkspaceWidth(
+            current,
+            navigationWidth,
+            sidebarWidth,
+            effectiveApplicationWorkspaceOpen
+          )
         );
-      }, [navigationWidth, showAgentWorkspace, sidebarWidth]);
+      }, [
+        effectiveApplicationWorkspaceOpen,
+        navigationWidth,
+        showAgentWorkspace,
+        sidebarWidth,
+      ]);
 
       const layoutConfigKey =
         chromeStyle === 'classic' ? 'classic' : isNextChromeEnabled ? 'projectNext' : 'project';
@@ -165,9 +187,11 @@ export class GridLayout implements LayoutService {
           navigationWidth,
           agentWidth: showAgentWorkspace ? agentWorkspaceWidth : 0,
           applicationWorkspaceWidth: 0,
+          applicationWorkspaceOpen: effectiveApplicationWorkspaceOpen,
         }),
         [
           agentWorkspaceWidth,
+          effectiveApplicationWorkspaceOpen,
           layoutConfigKey,
           navigationWidth,
           showAgentWorkspace,
@@ -208,10 +232,11 @@ export class GridLayout implements LayoutService {
 
       if (showAgentWorkspace) {
         agent = (
-            <AgentWorkspacePanel
+          <AgentWorkspacePanel
             width={agentWorkspaceWidth}
             navigationWidth={navigationWidth}
             sidebarWidth={sidebarWidth}
+            applicationWorkspaceOpen={effectiveApplicationWorkspaceOpen}
             onWidthChange={setAgentWorkspaceWidthClamped}
           >
             <AgentWorkspaceSlot />
@@ -222,6 +247,7 @@ export class GridLayout implements LayoutService {
       const layoutContent = (
         <>
           {showAgentWorkspace && <AgentFirstChromeGlobalStyles />}
+          {showAgentWorkspace && <AgentFirstApplicationWorkspaceBridge />}
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} hasAgentWorkspace={showAgentWorkspace} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout

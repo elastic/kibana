@@ -19,6 +19,7 @@ import {
 import { useOptionalConversationSpineContext } from '../../../../agent_first/conversation_spine/conversation_spine_context';
 import { useCanvasContext } from '../conversation_rounds/round_response/attachments/canvas_context';
 import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const labels = {
   attachments: (count: number) =>
@@ -57,6 +58,9 @@ export const AttachmentCartButton: React.FC = () => {
   const { openAttachmentCart } = useCanvasContext();
   const spineContext = useOptionalConversationSpineContext();
   const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const {
+    services: { chrome },
+  } = useKibana();
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
   const [isPulsing, setIsPulsing] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
@@ -94,6 +98,8 @@ export const AttachmentCartButton: React.FC = () => {
 
   const handleOpenCart = useCallback(() => {
     if (isAgentWorkspaceMount && !isEmbeddedContext && spineContext) {
+      chrome.applicationWorkspace.open();
+
       if (!spineContext.hasAttachments) {
         if (spineContext.isAttachmentsEmptyOpen) {
           spineContext.closeAttachmentsEmptyOverlay();
@@ -116,7 +122,7 @@ export const AttachmentCartButton: React.FC = () => {
       return;
     }
     openAttachmentCart(isEmbeddedContext);
-  }, [isAgentWorkspaceMount, isEmbeddedContext, spineContext, openAttachmentCart]);
+  }, [chrome, isAgentWorkspaceMount, isEmbeddedContext, spineContext, openAttachmentCart]);
 
   const cartIconType = isReceiving ? 'folderOpen' : 'folder';
   const tooltipContent = isAgentWorkspaceMount

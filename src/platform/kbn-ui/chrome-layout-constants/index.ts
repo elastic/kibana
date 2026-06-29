@@ -34,11 +34,13 @@ export const MAX_AGENT_VIEWPORT_WIDTH_RATIO = 0.5;
 
 export const getMaxAgentWorkspaceWidth = (
   navigationWidth: number,
-  sidebarWidth: number
+  sidebarWidth: number,
+  applicationWorkspaceOpen = true
 ): number => {
   const maxByViewport = Math.floor(window.innerWidth * MAX_AGENT_VIEWPORT_WIDTH_RATIO);
+  const reservedApplicationWidth = applicationWorkspaceOpen ? MIN_APPLICATION_WORKSPACE_WIDTH : 0;
   const maxByRemainingSpace =
-    window.innerWidth - navigationWidth - MIN_APPLICATION_WORKSPACE_WIDTH - sidebarWidth;
+    window.innerWidth - navigationWidth - reservedApplicationWidth - sidebarWidth;
 
   return Math.max(MIN_AGENT_WIDTH, Math.min(maxByViewport, maxByRemainingSpace));
 };
@@ -46,11 +48,15 @@ export const getMaxAgentWorkspaceWidth = (
 export const clampAgentWorkspaceWidth = (
   width: number,
   navigationWidth: number,
-  sidebarWidth: number
+  sidebarWidth: number,
+  applicationWorkspaceOpen = true
 ): number =>
   Math.max(
     MIN_AGENT_WIDTH,
-    Math.min(getMaxAgentWorkspaceWidth(navigationWidth, sidebarWidth), Math.floor(width))
+    Math.min(
+      getMaxAgentWorkspaceWidth(navigationWidth, sidebarWidth, applicationWorkspaceOpen),
+      Math.floor(width)
+    )
   );
 
 export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
@@ -67,3 +73,8 @@ export const euiIncludeSelectorInFocusTrap = {
   },
   selector: `[data-eui-includes-in-flyout-focus-trap="true"]`,
 };
+
+export {
+  registerBeforeNavigateToApp,
+  notifyBeforeNavigateToApp,
+} from './src/application_workspace_navigation';

@@ -33,6 +33,7 @@ export interface AgentWorkspacePanelProps {
   width: number;
   navigationWidth: number;
   sidebarWidth: number;
+  applicationWorkspaceOpen: boolean;
   onWidthChange: (width: number) => void;
   children: ReactNode;
 }
@@ -45,6 +46,7 @@ export function AgentWorkspacePanel({
   width,
   navigationWidth,
   sidebarWidth,
+  applicationWorkspaceOpen,
   onWidthChange,
   children,
 }: AgentWorkspacePanelProps) {
@@ -55,6 +57,7 @@ export function AgentWorkspacePanel({
         width={width}
         navigationWidth={navigationWidth}
         sidebarWidth={sidebarWidth}
+        applicationWorkspaceOpen={applicationWorkspaceOpen}
         onWidthChange={onWidthChange}
       />
     </div>

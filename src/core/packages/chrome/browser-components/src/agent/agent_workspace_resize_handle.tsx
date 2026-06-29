@@ -24,6 +24,7 @@ export interface AgentWorkspaceResizeHandleProps {
   width: number;
   navigationWidth: number;
   sidebarWidth: number;
+  applicationWorkspaceOpen: boolean;
   onWidthChange: (width: number) => void;
 }
 
@@ -35,6 +36,7 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
   width,
   navigationWidth,
   sidebarWidth,
+  applicationWorkspaceOpen,
   onWidthChange,
 }) => {
   const startXRef = useRef<number>(0);
@@ -42,9 +44,16 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
 
   const setWidth = useCallback(
     (nextWidth: number) => {
-      onWidthChange(clampAgentWorkspaceWidth(nextWidth, navigationWidth, sidebarWidth));
+      onWidthChange(
+        clampAgentWorkspaceWidth(
+          nextWidth,
+          navigationWidth,
+          sidebarWidth,
+          applicationWorkspaceOpen
+        )
+      );
     },
-    [navigationWidth, onWidthChange, sidebarWidth]
+    [applicationWorkspaceOpen, navigationWidth, onWidthChange, sidebarWidth]
   );
 
   const handleMouseDown = useCallback(
@@ -107,6 +116,10 @@ export const AgentWorkspaceResizeHandle: FC<AgentWorkspaceResizeHandleProps> = (
     },
     [setWidth, width]
   );
+
+  if (!applicationWorkspaceOpen) {
+    return null;
+  }
 
   return (
     <EuiResizableButton

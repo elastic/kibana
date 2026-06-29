@@ -47,6 +47,7 @@ import {
   getLocationObservable,
 } from './utils';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
+import { notifyBeforeNavigateToApp } from '@kbn/ui-chrome-layout-constants';
 
 export interface SetupDeps {
   http: InternalHttpSetup;
@@ -291,6 +292,8 @@ export class ApplicationService {
         skipAppLeave = false,
       }: NavigateToAppOptions = {}
     ) => {
+      notifyBeforeNavigateToApp(appId);
+
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
       const shouldNavigate =
