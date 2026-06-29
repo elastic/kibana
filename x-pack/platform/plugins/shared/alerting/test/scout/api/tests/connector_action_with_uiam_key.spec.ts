@@ -94,7 +94,8 @@ apiTest.describe(
 
         // Always-firing .es-query rule: match_all against an index that always
         // has documents (the event log), threshold `> -1` so count is always
-        // above it, schedule every minute.
+        // above it. The rule is force-triggered below via _run_soon, so the
+        // schedule interval just satisfies the API contract.
         const ruleResponse = await apiClient.post('api/alerting/rule', {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
@@ -145,6 +146,13 @@ apiTest.describe(
         });
         const alertAttrs = _source?.alert as Record<string, unknown> | undefined;
         expect(alertAttrs?.uiamApiKey).toBeDefined();
+
+        // Force an immediate run so we don't pay the rule's 1m schedule cadence
+        // before the action task is enqueued. Same pattern as
+        // wait_for_successful_event_log.ts.
+        await apiClient.post(`internal/alerting/rule/${createdRuleId}/_run_soon`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+        });
 
         // End-to-end assertion: the action runs and indexes its document.
         const actionRan = await waitFor(
