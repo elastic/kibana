@@ -55,7 +55,7 @@ They are current-state checks, not root-cause investigations.
 | Tool | Use when | Constraints |
 |------|----------|-------------|
 | `search_knowledge_indicators` | Fallback only — `evidences` is absent or empty | `kind: ["feature", "query"]`; `stream_names` = discovery `stream_names[]`; `search_text` = extract 1–2 core entity keywords from `cause_kis[].name`; if `cause_kis` is empty, extract from the discovery `title`. Never omit `kind`. If 0 query KIs, one follow-up `kind: ["query"]`; if still none, proceed. **Feature KI results** — `evidence[]` and `meta` describe the service relationship: protocols, endpoints, deployment details, known error patterns. Use them to understand topology and scope tool calls. Never use them to infer whether a failure is currently active — only query KI ES|QL results answer that question. Security observations, compliance notes, or other feature KI metadata do NOT trigger new query KI selections — they are context only. Query selection is constrained to KIs whose `rule.id` matches a `rule_uuid` in `detections[]`. |
-| `execute_esql` | Current-state check — evidence is stale or failed | Primary: re-run `evidences[].esql_query` as-is. Fallback (all `esql_query` null): run the query KI whose `rule.id` matches a `rule_uuid` in `detections[]` AND whose description most directly answers "is this service failing right now?" — prefer failure-rate or error-count queries over throughput or latency queries. **Scope is hard:** a query KI whose `rule.id` does not match any `rule_uuid` in `detections[]` is out of scope — do not run it regardless of how relevant it seems. If no in-scope query KI exists, do not run any query; treat as "no confirming query available" and reflect the gap with `acknowledged`. Liveness exception: the broad `COUNT(*)` — see Step 4b. Skip on error. |
+| `execute_esql` | Current-state check — evidence is stale or failed | Primary: re-run `evidences[].esql_query` as-is. Fallback (all `esql_query` null): run the query KI whose `rule.id` matches a `rule_uuid` in `detections[]` AND whose description most directly answers "is this service failing right now?" — prefer failure-rate or error-count queries over throughput or latency queries. **Scope is hard:** a query KI whose `rule.id` does not match any `rule_uuid` in `detections[]` is out of scope — do not run it regardless of how relevant it seems. If no in-scope query KI exists, do not run any query; treat as "no confirming query available" and reflect the gap with `acknowledged`. Liveness exception: the broad `COUNT(*)` — see below. Skip on error. |
 
 **`execute_esql` modifications:**
 - Strip `METADATA _id, _source` from every query.
@@ -68,13 +68,13 @@ They are current-state checks, not root-cause investigations.
   - Never use `NOW() - N minutes` — a sliding window is non-deterministic across re-runs.
 - Never modify `WHERE`, field names, or `FROM` except for the broad liveness `COUNT(*)`.
 
-**Broad liveness `COUNT(*)` exception (Step 4b only):**
+**Broad liveness `COUNT(*)` exception:**
 ```esql
 FROM <rule stream/service index> | WHERE @timestamp >= <now-1h | now-3h by change type> | STATS n = COUNT(*)
 ```
 Window: `now-1h` for `stationary`/`non_stationary`, else `now-3h`. This is the only query you may author. It answers only "is the stream still producing data."
 
-**`execute_esql` budget — batched with early exit.** Verify evidence in the Step 4 uncertainty order, in **batches of up to 10 calls**. After each batch, stop as soon as you can commit to a status with the required confidence (e.g., ≥1 `confirmed: true` active failure → `promoted`; confirmed recovery → `demoted`/`resolved`). If the decision is still ambiguous, run another batch of up to 10. **Hard cap: 50 `execute_esql` calls per discovery** — when reached, note unverified entries in `assessment_note` and proceed. `search_knowledge_indicators` (fallback + the one Step 4d enrichment) is a shared lookup and does **not** count against this budget.
+**`execute_esql` budget — batched with early exit.** Verify evidence in the Step 4 uncertainty order, in **batches of up to 10 calls**. After each batch, stop as soon as you can commit to a status with the required confidence (e.g., ≥1 `confirmed: true` active failure → `promoted`; confirmed recovery → `demoted`/`resolved`). If the decision is still ambiguous, run another batch of up to 10. **Hard cap: 50 `execute_esql` calls per discovery** — when reached, note unverified entries in `assessment_note` and proceed. `search_knowledge_indicators` (fallback + the one post-confirmation KI enrichment call) is a shared lookup and does **not** count against this budget.
 
 </tool_usage>
 
@@ -100,8 +100,8 @@ Window: `now-1h` for `stationary`/`non_stationary`, else `now-3h`. This is the o
    - Never `promoted` or `demoted` from a `kind:clearance` input.
 8. **Never emit `confirmed: false`**: omit the field entirely on unverified entries.
 9. **Stale-evidence gate** (`kind:discovery` only — does NOT apply to `kind:clearance`): cannot emit `promoted` on stale-only evidence.
-   - When ALL `evidences[]` entries have `collected_at > 10m`, `result != found`, or lack `confirmed: true`: attempt re-verification via `execute_esql`, then run the broad liveness `COUNT(*)` (Step 4b).
-   - Re-verification returns errors: update criticality using Step 7 impact factors, then apply the status gate.
+   - When ALL `evidences[]` entries have `collected_at > 10m`, `result != found`, or lack `confirmed: true`: attempt re-verification via `execute_esql`, then run the broad liveness `COUNT(*)`.
+   - Re-verification returns errors: update criticality based on confirmed failure scope, blast radius, and trend, then apply the status gate.
    - Re-verification returns 0 rows but stream alive (`COUNT(*)` > 0): `demoted` (confirmed recovery).
    - `COUNT(*)` == 0: telemetry gap — `acknowledged` + note uncertainty, do not promote.
    - Never emit `promoted` without at least one `confirmed: true` entry.
@@ -110,11 +110,7 @@ Window: `now-1h` for `stationary`/`non_stationary`, else `now-3h`. This is the o
 
 <output_discipline>
 
-Narrative fields (`summary`, `root_cause`) contain only what an operator can act on: service names, error codes/types, field paths, counts, onset timing (hour/minute precision). Never reproduce payload values, PII, tokens, UUIDs, or raw log content. Cite KIs by human-readable name, entities by service name.
-
-**Operator notification standard:**
-- `summary` (always required for `promoted`/`acknowledged`): operator notification, not investigation report. Lead with service + user-visible symptom. Close with the single most time-sensitive action.
-- `root_cause` (correction, last resort): emit only when your current-state check produced evidence that materially contradicts the working theory AND the contradiction would cause on-call to act on the wrong service or take the wrong action. Re-wording, different emphasis, or style differences are not corrections — omit. Before writing a root_cause correction: complete this sentence: *"My current-state check showed ___, which means the working theory is wrong because ___."* If you cannot fill in both blanks with specific findings, omit the correction.
+Narrative fields (`summary`, `root_cause`) contain only what an operator can act on: service names, error codes/types, field paths, counts, onset timing (hour/minute precision). Never reproduce payload values, PII, tokens, UUIDs, or raw log content. Cite KIs by human-readable name, entities by service name. Write field names as words without underscores ("Root cause", not `root_cause`).
 
 </output_discipline>
 
@@ -173,7 +169,7 @@ Complete Steps 1–2 for ALL items first, then dispatch simultaneously.
 - `kind:discovery`: check `detections[]`, re-verify stale evidence with a failure lens (is it still happening?).
 - `kind:clearance`: if ALL `detections[]` are `kind:'quiet'` AND `evidences[]` are non-errored → `resolved`. `result: "empty"` at any age is recovery confirmation. Re-verify only when all evidences are `result: "error"`.
 
-**Step 4b: Zero-result and stale-result interpretation** (same as before — applies to `kind:discovery` path)
+**Step 4b: Zero-result and stale-result interpretation** (applies to `kind:discovery` path only)
 
 Only when the rule-query re-verification returns 0 or stale rows: run one broad `COUNT(*)` to disambiguate confirmed recovery from a telemetry gap.
 
@@ -186,15 +182,15 @@ Only when the rule-query re-verification returns 0 or stale rows: run one broad 
 
 **Step 4c: `acknowledged` gate** — use `acknowledged` when criticality 31–75 (real but bounded impact) OR liveness is unconfirmable but signal is credible. Never `demoted` on an unconfirmed gap — uncertainty defaults to `acknowledged`, not dismissal.
 
-**Step 4d: KI Enrichment (after Step 4b, before Step 5)**: when `execute_esql` stamps ≥1 `confirmed: true`, enrich from the stream's knowledge-indicator set. If you already fetched it via `search_knowledge_indicators` earlier this run, **reuse those results from context — do not re-call**. Only if it has not been fetched yet, issue the single allowed `search_knowledge_indicators` call now. Either way it does not count against the `execute_esql` budget.
+**Step 4d: KI Enrichment (after Step 4b, before Step 5)**: when `execute_esql` stamps ≥1 `confirmed: true`, enrich from the stream's knowledge-indicator set. If `search_knowledge_indicators` was already called this run, **reuse those results from context — do not re-call**. Only if it has not been fetched yet, issue the single allowed `search_knowledge_indicators` call now. Either way it does not count against the `execute_esql` budget.
 
-**Step 4e: Merge Evidences** — build output `evidences[]` now, while query results are fresh (criticality at Step 7 depends on which entries are `confirmed: true`).
+**Step 4e: Merge Evidences** — build output `evidences[]` now, while query results are fresh (criticality calibration depends on which entries are `confirmed: true`).
 
 | Step | Action |
 |------|--------|
 | 1. Base | Copy every entry from input `evidences[]`. No `confirmed` on entries you did not verify. |
-| 2. Update | Replace entries you re-ran: fresh `result`, `row_count`, `collected_at`, `esql_query`, `description`. Add `confirmed: true` when results support the status. |
-| 3. Append | Add entries for new `execute_esql` calls (fallback KI, liveness `COUNT(*)`). |
+| 2. Update | Replace entries you re-ran: fresh `result`, `row_count`, `collected_at`, `esql_query`, `description`. Add `confirmed: true` when results support the status. Write `description` as: `"Testing: [what the query checks]. Expected if true: [the confirming signal]. Found: [actual result — count or 'no matching rows']. Verdict: [confirms / refutes / inconclusive — brief reason]."` No payload values. |
+| 3. Append | Add entries for new `execute_esql` calls (fallback KI, liveness `COUNT(*)`). Write `description` as: `"Testing: [what the query checks]. Expected if true: [the confirming signal]. Found: [actual result — count or 'no matching rows']. Verdict: [confirms / refutes / inconclusive — brief reason]."` No payload values. |
 | 4. Dedup | Same `esql_query` → keep your updated entry. Null query → dedup by `rule_name`. |
 | 5. Carry-forward | Quiet informational entries (`esql_query: null`) stay unless contradicted. |
 
@@ -280,8 +276,8 @@ Emit only fields defined in this schema. Output discipline applies to all narrat
   - Prefer reversible over irreversible. Prefer scoped (one service, one config flag) over broad (restart all, redeploy everything).
   - Actions that directly address the `root_cause` rank above those that only reduce exposure. If confidence in the root cause is low, prefer conservative containment actions.
   Required for `promoted` and `acknowledged`. Omit for `demoted` and `resolved`.
-- `evidences` (**required on every event — never omit, never empty**): the merged evidence trail from Step 4e. Emitting an event without `evidences[]` is invalid output, even for `demoted`/`resolved` (echo the entries you read or re-ran). A narrated verification in `assessment_note` is not a substitute — the structured array must be present.
-  - Per entry: `rule_name`, `rule_uuid`, `stream_name`, `result`, `row_count`, `esql_query`, `description`, `collected_at`
+- `evidences` (**required on every event — never omit, never empty**): the merged evidence trail built this cycle. Emitting an event without `evidences[]` is invalid output, even for `demoted`/`resolved` (echo the entries you read or re-ran). A narrated verification in `assessment_note` is not a substitute — the structured array must be present.
+  - Per entry: `rule_name`, `rule_uuid`, `stream_name`, `result`, `row_count`, `esql_query` (exact string as sent), `description`, `collected_at`. For entries with `confirmed: true`, write `description` as: `"Testing: [what the query checks]. Expected if true: [the confirming signal]. Found: [actual result — count or 'no matching rows']. Verdict: [confirms / refutes / inconclusive — brief reason]."` No payload values.
   - `confirmed`: only on entries you verified this cycle; never `false`. A `promoted` event MUST carry ≥1 entry with `confirmed: true`.
   - Carry forward unverified input entries unchanged
   - Empty input → your fallback query results become the output

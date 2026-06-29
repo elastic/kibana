@@ -29,19 +29,18 @@ export const createStatusCorrectnessEvaluator = (
   kind: 'LLM',
   evaluate: async (params) => {
     const { output, expected } = params;
-    const expectedStatus = expected?.expected_status;
+    const expectedGroundTruth = expected?.expected_ground_truth;
 
-    if (!expectedStatus || expectedStatus === 'any') {
+    if (!expectedGroundTruth) {
       return {
         score: null,
         label: 'unavailable',
-        explanation:
-          'expected_status is "any" or not specified — skipping status correctness check',
+        explanation: 'expected_ground_truth not specified — skipping status correctness check',
       };
     }
 
     const events = output?.significantEvents ?? [];
-    const statuses = events.map((e) => e.status).filter(Boolean);
+    const statusSummary = events.map((e) => `${e.discovery_slug}=${e.status}`).join(', ');
 
     const criteria: EvaluationCriterion[] = [
       {
@@ -49,9 +48,9 @@ export const createStatusCorrectnessEvaluator = (
         score: 1,
         text:
           `${STATUS_DECISION_RUBRIC}\n\n` +
-          `The calibrated-correct status for this scenario is "${expectedStatus}". ` +
-          `The judge returned status [${statuses.join(', ') || 'none'}]. ` +
-          `PASS only if the returned status matches that outcome AND is justified by the event's ` +
+          `Expected outcome: ${expectedGroundTruth}. ` +
+          `The judge returned: [${statusSummary || 'none'}]. ` +
+          `PASS only if each discovery's returned status matches the expected outcome (match by title/content, not by exact slug) AND is justified by the event's ` +
           `evidence, criticality, and the gates above. An over-escalation, under-escalation, or ` +
           `constraint violation is a FAIL even if it is "close".`,
       },

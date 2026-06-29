@@ -10,10 +10,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import type { InvestigatorEvaluator } from '../types';
-import {
-  createToolTrajectoryEvaluator,
-  createExecuteEsqlGroundingEvaluator,
-} from '../common/tool_usage_validation';
+import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grouding';
+import { createInvestigatorToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
   createCriticalityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
@@ -34,7 +32,7 @@ export const createInvestigatorEvaluators = (
     schemaValidityInvestigatorEvaluator,
     groupingCorrectnessEvaluator,
     evidenceCollectionEvaluator,
-    createToolTrajectoryEvaluator(),
+    createInvestigatorToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
   ];
 

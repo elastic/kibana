@@ -7,7 +7,15 @@
 
 import type { InvestigatorEvaluator } from '../../types';
 
-/** Unordered same-group `rule_name` pairs ("a|b", a<b), keyed by rule_name so grouping is order/count-independent. */
+/**
+ * Returns a stable identifier for a detection — `rule_uuid` when present (survives rule renames
+ * and snapshot catalog variants), falling back to `rule_name`.
+ */
+function detectionKey(d: { rule_uuid?: string; rule_name?: string }): string {
+  return d.rule_uuid ?? d.rule_name ?? '';
+}
+
+/** Unordered same-group detection-key pairs ("a|b", a<b), order/count-independent. */
 function sameGroupPairs(groups: string[][]): Set<string> {
   const pairs = new Set<string>();
   for (const group of groups) {
@@ -31,17 +39,15 @@ function intersectionSize(a: Set<string>, b: Set<string>): number {
   return n;
 }
 
-/** CODE evaluator: scores how well grouped rule pairs match the expected groups (F1 over same-group pairs). */
+/** CODE evaluator: scores how well grouped detection-key pairs match the expected groups (F1 over same-group pairs). */
 export const groupingCorrectnessEvaluator: InvestigatorEvaluator = {
   name: 'grouping_correctness',
   kind: 'CODE',
   evaluate: ({ output, expected }) => {
     // Derive the expected grouping from the canonical expected_discoveries: each discovery's
-    // detections form one group, keyed by rule_name.
+    // detections form one group, keyed by rule_uuid (or rule_name as fallback).
     const expectedGroups = expected?.expected_discoveries?.map((discovery) =>
-      (discovery.detections ?? [])
-        .map((d) => d.rule_name)
-        .filter((name): name is string => Boolean(name))
+      (discovery.detections ?? []).map((d) => detectionKey(d)).filter(Boolean)
     );
     if (!expectedGroups || expectedGroups.length === 0) {
       return Promise.resolve({
@@ -54,7 +60,7 @@ export const groupingCorrectnessEvaluator: InvestigatorEvaluator = {
     const discoveries = output?.discoveries ?? [];
     const actualGroups = discoveries.map((discovery) => {
       const detections = discovery.detections ?? [];
-      return detections.map((d) => d.rule_name).filter((name): name is string => Boolean(name));
+      return detections.map((d) => detectionKey(d)).filter(Boolean);
     });
 
     const totalRules = new Set(expectedGroups.flat()).size;
@@ -62,21 +68,22 @@ export const groupingCorrectnessEvaluator: InvestigatorEvaluator = {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'Fewer than two rules to group — grouping is trivial',
+        explanation: 'Fewer than two detections to group — grouping is trivial',
       });
     }
 
-    // Snapshot variant uses a different detection catalog, so rule sets can be disjoint — skip then.
-    const expectedRuleNames = new Set(expectedGroups.flat());
-    const actualRuleNames = new Set(actualGroups.flat());
-    const sharedRules = [...actualRuleNames].filter((name) => expectedRuleNames.has(name)).length;
-    if (actualRuleNames.size > 0 && sharedRules === 0) {
+    // Guard: if the actual and expected rule universes are completely disjoint (e.g. snapshot run
+    // against a different detection catalog) the F1 score is trivially 0 for the wrong reason —
+    // there is no meaningful signal to surface. Return null so the harness marks it unavailable.
+    const expectedUniverse = new Set(expectedGroups.flat());
+    const actualUniverse = new Set(actualGroups.flat());
+    const hasOverlap = [...actualUniverse].some((key) => expectedUniverse.has(key));
+    if (!hasOverlap && actualUniverse.size > 0) {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
         explanation:
-          'Expected and actual rule sets are disjoint (the variant uses a different detection ' +
-          'catalog than the canonical expected_discoveries) — grouping ground truth does not apply',
+          'Actual rule universe is disjoint from expected universe — catalog mismatch, grouping cannot be scored',
       });
     }
 

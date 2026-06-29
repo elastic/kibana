@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery, Detection } from '@kbn/streams-schema';
 import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
 const buildDiscovery = (...ruleNames: string[]): Partial<Discovery> => ({
@@ -13,13 +13,18 @@ const buildDiscovery = (...ruleNames: string[]): Partial<Discovery> => ({
 });
 
 // The expected grouping is derived from `expected_discoveries`, so build them from the gold groups.
+// The evaluator only reads output.discoveries[].detections and expected.expected_discoveries[].detections.
 const evaluate = (discoveries: Array<Partial<Discovery>>, expectedGroups?: string[][]) =>
   groupingCorrectnessEvaluator.evaluate({
-    input: {},
-    // The evaluator only reads detections[].rule_name; partial discoveries suffice as fixtures.
-    output: { discoveries: discoveries as Discovery[], steps: [] },
+    input: {
+      episodeSuffix: 'test',
+      detections: discoveries.flatMap((d) => d.detections ?? []) as Detection[],
+    },
+    output: { discoveries: discoveries as unknown as Discovery[], steps: [] },
     expected: {
-      expected_discoveries: expectedGroups?.map((group) => buildDiscovery(...group)),
+      expected_discoveries: expectedGroups?.map((group) => ({
+        detections: group.map((rule_name) => ({ kind: 'detection' as const, rule_name })),
+      })) as unknown as Discovery[],
     },
     metadata: null,
   });

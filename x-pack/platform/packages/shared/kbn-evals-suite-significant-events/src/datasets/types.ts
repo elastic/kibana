@@ -100,8 +100,9 @@ export interface DiscoveryInvestigatorScenario {
   continuationChains?: Record<string, string[]>;
   output: {
     criteria: SamplingCriterion[];
-    expected_kind: 'discovery' | 'clearance' | 'handled' | 'any';
     expected_min_evidence_count?: number;
+    /** Human-readable summary of expected output for quick orientation (e.g. `discoveries=[cascade, benign-auth]`). */
+    expected_ground_truth?: string;
     /**
      * The discoveries the investigator is expected to produce — same shape as the judge's
      * `input.discoveries` (detections + evidences + cause_kis). This is the canonical ground
@@ -115,13 +116,15 @@ export interface DiscoveryInvestigatorScenario {
 }
 
 export interface DiscoveryJudgeScenario {
+  id?: string;
   input: {
     scenario_id: string;
     discoveries: Array<Partial<Discovery>>;
   };
   output: {
     criteria: SamplingCriterion[];
-    expected_status: 'promoted' | 'demoted' | 'acknowledged' | 'resolved' | 'any';
+    /** Human-readable summary of expected outcome for each discovery, e.g. `slug=promoted (reason); slug=demoted (reason)`. Used by the status-correctness evaluator. */
+    expected_ground_truth: string;
     expect_assessment_note?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
