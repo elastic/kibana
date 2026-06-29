@@ -47,7 +47,11 @@ export {
   OTEL_SEVERITY_FIELD,
   ECS_SEVERITY_FIELD,
 } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
+export {
+  getIndexPatternsForStream,
+  getSourcesForStream,
+  getStreamSamplingSource,
+} from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export { definitionToESQLQuery } from './src/helpers/definition_to_esql_query';
 export type { DefinitionToESQLQueryOptions } from './src/helpers/definition_to_esql_query';
@@ -235,6 +239,7 @@ export {
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   INFERRED_FEATURE_TYPES,
   isFeature,
@@ -277,18 +282,15 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   SIG_EVENT_STATUS_OPTIONS,
-  SIG_EVENT_IMPACT_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
   type Discovery,
   sigEventSchema,
   sigEventStatusSchema,
-  sigEventImpactSchema,
   type SigEvent,
   type KnowledgeIndicator,
   type SigEventStatus,
-  type SigEventImpact,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
@@ -317,6 +319,7 @@ export {
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   STREAMS_INFERENCE_PARENT_FEATURE_ID,
   STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
   STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
