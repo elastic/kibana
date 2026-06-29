@@ -69,7 +69,8 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).first().should('be.visible');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
-    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView().type('flow');
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
 
     // Register the intercept for the first save (excluding netflow) before triggering it
     cy.intercept('PATCH', '/api/timeline').as('excludeNetflow');
@@ -86,7 +87,8 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     // open modal, filter and check
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
 
-    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView().type('flow');
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();
 
     // close modal and save timeline changes
@@ -127,7 +129,8 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
 
       // Search for the suricata renderer by name
-      cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView().type('suricata');
+      cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
+      cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('suricata');
 
       // The suricata renderer checkbox should appear in the filtered list
       cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('exist');
