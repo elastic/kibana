@@ -35,7 +35,11 @@ const mockGapsOverview: GapsOverview = {
     },
   ],
   recommended_connectors: [
-    { type: 'github', name: 'GitHub', rationale: 'No code repository connector configured' },
+    {
+      actionTypeId: '.github',
+      name: 'GitHub (my-org)',
+      rationale: 'No code repository connector configured',
+    },
   ],
 };
 
@@ -78,7 +82,7 @@ describe('NightshiftApp', () => {
     it('renders the recommended connectors panel', () => {
       render(<NightshiftApp gapsOverview={mockGapsOverview} />);
       expect(screen.getByTestId('nightshiftConnectorList')).toBeInTheDocument();
-      expect(screen.getByText('GitHub')).toBeInTheDocument();
+      expect(screen.getByText('GitHub (my-org)')).toBeInTheDocument();
     });
 
     it('hides the connectors panel when no connectors are recommended', () => {

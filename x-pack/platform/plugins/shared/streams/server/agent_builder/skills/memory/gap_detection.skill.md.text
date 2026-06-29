@@ -21,7 +21,7 @@ Evaluate the memory knowledge base against each of these dimensions:
 1. Call `platform_streams_memory_list` to enumerate all existing memory pages and their categories.
 2. Call `platform_sig_events_ki_search` (no filters) to review all available knowledge indicators.
 3. Call `platform.streams.inspect_streams` to get the list of streams — this reveals what data sources are connected to Elastic and what is likely missing.
-4. Call `platform.workflows.get_connectors` to see which connectors are configured — use this to assess dimension 11 (access points and connectors).
+4. Call `platform.workflows.get_connectors` to enumerate every installed connector. Record each connector's `actionTypeId` and `name` — you will need these for the JSON output. Use this to assess dimension 11 (access points and connectors).
 5. Read relevant memory pages using `platform_streams_memory_read` or `platform_streams_memory_search` to understand what is already known.
 6. For each of the 11 dimensions above, assess:
    - **Known**: what the memory clearly documents about this dimension
@@ -50,9 +50,9 @@ The JSON block uses this exact schema (use the literal string `gaps-data` as the
   ],
   "recommended_connectors": [
     {
-      "type": "<lowercase type, e.g. slack, github, pagerduty, jira, opsgenie>",
-      "name": "<display name>",
-      "rationale": "<one sentence explaining why this connector would help>"
+      "actionTypeId": "<exact actionTypeId from platform.workflows.get_connectors, e.g. .slack2, .github, .pagerduty_mcp, .jira-cloud>",
+      "name": "<connector instance name from platform.workflows.get_connectors>",
+      "rationale": "<one sentence explaining which gap this connector would help address>"
     }
   ]
 }
@@ -61,7 +61,7 @@ The JSON block uses this exact schema (use the literal string `gaps-data` as the
 
 Dimension `id` values in order: `services`, `deployment`, `infrastructure`, `observability`, `admin_gates`, `health_oncall`, `failure_modes`, `mcp_integrations`, `code_repos`, `data_flows`, `access_points`.
 
-Only include a connector in `recommended_connectors` if it is not already configured and would provide meaningful value. If all relevant connectors are configured the array may be empty.
+Only include connectors in `recommended_connectors` that are returned by `platform.workflows.get_connectors` AND would provide meaningful value for one of the identified gaps. Use the exact `actionTypeId` and `name` values from the connector data — never invent or abbreviate them. If no installed connectors are relevant to the gaps, the array may be empty.
 
 After the JSON block, write the full human-readable Markdown report:
 

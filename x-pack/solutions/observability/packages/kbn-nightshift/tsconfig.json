@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/storybook",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/connector-specs"
   ]
 }

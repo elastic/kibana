@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { NightshiftIllustration } from './nightshift_illustration';
 
 export interface GapsDimension {
@@ -29,7 +30,9 @@ export interface GapsDimension {
 }
 
 export interface RecommendedConnector {
-  type: string;
+  /** Kibana connector type ID, e.g. ".slack2", ".github", ".pagerduty_mcp" */
+  actionTypeId: string;
+  /** Connector instance display name from the system */
   name: string;
   rationale: string;
 }
@@ -53,15 +56,21 @@ const STATUS_COLOR: Record<GapsDimension['status'], string> = {
   missing: 'danger',
 };
 
-const CONNECTOR_ICON: Record<string, string> = {
-  slack: 'logoSlack',
-  github: 'logoGithub',
-  jira: 'logoJira',
-};
-
 const onboardingButtonLabel = i18n.translate('xpack.nightshift.startOnboardingButton', {
   defaultMessage: 'Tell us about your system',
 });
+
+const ConnectorIcon: React.FC<{ actionTypeId: string }> = ({ actionTypeId }) => {
+  const LazyIcon = ConnectorIconsMap.get(actionTypeId);
+  if (!LazyIcon) {
+    return <EuiIcon type="link" size="m" />;
+  }
+  return (
+    <Suspense fallback={<EuiIcon type="link" size="m" />}>
+      <LazyIcon size="m" />
+    </Suspense>
+  );
+};
 
 export function NightshiftApp({
   onStartOnboarding,
@@ -174,20 +183,16 @@ export function NightshiftApp({
               <EuiSpacer size="m" />
               <EuiFlexGroup
                 direction="column"
-                gutterSize="s"
+                gutterSize="m"
                 data-test-subj="nightshiftConnectorList"
               >
                 {gapsOverview.recommended_connectors.map((connector) => (
-                  <EuiFlexItem key={connector.type}>
+                  <EuiFlexItem key={connector.actionTypeId}>
                     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          type={CONNECTOR_ICON[connector.type] ?? 'link'}
-                          size="m"
-                          title={connector.name}
-                        />
+                      <EuiFlexItem grow={false} style={{ width: 32, textAlign: 'center' }}>
+                        <ConnectorIcon actionTypeId={connector.actionTypeId} />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false} style={{ minWidth: 120 }}>
+                      <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
                         <EuiText size="s">
                           <strong>{connector.name}</strong>
                         </EuiText>
