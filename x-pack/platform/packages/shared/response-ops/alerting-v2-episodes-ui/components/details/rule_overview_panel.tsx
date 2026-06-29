@@ -30,8 +30,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
   rule,
   ruleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelProps) => {
-  const ruleKindLabel =
-    rule.kind === 'signal' ? i18n.RULE_OVERVIEW_KIND_SIGNAL : i18n.RULE_OVERVIEW_KIND_ALERTING;
+  const ruleKindLabel = i18n.RULE_KIND_LABELS[rule.kind];
 
   const titleNode = (
     <EuiTitle size="xs">
@@ -67,10 +66,10 @@ export const AlertEpisodeRuleOverviewPanel = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.RULE_OVERVIEW_KIND_TOOLTIP}>
+          <EuiToolTip content={i18n.RULE_KIND_TOOLTIPS[rule.kind]}>
             <EuiBadge
               color="hollow"
-              iconType={rule.kind === 'signal' ? 'radar' : 'bell'}
+              iconType={i18n.RULE_KIND_ICONS[rule.kind]}
               iconSide="left"
               tabIndex={0}
               data-test-subj="alertingV2EpisodeDetailsRuleKindBadge"

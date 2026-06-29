@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 
 /** --- Overview list --- */
 export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
@@ -352,12 +353,36 @@ export const RULE_OVERVIEW_KIND_ALERTING = i18n.translate(
   }
 );
 
-export const RULE_OVERVIEW_KIND_TOOLTIP = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.tooltip',
+export const RULE_OVERVIEW_KIND_ALERT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.alertTooltip',
   {
-    defaultMessage: 'Mode can be changed in the rule edit form',
+    defaultMessage:
+      'Tracks a problem across state changes and can notify your team or trigger automated actions when the state changes.',
   }
 );
+
+export const RULE_OVERVIEW_KIND_SIGNAL_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.signalTooltip',
+  {
+    defaultMessage:
+      'Records each match as a data point without lifecycle tracking or notifications.',
+  }
+);
+
+export const RULE_KIND_LABELS: Record<RuleKind, string> = {
+  alert: RULE_OVERVIEW_KIND_ALERTING,
+  signal: RULE_OVERVIEW_KIND_SIGNAL,
+};
+
+export const RULE_KIND_TOOLTIPS: Record<RuleKind, string> = {
+  alert: RULE_OVERVIEW_KIND_ALERT_TOOLTIP,
+  signal: RULE_OVERVIEW_KIND_SIGNAL_TOOLTIP,
+};
+
+export const RULE_KIND_ICONS: Record<RuleKind, string> = {
+  alert: 'bell',
+  signal: 'radar',
+};
 
 export const RULE_OVERVIEW_ENABLED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.enabled',
