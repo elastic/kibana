@@ -128,6 +128,7 @@ describe('<ComponentTemplateEdit />', () => {
               ...COMPONENT_TEMPLATE_TO_EDIT,
               template: {
                 ...COMPONENT_TEMPLATE_TO_EDIT.template,
+                lifecycle: { enabled: true },
               },
               version: 1,
             }),
