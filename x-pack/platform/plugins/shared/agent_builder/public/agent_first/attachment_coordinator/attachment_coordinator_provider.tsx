@@ -53,7 +53,7 @@ export const AgentFirstAttachmentCoordinatorProvider: React.FC<
     async (attachment: AttachmentInput, options?: AttachWithFlightOptions) => {
       const sourceElement = options?.sourceElement ?? getApplicationAttachButtonElement();
       const targetElement = getAgentCartButtonElement();
-      const iconType = options?.iconType ?? 'pin';
+      const iconType = 'documents';
 
       const fromRect =
         options?.sourceRect ??
