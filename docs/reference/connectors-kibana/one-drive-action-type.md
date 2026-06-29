@@ -37,8 +37,6 @@ Token URL
 
 ## Test connectors [one-drive-action-configuration]
 
-You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's profile from the Microsoft Graph API.
-
 The OneDrive connector has the following actions:
 
 Get me

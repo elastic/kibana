@@ -38,6 +38,12 @@ import {
   SearchInputSchema,
 } from './types';
 
+const COMMON_SELECT = 'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime';
+const ITEM_CHILDREN_SELECT = `${COMMON_SELECT},@microsoft.graph.downloadUrl`;
+const SEARCH_SELECT = `${COMMON_SELECT},parentReference`;
+const FILE_METADATA_SELECT = `${COMMON_SELECT},parentReference,@microsoft.graph.downloadUrl`;
+const REMOTE_ITEMS_SELECT = `${COMMON_SELECT},remoteItem`;
+
 export const OneDrive: ConnectorSpec = {
   metadata: {
     id: '.one_drive',
@@ -136,8 +142,7 @@ export const OneDrive: ConnectorSpec = {
 
         const response = await ctx.client.get(url, {
           params: {
-            $select:
-              'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,@microsoft.graph.downloadUrl',
+            $select: ITEM_CHILDREN_SELECT,
             $top: input.top ?? 50,
             ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
           },
@@ -164,8 +169,7 @@ export const OneDrive: ConnectorSpec = {
           : 'https://graph.microsoft.com/v1.0/me/drive/root/search';
         const response = await ctx.client.get(url, {
           params: {
-            $select:
-              'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,parentReference',
+            $select: SEARCH_SELECT,
             $top: input.top ?? 25,
             ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
           },
@@ -191,8 +195,7 @@ export const OneDrive: ConnectorSpec = {
           : `https://graph.microsoft.com/v1.0/me/drive/items/${input.itemId}`;
         const response = await ctx.client.get(itemUrl, {
           params: {
-            $select:
-              'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,parentReference,@microsoft.graph.downloadUrl',
+            $select: FILE_METADATA_SELECT,
           },
         });
         return response.data;
@@ -244,8 +247,7 @@ export const OneDrive: ConnectorSpec = {
           'https://graph.microsoft.com/v1.0/me/drive/sharedWithMe',
           {
             params: {
-              $select:
-                'id,name,size,webUrl,file,folder,createdDateTime,lastModifiedDateTime,remoteItem',
+              $select: REMOTE_ITEMS_SELECT,
               ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
             },
           }
@@ -266,7 +268,7 @@ export const OneDrive: ConnectorSpec = {
       handler: async (ctx, input: ListRecentFilesInput) => {
         const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/drive/recent', {
           params: {
-            $select: 'id,name,size,webUrl,file,createdDateTime,lastModifiedDateTime,remoteItem',
+            $select: REMOTE_ITEMS_SELECT,
             $top: 25,
             ...(input.pageToken ? { $skiptoken: input.pageToken } : {}),
           },
