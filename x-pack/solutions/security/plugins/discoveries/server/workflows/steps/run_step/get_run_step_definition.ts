@@ -108,15 +108,21 @@ export const getRunStepDefinition = ({
           connector_id: effectiveConnectorId,
         };
 
-        // Auto-detect 'provided' mode when alerts are pre-supplied
-        const effectiveRetrievalMode =
-          alerts != null && alerts.length > 0 ? 'provided' : alertRetrievalMode;
+        // Pre-supplied alerts are passed directly via `executeParams.alerts`, so
+        // the retrieval phase is skipped; otherwise the legacy run-step input
+        // enum is bridged to the composite toggles (legacy `custom_only` =>
+        // default retrieval off).
+        const hasProvidedAlerts = alerts != null && alerts.length > 0;
+        const queryMode = alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
 
         const workflowConfig: WorkflowConfig = {
           ...(additionalContext != null ? { additional_context: additionalContext } : {}),
-          alert_retrieval_mode: effectiveRetrievalMode,
+          alert_retrieval_mode: queryMode,
           alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
-          esql_query: esqlQuery,
+          alert_retrieval_workflows_enabled: alertRetrievalWorkflowIds.length > 0,
+          default_retrieval_enabled: !hasProvidedAlerts && alertRetrievalMode !== 'custom_only',
+          ...(esqlQuery != null ? { esql_query: esqlQuery } : {}),
+          skill_enabled: true,
           validation_workflow_id: validationWorkflowId,
         };
 
