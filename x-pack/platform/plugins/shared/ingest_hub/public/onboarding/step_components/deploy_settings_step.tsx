@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -17,16 +17,19 @@ import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { getSelectedServicePermissions } from '../service_permissions';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { AwsPermissionsViewer } from './aws_permissions_viewer';
+import { useDeploy } from './deploy_settings_step/use_deploy';
 
 interface DeploySettingsStepProps {
-  onNext: () => void;
+  onContinue: () => void;
   onBack?: () => void;
 }
 
-export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) {
+export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { connectStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
+  const { deploySettingsStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
+
+  const { handleDeploy } = useDeploy({ onContinue });
 
   const showIdentityFederation = useMemo(() => {
     if (selectedServiceIds.length === 0) return true;
@@ -47,27 +50,24 @@ export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) 
 
   return (
     <div data-test-subj="onboardingStep-deploy-settings">
-      {onBack && (
-        <>
-          <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
-            <FormattedMessage
-              id="xpack.ingestHub.deploySettingsStep.backButton"
-              defaultMessage="Back"
-            />
-          </EuiButtonEmpty>
-          <EuiSpacer size="m" />
-        </>
-      )}
       <Suspense
         fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-deploy-settings-loading" />}
       >
         <LazyAwsConnectSetup
           cloud={services.cloud as CloudSetupForCloudConnector | undefined}
-          initialConnectorId={connectStep.connectorId}
-          initialStaticKeys={connectStep.staticKeys}
+          initialConnectorId={deploySettingsStep.connectorId}
+          initialStaticKeys={deploySettingsStep.staticKeys}
           showIdentityFederation={showIdentityFederation}
           staticKeysContent={staticKeysContent}
-          onNext={onNext}
+          onBack={onBack}
+          onContinue={() => handleDeploy()}
+          continueButtonLabel={
+            <FormattedMessage
+              id="xpack.ingestHub.deploySettingsStep.continueButton"
+              defaultMessage="Deploy"
+            />
+          }
+          continueButtonIconType="playFilled"
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}
         />
