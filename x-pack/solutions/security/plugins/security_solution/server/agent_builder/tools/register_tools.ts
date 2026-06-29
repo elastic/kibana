@@ -17,6 +17,7 @@ import {
   listLeadsTool,
   searchEntitiesTool,
   dismissLeadTool,
+  setAssetCriticalityTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -54,6 +55,7 @@ export const registerTools = async (
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(setAssetCriticalityTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
