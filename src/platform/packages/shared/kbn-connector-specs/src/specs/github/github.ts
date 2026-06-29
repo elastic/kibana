@@ -109,6 +109,7 @@ export const GithubConnector: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://api.githubcopilot.com/mcp/',
+          hidden: true,
           label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
