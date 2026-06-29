@@ -38,6 +38,11 @@ const defaultProps = {
   workflows: mockWorkflows,
 };
 
+// EuiComboBox no longer sets a `title` attribute on rendered options, so locate
+// an option by the text content it renders (name + optional description).
+const findOptionByName = (name: string): HTMLElement | null =>
+  screen.queryAllByRole('option').find((option) => option.textContent?.includes(name)) ?? null;
+
 describe('WorkflowPicker', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -76,20 +81,20 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+        expect(findOptionByName('Workflow 1')).toBeInTheDocument();
       });
     });
 
     it('renders first workflow option', () => {
-      expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+      expect(findOptionByName('Workflow 1')).toBeInTheDocument();
     });
 
     it('renders second workflow option', () => {
-      expect(screen.getByTitle('Workflow 2')).toBeInTheDocument();
+      expect(findOptionByName('Workflow 2')).toBeInTheDocument();
     });
 
     it('renders third workflow option', () => {
-      expect(screen.getByTitle('Workflow 3')).toBeInTheDocument();
+      expect(findOptionByName('Workflow 3')).toBeInTheDocument();
     });
   });
 
@@ -274,7 +279,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+        expect(findOptionByName('Workflow 1')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Test workflow 1')).toBeInTheDocument();
@@ -292,7 +297,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+        expect(findOptionByName('Workflow 1')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Test workflow 1')).toBeInTheDocument();
@@ -316,7 +321,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Empty');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Empty Desc Workflow')).toBeInTheDocument();
+        expect(findOptionByName('Empty Desc Workflow')).toBeInTheDocument();
       });
 
       expect(screen.queryByTestId('workflowOptionDescription')).not.toBeInTheDocument();
@@ -334,7 +339,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+        expect(findOptionByName('Workflow 1')).toBeInTheDocument();
       });
 
       const descriptions = screen.getAllByTestId('workflowOptionDescription');
@@ -353,7 +358,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow 1');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+        expect(findOptionByName('Workflow 1')).toBeInTheDocument();
       });
 
       const marks = document.querySelectorAll('mark');
@@ -388,7 +393,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Default Workflow')).toBeInTheDocument();
+        expect(findOptionByName('Default Workflow')).toBeInTheDocument();
       });
     });
 
@@ -404,7 +409,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Workflow 1')).toBeInTheDocument();
+        expect(findOptionByName('Workflow 1')).toBeInTheDocument();
       });
 
       expect(screen.queryByText(/\(recommended\)/)).not.toBeInTheDocument();
@@ -439,7 +444,7 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Enabled Workflow')).toBeInTheDocument();
+        expect(findOptionByName('Enabled Workflow')).toBeInTheDocument();
       });
 
       const options = screen.getAllByRole('option');
@@ -459,10 +464,10 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Disabled Workflow (disabled)')).toBeInTheDocument();
+        expect(findOptionByName('Disabled Workflow (disabled)')).toBeInTheDocument();
       });
 
-      expect(screen.queryByTitle('Enabled Workflow (disabled)')).not.toBeInTheDocument();
+      expect(findOptionByName('Enabled Workflow (disabled)')).not.toBeInTheDocument();
     });
 
     it('marks disabled workflows as disabled options in the combobox', async () => {
@@ -477,12 +482,10 @@ describe('WorkflowPicker', () => {
       await userEvent.type(input, 'Workflow');
 
       await waitFor(() => {
-        expect(screen.getByTitle('Disabled Workflow (disabled)')).toBeInTheDocument();
+        expect(findOptionByName('Disabled Workflow (disabled)')).toBeInTheDocument();
       });
 
-      const disabledOption = screen
-        .getByTitle('Disabled Workflow (disabled)')
-        .closest('[role="option"]');
+      const disabledOption = findOptionByName('Disabled Workflow (disabled)');
       expect(disabledOption).toHaveAttribute('aria-disabled', 'true');
     });
 
