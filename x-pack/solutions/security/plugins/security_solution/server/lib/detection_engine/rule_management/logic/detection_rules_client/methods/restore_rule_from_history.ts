@@ -200,7 +200,7 @@ async function restoreDeletedRule({
       consumer: SERVER_APP_ID,
       enabled: false,
     },
-    options: { id: ruleId },
+    options: { id: ruleId, initialRevision: snapshotRule.revision + 1 },
     changeTracking: {
       action: SecurityRuleChangeTrackingAction.ruleRestore,
       metadata: { restoredFromChangeId: changeId, restoredToRevision: snapshotRule.revision },
