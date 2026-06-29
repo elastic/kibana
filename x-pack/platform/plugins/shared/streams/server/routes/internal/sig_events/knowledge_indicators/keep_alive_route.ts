@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -22,7 +23,7 @@ export const keepAlivePersistentIndicatorsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
