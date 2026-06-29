@@ -58,6 +58,14 @@ describe('CasesInlineContent', () => {
     expect(screen.getByText('SHA256 hash')).toBeInTheDocument();
   });
 
+  it('does not break when no cases passed', (cb) => {
+    const cases: CaseAttachmentData[] = [];
+    expect(() => {
+      renderInline(buildAttachment(cases, 0));
+      cb();
+    }).not.toThrow();
+  });
+
   it('renders clickable title links and badge links for each row', () => {
     const cases = [buildCase({ id: '125', incremental_id: 125, title: 'Suspicious OAuth Token' })];
     renderInline(buildAttachment(cases));

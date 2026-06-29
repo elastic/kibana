@@ -104,8 +104,9 @@ interface InlineContentProps extends AttachmentRenderProps<CasesAttachment> {
 }
 const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }) => {
   const { data } = attachment;
+  if (data.cases.length === 0) return null;
   const visible = data.cases.slice(0, MAX_VISIBLE_ROWS);
-  const owner = data.cases[0].owner;
+  const owner = visible[0].owner;
 
   const casesUrl = useMemo(
     () =>
