@@ -7,14 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const rawUserConnectorTokenSchema = schema.object({
-  profileUid: schema.string(),
+import { rawUserConnectorTokenSchema as rawUserConnectorTokenSchemaV1 } from './v1';
+
+export const rawUserConnectorTokenSchema = rawUserConnectorTokenSchemaV1.extends({
   userCloudId: schema.maybe(schema.string()),
-  connectorId: schema.string(),
-  credentialType: schema.string(),
-  credentials: schema.string({ defaultValue: '{}' }),
-  expiresAt: schema.maybe(schema.string()),
-  refreshTokenExpiresAt: schema.maybe(schema.string()),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
 });
