@@ -467,13 +467,17 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // persists this to `extracted.ioc_set_hash` and uses it to find other reports
   // with overlapping infrastructure. `value` is already normalized (lowercase for
   // domain/url/hash); the .toLowerCase() call is a safety net for ip and future types.
+  // Hashes value-only (not type:value) so domain:x.com and url:x.com (same infra,
+  // different classification) still produce the same fingerprint. NOTE: this changed
+  // from type:value keying — existing stored ioc_set_hash values are stale and need
+  // a backfill recompute to match across old+new docs.
   const iocSetHash =
     iocs.length === 0
       ? null
       : createHash('sha256')
           .update(
             iocs
-              .map((ioc) => `${ioc.type}:${ioc.value.toLowerCase()}`)
+              .map((ioc) => ioc.value.toLowerCase())
               .sort()
               .join('\n')
           )
