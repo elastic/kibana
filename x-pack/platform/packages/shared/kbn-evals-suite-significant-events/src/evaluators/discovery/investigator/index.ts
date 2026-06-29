@@ -5,43 +5,37 @@
  * 2.0.
  */
 
-import type { Evaluator } from '@kbn/evals';
 import { selectEvaluators } from '@kbn/evals';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
-import type {
-  InvestigatorEvaluationExample,
-  InvestigatorEvaluator,
-  InvestigatorOutput,
-  ScenarioCriteriaConfig,
-} from '../types';
+import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
+import type { InvestigatorEvaluator } from '../types';
 import {
   createToolTrajectoryEvaluator,
   createExecuteEsqlGroundingEvaluator,
-} from '../common/tool_usage/tool_usage_validation';
+} from '../common/tool_usage_validation';
 import {
   createCriticalityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
-} from '../calibration';
+} from '../common/scores_calibration';
+import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
 import { schemaValidityInvestigatorEvaluator } from './schema/schema_validity';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
-
-export type { ScenarioCriteriaConfig } from '../types';
 
 /**
  * Factory that creates the full set of evaluators for the investigator agent eval suite.
  */
 export const createInvestigatorEvaluators = (
   esClient: ElasticsearchClient,
-  scenarioCriteria?: ScenarioCriteriaConfig
-): Array<Evaluator<InvestigatorEvaluationExample, InvestigatorOutput>> => {
+  scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
+): InvestigatorEvaluator[] => {
   const codeEvaluators: InvestigatorEvaluator[] = [
     schemaValidityInvestigatorEvaluator,
     groupingCorrectnessEvaluator,
     evidenceCollectionEvaluator,
-    createToolTrajectoryEvaluator() as InvestigatorEvaluator,
-    createExecuteEsqlGroundingEvaluator() as InvestigatorEvaluator,
+    createToolTrajectoryEvaluator(),
+    createExecuteEsqlGroundingEvaluator(),
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -51,27 +45,12 @@ export const createInvestigatorEvaluators = (
   }
 
   const { criteriaFn, criteria } = scenarioCriteria;
-  const toCriteria = (c: Parameters<typeof criteriaFn>[0]) =>
-    criteriaFn(c) as Evaluator<InvestigatorEvaluationExample, InvestigatorOutput>;
-  // Drop the bulky `steps` before the calibration judge sees the output.
-  const withoutSteps = (output: InvestigatorOutput): InvestigatorOutput => ({
-    ...output,
-    steps: [],
-  });
 
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator<InvestigatorEvaluationExample, InvestigatorOutput>({
-      criteriaFn: toCriteria,
-      criteria,
-    }),
-    createCriticalityCalibrationEvaluator<InvestigatorEvaluationExample, InvestigatorOutput>({
-      criteriaFn,
-      transformOutput: withoutSteps,
-    }),
-    createConfidenceCalibrationEvaluator<InvestigatorEvaluationExample, InvestigatorOutput>({
-      criteriaFn,
-      transformOutput: withoutSteps,
-    }),
+    createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
+    createEvidenceDescriptionEvaluator({ criteriaFn }),
+    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };

@@ -5,39 +5,28 @@
  * 2.0.
  */
 
-import type { InvestigatorEvaluator, InvestigatorOutput } from '../../types';
+import type { InvestigatorEvaluator } from '../../types';
 
-/**
- * CODE evaluator: the investigator's job is to COLLECT evidence — every rule it acts on must carry
- * at least one `evidences[]` entry (a query result, or a "no confirming query available"
- * disposition for rules with no KI; quiet rules get an informational entry). See Critical Rule 11.
- * This is distinct from `execute_esql_grounding` (did a tool call return rows): here we check the
- * investigator actually documented evidence per rule in its output.
- *
- * Score = rules with ≥1 attributed evidence / total rules. Evidence is matched to a rule by
- * `rule_uuid` (reliable attribution within a single output). Skips (null) when there are no
- * detections to cover.
- */
+/** CODE evaluator: every detection rule must carry ≥1 attributed evidence. Score = covered / total rules. */
 export const evidenceCollectionEvaluator: InvestigatorEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
   evaluate: ({ output }) => {
-    const discoveries = (output as InvestigatorOutput)?.discoveries ?? [];
+    const discoveries = output?.discoveries ?? [];
 
     let totalRules = 0;
     let covered = 0;
     const issues: string[] = [];
 
     for (const [i, discovery] of discoveries.entries()) {
-      const doc = discovery as Record<string, unknown>;
-      const detections = (doc.detections ?? []) as Array<Record<string, unknown>>;
-      const evidences = (doc.evidences ?? []) as Array<Record<string, unknown>>;
+      const detections = discovery.detections ?? [];
+      const evidences = discovery.evidences ?? [];
       const evidenceRuleUuids = new Set(
         evidences.map((e) => e.rule_uuid).filter((id): id is string => Boolean(id))
       );
 
       for (const det of detections) {
-        const ruleUuid = det.rule_uuid as string | undefined;
+        const ruleUuid = det.rule_uuid;
         if (!ruleUuid) {
           continue;
         }

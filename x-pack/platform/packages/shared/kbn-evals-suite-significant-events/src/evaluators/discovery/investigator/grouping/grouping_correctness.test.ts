@@ -56,4 +56,15 @@ describe('groupingCorrectnessEvaluator', () => {
     // precision 1 (1/1), recall 1/3 → F1 = 0.5
     expect(result.score).toBeCloseTo(0.5, 5);
   });
+
+  it('is unavailable when expected and actual rule universes are disjoint (snapshot catalog mismatch)', async () => {
+    // The snapshot variant feeds a different detection catalog, so actual rules (x,y,z) share nothing
+    // with the canonical expected rules (a,b,c) — grouping cannot be scored across disjoint universes.
+    const result = await evaluate(
+      [buildDiscovery('x', 'y'), buildDiscovery('z')],
+      [['a', 'b'], ['c']]
+    );
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+  });
 });

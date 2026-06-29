@@ -6,14 +6,9 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { JudgeEvaluationExample, JudgeOutput } from '../../types';
+import type { JudgeEvaluationExample, JudgeAgentOutput } from '../../types';
 
-/**
- * The Incident Commander status decision gates, mirrored from the judge instructions
- * (status table + Critical Rules 6–7). Inlining them gives the LLM judge the standard to grade
- * against, so it assesses whether the decision is *justified by the evidence* — not just whether
- * the label matches.
- */
+/** Status decision gates, mirrored from the judge instructions so the LLM grades evidence justification. */
 const STATUS_DECISION_RUBRIC = [
   "As Incident Commander, each event's `status` must follow these gates:",
   '- `promoted` (kind:discovery only): credible signal (p_value ≤ 0.05) AND ≥1 `confirmed: true` evidence the judge verified this cycle AND criticality ≥ 76 AND a blocked user task or confirmed live sensitive-data (PII/credentials/secrets) exposure.',
@@ -24,14 +19,12 @@ const STATUS_DECISION_RUBRIC = [
 ].join('\n');
 
 /**
- * LLM-judge evaluator: grades whether the judge's `status` decision matches the scenario's
- * calibrated-correct outcome AND is consistent with the IC decision gates and the event's evidence.
- * Over-escalation (e.g. `promoted` where `acknowledged` was warranted), under-escalation, and
- * constraint violations all fail — not just a mismatched label.
+ * LLM evaluator: grades whether `status` matches the calibrated outcome and the IC decision gates.
+ * Over/under-escalation and constraint violations fail. Score per scenario criteria.
  */
 export const createStatusCorrectnessEvaluator = (
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator
-): Evaluator<JudgeEvaluationExample, JudgeOutput> => ({
+): Evaluator<JudgeEvaluationExample, JudgeAgentOutput> => ({
   name: 'status_correctness',
   kind: 'LLM',
   evaluate: async (params) => {
@@ -47,8 +40,8 @@ export const createStatusCorrectnessEvaluator = (
       };
     }
 
-    const events = (output as JudgeOutput)?.significantEvents ?? [];
-    const statuses = events.map((e) => (e as Record<string, unknown>).status).filter(Boolean);
+    const events = output?.significantEvents ?? [];
+    const statuses = events.map((e) => e.status).filter(Boolean);
 
     const criteria: EvaluationCriterion[] = [
       {
@@ -66,7 +59,7 @@ export const createStatusCorrectnessEvaluator = (
 
     return criteriaFn(criteria).evaluate({
       ...params,
-      output: output as JudgeOutput,
+      output,
     });
   },
 });

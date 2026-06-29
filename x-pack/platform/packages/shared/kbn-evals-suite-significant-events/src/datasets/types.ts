@@ -96,6 +96,8 @@ export interface DiscoveryInvestigatorScenario {
     detections: Array<Partial<Detection>>;
     continuation_candidates?: Array<Discovery>;
   };
+  /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
+  continuationChains?: Record<string, string[]>;
   output: {
     criteria: SamplingCriterion[];
     expected_kind: 'discovery' | 'clearance' | 'handled' | 'any';

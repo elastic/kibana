@@ -5,39 +5,33 @@
  * 2.0.
  */
 
-import type { Evaluator } from '@kbn/evals';
 import { selectEvaluators } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
-import type {
-  JudgeEvaluationExample,
-  JudgeEvaluator,
-  JudgeOutput,
-  ScenarioCriteriaConfig,
-} from '../types';
+import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
+import type { JudgeEvaluator } from '../types';
 import {
   createToolTrajectoryEvaluator,
   createExecuteEsqlGroundingEvaluator,
-} from '../common/tool_usage/tool_usage_validation';
+} from '../common/tool_usage_validation';
 import {
   createCriticalityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
-} from '../calibration';
+} from '../common/scores_calibration';
+import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
 import { schemaValidityJudgeEvaluator } from './schema/schema_validity';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
-
-export type { ScenarioCriteriaConfig } from '../types';
 
 /**
  * Factory that creates the full set of evaluators for the judge agent eval suite.
  */
 export const createJudgeEvaluators = (
-  scenarioCriteria?: ScenarioCriteriaConfig
-): Array<Evaluator<JudgeEvaluationExample, JudgeOutput>> => {
+  scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
+): JudgeEvaluator[] => {
   const codeEvaluators: JudgeEvaluator[] = [
     schemaValidityJudgeEvaluator,
-    createToolTrajectoryEvaluator() as JudgeEvaluator,
-    createExecuteEsqlGroundingEvaluator() as JudgeEvaluator,
+    createToolTrajectoryEvaluator(),
+    createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
   ];
 
@@ -48,25 +42,13 @@ export const createJudgeEvaluators = (
   }
 
   const { criteriaFn, criteria } = scenarioCriteria;
-  const toCriteria = (c: Parameters<typeof criteriaFn>[0]) =>
-    criteriaFn(c) as Evaluator<JudgeEvaluationExample, JudgeOutput>;
-  // Drop the bulky `steps` before the calibration judge sees the output.
-  const withoutSteps = (output: JudgeOutput): JudgeOutput => ({ ...output, steps: [] });
 
   return [
     ...base,
     createStatusCorrectnessEvaluator(criteriaFn),
-    createScenarioCriteriaLlmEvaluator<JudgeEvaluationExample, JudgeOutput>({
-      criteriaFn: toCriteria,
-      criteria,
-    }),
-    createCriticalityCalibrationEvaluator<JudgeEvaluationExample, JudgeOutput>({
-      criteriaFn,
-      transformOutput: withoutSteps,
-    }),
-    createConfidenceCalibrationEvaluator<JudgeEvaluationExample, JudgeOutput>({
-      criteriaFn,
-      transformOutput: withoutSteps,
-    }),
+    createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
+    createEvidenceDescriptionEvaluator({ criteriaFn }),
+    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };

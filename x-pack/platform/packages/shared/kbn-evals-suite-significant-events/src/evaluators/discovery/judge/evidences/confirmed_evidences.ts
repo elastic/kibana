@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import type { JudgeEvaluator, JudgeOutput } from '../../types';
+import type { JudgeEvaluator } from '../../types';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
- * CODE evaluator (hard invariant): the judge may only `promote` an event after confirming it with
- * its own `execute_esql`. So every `promoted` event must carry at least one evidence stamped
- * `confirmed: true`, and the judge must actually have run `execute_esql` this cycle. This catches a
- * judge that pages on stale/unverified evidence.
- *
- * Score = promoted events satisfying the invariant / promoted events. Skips (null) when nothing was
- * promoted — there is no invariant to check.
+ * CODE evaluator: every `promoted` event must carry a `confirmed: true` evidence and the judge must
+ * have run `execute_esql` this cycle. Score = valid promoted / promoted; null when none promoted.
  */
 export const confirmedEvidencesEvaluator: JudgeEvaluator = {
   name: 'confirmed_evidences',
   kind: 'CODE',
   evaluate: ({ output }) => {
-    const { significantEvents, steps } = output as JudgeOutput;
+    const { significantEvents, steps } = output;
     const events = significantEvents ?? [];
-    const promoted = events.filter((e) => (e as Record<string, unknown>).status === 'promoted');
+    const promoted = events.filter((e) => e.status === 'promoted');
 
     if (promoted.length === 0) {
       return Promise.resolve({
@@ -39,9 +34,7 @@ export const confirmedEvidencesEvaluator: JudgeEvaluator = {
     const issues: string[] = [];
 
     promoted.forEach((event, i) => {
-      const evidences = ((event as Record<string, unknown>).evidences ?? []) as Array<
-        Record<string, unknown>
-      >;
+      const evidences = event.evidences ?? [];
       const hasConfirmed = evidences.some((ev) => ev.confirmed === true);
 
       if (hasConfirmed && esqlRan) {
