@@ -47,7 +47,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   allowScopeSelection,
 }) => {
   const { services } = useMlKibana();
-  const { cps, overlays, ...startServices } = services;
+  const { cps, overlays, rendering } = services;
   const { toasts } = useNotifications();
   const jobsApi = useJobsApiService();
   const cpsManager = cps?.cpsManager;
@@ -131,7 +131,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     try {
       await showProjectRoutingChangeConfirmModal({
         overlays,
-        startServices,
+        rendering,
         jobCount: jobIds.length,
       });
     } catch {
@@ -189,7 +189,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     } finally {
       setUpdating(false);
     }
-  }, [jobIds, jobsApi, selectedProjectRouting, toasts, onClose, overlays, startServices]);
+  }, [jobIds, jobsApi, selectedProjectRouting, toasts, onClose, overlays, rendering]);
 
   const allUpdatesSucceeded = useMemo(
     () =>

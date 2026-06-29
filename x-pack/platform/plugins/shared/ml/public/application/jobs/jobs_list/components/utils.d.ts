@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ApplicationStart, ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
@@ -39,7 +40,7 @@ export function showResults(
 ): void;
 export function cloneJob(
   toastNotifications: ToastsStart,
-  application: ApplicationStart,
+  share: SharePluginStart,
   mlApi: MlApi,
   jobId: string
 ): Promise<void>;

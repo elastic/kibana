@@ -9,16 +9,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
-import type { CoreStart, OverlayStart } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export function showProjectRoutingChangeConfirmModal({
   overlays,
-  startServices,
+  rendering,
   jobCount,
 }: {
   overlays: OverlayStart;
-  startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+  rendering: RenderingService;
   jobCount: number;
 }): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -64,7 +65,7 @@ export function showProjectRoutingChangeConfirmModal({
               values={{ count: jobCount }}
             />
           </EuiConfirmModal>,
-          startServices
+          rendering
         )
       );
     } catch (e) {
