@@ -75,9 +75,15 @@ export class InstallationService {
     return response;
   }
 
-  async getDefaultInferenceId(): Promise<string> {
+  async getDefaultInferenceId(params?: {
+    resourceType?: ProductDocInstallParams['resourceType'];
+  }): Promise<string> {
+    const resourceType = params?.resourceType;
     const response = await this.http.get<DefaultInferenceIdResponse>(
-      GET_DEFAULT_INFERENCE_ID_API_PATH
+      GET_DEFAULT_INFERENCE_ID_API_PATH,
+      {
+        query: { ...(resourceType ? { resourceType } : {}) },
+      }
     );
     return response.inferenceId;
   }

@@ -9,8 +9,11 @@ import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { resolveDefaultInferenceId } from '@kbn/product-doc-common';
-import { ResourceTypes, type ResourceType } from '@kbn/product-doc-common';
+import {
+  resolveDefaultInferenceId,
+  ResourceTypes,
+  type ResourceType,
+} from '@kbn/product-doc-common';
 import type {
   InstallationStatusResponse,
   PerformInstallResponse,
@@ -51,7 +54,11 @@ export const registerInstallationRoutes = ({
   router.get(
     {
       path: GET_DEFAULT_INFERENCE_ID_API_PATH,
-      validate: false,
+      validate: {
+        query: schema.object({
+          resourceType: resourceTypeSchema,
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -65,8 +72,9 @@ export const registerInstallationRoutes = ({
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
       const result = await esClient.inference.get({});
       const endpointIds = new Set((result.endpoints ?? []).map((e) => e.inference_id));
+      const resourceType = req.query?.resourceType as ResourceType;
 
-      const inferenceId = resolveDefaultInferenceId(endpointIds);
+      const inferenceId = resolveDefaultInferenceId(endpointIds, { resourceType });
 
       return res.ok<DefaultInferenceIdResponse>({ body: { inferenceId } });
     }

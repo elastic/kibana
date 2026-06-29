@@ -6,6 +6,7 @@
  */
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes, type ResourceType } from './resource_type';
 
 export const productDocInferenceIdCandidates = [
   defaultInferenceEndpoints.JINAv5,
@@ -13,15 +14,27 @@ export const productDocInferenceIdCandidates = [
   defaultInferenceEndpoints.ELSER,
 ] as const;
 
+export interface ResolveDefaultInferenceIdOptions {
+  resourceType?: ResourceType;
+}
+
+const prefersJinaEmbeddings = (resourceType?: ResourceType): boolean =>
+  resourceType !== ResourceTypes.securityLabs;
+
 /**
- * Resolves the default inference ID for product documentation installation,
+ * Resolves the default inference ID for knowledge base installation,
  * matching the priority used by GenAI Settings.
+ *
+ * Product documentation prefers Jina v5 when available. Security Labs content
+ * does not support Jina embeddings yet, so ELSER is preferred instead.
  */
-export const resolveDefaultInferenceId = (endpointIds: ReadonlySet<string>): string => {
-  // @ TODO: Uncomment this block when Security Labs adds Jina v5 support
-  // if (endpointIds.has(defaultInferenceEndpoints.JINAv5)) {
-  //   return defaultInferenceEndpoints.JINAv5;
-  // }
+export const resolveDefaultInferenceId = (
+  endpointIds: ReadonlySet<string>,
+  { resourceType }: ResolveDefaultInferenceIdOptions = {}
+): string => {
+  if (prefersJinaEmbeddings(resourceType) && endpointIds.has(defaultInferenceEndpoints.JINAv5)) {
+    return defaultInferenceEndpoints.JINAv5;
+  }
   if (endpointIds.has(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)) {
     return defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
   }
@@ -40,12 +53,13 @@ export const getProductDocInferenceIdCandidates = (defaultInferenceId: string): 
 };
 
 export const resolveDefaultInferenceIdFromInferenceGet = async (
-  inferenceGet: () => Promise<{ endpoints?: Array<{ inference_id: string }> }>
+  inferenceGet: () => Promise<{ endpoints?: Array<{ inference_id: string }> }>,
+  options: ResolveDefaultInferenceIdOptions = {}
 ): Promise<string> => {
   try {
     const result = await inferenceGet();
     const endpointIds = new Set((result.endpoints ?? []).map((endpoint) => endpoint.inference_id));
-    return resolveDefaultInferenceId(endpointIds);
+    return resolveDefaultInferenceId(endpointIds, options);
   } catch {
     return defaultInferenceEndpoints.ELSER;
   }

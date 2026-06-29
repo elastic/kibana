@@ -31,6 +31,7 @@ import {
   REACT_QUERY_KEYS,
   type ProductDocBasePluginStart,
 } from '@kbn/product-doc-base-plugin/public';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
@@ -51,13 +52,28 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const queryClient = useQueryClient();
 
-  const { inferenceId, isLoading: isInferenceIdLoading } = useDefaultInferenceId(productDocBase);
+  const { inferenceId: productDocInferenceId, isLoading: isProductDocInferenceIdLoading } =
+    useDefaultInferenceId(productDocBase, ResourceTypes.productDoc);
+  const { inferenceId: securityLabsInferenceId, isLoading: isSecurityLabsInferenceIdLoading } =
+    useDefaultInferenceId(productDocBase, ResourceTypes.securityLabs);
+
+  const inferenceIdByResourceType = useMemo(
+    () => ({
+      [ResourceTypes.productDoc]: productDocInferenceId,
+      [ResourceTypes.securityLabs]: securityLabsInferenceId,
+      [ResourceTypes.openapiSpec]: productDocInferenceId,
+    }),
+    [productDocInferenceId, securityLabsInferenceId]
+  );
+
+  const isInferenceIdLoading = isProductDocInferenceIdLoading || isSecurityLabsInferenceIdLoading;
 
   const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
 
   const statusQueries = useQueries({
     queries: docsConfig.map((doc) => {
       const resourceType = doc.resourceType;
+      const inferenceId = inferenceIdByResourceType[resourceType];
       return {
         // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
         // invalidate these queries automatically (otherwise status only updates on full refresh).
@@ -93,7 +109,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: doc.name,
         status,
         resourceType: doc.resourceType,
-        inferenceId,
+        inferenceId: inferenceIdByResourceType[doc.resourceType],
         ...(updateAvailable ? { updateAvailable } : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
@@ -101,7 +117,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
       };
     });
-  }, [docsConfig, statusQueries, inferenceId]);
+  }, [docsConfig, statusQueries, inferenceIdByResourceType]);
 
   const getErrorSuggestion = useCallback(
     (failureReason: string, endpointId: string): string | null => {

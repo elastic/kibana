@@ -7,18 +7,23 @@
 
 import { useQuery } from '@kbn/react-query';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { ResourceType } from '@kbn/product-doc-common';
 import type { ProductDocBasePluginStart } from '../types';
 
 const STALE_TIME_MS = 5 * 60 * 1000;
 
 /**
- * Fetches the best available inference endpoint for product doc installation.
- * Priority: Jina v5 > .elser-2-elastic > .elser-2-elasticsearch (fallback)
+ * Fetches the best available inference endpoint for knowledge base installation.
+ * Product documentation priority: Jina v5 > .elser-2-elastic > .elser-2-elasticsearch
+ * Security Labs priority: .elser-2-elastic > .elser-2-elasticsearch
  */
-export function useDefaultInferenceId(productDocBase: ProductDocBasePluginStart) {
+export function useDefaultInferenceId(
+  productDocBase: ProductDocBasePluginStart,
+  resourceType?: ResourceType
+) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['productDocBase.defaultInferenceId'],
-    queryFn: () => productDocBase.installation.getDefaultInferenceId(),
+    queryKey: ['productDocBase.defaultInferenceId', resourceType],
+    queryFn: () => productDocBase.installation.getDefaultInferenceId({ resourceType }),
     staleTime: STALE_TIME_MS,
     refetchOnWindowFocus: false,
   });

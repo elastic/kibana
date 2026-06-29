@@ -6,6 +6,7 @@
  */
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes } from './resource_type';
 import {
   getProductDocInferenceIdCandidates,
   resolveDefaultInferenceId,
@@ -14,7 +15,7 @@ import {
 } from './default_inference_id';
 
 describe('resolveDefaultInferenceId', () => {
-  it('prefers EIS ELSER when available alongside default ELSER', () => {
+  it('prefers Jina when available alongside EIS ELSER and default ELSER', () => {
     expect(
       resolveDefaultInferenceId(
         new Set([
@@ -23,7 +24,7 @@ describe('resolveDefaultInferenceId', () => {
           defaultInferenceEndpoints.ELSER,
         ])
       )
-    ).toBe(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID);
+    ).toBe(defaultInferenceEndpoints.JINAv5);
   });
 
   it('prefers EIS ELSER when Jina is unavailable', () => {
@@ -37,10 +38,27 @@ describe('resolveDefaultInferenceId', () => {
     ).toBe(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID);
   });
 
-  it('falls back to default ELSER', () => {
+  it('falls back to default ELSER when Jina and EIS ELSER are unavailable', () => {
     expect(resolveDefaultInferenceId(new Set([defaultInferenceEndpoints.ELSER]))).toBe(
       defaultInferenceEndpoints.ELSER
     );
+  });
+
+  it('falls back to default ELSER when no endpoints are available', () => {
+    expect(resolveDefaultInferenceId(new Set())).toBe(defaultInferenceEndpoints.ELSER);
+  });
+
+  it('prefers EIS ELSER over Jina for Security Labs content', () => {
+    expect(
+      resolveDefaultInferenceId(
+        new Set([
+          defaultInferenceEndpoints.JINAv5,
+          defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+          defaultInferenceEndpoints.ELSER,
+        ]),
+        { resourceType: ResourceTypes.securityLabs }
+      )
+    ).toBe(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID);
   });
 });
 
@@ -55,10 +73,40 @@ describe('getProductDocInferenceIdCandidates', () => {
 });
 
 describe('resolveDefaultInferenceIdFromInferenceGet', () => {
+  it('prefers Jina when inference lookup returns all supported endpoints', async () => {
+    await expect(
+      resolveDefaultInferenceIdFromInferenceGet(() =>
+        Promise.resolve({
+          endpoints: [
+            { inference_id: defaultInferenceEndpoints.ELSER },
+            { inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID },
+            { inference_id: defaultInferenceEndpoints.JINAv5 },
+          ],
+        })
+      )
+    ).resolves.toBe(defaultInferenceEndpoints.JINAv5);
+  });
+
   it('falls back to default ELSER when inference lookup fails', async () => {
     await expect(
       resolveDefaultInferenceIdFromInferenceGet(() => Promise.reject(new Error('failed')))
     ).resolves.toBe(defaultInferenceEndpoints.ELSER);
+  });
+
+  it('prefers EIS ELSER over Jina for Security Labs content', async () => {
+    await expect(
+      resolveDefaultInferenceIdFromInferenceGet(
+        () =>
+          Promise.resolve({
+            endpoints: [
+              { inference_id: defaultInferenceEndpoints.ELSER },
+              { inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID },
+              { inference_id: defaultInferenceEndpoints.JINAv5 },
+            ],
+          }),
+        { resourceType: ResourceTypes.securityLabs }
+      )
+    ).resolves.toBe(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID);
   });
 });
 
