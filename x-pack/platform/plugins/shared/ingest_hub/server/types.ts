@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
-/** Renders the footer chrome below the preview panel (validation, diff nav, etc.). */
-export type ChangeHistoryPreviewFooterRenderFn = (props: {
-  objectId: string;
-  selectedChangeId?: string;
-}) => ReactNode;
+// No setup-time plugin dependencies required.
+export type IngestHubServerSetupDeps = Record<string, never>;
+
+export interface IngestHubServerStartDeps {
+  fleet: FleetStartContract;
+}
