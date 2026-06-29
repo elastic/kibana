@@ -293,12 +293,14 @@ describe('RuleChangesHistory', () => {
   });
 });
 
+const MOCK_RULE: RuleResponse = { rule_source: { type: 'internal' } } as RuleResponse;
+
 // 'rule_create' is in DIFFABLE_CHANGE_ACTIONS so the timeline auto-selects it on mount.
 const MOCK_RULE_1_HISTORY_ITEM: RuleHistoryItem = {
   id: 'item-rule-1',
   timestamp: new Date().toISOString(),
   action: 'rule_create',
-  rule: {} as RuleResponse,
+  rule: MOCK_RULE,
   old_values: null,
 };
 
@@ -306,19 +308,20 @@ const MOCK_RULE_2_HISTORY_ITEM: RuleHistoryItem = {
   id: 'item-rule-2',
   timestamp: new Date().toISOString(),
   action: 'rule_create',
-  rule: {} as RuleResponse,
+  rule: MOCK_RULE,
   old_values: null,
 };
 
 function createHistoryItem(
-  overrides: Partial<RuleHistoryItem> & Pick<RuleHistoryItem, 'id'>
+  overrides: Partial<Omit<RuleHistoryItem, 'rule'>> &
+    Pick<RuleHistoryItem, 'id'> & { rule?: Partial<RuleResponse> }
 ): RuleHistoryItem {
   return {
     timestamp: new Date().toISOString(),
     action: 'rule_create',
-    rule: {} as RuleResponse,
     old_values: null,
     ...overrides,
+    rule: { ...MOCK_RULE, ...overrides.rule } as RuleResponse,
   };
 }
 

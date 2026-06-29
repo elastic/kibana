@@ -196,7 +196,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: { id: RULE_ID },
+        options: expect.objectContaining({ id: RULE_ID }),
         data: expect.objectContaining({
           params: expect.objectContaining({
             description: snapshotAlertingRule.params.description,
@@ -205,6 +205,23 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       })
     );
     expect(rulesClient.update).not.toHaveBeenCalled();
+  });
+
+  it('recreates a deleted rule with initialRevision set to snapshot revision + 1', async () => {
+    const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+
+    rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+    rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 1, total: 0 });
+    rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+    await detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID });
+
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: { id: RULE_ID, initialRevision: snapshotAlertingRule.revision + 1 },
+      })
+    );
   });
 
   it('throws 409 when the provided revision does not match the current rule revision', async () => {
