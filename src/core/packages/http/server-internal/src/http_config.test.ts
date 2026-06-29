@@ -280,6 +280,40 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
   );
 });
 
+describe('xsrf.allowedSchemes', () => {
+  it('rejects schemes outside the apikey/bearer safe set', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[xsrf.allowedSchemes.0]: must be one of [apikey, bearer]"`
+    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } })).toThrow(
+      /must be one of \[apikey, bearer\]/
+    );
+  });
+
+  it('accepts apikey and bearer case-insensitively and an empty list', () => {
+    const httpSchema = config.schema;
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['ApiKey', 'BEARER'] } }).xsrf.allowedSchemes
+    ).toEqual(['ApiKey', 'BEARER']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: [] } }, { serverless: true }).xsrf
+        .allowedSchemes
+    ).toEqual([]);
+  });
+
+  it('defaults to apikey and bearer on serverless and empty on traditional', () => {
+    const httpSchema = config.schema;
+    expect(httpSchema.validate({}, { serverless: true }).xsrf.allowedSchemes).toEqual([
+      'apikey',
+      'bearer',
+    ]);
+    expect(httpSchema.validate({}, { traditional: true }).xsrf.allowedSchemes).toEqual([]);
+  });
+});
+
 test('accepts any type of objects for custom headers', () => {
   const httpSchema = config.schema;
   const obj = {
@@ -814,5 +848,20 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
     expect(httpConfig.restrictInternalApis).toBe(true);
+  });
+
+  it('normalizes xsrf.allowedSchemes to a deduped, lower-cased list', () => {
+    const rawConfig = config.schema.validate({
+      xsrf: { allowedSchemes: ['ApiKey', ' bearer ', 'apikey'] },
+    });
+    const rawCspConfig = cspConfig.schema.validate({});
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
+    expect(httpConfig.xsrf.allowedSchemes).toEqual(['apikey', 'bearer']);
   });
 });

@@ -56,7 +56,7 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
     xsrf: {
       disableProtection: false,
       allowlist: [allowlistedTestPath],
-      allowBearerTokens: false,
+      allowedSchemes: [],
     },
     restrictInternalApis: false,
   },

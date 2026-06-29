@@ -111,7 +111,7 @@ describe('xsrf post-auth handler', () => {
   describe('non destructive methods', () => {
     it('accepts requests without version or xsrf header', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'get', headers: {} });
@@ -129,7 +129,7 @@ describe('xsrf post-auth handler', () => {
   describe('destructive methods', () => {
     it('accepts requests with xsrf header', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: { 'kbn-xsrf': 'xsrf' } });
@@ -145,7 +145,7 @@ describe('xsrf post-auth handler', () => {
 
     it('accepts requests with version header', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: { 'kbn-version': 'some-version' } });
@@ -161,7 +161,7 @@ describe('xsrf post-auth handler', () => {
 
     it('returns a bad request if called without xsrf or version header', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post' });
@@ -182,7 +182,7 @@ describe('xsrf post-auth handler', () => {
 
     it('accepts requests if protection is disabled', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: true, allowBearerTokens: false },
+        xsrf: { allowlist: [], disableProtection: true, allowedSchemes: [] },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: {} });
@@ -201,7 +201,7 @@ describe('xsrf post-auth handler', () => {
         xsrf: {
           allowlist: ['/some-path'],
           disableProtection: false,
-          allowBearerTokens: false,
+          allowedSchemes: [],
         },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
@@ -218,7 +218,7 @@ describe('xsrf post-auth handler', () => {
 
     it('accepts requests if xsrf protection on a route is disabled', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
       const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({
@@ -241,27 +241,67 @@ describe('xsrf post-auth handler', () => {
     });
   });
 
-  describe('allowBearerTokens', () => {
-    const allowBearerConfig = createConfig({
-      xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
+  describe('allowedSchemes', () => {
+    const apikeyBearerConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: ['apikey', 'bearer'] },
     });
-    const denyBearerConfig = createConfig({
-      xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+    const apikeyOnlyConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: ['apikey'] },
+    });
+    const bearerOnlyConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: ['bearer'] },
+    });
+    const noSchemesConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
     });
 
     it.each([
-      { label: 'apikey scheme, POST', scheme: 'apikey', method: 'post' as RouteMethod },
-      { label: 'bearer scheme, POST', scheme: 'bearer', method: 'post' as RouteMethod },
-      { label: 'apikey scheme, DELETE', scheme: 'apikey', method: 'delete' as RouteMethod },
+      {
+        label: 'apikey scheme, POST',
+        config: apikeyBearerConfig,
+        scheme: 'apikey',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'bearer scheme, POST',
+        config: apikeyBearerConfig,
+        scheme: 'bearer',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'apikey scheme, DELETE',
+        config: apikeyBearerConfig,
+        scheme: 'apikey',
+        method: 'delete' as RouteMethod,
+      },
       {
         label: 'apikey scheme, POST (kbn-xsrf also present)',
+        config: apikeyBearerConfig,
         scheme: 'apikey',
         method: 'post' as RouteMethod,
         extraHeaders: { 'kbn-xsrf': 'xsrf' },
       },
-    ])('accepts $label when allowBearerTokens is enabled', ({ scheme, method, extraHeaders }) => {
+      {
+        label: 'mixed-case incoming scheme, POST',
+        config: apikeyBearerConfig,
+        scheme: 'ApiKey',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'apikey scheme when only apikey is allowed',
+        config: apikeyOnlyConfig,
+        scheme: 'apikey',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'bearer scheme when only bearer is allowed',
+        config: bearerOnlyConfig,
+        scheme: 'bearer',
+        method: 'post' as RouteMethod,
+      },
+    ])('accepts $label', ({ config, scheme, method, extraHeaders }) => {
       const handler = createXsrfPostAuthHandler(
-        allowBearerConfig,
+        config,
         createGetAuthState({ http_authentication_scheme: scheme })
       );
       const request = forgeRequest({ method, headers: extraHeaders ?? {} });
@@ -275,36 +315,62 @@ describe('xsrf post-auth handler', () => {
       expect(result).toEqual('next');
     });
 
+    it('exempts a safe (GET) request regardless of the authentication scheme', () => {
+      const handler = createXsrfPostAuthHandler(
+        apikeyBearerConfig,
+        createGetAuthState({ http_authentication_scheme: 'basic' })
+      );
+      const request = forgeRequest({ method: 'get', headers: {} });
+
+      toolkit.next.mockReturnValue('next' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(responseFactory.badRequest).not.toHaveBeenCalled();
+      expect(toolkit.next).toHaveBeenCalledTimes(1);
+      expect(result).toEqual('next');
+    });
+
     it.each([
       {
-        label: 'basic scheme, allowBearerTokens enabled',
-        config: allowBearerConfig,
+        label: 'basic scheme, apikey and bearer allowed',
+        config: apikeyBearerConfig,
         getAuthState: () => createGetAuthState({ http_authentication_scheme: 'basic' }),
       },
       {
-        label: 'apikey scheme, allowBearerTokens disabled',
-        config: denyBearerConfig,
+        label: 'apikey scheme, no schemes allowed',
+        config: noSchemesConfig,
         getAuthState: () => createGetAuthState({ http_authentication_scheme: 'apikey' }),
       },
       {
-        label: 'unauthenticated request, allowBearerTokens enabled',
-        config: allowBearerConfig,
+        label: 'bearer scheme, only apikey allowed',
+        config: apikeyOnlyConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'bearer' }),
+      },
+      {
+        label: 'apikey scheme, only bearer allowed',
+        config: bearerOnlyConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'apikey' }),
+      },
+      {
+        label: 'unauthenticated request, apikey and bearer allowed',
+        config: apikeyBearerConfig,
         getAuthState: () => createGetAuthState(), // unauthenticated
       },
       {
-        label: 'null scheme, allowBearerTokens enabled',
-        config: allowBearerConfig,
+        label: 'null scheme, apikey and bearer allowed',
+        config: apikeyBearerConfig,
         getAuthState: () => createGetAuthState({ http_authentication_scheme: null }),
       },
       {
         label: 'authenticated status but null state object',
-        config: allowBearerConfig,
+        config: apikeyBearerConfig,
         getAuthState: (): GetAuthState =>
           jest.fn().mockReturnValue({ status: AuthStatus.authenticated, state: null }),
       },
       {
         label: 'http_authentication_scheme missing from state',
-        config: allowBearerConfig,
+        config: apikeyBearerConfig,
         getAuthState: (): GetAuthState =>
           jest.fn().mockReturnValue({
             status: AuthStatus.authenticated,
