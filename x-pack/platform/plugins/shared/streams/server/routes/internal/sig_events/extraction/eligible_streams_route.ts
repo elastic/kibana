@@ -10,8 +10,12 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
+import {
+  Streams,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
@@ -124,7 +128,7 @@ const eligibleStreamsRoute = createServerRoute({
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [connectorId, executions, allStreams] = await Promise.all([
+    const [connectorId, executions, allStreams, isQueryStreamsEnabled] = await Promise.all([
       resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -133,7 +137,12 @@ const eligibleStreamsRoute = createServerRoute({
       }),
       streamsKIsOnboardingClient.getRecentExecutions(),
       streamsClient.listStreams(),
+      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
     ]);
+
+    const eligibleStreams = isQueryStreamsEnabled
+      ? allStreams
+      : allStreams.filter((stream) => !Streams.QueryStream.Definition.is(stream));
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
@@ -141,7 +150,7 @@ const eligibleStreamsRoute = createServerRoute({
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
-      allStreams,
+      allStreams: eligibleStreams,
       executions,
       excludedStreamPatterns: resolvedExcludedPatterns,
       intervalHours,
