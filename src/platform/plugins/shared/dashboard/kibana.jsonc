@@ -28,6 +28,7 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "home",
       "spaces",
       "savedObjectsTaggingOss",

@@ -79,6 +79,18 @@ export const useAttachmentCartActivation = () => {
 
       closeCanvas();
 
+      const isSpineGridOverlay =
+        isAgentWorkspaceMount &&
+        !isSidebar &&
+        spineContext?.isSpineActive &&
+        spineContext.spineState?.attachmentsView.mode === 'grid';
+
+      const closeSpineOverlayIfActive = () => {
+        if (isSpineGridOverlay && spineContext) {
+          spineContext.closeSpine();
+        }
+      };
+
       const updateOrigin = async (origin: string) => {
         const result = await attachmentsService.updateOrigin(
           conversationId,
@@ -91,6 +103,11 @@ export const useAttachmentCartActivation = () => {
 
       const openCanvasForAttachment = () => {
         if (isAgentWorkspaceMount && !isSidebar && spineContext) {
+          if (isSpineGridOverlay) {
+            spineContext.closeSpine();
+            return;
+          }
+
           spineContext.openAttachmentPreview(attachment);
           return;
         }
@@ -115,6 +132,7 @@ export const useAttachmentCartActivation = () => {
         const activationButton = pickCartActivationButton(buttons);
         if (activationButton) {
           await activationButton.handler();
+          closeSpineOverlayIfActive();
           return;
         }
       }
@@ -134,6 +152,7 @@ export const useAttachmentCartActivation = () => {
       openCanvas,
       openSidebarConversation,
       spineContext,
+      isAgentWorkspaceMount,
     ]
   );
 
