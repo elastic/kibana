@@ -191,7 +191,7 @@ describe('service flyout chart_configs', () => {
       const memory = infrastructureMetrics[1].config as XYLensConfig;
 
       expect(esqlOf(infrastructureMetrics[1].config)).toEqual(
-        'FROM traces-apm*, metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | WHERE TO_DOUBLE(system.memory.actual.free) IS NOT NULL AND TO_DOUBLE(system.memory.total) IS NOT NULL | STATS free = AVG(TO_DOUBLE(system.memory.actual.free)), total = AVG(TO_DOUBLE(system.memory.total)) BY timestamp = TBUCKET(100) | EVAL memory_usage = CASE(total > 0, 1 - free / total, NULL) | KEEP timestamp, memory_usage | SORT timestamp'
+        'FROM traces-apm*, metrics-apm* | WHERE `processor.event` == "metric" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL cgroup_usage = TO_DOUBLE(system.process.cgroup.memory.mem.usage.bytes) | EVAL cgroup_limit = TO_DOUBLE(system.process.cgroup.memory.mem.`limit`.bytes) | EVAL sys_free = TO_DOUBLE(system.memory.actual.free) | EVAL sys_total = TO_DOUBLE(system.memory.total) | WHERE cgroup_usage IS NOT NULL OR sys_free IS NOT NULL AND sys_total IS NOT NULL | EVAL effective_total = CASE(cgroup_limit > 0 AND cgroup_limit != 9223372036854772000, cgroup_limit, sys_total) | EVAL memory_usage = CASE(cgroup_usage IS NOT NULL AND effective_total > 0, cgroup_usage / effective_total, sys_total > 0 AND sys_free IS NOT NULL, 1 - sys_free / sys_total, NULL) | STATS memory_usage = AVG(memory_usage) BY timestamp = TBUCKET(100) | KEEP timestamp, memory_usage | SORT timestamp'
       );
       expect(memory.layers[0].yAxis[0].value).toBe('memory_usage');
     });

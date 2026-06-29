@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import {
   EVENT_OUTCOME,
+  METRIC_CGROUP_MEMORY_LIMIT_BYTES,
+  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
@@ -37,6 +39,12 @@ type LensYAxis = LensSeriesLayer['yAxis'][number];
 
 const TIME_BUCKET_FIELD = 'timestamp';
 const TIME_BUCKET_BY = `${TIME_BUCKET_FIELD} = TBUCKET(100)`;
+
+// When no limit is specified in the container, docker allows the app as much memory / swap memory
+// as it wants. This number represents the max possible value for the limit field. Stored as a
+// string to avoid JS floating-point precision loss. The equivalent Painless constant lives at:
+// https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/routes/metrics/by_agent/shared/memory/index.ts#L87
+const CGROUP_LIMIT_MAX_VALUE = '9223372036854771712';
 
 interface ServiceScope {
   serviceName: string;
@@ -318,13 +326,20 @@ function getMemoryUsageChart(
     indexes,
     buildQuery: (idx) => {
       const query = createBaseServiceQuery({ indexes: idx, processorEvent: 'metric', scope });
+      query.pipe(`EVAL cgroup_usage = TO_DOUBLE(${METRIC_CGROUP_MEMORY_USAGE_BYTES})`);
+      query.pipe(`EVAL cgroup_limit = TO_DOUBLE(${METRIC_CGROUP_MEMORY_LIMIT_BYTES})`);
+      query.pipe(`EVAL sys_free = TO_DOUBLE(${METRIC_SYSTEM_FREE_MEMORY})`);
+      query.pipe(`EVAL sys_total = TO_DOUBLE(${METRIC_SYSTEM_TOTAL_MEMORY})`);
       query.pipe(
-        `WHERE TO_DOUBLE(${METRIC_SYSTEM_FREE_MEMORY}) IS NOT NULL AND TO_DOUBLE(${METRIC_SYSTEM_TOTAL_MEMORY}) IS NOT NULL`
+        'WHERE cgroup_usage IS NOT NULL OR (sys_free IS NOT NULL AND sys_total IS NOT NULL)'
       );
       query.pipe(
-        `STATS free = AVG(TO_DOUBLE(${METRIC_SYSTEM_FREE_MEMORY})), total = AVG(TO_DOUBLE(${METRIC_SYSTEM_TOTAL_MEMORY})) BY ${TIME_BUCKET_BY}`
+        `EVAL effective_total = CASE(cgroup_limit > 0 AND cgroup_limit != ${CGROUP_LIMIT_MAX_VALUE}, cgroup_limit, sys_total)`
       );
-      query.pipe('EVAL memory_usage = CASE(total > 0, 1 - free / total, null)');
+      query.pipe(
+        'EVAL memory_usage = CASE(cgroup_usage IS NOT NULL AND effective_total > 0, cgroup_usage / effective_total, sys_total > 0 AND sys_free IS NOT NULL, 1 - sys_free / sys_total, NULL)'
+      );
+      query.pipe(`STATS memory_usage = AVG(memory_usage) BY ${TIME_BUCKET_BY}`);
       query.pipe('KEEP timestamp, memory_usage');
       query.pipe('SORT timestamp');
       return query;
