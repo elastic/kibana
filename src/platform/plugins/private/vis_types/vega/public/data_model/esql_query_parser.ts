@@ -9,7 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { hasStartEndParams, getStartEndParams } from '@kbn/esql-utils';
+import {
+  hasStartEndParams,
+  getStartEndParams,
+  getTimeFieldFromESQLQuery,
+  injectWhereClauseAfterSourceCommand,
+} from '@kbn/esql-utils';
+import { Parser, Walker } from '@elastic/esql';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
 import type { Data, EsqlUrlObject, Bool } from './types';
@@ -42,6 +48,31 @@ interface InjectedParams {
  * Default value for dropNullColumns parameter
  */
 const DEFAULT_DROP_NULL_COLUMNS = true;
+
+/**
+ * Whether any `?_tstart` / `?_tend` time parameter is already used inside a
+ * `WHERE` command, in which case the query already filters rows by time and we
+ * must not inject another time filter.
+ *
+ * This is AST-based (rather than a regex) so that an unrelated `WHERE` placed
+ * before a time-parameterized `BUCKET` (e.g. `... | WHERE host == "a" | STATS
+ * ... BY BUCKET(timestamp, ?_tstart, ?_tend)`) is not mistaken for a time filter.
+ */
+const hasTimeParamInWhere = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const whereCommands = root.commands.filter(({ name }) => name === 'where');
+  if (!whereCommands.length) {
+    return false;
+  }
+  const timeParams = Walker.params(root).filter(
+    ({ value }) => value === '_tstart' || value === '_tend'
+  );
+  return timeParams.some((param) =>
+    whereCommands.some(
+      ({ location }) => location.min <= param.location.min && location.max >= param.location.max
+    )
+  );
+};
 
 /**
  * Localized strings for ESQL query parser
@@ -178,11 +209,24 @@ export class EsqlQueryParser {
    * Inject named parameters for time range
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
+    let effectiveQuery = query;
     const params: Record<string, unknown>[] = [];
 
     // Check if we should inject time parameters
     if (url._useTimeParams) {
-      if (hasStartEndParams(query)) {
+      if (hasStartEndParams(effectiveQuery)) {
+        // Resolve the actual time field referenced by the `?_tstart` / `?_tend`
+        // params (e.g. the source field inside `BUCKET(timestamp, ...)`), using
+        // the same extraction logic Lens/esql-utils rely on. `BUCKET` only sets
+        // aggregation boundaries, it does not filter rows, so when the time
+        // params are not already used in a `WHERE` we inject one to actually
+        // restrict the data to the selected time range.
+        const filterTimefield = getTimeFieldFromESQLQuery(effectiveQuery);
+        if (filterTimefield && !hasTimeParamInWhere(effectiveQuery)) {
+          const whereExpression = `${filterTimefield} >= ?_tstart AND ${filterTimefield} <= ?_tend`;
+          effectiveQuery = injectWhereClauseAfterSourceCommand(effectiveQuery, whereExpression);
+        }
+
         const bounds = this._timeCache.getTimeBounds();
 
         // Convert numeric bounds to TimeRange format for shared utility
@@ -191,7 +235,7 @@ export class EsqlQueryParser {
           to: new Date(bounds.max).toISOString(),
         };
 
-        params.push(...getStartEndParams(query, timeRange));
+        params.push(...getStartEndParams(effectiveQuery, timeRange));
       } else {
         // Warn user that timefield was specified but no parameters in query
         this._onWarning(strings.timeFieldWithoutParamsWarning());
@@ -203,7 +247,7 @@ export class EsqlQueryParser {
       params.push(...url.params);
     }
 
-    return { query, params };
+    return { query: effectiveQuery, params };
   }
 
   /**

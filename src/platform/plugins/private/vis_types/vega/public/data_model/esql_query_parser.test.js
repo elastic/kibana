@@ -442,6 +442,63 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params[1]).toEqual({ level: 'ERROR' });
   });
 
+  test('should inject a source-level time WHERE when only BUCKET uses time params', () => {
+    const { parser } = createParser(1000000, 2000000);
+
+    const query =
+      'FROM kibana_sample_data_flights | STATS count=COUNT(*) BY Date = BUCKET(timestamp, 75, ?_tstart, ?_tend)';
+    const url = { query, _useTimeParams: true };
+
+    const result = parser._injectNamedParams(query, url);
+
+    expect(result.query).toBe(
+      'FROM kibana_sample_data_flights\n' +
+        '| WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | STATS count=COUNT(*) BY Date = BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+    expect(result.params).toHaveLength(2);
+    expect(result.params[0]).toHaveProperty('_tstart');
+    expect(result.params[1]).toHaveProperty('_tend');
+  });
+
+  test('should use the time field referenced by BUCKET (not the result alias) for injected WHERE', () => {
+    const { parser } = createParser(1000000, 2000000);
+
+    const query =
+      'FROM kibana_sample_data_flights | STATS count=COUNT(*) BY Date = BUCKET(timestamp, 75, ?_tstart, ?_tend)';
+    const url = { query, _useTimeParams: true };
+
+    const result = parser._injectNamedParams(query, url);
+
+    expect(result.query).toContain('| WHERE timestamp >= ?_tstart AND timestamp <= ?_tend');
+    expect(result.query).not.toContain('| WHERE Date >= ?_tstart AND Date <= ?_tend');
+  });
+
+  test('should still inject a time WHERE when an unrelated WHERE precedes a time BUCKET', () => {
+    const { parser } = createParser(1000000, 2000000);
+
+    const query =
+      'FROM kibana_sample_data_flights | WHERE OriginCountry == "US" | STATS count=COUNT(*) BY Date = BUCKET(timestamp, 75, ?_tstart, ?_tend)';
+    const url = { query, _useTimeParams: true };
+
+    const result = parser._injectNamedParams(query, url);
+
+    expect(result.query).toContain('| WHERE timestamp >= ?_tstart AND timestamp <= ?_tend');
+    expect(result.params).toHaveLength(2);
+  });
+
+  test('should not inject time WHERE when query already filters by time', () => {
+    const { parser } = createParser(1000000, 2000000);
+
+    const query =
+      'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count=COUNT(*)';
+    const url = { query, _useTimeParams: true };
+
+    const result = parser._injectNamedParams(query, url);
+
+    expect(result.query).toBe(query);
+    expect(result.params).toHaveLength(2);
+  });
+
   test('should handle case-insensitive time parameter detection', () => {
     const { parser } = createParser(1000000, 2000000);
 
