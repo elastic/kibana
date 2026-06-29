@@ -28,6 +28,10 @@ import { isActiveFromUrl } from './utils/is_active_from_url';
 
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
+const formatLabel = (node: ChromeProjectNavigationNode, title: string): string => {
+  return node.disableSentenceCase ? title : toSentenceCase(title);
+}
+
 const HOME_TITLE = i18n.translate('core.ui.chrome.sideNavigation.homeItemTitle', {
   defaultMessage: 'Home',
 });
@@ -171,7 +175,7 @@ export const toNavigationItems = (
       maybeMarkActive(child, 2, navNode);
       return {
         id: child.id,
-        label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
+        label: formatLabel(child, warnIfMissing(child, 'title', 'Missing Title 😭')),
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
@@ -222,7 +226,7 @@ export const toNavigationItems = (
 
             return {
               id: child.id,
-              label: child.title && toSentenceCase(child.title),
+              label: child.title && formatLabel(child, child.title),
               items: secondaryItems,
             };
           })
@@ -246,7 +250,7 @@ export const toNavigationItems = (
 
     return {
       id: navNode.id,
-      label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
+      label: formatLabel(navNode, warnIfMissing(navNode, 'title', 'Missing Title 😭')),
       iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,

@@ -291,6 +291,94 @@ describe('hidden panel link', () => {
   });
 });
 
+describe('disableSentenceCase', () => {
+  const buildSimpleTree = (
+    nodes: Array<Partial<ChromeProjectNavigationNode>>
+  ): NavigationTreeDefinitionUI => ({
+    id: 'search',
+    body: nodes.map((n, idx) => ({
+      id: `node-${idx}`,
+      path: `node-${idx}`,
+      title: 'fallback',
+      href: `/app/node-${idx}`,
+      ...n,
+    })),
+  });
+
+  it('primary item: keeps raw casing when disableSentenceCase is true', () => {
+    const tree = buildSimpleTree([{ title: 'ES|QL', disableSentenceCase: true }]);
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+    expect(primaryItems[0]?.label).toBe('ES|QL');
+  });
+
+  it('primary item: sentence-cases the label when disableSentenceCase is false (default)', () => {
+    const tree = buildSimpleTree([{ title: 'ES|QL' }]);
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+    // toSentenceCase lowercases after the first character for non-glossary terms
+    expect(primaryItems[0]?.label).toBe('Es|ql');
+  });
+
+  it('secondary item: keeps raw casing when disableSentenceCase is true', () => {
+    const child: Partial<ChromeProjectNavigationNode> = {
+      id: 'esql-child',
+      path: 'panel.esql-child',
+      title: 'ES|QL',
+      href: '/app/esql',
+      disableSentenceCase: true,
+    };
+    const tree = buildSimpleTree([
+      {
+        id: 'panel',
+        title: 'My Panel',
+        renderAs: 'panelOpener',
+        href: undefined,
+        children: [child as ChromeProjectNavigationNode],
+      },
+    ]);
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+    const panelItem = primaryItems.find((item) => item.id === 'panel');
+    const secondaryItem = panelItem?.sections?.[0]?.items?.[0];
+    expect(secondaryItem?.label).toBe('ES|QL');
+  });
+
+  it('secondary section title: keeps raw casing when disableSentenceCase is true', () => {
+    const grandchild: Partial<ChromeProjectNavigationNode> = {
+      id: 'esql-link',
+      path: 'panel.section.esql-link',
+      title: 'some link',
+      href: '/app/esql',
+    };
+    const section: Partial<ChromeProjectNavigationNode> = {
+      id: 'esql-section',
+      path: 'panel.esql-section',
+      title: 'ES|QL',
+      disableSentenceCase: true,
+      children: [grandchild as ChromeProjectNavigationNode],
+    };
+    const tree = buildSimpleTree([
+      {
+        id: 'panel',
+        title: 'My Panel',
+        renderAs: 'panelOpener',
+        href: undefined,
+        children: [section as ChromeProjectNavigationNode],
+      },
+    ]);
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+    const panelItem = primaryItems.find((item) => item.id === 'panel');
+    const sectionTitle = panelItem?.sections?.[0]?.label;
+    expect(sectionTitle).toBe('ES|QL');
+  });
+});
+
 describe('Chrome Next mode (isNextChrome)', () => {
   const createChromeNextNavigationItems = (
     tree: NavigationTreeDefinitionUI = navigationTree,

@@ -159,6 +159,14 @@ interface NodeDefinitionBase {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+
+  /**
+   * When true, the side navigation renders this node's label exactly as provided in `title`,
+   * skipping the automatic sentence-casing applied to all other nodes. Useful for labels
+   * with intentional casing that the formatter would corrupt (e.g. "ES|QL" → "Es|ql").
+   * @default false
+   */
+  disableSentenceCase?: boolean;
 }
 
 /** @public */
