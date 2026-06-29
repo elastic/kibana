@@ -1062,6 +1062,29 @@ describe('UiamService', () => {
       );
     });
 
+    it('includes project_id query parameter when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ clients: [] }),
+      });
+
+      await uiamService.listOAuthClients('access-token', undefined, 'my-project-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients?project_id=my-project-id',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
     it('throws error if listing fails', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
