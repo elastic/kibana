@@ -38,7 +38,7 @@ import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
-import type { StreamQueryStats } from '../../../../../hooks/significant_events/use_fetch_significant_event_stats';
+import type { StreamQueryStats } from '../../../../../hooks/significant_events/use_fetch_query_occurrence_stats';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { InfoPanel } from '../../../../info_panel';

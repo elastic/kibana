@@ -16,7 +16,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetchSignificantEventStats } from '../../../../../hooks/significant_events/use_fetch_significant_event_stats';
+import { useFetchQueryOccurrenceStats } from '../../../../../hooks/significant_events/use_fetch_query_occurrence_stats';
 import { getFormattedError } from '../../../../../util/errors';
 import { SparkPlot } from '../../../../spark_plot';
 
@@ -30,7 +30,7 @@ interface SignificantEventsColumnProps {
 
 export function SignificantEventsColumn({ streamName }: SignificantEventsColumnProps) {
   const { euiTheme } = useEuiTheme();
-  const significantEventsFetchState = useFetchSignificantEventStats({
+  const significantEventsFetchState = useFetchQueryOccurrenceStats({
     name: streamName,
   });
 

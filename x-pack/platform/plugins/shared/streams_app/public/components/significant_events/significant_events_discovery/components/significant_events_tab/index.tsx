@@ -28,7 +28,7 @@ import { useFetchSignificantEvents } from '../../../../../hooks/significant_even
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
-import { SignificantEventFlyout } from './sig_event_flyout';
+import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';

@@ -9,7 +9,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import type { MemoryToolsOptions } from '../tools/memory';
 import { createMemoryTools } from '../tools/memory';
 import { toInlineMemoryTools } from './memory/to_inline_tools';
-import content from './sigevents_onboarding.skill.md.text';
+import content from './significant_events_onboarding.skill.md.text';
 
 export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
   defineSkillType({

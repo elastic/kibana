@@ -24,12 +24,12 @@ export interface StreamQueryStats {
 type SignificantEventsStatsFetchResult =
   | undefined
   | {
-      significant_events: StreamQueryStats[];
+      queries: StreamQueryStats[];
       aggregated_occurrences: { x: number; y: number }[];
       total_occurrences: number;
     };
 
-export const useFetchSignificantEventStats = (
+export const useFetchQueryOccurrenceStats = (
   options: { name?: string; query?: string } | undefined = {},
   deps: unknown[] = []
 ) => {
@@ -46,7 +46,7 @@ export const useFetchSignificantEventStats = (
 
   const { timeState } = useTimefilter();
 
-  const fetchSignificantEventsStats = async ({
+  const fetchQueryOccurrenceStats = async ({
     signal,
   }: QueryFunctionContext): Promise<SignificantEventsStatsFetchResult> => {
     const isoFrom = new Date(timeState.start).toISOString();
@@ -90,7 +90,7 @@ export const useFetchSignificantEventStats = (
         aggregated_occurrences: aggregatedOccurrences,
       }) => {
         return {
-          significant_events: significantEvents.map((series) => {
+          queries: significantEvents.map((series) => {
             const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
             return {
               query: rest,
@@ -117,8 +117,8 @@ export const useFetchSignificantEventStats = (
   };
 
   return useQuery<SignificantEventsStatsFetchResult, Error>({
-    queryKey: ['significantEventsStats', name, timeState.start, timeState.end, query, ...deps],
-    queryFn: fetchSignificantEventsStats,
+    queryKey: ['queryOccurrenceStats', name, timeState.start, timeState.end, query, ...deps],
+    queryFn: fetchQueryOccurrenceStats,
     onError: showFetchErrorToast,
   });
 };
