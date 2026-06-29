@@ -109,12 +109,12 @@ export function useCurrentUser(
       ? {
           rawAuthQuery: {
             isLoading: authState.loading,
-            data: authState.value,
+            value: authState.value,
             error: authState.error,
           },
           rawProfileQuery: {
             isLoading: profileState.loading,
-            data: profileState.value,
+            value: profileState.value,
             error: profileState.error,
           },
         }

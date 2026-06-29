@@ -15,33 +15,28 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { UserProfile } from './user_profile';
-import type { UserProfileData } from '../../common';
 import { canUserHaveProfile } from '../../common/model';
-import { useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
 
 export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
-  // The account page needs the raw `AuthenticatedUser` for `canUserHaveProfile` and the
-  // `UserProfile` component, so opt into the raw query source.
-  const { rawAuthQuery } = useCurrentUser({ includeRawQuerySource: true });
-  const user = rawAuthQuery.data;
+  const { rawAuthQuery, rawProfileQuery } = useCurrentUser({ includeRawQuerySource: true });
+  const user = rawAuthQuery.value;
   const authError = rawAuthQuery.error;
-  const userProfile = useUserProfile<UserProfileData>('avatar,userSettings');
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed
   // to have a profile. For example, anonymous and users authenticated via
   // authentication proxies don't have profiles.
   const profileLoadError =
-    userProfile.error && user && canUserHaveProfile(user) ? userProfile.error : undefined;
+    rawProfileQuery.error && user && canUserHaveProfile(user) ? rawProfileQuery.error : undefined;
 
   const error = authError || profileLoadError;
   if (error) {
     return <EuiEmptyPrompt iconType="warning" title={<h2>{error.message}</h2>} />;
   }
 
-  if (!user || (canUserHaveProfile(user) && !userProfile.value)) {
+  if (!user || (canUserHaveProfile(user) && !rawProfileQuery.value)) {
     return null;
   }
 
@@ -52,7 +47,7 @@ export const AccountManagementPage: FunctionComponent = () => {
       })}
       href={services.http.basePath.prepend('/security/account')}
     >
-      <UserProfile user={user} data={userProfile.value?.data} />
+      <UserProfile user={user} data={rawProfileQuery.value?.data} />
     </Breadcrumb>
   );
 };

@@ -128,7 +128,7 @@ describe('useCurrentUser', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.rawProfileQuery.data).toBeNull();
+    expect(result.current.rawProfileQuery.value).toBeNull();
     expect(result.current.rawProfileQuery.error).toBeUndefined();
     // user is still valid from auth
     expect(result.current.user).toEqual(expect.objectContaining({ username: 'jdoe' }));

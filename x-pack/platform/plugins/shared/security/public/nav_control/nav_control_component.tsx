@@ -89,7 +89,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { user, isLoading, rawAuthQuery, rawProfileQuery } = useCurrentUser({
+  const { user, rawAuthQuery, rawProfileQuery } = useCurrentUser({
     includeRawQuerySource: true,
   });
 
@@ -100,16 +100,16 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     [user]
   );
 
-  const avatar = rawProfileQuery.data ? (
+  const avatar = rawProfileQuery.value ? (
     <UserAvatar
-      user={rawProfileQuery.data.user}
+      user={rawProfileQuery.value?.user}
       avatar={user?.avatar}
       size={avatarSize}
       data-test-subj="userMenuAvatar"
     />
-  ) : user && !isLoading ? (
+  ) : user && rawProfileQuery.error ? (
     <UserAvatar
-      user={rawAuthQuery.data}
+      user={rawAuthQuery.value}
       avatar={user.avatar}
       size={avatarSize}
       data-test-subj="userMenuAvatar"
