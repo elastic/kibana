@@ -57,6 +57,10 @@ export const useChangeHistoryRestore = (): UseChangeHistoryRestoreResult => {
 
         await refetchList();
 
+        if (abortController.signal.aborted) {
+          return false;
+        }
+
         return true;
       } catch (restoreError) {
         if (abortController.signal.aborted) {

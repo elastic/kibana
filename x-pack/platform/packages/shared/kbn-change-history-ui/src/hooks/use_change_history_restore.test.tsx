@@ -116,7 +116,7 @@ describe('useChangeHistoryRestore', () => {
       changeId: 'evt-3',
       signal: expect.any(AbortSignal),
     });
-    expect(refetchList).toHaveBeenCalled();
+    expect(refetchList).toHaveBeenCalledTimes(1);
   });
 
   it('maps structured restore errors', async () => {

@@ -40,4 +40,39 @@ describe('useChangeHistoryDetail', () => {
 
     expect(result.current.isLoading).toBe(false);
   });
+
+  it('does not clear the loaded change when fetching is temporarily disabled', async () => {
+    const detail: ChangeHistoryDetail = {
+      id: 'evt-1',
+      timestamp: '2026-01-01T00:00:00Z',
+      actor: { name: 'Alice' },
+      action: 'Updated',
+      snapshot: TEST_SNAPSHOT,
+    };
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges: jest.fn(),
+      getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
+    };
+
+    const { result, rerender } = renderHook(
+      ({ enabled }) =>
+        useChangeHistoryDetail({
+          adapter,
+          objectId: 'obj-1',
+          changeId: 'evt-1',
+          enabled,
+        }),
+      { initialProps: { enabled: true } }
+    );
+
+    await waitFor(() => {
+      expect(result.current.change).toEqual(detail);
+    });
+
+    rerender({ enabled: false });
+
+    expect(result.current.change).toEqual(detail);
+    expect(adapter.getChange).toHaveBeenCalledTimes(1);
+  });
 });

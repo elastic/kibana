@@ -40,7 +40,8 @@ export const ChangeHistoryProvider = ({
   permissions,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
-  const listRefetchRef = useRef<(() => Promise<void> | void) | undefined>();
+  const listRefetchRef = useRef<(() => Promise<void>) | undefined>();
+  const selectCurrentAfterRefetchRef = useRef(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
   const [isListRefreshPending, setIsListRefreshPending] = useState(false);
@@ -70,12 +71,21 @@ export const ChangeHistoryProvider = ({
     [adapter, features, permissions]
   );
 
-  const registerListRefetch = useCallback((refetch: (() => Promise<void> | void) | undefined) => {
+  const registerListRefetch = useCallback((refetch: (() => Promise<void>) | undefined) => {
     listRefetchRef.current = refetch;
   }, []);
 
-  const refetchList = useCallback(async () => {
-    setSelectedChangeId(undefined);
+  const consumeSelectCurrentAfterRefetch = useCallback((): boolean => {
+    if (!selectCurrentAfterRefetchRef.current) {
+      return false;
+    }
+
+    selectCurrentAfterRefetchRef.current = false;
+    return true;
+  }, []);
+
+  const refetchList = useCallback(async (): Promise<void> => {
+    selectCurrentAfterRefetchRef.current = true;
     await listRefetchRef.current?.();
   }, []);
 
@@ -108,6 +118,7 @@ export const ChangeHistoryProvider = ({
     () => ({
       refetchList,
       registerListRefetch,
+      consumeSelectCurrentAfterRefetch,
       isListRefreshPending,
       setListRefreshPending: setIsListRefreshPending,
       isModalOpen,
@@ -124,6 +135,7 @@ export const ChangeHistoryProvider = ({
       openModal,
       refetchList,
       registerListRefetch,
+      consumeSelectCurrentAfterRefetch,
       selectedChangeId,
     ]
   );

@@ -34,10 +34,14 @@ export const useChangeHistoryDetail = ({
   const abortControllerRef = useRef<AbortController | undefined>();
 
   useEffect(() => {
-    if (!enabled || !changeId || !objectId) {
+    if (!changeId || !objectId) {
       setChange(undefined);
       setError(undefined);
       setIsLoading(false);
+      return;
+    }
+
+    if (!enabled) {
       return;
     }
 

@@ -10,7 +10,8 @@ import { createContext } from 'react';
 /** Package-internal modal, selection, and list refresh state. */
 export interface ChangeHistoryInternalConfigValue {
   refetchList: () => Promise<void>;
-  registerListRefetch: (refetch: (() => Promise<void> | void) | undefined) => void;
+  registerListRefetch: (refetch: (() => Promise<void>) | undefined) => void;
+  consumeSelectCurrentAfterRefetch: () => boolean;
   isListRefreshPending: boolean;
   setListRefreshPending: (pending: boolean) => void;
   isModalOpen: boolean;

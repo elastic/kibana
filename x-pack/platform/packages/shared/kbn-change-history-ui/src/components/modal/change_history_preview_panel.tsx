@@ -54,12 +54,12 @@ export function ChangeHistoryPreviewPanel({
   listItems = [],
 }: ChangeHistoryPreviewPanelProps): JSX.Element {
   const { adapter, objectId, renderPreview } = useChangeHistoryConfig();
-  const { selectedChangeId, isListRefreshPending } = useChangeHistoryInternalConfig();
+  const { selectedChangeId } = useChangeHistoryInternalConfig();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
     objectId,
     changeId: selectedChangeId,
-    enabled: Boolean(selectedChangeId) && !isListRefreshPending,
+    enabled: Boolean(selectedChangeId),
   });
 
   const { currentChange, previousChange, isLoadingCompareContext } = useChangeHistoryPreviewCompare(
@@ -71,21 +71,6 @@ export function ChangeHistoryPreviewPanel({
       selectedChangeId,
     }
   );
-
-  if (isListRefreshPending) {
-    return (
-      <PreviewPanelState testSubj="changeHistoryPreviewLoading">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" textAlign="center">
-            {i18n.PREVIEW_LOADING}
-          </EuiText>
-        </EuiFlexItem>
-      </PreviewPanelState>
-    );
-  }
 
   if (!selectedChangeId) {
     return (

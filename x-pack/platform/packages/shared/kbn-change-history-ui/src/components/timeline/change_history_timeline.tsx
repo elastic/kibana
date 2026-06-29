@@ -63,6 +63,25 @@ export function ChangeHistoryTimeline({
     return () => observer.disconnect();
   }, [isLoading, items.length, onLoadMore]);
 
+  const firstItemId = items[0]?.id;
+
+  useEffect(() => {
+    if (!selectedItemId || !firstItemId || selectedItemId !== firstItemId) {
+      return;
+    }
+
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) {
+      return;
+    }
+
+    if (typeof scrollContainer.scrollTo === 'function') {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      scrollContainer.scrollTop = 0;
+    }
+  }, [firstItemId, selectedItemId]);
+
   const styles = useMemo(
     () => ({
       changesTimelineWrapper: css`

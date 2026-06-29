@@ -101,7 +101,8 @@ export const logWorkflowChanges = async ({
   const logOpts: ScopedLogChangeHistoryOptions = {
     action,
     spaceId,
-    ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: true } : {}),
+    // Restore is interactive: wait until this history row is searchable without forcing a shard refresh.
+    ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: 'wait_for' } : {}),
     ...(correlationId ? { correlationId } : {}),
     ...(restoreMetadata
       ? {

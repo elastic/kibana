@@ -39,6 +39,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     setSelectedChangeId,
     registerListRefetch,
     isListRefreshPending,
+    consumeSelectCurrentAfterRefetch,
   } = useChangeHistoryInternalConfig();
 
   const { items, total, isLoading, isLoadingMore, error, loadMore, refetch } = useChangeHistoryList(
@@ -66,6 +67,17 @@ export function ChangeHistoryModal(): JSX.Element | null {
 
     setSelectedChangeId(items[0]?.id);
   }, [isListRefreshPending, isModalOpen, isLoading, items, selectedChangeId, setSelectedChangeId]);
+
+  useEffect(() => {
+    if (isListRefreshPending || items.length === 0 || !consumeSelectCurrentAfterRefetch()) {
+      return;
+    }
+
+    const currentChangeId = items[0]?.id;
+    if (currentChangeId) {
+      setSelectedChangeId(currentChangeId);
+    }
+  }, [consumeSelectCurrentAfterRefetch, isListRefreshPending, items, setSelectedChangeId]);
 
   const styles = useMemo(
     () => ({
