@@ -18,11 +18,7 @@ import {
 import { useStartServices } from '../../hooks';
 import type { RegistryPolicyTemplate } from '../../types';
 
-export const NextSteps = ({
-  policyTemplates,
-}: {
-  policyTemplates?: RegistryPolicyTemplate[];
-}) => {
+export const NextSteps = ({ policyTemplates }: { policyTemplates?: RegistryPolicyTemplate[] }) => {
   const { application } = useStartServices();
 
   const configurationLinks = useMemo(() => {
