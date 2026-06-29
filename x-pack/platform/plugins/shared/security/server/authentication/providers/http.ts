@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  UIAM_INTERNAL_CLIENT_AUTH_HEADER,
+} from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -109,14 +113,21 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    // UIAM API key credentials (e.g. `ApiKey essu_...`) need the UIAM shared secret forwarded to
-    // Elasticsearch via the `x-client-authentication` header so ES can validate the cloud key with
-    // the UIAM service. The Bearer scheme is reserved for the UIAM OAuth path handled above, so it is
-    // excluded here; this targets UIAM API keys. Mirrors the SAML/OAuth providers and `api_keys.validate`.
+    // Internal UIAM API keys (e.g. an `ApiKey essu_...` minted by Task Manager and replayed by the
+    // workflows engine over a loopback HTTP request) must be validated against Elasticsearch with the
+    // UIAM client-authentication shared secret. We only attach it for requests that carry the
+    // `UIAM_INTERNAL_CLIENT_AUTH_HEADER` marker set by those trusted in-process callers; the secret
+    // stays server-side and the marker is never forwarded to ES.
+    //
+    // The marker is required: non-internal/global cloud API keys are also `essu_`-prefixed but are
+    // validated by the ES `_cloud_api_key` realm, which rejects a shared secret (401). External
+    // callers never set the marker, so those keys keep working. The Bearer scheme is reserved for the
+    // UIAM OAuth path handled above and is excluded here.
     const clientAuthHeaders =
       this.options.uiam &&
       authorizationHeader.scheme.toLowerCase() !== 'bearer' &&
-      isUiamCredential(authorizationHeader)
+      isUiamCredential(authorizationHeader) &&
+      request.headers[UIAM_INTERNAL_CLIENT_AUTH_HEADER] === 'true'
         ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.options.uiam.getClientAuthentication().value }
         : undefined;
 
