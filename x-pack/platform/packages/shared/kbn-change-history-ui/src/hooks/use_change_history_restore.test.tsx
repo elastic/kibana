@@ -65,7 +65,7 @@ describe('useChangeHistoryRestore', () => {
           adapter={adapter}
           features={{ restore: true }}
           labels={{ previewTitle: 'Test workflow' }}
-        renderPreview={() => null}
+          renderPreview={() => null}
         >
           <ListRefetchRegistrar refetch={refetchList} />
           {children}
