@@ -21,7 +21,7 @@ const EMPTY_FACETS: CertFacets = {
   tags: [],
   issuers: [],
   resourceTypes: [],
-  party: [],
+  certOrigin: [],
   expiringWithin: [],
 };
 

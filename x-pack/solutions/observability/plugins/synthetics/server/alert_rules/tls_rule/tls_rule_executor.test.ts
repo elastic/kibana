@@ -127,6 +127,20 @@ describe('tlsRuleExecutor', () => {
       });
     });
 
+    it('should include browser monitors when includeBrowserCerts is true', async () => {
+      const tlsRule = new TLSRuleExecutor(
+        ...getTLSRuleExecutorParams({ includeBrowserCerts: true })
+      );
+      const configRepo = tlsRule.monitorConfigRepository;
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `(${commonFilter}) or (synthetics-monitor-multi-space.attributes.type: browser)`,
+      });
+    });
+
     it('should filter monitors based on monitor types', async () => {
       const monitorType = 'http';
       const tlsRule = new TLSRuleExecutor(

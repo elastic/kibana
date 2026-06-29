@@ -198,7 +198,7 @@ interface CertsFacetsAggs {
 const fromKeyedBuckets = (
   buckets: Record<string, { distinct: { value: number } }>,
   order: readonly string[]
-): CertFacets['party'] =>
+): CertFacets['certOrigin'] =>
   order.map((value) => ({ value, count: buckets[value]?.distinct.value ?? 0 }));
 
 export const processCertsFacetsResult = (aggregations?: CertsFacetsAggs): CertFacets => {
@@ -212,7 +212,9 @@ export const processCertsFacetsResult = (aggregations?: CertsFacetsAggs): CertFa
     resourceTypes: aggregations
       ? fromKeyedBuckets(aggregations.resourceTypes.byCategory.buckets, MIME_TYPE_CATEGORIES)
       : [],
-    party: aggregations
+    // Response field is the public `certOrigin`; the internal ES aggregation is
+    // still keyed `party` (the first/third-party concept it buckets on).
+    certOrigin: aggregations
       ? fromKeyedBuckets(aggregations.party.byParty.buckets, [FIRST_PARTY, THIRD_PARTY])
       : [],
     expiringWithin: aggregations
