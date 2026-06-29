@@ -301,7 +301,9 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               isLoading={isSaving}
               disabled={isSaving || dataSources.length === 0}
             >
-              {createDatasetFlyoutStrings.saveButton()}
+              {isEditMode
+                ? createDatasetFlyoutStrings.saveButton()
+                : createDatasetFlyoutStrings.addButton()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

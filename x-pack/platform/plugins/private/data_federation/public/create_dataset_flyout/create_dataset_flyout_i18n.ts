@@ -486,6 +486,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Cancel',
     }),
 
+  addButton: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.addButton', {
+      defaultMessage: 'Add',
+    }),
+
   saveButton: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.saveButton', {
       defaultMessage: 'Save',

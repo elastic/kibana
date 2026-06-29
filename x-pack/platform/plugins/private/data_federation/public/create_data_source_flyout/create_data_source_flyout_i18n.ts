@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const createDataSourceFlyoutStrings = {
   createTitle: () =>
     i18n.translate('xpack.dataFederation.createFlyout.title', {
-      defaultMessage: 'Configure cloud data source',
+      defaultMessage: 'Connect external data source',
     }),
 
   editTitle: () =>
@@ -52,6 +52,11 @@ export const createDataSourceFlyoutStrings = {
   cancelButton: () =>
     i18n.translate('xpack.dataFederation.createFlyout.cancelButton', {
       defaultMessage: 'Cancel',
+    }),
+
+  connectButton: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.connectButton', {
+      defaultMessage: 'Connect',
     }),
 
   saveButton: () =>

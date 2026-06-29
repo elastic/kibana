@@ -339,7 +339,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
                   isLoading={isSaving}
                   disabled={isSaving}
                 >
-                  {createDataSourceFlyoutStrings.saveButton()}
+                  {isEditMode
+                    ? createDataSourceFlyoutStrings.saveButton()
+                    : createDataSourceFlyoutStrings.connectButton()}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
