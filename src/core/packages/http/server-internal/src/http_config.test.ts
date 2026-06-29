@@ -294,9 +294,9 @@ describe('xsrf.allowedSchemes', () => {
   });
 
   it('rejects a scalar string — allowedSchemes must be an array', () => {
-    expect(() =>
-      config.schema.validate({ xsrf: { allowedSchemes: 'apikey' as any } })
-    ).toThrow(/\[xsrf.allowedSchemes\]/);
+    expect(() => config.schema.validate({ xsrf: { allowedSchemes: 'apikey' as any } })).toThrow(
+      /\[xsrf.allowedSchemes\]/
+    );
   });
 
   it('accepts apikey and bearer case-insensitively and an empty list', () => {
