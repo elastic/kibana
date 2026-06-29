@@ -45,7 +45,9 @@ export const AlertEpisodeTimelineActionComment = ({
       data-timestamp={entry['@timestamp']}
       username={displayName}
       timestamp={formatTimestamp(entry['@timestamp'])}
-      event={i18n.ACTION_LABELS[entry.action_type] ?? entry.action_type}
+      event={`${i18n.ACTION_LABELS[entry.action_type] ?? entry.action_type} ${
+        i18n.ACTION_ON_LABEL
+      }`}
       timelineAvatar={timelineAvatar}
     >
       <AlertEpisodeTimelineActionBody entry={entry} assigneeProfile={assigneeProfile} />

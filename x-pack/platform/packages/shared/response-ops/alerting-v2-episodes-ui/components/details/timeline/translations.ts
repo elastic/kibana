@@ -58,30 +58,39 @@ export const getAfterNEventsLabel = (count: number, prevStatus: string): string 
 /** --- Timeline (action comments) --- */
 export const ACTION_LABELS: Record<string, string> = {
   ack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.ack', {
-    defaultMessage: 'Acknowledged',
+    defaultMessage: 'acknowledged',
   }),
   unack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unack', {
-    defaultMessage: 'Unacknowledged',
+    defaultMessage: 'unacknowledged',
   }),
   snooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.snooze', {
-    defaultMessage: 'Snoozed',
+    defaultMessage: 'snoozed',
   }),
   unsnooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unsnooze', {
-    defaultMessage: 'Unsnoozed',
+    defaultMessage: 'unsnoozed',
   }),
   deactivate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.deactivate', {
-    defaultMessage: 'Resolved',
+    defaultMessage: 'resolved',
   }),
   activate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.activate', {
-    defaultMessage: 'Re-opened',
+    defaultMessage: 're-opened',
   }),
   tag: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.tag', {
-    defaultMessage: 'Tags updated',
+    defaultMessage: 'updated tags',
   }),
   assign: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.assign', {
-    defaultMessage: 'Assignee updated',
+    defaultMessage: 'updated assignee',
   }),
 };
+
+// Preposition joining the action verb to the timestamp shown by EuiComment,
+// kept separate so translators can reorder it relative to the verb.
+export const ACTION_ON_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.actionOnLabel',
+  {
+    defaultMessage: 'on',
+  }
+);
 
 export const STATUS_LABELS: Record<string, string> = {
   pending: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.statusLabel.pending', {

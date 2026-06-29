@@ -119,7 +119,7 @@ describe('AlertEpisodeTimelineSection', () => {
     mockEvents([]);
     mockActions([mockAction]);
     renderSection();
-    expect(screen.getByText('Acknowledged')).toBeInTheDocument();
+    expect(screen.getByText('acknowledged on')).toBeInTheDocument();
   });
 
   it('falls back to "system" username when actor is null', () => {
