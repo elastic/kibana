@@ -12,10 +12,9 @@ export class ExecutionHistoryPage {
   public readonly retryButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    // EuiBasicTable renders `noItemsMessage` in both an a11y `<caption>` and the
-    // visible `<td>`, so the empty-prompt test-subj appears twice. Scope to the
-    // cell so we match only the visible copy.
-    this.emptyPrompt = this.page.getByRole('cell').getByTestId('executionHistoryEmptyPrompt');
+    // The Rules tab is the default. EuiBasicTable renders `noItemsMessage` in
+    // both an a11y `<caption>` and the visible `<td>`, so scope to the cell.
+    this.emptyPrompt = this.page.getByRole('cell').getByTestId('ruleExecutionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
   }
 
