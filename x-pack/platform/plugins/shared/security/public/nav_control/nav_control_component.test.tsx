@@ -15,6 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { userProfileMock } from '../../common/model/user_profile.mock';
 
 jest.mock('@kbn/core-user-profile-browser', () => {
   const actual = jest.requireActual('@kbn/core-user-profile-browser');
@@ -24,6 +25,14 @@ jest.mock('react-use/lib/useObservable');
 
 const useObservableMock = useObservable as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
+
+const userProfile = {
+  ...userProfileMock.createWithSecurity(),
+  user: {
+    ...userProfileMock.createWithSecurity().user,
+    authentication_provider: { type: 'basic', name: 'basic1' },
+  },
+};
 
 const userMenuLinks$ = new BehaviorSubject([]);
 
@@ -36,7 +45,7 @@ describe('SecurityNavControl', () => {
       isLoading: false,
       user: { displayName: 'full name', isAnonymous: false, avatar: undefined },
       rawAuthQuery: { isLoading: false, state: mockAuthenticatedUser(), error: undefined },
-      rawProfileQuery: { isLoading: false, state: undefined, error: undefined },
+      rawProfileQuery: { isLoading: false, state: userProfile, error: undefined },
     });
 
     useObservableMock.mockReset();
@@ -70,24 +79,20 @@ describe('SecurityNavControl', () => {
             <span
               class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-user"
-                id="generated-id_euiToolTipAnchor"
+              <div
+                aria-label="some@email"
+                class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
+                data-test-subj="userMenuAvatar"
+                role="img"
+                style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
+                title="some@email"
               >
-                <div
-                  aria-label="some@email"
-                  class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
-                  data-test-subj="userMenuAvatar"
-                  role="img"
-                  style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
+                <span
+                  aria-hidden="true"
                 >
-                  <span
-                    aria-hidden="true"
-                  >
-                    s
-                  </span>
-                </div>
-              </span>
+                  s
+                </span>
+              </div>
             </span>
           </span>
         </span>
