@@ -49,7 +49,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     });
 
     if (plugins.usageCollection) {
-      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('dashboard_api');
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('links_api');
     }
     registerRoutes(core.http, this.apiUsageCounter, this.logger);
 
