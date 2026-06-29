@@ -174,23 +174,8 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
     <>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder paddingSize="s">
-        {statItems.length > 0 && (
-          <EuiFlexGrid columns={2} gutterSize="m">
-            {statItems.map(({ label, value }) => (
-              <EuiFlexItem key={label}>
-                <EuiText size="xs" color="subdued">
-                  <p>{label}</p>
-                </EuiText>
-                <EuiText size="s" style={{ wordBreak: 'break-all' }}>
-                  {value}
-                </EuiText>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        )}
         {description && (
           <>
-            {statItems.length > 0 && <EuiHorizontalRule margin="xs" />}
             <EuiText size="xs" color="subdued">
               <p>
                 {i18n.translate('changePointChartViewer.details.descriptionLabel', {
@@ -201,7 +186,28 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
             <EuiText size="s">
               <p>{description}</p>
             </EuiText>
+            {statItems.length > 0 && <EuiHorizontalRule margin="xs" />}
           </>
+        )}
+        {statItems.length > 0 && (
+          <EuiFlexGrid columns={2} gutterSize="s" component="span">
+            {statItems.map(({ label, value }) => (
+              <React.Fragment key={label}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <strong>{label}</strong>
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" style={{ wordBreak: 'break-all' }}>
+                    {value}
+                  </EuiText>
+                </EuiFlexItem>
+              </React.Fragment>
+            ))}
+          </EuiFlexGrid>
         )}
       </EuiPanel>
     </>

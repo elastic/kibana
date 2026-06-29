@@ -106,7 +106,7 @@ export const createChangePointDataSourceProfileProvider =
               registry.add({
                 id: 'doc_view_change_point_chart',
                 title: i18n.translate('discover.docViews.changePoint.title', {
-                  defaultMessage: 'Change point chart',
+                  defaultMessage: 'Overview',
                 }),
                 order: 0,
                 render: () =>
