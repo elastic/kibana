@@ -461,7 +461,9 @@ export class HttpConfig implements IHttpConfig {
     this.xsrf = {
       ...rawHttpConfig.xsrf,
       allowedSchemes: [
-        ...new Set(rawHttpConfig.xsrf.allowedSchemes.map((scheme) => scheme.trim().toLowerCase())),
+        ...new Set(
+          (rawHttpConfig.xsrf.allowedSchemes ?? []).map((scheme) => scheme.trim().toLowerCase())
+        ),
       ],
     };
     this.excludeRoutes = rawHttpConfig.excludeRoutes;
