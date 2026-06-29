@@ -21,7 +21,7 @@ export const useFetchSignificantEventLifecycle = (eventId: string | undefined) =
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<EventLifecycleResponse, Error>({
-    queryKey: ['sigEventLifecycle', eventId],
+    queryKey: ['significantEventLifecycle', eventId],
     queryFn: async ({ signal }: QueryFunctionContext) => {
       return streamsRepositoryClient.fetch(
         'GET /internal/significant_events/events/{id}/lifecycle',

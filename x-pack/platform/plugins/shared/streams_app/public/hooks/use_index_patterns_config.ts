@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { streamMatchesIndexPatterns, DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
