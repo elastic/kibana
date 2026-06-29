@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
+import { Builder, LeafPrinter, esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
 
@@ -19,17 +19,21 @@ export interface EpisodeTrendRow {
   metrics: Record<string, number | null>;
 }
 
-const METRIC_COLUMN_PREFIX = 'metric_';
-
-/** Stable column name for the i-th requested metric, mapped back to its label by index. */
-const metricColumn = (index: number): string => `${METRIC_COLUMN_PREFIX}${index}`;
+/**
+ * Escaped ES|QL identifier for the column holding a metric label's values. The column
+ * is named after the label itself, so the query reads as `EVAL count = ...` rather than
+ * an opaque positional name; `LeafPrinter` backtick-escapes labels with special characters.
+ */
+const metricColumn = (label: string): string =>
+  LeafPrinter.column(Builder.expression.column(label));
 
 /**
- * Builds a `JSON_EXTRACT` selector reading `<label>` out of the event's `data`
- * object. Always uses bracket notation (`data['count']`) so labels containing dots
- * or other special characters are read as a single key, escaping `'` and `\`.
+ * `JSON_EXTRACT` string-literal selector reading `<label>` out of the event's flattened
+ * `data` object. Bracket notation (`data['count']`) reads the label as a single key, so
+ * labels containing dots or other special characters work; `'` and `\` are escaped.
  */
-const dataSelector = (label: string): string => `data['${label.replace(/['\\]/g, '\\$&')}']`;
+const dataSelector = (label: string): string =>
+  LeafPrinter.string({ valueUnquoted: `data['${label.replace(/['\\]/g, '\\$&')}']` });
 
 const toNumberOrNull = (value: unknown): number | null => {
   const num = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
@@ -44,9 +48,9 @@ const toNumberOrNull = (value: unknown): number | null => {
  * — and they are already scoped to the episode's group via `episode.id`.
  *
  * `METADATA _source` lets `JSON_EXTRACT` read the flattened `data` field. Rather than
- * shipping the whole `data` row, we project only the charted metrics — one
- * `metric_<i>` column per requested label — so the response carries just the values
- * the trend chart plots.
+ * shipping the whole `data` row, we project only the charted metrics — one column per
+ * requested label, named after it — so the response carries just the values the trend
+ * chart plots.
  */
 export const buildEpisodeTrendQuery = (
   spaceId: string,
@@ -59,23 +63,19 @@ export const buildEpisodeTrendQuery = (
     .where`type == "alert"`
     .where`episode.id == ${episodeId}`;
 
-  metricLabels.forEach((label, index) => {
-    // JSON_EXTRACT requires a string literal selector; JSON.stringify yields a valid,
-    // safely-escaped ES|QL double-quoted string for the (controlled) selector.
+  metricLabels.forEach((label) => {
     query = query.pipe(
-      `EVAL ${metricColumn(index)} = JSON_EXTRACT(_source, ${JSON.stringify(dataSelector(label))})`
+      `EVAL ${metricColumn(label)} = JSON_EXTRACT(_source, ${dataSelector(label)})`
     );
   });
 
-  return query
-    .sort([TIME_FIELD, 'ASC'])
-    .keep('@timestamp', 'episode.status', ...metricLabels.map((_, index) => metricColumn(index)));
+  return query.sort([TIME_FIELD, 'ASC']).keep('@timestamp', 'episode.status', ...metricLabels);
 };
 
 /**
- * Maps the raw ES|QL rows (keyed by `metric_<i>` columns) back into {@link EpisodeTrendRow}s,
- * keying each event's values by the metric label that produced them and coercing the
- * extracted values to numbers (`JSON_EXTRACT` returns keywords).
+ * Maps the raw ES|QL rows back into {@link EpisodeTrendRow}s, keying each event's values
+ * by the metric label that produced them and coercing the extracted values to numbers
+ * (`JSON_EXTRACT` returns keywords).
  */
 export const parseEpisodeTrendRows = (
   rawRows: Array<Record<string, unknown>>,
@@ -84,7 +84,5 @@ export const parseEpisodeTrendRows = (
   rawRows.map((row) => ({
     '@timestamp': row['@timestamp'] as string,
     'episode.status': row['episode.status'] as AlertEpisodeStatus,
-    metrics: Object.fromEntries(
-      metricLabels.map((label, index) => [label, toNumberOrNull(row[metricColumn(index)])])
-    ),
+    metrics: Object.fromEntries(metricLabels.map((label) => [label, toNumberOrNull(row[label])])),
   }));

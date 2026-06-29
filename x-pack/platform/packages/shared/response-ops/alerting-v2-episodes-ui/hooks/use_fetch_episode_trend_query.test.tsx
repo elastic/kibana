@@ -50,7 +50,7 @@ describe('useFetchEpisodeTrendQuery', () => {
       columns: [
         { name: '@timestamp', type: 'date' },
         { name: 'episode.status', type: 'keyword' },
-        { name: 'metric_0', type: 'keyword' },
+        { name: 'count', type: 'keyword' },
       ],
       values: [['2026-06-18T00:00:00.000Z', 'active', '10']],
     } as Awaited<ReturnType<typeof runEsqlAsyncSearch>>);

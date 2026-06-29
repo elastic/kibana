@@ -26,27 +26,27 @@ describe('buildEpisodeTrendQuery', () => {
     expect(queryString).toContain(episodeId);
   });
 
-  it('projects one bracket-notation JSON_EXTRACT column per requested metric, reading from data', () => {
+  it('projects one column per requested metric, named after the label and reading from data', () => {
     const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['count', 'error_rate']).print(
       'basic'
     );
-    expect(queryString).toContain(`metric_0 = JSON_EXTRACT(_source, "data['count']")`);
-    expect(queryString).toContain(`metric_1 = JSON_EXTRACT(_source, "data['error_rate']")`);
+    expect(queryString).toContain(`count = JSON_EXTRACT(_source, "data['count']")`);
+    expect(queryString).toContain(`error_rate = JSON_EXTRACT(_source, "data['error_rate']")`);
   });
 
-  it('reads labels with special characters as a single key', () => {
+  it('escapes labels with special characters in both the column name and selector', () => {
     const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['host.name']).print('basic');
-    expect(queryString).toContain(`metric_0 = JSON_EXTRACT(_source, "data['host.name']")`);
+    expect(queryString).toContain('`host.name` = JSON_EXTRACT(_source, "data[\'host.name\']")');
   });
 
   it('keeps the timestamp, status and metric columns, sorted oldest first', () => {
     const queryString = buildEpisodeTrendQuery(SPACE_ID, 'ep-1', ['count']).print('basic');
     expect(queryString).toContain('@timestamp');
     expect(queryString).toContain('episode.status');
-    expect(queryString).toContain('metric_0');
+    expect(queryString.toUpperCase()).toContain('KEEP');
+    expect(queryString).toMatch(/KEEP[^|]*\bcount\b/);
     expect(queryString.toUpperCase()).toContain('SORT');
     expect(queryString.toUpperCase()).toContain('ASC');
-    expect(queryString.toUpperCase()).toContain('KEEP');
   });
 
   it('builds a valid query when there are no metric labels', () => {
@@ -64,8 +64,8 @@ describe('parseEpisodeTrendRows', () => {
         {
           '@timestamp': '2026-06-18T00:00:00.000Z',
           'episode.status': 'active',
-          metric_0: '10',
-          metric_1: '1.5',
+          count: '10',
+          error_rate: '1.5',
         },
       ],
       ['count', 'error_rate']
@@ -86,8 +86,8 @@ describe('parseEpisodeTrendRows', () => {
         {
           '@timestamp': '2026-06-18T00:00:00.000Z',
           'episode.status': 'recovered',
-          metric_0: null,
-          metric_1: 'oops',
+          count: null,
+          error_rate: 'oops',
         },
       ],
       ['count', 'error_rate']
