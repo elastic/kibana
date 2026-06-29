@@ -137,8 +137,7 @@ export function getQuerySummaryPerCommandType(
  */
 export function getSummaryPerCommand(query: string, command: ESQLAstCommand): ESQLCommandSummary {
   // unwrapExpressionParens mutates its input. This command belongs to the caller's AST,
-  // so clone it and wrap it in a real query node; the Walker won't traverse a plain
-  // `{ commands: [...] }` object.
+  // so clone it and wrap it in a real query node;
   const normalizedRoot = Builder.expression.query([structuredClone(command)]);
   unwrapExpressionParens(normalizedRoot);
   const [normalizedCommand] = normalizedRoot.commands;
