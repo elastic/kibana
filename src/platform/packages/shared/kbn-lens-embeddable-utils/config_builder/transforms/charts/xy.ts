@@ -20,7 +20,6 @@ import { buildDatasourceStates, buildReferences, getAdhocDataviews } from '../ut
 import { buildVisualizationAPI, buildVisualizationState } from './xy/chart';
 import { buildFormBasedXYLayer, getValueColumns } from './xy/state_layers';
 import { getIdForLayer, isAPIAnnotationLayer } from './xy/helpers';
-import { LENS_LAYER_SUFFIX } from '../constants';
 
 type XYLens = Extract<TypedLensSerializedState['attributes'], { visualizationType: 'lnsXY' }>;
 type XYLensState = Omit<XYLens['state'], 'filters' | 'query'>;
@@ -47,24 +46,23 @@ export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilte
   const regularDataViewsMap = Object.fromEntries(
     regularDataViews.map(([key, { id }]) => [key, id])
   );
-  // merge both internal references and regularDataViews into a single map { layerId => dataViewId }
-  const dataViewLayerToIdMap: Record<string, string> = Object.fromEntries([
-    ...Object.entries(regularDataViewsMap).map(([layerId, dataViewId]) => [layerId, dataViewId]),
-    ...internalReferences.map((ref) => [ref.name.replace(LENS_LAYER_SUFFIX, ''), ref.id]),
-  ]);
 
   const annotationGroupReferences: SavedObjectReference[] = [];
 
-  const visualizationState = buildVisualizationState(
-    config,
-    dataViewLayerToIdMap,
-    annotationGroupReferences
-  );
+  const visualizationState = buildVisualizationState(config, annotationGroupReferences);
 
+  // By-value annotation layers persist their data view under the
+  // `xy-visualization-layer-` reference name. A layer that omits its own
+  // data_source carries no entry in `regularDataViewsMap`, so it emits no such
+  // reference and the Lens XY runtime resolves it by falling back to the first
+  // index-pattern reference at load time (see
+  // x-pack/.../lens/public/visualizations/xy/persistence.ts).
   const annotationLayerIds = new Set(
     config.layers
       .map((layer, index) =>
-        isAPIAnnotationLayer(layer) ? getIdForLayer(layer, index) : undefined
+        isAPIAnnotationLayer(layer) && !('group_id' in layer)
+          ? getIdForLayer(layer, index)
+          : undefined
       )
       .filter((id): id is string => id != null)
   );

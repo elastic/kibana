@@ -419,6 +419,22 @@ export const buildDatasourceStates = (
         // by-ref annotation layers don't require a data_source
         continue;
       }
+      if ('type' in layer && layer.type === 'annotations') {
+        // Query annotations actually query an index, so they require a data
+        // source. Manual point/range annotations are positioned purely by
+        // timestamp and may omit their data_source: they share the data view of
+        // the chart's data layers, which the Lens XY runtime resolves at load
+        // time. Either way an annotation layer produces no datasource state, so
+        // there's nothing to build here.
+        const hasQueryEvent =
+          'events' in layer &&
+          Array.isArray(layer.events) &&
+          layer.events.some((event) => event?.type === 'query');
+        if (hasQueryEvent) {
+          throw Error('A data source is required for annotation layers with query events');
+        }
+        continue;
+      }
       throw Error('DataSource must be defined');
     }
 

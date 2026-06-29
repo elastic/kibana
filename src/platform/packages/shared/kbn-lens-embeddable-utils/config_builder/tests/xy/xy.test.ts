@@ -151,6 +151,111 @@ describe('XY', () => {
           expect(referenceNames.has(`indexpattern-datasource-layer-${layerId}`)).toBe(true);
         }
       });
+
+      // Regression test for https://github.com/elastic/kibana/issues/268821
+      // A by-value annotation layer made of manual (point/range) annotations does
+      // not query an index, so the data view is not useful for it. Even when the
+      // state still carries a `xy-visualization-layer-<layerId>` reference (e.g.
+      // sample data / older saved objects), `toAPIFormat` should NOT emit a
+      // `data_source` for a manual-only layer, and the round trip back to state
+      // produces a persisted by-value layer (no `indexPatternId`) that relies on
+      // the Lens XY runtime fallback.
+      it('omits data_source for a manual-only annotation layer and persists it for the runtime fallback', () => {
+        const manualAnnotationXY: LensAttributes = {
+          ...annotationXY,
+          state: {
+            ...annotationXY.state,
+            visualization: {
+              ...(annotationXY.state.visualization as XYVisualizationState),
+              layers: (annotationXY.state.visualization as XYVisualizationState).layers.map(
+                (layer) =>
+                  layer.layerType === 'annotations'
+                    ? {
+                        ...layer,
+                        annotations: [
+                          {
+                            type: 'manual',
+                            id: 'manual_event_0',
+                            label: 'Event',
+                            key: {
+                              type: 'point_in_time',
+                              timestamp: '2016-02-09T10:30:00.000Z',
+                            },
+                          },
+                        ],
+                      }
+                    : layer
+              ),
+            },
+          },
+        } as LensAttributes;
+
+        const builder = new LensConfigBuilder(undefined, true);
+
+        expect(() => builder.toAPIFormat(manualAnnotationXY)).not.toThrow();
+
+        const api = builder.toAPIFormat(manualAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((layer) => layer.type === 'annotations');
+
+        // Manual-only annotation layer: no data view is emitted on the API layer,
+        // even though the source state still has the `xy-visualization-layer-` ref.
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer?.data_source).toBeUndefined();
+
+        // Round trip back to state must produce a persisted by-value annotation
+        // layer (no `indexPatternId`, no own reference). The Lens XY runtime then
+        // injects the data view via the first-index-pattern fallback.
+        const lensState = builder.fromAPIFormat(api);
+        const referenceNames = new Set(lensState.references.map((ref) => ref.name));
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const rebuiltAnnotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+
+        expect(rebuiltAnnotationLayer).toBeDefined();
+        expect(rebuiltAnnotationLayer).not.toHaveProperty('indexPatternId');
+        expect(rebuiltAnnotationLayer?.persistanceType).toBe('byValue');
+        expect(
+          referenceNames.has(`xy-visualization-layer-${rebuiltAnnotationLayer?.layerId}`)
+        ).toBe(false);
+      });
+
+      // A query annotation genuinely queries an index, so `toAPIFormat` must emit
+      // its `data_source` (and `fromAPIFormat` must round-trip the reference).
+      it('emits data_source for a query annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(annotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((layer) => layer.type === 'annotations');
+
+        expect(annotationLayer?.data_source).toEqual(
+          expect.objectContaining({
+            type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+            ref_id: 'metrics-*',
+          })
+        );
+      });
+
+      // The inbound direction must reject a query annotation layer that arrives
+      // without a data_source, since a query event cannot be represented without
+      // an index to query.
+      it('throws when a query annotation layer is missing its data_source', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(annotationXY) as XYConfig;
+
+        const apiWithoutAnnotationDataSource: XYConfig = {
+          ...api,
+          layers: api.layers.map((layer) =>
+            layer.type === 'annotations' ? { ...layer, data_source: undefined } : layer
+          ),
+        };
+
+        expect(() => builder.fromAPIFormat(apiWithoutAnnotationDataSource)).toThrow(
+          'A data source is required for annotation layers with query events'
+        );
+      });
     });
 
     describe('ES|QL panels', () => {
