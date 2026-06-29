@@ -33,6 +33,10 @@ import type { RunTestsOptions } from './flags';
  * user-supplied pattern can't simply be appended — it has to be AND-combined with the tag into one
  * regex. We do that with lookaheads so both the mode tag and the user pattern must match the test
  * title: `(?=.*<tag>)(?=.*<userGrep>)`.
+ *
+ * Note: because the user pattern is embedded inside `(?=.*<userGrep>)`, anchored patterns
+ * (e.g. `^My Test$`) won't behave as expected — `.*^` can't match mid-string. Standard `--grep`
+ * patterns are substring matches and are not anchored, so this is an accepted limitation.
  */
 export const buildPlaywrightGrepArg = (modeTag: string, userGrep?: string): string => {
   const trimmedUserGrep = userGrep?.trim();

@@ -39,7 +39,8 @@ export const TEST_FLAG_OPTIONS: FlagOptions = {
     --testFiles         Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed            Run Playwright with browser head
     --repeatEach        Run each test N times for local flakiness validation (e.g. --repeatEach 5)
-    --grep              Only run tests whose title matches this regular expression (e.g. --grep 'my test')
+    --grep              Only run tests whose title matches this regular expression (e.g. --grep 'my test').
+                        Anchors (^, $) are not supported as the pattern is embedded in a lookahead.
   `,
 };
 

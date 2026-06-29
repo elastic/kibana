@@ -215,8 +215,11 @@ function getTestSuitesFromJson(json: string) {
         );
       }
 
-      if (item.grep !== undefined && typeof item.grep !== 'string') {
-        fail(`testSuite.grep must be a string for scoutConfig entries`);
+      if (
+        item.grep !== undefined &&
+        (typeof item.grep !== 'string' || item.grep.trim().length === 0)
+      ) {
+        fail(`testSuite.grep must be a non-empty string for scoutConfig entries`);
       }
 
       testSuites.push({
