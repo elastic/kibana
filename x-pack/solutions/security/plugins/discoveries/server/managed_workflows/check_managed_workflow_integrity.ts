@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as yaml from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type {
@@ -60,7 +60,7 @@ const getUnregisteredStepType = (
   const definition = getManagedWorkflowDefinition(workflowId);
   if (!definition?.yaml) return null;
 
-  const parsed = yaml.load(definition.yaml) as Record<string, unknown> | null;
+  const parsed = parse(definition.yaml) as Record<string, unknown> | null;
   const steps = Array.isArray(parsed?.steps) ? (parsed.steps as unknown[]) : [];
 
   for (const stepType of collectStepTypes(steps)) {
