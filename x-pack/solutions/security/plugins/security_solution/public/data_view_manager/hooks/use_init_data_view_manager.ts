@@ -43,7 +43,7 @@ export const useInitDataViewManager = () => {
   const services = useKibana().services;
   const enableAlertsAndAttacksAlignment = services.uiSettings.get(
     ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    false
+    true
   );
 
   const {

@@ -133,7 +133,7 @@ describe('getFilteredLinks', () => {
       const resultIds = result.map((link) => link.id);
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alert_detections');
-      expect(resultIds).toContain('attack_discovery');
+      expect(resultIds).not.toContain('attack_discovery');
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
       expect(resultIds).toContain('launchpad');

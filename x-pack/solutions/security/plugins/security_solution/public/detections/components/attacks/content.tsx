@@ -26,7 +26,6 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -136,7 +135,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  const isTourFlagEnabled = useIsExperimentalFeatureEnabled('attacksPageTourEnabled');
   // Drives the tour's optional attack-details step. Derived from the table's
   // grouped results (which honor every active filter) instead of a standalone
   // query, and kept `undefined` until those results load so the tour treats
@@ -253,12 +251,8 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
-            {isTourFlagEnabled && (
-              <>
-                <WelcomeTourCallout />
-                <AttacksTour />
-              </>
-            )}
+            <WelcomeTourCallout />
+            <AttacksTour />
             <EuiFlexGroup direction="row" responsive={false} wrap={true}>
               <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
                 <EuiFlexGroup direction="row" responsive={false}>
@@ -323,7 +317,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             selectedConnectorNames={selectedConnectorNames}
             selectedTypes={selectedTypes}
             openSchedulesFlyout={openSchedulesFlyout}
-            onAttackIdsChange={isTourFlagEnabled ? onAttackIdsChange : undefined}
+            onAttackIdsChange={onAttackIdsChange}
           />
 
           {settingsFlyout}
@@ -341,7 +335,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       handleGenerate,
       handleOpenFlyout,
       isLoading,
-      isTourFlagEnabled,
       onAssigneesSelectionChange,
       onAttackIdsChange,
       openSchedulesFlyout,
@@ -355,10 +348,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     ]
   );
 
-  if (isTourFlagEnabled) {
-    return <AttacksTourProvider hasAttacks={hasAttacks}>{pageContent}</AttacksTourProvider>;
-  }
-
-  return pageContent;
+  return <AttacksTourProvider hasAttacks={hasAttacks}>{pageContent}</AttacksTourProvider>;
 });
 AttacksPageContent.displayName = 'AttacksPageContent';

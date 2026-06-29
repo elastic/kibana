@@ -69,14 +69,16 @@ export const getFilteredLinks = async (
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
+  const enableAlertsAndAttacksAlignment = core.uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+    true
+  );
 
   return Object.freeze([
     dashboardsLinks,
-    core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
-      ? alertDetectionsLinks
-      : alertsLink,
+    enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
-    attackDiscoveryLinks,
+    ...(enableAlertsAndAttacksAlignment ? [] : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,

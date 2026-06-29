@@ -334,7 +334,7 @@ export const SecuritySideNav: React.FC = () => {
   const categories = useMemo(() => {
     const enableAlertsAndAttacksAlignment = uiSettings.get(
       ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-      false
+      true
     );
     return getNavCategories(
       chatExperience,

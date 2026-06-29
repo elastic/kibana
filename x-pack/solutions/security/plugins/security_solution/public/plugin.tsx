@@ -53,6 +53,7 @@ import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations
 import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
+import { appLinks } from './app/links';
 import {
   type ApplicationLinksUpdateParams,
   applicationLinksUpdater,
@@ -847,17 +848,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     // Configuration of AppLinks updater registration based on license and capabilities
-    const {
-      appLinks: initialAppLinks,
-      getFilteredLinks,
-      registerDeepLinksUpdater,
-    } = await this.lazyApplicationLinks();
+    const { getFilteredLinks, registerDeepLinksUpdater } = await this.lazyApplicationLinks();
 
     registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
-    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
+    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(appLinks);
 
-    appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
+    appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinksToUpdate, license]) => {
       const params: ApplicationLinksUpdateParams = {
         experimentalFeatures: this.experimentalFeatures,
         upselling: upsellingService,
@@ -865,7 +862,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         uiSettingsClient: core.uiSettings,
         ...(license.type != null && { license }),
       };
-      applicationLinksUpdater.update(appLinks, params);
+      applicationLinksUpdater.update(appLinksToUpdate, params);
     });
 
     const filteredLinks = await getFilteredLinks(core, plugins, this.experimentalFeatures);

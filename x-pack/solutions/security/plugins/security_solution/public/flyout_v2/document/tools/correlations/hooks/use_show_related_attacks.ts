@@ -38,7 +38,7 @@ export const useShowRelatedAttacks = ({
   const { uiSettings } = useKibana().services;
   const enableAlertsAndAttacksAlignment = uiSettings.get(
     ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    false
+    true
   );
 
   const attackIds = getFieldArray(hit.flattened[ALERT_ATTACK_IDS]).filter(

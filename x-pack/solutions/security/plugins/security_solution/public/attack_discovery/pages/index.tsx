@@ -49,7 +49,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const enableAlertsAndAttacksAlignment = uiSettings.get(
     ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    false
+    true
   );
 
   return (
