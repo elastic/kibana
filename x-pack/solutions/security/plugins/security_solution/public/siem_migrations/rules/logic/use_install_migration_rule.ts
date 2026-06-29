@@ -23,7 +23,7 @@ interface InstallMigrationRuleParams {
   migrationRule: RuleMigrationRule;
   enabled?: boolean;
 }
-
+// add a comment to the code
 export const useInstallMigrationRule = (migrationId: string) => {
   const { addError, addSuccess } = useAppToasts();
   const { telemetry } = useKibana().services.siemMigrations.rules;
