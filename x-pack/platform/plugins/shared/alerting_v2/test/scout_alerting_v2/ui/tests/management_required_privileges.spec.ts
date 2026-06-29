@@ -54,14 +54,27 @@ const READ_ROLE: KibanaRole = {
   ],
 };
 
-/** No alerting_v2 access at all; every management page must be gated. */
+/**
+ * No alerting_v2 access at all; every management page must be gated.
+ *
+ * The baseline grant is `advancedSettings: ['read']` rather than `discover`
+ * because it must be a feature that is independently grantable in every target
+ * deployment. In serverless security `discover` (and `dashboard`/`visualize`/
+ * `maps`) are hidden and only auto-granted via the SIEM feature, so a role that
+ * leans on `discover` ends up with zero registered privileges there: the user
+ * can't load Stack Management and is bounced to `/security/reset_session`
+ * instead of seeing the in-app interstitial. `advancedSettings` is a platform
+ * management feature that is grantable across stateful and every serverless
+ * project type, so it gives the user a valid session with Stack Management
+ * access while still holding no alerting_v2 privileges.
+ */
 const NO_ACCESS_ROLE: KibanaRole = {
   elasticsearch: NO_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
       feature: {
-        discover: ['read'],
+        advancedSettings: ['read'],
       },
       spaces: ['*'],
     },
