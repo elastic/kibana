@@ -151,6 +151,8 @@ export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_
 
 export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
 
+export { getAgentlessThroughputIndexPatterns } from './agentless_throughput_helper';
+
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';
 export {
