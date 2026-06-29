@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
-import { Parser } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
+import { Builder, Parser } from '@elastic/esql';
 import {
   esqlCommandRegistry,
   unwrapExpressionParens,
@@ -136,15 +136,19 @@ export function getQuerySummaryPerCommandType(
  * Analyzes a specific command within an ES|QL query and returns a summary of it.
  */
 export function getSummaryPerCommand(query: string, command: ESQLAstCommand): ESQLCommandSummary {
-  unwrapExpressionParens({ commands: [command] } as ESQLAstQueryExpression);
-
+  // unwrapExpressionParens mutates its input. This command belongs to the caller's AST,
+  // so clone it and wrap it in a real query node; the Walker won't traverse a plain
+  // `{ commands: [...] }` object.
+  const normalizedRoot = Builder.expression.query([structuredClone(command)]);
+  unwrapExpressionParens(normalizedRoot);
+  const [normalizedCommand] = normalizedRoot.commands;
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set<string>();
   const allAggregates = new Set<FieldSummary>();
   const allGroupings = new Set<FieldSummary>();
 
-  processCommand(command, query, {
+  processCommand(normalizedCommand, query, {
     newColumns: allNewColumns,
     renamedColumnsPairs: allRenamedColumnsPairs,
     metadataColumns: allMetadataColumns,

@@ -7,11 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser, Walker, isParens, isSubQuery } from '@elastic/esql';
 import {
   getQuerySummary,
   getQuerySummaryPerCommandType,
+  getSummaryPerCommand,
   isComputedColumn,
 } from './get_query_summary';
+
+const countExpressionParens = (node: unknown): number => {
+  let count = 0;
+  Walker.walk(node as Parameters<typeof Walker.walk>[0], {
+    visitAny: (visited) => {
+      if (isParens(visited) && !isSubQuery(visited)) {
+        count++;
+      }
+    },
+  });
+  return count;
+};
 
 describe('getQuerySummary', () => {
   it('returns new columns from ROW command', () => {
@@ -276,5 +290,44 @@ describe('getQuerySummaryPerCommandType', () => {
         }),
       ])
     );
+  });
+});
+
+describe('getSummaryPerCommand', () => {
+  it('summarizes a single STATS command', () => {
+    const query = 'FROM logs* | STATS avg_price = AVG(price) BY category';
+    const { root } = Parser.parseQuery(query);
+    const statsCommand = root.commands.find((c) => c.name === 'stats')!;
+
+    const result = getSummaryPerCommand(query, statsCommand);
+
+    expect(result.newColumns).toEqual(new Set(['avg_price']));
+    expect(result.grouping).toEqual(new Set([expect.objectContaining({ field: 'category' })]));
+  });
+
+  it('unwraps grouping parentheses before summarizing', () => {
+    const query = 'FROM logs* | STATS (avg(price)) BY (category)';
+    const { root } = Parser.parseQuery(query);
+    const statsCommand = root.commands.find((c) => c.name === 'stats')!;
+
+    const result = getSummaryPerCommand(query, statsCommand);
+
+    expect(result.newColumns).toEqual(new Set(['avg(price)']));
+    expect(result.aggregates).toEqual(new Set([expect.objectContaining({ field: 'avg(price)' })]));
+    expect(result.grouping).toEqual(new Set([expect.objectContaining({ field: 'category' })]));
+  });
+
+  it('does not mutate the command passed in by the caller', () => {
+    const query = 'FROM logs* | STATS (avg(price)) BY (category)';
+    const { root } = Parser.parseQuery(query);
+    const statsCommand = root.commands.find((c) => c.name === 'stats')!;
+
+    const parensBefore = countExpressionParens(statsCommand);
+    expect(parensBefore).toBeGreaterThan(0);
+
+    getSummaryPerCommand(query, statsCommand);
+
+    // The unwrap must happen on an internal clone, leaving the caller's AST intact.
+    expect(countExpressionParens(statsCommand)).toBe(parensBefore);
   });
 });
