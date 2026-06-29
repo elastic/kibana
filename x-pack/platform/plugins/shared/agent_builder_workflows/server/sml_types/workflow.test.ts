@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
@@ -448,7 +449,7 @@ describe('workflowSmlType', () => {
         logger: createMockLogger(),
       });
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
+        kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
         elasticsearch: { indices: [] },
       });
     });
