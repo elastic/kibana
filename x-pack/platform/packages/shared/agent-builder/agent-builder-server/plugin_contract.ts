@@ -81,6 +81,11 @@ export interface SkillsStart {
    * Only affects future conversations (existing ones snapshot skills at creation time).
    */
   register: (skill: SkillDefinition) => Promise<void>;
+  /**
+   * Unregister a dynamically registered built-in skill after plugin start.
+   * Returns false when the skill was not registered.
+   */
+  unregister: (skillId: string) => Promise<boolean>;
 }
 
 export interface AgentsSetup {
@@ -190,22 +195,6 @@ export interface TopSnippetsConfig {
 }
 
 /**
- * AgentBuilder dashboard service's start contract.
- */
-export interface DashboardStart {
-  /**
-   * Syncs the Agent Builder overview dashboard across all spaces.
-   * Installs when `tracingEnabled` is true, removes otherwise.
-   */
-  syncOverview: (tracingEnabled: boolean) => Promise<void>;
-  /**
-   * Syncs the Agent Builder overview dashboard for a single space.
-   * Installs when `tracingEnabled` is true, removes otherwise.
-   */
-  syncOverviewForSpace: (tracingEnabled: boolean, spaceId: string) => Promise<void>;
-}
-
-/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -273,8 +262,4 @@ export interface AgentBuilderPluginStart {
    * Conversations service (read-only), to list and retrieve conversations.
    */
   conversations: ConversationsStart;
-  /**
-   * Dashboard service, to manage Agent Builder managed dashboards.
-   */
-  dashboard: DashboardStart;
 }

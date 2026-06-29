@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_traces_skill';
 import { graphCreationSkill } from './graph_creation_skill';
 import { visualizationCreationSkill } from './visualization_creation_skill';
@@ -15,5 +15,12 @@ export const registerSkills = (agentBuilder: AgentBuilderPluginSetup) => {
   agentBuilder.skills.register(visualizationCreationSkill);
   agentBuilder.skills.register(graphCreationSkill);
   agentBuilder.skills.register(skillAuthoringSkill);
-  agentBuilder.skills.register(agentBuilderTracesSkill);
+};
+
+export const registerTracingSkill = async (agentBuilder: AgentBuilderPluginStart) => {
+  await agentBuilder.skills.register(agentBuilderTracesSkill);
+};
+
+export const unregisterTracingSkill = async (agentBuilder: AgentBuilderPluginStart) => {
+  await agentBuilder.skills.unregister(agentBuilderTracesSkill.id);
 };

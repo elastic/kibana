@@ -55,6 +55,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     skills: {
       getRegistry: jest.fn(),
       register: jest.fn(),
+      unregister: jest.fn(),
     },
     plugins: {
       getRegistry: jest.fn(),
@@ -72,10 +73,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
-    },
-    dashboard: {
-      syncOverview: jest.fn(),
-      syncOverviewForSpace: jest.fn(),
     },
   };
 };

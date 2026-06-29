@@ -48,6 +48,14 @@ export interface SkillServiceStart {
    * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
+
+  /**
+   * Unregister a dynamically registered built-in skill after plugin start.
+   *
+   * Returns false when the skill was not registered. Only affects future
+   * `getRegistry()` calls.
+   */
+  unregisterSkill(skillId: string): Promise<boolean>;
 }
 
 export interface SkillService {
@@ -155,6 +163,20 @@ class SkillServiceImpl implements SkillService {
           }
           this.skillFullPaths.add(fullPath);
           this.skills.set(skill.id, skill);
+        });
+        this.mutationQueue = op.catch(() => {});
+        return op;
+      },
+      unregisterSkill: (skillId) => {
+        const op = this.mutationQueue.then(async () => {
+          const skill = this.skills.get(skillId);
+          if (!skill) {
+            return false;
+          }
+
+          this.skills.delete(skillId);
+          this.skillFullPaths.delete(getSkillEntryPath({ skill }));
+          return true;
         });
         this.mutationQueue = op.catch(() => {});
         return op;

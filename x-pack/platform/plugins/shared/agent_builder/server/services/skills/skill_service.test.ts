@@ -169,4 +169,41 @@ describe('createSkillService', () => {
       expect(await registry.has('builtin-1')).toBe(true);
     });
   });
+
+  describe('start().unregisterSkill', () => {
+    const createStartedService = () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+      const skill = createMockSkillDefinition({ id: 'builtin-1' });
+      registerSkill(skill);
+
+      const { unregisterSkill, getRegistry } = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        uiSettings: {
+          asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
+        } as any,
+        savedObjects: { getScopedClient: jest.fn().mockReturnValue({ get: jest.fn() }) } as any,
+      });
+
+      return { unregisterSkill, getRegistry };
+    };
+
+    it('removes a registered skill and returns true', async () => {
+      const { unregisterSkill, getRegistry } = createStartedService();
+
+      expect(await unregisterSkill('builtin-1')).toBe(true);
+
+      const registry = await getRegistry({ request: {} as any });
+      expect(await registry.has('builtin-1')).toBe(false);
+    });
+
+    it('returns false when the skill was not registered', async () => {
+      const { unregisterSkill } = createStartedService();
+
+      expect(await unregisterSkill('missing-skill')).toBe(false);
+    });
+  });
 });

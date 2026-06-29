@@ -47,7 +47,7 @@ export class GenAiSettingsPlugin
   ): GenAiSettingsPluginSetup {
     const routeHandlerPlugins: Pick<
       GenAiSettingsRouteHandlerResources['plugins'],
-      'actions' | 'inference' | 'agentBuilder'
+      'actions' | 'inference' | 'agentBuilder' | 'agentBuilderPlatform'
     > = {
       actions: {
         setup: plugins.actions,
@@ -61,6 +61,14 @@ export class GenAiSettingsPlugin
         ? {
             agentBuilder: {
               start: () => core.getStartServices().then(([, starts]) => starts.agentBuilder!),
+            },
+          }
+        : {}),
+      ...(plugins.agentBuilderPlatform
+        ? {
+            agentBuilderPlatform: {
+              start: () =>
+                core.getStartServices().then(([, starts]) => starts.agentBuilderPlatform!),
             },
           }
         : {}),

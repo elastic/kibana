@@ -30,6 +30,11 @@ export interface GenAiSettingsRouteHandlerResources
     agentBuilder?: {
       start: () => Promise<NonNullable<GenAiSettingsPluginStartDependencies['agentBuilder']>>;
     };
+    agentBuilderPlatform?: {
+      start: () => Promise<
+        NonNullable<GenAiSettingsPluginStartDependencies['agentBuilderPlatform']>
+      >;
+    };
   };
 }
 

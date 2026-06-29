@@ -25,3 +25,10 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export type {
+  AgentBuilderPlatformPluginSetup,
+  AgentBuilderPlatformPluginStart,
+  AgentBuilderPlatformTracingFeaturesStart,
+  PluginSetupDependencies,
+  PluginStartDependencies,
+} from './types';

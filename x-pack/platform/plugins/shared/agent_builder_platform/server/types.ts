@@ -29,8 +29,18 @@ export interface PluginStartDependencies {
   spaces?: SpacesPluginStart;
 }
 
+export interface AgentBuilderPlatformTracingFeaturesStart {
+  /**
+   * Syncs tracing platform features (overview dashboard and traces skill).
+   * When `spaceId` is provided, only the dashboard for that space is synced.
+   * The traces skill is registered globally when `enabled` is true.
+   */
+  sync: (options: { enabled: boolean; spaceId?: string }) => Promise<void>;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderPlatformPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentBuilderPlatformPluginStart {}
+export interface AgentBuilderPlatformPluginStart {
+  tracingFeatures: AgentBuilderPlatformTracingFeaturesStart;
+}
