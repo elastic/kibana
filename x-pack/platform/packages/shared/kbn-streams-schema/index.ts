@@ -47,7 +47,11 @@ export {
   OTEL_SEVERITY_FIELD,
   ECS_SEVERITY_FIELD,
 } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
+export {
+  getIndexPatternsForStream,
+  getSourcesForStream,
+  getStreamSamplingSource,
+} from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export { definitionToESQLQuery } from './src/helpers/definition_to_esql_query';
 export type { DefinitionToESQLQueryOptions } from './src/helpers/definition_to_esql_query';
@@ -278,18 +282,15 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   SIG_EVENT_STATUS_OPTIONS,
-  SIG_EVENT_IMPACT_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
   type Discovery,
   sigEventSchema,
   sigEventStatusSchema,
-  sigEventImpactSchema,
   type SigEvent,
   type KnowledgeIndicator,
   type SigEventStatus,
-  type SigEventImpact,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
