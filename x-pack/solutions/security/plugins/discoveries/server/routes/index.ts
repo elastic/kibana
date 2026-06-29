@@ -5,16 +5,86 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, IRouter, Logger, CoreStart } from '@kbn/core/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { DiscoveriesPluginStartDeps } from '../types';
+import { registerDeleteScheduleRoute } from './delete/schedules/delete_schedule';
+import { registerGenerateRoute } from './generate/post_generate';
+import { registerGetDefaultEsqlQueryRoute } from './get/default_esql_query/get_default_esql_query';
+import { registerGetExecutionTrackingRoute } from './get/execution_tracking/get_execution_tracking';
+import { registerFindSchedulesRoute } from './get/schedules/find_schedules';
+import { registerGetScheduleRoute } from './get/schedules/get_schedule';
+import { registerGetPipelineDataRoute } from './get/pipeline_data/get_pipeline_data';
+import { registerCreateScheduleRoute } from './post/schedules/create_schedule';
+import { registerDisableScheduleRoute } from './post/schedules/disable_schedule';
+import { registerEnableScheduleRoute } from './post/schedules/enable_schedule';
+import { registerUpdateScheduleRoute } from './put/schedules/update_schedule';
 
-// Stub: real route registrations are added by later PRs in the stack. PR2's
-// plugin scaffold needs `./routes` to resolve as a module so the plugin can
-// load and its tests can run; the no-op registration preserves FF-off prod
-// safety in PR2 standalone (no new routes are exposed).
 export const registerRoutes = (
-  _router: IRouter,
-  _logger: Logger,
-  _services: Record<string, unknown>
-): void => {
-  // no-op stub; replaced by real route registrations in later PRs
+  router: IRouter,
+  logger: Logger,
+  {
+    analytics,
+    getEventLogIndex,
+    getEventLogger,
+    getStartServices,
+    workflowsManagementApi,
+  }: {
+    analytics: AnalyticsServiceSetup;
+    getEventLogIndex: () => Promise<string>;
+    getEventLogger: () => Promise<IEventLogger>;
+    getStartServices: () => Promise<{
+      coreStart: CoreStart;
+      pluginsStart: DiscoveriesPluginStartDeps;
+    }>;
+    workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
+  }
+) => {
+  registerGenerateRoute(router, logger, {
+    analytics,
+    getEventLogIndex,
+    getEventLogger,
+    getStartServices,
+    workflowsManagementApi,
+  });
+  registerGetDefaultEsqlQueryRoute(router, logger, {
+    getStartServices,
+  });
+  registerGetExecutionTrackingRoute(router, logger, {
+    getEventLogIndex,
+    getStartServices,
+  });
+  registerGetPipelineDataRoute(router, logger, {
+    getEventLogIndex,
+    getStartServices,
+    workflowsManagementApi,
+  });
+  // Schedule routes
+  registerCreateScheduleRoute(router, logger, {
+    analytics,
+    getStartServices,
+  });
+  registerDeleteScheduleRoute(router, logger, {
+    analytics,
+    getStartServices,
+  });
+  registerDisableScheduleRoute(router, logger, {
+    analytics,
+    getStartServices,
+  });
+  registerEnableScheduleRoute(router, logger, {
+    analytics,
+    getStartServices,
+  });
+  registerFindSchedulesRoute(router, logger, {
+    getStartServices,
+  });
+  registerGetScheduleRoute(router, logger, {
+    getStartServices,
+  });
+  registerUpdateScheduleRoute(router, logger, {
+    analytics,
+    getStartServices,
+  });
 };

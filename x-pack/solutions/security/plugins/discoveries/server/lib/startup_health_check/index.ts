@@ -7,14 +7,19 @@
 
 import type { Logger } from '@kbn/core/server';
 
-// Stub: real implementation is added by a later PR in the stack. PR2's plugin
-// scaffold needs this module to exist so plugin.ts can import it; the no-op
-// preserves FF-off prod safety in PR2 standalone (no logging side effects).
-export const logStartupHealthCheck = (_params: {
-  expectedWorkflowIds: readonly string[];
-  failedWorkflowIds: readonly string[];
+// PR3 callers pass `{ expectedWorkflowIds, failedWorkflowIds, logger,
+// workflowsManagementApiAvailable }`; older callers passed the
+// `failedStepIds`/`registeredStepCount` shape. Both are accepted here so the
+// stub satisfies PR2 + PR3 simultaneously; the real impl (PR4) refines the
+// signature.
+export interface StartupHealthCheckParams {
+  expectedWorkflowIds?: readonly string[];
+  failedStepIds?: string[];
+  failedWorkflowIds?: string[];
   logger: Logger;
+  registeredStepCount?: number;
   workflowsManagementApiAvailable: boolean;
-}): void => {
-  // no-op stub; replaced by the real implementation in a later PR
-};
+}
+
+// Placeholder — real implementation added in PR 4
+export const logStartupHealthCheck = (_params: StartupHealthCheckParams): void => {};
