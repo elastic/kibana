@@ -9,6 +9,7 @@
 
 import {
   getIndexPatternFromESQLQuery,
+  getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
 } from './get_index_pattern_from_query';
 
@@ -92,6 +93,61 @@ describe('getIndexPatternFromESQLQuery', () => {
       'PROMQL index = kibana_sample_data_logstsdb step="5m" start=?_tstart end=?_tend avg(bytes)'
     );
     expect(idxPattern23).toBe('kibana_sample_data_logstsdb');
+  });
+});
+
+describe('getIndexPatternsFromESQLQuery', () => {
+  it('should keep the index pattern and strip remote cluster prefixes in parallel', () => {
+    expect(getIndexPatternsFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3')).toEqual({
+      indexPattern: 'foo-1,remote_cluster:foo-2,foo-3',
+      indexPatternWithoutRemoteClusterPrefix: 'foo-1,foo-2,foo-3',
+    });
+  });
+
+  it('should preserve the :: selector when stripping the remote cluster prefix', () => {
+    expect(getIndexPatternsFromESQLQuery('FROM logs-2024::data')).toEqual({
+      indexPattern: 'logs-2024::data',
+      indexPatternWithoutRemoteClusterPrefix: 'logs-2024::data',
+    });
+
+    expect(getIndexPatternsFromESQLQuery('FROM remote_cluster:logs-*::failures')).toEqual({
+      indexPattern: 'remote_cluster:logs-*::failures',
+      indexPatternWithoutRemoteClusterPrefix: 'logs-*::failures',
+    });
+  });
+
+  it('should strip remote cluster prefixes from TS sources', () => {
+    expect(getIndexPatternsFromESQLQuery('TS remote_cluster:metrics-*')).toEqual({
+      indexPattern: 'remote_cluster:metrics-*',
+      indexPatternWithoutRemoteClusterPrefix: 'metrics-*',
+    });
+  });
+
+  it('should strip remote cluster prefixes from subquery sources', () => {
+    expect(
+      getIndexPatternsFromESQLQuery('FROM index1, (FROM cluster1:index2, index3 | WHERE field >0)')
+    ).toEqual({
+      indexPattern: 'index1,cluster1:index2,index3',
+      indexPatternWithoutRemoteClusterPrefix: 'index1,index2,index3',
+    });
+  });
+
+  it('should leave quoted "cluster:index" blobs unchanged (no structured prefix)', () => {
+    expect(getIndexPatternsFromESQLQuery('FROM "cluster1:idx1,cluster2:idx2"')).toEqual({
+      indexPattern: 'cluster1:idx1,cluster2:idx2',
+      indexPatternWithoutRemoteClusterPrefix: 'cluster1:idx1,cluster2:idx2',
+    });
+  });
+
+  it('should return empty strings for queries without a source', () => {
+    expect(getIndexPatternsFromESQLQuery('')).toEqual({
+      indexPattern: '',
+      indexPatternWithoutRemoteClusterPrefix: '',
+    });
+    expect(getIndexPatternsFromESQLQuery('ROW a = 1')).toEqual({
+      indexPattern: '',
+      indexPatternWithoutRemoteClusterPrefix: '',
+    });
   });
 });
 

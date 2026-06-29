@@ -17,6 +17,7 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
 import { filterSchema } from './filter';
+import { positionSchema } from './alignments';
 
 export const labelSharedProp = {
   /**
@@ -171,5 +172,16 @@ export const legendTruncateAfterLinesSchema = schema.maybe(
       description: 'Number of lines before legend items are truncated.',
       id: 'legendTruncateAfterLines',
     },
+  })
+);
+
+export const legendPositionSchema = schema.maybe(
+  positionSchema({
+    meta: {
+      description: 'Legend Position.',
+      id: 'legendPosition',
+      title: 'Legend Position',
+    },
+    defaultValue: 'right',
   })
 );

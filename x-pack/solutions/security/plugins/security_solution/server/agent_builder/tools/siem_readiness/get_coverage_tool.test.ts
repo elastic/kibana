@@ -15,10 +15,28 @@ import {
 } from '../../__mocks__/test_helpers';
 import { getCoverageTool } from './get_coverage_tool';
 import { getCoverage } from '../../../lib/siem_readiness/dimensions';
+import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
 jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getCoverage: jest.fn() }));
+jest.mock('../../../lib/siem_readiness/fetchers', () => ({
+  getSiemReadinessSharedContext: jest.fn(),
+  fetchSiemReadinessSharedContext: jest.fn(),
+}));
 
 const mockGetCoverage = getCoverage as jest.Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
+
+const mockSharedContext = {
+  reverseMapResult: {
+    indexToRules: new Map(),
+    pipelineToIndices: new Map(),
+    categoryToIndices: new Map(),
+    tacticTotals: new Map(),
+    mlRules: [],
+  },
+  categoriesResult: { rawCategoriesMap: [], mainCategoriesMap: [] },
+  indexToPlatform: new Map(),
+};
 
 const makePayload = (overrides: Partial<CoveragePayload> = {}): CoveragePayload => ({
   status: 'healthy',
@@ -35,6 +53,7 @@ describe('getCoverageTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
+    mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });
 
   describe('handler — result shape', () => {
@@ -67,7 +86,7 @@ describe('getCoverageTool', () => {
         ],
         actionableFindings: [
           {
-            severity: 'warning',
+            severity: 'WARNING',
             message: 'No data for Cloud.',
             resource: 'Cloud',
             category: 'Cloud',

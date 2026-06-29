@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -43,29 +43,44 @@ export const ActionPolicyActionsCell = ({
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="eye"
-          color="text"
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.alertingV2.actionPoliciesList.action.viewDetails.description',
             { defaultMessage: 'View action policy details' }
           )}
-          onClick={() => onViewDetails(policy)}
-          isDisabled={isDisabled}
-          data-test-subj="actionPolicyViewDetailsButton"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="eye"
+            color="text"
+            aria-label={i18n.translate(
+              'xpack.alertingV2.actionPoliciesList.action.viewDetails.description',
+              { defaultMessage: 'View action policy details' }
+            )}
+            onClick={() => onViewDetails(policy)}
+            isDisabled={isDisabled}
+            data-test-subj="actionPolicyViewDetailsButton"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="pencil"
-          color="text"
-          aria-label={i18n.translate(
-            'xpack.alertingV2.actionPoliciesList.action.edit.description',
-            { defaultMessage: 'Edit this action policy' }
-          )}
-          onClick={() => onEdit(policy.id)}
-          isDisabled={isDisabled}
-        />
+        <EuiToolTip
+          content={i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit.description', {
+            defaultMessage: 'Edit this action policy',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="pencil"
+            color="text"
+            aria-label={i18n.translate(
+              'xpack.alertingV2.actionPoliciesList.action.edit.description',
+              { defaultMessage: 'Edit this action policy' }
+            )}
+            onClick={() => onEdit(policy.id)}
+            isDisabled={isDisabled}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ActionPolicyActionsMenu

@@ -51,6 +51,14 @@ const readStreamSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-significant-events',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
     oasOperationObject: () => ({
       requestBody: {
         content: {
@@ -86,7 +94,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
   }): Promise<SignificantEventsGetResponse> => {
     const {
       streamsClient,
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,
       scopedClusterClient,
       licensing,
@@ -104,7 +112,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -115,7 +123,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         searchMode,
         alertsSource,
       },
-      { queryClient, scopedClusterClient }
+      { kiClient, scopedClusterClient }
     );
   },
 });

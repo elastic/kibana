@@ -8,63 +8,84 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type {
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimlaneProps as AnomalySwimlanePropsFromSchema,
-} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
-import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
-import type { HasSerializedChildState } from '@kbn/presentation-publishing';
+  PublishesWritableUnifiedSearch,
+  HasSerializedChildState,
+} from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
-export interface AnomalySwimLaneProps extends AnomalySwimlanePropsFromSchema {
+type AnomalySwimLaneViewByState = Extract<
+  AnomalySwimLaneEmbeddableState,
+  { swimlane_type: 'viewBy' }
+>;
+
+export interface AnomalySwimLaneProps {
+  id?: string;
+  jobIds: AnomalySwimLaneEmbeddableState['job_ids'];
+  swimlaneType: AnomalySwimLaneEmbeddableState['swimlane_type'];
+  viewBy?: AnomalySwimLaneViewByState['view_by'];
+  timeRange?: AnomalySwimLaneEmbeddableState['time_range'];
+  perPage?: AnomalySwimLaneEmbeddableState['per_page'];
+  filters?: Filter[];
+  query?: Query;
   executionContext: KibanaExecutionContext;
 }
+
+const buildEmbeddableState = ({
+  jobIds,
+  swimlaneType,
+  viewBy,
+  perPage,
+}: Pick<
+  AnomalySwimLaneProps,
+  'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'
+>): AnomalySwimLaneEmbeddableState => {
+  if (swimlaneType === 'viewBy' && viewBy) {
+    return {
+      job_ids: jobIds,
+      swimlane_type: 'viewBy',
+      view_by: viewBy,
+      ...(perPage !== undefined ? { per_page: perPage } : {}),
+    };
+  }
+
+  return {
+    job_ids: jobIds,
+    swimlane_type: 'overall',
+    ...(perPage !== undefined ? { per_page: perPage } : {}),
+  };
+};
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   id,
   jobIds,
   swimlaneType,
   viewBy,
-  time_range: timeRange,
+  timeRange,
   filters,
   query,
-  refreshConfig,
   perPage,
   executionContext,
 }) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
-  const embeddableState: AnomalySwimLaneEmbeddableState = useMemo(() => {
-    if (swimlaneType === 'viewBy' && viewBy) {
-      return {
-        jobIds,
-        swimlaneType: 'viewBy',
-        refreshConfig,
-        viewBy,
-      };
-    }
-
-    return {
-      jobIds,
-      swimlaneType: 'overall',
-      refreshConfig,
-      viewBy,
-      timeRange,
-    };
-  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
+  const embeddableState = useMemo(
+    () => buildEmbeddableState({ jobIds, swimlaneType, viewBy, perPage }),
+    [jobIds, swimlaneType, viewBy, perPage]
+  );
 
   useEffect(
     function syncState() {
       if (!embeddableApi.current) return;
-
-      embeddableApi.current.updateUserInput({
-        jobIds,
-        swimlaneType,
-        viewBy,
-      });
+      embeddableApi.current.updateUserInput(
+        swimlaneType === 'viewBy' && viewBy
+          ? { job_ids: jobIds, swimlane_type: 'viewBy', view_by: viewBy }
+          : { job_ids: jobIds, swimlane_type: 'overall' }
+      );
     },
     [jobIds, swimlaneType, viewBy]
   );

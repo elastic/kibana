@@ -86,7 +86,7 @@ describe('registerAutocompleteRoute', () => {
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
         spaces: ['test-space'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         matched_discovery_labels: [
           { value: 'GitHub Connector', kind: 'title' },
           { value: 'github', kind: 'tagline' },
@@ -122,7 +122,7 @@ describe('registerAutocompleteRoute', () => {
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
         spaces: ['test-space'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });
@@ -141,7 +141,10 @@ describe('registerAutocompleteRoute', () => {
         title: 'V',
         origin: { uri: 'v-1' },
         spaces: ['test-space'],
-        permissions: ['saved_object:visualization/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:visualization/get' }] },
+          elasticsearch: { indices: [] },
+        },
       },
     ];
     mockSmlService.autocomplete.mockResolvedValue({ results: mockResults });

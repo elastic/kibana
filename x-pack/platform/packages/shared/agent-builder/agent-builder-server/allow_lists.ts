@@ -48,6 +48,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
+  `${internalNamespaces.security}.run_rule_preview`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
@@ -93,6 +94,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.security}.agent`,
   `${internalNamespaces.streams}.significant-events.discovery.investigator`,
   `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -131,8 +133,14 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'significant-events-management',
+  'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Workflows
   'workflow-authoring',

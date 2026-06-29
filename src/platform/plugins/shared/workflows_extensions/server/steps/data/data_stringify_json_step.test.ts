@@ -58,6 +58,15 @@ describe('dataStringifyJsonStepDefinition', () => {
       expect(result.output).toBe('"hello"');
     });
 
+    it('should stringify literal Liquid returned from template rendering', async () => {
+      const context = createMockContext({ source: '{{ workflow.name }}' });
+
+      const result = await dataStringifyJsonStepDefinition.handler(context);
+
+      expect(context.contextManager.renderInputTemplate).not.toHaveBeenCalled();
+      expect(result.output).toBe('"{{ workflow.name }}"');
+    });
+
     it('should stringify a number', async () => {
       const context = createMockContext({ source: 42 });
       const result = await dataStringifyJsonStepDefinition.handler(context);

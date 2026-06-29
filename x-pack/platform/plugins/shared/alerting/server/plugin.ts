@@ -366,6 +366,7 @@ export class AlertingPlugin {
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
+          totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
         });
       }
     }
@@ -618,6 +619,7 @@ export class AlertingPlugin {
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
+        getTotalFieldsLimit: () => this.config.alertsService.totalFieldsLimit,
         getContextInitializationPromise: (
           context: string,
           namespace: string

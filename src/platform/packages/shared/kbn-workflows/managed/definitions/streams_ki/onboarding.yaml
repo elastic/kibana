@@ -4,12 +4,11 @@
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
 #   3. Queries generation (optional, skippable — persistence handled by the child workflow)
-#   4. Memory generation (fire-and-forget, best-effort)
 
 version: "1"
 name: ".streams-ki-onboarding"
 enabled: true
-description: "Orchestrates KI feature identification, query generation, and memory synthesis for a stream."
+description: "Orchestrates KI feature identification and query generation for a stream."
 tags:
   - observability
   - streams
@@ -95,9 +94,6 @@ steps:
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
-      memoryTriggered: false
-      memorySkipped: false
-      memoryReason: ""
 
   # -----------------------------------------------------------------------
   # Step 1: Recency check — auto-skip features if recently identified.
@@ -179,34 +175,7 @@ steps:
           queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 4: Memory generation (best-effort, calls endpoint directly to
-  #          avoid workflow input validation on complex objects).
-  #          Triggered when at least one discovery produced results.
-  # -----------------------------------------------------------------------
-  - name: trigger_memory
-    type: if
-    condition: "${{ variables.discoveredFeatures.size > 0 or variables.generatedQueries.size > 0 }}"
-    steps:
-      - name: generate_memory
-        type: kibana.request
-        on-failure:
-          continue: true
-        with:
-          method: POST
-          path: "/internal/streams/{{ inputs.streamName }}/memory/_generate"
-          headers:
-            x-elastic-internal-origin: "kibana"
-          body:
-            features: "${{ variables.discoveredFeatures }}"
-            queries: "${{ variables.generatedQueries }}"
-      - name: save_memory_output
-        type: data.set
-        with:
-          memoryTriggered: true
-          memorySkipped: "${{ steps.generate_memory.output.skipped }}"
-          memoryReason: "${{ steps.generate_memory.output.reason }}"
-  # -----------------------------------------------------------------------
-  # Step 5: Output summary
+  # Step 4: Output summary
   # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
@@ -220,6 +189,3 @@ steps:
       queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
-      memoryTriggered: "${{ variables.memoryTriggered }}"
-      memorySkipped: "${{ variables.memorySkipped }}"
-      memoryReason: "${{ variables.memoryReason }}"

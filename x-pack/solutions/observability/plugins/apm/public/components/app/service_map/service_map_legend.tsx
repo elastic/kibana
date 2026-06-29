@@ -19,6 +19,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiNotificationBadge,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -148,17 +149,18 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          display="empty"
-          color="text"
-          size="s"
-          iconType="question"
-          onClick={toggle}
-          title={legendButtonLabel}
-          aria-label={legendButtonLabel}
-          data-test-subj="serviceMapLegendButton"
-          css={controlIconCss}
-        />
+        <EuiToolTip content={legendButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            display="empty"
+            color="text"
+            size="s"
+            iconType="question"
+            onClick={toggle}
+            aria-label={legendButtonLabel}
+            data-test-subj="serviceMapLegendButton"
+            css={controlIconCss}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={close}

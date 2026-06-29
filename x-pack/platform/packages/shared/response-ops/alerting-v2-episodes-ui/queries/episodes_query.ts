@@ -35,6 +35,8 @@ export interface AlertEpisode {
   last_tags?: string[];
   /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
   episode_data?: string | null;
+  /** Latest top-level `severity` from a breached rule event, when present. */
+  severity?: string | null;
 }
 
 /**
@@ -61,6 +63,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_deactivate_action',
   'last_tags',
   'episode_data',
+  'severity',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -68,6 +71,15 @@ export interface EpisodesFilterState {
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;
+  /** Group hash — narrows to a single per-rule series (used for deep-links from rule details). */
+  groupHash?: string | null;
+  /**
+   * Display-only companion to `groupHash`. When a deep-link carries the
+   * resolved grouping field values (e.g. `{ "host.name": "web-01" }`), the
+   * destination chip can render `host=web-01` without re-running the DSL
+   * lookup. Does NOT affect the query — `buildEpisodesQuery` ignores it.
+   */
+  groupingValues?: Record<string, string | null> | null;
   /** Query string for full-text search */
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
@@ -101,7 +113,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -147,6 +159,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   }
   if (filterState.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
   }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);

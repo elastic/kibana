@@ -22,8 +22,10 @@ describe('startKiIdentificationToolHandler', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
+    const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
+      telemetry,
     });
 
     return {
@@ -74,6 +76,6 @@ describe('startKiIdentificationToolHandler', () => {
         streamsKIsOnboardingClient,
         request,
       })
-    ).rejects.toThrow(/Onboarding workflow .+ not found/);
+    ).rejects.toThrow(/Workflow .+ not found/);
   });
 });

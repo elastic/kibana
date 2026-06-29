@@ -38,7 +38,7 @@ export interface RouteHandlerScopedClients {
   rulesClient: RulesClientApi;
   racClient: AlertsClient;
   repository: SLODefinitionRepository;
-  compositeSloRepository: CompositeSLORepository;
+  compositeRepository: CompositeSLORepository;
   settingsRepository: SLOSettingsRepository;
   templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;

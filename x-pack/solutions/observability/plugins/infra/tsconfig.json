@@ -26,6 +26,7 @@
     "@kbn/alerting-plugin",
     "@kbn/features-plugin",
     "@kbn/license-management-plugin",
+    "@kbn/ml-common-types",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
     "@kbn/spaces-plugin",
