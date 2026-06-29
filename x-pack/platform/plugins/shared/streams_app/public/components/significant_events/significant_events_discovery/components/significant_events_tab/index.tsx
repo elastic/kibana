@@ -36,6 +36,7 @@ import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import { RunInvestigationButton } from './run_investigation_button';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -125,6 +126,12 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
     }),
     width: '100px',
     render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
+  },
+  {
+    name: '',
+    width: '48px',
+    align: 'right' as const,
+    render: (item: SignificantEvent) => <RunInvestigationButton event={item} iconOnly />,
   },
 ];
 

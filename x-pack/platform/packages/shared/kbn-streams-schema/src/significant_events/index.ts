@@ -14,6 +14,11 @@ export {
   significantEventStatusSchema,
   type SignificantEvent,
   type SignificantEventStatus,
+  SIG_EVENT_INVESTIGATION_STATUS_OPTIONS,
+  sigEventInvestigationSchema,
+  sigEventInvestigationStatusSchema,
+  type SigEventInvestigation,
+  type SigEventInvestigationStatus,
 } from './events';
 export {
   MAX_ID_LENGTH,
