@@ -35,6 +35,7 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
+    "@kbn/ui-chrome-layout-constants",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-error-boundary",
   ],

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { ApplicationWorkspaceCollapseButton } from './application_workspace_collapse_button';
 import { AttachmentCartButton } from './attachment_cart_button';
 import { MoreActionsButton } from './more_actions_button';
 
@@ -40,6 +41,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
     >
       <AttachmentCartButton />
       <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
+      <ApplicationWorkspaceCollapseButton />
       {isEmbeddedContext && (
         <EuiToolTip content={labels.close} disableScreenReaderOutput>
           <EuiButtonIcon

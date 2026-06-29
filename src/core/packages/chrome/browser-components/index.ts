@@ -22,6 +22,7 @@ export {
   AgentFirstProjectSideNav,
   AgentFirstGlobalHeader,
   type AgentFirstGlobalHeaderProps,
+  AgentFirstApplicationWorkspaceBridge,
 } from './src/agent_first';
 export { AgentSlotPlaceholder } from './src/agent/agent_slot_placeholder';
 export { AgentWorkspaceSlot } from './src/agent/agent_workspace_slot';

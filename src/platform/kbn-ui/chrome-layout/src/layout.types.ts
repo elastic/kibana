@@ -29,6 +29,7 @@ export interface LayoutDimensions {
   applicationMarginBottom: number;
   applicationMarginRight: number;
   agentMarginLeft: number;
+  applicationWorkspaceOpen: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export interface LayoutState extends LayoutDimensions {
   hasHeader: boolean;
   hasNavigation: boolean;
   hasAgent: boolean;
+  hasApplicationWorkspace: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
 }

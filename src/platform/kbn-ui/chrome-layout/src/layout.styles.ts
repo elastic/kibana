@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { MIN_AGENT_WIDTH } from '@kbn/ui-chrome-layout-constants';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
@@ -39,13 +40,21 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
     bannerHeight,
     headerHeight,
     footerHeight,
+    applicationWorkspaceOpen,
+    hasAgent,
   } = layoutState;
+
+  const agentColumn =
+    hasAgent && !applicationWorkspaceOpen
+      ? `minmax(${MIN_AGENT_WIDTH}px, 1fr)`
+      : `${agentWidth}px`;
+  const applicationColumn = hasAgent && !applicationWorkspaceOpen ? '0px' : '1fr';
 
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px
-      ${agentWidth}px
-      1fr
+      ${agentColumn}
+      ${applicationColumn}
       ${sidebarWidth}px
     `,
     gridTemplateRows: `

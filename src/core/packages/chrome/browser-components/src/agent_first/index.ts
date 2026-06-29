@@ -10,3 +10,4 @@
 export { AgentFirstProjectSideNav } from './agent_first_project_side_nav';
 export { AgentFirstGlobalHeader, type AgentFirstGlobalHeaderProps } from './agent_first_global_header';
 export { AgentFirstNavTopControls } from './agent_first_nav_top_controls';
+export { AgentFirstApplicationWorkspaceBridge } from './agent_first_application_workspace_bridge';

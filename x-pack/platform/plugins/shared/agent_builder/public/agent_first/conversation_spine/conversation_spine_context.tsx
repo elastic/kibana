@@ -17,6 +17,7 @@ import React, {
 } from 'react';
 import { useConversationId } from '../../application/context/conversation/use_conversation_id';
 import { useActiveConversationAttachmentCount } from '../../application/hooks/use_active_conversation_attachment_count';
+import { useKibana } from '../../application/hooks/use_kibana';
 import { formatSpineDisplayLabel } from './hooks/use_spine_display_label';
 import { formatSpineIdentifier } from './hooks/use_spine_identifier';
 import { getSpineConversationId, PROVISIONAL_SPINE_CONVERSATION_ID } from './provisional_spine_conversation_id';
@@ -63,6 +64,9 @@ interface ConversationSpineProviderProps {
 }
 
 export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps> = ({ children }) => {
+  const {
+    services: { chrome },
+  } = useKibana();
   const conversationId = useConversationId();
   const spineConversationId = getSpineConversationId(conversationId);
   const attachmentCount = useActiveConversationAttachmentCount();
@@ -81,10 +85,22 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
     setIsAttachmentsEmptyOpen(false);
   }, []);
 
+  const openApplicationWorkspace = useCallback(() => {
+    chrome.applicationWorkspace.open();
+  }, [chrome]);
+
+  useEffect(() => {
+    return chrome.applicationWorkspace.registerOnClose(() => {
+      closeSpine();
+      closeAttachmentsEmptyOverlay();
+    });
+  }, [chrome, closeAttachmentsEmptyOverlay, closeSpine]);
+
   const openAttachmentsEmptyOverlay = useCallback(() => {
+    openApplicationWorkspace();
     closeSpine();
     setIsAttachmentsEmptyOpen(true);
-  }, [closeSpine]);
+  }, [closeSpine, openApplicationWorkspace]);
 
   useEffect(() => {
     const previousConversationId = prevConversationIdRef.current;
@@ -134,6 +150,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
         return;
       }
 
+      openApplicationWorkspace();
       closeAttachmentsEmptyOverlay();
 
       const isSidebar = options?.isSidebar ?? false;
@@ -147,7 +164,7 @@ export const ConversationSpineProvider: React.FC<ConversationSpineProviderProps>
         isSidebar,
       });
     },
-    [closeAttachmentsEmptyOverlay, hasAttachments, promotedSpineType, spineConversationId]
+    [closeAttachmentsEmptyOverlay, hasAttachments, openApplicationWorkspace, promotedSpineType, spineConversationId]
   );
 
   const setSpineType = useCallback(
