@@ -45,7 +45,7 @@ triggers:
 
 steps:
 
-  - name: investigate
+  - name: platform_streams_investigation_rca
     type: ai.agent
     agent-id: platform.streams.investigation
     connector-id: '{{ inputs.connector_id }}'
