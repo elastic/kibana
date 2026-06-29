@@ -2113,17 +2113,17 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@dagrejs/dagre@1.1.8":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-1.1.8.tgz#fcbee59344c7b4f48b711ba30783543b70029310"
-  integrity sha512-5SEDlndt4W/LaVzPYJW+bSmSEZc9EzTf8rJ20WCKvjS5EAZAN0b+x0Yww7VMT4R3Wootkg+X9bUfUxazYw6Blw==
+"@dagrejs/dagre@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-3.0.0.tgz#543f20188f7494db0f45d634f7b3760747f87f23"
+  integrity sha512-ZzhnTy1rfuoew9Ez3EIw4L2znPGnYYhfn8vc9c4oB8iw6QAsszbiU0vRhlxWPFnmmNSFAkrYeF1PhM5m4lAN0Q==
   dependencies:
-    "@dagrejs/graphlib" "2.2.4"
+    "@dagrejs/graphlib" "4.0.1"
 
-"@dagrejs/graphlib@2.2.4":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-2.2.4.tgz#d77bfa9ff49e2307c0c6e6b8b26b5dd3c05816c4"
-  integrity sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==
+"@dagrejs/graphlib@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-4.0.1.tgz#a9cf907cc5ddf9140a64360ad487766f17d1ee36"
+  integrity sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==
 
 "@date-fns/tz@^1.4.1":
   version "1.4.1"
