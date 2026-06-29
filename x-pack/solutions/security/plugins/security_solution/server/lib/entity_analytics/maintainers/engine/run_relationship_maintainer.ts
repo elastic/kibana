@@ -274,11 +274,12 @@ async function runIntegration(
     // When target validation ran, restrict the metadata write to the same
     // validated target set so the history stream stays consistent with the
     // latest-index write (no dangling targets in either store).
-    const metadataRecords = write.validTargetIds
+    const { validTargetIds } = write;
+    const metadataRecords = validTargetIds
       ? records.flatMap((r) => {
           const filteredRels: Record<string, string[]> = {};
           for (const [relType, targetEuids] of Object.entries(r.relationships)) {
-            const valid = targetEuids.filter((id) => write.validTargetIds!.has(id));
+            const valid = targetEuids.filter((id) => validTargetIds.has(id));
             if (valid.length > 0) filteredRels[relType] = valid;
           }
           return Object.keys(filteredRels).length > 0
