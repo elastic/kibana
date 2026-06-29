@@ -85,6 +85,9 @@ describe('transformCreatePropsFromApi', () => {
         workflowConfig: {
           alertRetrievalMode: 'custom_query',
           alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: false,
+          skillEnabled: true,
           validationWorkflowId: 'default',
         },
       },
@@ -121,8 +124,11 @@ describe('transformCreatePropsFromApi', () => {
     const result = transformCreatePropsFromApi(defaultApiCreateProps);
 
     expect(result.params.workflowConfig).toEqual({
-      alertRetrievalWorkflowIds: [],
       alertRetrievalMode: 'custom_query',
+      alertRetrievalWorkflowIds: [],
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: false,
+      skillEnabled: true,
       validationWorkflowId: 'default',
     });
   });
@@ -133,8 +139,11 @@ describe('transformCreatePropsFromApi', () => {
       params: {
         ...defaultApiCreateProps.params,
         workflow_config: {
-          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_mode: 'custom_query',
           alert_retrieval_workflow_ids: ['wf-custom-1', 'wf-custom-2'],
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'wf-custom-validate',
         },
       },
@@ -143,8 +152,11 @@ describe('transformCreatePropsFromApi', () => {
     const result = transformCreatePropsFromApi(propsWithConfig);
 
     expect(result.params.workflowConfig).toEqual({
-      alertRetrievalMode: 'custom_only',
+      alertRetrievalMode: 'custom_query',
       alertRetrievalWorkflowIds: ['wf-custom-1', 'wf-custom-2'],
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: true,
+      skillEnabled: true,
       validationWorkflowId: 'wf-custom-validate',
     });
   });

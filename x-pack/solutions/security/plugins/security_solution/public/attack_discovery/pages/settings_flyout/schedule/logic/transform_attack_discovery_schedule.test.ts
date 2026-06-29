@@ -62,14 +62,18 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
     });
   });
 
-  it('includes workflowConfig when workflow_config is present', () => {
+  it('includes the composite workflowConfig when workflow_config is present', () => {
     const scheduleWithWorkflowConfig: AttackDiscoverySchedule = {
       ...baseAttackDiscoverySchedule,
       params: {
         ...baseAttackDiscoverySchedule.params,
         workflow_config: {
+          alert_retrieval_mode: 'esql',
           alert_retrieval_workflow_ids: ['wf-1', 'wf-2'],
-          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_workflows_enabled: true,
+          default_retrieval_enabled: true,
+          esql_query: 'FROM .alerts-security.alerts-default',
+          skill_enabled: false,
           validation_workflow_id: 'custom-validate',
         },
       },
@@ -80,9 +84,41 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
     );
 
     expect(result.params.workflowConfig).toEqual({
+      alertRetrievalMode: 'esql',
       alertRetrievalWorkflowIds: ['wf-1', 'wf-2'],
-      alertRetrievalMode: 'custom_only',
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: true,
+      esqlQuery: 'FROM .alerts-security.alerts-default',
+      skillEnabled: false,
       validationWorkflowId: 'custom-validate',
+    });
+  });
+
+  it('omits esqlQuery when esql_query is not present', () => {
+    const scheduleWithoutEsql: AttackDiscoverySchedule = {
+      ...baseAttackDiscoverySchedule,
+      params: {
+        ...baseAttackDiscoverySchedule.params,
+        workflow_config: {
+          alert_retrieval_mode: 'custom_query',
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: false,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+      },
+    };
+
+    const result = transformAttackDiscoveryScheduleToAttackDiscoverySchedule(scheduleWithoutEsql);
+
+    expect(result.params.workflowConfig).toEqual({
+      alertRetrievalMode: 'custom_query',
+      alertRetrievalWorkflowIds: [],
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: false,
+      skillEnabled: true,
+      validationWorkflowId: 'default',
     });
   });
 
@@ -92,27 +128,5 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
     );
 
     expect(result.params.workflowConfig).toBeUndefined();
-  });
-
-  it('handles workflow_config with default values', () => {
-    const scheduleWithDefaults: AttackDiscoverySchedule = {
-      ...baseAttackDiscoverySchedule,
-      params: {
-        ...baseAttackDiscoverySchedule.params,
-        workflow_config: {
-          alert_retrieval_workflow_ids: [],
-          alert_retrieval_mode: 'custom_query',
-          validation_workflow_id: 'default',
-        },
-      },
-    };
-
-    const result = transformAttackDiscoveryScheduleToAttackDiscoverySchedule(scheduleWithDefaults);
-
-    expect(result.params.workflowConfig).toEqual({
-      alertRetrievalWorkflowIds: [],
-      alertRetrievalMode: 'custom_query',
-      validationWorkflowId: 'default',
-    });
   });
 });

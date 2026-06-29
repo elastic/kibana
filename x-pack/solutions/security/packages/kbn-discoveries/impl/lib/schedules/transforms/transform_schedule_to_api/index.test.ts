@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+
 import { getScheduleMock } from '../../__mocks__/schedules.mock';
 import { transformScheduleToApi } from '.';
 
@@ -110,7 +112,7 @@ describe('transformScheduleToApi', () => {
     });
   });
 
-  it('includes workflow_config when workflowConfig is present', () => {
+  it('passes the composite workflow_config through when present (new schedules)', () => {
     const mockSchedule = getScheduleMock({
       params: {
         alertsIndexPattern: '.alerts-security.alerts-default',
@@ -121,8 +123,12 @@ describe('transformScheduleToApi', () => {
         },
         size: 100,
         workflowConfig: {
-          alertRetrievalMode: 'custom_only',
+          alertRetrievalMode: 'esql',
           alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
+          alertRetrievalWorkflowsEnabled: true,
+          defaultRetrievalEnabled: true,
+          esqlQuery: 'FROM .alerts-security.alerts-default',
+          skillEnabled: false,
           validationWorkflowId: 'custom-validation',
         },
       },
@@ -131,8 +137,46 @@ describe('transformScheduleToApi', () => {
     const result = transformScheduleToApi(mockSchedule);
 
     expect(result.params.workflow_config).toEqual({
-      alert_retrieval_mode: 'custom_only',
+      alert_retrieval_mode: 'esql',
       alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
+      alert_retrieval_workflows_enabled: true,
+      default_retrieval_enabled: true,
+      esql_query: 'FROM .alerts-security.alerts-default',
+      skill_enabled: false,
+      validation_workflow_id: 'custom-validation',
+    });
+  });
+
+  it('derives the composite toggles from a legacy single-enum workflow_config (backward compatibility)', () => {
+    const mockSchedule = getScheduleMock({
+      params: {
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: {
+          actionTypeId: '.gen-ai',
+          connectorId: 'gpt-4o',
+          name: 'Mock GPT-4o',
+        },
+        size: 100,
+        // Simulate an old persisted schedule that predates the composite migration.
+        workflowConfig: {
+          alertRetrievalMode: 'custom_only',
+          alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
+          validationWorkflowId: 'custom-validation',
+        } as unknown as NonNullable<AttackDiscoverySchedule['params']['workflowConfig']>,
+      },
+    });
+
+    const result = transformScheduleToApi(mockSchedule);
+
+    // The legacy persisted `custom_only` mode bridges to the composite toggles:
+    // default retrieval off, custom workflows on (ids present), query mode falls
+    // back to `custom_query`, and the always-on skill toggle defaults on.
+    expect(result.params.workflow_config).toEqual({
+      alert_retrieval_mode: 'custom_query',
+      alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
+      alert_retrieval_workflows_enabled: true,
+      default_retrieval_enabled: false,
+      skill_enabled: true,
       validation_workflow_id: 'custom-validation',
     });
   });

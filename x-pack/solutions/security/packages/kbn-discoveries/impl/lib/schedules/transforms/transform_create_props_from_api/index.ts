@@ -12,6 +12,9 @@ import { transformActionsFromApi } from '../transform_actions_from_api';
 const DEFAULT_WORKFLOW_CONFIG = {
   alertRetrievalMode: 'custom_query' as const,
   alertRetrievalWorkflowIds: [] as string[],
+  alertRetrievalWorkflowsEnabled: false,
+  defaultRetrievalEnabled: false,
+  skillEnabled: true,
   validationWorkflowId: 'default',
 };
 
@@ -48,11 +51,15 @@ export const transformCreatePropsFromApi = (
     workflowConfig:
       apiCreateProps.params.workflow_config != null
         ? {
+            alertRetrievalMode: apiCreateProps.params.workflow_config.alert_retrieval_mode,
             alertRetrievalWorkflowIds:
               apiCreateProps.params.workflow_config.alert_retrieval_workflow_ids,
-            alertRetrievalMode:
-              apiCreateProps.params.workflow_config.alert_retrieval_mode ?? 'custom_query',
+            alertRetrievalWorkflowsEnabled:
+              apiCreateProps.params.workflow_config.alert_retrieval_workflows_enabled,
+            defaultRetrievalEnabled:
+              apiCreateProps.params.workflow_config.default_retrieval_enabled,
             esqlQuery: apiCreateProps.params.workflow_config.esql_query,
+            skillEnabled: apiCreateProps.params.workflow_config.skill_enabled,
             validationWorkflowId: apiCreateProps.params.workflow_config.validation_workflow_id,
           }
         : DEFAULT_WORKFLOW_CONFIG,

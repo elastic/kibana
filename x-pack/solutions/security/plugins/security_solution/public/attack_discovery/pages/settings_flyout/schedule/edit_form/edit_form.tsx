@@ -17,18 +17,23 @@ import type { AttackDiscoveryScheduleSchema } from './types';
 import { ConnectorSelectorField } from '../form_fields/connector_selector_field';
 import { ScheduleField } from '../form_fields/schedule_field';
 import { useSettingsView } from '../../hooks/use_settings_view';
-import type { AlertsSelectionSettings } from '../../types';
+import { useWorkflowHealthCheck } from '../../hooks/use_workflow_health_check';
+import type { AlertsSelectionSettings, ValidationItem } from '../../types';
 import type { WorkflowConfiguration } from '../../workflow_configuration/types';
 import {
   AlertRetrievalStep,
   ConnectorTypeSelectorPanel,
   DEFAULT_WORKFLOW_CONFIGURATION,
   GenerationStep,
+  hasAtLeastOneRetrievalToggle,
+  hasEmptyRequiredRetrievalWorkflows,
   NotificationsStep,
   ValidationPanel,
   ValidationStep,
 } from '../../workflow_configuration';
+import * as workflowI18n from '../../workflow_configuration/translations';
 import { AlertRetrievalContent } from '../../workflow_settings_view/alert_retrieval_step/alert_retrieval_content';
+import { WorkflowValidationCallouts } from '../../workflow_settings_view/components';
 import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useConnectors } from '../../../../../common/hooks/use_connectors';
@@ -100,14 +105,6 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
 
   const [{ value }] = useFormData<{ value: AttackDiscoveryScheduleSchema }>({ form });
   const { isValid, setFieldValue, submit } = form;
-
-  useEffect(() => {
-    onChange({
-      isValid,
-      submit,
-      value,
-    });
-  }, [isValid, onChange, submit, value]);
 
   const [settings, setSettings] = useState<AlertsSelectionSettings>(
     initialValue.alertsSelectionSettings
@@ -198,10 +195,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     if (!isWorkflowsEnabled) {
       return false;
     }
-    return (
-      workflowConfig.alertRetrievalMode === 'custom_only' &&
-      workflowConfig.alertRetrievalWorkflowIds.length === 0
-    );
+    return !hasAtLeastOneRetrievalToggle(workflowConfig);
   }, [isWorkflowsEnabled, workflowConfig]);
 
   const validationHasError = useMemo(() => {
@@ -210,6 +204,76 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     }
     return !workflowConfig.validationWorkflowId;
   }, [isWorkflowsEnabled, workflowConfig.validationWorkflowId]);
+
+  // Deferred validation: the alert retrieval workflows toggle is the sole enabled
+  // retrieval source but no workflow is selected. This must NOT surface
+  // immediately; instead a Save attempt is canceled and the error is revealed.
+  const emptyRetrievalWorkflows = useMemo(
+    () => Boolean(isWorkflowsEnabled) && hasEmptyRequiredRetrievalWorkflows(workflowConfig),
+    [isWorkflowsEnabled, workflowConfig]
+  );
+
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+
+  // Once the misconfiguration is resolved, reset the attempt flag so the error
+  // only ever reappears after another Save attempt.
+  useEffect(() => {
+    if (!emptyRetrievalWorkflows) {
+      setHasAttemptedSave(false);
+    }
+  }, [emptyRetrievalWorkflows]);
+
+  const showEmptyRetrievalWorkflowsError = hasAttemptedSave && emptyRetrievalWorkflows;
+
+  const alertRetrievalSectionHasError = alertRetrievalHasError || showEmptyRetrievalWorkflowsError;
+
+  // Wrap the form submit so a Save attempt with the empty-workflows
+  // misconfiguration is canceled (`isValid: false`) and the deferred error is
+  // revealed, without disabling the Save button up front.
+  const handleSubmit = useCallback<FormHook<AttackDiscoveryScheduleSchema>['submit']>(async () => {
+    const result = await submit();
+
+    if (emptyRetrievalWorkflows) {
+      setHasAttemptedSave(true);
+      return { ...result, isValid: false };
+    }
+
+    return result;
+  }, [emptyRetrievalWorkflows, submit]);
+
+  useEffect(() => {
+    onChange({
+      isValid,
+      submit: handleSubmit,
+      value,
+    });
+  }, [handleSubmit, isValid, onChange, value]);
+
+  const healthCheckWarnings = useWorkflowHealthCheck({
+    isWorkflowsEnabled,
+    workflowConfiguration: workflowConfig,
+  });
+
+  const workflowValidationItems = useMemo<readonly ValidationItem[]>(() => {
+    const errors: ValidationItem[] = [
+      ...(alertRetrievalHasError
+        ? [{ level: 'error' as const, message: workflowI18n.NO_ALERT_RETRIEVAL_METHOD_SELECTED }]
+        : []),
+      ...(showEmptyRetrievalWorkflowsError
+        ? [{ level: 'error' as const, message: workflowI18n.NO_ALERT_RETRIEVAL_WORKFLOWS_SELECTED }]
+        : []),
+      ...(validationHasError
+        ? [{ level: 'error' as const, message: workflowI18n.NO_VALIDATION_WORKFLOW_SELECTED }]
+        : []),
+    ];
+
+    return [...errors, ...healthCheckWarnings];
+  }, [
+    alertRetrievalHasError,
+    healthCheckWarnings,
+    showEmptyRetrievalWorkflowsError,
+    validationHasError,
+  ]);
 
   return (
     <Form form={form} data-test-subj="attackDiscoveryScheduleForm">
@@ -228,11 +292,13 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
         </EuiFlexItem>
         {isWorkflowsEnabled ? (
           <EuiFlexItem>
-            <AlertRetrievalStep hasError={alertRetrievalHasError} isLast={false}>
+            <WorkflowValidationCallouts workflowValidationItems={workflowValidationItems} />
+
+            <AlertRetrievalStep hasError={alertRetrievalSectionHasError} isLast={false}>
               <UseField path="alertsSelectionSettings">{() => null}</UseField>
               <UseField path="workflowConfig">{() => null}</UseField>
               <AlertRetrievalContent
-                alertRetrievalHasError={alertRetrievalHasError}
+                alertRetrievalHasError={alertRetrievalSectionHasError}
                 alertsPreviewStackBy0={alertsPreviewStackBy0}
                 alertSummaryStackBy0={alertSummaryStackBy0}
                 connectorId={connectorId}

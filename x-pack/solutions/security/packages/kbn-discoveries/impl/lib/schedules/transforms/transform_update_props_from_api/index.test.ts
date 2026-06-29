@@ -91,6 +91,9 @@ describe('transformUpdatePropsFromApi', () => {
     const existingWorkflowConfig = {
       alertRetrievalMode: 'esql' as const,
       alertRetrievalWorkflowIds: ['wf-existing-1'],
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: true,
+      skillEnabled: false,
       validationWorkflowId: 'wf-existing-validate',
     };
 
@@ -103,6 +106,9 @@ describe('transformUpdatePropsFromApi', () => {
     const existingWorkflowConfig = {
       alertRetrievalMode: 'esql' as const,
       alertRetrievalWorkflowIds: ['wf-existing-1'],
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: true,
+      skillEnabled: false,
       validationWorkflowId: 'wf-existing-validate',
     };
     const propsWithConfig: AttackDiscoveryScheduleUpdateProps = {
@@ -111,7 +117,10 @@ describe('transformUpdatePropsFromApi', () => {
         ...defaultApiUpdateProps.params,
         workflow_config: {
           alert_retrieval_workflow_ids: ['wf-request-1'],
-          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_mode: 'custom_query',
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'wf-request-validate',
         },
       },
@@ -120,8 +129,11 @@ describe('transformUpdatePropsFromApi', () => {
     const result = transformUpdatePropsFromApi(propsWithConfig, existingWorkflowConfig);
 
     expect(result.params.workflowConfig).toEqual({
+      alertRetrievalMode: 'custom_query',
       alertRetrievalWorkflowIds: ['wf-request-1'],
-      alertRetrievalMode: 'custom_only',
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: true,
+      skillEnabled: true,
       validationWorkflowId: 'wf-request-validate',
     });
   });
@@ -132,6 +144,9 @@ describe('transformUpdatePropsFromApi', () => {
     expect(result.params.workflowConfig).not.toEqual({
       alertRetrievalMode: 'custom_query',
       alertRetrievalWorkflowIds: [],
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: false,
+      skillEnabled: true,
       validationWorkflowId: 'default',
     });
   });
@@ -143,7 +158,10 @@ describe('transformUpdatePropsFromApi', () => {
         ...defaultApiUpdateProps.params,
         workflow_config: {
           alert_retrieval_workflow_ids: ['wf-custom-1'],
-          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_mode: 'custom_query',
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'wf-custom-validate',
         },
       },
@@ -152,8 +170,11 @@ describe('transformUpdatePropsFromApi', () => {
     const result = transformUpdatePropsFromApi(propsWithConfig);
 
     expect(result.params.workflowConfig).toEqual({
+      alertRetrievalMode: 'custom_query',
       alertRetrievalWorkflowIds: ['wf-custom-1'],
-      alertRetrievalMode: 'custom_only',
+      alertRetrievalWorkflowsEnabled: false,
+      defaultRetrievalEnabled: true,
+      skillEnabled: true,
       validationWorkflowId: 'wf-custom-validate',
     });
   });

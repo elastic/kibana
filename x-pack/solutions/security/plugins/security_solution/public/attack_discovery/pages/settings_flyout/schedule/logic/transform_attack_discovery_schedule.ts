@@ -12,6 +12,8 @@ import type {
   ScheduleGeneralAction,
 } from '@kbn/discoveries-schemas';
 
+import { workflowConfigApiToForm } from '../utils/workflow_config_api_to_form';
+
 const isGeneralAction = (action: ScheduleAction): action is ScheduleGeneralAction =>
   Object.hasOwn(action, 'group');
 
@@ -74,17 +76,7 @@ export const transformAttackDiscoveryScheduleToAttackDiscoverySchedule = (
     start: schedule.params.start,
     workflowConfig:
       schedule.params.workflow_config != null
-        ? {
-            alertRetrievalMode:
-              schedule.params.workflow_config.alert_retrieval_mode ?? 'custom_query',
-            alertRetrievalWorkflowIds:
-              schedule.params.workflow_config.alert_retrieval_workflow_ids ?? [],
-            ...(schedule.params.workflow_config.esql_query != null
-              ? { esqlQuery: schedule.params.workflow_config.esql_query }
-              : {}),
-            validationWorkflowId:
-              schedule.params.workflow_config.validation_workflow_id ?? 'default',
-          }
+        ? workflowConfigApiToForm(schedule.params.workflow_config)
         : undefined,
   },
   schedule: schedule.schedule,
