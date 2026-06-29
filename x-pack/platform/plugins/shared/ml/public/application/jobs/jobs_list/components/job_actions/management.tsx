@@ -54,21 +54,6 @@ const isJobBlocked = (item: MlSummaryJob): boolean => {
   return item.blocked !== undefined;
 };
 
-const closeMenu = (now = false): void => {
-  if (now) {
-    document.querySelector('.euiTable')?.click();
-  } else {
-    window.setTimeout(() => {
-      const modalBody = document.querySelector('.euiModalBody');
-      if (modalBody) {
-        modalBody.click();
-      } else {
-        document.querySelector('.euiTable')?.click();
-      }
-    }, 500);
-  }
-};
-
 export const useActionsMenuContent = ({
   toastNotifications,
   share,
@@ -122,12 +107,12 @@ export const useActionsMenuContent = ({
             defaultMessage: 'Start datafeed',
           }
         ),
+        type: 'icon',
         icon: 'play',
         enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
         available: (item) => isStartable([item]),
         onClick: (item) => {
           showStartDatafeedModal([item]);
-          closeMenu();
         },
         'data-test-subj': 'mlActionButtonStartDatafeed',
       },
@@ -138,6 +123,7 @@ export const useActionsMenuContent = ({
         description: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedDescription', {
           defaultMessage: 'Stop datafeed',
         }),
+        type: 'icon',
         icon: 'stop',
         enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
         available: (item) => isStoppable([item]),
@@ -147,8 +133,6 @@ export const useActionsMenuContent = ({
           } else {
             stopDatafeeds(toastNotifications, mlApi, [item], refreshJobs);
           }
-
-          closeMenu(true);
         },
         'data-test-subj': 'mlActionButtonStopDatafeed',
       },
@@ -159,12 +143,12 @@ export const useActionsMenuContent = ({
         description: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
           defaultMessage: 'Create alert rule',
         }),
+        type: 'icon',
         icon: 'bell',
         enabled: (item) => isJobBlocked(item) === false,
         available: () => canCreateMlAlerts,
         onClick: (item) => {
           showCreateAlertFlyout([item.id]);
-          closeMenu(true);
         },
         'data-test-subj': 'mlActionButtonCreateAlert',
       },
@@ -175,6 +159,7 @@ export const useActionsMenuContent = ({
         description: i18n.translate('xpack.ml.jobsList.managementActions.closeJobDescription', {
           defaultMessage: 'Close job',
         }),
+        type: 'icon',
         icon: 'cross',
         enabled: (item) => isJobBlocked(item) === false && canCloseJob,
         available: (item) => isClosable([item]),
@@ -184,8 +169,6 @@ export const useActionsMenuContent = ({
           } else {
             closeJobs(toastNotifications, mlApi, [item], refreshJobs);
           }
-
-          closeMenu(true);
         },
         'data-test-subj': 'mlActionButtonCloseJob',
       },
@@ -196,12 +179,12 @@ export const useActionsMenuContent = ({
         description: i18n.translate('xpack.ml.jobsList.managementActions.resetJobDescription', {
           defaultMessage: 'Reset job',
         }),
+        type: 'icon',
         icon: 'refresh',
         enabled: (item) => isResetEnabled(item) && canResetJob,
         available: (item) => isResettable([item]),
         onClick: (item) => {
           showResetJobModal([item]);
-          closeMenu(true);
         },
         'data-test-subj': 'mlActionButtonResetJob',
       },
@@ -212,13 +195,13 @@ export const useActionsMenuContent = ({
         description: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobDescription', {
           defaultMessage: 'Clone job',
         }),
+        type: 'icon',
         icon: 'copy',
         enabled: (item) => {
           return isJobBlocked(item) === false && canCreateJob;
         },
         onClick: (item) => {
           cloneJob(toastNotifications, share, mlApi, item.id);
-          closeMenu(true);
         },
         'data-test-subj': 'mlActionButtonCloneJob',
       },
@@ -232,12 +215,12 @@ export const useActionsMenuContent = ({
             defaultMessage: 'View datafeed counts',
           }
         ),
+        type: 'icon',
         icon: 'chartAreaStack',
         enabled: () => canGetDatafeeds,
         available: () => canGetDatafeeds,
         onClick: (item) => {
           showDatafeedChartFlyout(item);
-          closeMenu();
         },
         'data-test-subj': 'mlActionButtonViewDatafeedChart',
       },
@@ -248,11 +231,11 @@ export const useActionsMenuContent = ({
         description: i18n.translate('xpack.ml.jobsList.managementActions.editJobDescription', {
           defaultMessage: 'Edit job',
         }),
+        type: 'icon',
         icon: 'pencil',
         enabled: (item) => isJobBlocked(item) === false && canUpdateJob && canUpdateDatafeed,
         onClick: (item) => {
           showEditJobFlyout(item);
-          closeMenu();
         },
         'data-test-subj': 'mlActionButtonEditJob',
       },
@@ -264,11 +247,11 @@ export const useActionsMenuContent = ({
           defaultMessage: 'Delete job',
         }),
         icon: 'trash',
+        type: 'icon',
         color: 'danger',
         enabled: () => canDeleteJob,
         onClick: (item) => {
           showDeleteJobModal([item]);
-          closeMenu();
         },
         'data-test-subj': 'mlActionButtonDeleteJob',
       },
