@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -79,7 +80,6 @@ import type {
 } from '../../common/lib/workflow_change_history/types';
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
-import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
@@ -133,7 +133,6 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
-  private workflowVersioningEnabled!: boolean;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
@@ -204,9 +203,9 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+    const workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart, this.logger);
 
-    if (this.workflowVersioningEnabled) {
+    if (workflowVersioningEnabled) {
       await this.initializeChangeHistoryService(coreStart);
     } else {
       this.logger.debug(
@@ -225,7 +224,7 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowVersioningEnabled: this.workflowVersioningEnabled,
+      workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -274,7 +273,7 @@ export class WorkflowsService {
       {
         changeHistoryService: this.changeHistoryService,
         getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
-        workflowVersioningEnabled: this.workflowVersioningEnabled,
+        workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
       },
       { workflowId: id, spaceId, ...options }
     );
