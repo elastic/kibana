@@ -502,7 +502,7 @@ class SmlIndexerImpl implements SmlIndexer {
       title: chunk.title,
       origin: { uri: `${chunk.type}://${originId}` },
       content: chunk.content,
-      created_at: createdAt ?? now,
+      created_at: createdAt || now,
       updated_at: now,
       spaces,
       permissions: {

@@ -21,27 +21,10 @@ import { WRITE_SECURITY, withSmlFeatureFlag } from './common';
 /**
  * `DELETE /internal/agent_context_layer/sml/{type}/{originId}`
  *
- * Removes every chunk written under the compound `(type, originId)`
- * key (manual + crawled) via
- * {@link SmlService.deleteAttachment} with `ingestionMethod: 'all'`,
- * mirroring the PUT route's "claim the origin" semantic in reverse.
- *
- * `type` is part of the URL because the storage's canonical key is
- * the compound `origin.uri = ${type}://${originId}`. An earlier
- * design discovered the type by enumerating existing chunks — that
- * path queried a phantom `origin_id` keyword that's not in the index
- * mapping and silently returned `[]`, so every DELETE 404'd. Putting
- * `type` in the URL also lets the indexer's `deleteAttachment`
- * target a single canonical URI in `deleteByQuery`, instead of the
- * route fanning out one call per discovered type.
- *
- * Cross-space guard: an origin owned by another space is reported
- * as 404 (same shape as the GET route) so a caller in space A
- * cannot even probe for origins in space B.
- *
- * Per-chunk privilege guard: a caller who cannot read every chunk
- * for the origin should not be allowed to delete the lot. Mirrors
- * the upsert route's `checkItemsAccess` shape.
+ * Removes all chunks under `(type, originId)` via `deleteAttachment`.
+ * Cross-space guard: returns 404 (not 403) when the origin is invisible
+ * from the caller's space. Per-chunk privilege guard: caller must hold
+ * read access to every chunk they are about to delete.
  */
 export const registerDeleteRoute = ({
   router,

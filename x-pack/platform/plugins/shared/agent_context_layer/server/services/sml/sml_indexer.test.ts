@@ -642,15 +642,8 @@ describe('createSmlIndexer', () => {
       });
 
       it('hasManualEntry treats unexpected ES errors as manual-entry-present (fail-closed)', async () => {
-        // Previous behaviour was fail-OPEN — a transient ES blip during
-        // the manual-entry probe let the crawler proceed straight to
-        // `deleteChunks` and silently destroyed admin-curated manual
-        // entries. We now fail-CLOSED: on an unexpected error we assume
-        // a manual entry exists and skip this cycle. The trade-off (a
-        // skipped crawl tick vs. silently wiping curated content) lands
-        // on the side of not destroying admin intent — the next cycle
-        // recovers automatically once ES is healthy. Force re-crawl
-        // remains available via `force: true`.
+        // Fail-closed: a transient ES error skips the crawl tick rather than risking
+        // destruction of admin-curated manual entries.
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -680,18 +673,13 @@ describe('createSmlIndexer', () => {
           expect.stringContaining('hasManualEntry check failed')
         );
         expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fail-closed'));
-        // The whole point — no destructive operations against the
-        // origin while the probe is uncertain.
         expect(getSmlData).not.toHaveBeenCalled();
         expect(esClient.deleteByQuery).not.toHaveBeenCalled();
         expect(bulkMock).not.toHaveBeenCalled();
       });
 
       it('hasManualEntry index_not_found still treats origin as fresh (no fail-closed)', async () => {
-        // Index-not-found is unambiguous: "no SML index yet" means
-        // there cannot be a manual entry. We MUST NOT fail-closed in
-        // this case or first-write crawls would never make progress on
-        // a brand-new cluster.
+        // index_not_found is unambiguous — fail-closed here would block first-write crawls on new clusters.
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -763,14 +751,7 @@ describe('createSmlIndexer', () => {
         );
 
         expect(getSmlData).not.toHaveBeenCalled();
-        // getPermissions is called exactly once per `indexAttachment`
-        // call — its result only depends on `originId` (not on the chunk),
-        // so calling it per chunk would be wasted work and would also
-        // make fail-closed atomicity hard to reason about (a per-chunk
-        // throw on chunk N would leave the origin half-written). The
-        // workflow step still cannot bypass the type's gating by
-        // writing in content mode: the one call applies to every chunk
-        // produced in the batch.
+        // Called once per indexAttachment — per-chunk calls would risk half-written origins on throw.
         expect(getPermissions).toHaveBeenCalledTimes(1);
         expect(getPermissions).toHaveBeenCalledWith(
           'att-manual',
@@ -806,9 +787,6 @@ describe('createSmlIndexer', () => {
       });
 
       it('content-mode getPermissions throw: propagates the throw and leaves existing chunks intact', async () => {
-        // Same fail-closed contract as origin mode, repeated here so the
-        // content-mode framing in the warn line ('aborting content-mode
-        // write') can't silently drift away from the origin-mode framing.
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });

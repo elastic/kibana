@@ -108,14 +108,6 @@ describe('registerDeleteRoute', () => {
   });
 
   it('targets only the URL-pinned type even if chunks of other types share the bare id', async () => {
-    // With `type` in the URL, the route never needs to enumerate
-    // types — the `findByOriginAcrossSpaces` query is already scoped
-    // by `origin.uri = ${type}://${originId}`. This test pins the
-    // contract that a DELETE for `visualization/viz-1` will never
-    // touch a `dashboard/viz-1` chunk that legitimately shares the
-    // bare id. The mock service returns only what the canonical URI
-    // would match, so the route's behaviour reduces to: one delete,
-    // exactly one `attachmentType`.
     const vizChunk = { ...sampleDocument, id: 'chunk-1', type: 'visualization' };
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([vizChunk]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[vizChunk.id, true]]));

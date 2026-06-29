@@ -25,61 +25,17 @@ import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 /**
  * `PUT /internal/agent_context_layer/sml/{type}/{originId}`
  *
- * Writes a single manual chunk under `(type, originId)` via
- * {@link SmlService.indexAttachment} content-mode — the same code path
- * the workflow step's `sml.index` action uses.
+ * Writes a manual chunk via `indexAttachment` content-mode (same path as the
+ * workflow step). Permissions are stamped by the indexer from `getPermissions`;
+ * callers cannot supply them. The write replaces all existing chunks for the
+ * origin ("claim the origin" semantic). Omitting `tags` clears them — PUT is
+ * a full-document replace, not a merge.
  *
- * The URL is compound on purpose: `type` plus `originId` is the only
- * pair that addresses a chunk unambiguously. The bare `originId` is
- * not globally unique (a `lens` id and a `dashboard` id can
- * legitimately collide), and the storage's canonical key is the
- * compound `origin.uri = ${type}://${originId}`. An earlier shape
- * (`/sml/{originId}`) assumed the bare id was system-unique and
- * routed every lookup through a phantom `origin_id` keyword that
- * isn't in the index mapping — every per-origin route silently
- * 404'd. See `common/constants.ts` for the long-form history.
- *
- * Permissions are stamped by the indexer:
- * - When `type` matches a registered SML type, its `getPermissions`
- *   hook supplies them.
- * - When it doesn't (ad-hoc namespace), the indexer stamps empty
- *   `SmlPermissions` and the chunk becomes readable to anyone in the
- *   caller's space. The indexer logs a once-per-process warn so this
- *   doesn't happen invisibly. Callers cannot influence permissions
- *   from the body — that surface was removed to close a spoofing
- *   vector.
- *
- * The indexer's content-mode write wipes every existing chunk for
- * the origin (regardless of `ingestion_method`), so this route is
- * the "claim the origin" semantic — any crawler-written chunks for
- * that `(type, originId)` are replaced.
- *
- * Cross-space guard: before calling the indexer the route looks the
- * origin up across all spaces and rejects requests from a space that
- * cannot see it (404) so a caller in space A cannot stomp on chunks
- * in space B.
- *
- * Per-chunk privilege guard: when the origin already has chunks in
- * the caller's space, the route also runs `checkItemsAccess` to
- * confirm the caller has the Kibana privileges those chunks were
- * gated with. Without this gate, a user holding
- * `agentContextLayer:write` but lacking the underlying object
- * privileges (e.g. `saved_object:dashboard/get`) could PUT new
- * content over a dashboard origin — the indexer would dutifully
- * delete the existing permission-gated chunks and write the caller's
- * chunks in their place, achieving content injection on a resource
- * the caller cannot read. Mirroring the DELETE route's gate (and
- * returning 404 rather than 403) keeps the surface symmetric and
- * avoids disclosing the existence of gated chunks the caller cannot
- * see.
- *
- * `tags` semantics: the route writes the new chunk wholesale via the
- * indexer's content-mode write — there is no merge/patch step. A PUT
- * that omits `tags` therefore CLEARS any previously stored tags.
- * This is the intended REST `PUT` semantic (the body is the complete
- * new representation), but callers used to JSON-merge semantics
- * should pin the current tag list explicitly. The behaviour is
- * locked in by a route-level test.
+ * Cross-space guard: origins invisible from the caller's space return 404.
+ * Per-chunk privilege guard: caller must hold read access to every existing
+ * chunk before they can overwrite it, to prevent content injection on
+ * permission-gated origins. Both guards return 404 (not 403) to avoid
+ * disclosing the existence of chunks the caller cannot see.
  */
 export const registerUpsertRoute = ({
   router,
@@ -96,13 +52,8 @@ export const registerUpsertRoute = ({
     {
       path: smlByTypeAndOriginIdPath,
       validate: {
-        // The `type` URL param carries the same syntactic guard as the
-        // workflow step schema and the (now-removed) body field —
-        // lowercase identifier starting with a letter. It's the last
-        // line of defense against junk namespace ids reaching the
-        // index, since the indexer is permissive about whether a type
-        // is registered. `originId` is bounded but otherwise free-form
-        // — it's the producer's externally-issued key.
+        // `type` is validated as a lowercase identifier; the indexer is permissive about
+        // registration, so this is the last syntactic guard against junk namespace ids.
         params: schema.object({
           type: schema.string({
             minLength: 1,
@@ -114,26 +65,8 @@ export const registerUpsertRoute = ({
           }),
           originId: schema.string({ minLength: 1, maxLength: MAX_SML_ORIGIN_ID_LENGTH }),
         }),
-        // Neither `type`, `permissions`, nor `origin_id` appear in
-        // this body:
-        // - `type` is the URL path param; duplicating it in the body
-        //   invites caller/path mismatch with no user value.
-        // - `permissions` are derived by the indexer from the
-        //   registered SML type's `getPermissions` hook (same source
-        //   of truth as the crawler, the workflow step, and
-        //   event-driven writes). Accepting caller-supplied permissions
-        //   would let an HTTP client override the access-control gate.
-        // - `origin_id` is the URL path parameter; duplicating it in
-        //   the body invites caller/path mismatch with no
-        //   consistency check.
-        //
-        // Every string field carries a `maxLength` to keep the
-        // request envelope predictable (a single PUT cannot exceed
-        // ~MAX_SML_CONTENT_LENGTH + a few KB of overhead). The
-        // workflow step's content-mode applies the same caps via
-        // `AttachmentChunkSchema` so HTTP and workflow producers
-        // share a single envelope — `tags` reuses both the per-tag
-        // length cap and the per-document tag-count cap.
+        // `permissions` are not accepted from the body — callers cannot override the
+        // indexer's getPermissions gate. `type` and `originId` are URL params only.
         body: schema.object({
           title: schema.string({ minLength: 1, maxLength: MAX_SML_TITLE_LENGTH }),
           content: schema.string({ maxLength: MAX_SML_CONTENT_LENGTH }),
@@ -180,10 +113,7 @@ export const registerUpsertRoute = ({
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        // Cross-space guard: an origin already owned by a different
-        // space is opaque to the caller — return 404 rather than 403
-        // to avoid disclosing the existence of resources in other
-        // spaces.
+        // Cross-space guard: 404 (not 403) to avoid disclosing origins in other spaces.
         const existing = await sml.findByOriginAcrossSpaces({ type, originId, esClient });
         const visibleInCallerSpace =
           existing.length === 0 || existing.some((doc) => isVisibleInSpace(doc.spaces, spaceId));
@@ -193,15 +123,8 @@ export const registerUpsertRoute = ({
           });
         }
 
-        // Per-chunk privilege gate — same shape as the DELETE route's
-        // gate. Writing under an existing origin overwrites every
-        // chunk already there, so the caller must be able to read
-        // every chunk they're about to replace; otherwise a caller
-        // with `agentContextLayer:write` but no
-        // `saved_object:dashboard/get` could overwrite a
-        // permission-gated dashboard chunk with attacker-controlled
-        // content. Empty `existing` is a fresh create — no existing
-        // privileges to check.
+        // Per-chunk privilege gate: caller must hold read access to every chunk they
+        // are about to replace — prevents content injection on permission-gated origins.
         if (existing.length > 0) {
           const accessMap = await sml.checkItemsAccess({
             ids: existing.map((d) => d.id),
@@ -242,11 +165,7 @@ export const registerUpsertRoute = ({
           createdAt: existingCreatedAt,
         });
 
-        // Re-read so the response reflects what the indexer actually
-        // persisted (chunk `_id`, server-assigned `created_at`,
-        // stamped `permissions`, etc.). The content-mode write wipes
-        // all prior chunks for the origin so the post-state is the
-        // chunks just written.
+        // Re-read to return the indexer-stamped state (permissions, created_at, chunk ids).
         const persisted = await sml.findByOrigin({ type, originId, spaceId, esClient });
 
         const responseBody: SmlUpsertHttpResponse = {

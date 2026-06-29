@@ -144,15 +144,6 @@ describe('resolveSmlAttachItems', () => {
   });
 
   it('returns a generic text attachment when getTypeDefinition is undefined (unregistered SML type)', async () => {
-    // Chunks indexed under an unregistered `attachmentType` (via the
-    // content-mode write path — workflow author ad-hoc namespaces, HTTP
-    // upserts under a new type id, etc.) have no `toAttachment` hook
-    // to render through. Falling back to a `text` attachment with the
-    // stored title + content keeps the chunk usable by the agent
-    // without requiring a code change every time a new namespace is
-    // introduced. The chunk-level permissions check upstream
-    // (`checkItemsAccess`) already ran; reaching this branch means the
-    // caller is authorized to read the chunk.
     const smlDoc = createSmlDoc({
       type: 'orphan-type',
       title: 'Ad-hoc note',

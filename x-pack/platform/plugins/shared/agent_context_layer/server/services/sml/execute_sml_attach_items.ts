@@ -88,14 +88,7 @@ export const resolveSmlAttachItems = async ({
 
       const typeDefinition = sml.getTypeDefinition(smlDoc.type);
       if (!typeDefinition) {
-        // Generic fallback for chunks indexed under an unregistered type
-        // (e.g. workflow-authored ad-hoc namespaces — see
-        // `SmlIndexer.indexManualChunks`). Surface the stored content as
-        // a plain `text` attachment so the agent can still reason about
-        // it; specialized rendering (inline previews, click-throughs)
-        // only kicks in when a registered type's `toAttachment` is
-        // available. This keeps the SML index usable without a code
-        // change every time a new namespace is introduced.
+        // Unregistered type (e.g. workflow ad-hoc namespace): fall back to plain text attachment.
         return {
           success: true,
           chunk_id: chunkId,

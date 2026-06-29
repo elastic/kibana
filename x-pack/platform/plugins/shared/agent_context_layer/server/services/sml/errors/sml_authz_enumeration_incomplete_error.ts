@@ -7,10 +7,5 @@
 
 import { SmlError } from './sml_error';
 
-/**
- * Thrown when a `_terms_enum` enumeration of a permission field returns
- * `complete: false` (node error / timeout). A partial universe would
- * under-count the corpus's permission set and silently over-authorize the
- * subsequent search, so the search fails closed instead.
- */
+/** Thrown when `_terms_enum` returns `complete: false`. Fails closed to avoid over-authorizing against a partial permission universe. */
 export class SmlAuthzEnumerationIncompleteError extends SmlError {}

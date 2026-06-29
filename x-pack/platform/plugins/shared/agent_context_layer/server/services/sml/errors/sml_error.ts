@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-/**
- * Base class for typed SML service errors. Subclasses are expected/handled
- * outcomes (routes map them to specific HTTP statuses), distinct from
- * unexpected ES failures which propagate as 500s. The shared constructor sets
- * `name` from the concrete class so stack traces and `instanceof` checks read
- * correctly.
- *
- * Each subclass lives in its own file (rather than co-located with the base)
- * so the `max-classes-per-file` lint stays clean. The `./index` barrel
- * re-exports all of them — callers should import from there or from the
- * `../sml_errors` re-export, never reach into a leaf file directly.
- */
+/** Base for typed SML errors — routes map subclasses to specific HTTP statuses. */
 export class SmlError extends Error {
   constructor(message: string) {
     super(message);

@@ -7,11 +7,5 @@
 
 import { SmlError } from './sml_error';
 
-/**
- * Thrown when the number of distinct values for a permission field exceeds the
- * enumeration ceiling (`maxPages * pageSize`). Hitting this means the corpus
- * has grown beyond what the request-scoped pre-aggregation can safely
- * enumerate; the search fails closed rather than authorize against a truncated
- * universe.
- */
+/** Thrown when permission-field distinct values exceed the enumeration ceiling. Fails closed rather than authorize against a truncated universe. */
 export class SmlCorpusTooLargeError extends SmlError {}

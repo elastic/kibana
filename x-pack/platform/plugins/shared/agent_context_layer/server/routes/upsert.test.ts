@@ -116,11 +116,8 @@ describe('registerUpsertRoute', () => {
   });
 
   it('threads existing created_at through to indexAttachment on update', async () => {
-    // Regression guard: findByOriginAcrossSpaces uses a trimmed _source projection.
-    // If created_at is excluded from that projection, hydrateDocument defaults it to ''
-    // and createdAt: '' ?? now keeps '' — the bulk write fails with an invalid date,
-    // deleteChunks has already run, and the origin is silently destroyed.
-    // created_at must be in FIND_ACROSS_SPACES_SOURCE_FIELDS.
+    // Regression guard: created_at must be in FIND_ACROSS_SPACES_SOURCE_FIELDS or the
+    // update path silently destroys the origin (empty string fails the ES date field).
     const existingWithTimestamp = { ...sampleDocument, created_at: '2024-06-01T12:00:00.000Z' };
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([existingWithTimestamp]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
@@ -150,10 +147,6 @@ describe('registerUpsertRoute', () => {
   });
 
   it('clears existing tags when the PUT body omits tags (full-document replace semantic)', async () => {
-    // PUT is a full-document replace — omitting `tags` must clear any
-    // existing tags. Pin this so merge-semantics regressions fail loudly.
-    // The assertion checks the payload handed to the indexer (the single
-    // source of truth for what lands on disk).
     const taggedDoc = { ...sampleDocument, tags: ['stale-tag-1', 'stale-tag-2'] };
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([taggedDoc]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
@@ -165,9 +158,6 @@ describe('registerUpsertRoute', () => {
 
     const [callArgs] = mockSmlService.indexAttachment.mock.calls;
     const passedContent = callArgs[0].content as Array<{ tags?: unknown }>;
-    // The single chunk we passed must not carry a `tags` field at all
-    // — the indexer reads "absent" as "clear", consistent with the
-    // workflow step's content-mode schema.
     expect(passedContent).toHaveLength(1);
     expect(passedContent[0]).not.toHaveProperty('tags');
   });
@@ -185,13 +175,6 @@ describe('registerUpsertRoute', () => {
   });
 
   it('returns 404 (and does not overwrite) when caller lacks read access to existing chunks', async () => {
-    // Privilege escalation guard: a caller with `agentContextLayer:write`
-    // but lacking the underlying object privilege (e.g.
-    // `saved_object:dashboard/get`) must not be able to overwrite a
-    // permission-gated origin. The route's content-mode write would
-    // otherwise delete the existing chunks and replace them with the
-    // caller's input — content injection on a resource they cannot read.
-    // This mirrors the DELETE route's `checkItemsAccess` gate.
     const gatedDoc = { ...sampleDocument, id: 'chunk-1', spaces: ['test-space'] };
     mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([gatedDoc]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
@@ -207,8 +190,6 @@ describe('registerUpsertRoute', () => {
     expect(response.notFound).toHaveBeenCalledWith({
       body: { message: "SML origin 'visualization/viz-1' not found" },
     });
-    // The whole point of the gate — no write must happen on the
-    // unauthorized branch.
     expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
   });
 

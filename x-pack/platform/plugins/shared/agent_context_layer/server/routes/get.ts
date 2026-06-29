@@ -20,23 +20,9 @@ import { READ_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 /**
  * `GET /internal/agent_context_layer/sml/{type}/{originId}`
  *
- * Returns every chunk written under the compound `(type, originId)`
- * key that is visible from the caller's space. The crawler and the
- * workflow step's content mode can both produce multiple chunks per
- * origin, so the response is an array — consumers iterate without
- * ordering assumptions.
- *
- * Both URL parts are required because the bare `originId` is not
- * globally unique (a `lens` id and a `dashboard` id can collide), so
- * the storage's canonical key is the compound `origin.uri =
- * ${type}://${originId}` — see `common/constants.ts` for the
- * history.
- *
- * Per-chunk permission filtering: chunks the caller is not
- * authorized to access (per their Kibana feature privileges) are
- * dropped from the result. An empty post-filter result is reported
- * as 404 to avoid disclosing existence of chunks the user cannot
- * see.
+ * Returns all chunks for `(type, originId)` visible from the caller's space.
+ * Chunks the caller lacks privileges for are filtered out; an empty result
+ * is reported as 404 to avoid disclosing their existence.
  */
 export const registerGetRoute = ({
   router,
