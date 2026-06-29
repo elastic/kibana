@@ -115,6 +115,24 @@ apiTest.describe('Find muted alerts', { tag: tags.deploymentAgnostic }, () => {
     }
   });
 
+  const expectValidResponseShape = (body: FindMutedAlertsResponseBody): void => {
+    expect(typeof body.page).toBe('number');
+    expect(typeof body.per_page).toBe('number');
+    expect(typeof body.total).toBe('number');
+    expect(Array.isArray(body.data)).toBe(true);
+
+    for (const record of body.data) {
+      // Each entry must expose exactly the muted-alert contract (id + muted_alert_ids)
+      // and never leak additional rule attributes.
+      expect(Object.keys(record).sort()).toStrictEqual(['id', 'muted_alert_ids']);
+      expect(typeof record.id).toBe('string');
+      expect(Array.isArray(record.muted_alert_ids)).toBe(true);
+      for (const alertId of record.muted_alert_ids) {
+        expect(typeof alertId).toBe('string');
+      }
+    }
+  };
+
   const expectMutedAlertReturned = (
     body: FindMutedAlertsResponseBody,
     ruleId: string,
@@ -145,7 +163,9 @@ apiTest.describe('Find muted alerts', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expectMutedAlertReturned(response.body as FindMutedAlertsResponseBody, ruleId, instanceId);
+    const body = response.body as FindMutedAlertsResponseBody;
+    expectValidResponseShape(body);
+    expectMutedAlertReturned(body, ruleId, instanceId);
   };
 
   apiTest(
