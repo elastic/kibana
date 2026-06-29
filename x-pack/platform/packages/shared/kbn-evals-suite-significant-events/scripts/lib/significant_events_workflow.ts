@@ -543,7 +543,15 @@ async function persistDocsForSnapshot(
       },
       doc,
     ]);
-    await esClient.bulk({ refresh: true, operations });
+    const bulkResponse = await esClient.bulk({ refresh: true, operations });
+
+    if (bulkResponse.errors) {
+      const firstError = bulkResponse.items.find((item) => {
+        const op = Object.values(item)[0];
+        return op && 'error' in op && op.error;
+      });
+      throw new Error(`Bulk indexing into ${index} failed: ${JSON.stringify(firstError, null, 2)}`);
+    }
   } else {
     await esClient.indices.refresh({ index });
   }
