@@ -189,23 +189,18 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
     .map(normalizeEpisodeSeverity);
   const includeNoSeverity = severities.includes(EPISODE_SEVERITY_FILTER_NONE);
 
-  if (severityValues.length === 0 && !includeNoSeverity) {
-    return;
+  const parts: string[] = [];
+  if (severityValues.length) {
+    const inList = severityValues.map((severity) => escapeStringValue(severity)).join(', ');
+    parts.push(`severity IN (${inList})`);
   }
-
-  if (severityValues.length === 0) {
-    query.pipe('WHERE severity IS NULL');
-    return;
-  }
-
-  const inList = severityValues.map((severity) => escapeStringValue(severity)).join(', ');
-
   if (includeNoSeverity) {
-    query.pipe(`WHERE (severity IN (${inList}) OR severity IS NULL)`);
+    parts.push('severity IS NULL');
+  }
+  if (!parts.length) {
     return;
   }
-
-  query.pipe(`WHERE severity IN (${inList})`);
+  query.pipe(`WHERE ${parts.join(' OR ')}`);
 };
 
 const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {

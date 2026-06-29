@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
 import {
   EPISODE_SEVERITIES,
@@ -39,7 +39,7 @@ export function AlertEpisodesSeverityFilter({
 }: AlertEpisodesSeverityFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const options = useMemo(() => SEVERITY_FILTER_OPTIONS, []);
+  const options = SEVERITY_FILTER_OPTIONS;
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
