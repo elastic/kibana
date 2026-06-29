@@ -33,7 +33,7 @@ const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
 const formatLabel = (node: ChromeProjectNavigationNode, title: string): string => {
   return node.disableSentenceCase ? title : toSentenceCase(title);
-}
+};
 
 const HOME_TITLE = i18n.translate('core.ui.chrome.sideNavigation.homeItemTitle', {
   defaultMessage: 'Home',
