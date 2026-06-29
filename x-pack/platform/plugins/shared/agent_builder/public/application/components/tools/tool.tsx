@@ -322,9 +322,21 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       <FormProvider {...form}>
         <KibanaPageTemplate data-test-subj="agentBuilderToolFormPage">
           <KibanaPageTemplate.Header
+            className="agentBuilderToolHeader"
             pageTitle={
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="m"
+                responsive={false}
+                css={{ minWidth: 0 }}
+              >
+                <EuiFlexItem
+                  grow={true}
+                  css={css`
+                    min-width: 0;
+                    overflow-wrap: break-word;
+                  `}
+                >
                   {[ToolFormMode.View, ToolFormMode.Edit].includes(mode)
                     ? tool?.id
                     : labels.tools.newToolTitle}
@@ -381,7 +393,24 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               ...(mode === ToolFormMode.Edit ? [<ToolEditContextMenu />] : []),
             ]}
             rightSideGroupProps={{ gutterSize: 's' }}
+            pageTitleProps={{
+              css: css`
+                min-width: 0;
+                overflow: visible;
+              `,
+            }}
             css={css`
+              /* Scoped under .agentBuilderToolHeader — avoid targeting EUI header/title classes globally */
+              &.agentBuilderToolHeader .euiPageHeaderContent__top {
+                min-width: 0;
+                overflow: visible;
+              }
+
+              &.agentBuilderToolHeader .euiTitle {
+                min-width: 0;
+                overflow-wrap: break-word;
+              }
+
               background-color: ${euiTheme.colors.backgroundBasePlain};
               border-block-end: none;
             `}
