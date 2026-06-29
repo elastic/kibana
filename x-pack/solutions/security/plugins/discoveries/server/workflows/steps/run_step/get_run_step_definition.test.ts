@@ -523,8 +523,8 @@ describe('getRunStepDefinition', () => {
     });
   });
 
-  describe('provided mode auto-detection', () => {
-    it('auto-detects provided mode when alerts are non-empty', async () => {
+  describe('provided alerts auto-detection', () => {
+    it('disables default retrieval and forwards alerts when alerts are non-empty', async () => {
       const contextWithAlerts = {
         ...baseMockContext,
         input: {
@@ -542,7 +542,7 @@ describe('getRunStepDefinition', () => {
         expect.objectContaining({
           alerts: ['alert-string-1', 'alert-string-2'],
           workflowConfig: expect.objectContaining({
-            alert_retrieval_mode: 'provided',
+            default_retrieval_enabled: false,
           }),
         })
       );

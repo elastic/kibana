@@ -14,7 +14,8 @@ export type ExtractionStrategy =
   | 'custom_workflow'
   | 'default_custom_query'
   | 'default_esql'
-  | 'provided';
+  | 'provided'
+  | 'skill';
 
 /** Pre-execution check result — mirrors server-side DiagnosticsPreExecutionCheck. */
 export interface DiagnosticsPreExecutionCheck {
@@ -53,6 +54,12 @@ export interface DiagnosticsContext {
 export interface PipelineAlertRetrievalData {
   alerts: string[];
   alerts_context_count: number | null;
+  /**
+   * Count of custom-workflow alerts that lack a recoverable backing `_id` (C2).
+   * When > 0 the UI surfaces a warning, since such alerts are silently dropped
+   * before generation (the workflow must select `METADATA _id`).
+   */
+  alerts_missing_id_count?: number;
   extraction_strategy: ExtractionStrategy;
   workflow_run_id?: string;
 }

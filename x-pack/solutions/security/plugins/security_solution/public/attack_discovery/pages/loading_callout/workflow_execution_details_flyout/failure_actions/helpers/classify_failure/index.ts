@@ -89,6 +89,7 @@ const SUMMARIES: Record<FailureCategory, string> = {
   cluster_health: 'An Elasticsearch cluster health issue prevented generation from completing.',
   concurrent_conflict: 'A concurrent conflict occurred. Retry generation.',
   connector_error: 'A connector error prevented generation from completing.',
+  interrupted: 'The run was interrupted (e.g. a Kibana restart or crash). Retry generation.',
   network_error: 'A network error occurred during generation.',
   permission_error: 'A permission error occurred. Check Kibana and Elasticsearch privileges.',
   rate_limit: 'A rate limit was reached. Wait a moment before retrying.',

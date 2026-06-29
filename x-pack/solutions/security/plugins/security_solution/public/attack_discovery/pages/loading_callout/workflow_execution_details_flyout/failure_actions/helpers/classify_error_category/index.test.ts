@@ -286,6 +286,40 @@ describe('classifyErrorCategory', () => {
     it('is case-insensitive', () => {
       expect(classifyErrorCategory('TIMEOUT')).toBe('timeout');
     });
+
+    it('returns timeout when the pipeline budget is exceeded before generation', () => {
+      expect(
+        classifyErrorCategory(
+          'Pipeline budget exceeded (1800000ms) before starting generation phase'
+        )
+      ).toBe('timeout');
+    });
+
+    it('returns timeout when the pipeline budget is exceeded before validation', () => {
+      expect(
+        classifyErrorCategory(
+          'Pipeline budget exceeded (1800000ms) before starting validation phase'
+        )
+      ).toBe('timeout');
+    });
+  });
+
+  describe('interrupted', () => {
+    it('returns interrupted when a prior run was interrupted (server restart/crash)', () => {
+      expect(
+        classifyErrorCategory(
+          "Marked workflow execution 'abc' as FAILED after workflow:run retry (attempts=2) - prior run was interrupted"
+        )
+      ).toBe('interrupted');
+    });
+
+    it('returns interrupted for a generic interrupted message', () => {
+      expect(classifyErrorCategory('execution was interrupted')).toBe('interrupted');
+    });
+
+    it('is case-insensitive', () => {
+      expect(classifyErrorCategory('PRIOR RUN WAS INTERRUPTED')).toBe('interrupted');
+    });
   });
 
   describe('connector_error', () => {
@@ -345,6 +379,12 @@ describe('classifyErrorCategory', () => {
 
     it('prefers workflow_invalid over workflow_error', () => {
       expect(classifyErrorCategory("Workflow 'wf-abc' is not valid")).toBe('workflow_invalid');
+    });
+
+    it('prefers interrupted over workflow_error', () => {
+      expect(
+        classifyErrorCategory('Marked workflow execution as FAILED - prior run was interrupted')
+      ).toBe('interrupted');
     });
 
     it('prefers rate_limit over unknown', () => {

@@ -138,6 +138,16 @@ describe('StepDataModal', () => {
       );
     });
 
+    it('renders "Skill" badge for skill extraction strategy', () => {
+      render(
+        <TestProviders>
+          <StepDataModal {...defaultProps} extractionStrategy="skill" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('stepDataModalExtractionStrategy')).toHaveTextContent('Skill');
+    });
+
     it('does not render extraction strategy badge when not provided', () => {
       render(
         <TestProviders>

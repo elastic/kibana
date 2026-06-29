@@ -35,6 +35,13 @@ export const NO_EXECUTION_DATA = i18n.translate(
   }
 );
 
+export const OPEN_CONVERSATION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.loadingCallout.workflowExecutionDetailsFlyout.openConversation',
+  {
+    defaultMessage: 'Open conversation',
+  }
+);
+
 export const REFRESH = i18n.translate(
   'xpack.securitySolution.attackDiscovery.loadingCallout.workflowExecutionDetailsFlyout.refresh',
   {

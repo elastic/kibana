@@ -101,7 +101,7 @@ describe('getWorkflowLoadingMessage', () => {
     });
   });
 
-  describe('custom workflows only (default retrieval custom_only)', () => {
+  describe('custom workflows only (default retrieval disabled)', () => {
     it('returns the single workflow message when one workflow is selected', () => {
       const workflowConfig: WorkflowConfig = {
         ...baseConfig,

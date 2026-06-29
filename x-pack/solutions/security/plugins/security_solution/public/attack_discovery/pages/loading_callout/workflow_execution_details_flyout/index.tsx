@@ -27,13 +27,14 @@ import { usePipelineData } from '../../hooks/use_pipeline_data';
 import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_details';
 import { LoadingCallout } from '..';
 import { StepDataModal } from '../step_data_modal';
-import type { WorkflowInspectMetadata } from '../types';
+import type { AggregatedWorkflowExecution, WorkflowInspectMetadata } from '../types';
 import {
   getStepDataModalConfig,
   type StepDataModalConfig,
 } from './helpers/get_step_data_modal_config';
 import { buildEnrichedStepDataModalConfig } from './helpers/build_enriched_step_data_modal_config';
 import type { FailureCategory } from './failure_actions/helpers/classify_error_category';
+import { ConversationLink } from './conversation_link';
 import { ExecutionContent } from './execution_content';
 import { FailureSection } from './failure_section';
 import { RefreshSection } from './refresh_section';
@@ -309,6 +310,20 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
     effectiveGenerationStatus === 'canceled' ||
     effectiveGenerationStatus === 'dismissed';
 
+  // Some failures abort the run before any workflow executes (e.g. the alert
+  // retrieval workflows toggle is enabled but no workflow is selected), so there
+  // is no aggregated execution data to display. Fall back to a minimal failed
+  // execution so the failure/troubleshoot section still renders and the user can
+  // run the troubleshooting skill. The fallback is only used once we are no
+  // longer loading, so post-workflow failures still wait for their real data.
+  const failureAggregatedExecution: AggregatedWorkflowExecution = data ?? {
+    status: ExecutionStatus.FAILED,
+    steps: [],
+    workflowExecutions: effectiveWorkflowExecutions,
+  };
+
+  const showFailureSection = showTroubleshootWithAi && (data != null || !isLoading);
+
   return (
     <EuiFlyout
       aria-labelledby={flyoutTitleId}
@@ -360,12 +375,20 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
           pipelineData={pipelineData}
         />
 
-        {showTroubleshootWithAi && data != null && (
+        {liveGeneration?.conversation_id != null && (
+          <>
+            <EuiSpacer size="m" />
+
+            <ConversationLink conversationId={liveGeneration.conversation_id} />
+          </>
+        )}
+
+        {showFailureSection && (
           <>
             <EuiSpacer size="m" />
 
             <FailureSection
-              aggregatedExecution={data}
+              aggregatedExecution={failureAggregatedExecution}
               alertsContextCount={alertsContextCount}
               averageSuccessfulDurationMs={averageSuccessfulDurationMs}
               configuredMaxAlerts={configuredMaxAlerts}

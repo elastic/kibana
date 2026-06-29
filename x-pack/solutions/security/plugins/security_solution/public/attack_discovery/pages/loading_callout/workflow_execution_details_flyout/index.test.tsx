@@ -16,6 +16,7 @@ import { TestProviders } from '../../../../common/mock';
 import { usePipelineData } from '../../hooks/use_pipeline_data';
 import type { PipelineDataResponse } from '../../hooks/use_pipeline_data';
 import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_details';
+import { useGetAttackDiscoveryGeneration } from '../../hooks/use_get_attack_discovery_generation';
 import { WorkflowPipelineMonitor } from '../workflow_pipeline_monitor';
 import type { AggregatedWorkflowExecution, StepExecutionWithLink } from '../types';
 import type { TroubleshootWithAiProps } from './troubleshoot_with_ai';
@@ -23,6 +24,12 @@ import { FailureSection } from './failure_section';
 
 jest.mock('../../hooks/use_pipeline_data');
 jest.mock('../../hooks/use_workflow_execution_details');
+jest.mock('../../hooks/use_get_attack_discovery_generation');
+jest.mock('./conversation_link', () => ({
+  ConversationLink: jest.fn(({ conversationId }: { conversationId: string }) => (
+    <div data-test-subj="conversationLink" data-conversation-id={conversationId} />
+  )),
+}));
 jest.mock('../workflow_pipeline_monitor', () => ({
   WorkflowPipelineMonitor: jest.fn((props: Record<string, unknown>) => (
     <div data-test-subj="workflowPipelineMonitor">
@@ -70,6 +77,7 @@ jest.mock('./failure_section', () => ({
 const MockWorkflowPipelineMonitor = WorkflowPipelineMonitor as unknown as jest.Mock;
 const mockUsePipelineData = usePipelineData as jest.Mock;
 const mockUseWorkflowExecutionDetails = useWorkflowExecutionDetails as jest.Mock;
+const mockUseGetAttackDiscoveryGeneration = useGetAttackDiscoveryGeneration as jest.Mock;
 const MockFailureSection = FailureSection as jest.MockedFunction<typeof FailureSection>;
 
 const mockPipelineDataResponse: PipelineDataResponse = {
@@ -157,6 +165,10 @@ describe('WorkflowExecutionDetailsFlyout', () => {
     mockUseWorkflowExecutionDetails.mockReturnValue({
       data: mockExecutionData,
       error: undefined,
+      isLoading: false,
+    });
+    mockUseGetAttackDiscoveryGeneration.mockReturnValue({
+      generation: undefined,
       isLoading: false,
     });
   });
@@ -759,11 +771,31 @@ describe('WorkflowExecutionDetailsFlyout', () => {
       expect(screen.queryByTestId('failureSection')).not.toBeInTheDocument();
     });
 
-    it('does NOT render FailureSection when execution data is not available', () => {
+    it('renders FailureSection on a terminal failure even when execution data is not available', () => {
+      // A misconfiguration (e.g. the alert retrieval workflows toggle is enabled
+      // but no workflow is selected) fails the run BEFORE any workflow executes,
+      // so there is no aggregated execution data. The failure/troubleshoot
+      // section must still render so the user can troubleshoot the failure.
       mockUseWorkflowExecutionDetails.mockReturnValue({
         data: undefined,
         error: undefined,
         isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="failed" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('failureSection')).toBeInTheDocument();
+    });
+
+    it('does NOT render FailureSection while loading even when generationStatus is failed', () => {
+      mockUseWorkflowExecutionDetails.mockReturnValue({
+        data: undefined,
+        error: undefined,
+        isLoading: true,
       });
 
       render(
@@ -1068,6 +1100,66 @@ describe('WorkflowExecutionDetailsFlyout', () => {
       await userEvent.click(screen.getByTestId('stepDataModalCloseButton'));
 
       expect(screen.queryByTestId('stepDataModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ConversationLink rendering', () => {
+    it('renders the ConversationLink when the live generation has a conversation_id', () => {
+      mockUseGetAttackDiscoveryGeneration.mockReturnValue({
+        generation: { conversation_id: 'conversation-123', status: 'succeeded' },
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('conversationLink')).toBeInTheDocument();
+    });
+
+    it('passes the conversation_id to the ConversationLink', () => {
+      mockUseGetAttackDiscoveryGeneration.mockReturnValue({
+        generation: { conversation_id: 'conversation-123', status: 'succeeded' },
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('conversationLink')).toHaveAttribute(
+        'data-conversation-id',
+        'conversation-123'
+      );
+    });
+
+    it('does NOT render the ConversationLink when the live generation has no conversation_id', () => {
+      mockUseGetAttackDiscoveryGeneration.mockReturnValue({
+        generation: { status: 'succeeded' },
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('conversationLink')).not.toBeInTheDocument();
+    });
+
+    it('does NOT render the ConversationLink when there is no live generation', () => {
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('conversationLink')).not.toBeInTheDocument();
     });
   });
 });

@@ -189,6 +189,19 @@ describe('classifyFailure', () => {
     });
   });
 
+  describe('interrupted', () => {
+    it('classifies an interrupted run with no actions and a retry-oriented summary', () => {
+      const result = classifyFailure(
+        'Marked workflow execution as FAILED - prior run was interrupted',
+        emptyExecution
+      );
+
+      expect(result.category).toBe('interrupted');
+      expect(result.actions).toHaveLength(0);
+      expect(result.summary).toMatch(/retry/i);
+    });
+  });
+
   describe('anonymization_error', () => {
     it('classifies anonymization error reason with no actions', () => {
       const result = classifyFailure('anonymization pipeline failed', emptyExecution);

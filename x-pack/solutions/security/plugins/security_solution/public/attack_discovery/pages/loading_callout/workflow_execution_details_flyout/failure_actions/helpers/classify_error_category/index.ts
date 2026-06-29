@@ -84,7 +84,12 @@ const CATEGORY_RULES: ReadonlyArray<{
     test: (l) => includesAny(l, ['not registered', 'unknown step', 'step type']),
   },
   // Timeouts — checked before connector to avoid matching "connector timeout".
-  { category: 'timeout', test: (l) => includesAny(l, ['timeout', 'timed out']) },
+  // "budget exceeded" is the pipeline-budget (ADR-008) variant of a timeout.
+  { category: 'timeout', test: (l) => includesAny(l, ['timeout', 'timed out', 'budget exceeded']) },
+  // Interrupted runs (server restart/crash/shutdown mid-execution) — checked before
+  // the generic `workflow_error` catch-all so "prior run was interrupted" is not
+  // bucketed as a generic workflow error.
+  { category: 'interrupted', test: (l) => l.includes('interrupted') },
   // Connector errors.
   { category: 'connector_error', test: (l) => l.includes('connector') },
   // Validation errors — checked before generic workflow catch-all.
