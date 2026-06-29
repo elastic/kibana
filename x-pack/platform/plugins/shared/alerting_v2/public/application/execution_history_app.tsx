@@ -9,11 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { ExecutionHistoryPage } from '../pages/execution_history_page/execution_history_page';
-import { RequireAlertingV2Privilege } from '../components/require_alerting_v2_privilege';
+import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 export const ExecutionHistoryApp = () => {
   return (
-    <RequireAlertingV2Privilege
+    <RequireAlertingPrivilege
       features={['executionHistory']}
       pageName={i18n.translate('xpack.alertingV2.executionHistoryApp.pageName', {
         defaultMessage: 'Execution history',
@@ -24,6 +24,6 @@ export const ExecutionHistoryApp = () => {
           <ExecutionHistoryPage />
         </Route>
       </Routes>
-    </RequireAlertingV2Privilege>
+    </RequireAlertingPrivilege>
   );
 };

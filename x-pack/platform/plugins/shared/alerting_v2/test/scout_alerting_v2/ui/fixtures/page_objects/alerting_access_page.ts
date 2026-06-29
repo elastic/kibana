@@ -7,9 +7,9 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
-export type AlertingV2App = 'rules' | 'alerts' | 'actionPolicies' | 'executionHistory';
+export type AlertingApp = 'rules' | 'alerts' | 'actionPolicies' | 'executionHistory';
 
-interface AlertingV2AppMeta {
+interface AlertingAppMeta {
   /** Management deep-link path passed to `page.gotoApp`. */
   readonly path: string;
   /** Kibana feature id backing the page (used in the interstitial list). */
@@ -18,7 +18,7 @@ interface AlertingV2AppMeta {
   readonly heading: RegExp;
 }
 
-export const ALERTING_V2_APP_META: Record<AlertingV2App, AlertingV2AppMeta> = {
+export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
   rules: {
     path: 'management/alertingV2/rules',
     featureId: 'alerting_v2_rules',
@@ -46,26 +46,24 @@ export const ALERTING_V2_APP_META: Record<AlertingV2App, AlertingV2AppMeta> = {
  * "Privileges required" interstitial locators, so specs can assert which pages
  * a given role can view.
  */
-export class AlertingV2AccessPage {
+export class AlertingAccessPage {
   public readonly requiredPrivilegesPrompt: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.requiredPrivilegesPrompt = this.page.testSubj.locator(
-      'alertingV2RequiredPrivilegesPrompt'
-    );
+    this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
   }
 
-  async goto(app: AlertingV2App) {
-    await this.page.gotoApp(ALERTING_V2_APP_META[app].path);
+  async goto(app: AlertingApp) {
+    await this.page.gotoApp(ALERTING_APP_META[app].path);
   }
 
-  pageHeading(app: AlertingV2App): Locator {
-    return this.page.getByRole('heading', { name: ALERTING_V2_APP_META[app].heading });
+  pageHeading(app: AlertingApp): Locator {
+    return this.page.getByRole('heading', { name: ALERTING_APP_META[app].heading });
   }
 
-  requiredPrivilegeItem(app: AlertingV2App): Locator {
+  requiredPrivilegeItem(app: AlertingApp): Locator {
     return this.page.testSubj.locator(
-      `alertingV2RequiredPrivilege-${ALERTING_V2_APP_META[app].featureId}`
+      `alertingRequiredPrivilege-${ALERTING_APP_META[app].featureId}`
     );
   }
 }

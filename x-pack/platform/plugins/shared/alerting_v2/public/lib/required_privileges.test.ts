@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getAlertingV2RequiredPrivileges } from './required_privileges';
+import { getAlertingRequiredPrivileges } from './required_privileges';
 
-describe('getAlertingV2RequiredPrivileges', () => {
+describe('getAlertingRequiredPrivileges', () => {
   it('maps a feature to its id, name, privilege level, and fully-qualified capability', () => {
-    expect(getAlertingV2RequiredPrivileges(['rules'])).toEqual([
+    expect(getAlertingRequiredPrivileges(['rules'])).toEqual([
       {
         featureId: 'alerting_v2_rules',
         featureName: 'Rules',
@@ -20,7 +20,7 @@ describe('getAlertingV2RequiredPrivileges', () => {
   });
 
   it('preserves order and maps every feature in the set', () => {
-    const result = getAlertingV2RequiredPrivileges(['alerts', 'actionPolicies']);
+    const result = getAlertingRequiredPrivileges(['alerts', 'actionPolicies']);
     expect(result.map(({ featureId }) => featureId)).toEqual([
       'alerting_v2_alerts',
       'alerting_v2_action_policies',
@@ -28,7 +28,7 @@ describe('getAlertingV2RequiredPrivileges', () => {
   });
 
   it('reflects the requested capability in the privilege level and capability id', () => {
-    expect(getAlertingV2RequiredPrivileges(['executionHistory'], 'all')).toEqual([
+    expect(getAlertingRequiredPrivileges(['executionHistory'], 'all')).toEqual([
       {
         featureId: 'alerting_v2_execution_history',
         featureName: 'Execution history',
@@ -39,6 +39,6 @@ describe('getAlertingV2RequiredPrivileges', () => {
   });
 
   it('returns an empty list for an empty feature set', () => {
-    expect(getAlertingV2RequiredPrivileges([])).toEqual([]);
+    expect(getAlertingRequiredPrivileges([])).toEqual([]);
   });
 });

@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { ListActionPoliciesPage } from '../pages/list_action_policies_page/list_action_policies_page';
 import { ActionPolicyFormPage } from '../pages/action_policy_form_page/action_policy_form_page';
-import { RequireAlertingV2Privilege } from '../components/require_alerting_v2_privilege';
+import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 export const ActionPoliciesApp = () => {
   return (
-    <RequireAlertingV2Privilege
+    <RequireAlertingPrivilege
       features={['actionPolicies']}
       pageName={i18n.translate('xpack.alertingV2.actionPoliciesApp.pageName', {
         defaultMessage: 'Action Policies',
@@ -31,6 +31,6 @@ export const ActionPoliciesApp = () => {
           <ListActionPoliciesPage />
         </Route>
       </Routes>
-    </RequireAlertingV2Privilege>
+    </RequireAlertingPrivilege>
   );
 };

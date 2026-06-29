@@ -34,12 +34,12 @@ describe('RequiredPrivilegesPrompt', () => {
       </I18nProvider>
     );
 
-    const alertsItem = screen.getByTestId('alertingV2RequiredPrivilege-alerting_v2_alerts');
+    const alertsItem = screen.getByTestId('alertingRequiredPrivilege-alerting_v2_alerts');
     expect(within(alertsItem).getByText('Alerts')).toBeInTheDocument();
     expect(within(alertsItem).getByText('Read')).toBeInTheDocument();
     expect(within(alertsItem).getByText('alerting_v2_alerts.read')).toBeInTheDocument();
 
-    const rulesItem = screen.getByTestId('alertingV2RequiredPrivilege-alerting_v2_rules');
+    const rulesItem = screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules');
     expect(within(rulesItem).getByText('alerting_v2_rules.read')).toBeInTheDocument();
   });
 
@@ -60,7 +60,7 @@ describe('RequiredPrivilegesPrompt', () => {
       </I18nProvider>
     );
 
-    const rulesItem = screen.getByTestId('alertingV2RequiredPrivilege-alerting_v2_rules');
+    const rulesItem = screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules');
     expect(within(rulesItem).getByText('All')).toBeInTheDocument();
   });
 });

@@ -9,16 +9,16 @@ import React from 'react';
 import { EuiCode, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AlertingV2RequiredPrivilege } from '../lib/required_privileges';
+import type { AlertingRequiredPrivilege } from '../lib/required_privileges';
 
 export interface RequiredPrivilegesPromptProps {
   /** Human-readable name of the page the user attempted to view, e.g. "Rules". */
   pageName: string;
   /** Privileges the user is missing, shown so they know exactly what to request. */
-  requiredPrivileges: readonly AlertingV2RequiredPrivilege[];
+  requiredPrivileges: readonly AlertingRequiredPrivilege[];
 }
 
-const PRIVILEGE_LABELS: Record<AlertingV2RequiredPrivilege['privilege'], string> = {
+const PRIVILEGE_LABELS: Record<AlertingRequiredPrivilege['privilege'], string> = {
   read: i18n.translate('xpack.alertingV2.requiredPrivileges.readPrivilegeLabel', {
     defaultMessage: 'Read',
   }),
@@ -38,7 +38,7 @@ export const RequiredPrivilegesPrompt = ({
   requiredPrivileges,
 }: RequiredPrivilegesPromptProps) => (
   <EuiEmptyPrompt
-    data-test-subj="alertingV2RequiredPrivilegesPrompt"
+    data-test-subj="alertingRequiredPrivilegesPrompt"
     iconType="lock"
     color="subdued"
     title={
@@ -61,22 +61,20 @@ export const RequiredPrivilegesPrompt = ({
           </p>
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiText size="s" textAlign="left">
-          <ul data-test-subj="alertingV2RequiredPrivilegesList">
-            {requiredPrivileges.map(({ featureId, featureName, privilege, capability }) => (
-              <li key={featureId} data-test-subj={`alertingV2RequiredPrivilege-${featureId}`}>
-                <FormattedMessage
-                  id="xpack.alertingV2.requiredPrivileges.privilegeItem"
-                  defaultMessage="{featureName}: {privilege} — grants the {capability} capability"
-                  values={{
-                    featureName: <strong>{featureName}</strong>,
-                    privilege: <strong>{PRIVILEGE_LABELS[privilege]}</strong>,
-                    capability: <EuiCode>{capability}</EuiCode>,
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
+        <EuiText size="s">
+          {requiredPrivileges.map(({ featureId, featureName, privilege, capability }) => (
+            <p key={featureId} data-test-subj={`alertingRequiredPrivilege-${featureId}`}>
+              <FormattedMessage
+                id="xpack.alertingV2.requiredPrivileges.privilegeItem"
+                defaultMessage="{featureName}: {privilege} - grants the {capability} capability"
+                values={{
+                  featureName: <strong>{featureName}</strong>,
+                  privilege: <strong>{PRIVILEGE_LABELS[privilege]}</strong>,
+                  capability: <EuiCode>{capability}</EuiCode>,
+                }}
+              />
+            </p>
+          ))}
         </EuiText>
       </>
     }

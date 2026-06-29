@@ -11,20 +11,20 @@ import {
   type AlertingV2Feature,
 } from '../../common/feature_privileges';
 
-type AlertingV2Capability = 'read' | 'all';
+type AlertingCapability = 'read' | 'all';
 
 /**
  * Describes a single privilege a user must hold to view a gated page, surfaced
  * in the "Privileges required" interstitial so the user can tell their admin
  * exactly what to grant.
  */
-export interface AlertingV2RequiredPrivilege {
+export interface AlertingRequiredPrivilege {
   /** Kibana feature id backing the capability, e.g. "alerting_v2_rules". */
   featureId: string;
   /** Feature name as it appears in role management, e.g. "Rules". */
   featureName: string;
   /** Minimum feature privilege that grants the capability, e.g. "read". */
-  privilege: AlertingV2Capability;
+  privilege: AlertingCapability;
   /**
    * Fully-qualified UI capability the page checks, e.g.
    * "alerting_v2_rules.read".
@@ -37,10 +37,10 @@ export interface AlertingV2RequiredPrivilege {
  * The `read` capability is minimally granted by the feature's `read` privilege
  * (and also by `all`), so the privilege level mirrors the requested capability.
  */
-export const getAlertingV2RequiredPrivileges = (
+export const getAlertingRequiredPrivileges = (
   features: readonly AlertingV2Feature[],
-  capability: AlertingV2Capability = 'read'
-): AlertingV2RequiredPrivilege[] =>
+  capability: AlertingCapability = 'read'
+): AlertingRequiredPrivilege[] =>
   features.map((feature) => {
     const { id, name } = ALERTING_V2_FEATURES[feature];
     return {

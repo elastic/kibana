@@ -7,11 +7,11 @@
 
 import React from 'react';
 import type { AlertingV2Feature } from '../../common/feature_privileges';
-import { useHasAllAlertingV2Privileges } from '../hooks/use_has_alerting_v2_privilege';
-import { getAlertingV2RequiredPrivileges } from '../lib/required_privileges';
+import { useHasAllAlertingPrivileges } from '../hooks/use_has_alerting_privilege';
+import { getAlertingRequiredPrivileges } from '../lib/required_privileges';
 import { RequiredPrivilegesPrompt } from './required_privileges_prompt';
 
-export interface RequireAlertingV2PrivilegeProps {
+export interface RequireAlertingPrivilegeProps {
   /**
    * Set of features whose minimum (`read`) UI capability is required to view
    * the children. The user must hold every feature's capability (AND
@@ -28,18 +28,18 @@ export interface RequireAlertingV2PrivilegeProps {
  * Renders a "Privileges required" interstitial when the user lacks the minimum
  * `read` capability for the required feature set, otherwise renders the children.
  */
-export const RequireAlertingV2Privilege = ({
+export const RequireAlertingPrivilege = ({
   features,
   pageName,
   children,
-}: RequireAlertingV2PrivilegeProps) => {
-  const hasPrivilege = useHasAllAlertingV2Privileges(features);
+}: RequireAlertingPrivilegeProps) => {
+  const hasPrivilege = useHasAllAlertingPrivileges(features);
 
   if (!hasPrivilege) {
     return (
       <RequiredPrivilegesPrompt
         pageName={pageName}
-        requiredPrivileges={getAlertingV2RequiredPrivileges(features)}
+        requiredPrivileges={getAlertingRequiredPrivileges(features)}
       />
     );
   }
