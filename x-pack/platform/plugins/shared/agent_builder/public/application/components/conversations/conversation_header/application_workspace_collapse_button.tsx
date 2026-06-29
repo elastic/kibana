@@ -20,6 +20,12 @@ const labels = {
       defaultMessage: 'Hide workspace',
     }
   ),
+  showWorkspace: i18n.translate(
+    'xpack.agentBuilder.conversationHeader.applicationWorkspaceCollapse.showWorkspace',
+    {
+      defaultMessage: 'Show workspace',
+    }
+  ),
 };
 
 export const ApplicationWorkspaceCollapseButton: React.FC = () => {
@@ -38,24 +44,32 @@ export const ApplicationWorkspaceCollapseButton: React.FC = () => {
     chrome.applicationWorkspace.getIsOpen()
   );
 
-  const handleCollapse = useCallback(() => {
-    chrome.applicationWorkspace.close();
-  }, [chrome]);
+  const handleToggle = useCallback(() => {
+    if (isApplicationWorkspaceOpen) {
+      chrome.applicationWorkspace.close();
+      return;
+    }
 
-  if (!isAgentWorkspaceMount || isEmbeddedContext || !isApplicationWorkspaceOpen) {
+    chrome.applicationWorkspace.open();
+  }, [chrome, isApplicationWorkspaceOpen]);
+
+  if (!isAgentWorkspaceMount || isEmbeddedContext) {
     return null;
   }
 
+  const label = isApplicationWorkspaceOpen ? labels.hideWorkspace : labels.showWorkspace;
+  const iconType = isApplicationWorkspaceOpen ? 'transitionLeftIn' : 'transitionLeftOut';
+
   return (
-    <EuiToolTip content={labels.hideWorkspace} disableScreenReaderOutput>
+    <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon
         color="text"
-        iconType="transitionLeftIn"
+        iconType={iconType}
         size="xs"
-        aria-label={labels.hideWorkspace}
-        aria-expanded={true}
-        data-test-subj="agentBuilderApplicationWorkspaceCollapseButton"
-        onClick={handleCollapse}
+        aria-label={label}
+        aria-expanded={isApplicationWorkspaceOpen}
+        data-test-subj="agentBuilderApplicationWorkspaceToggleButton"
+        onClick={handleToggle}
       />
     </EuiToolTip>
   );
