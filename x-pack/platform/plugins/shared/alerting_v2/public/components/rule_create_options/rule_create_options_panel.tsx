@@ -103,7 +103,7 @@ interface RuleCreateOptionItem {
   description: string;
   onClick: () => void;
   /** When set, the option is disabled and this string is shown as a hover tooltip. */
-  disabledReason?: string;
+  tooltipText?: string;
   'data-test-subj'?: string;
 }
 
@@ -153,7 +153,7 @@ const RuleCreateOptionActionPanel: React.FC<{
   item: RuleCreateOptionItem;
   actionPanelStyle: React.ComponentProps<typeof EuiPanel>['css'];
 }> = ({ item, actionPanelStyle }) => {
-  const isDisabled = item.disabledReason !== undefined;
+  const isDisabled = item.tooltipText !== undefined;
   const panel = (
     <EuiPanel
       element="button"
@@ -185,7 +185,7 @@ const RuleCreateOptionActionPanel: React.FC<{
 
   if (isDisabled) {
     return (
-      <EuiToolTip content={item.disabledReason} display="block">
+      <EuiToolTip content={item.tooltipText} display="block">
         {panel}
       </EuiToolTip>
     );
@@ -242,7 +242,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         title: AI_AGENT_TITLE,
         description: AI_AGENT_DESCRIPTION,
         onClick: onCreateWithAgent,
-        disabledReason: createWithAgentTooltipText,
+        tooltipText: createWithAgentTooltipText,
         'data-test-subj': 'createWithAgentCard',
       },
     ],
