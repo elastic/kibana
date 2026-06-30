@@ -24,65 +24,13 @@ export interface EnhancedCaseData extends Case {
   url: string | null;
 }
 
-/**
- * Normalizes and validates time range parameters for case queries.
- */
-export const normalizeTimeRange = (
-  start: string | undefined,
-  end: string | undefined,
-  logger: Logger
-): {
-  start: string | null;
-  end: string | null;
-  startDate: Date | null;
-  endDate: Date | null;
-} | null => {
-  if (!start && !end) {
-    return null;
-  }
-
-  let startDate: Date | null = null;
-  if (start) {
-    startDate = new Date(start);
-    if (isNaN(startDate.getTime())) {
-      logger.warn(`Invalid start date: ${start}`);
-      startDate = null;
-    }
-  }
-
-  let endDate: Date | null = null;
-  if (end) {
-    endDate = new Date(end);
-    if (isNaN(endDate.getTime())) {
-      logger.warn(`Invalid end date: ${end}`);
-      endDate = null;
-    }
-  }
-
-  return {
-    start: startDate ? startDate.toISOString() : null,
-    end: endDate ? endDate.toISOString() : null,
-    startDate,
-    endDate,
-  };
-};
-
-/**
- * Creates a standardized tool result response for the cases search tool.
- */
-export const createResult = (
-  cases: EnhancedCaseData[],
-  timeRange: ReturnType<typeof normalizeTimeRange> | null,
-  message?: string
-) => ({
+export const createResult = (cases: EnhancedCaseData[], message?: string) => ({
   results: [
     {
       type: ToolResultType.other,
       data: {
         total: cases.length,
         cases,
-        start: timeRange?.start || null,
-        end: timeRange?.end || null,
         ...(message && { message }),
       },
     },

@@ -34,8 +34,10 @@ export const caseAttachmentDataSchema = CaseResponseProperties.pick({
 });
 export type CaseAttachmentData = z.infer<typeof caseAttachmentDataSchema>;
 
+export const CASES_ATTACHMENT_MAX = 20;
+
 export const casesAttachmentDataSchema = z.object({
-  cases: z.array(caseAttachmentDataSchema).max(20),
+  cases: z.array(caseAttachmentDataSchema).max(CASES_ATTACHMENT_MAX),
   total: z.number().int(),
   url: z.string().nullable().optional(),
 });

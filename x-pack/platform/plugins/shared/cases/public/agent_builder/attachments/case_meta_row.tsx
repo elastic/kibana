@@ -29,7 +29,7 @@ export const CaseMetaRow: React.FC<Props> = ({ data, caseUrls }) => {
           <EuiBadge
             color="danger"
             iconType="warning"
-            href={caseUrls.alertsTab}
+            href={caseUrls.attachmentsTab}
             target="_blank"
             aria-label={VIEW_ALERTS}
           >

@@ -52,6 +52,16 @@ const emitSearchAttachments = async (
 };
 
 const casesSchema = z.object({
+  mode: z
+    .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
+    .describe(
+      'Required fields per mode:\n' +
+        '- get: case_id\n' +
+        '- bulk_get: case_ids (keep ≤10)\n' +
+        '- similar: similar_to_case_id (+ optional page, perPage)\n' +
+        '- by_alert: alert_ids (+ optional owner)\n' +
+        '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage'
+    ),
   ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
   ...getCasesStepCommonDefinition.inputSchema.partial().shape,
   ...findCasesStepCommonDefinition.inputSchema.partial().shape,
@@ -59,12 +69,12 @@ const casesSchema = z.object({
   similar_to_case_id: z
     .string()
     .optional()
-    .describe('Find cases similar to this case ID based on shared observables.'),
+    .describe('Find cases similar to this case ID based on shared observables. Required for similar mode.'),
   alert_ids: z
     .array(z.string().min(1))
     .optional()
     .describe(
-      'Array of alert IDs to find cases containing these alerts. Cases containing any of these alert IDs will be returned.'
+      'Array of alert IDs to find cases containing these alerts. Required for by_alert mode.'
     ),
   // owner, assignees, from, to, search: descriptions inherited from step schemas
 });
@@ -150,19 +160,17 @@ export const searchCasesTool = (
 
 ${CASES_SOLUTION_CONTEXT_INSTRUCTION}
 
-Modes (provide one):
-- \`case_id\` — get one case by ID.
-- \`case_ids\` — bulk get; keep ≤10 per call.
-- \`similar_to_case_id\` — find cases sharing observables (default \`perPage\` 20).
-- \`alert_ids\` — find cases containing any of these alert IDs.
-- search/filter — uses \`owner\` (required) plus \`search\`, \`severity\`, \`status\`, \`tags\`, \`assignees\`, \`reporters\`, \`category\`, \`from\`, \`to\`, \`searchFields\`. Returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
+Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`. See \`mode\` field for required inputs.
 
-\`owner\` is required for search/filter (modes 1, 2, 4 use specific identifiers instead). Never call this tool multiple times with different \`owner\` values — that's always a bug.
+\`owner\` is required for \`search\` (other modes use specific identifiers instead). Never call this tool multiple times with different \`owner\` values — that's always a bug.
+
+\`search\` mode returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
 Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.attachments\` mode \`get_all\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
     schema: casesSchema,
     handler: async (
       {
+        mode,
         case_id,
         case_ids,
         similar_to_case_id,
@@ -191,123 +199,170 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
 
         const casesClient = await getCasesClientFn(request);
 
-        // Mode 2: Bulk get by IDs
-        if (case_ids && case_ids.length > 0) {
-          logger.info(`[Cases Tool] Bulk-getting ${case_ids.length} cases`);
-          const bulkResult = await casesClient.cases.bulkGet({ ids: case_ids });
-          const enrichedCases = enhanceCases(bulkResult.cases, request, coreServices, logger);
-          const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
-          return injectAttachmentIds(
-            createResult(
-              enrichedCases,
-              null,
-              `Retrieved ${enrichedCases.length} case(s)${
-                bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''
-              }`
-            ),
-            bulkAttachmentIds
-          );
-        }
-
-        // Mode 3: Find similar cases
-        if (similar_to_case_id) {
-          logger.info(`[Cases Tool] Finding cases similar to: ${similar_to_case_id}`);
-          const similarResult = await casesClient.cases.similar(similar_to_case_id, {
-            page: page ?? 1,
-            perPage: perPage ?? 20,
-          });
-          const enrichedSimilar = enhanceCases(similarResult.cases, request, coreServices, logger);
-          const similarAttachmentIds = await emitSearchAttachments(enrichedSimilar, attachments);
-          return injectAttachmentIds(
-            {
-              results: [
-                {
-                  type: 'other' as const,
-                  data: { ...similarResult, cases: enrichedSimilar },
-                },
-              ],
-            },
-            similarAttachmentIds
-          );
-        }
-
-        // Mode 4: Find by alert IDs
-        if (alert_ids && alert_ids.length > 0) {
-          logger.info(`[Cases Tool] Querying cases by alert IDs: ${alert_ids.join(', ')}`);
-          const cases = await fetchCasesByAlertIds(
-            alert_ids,
-            casesClient,
-            owner as string | undefined,
-            logger
-          );
-
-          if (cases.length === 0) {
-            return createResult(
-              [],
-              null,
-              `No cases found containing alert IDs: ${alert_ids.join(', ')}`
+        switch (mode) {
+          case 'get': {
+            if (!case_id) {
+              return createErrorResponse(
+                new Error('case_id is required for get mode'),
+                '[Cases Tool] Missing required field',
+                'Missing required field: case_id',
+                logger
+              );
+            }
+            logger.info(`[Cases Tool] Getting case by ID: ${case_id}`);
+            const caseData = await fetchCaseById(
+              case_id,
+              casesClient,
+              request,
+              coreServices,
+              logger
+            );
+            const singleAttachmentId = await emitCaseAttachment(
+              attachments,
+              toCaseAttachmentData(caseData, caseData.url)
+            );
+            return injectAttachmentIds(
+              createResult([caseData], `Retrieved case: ${caseData.title}`),
+              [singleAttachmentId]
             );
           }
 
-          const casesData = enhanceCases(cases, request, coreServices, logger);
-          const alertAttachmentIds = await emitSearchAttachments(casesData, attachments);
-          return injectAttachmentIds(
-            createResult(
-              casesData,
-              null,
-              `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(
-                ', '
-              )}`
-            ),
-            alertAttachmentIds
-          );
+          case 'bulk_get': {
+            if (!case_ids || case_ids.length === 0) {
+              return createErrorResponse(
+                new Error('case_ids is required for bulk_get mode'),
+                '[Cases Tool] Missing required field',
+                'Missing required field: case_ids',
+                logger
+              );
+            }
+            logger.info(`[Cases Tool] Bulk-getting ${case_ids.length} cases`);
+            const bulkResult = await casesClient.cases.bulkGet({ ids: case_ids });
+            const enrichedCases = enhanceCases(bulkResult.cases, request, coreServices, logger);
+            const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
+            return injectAttachmentIds(
+              createResult(
+                enrichedCases,
+                `Retrieved ${enrichedCases.length} case(s)${
+                  bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''
+                }`
+              ),
+              bulkAttachmentIds
+            );
+          }
+
+          case 'similar': {
+            if (!similar_to_case_id) {
+              return createErrorResponse(
+                new Error('similar_to_case_id is required for similar mode'),
+                '[Cases Tool] Missing required field',
+                'Missing required field: similar_to_case_id',
+                logger
+              );
+            }
+            logger.info(`[Cases Tool] Finding cases similar to: ${similar_to_case_id}`);
+            const similarResult = await casesClient.cases.similar(similar_to_case_id, {
+              page: page ?? 1,
+              perPage: perPage ?? 20,
+            });
+            const enrichedSimilar = enhanceCases(
+              similarResult.cases,
+              request,
+              coreServices,
+              logger
+            );
+            const similarAttachmentIds = await emitSearchAttachments(enrichedSimilar, attachments);
+            return injectAttachmentIds(
+              {
+                results: [
+                  {
+                    type: 'other' as const,
+                    data: { ...similarResult, cases: enrichedSimilar },
+                  },
+                ],
+              },
+              similarAttachmentIds
+            );
+          }
+
+          case 'by_alert': {
+            if (!alert_ids || alert_ids.length === 0) {
+              return createErrorResponse(
+                new Error('alert_ids is required for by_alert mode'),
+                '[Cases Tool] Missing required field',
+                'Missing required field: alert_ids',
+                logger
+              );
+            }
+            logger.info(`[Cases Tool] Querying cases by alert IDs: ${alert_ids.join(', ')}`);
+            const cases = await fetchCasesByAlertIds(
+              alert_ids,
+              casesClient,
+              owner as string | undefined,
+              logger
+            );
+
+            if (cases.length === 0) {
+              return createResult(
+                [],
+                `No cases found containing alert IDs: ${alert_ids.join(', ')}`
+              );
+            }
+
+            const casesData = enhanceCases(cases, request, coreServices, logger);
+            const alertAttachmentIds = await emitSearchAttachments(casesData, attachments);
+            return injectAttachmentIds(
+              createResult(
+                casesData,
+                `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(
+                  ', '
+                )}`
+              ),
+              alertAttachmentIds
+            );
+          }
+
+          case 'search': {
+            // Single page; agent paginates explicitly via `page` / `perPage`.
+            const requestedPerPage = Math.min(perPage ?? 10, 50);
+            const requestedPage = page ?? 1;
+            const searchParams: CasesFindRequest = {
+              sortField: (sortField as CasesFindRequest['sortField']) ?? 'updatedAt',
+              sortOrder: sortOrder ?? 'desc',
+              perPage: requestedPerPage,
+              page: requestedPage,
+              ...(owner && { owner }),
+              ...(search && { search }),
+              ...(searchFields && {
+                searchFields: searchFields as CasesFindRequest['searchFields'],
+              }),
+              ...(severity && { severity: severity as CasesFindRequest['severity'] }),
+              ...(status && { status: status as CasesFindRequest['status'] }),
+              ...(tags && { tags }),
+              ...(assignees && { assignees }),
+              ...(reporters && { reporters }),
+              ...(category && { category }),
+              ...(from && { from }),
+              ...(to && { to }),
+            };
+
+            const findResult = await casesClient.cases.find(searchParams);
+            const casesData = enhanceCases(findResult.cases, request, coreServices, logger);
+            const searchAttachmentIds = await emitSearchAttachments(casesData, attachments);
+
+            const totalPages = Math.max(1, Math.ceil(findResult.total / requestedPerPage));
+            const message =
+              findResult.total > casesData.length
+                ? `Showing page ${requestedPage} of ${totalPages} (${casesData.length} of ${findResult.total} matches). Pass \`page\` to fetch additional pages.`
+                : undefined;
+            return injectAttachmentIds(createResult(casesData, message), searchAttachmentIds);
+          }
+
+          default: {
+            const _exhaustive: never = mode;
+            throw new Error(`Unknown search_cases mode: ${_exhaustive}`);
+          }
         }
-
-        // Mode 1: Get case by ID
-        if (case_id) {
-          logger.info(`[Cases Tool] Getting case by ID: ${case_id}`);
-          const caseData = await fetchCaseById(case_id, casesClient, request, coreServices, logger);
-          const singleAttachmentId = await emitCaseAttachment(
-            attachments,
-            toCaseAttachmentData(caseData, caseData.url)
-          );
-          return injectAttachmentIds(
-            createResult([caseData], null, `Retrieved case: ${caseData.title}`),
-            [singleAttachmentId]
-          );
-        }
-
-        // Mode 5: Search / filter — single page; agent paginates explicitly via `page` / `perPage`.
-        const requestedPerPage = Math.min(perPage ?? 10, 50);
-        const requestedPage = page ?? 1;
-        const searchParams: CasesFindRequest = {
-          sortField: (sortField as CasesFindRequest['sortField']) ?? 'updatedAt',
-          sortOrder: sortOrder ?? 'desc',
-          perPage: requestedPerPage,
-          page: requestedPage,
-          ...(owner && { owner }),
-          ...(search && { search }),
-          ...(searchFields && { searchFields: searchFields as CasesFindRequest['searchFields'] }),
-          ...(severity && { severity: severity as CasesFindRequest['severity'] }),
-          ...(status && { status: status as CasesFindRequest['status'] }),
-          ...(tags && { tags }),
-          ...(assignees && { assignees }),
-          ...(reporters && { reporters }),
-          ...(category && { category }),
-          ...(from && { from }),
-          ...(to && { to }),
-        };
-
-        const findResult = await casesClient.cases.find(searchParams);
-        const casesData = enhanceCases(findResult.cases, request, coreServices, logger);
-        const searchAttachmentIds = await emitSearchAttachments(casesData, attachments);
-
-        const totalPages = Math.max(1, Math.ceil(findResult.total / requestedPerPage));
-        const message =
-          findResult.total > casesData.length
-            ? `Showing page ${requestedPage} of ${totalPages} (${casesData.length} of ${findResult.total} matches). Pass \`page\` to fetch additional pages.`
-            : undefined;
-        return injectAttachmentIds(createResult(casesData, null, message), searchAttachmentIds);
       } catch (error) {
         return createErrorResponse(
           error,

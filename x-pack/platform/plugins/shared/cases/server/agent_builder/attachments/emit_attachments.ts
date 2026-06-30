@@ -10,6 +10,7 @@ import type { Case } from '../../../common/types/domain';
 import {
   CASE_ATTACHMENT_TYPE,
   CASES_ATTACHMENT_TYPE,
+  CASES_ATTACHMENT_MAX,
   type CaseAttachmentData,
   type CasesAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
@@ -84,7 +85,11 @@ export const emitCasesAttachment = async (
   url?: string | null,
   description?: string
 ): Promise<string> => {
-  const data: CasesAttachmentData = { cases, total, url: url ?? null };
+  const data: CasesAttachmentData = {
+    cases: cases.slice(0, CASES_ATTACHMENT_MAX),
+    total,
+    url: url ?? null,
+  };
   const added = await attachments.add({
     type: CASES_ATTACHMENT_TYPE,
     data,
