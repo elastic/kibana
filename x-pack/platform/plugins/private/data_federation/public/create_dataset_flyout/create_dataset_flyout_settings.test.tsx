@@ -68,47 +68,13 @@ describe('CreateDatasetFlyoutSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
-  describe('Automatic format (default)', () => {
-    it('shows all commonly-used fields directly', () => {
-      const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
+  it('shows no format-specific fields until a format is selected', () => {
+    const { getByTestId, queryByTestId } = renderSettings();
+    openOptional(getByTestId);
 
-      expect(getByTestId('createDatasetFlyoutSettingsDelimiter')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsMode')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsHeaderRow')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsNullValue')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsEncoding')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsErrorMode')).toBeVisible();
-    });
-
-    it('hides advanced fields until the advanced toggle is clicked', () => {
-      const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
-
-      expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).not.toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsSegmentSize')).not.toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsOptimizedReader')).not.toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsLateMaterialization')).not.toBeVisible();
-
-      fireEvent.click(getByTestId('createDatasetFlyoutAllFormatsAdvancedToggle'));
-
-      expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsSegmentSize')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsLateMaterialization')).toBeVisible();
-    });
-
-    it('updates a commonly-used field in form state', () => {
-      const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
-
-      fireEvent.change(getByTestId('createDatasetFlyoutSettingsDelimiter'), {
-        target: { value: '|' },
-      });
-
-      expect(getSettingsValue(getByTestId)).toMatchObject({ delimiter: '|' });
-    });
+    expect(queryByTestId('createDatasetFlyoutSettingsDelimiter')).toBeNull();
+    expect(queryByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeNull();
+    expect(queryByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeNull();
   });
 
   describe('CSV format', () => {

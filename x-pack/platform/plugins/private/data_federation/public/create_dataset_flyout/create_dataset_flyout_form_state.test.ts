@@ -47,13 +47,14 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('omits empty-string fields and returns only set fields', () => {
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toEqual({
-        error_mode: 'skip_row',
-      });
-
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), partition_detection: 'hive' })
       ).toEqual({ partition_detection: 'hive' });
+    });
+
+    it('ignores format-specific fields when no format is selected', () => {
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toBeUndefined();
+      expect(buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })).toBeUndefined();
     });
 
     it('includes schema_sample_size when set to a positive integer', () => {
@@ -136,21 +137,5 @@ describe('create_dataset_flyout_form_state', () => {
       expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50, segment_size: '5mb' });
     });
 
-    it('includes all fields when format is automatic (empty)', () => {
-      const result = buildDatasetSettingsFromFormValues({
-        ...empty(),
-        format: '',
-        delimiter: ',',
-        schema_sample_size: '10',
-        segment_size: '5mb',
-        optimized_reader: 'true',
-      });
-      expect(result).toEqual({
-        delimiter: ',',
-        schema_sample_size: 10,
-        segment_size: '5mb',
-        optimized_reader: true,
-      });
-    });
   });
 });

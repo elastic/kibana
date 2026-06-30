@@ -142,8 +142,6 @@ export const validateMaxFieldSize = (value: string): true | string => {
  * The form uses empty strings for "unset"; the API uses omitted fields.
  * Fields are filtered to only the subset valid for the chosen format so that
  * leftover values from a previously-selected format don't leak into the payload.
- * Automatic (format = '') allows all fields since the user is explicitly opting
- * into format detection and may know the files have CSV/NDJSON/Parquet structure.
  */
 export const buildDatasetSettingsFromFormValues = (
   settings: CreateDatasetSettingsFormValues
@@ -154,12 +152,11 @@ export const buildDatasetSettingsFromFormValues = (
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;
 
   const { format } = settings;
-  const isAuto = !format;
   const isCsvTsv = format === 'csv' || format === 'tsv';
   const isNdjson = format === 'ndjson';
   const isParquet = format === 'parquet';
 
-  if (isAuto || isCsvTsv) {
+  if (isCsvTsv) {
     if (settings.delimiter) applied.delimiter = settings.delimiter;
     if (settings.mode) applied.mode = settings.mode;
 
@@ -187,16 +184,16 @@ export const buildDatasetSettingsFromFormValues = (
     if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
   }
 
-  if (isAuto || isCsvTsv || isNdjson) {
+  if (isCsvTsv || isNdjson) {
     const schemaSampleSize = parseOptionalPositiveInteger(settings.schema_sample_size);
     if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
   }
 
-  if (isAuto || isNdjson) {
+  if (isNdjson) {
     if (settings.segment_size) applied.segment_size = settings.segment_size;
   }
 
-  if (isAuto || isParquet) {
+  if (isParquet) {
     const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
     if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
 

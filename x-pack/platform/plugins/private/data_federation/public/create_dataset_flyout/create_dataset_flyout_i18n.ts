@@ -116,9 +116,9 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Format',
     }),
 
-  settingsFormatAutomatic: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatAutomatic', {
-      defaultMessage: 'Automatic',
+  settingsFormatPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatPlaceholder', {
+      defaultMessage: 'Select a format',
     }),
 
   settingsFormatParquet: () =>
