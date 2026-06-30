@@ -14,13 +14,10 @@ import type { LinksApiState, LinksByValueState, StoredLinksState } from '../../.
 import { transformOut as transformEmbeddableOut } from '../../embeddable/transforms/transform_out';
 
 export function transformOut(
-  linkedSavedObjectAttributes: StoredLinksState,
+  linksSavedObjectAttributes: StoredLinksState,
   references: Reference[] = []
 ): LinksApiState {
-  const state = transformEmbeddableOut(
-    linkedSavedObjectAttributes,
-    references
-  ) as LinksByValueState; // `savedObject` is never the by-reference embeddable state
+  const state = transformEmbeddableOut(linksSavedObjectAttributes, references) as LinksByValueState; // `savedObject` is never the by-reference embeddable state
   const { tags } = toAsCodeTags(references);
-  return { ...state, tags };
+  return { title: linksSavedObjectAttributes.title, ...state, tags };
 }

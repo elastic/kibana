@@ -12,6 +12,7 @@ import type { DashboardLink, ExternalLink, LinksByValueState } from '../types';
 export type StoredLink = StoredDashboardLink | StoredExternalLink;
 export type StoredLinksState = Omit<LinksByValueState, 'links'> & {
   links?: StoredLink[];
+  title: string; // all saved objects have a title
 };
 export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &
   DeprecatedLinkProperties & {
