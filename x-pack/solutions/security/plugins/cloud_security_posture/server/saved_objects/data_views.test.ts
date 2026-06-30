@@ -98,6 +98,7 @@ describe('data_views', () => {
           namespaces: [DEFAULT_SPACE_ID],
           allowNoIndex: true,
           timeFieldName: '@timestamp',
+          managed: true,
         },
         true
       );
