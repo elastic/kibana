@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getEntityAnomalies } from './get_anomaly_details';
@@ -49,6 +49,7 @@ const makeJobConfig = (overrides: Partial<JobConfig> = {}): JobConfig => ({
 });
 
 const soClient = savedObjectsClientMock.create();
+const request = httpServerMock.createKibanaRequest();
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 let esClient: ElasticsearchClient;
 let mockMl: MlPluginSetup;
@@ -56,6 +57,7 @@ let mockMl: MlPluginSetup;
 const defaultParams = {
   entityId: 'user:alice',
   entityType: 'user' as const,
+  request,
 };
 
 beforeEach(() => {
