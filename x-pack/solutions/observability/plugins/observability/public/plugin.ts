@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -188,6 +189,13 @@ export interface ObservabilityPublicPluginsStart {
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Optional infra plugin - provides OverviewHostsTable when available */
+  infra?: {
+    OverviewHostsTable: ComponentType<{
+      dateRange: { from: number; to: number };
+      schema?: 'ecs' | 'semconv';
+    }>;
+  };
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   cps?: CPSPluginStart;
   ingestHub?: IngestHubStart;
