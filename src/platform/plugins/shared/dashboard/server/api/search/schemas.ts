@@ -27,6 +27,20 @@ export const searchRequestParamsSchema = schema.object({
       },
     })
   ),
+  sort_field: schema.maybe(
+    schema.oneOf([schema.literal('updated_at')], {
+      meta: {
+        description: 'Field used to sort search results. Currently supports `updated_at`.',
+      },
+    })
+  ),
+  sort_order: schema.maybe(
+    schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      meta: {
+        description: 'Sort direction for the selected `sort_field`.',
+      },
+    })
+  ),
   query: schema.maybe(
     schema.string({
       meta: {

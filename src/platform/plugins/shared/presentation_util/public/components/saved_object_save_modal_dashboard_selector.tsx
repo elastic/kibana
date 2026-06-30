@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiRadio,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
@@ -72,7 +72,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
           <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
             <div>
               <>
-                <EuiRadio
+                <EuiCheckableCard
                   checked={dashboardOption === 'existing'}
                   id="existing-dashboard-option"
                   name="dashboard-option"
@@ -84,8 +84,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                   )}
                   onChange={() => onChange('existing')}
                   disabled={isDisabled}
-                />
-                <div className="savAddDashboard__searchDashboards">
+                >
                   <DashboardPicker
                     isDisabled={dashboardOption !== 'existing'}
                     onChange={onSelectDashboard}
@@ -100,11 +99,11 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                       )}
                     </EuiFormErrorText>
                   ) : null}
-                </div>
+                </EuiCheckableCard>
                 <EuiSpacer size="s" />
               </>
               <>
-                <EuiRadio
+                <EuiCheckableCard
                   checked={dashboardOption === 'new'}
                   id="new-dashboard-option"
                   name="dashboard-option"
@@ -120,7 +119,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 <EuiSpacer size="s" />
               </>
               {canSaveByReference ? (
-                <EuiRadio
+                <EuiCheckableCard
                   checked={dashboardOption === null}
                   id="add-to-library-option"
                   name="dashboard-option"

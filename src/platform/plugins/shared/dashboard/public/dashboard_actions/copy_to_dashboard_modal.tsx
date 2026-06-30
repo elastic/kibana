@@ -10,12 +10,12 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckableCard,
   EuiFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
@@ -103,16 +103,14 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
             <div data-test-subj="add-to-dashboard-options">
               {canEditExisting && (
                 <>
-                  <EuiRadio
+                  <EuiCheckableCard
                     checked={dashboardOption === 'existing'}
                     data-test-subj="add-to-existing-dashboard-option"
                     id="existing-dashboard-option"
                     name="dashboard-option"
                     label={dashboardCopyToDashboardActionStrings.getExistingDashboardOption()}
                     onChange={() => setDashboardOption('existing')}
-                  />
-                  <EuiSpacer size="s" />
-                  <div>
+                  >
                     <DashboardPicker
                       isDisabled={dashboardOption !== 'existing'}
                       idsToOmit={dashboardId ? [dashboardId] : undefined}
@@ -121,13 +119,13 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
                         setDashboardOption('existing');
                       }}
                     />
-                  </div>
+                  </EuiCheckableCard>
                   <EuiSpacer size="s" />
                 </>
               )}
               {canCreateNew && (
                 <>
-                  <EuiRadio
+                  <EuiCheckableCard
                     checked={dashboardOption === 'new'}
                     data-test-subj="add-to-new-dashboard-option"
                     id="new-dashboard-option"

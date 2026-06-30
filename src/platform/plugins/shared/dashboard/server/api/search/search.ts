@@ -30,6 +30,7 @@ export async function search(
 
   const includedTags = normalizeToArray(searchParams.tags);
   const excludedTags = normalizeToArray(searchParams.excluded_tags);
+  const isSortByUpdatedAt = searchParams.sort_field === 'updated_at';
 
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
@@ -46,6 +47,12 @@ export async function search(
     perPage: searchParams.per_page,
     page: searchParams.page,
     defaultSearchOperator: 'AND',
+    ...(isSortByUpdatedAt
+      ? {
+          sortField: 'updated_at',
+          sortOrder: searchParams.sort_order ?? 'desc',
+        }
+      : {}),
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
   });
 
