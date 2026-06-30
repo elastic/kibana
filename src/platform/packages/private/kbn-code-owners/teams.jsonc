@@ -33,7 +33,8 @@
     "id": "apm-ui",
     "name": "Apm Ui",
     "github": {
-      "team": "elastic/apm-ui"
+      "team": "elastic/apm-ui",
+      "label": "Team:obs-ux-infra_services"
     }
   },
   {
@@ -133,14 +134,16 @@
     "name": "Eui Team",
     "area": "platform",
     "github": {
-      "team": "elastic/eui-team"
+      "team": "elastic/eui-team",
+      "label": "EUI"
     }
   },
   {
     "id": "experience-docs",
     "name": "Experience Docs",
     "github": {
-      "team": "elastic/experience-docs"
+      "team": "elastic/experience-docs",
+      "label": "Team:Docs"
     }
   },
   {
@@ -173,7 +176,8 @@
     "id": "kibana-accessibility",
     "name": "Kibana Accessibility",
     "github": {
-      "team": "elastic/kibana-accessibility"
+      "team": "elastic/kibana-accessibility",
+      "label": "Project:Accessibility"
     }
   },
   {
@@ -245,7 +249,7 @@
     "description": "UI/UX design for Kibana Analytics and Stack Management (incl. Platform) areas of Kibana",
     "github": {
       "team": "elastic/kibana-design",
-      "label": "Team:Design"
+      "label": "Team:Platform-Design"
     }
   },
   {
@@ -367,7 +371,9 @@
     "id": "kibana-telemetry",
     "name": "Kibana Telemetry",
     "github": {
-      "team": "elastic/kibana-telemetry"
+      "team": "elastic/kibana-telemetry",
+      "label": "Team:Core"
+      
     }
   },
   {
@@ -523,7 +529,8 @@
     "name": "Obs Ux Management Team",
     "area": "observability",
     "github": {
-      "team": "elastic/obs-ux-management-team"
+      "team": "elastic/obs-ux-management-team",
+      "label": "Team:obs-ux-management"
     }
   },
   {
@@ -818,46 +825,6 @@
     }
   },
   {
-    "id": "alerting-services",
-    "name": "Alerting Services",
-    "github": {
-      "team": "elastic/kibana-alerting-services",
-      "label": "Team:Alerting Services"
-    },
-    "responsibilities": [
-      "Rules and Connectors Management UIs",
-      "Alerting Framework",
-      "Actions Plugin",
-      "Task manager",
-      "Event Log",
-      "Stack Rules"
-    ]
-  },
-  {
-    "id": "application-services",
-    "name": "Application Services",
-    "github": {
-      "team": "elastic/kibana-app-services"
-    },
-    "responsibilities": [
-      "Expressions",
-      "Low-level search (async/background search, search strategies)",
-      "High-level search (SearchSource, aggs)",
-      "Timepicker, Query Bar, Filter Bar & KQL",
-      "Index pattern service & UI",
-      "Field formatters",
-      "Embeddables/UI Actions/Drilldowns",
-      "Short URL service",
-      "Reporting",
-      "Inspector",
-      "esaggs (incl. tabify)",
-      "Filtering in visualizations",
-      "Time Bucket",
-      "URL state management utils",
-      "@elastic/datemath"
-    ]
-  },
-  {
     "id": "data-vis",
     "name": "DataVis",
     "github": {
@@ -880,16 +847,6 @@
       "Maps (Visualize)",
       "Region Maps",
       "Tile Map visualization"
-    ]
-  },
-  {
-    "id": "compliance",
-    "name": "Compliance",
-    "github": {
-      "label": "Project:accessibility"
-    },
-    "responsibilities": [
-      "Accessibility"
     ]
   },
   {
@@ -950,47 +907,6 @@
     "responsibilities": [
       "Operational Experience Frontend"
     ]
-  },
-  {
-    "id": "core-ui",
-    "name": "Core UI",
-    "github": {
-      "team": "elastic/kibana-core-ui",
-      "label": "Team:Core UI"
-    }
-  },
-  {
-    "id": "app-architecture",
-    "name": "App Architecture",
-    "github": {
-      "team": "elastic/kibana-app-arch",
-      "label": "Team:AppArch"
-    }
-  },
-  {
-    "id": "kibana-app",
-    "name": "Kibana App",
-    "github": {
-      "team": "elastic/kibana-app",
-      "label": "Team:KibanaApp"
-    }
-  },
-  {
-    "id": "platform",
-    "name": "Platform",
-    "github": {
-      "team": "elastic/kibana-platform",
-      "label": "Team:Platform"
-    }
-  },
-  {
-    "id": "elasticsearch-ui",
-    "name": "Elasticsearch UI",
-    "description": "Previously the management team on Kibana, now a separate team.",
-    "github": {
-      "team": "elastic/es-ui",
-      "label": "Team:Elasticsearch UI"
-    }
   },
   {
     "id": "security-scalability",
