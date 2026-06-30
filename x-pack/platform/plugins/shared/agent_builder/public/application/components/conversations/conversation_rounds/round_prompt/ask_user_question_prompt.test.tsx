@@ -10,6 +10,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { isMac } from '@kbn/shared-ux-utility';
 import type {
   AskUserQuestionPromptResponse,
   AskUserQuestionItem,
@@ -104,16 +105,25 @@ describe('AskUserQuestionPrompt', () => {
   });
 
   describe('single-select submission', () => {
-    it('Confirm on the only question fires onSubmit with { choice: [N] }', async () => {
+    it('Picking a single-select option on the only question auto-submits with { choice: [N] }', async () => {
       const onSubmit = jest.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
       await userEvent.click(screen.getByLabelText('Blue'));
-      await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
       expect(onSubmit).toHaveBeenCalledWith({
         answers: [{ choice: [1] }],
       } satisfies AskUserQuestionPromptResponse);
+    });
+
+    it('Picking a single-select option on a non-final question auto-advances without onSubmit', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
+      );
+      await userEvent.click(screen.getByLabelText('A'));
+      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
   });
 
@@ -273,7 +283,7 @@ describe('AskUserQuestionPrompt', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       // advanced — Q2 visible
       expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
       expect(onSubmit).not.toHaveBeenCalled();
@@ -284,7 +294,7 @@ describe('AskUserQuestionPrompt', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       expect(onSubmit).toHaveBeenCalledWith({
         answers: [{ skipped: true }],
       } satisfies AskUserQuestionPromptResponse);
@@ -329,7 +339,7 @@ describe('AskUserQuestionPrompt', () => {
       await userEvent.click(screen.getByLabelText('A'));
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
       // Q2: skip
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       // Q3: custom text
       await userEvent.type(screen.getByRole('textbox'), 'free text');
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -374,18 +384,18 @@ describe('AskUserQuestionPrompt', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       expect(mockReportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
         expect.objectContaining({ outcome: 'skipped', selected_option_count: 0 })
       );
     });
 
-    it('fires HitlQuestionAnswered with outcome=skipped_all on Skip all', async () => {
+    it('fires HitlQuestionAnswered with outcome=skipped_all on Escape', async () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
       );
-      await userEvent.click(screen.getByRole('button', { name: 'Skip all' }));
+      await userEvent.keyboard('{Escape}');
       expect(mockReportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
         expect.objectContaining({ outcome: 'skipped_all' })
@@ -402,6 +412,250 @@ describe('AskUserQuestionPrompt', () => {
         AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
         expect.objectContaining({ outcome: 'answered', used_custom_text: true })
       );
+    });
+  });
+
+  describe('Key hints', () => {
+    it('renders a notification badge for every option and for the custom row', () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={jest.fn()} />
+      );
+      // multiQuestion has 3 options → custom row is #4
+      ['1', '2', '3', '4'].forEach((n) => {
+        const el = screen.getByText(n);
+        expect(el.closest('[aria-hidden="true"]')).not.toBeNull();
+      });
+    });
+
+    it('renders the navigation key hints on the action buttons', () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      expect(screen.getByText('→')).toBeInTheDocument();
+      expect(screen.getByText(isMac ? '⌘↵' : 'Ctrl↵')).toBeInTheDocument();
+    });
+
+    it('Back button is disabled on question 1 and enabled after advancing', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      expect(screen.getByRole('button', { name: 'Back' })).toBeDisabled();
+      await userEvent.click(screen.getByLabelText('A'));
+      expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();
+    });
+  });
+
+  describe('Keyboard shortcuts', () => {
+    it('digit key picks a single-select option and auto-advances', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('1');
+      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+    });
+
+    it('handles shortcuts when a disabled text field outside the prompt holds focus', async () => {
+      // Mirrors Kibana's chat input, which is disabled while a HITL prompt is open
+      // but may still be the document.activeElement after page load.
+      const disabledChatInput = document.createElement('textarea');
+      disabledChatInput.disabled = true;
+      document.body.appendChild(disabledChatInput);
+      try {
+        // jsdom won't programmatically focus a disabled element, so simulate
+        // the post-load state by inserting a non-disabled element, focusing it,
+        // then flipping the disabled flag — Kibana's flow lands on the same
+        // activeElement-on-a-disabled-textarea state.
+        disabledChatInput.disabled = false;
+        disabledChatInput.focus();
+        disabledChatInput.disabled = true;
+        expect(document.activeElement).toBe(disabledChatInput);
+
+        renderWithProviders(
+          <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        );
+        await userEvent.keyboard('1');
+        expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+      } finally {
+        document.body.removeChild(disabledChatInput);
+      }
+    });
+
+    it('passes keys through to a live text field outside the prompt', async () => {
+      const liveInput = document.createElement('input');
+      liveInput.type = 'text';
+      document.body.appendChild(liveInput);
+      liveInput.focus();
+      try {
+        renderWithProviders(
+          <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        );
+        await userEvent.keyboard('1');
+        // Still on Q1 — the digit went to the external input, not our handler.
+        expect(screen.getByRole('heading', { name: 'Q1: pick one' })).toBeInTheDocument();
+        expect(liveInput).toHaveValue('1');
+      } finally {
+        document.body.removeChild(liveInput);
+      }
+    });
+
+    it('digit key auto-submits on the only single-select question', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
+      );
+      await userEvent.keyboard('2');
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ choice: [1] }],
+      } satisfies AskUserQuestionPromptResponse);
+    });
+
+    it('digit key toggles an option in multi-select', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('1');
+      expect(screen.getByLabelText('Cat')).toBeChecked();
+      await userEvent.keyboard('1');
+      expect(screen.getByLabelText('Cat')).not.toBeChecked();
+    });
+
+    it('out-of-range digit key is ignored', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      // singleQuestion has 2 regular options + 1 custom row → indices 1, 2, 3 are valid
+      await userEvent.keyboard('9');
+      expect(screen.getByLabelText('Red')).not.toBeChecked();
+      expect(screen.getByLabelText('Blue')).not.toBeChecked();
+      expect(screen.getByRole('textbox')).not.toHaveFocus();
+    });
+
+    it('digit key for the "Be more specific…" row focuses the text input', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      // singleQuestion has 2 options → custom row digit is 3
+      await userEvent.keyboard('3');
+      expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it('digit keys are suppressed while the custom text input is focused', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+      );
+      const textbox = screen.getByRole('textbox');
+      await userEvent.click(textbox);
+      expect(textbox).toHaveFocus();
+      await userEvent.keyboard('1');
+      // '1' typed into the textbox instead of selecting option 1
+      expect(textbox).toHaveValue('1');
+      expect(screen.getByLabelText('Red')).not.toBeChecked();
+    });
+
+    it('Escape skips all remaining questions', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
+      );
+      await userEvent.keyboard('{Escape}');
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ skipped: true }, { skipped: true }, { skipped: true }],
+      } satisfies AskUserQuestionPromptResponse);
+    });
+
+    it('Escape works even while the custom text input is focused', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
+      );
+      await userEvent.type(screen.getByRole('textbox'), 'something');
+      await userEvent.keyboard('{Escape}');
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ skipped: true }, { skipped: true }, { skipped: true }],
+      } satisfies AskUserQuestionPromptResponse);
+    });
+
+    it('ArrowRight skips the current question and advances', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+    });
+
+    it('ArrowLeft goes back to the previous question', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('1'); // Q1 → Q2 (auto-advance)
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getByRole('heading', { name: 'Q1: pick one' })).toBeInTheDocument();
+    });
+
+    it('ArrowLeft is suppressed while the custom text input is focused', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      await userEvent.keyboard('1'); // Q1 → Q2
+      const textbox = screen.getByRole('textbox');
+      await userEvent.click(textbox);
+      await userEvent.keyboard('{ArrowLeft}');
+      // Still on Q2 — the arrow key didn't trigger Back
+      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+    });
+
+    it('Cmd/Ctrl+Enter submits a multi-select prompt', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
+      );
+      await userEvent.keyboard('1'); // toggle Cat
+      await userEvent.keyboard('2'); // toggle Dog
+      const modifier = isMac ? '{Meta>}{Enter}{/Meta}' : '{Control>}{Enter}{/Control}';
+      await userEvent.keyboard(modifier);
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ choice: [0, 1] }],
+      } satisfies AskUserQuestionPromptResponse);
+    });
+
+    it('does not carry focus to the next question after Cmd/Ctrl+Enter from the custom input', async () => {
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+      );
+      // Q1 has 2 regular options → digit 3 selects the custom row and focuses its input.
+      await userEvent.keyboard('3');
+      expect(screen.getByRole('textbox')).toHaveFocus();
+      await userEvent.keyboard('hello');
+      const modifier = isMac ? '{Meta>}{Enter}{/Meta}' : '{Control>}{Enter}{/Control}';
+      await userEvent.keyboard(modifier);
+      // On Q2 the custom input must NOT be auto-focused.
+      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).not.toHaveFocus();
+    });
+
+    it('Cmd/Ctrl+Enter fires even while the custom text input is focused', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
+      );
+      await userEvent.type(screen.getByRole('textbox'), 'Fish');
+      const modifier = isMac ? '{Meta>}{Enter}{/Meta}' : '{Control>}{Enter}{/Control}';
+      await userEvent.keyboard(modifier);
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ custom: 'Fish' }],
+      } satisfies AskUserQuestionPromptResponse);
+    });
+
+    it('Enter confirms a multi-select prompt when an option is tracked', async () => {
+      const onSubmit = jest.fn();
+      renderWithProviders(
+        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
+      );
+      await userEvent.keyboard('2'); // toggle Dog
+      await userEvent.keyboard('{Enter}');
+      expect(onSubmit).toHaveBeenCalledWith({
+        answers: [{ choice: [1] }],
+      } satisfies AskUserQuestionPromptResponse);
     });
   });
 });

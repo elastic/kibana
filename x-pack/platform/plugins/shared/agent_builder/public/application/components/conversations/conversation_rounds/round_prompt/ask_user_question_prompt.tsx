@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCheckableCard,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormErrorText,
   EuiIcon,
+  EuiNotificationBadge,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -22,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isMac } from '@kbn/shared-ux-utility';
 import {
   labels,
   containerStyles,
@@ -36,6 +38,35 @@ import type { AnswerDraft, AskUserQuestionPromptProps } from './ask_user_questio
 
 export type { AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
 
+const CONFIRM_KEY_HINT = isMac ? '⌘↵' : 'Ctrl↵';
+const HANDLED_DIGIT_KEY = /^[1-9]$/;
+
+/** True when the focused element can accept keyboard input — we don't steal those keys. */
+const isLiveTextEntry = (el: Element | null): boolean => {
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    return !el.disabled && !el.readOnly;
+  }
+  return el instanceof HTMLElement && el.isContentEditable;
+};
+
+const KeyHint = ({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      aria-hidden="true"
+      css={css`
+        margin-left: ${euiTheme.size.xs};
+        color: inherit;
+        opacity: 0.7;
+        font-size: 11px;
+        font-family: ${euiTheme.font.familyCode};
+      `}
+    >
+      {children}
+    </span>
+  );
+};
+
 export const AskUserQuestionPrompt = ({
   promptId,
   questions,
@@ -49,6 +80,7 @@ export const AskUserQuestionPrompt = ({
   const [drafts, setDrafts] = useState<AnswerDraft[]>(() => questions.map(() => ({})));
   const [showCustomError, setShowCustomError] = useState(false);
   const baseId = useGeneratedHtmlId({ prefix: 'askUserQuestionPrompt' });
+  const customInputRef = useRef<HTMLInputElement>(null);
 
   const { reportPromptShown, reportQuestionAnswered } = useAskUserQuestionTelemetry({
     promptId,
@@ -59,11 +91,21 @@ export const AskUserQuestionPrompt = ({
     reportPromptShown();
   }, [reportPromptShown]);
 
+  // When the question changes, drop focus from the custom input so it never
+  // carries over to the next question (e.g. user typed in custom on Q1 then
+  // hit Cmd+Enter — focus would otherwise stick to the new question's input).
+  useEffect(() => {
+    if (customInputRef.current && document.activeElement === customInputRef.current) {
+      customInputRef.current.blur();
+    }
+  }, [currentIndex]);
+
   const currentQuestion = questions[currentIndex];
   const currentDraft = drafts[currentIndex];
   const isFinalQuestion = currentIndex === totalQuestions - 1;
   const canConfirm = !currentDraft.skipped && isDraftAnswerable(currentDraft);
   const questionGroupName = `${baseId}-q${currentIndex}`;
+  const isInteractionDisabled = isDisabled || isLoading;
 
   const updateDraft = useCallback(
     (next: AnswerDraft) => {
@@ -144,14 +186,34 @@ export const AskUserQuestionPrompt = ({
         });
         return;
       }
-      updateDraft({
+
+      // Single-select: build the next draft inline and auto-advance / submit in the
+      // same call stack — avoids a stale-state read between setState and the
+      // advance decision.
+      const nextDraft: AnswerDraft = {
         skipped: false,
         choice: [optionIndex],
         custom: currentDraft.custom,
         customSelected: false,
-      });
+      };
+      updateDraft(nextDraft);
+      reportQuestionAnswered(currentIndex, nextDraft, 'answered');
+      if (isFinalQuestion) {
+        handleSubmit(nextDraft);
+        return;
+      }
+      setShowCustomError(false);
+      setCurrentIndex((idx) => idx + 1);
     },
-    [currentQuestion.multi_select, currentDraft, updateDraft]
+    [
+      currentQuestion.multi_select,
+      currentDraft,
+      updateDraft,
+      reportQuestionAnswered,
+      currentIndex,
+      isFinalQuestion,
+      handleSubmit,
+    ]
   );
 
   const handleCustomChange = useCallback(
@@ -184,7 +246,107 @@ export const AskUserQuestionPrompt = ({
 
   const isCustomActive = !!currentDraft.customSelected;
 
-  const isInteractionDisabled = isDisabled || isLoading;
+  // Keep the latest handler closures in a ref so the document-level keydown
+  // listener (below) can stay registered once for the lifetime of the prompt.
+  const keyboardHandlersRef = useRef({
+    isInteractionDisabled,
+    currentChoice: currentDraft.choice,
+    optionsCount: currentQuestion.options.length,
+    handleConfirm,
+    handleSkipAll,
+    handleSkip,
+    handleBack,
+    handleOptionPick,
+    handleCustomToggle,
+  });
+  keyboardHandlersRef.current = {
+    isInteractionDisabled,
+    currentChoice: currentDraft.choice,
+    optionsCount: currentQuestion.options.length,
+    handleConfirm,
+    handleSkipAll,
+    handleSkip,
+    handleBack,
+    handleOptionPick,
+    handleCustomToggle,
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const h = keyboardHandlersRef.current;
+      if (h.isInteractionDisabled) return;
+
+      const active = document.activeElement;
+      const isCustomInputFocused = !!customInputRef.current && customInputRef.current === active;
+
+      // Pass keys through to any text field the user is actively typing in.
+      // Disabled fields (e.g., the chat input while a HITL prompt is open)
+      // can't receive input, so they don't block shortcuts.
+      if (!isCustomInputFocused && isLiveTextEntry(active)) return;
+
+      // Cmd/Ctrl+Enter and Escape fire even while typing in the custom input.
+      if (event.key === 'Enter' && (isMac ? event.metaKey : event.ctrlKey)) {
+        event.preventDefault();
+        h.handleConfirm();
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        h.handleSkipAll();
+        return;
+      }
+
+      if (isCustomInputFocused) return;
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        h.handleConfirm();
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        h.handleBack();
+        return;
+      }
+
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        h.handleSkip();
+        return;
+      }
+
+      if (HANDLED_DIGIT_KEY.test(event.key) && !event.altKey && !event.ctrlKey && !event.metaKey) {
+        const optionIndex = Number(event.key) - 1;
+        if (optionIndex < h.optionsCount) {
+          event.preventDefault();
+          const alreadyChecked = (h.currentChoice ?? []).includes(optionIndex);
+          h.handleOptionPick(optionIndex, !alreadyChecked);
+          return;
+        }
+        if (optionIndex === h.optionsCount) {
+          event.preventDefault();
+          h.handleCustomToggle(true);
+          customInputRef.current?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const optionRowWrapperStyles = css`
+    position: relative;
+  `;
+  const optionBadgeAnchorStyles = css`
+    position: absolute;
+    right: ${euiTheme.size.base};
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  `;
 
   return (
     <EuiFlexGroup
@@ -243,27 +405,36 @@ export const AskUserQuestionPrompt = ({
           const checked = (currentDraft.choice ?? []).includes(optionIndex);
           return (
             <EuiFlexItem key={`${currentIndex}-${optionIndex}`} grow={false}>
-              <EuiCheckableCard
-                id={inputId}
-                label={option.label}
-                checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
-                name={questionGroupName}
-                checked={checked}
-                disabled={isInteractionDisabled}
-                css={optionCardStyles}
-                onChange={(e) =>
-                  handleOptionPick(
-                    optionIndex,
-                    currentQuestion.multi_select ? e.target.checked : true
-                  )
-                }
-              >
-                {option.description && (
-                  <EuiText size="xs" color="subdued">
-                    {option.description}
-                  </EuiText>
-                )}
-              </EuiCheckableCard>
+              <div css={optionRowWrapperStyles}>
+                <EuiCheckableCard
+                  id={inputId}
+                  label={option.label}
+                  checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
+                  name={questionGroupName}
+                  checked={checked}
+                  disabled={isInteractionDisabled}
+                  css={optionCardStyles}
+                  onChange={(e) =>
+                    handleOptionPick(
+                      optionIndex,
+                      currentQuestion.multi_select ? e.target.checked : true
+                    )
+                  }
+                >
+                  {option.description && (
+                    <EuiText size="xs" color="subdued">
+                      {option.description}
+                    </EuiText>
+                  )}
+                </EuiCheckableCard>
+                {/* Badge positioned over the card so it doesn't pollute the
+                      label's text content (would break getByLabelText). */}
+                <div aria-hidden="true" css={optionBadgeAnchorStyles}>
+                  <EuiNotificationBadge size="s" color="subdued">
+                    {optionIndex + 1}
+                  </EuiNotificationBadge>
+                </div>
+              </div>
             </EuiFlexItem>
           );
         })}
@@ -289,6 +460,7 @@ export const AskUserQuestionPrompt = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldText
+                  inputRef={customInputRef}
                   value={currentDraft.custom ?? ''}
                   placeholder={labels.customPlaceholder}
                   onChange={(e) => handleCustomChange(e.target.value)}
@@ -307,6 +479,20 @@ export const AskUserQuestionPrompt = ({
                   `}
                   fullWidth
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/* The custom row has zero right padding (see customRowStyles); compensate
+                      so the badge number aligns with the regular option numbers above. */}
+                <EuiNotificationBadge
+                  size="s"
+                  color="subdued"
+                  aria-hidden="true"
+                  css={css`
+                    margin-right: ${euiTheme.size.base};
+                  `}
+                >
+                  {currentQuestion.options.length + 1}
+                </EuiNotificationBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiCheckableCard>
@@ -331,38 +517,21 @@ export const AskUserQuestionPrompt = ({
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {totalQuestions > 1 && currentIndex === 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleSkipAll}
-                  disabled={isInteractionDisabled}
-                  size="s"
-                  color="text"
-                >
-                  {labels.skipAllButton}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            {currentIndex > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleBack}
-                  disabled={isInteractionDisabled}
-                  size="s"
-                  color="text"
-                  iconType="sortLeft"
-                >
-                  {labels.backButton}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiButtonIcon
+            onClick={handleBack}
+            disabled={currentIndex === 0 || isInteractionDisabled}
+            iconType="arrowLeft"
+            size="s"
+            color="text"
+            display="empty"
+            aria-label={labels.backButton}
+          />
         </EuiFlexItem>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={handleSkip} disabled={isInteractionDisabled} size="s" color="text">
-              {labels.skipButton}
+              {labels.skipQuestionButton}
+              <KeyHint>→</KeyHint>
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -375,6 +544,7 @@ export const AskUserQuestionPrompt = ({
               color="primary"
             >
               {isFinalQuestion ? labels.confirmButton : labels.continueButton}
+              <KeyHint>{CONFIRM_KEY_HINT}</KeyHint>
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

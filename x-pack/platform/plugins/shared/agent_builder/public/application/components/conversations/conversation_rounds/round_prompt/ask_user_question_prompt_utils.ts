@@ -45,12 +45,12 @@ export const labels = {
   backButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.backButton', {
     defaultMessage: 'Back',
   }),
-  skipButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.skipButton', {
-    defaultMessage: 'Skip',
-  }),
-  skipAllButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.skipAllButton', {
-    defaultMessage: 'Skip all',
-  }),
+  skipQuestionButton: i18n.translate(
+    'xpack.agentBuilder.askUserQuestionPrompt.skipQuestionButton',
+    {
+      defaultMessage: 'Skip question',
+    }
+  ),
   confirmButton: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.confirmButton', {
     defaultMessage: 'Submit',
   }),
@@ -67,14 +67,29 @@ export const labels = {
 
 export const optionCardStyles = ({ euiTheme }: UseEuiTheme) => css`
   border-radius: ${euiTheme.border.radius.medium};
+  /* The checkbox panel (subdued/primary) must stretch to the full card height,
+     so its background covers the description row as well. align-self: stretch
+     beats height: 100% here — the outer SplitPanel has no fixed height, so
+     percent heights collapse to auto and leave the panel content-sized. */
   .euiSplitPanel__inner.euiPanel--subdued,
   .euiSplitPanel__inner.euiPanel--primary {
     display: flex;
     align-items: center;
-    height: 100%;
+    align-self: stretch;
   }
   .euiCheckableCard__children {
     margin-block-start: 2px;
+  }
+  /* No focus ring on answer cards — the kbd number hint is the only nav indicator. */
+  &:focus,
+  &:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  input:focus,
+  input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
   }
 `;
 
