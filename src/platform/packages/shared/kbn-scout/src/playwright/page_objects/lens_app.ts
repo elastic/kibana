@@ -176,8 +176,7 @@ export class LensApp {
   }
 
   async setPalette(paletteId: string, isLegacy: boolean) {
-    await this.page.testSubj.click('lns_colorEditing_trigger');
-    await expect(this.page.testSubj.locator('lns-palettePanelFlyout')).toBeVisible();
+    await this.openPalettePanel();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
@@ -193,7 +192,7 @@ export class LensApp {
       await this.page.testSubj.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
     }
 
-    await this.closePaletteEditor();
+    await this.closePalettePanel();
   }
 
   async openPalettePanel() {
@@ -235,13 +234,6 @@ export class LensApp {
     }
 
     return result;
-  }
-
-  private async closePaletteEditor() {
-    await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
-    await expect(
-      this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
-    ).toBeHidden();
   }
 
   private async openDimensionEditor(dimension: string) {
