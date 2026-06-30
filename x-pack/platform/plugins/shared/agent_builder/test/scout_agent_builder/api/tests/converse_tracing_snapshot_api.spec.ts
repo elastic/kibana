@@ -104,19 +104,21 @@ const sanitizeSpan = (span: Record<string, unknown>): Record<string, unknown> =>
   return result;
 };
 
-apiTest.describe('Agent Builder — tracing snapshot', { tag: [...tags.stateful.classic] }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let llmProxy: LlmProxy;
-  let connectorId: string;
+apiTest.describe(
+  'Agent Builder — tracing snapshot',
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  () => {
+    let adminCredentials: RoleApiCredentials;
+    let llmProxy: LlmProxy;
+    let connectorId: string;
 
-  apiTest.beforeAll(async ({ requestAuth, log, kbnClient, esClient }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    llmProxy = await createLlmProxy(log);
-    const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
-    connectorId = id;
+    apiTest.beforeAll(async ({ requestAuth, log, kbnClient, esClient }) => {
+      adminCredentials = await requestAuth.getApiKeyForAdmin();
+      llmProxy = await createLlmProxy(log);
+      const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
+      connectorId = id;
 
-    // Clean any leftover trace data from previous runs
-    try {
+      // Clean any leftover trace data from previous runs
       await esClient.deleteByQuery({
         index: TRACE_INDEX,
         query: { match_all: {} },
@@ -124,117 +126,115 @@ apiTest.describe('Agent Builder — tracing snapshot', { tag: [...tags.stateful.
         conflicts: 'proceed',
         ignore_unavailable: true,
       });
-    } catch {
-      // Index may not exist yet
-    }
 
-    // Create a custom skill
-    await kbnClient.request({
-      method: 'POST',
-      path: `${API_AGENT_BUILDER}/skills`,
-      headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
-      body: {
-        id: 'test_skill',
-        name: 'test_skill',
-        description: 'A test skill for tracing snapshot',
-        content: 'Follow these instructions for test_skill.',
-        tool_ids: [],
-      },
-      ignoreErrors: [409],
-    });
-
-    // Create a custom agent
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `${API_AGENT_BUILDER}/agents/test_agent`,
-      headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
-      ignoreErrors: [404],
-    });
-    await kbnClient.request({
-      method: 'POST',
-      path: `${API_AGENT_BUILDER}/agents`,
-      headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
-      body: {
-        id: 'test_agent',
-        name: 'test_agent',
-        description: 'Agent for tracing snapshot test',
-        labels: [],
-        configuration: {
-          instructions: 'You are a test agent. Use tools when asked.',
-          tools: [{ tool_ids: ['*'] }],
-          skill_ids: ['test_skill'],
+      // Create a custom skill
+      await kbnClient.request({
+        method: 'POST',
+        path: `${API_AGENT_BUILDER}/skills`,
+        headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
+        body: {
+          id: 'test_skill',
+          name: 'test_skill',
+          description: 'A test skill for tracing snapshot',
+          content: 'Follow these instructions for test_skill.',
+          tool_ids: [],
         },
-      },
-    });
-  });
-
-  apiTest.afterAll(async ({ kbnClient, esClient }) => {
-    await deleteAllConversationsFromEs(esClient);
-    llmProxy.close();
-    await deleteConnectorById(kbnClient, connectorId);
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `${API_AGENT_BUILDER}/agents/test_agent`,
-      headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
-      ignoreErrors: [404],
-    });
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `${API_AGENT_BUILDER}/skills/test_skill`,
-      headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
-      ignoreErrors: [404],
-    });
-  });
-
-  apiTest(
-    'trace documents match snapshot after conversation with tool call',
-    async ({ apiClient, esClient }) => {
-      const EXPECTED_SPAN_COUNT = 7;
-      let hits: Array<{ _source?: unknown }> = [];
-
-      // Mock the conversation and tool call
-      mockTitleGeneration(llmProxy, 'Test Conversation');
-      mockAgentToolCall({
-        llmProxy,
-        toolName: 'platform_core_list_indices',
-        toolArg: { pattern: '*' },
+        ignoreErrors: [409],
       });
-      mockFinalAnswer(llmProxy, 'Here are the results from the tool call.');
 
-      // Agent Builder conversation
-      const res = await postConverse(
-        apiClient,
-        adminCredentials.apiKeyHeader,
-        { input: 'List all indices', connector_id: connectorId, agent_id: 'test_agent' },
-        'local'
-      );
-      expect(res).toHaveStatusCode(200);
-      const { conversation_id: conversationId } = res.body as ChatResponse;
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-      // Wait for the spans to be indexed
-      await expect(async () => {
-        await esClient.indices.refresh({ index: TRACE_INDEX });
-        const traceResult = await esClient.search({
-          index: TRACE_INDEX,
-          sort: [{ '@timestamp': 'asc' }],
-          query: {
-            term: { 'attributes.gen_ai.conversation.id': conversationId },
+      // Create a custom agent
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${API_AGENT_BUILDER}/agents/test_agent`,
+        headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
+        ignoreErrors: [404],
+      });
+      await kbnClient.request({
+        method: 'POST',
+        path: `${API_AGENT_BUILDER}/agents`,
+        headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
+        body: {
+          id: 'test_agent',
+          name: 'test_agent',
+          description: 'Agent for tracing snapshot test',
+          labels: [],
+          configuration: {
+            instructions: 'You are a test agent. Use tools when asked.',
+            tools: [{ tool_ids: ['*'] }],
+            skill_ids: ['test_skill'],
           },
-        });
-        hits = traceResult.hits.hits;
-        expect(hits).toHaveLength(EXPECTED_SPAN_COUNT);
-      }).toPass({ timeout: 10_000, intervals: [500, 1000, 2000] });
+        },
+      });
+    });
 
-      // Sanitize the spans and sort them by name
-      const spans = hits
-        .map((hit) => sanitizeSpan(hit._source as Record<string, unknown>))
-        .sort((a, b) => {
-          const byName = String(a.name ?? '').localeCompare(String(b.name ?? ''));
-          return byName !== 0 ? byName : JSON.stringify(a).localeCompare(JSON.stringify(b));
-        });
+    apiTest.afterAll(async ({ kbnClient, esClient }) => {
+      await deleteAllConversationsFromEs(esClient);
+      llmProxy.close();
+      await deleteConnectorById(kbnClient, connectorId);
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${API_AGENT_BUILDER}/agents/test_agent`,
+        headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
+        ignoreErrors: [404],
+      });
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${API_AGENT_BUILDER}/skills/test_skill`,
+        headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
+        ignoreErrors: [404],
+      });
+    });
 
-      expect(JSON.stringify(spans, null, 2)).toMatchSnapshot('agent_builder_traces.json');
-    }
-  );
-});
+    apiTest(
+      'trace documents match snapshot after conversation with tool call',
+      async ({ apiClient, esClient }) => {
+        const EXPECTED_SPAN_COUNT = 7;
+        let hits: Array<{ _source?: unknown }> = [];
+
+        // Mock the conversation and tool call
+        mockTitleGeneration(llmProxy, 'Test Conversation');
+        mockAgentToolCall({
+          llmProxy,
+          toolName: 'platform_core_list_indices',
+          toolArg: { pattern: '*' },
+        });
+        mockFinalAnswer(llmProxy, 'Here are the results from the tool call.');
+
+        // Agent Builder conversation
+        const res = await postConverse(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          { input: 'List all indices', connector_id: connectorId, agent_id: 'test_agent' },
+          'local'
+        );
+        expect(res).toHaveStatusCode(200);
+        const { conversation_id: conversationId } = res.body as ChatResponse;
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        // Wait for the spans to be indexed
+        await expect(async () => {
+          await esClient.indices.refresh({ index: TRACE_INDEX });
+          const traceResult = await esClient.search({
+            index: TRACE_INDEX,
+            sort: [{ '@timestamp': 'asc' }],
+            query: {
+              term: { 'attributes.gen_ai.conversation.id': conversationId },
+            },
+          });
+          hits = traceResult.hits.hits;
+          expect(hits).toHaveLength(EXPECTED_SPAN_COUNT);
+        }).toPass({ timeout: 10_000, intervals: [500, 1000, 2000] });
+
+        // Sanitize the spans and sort them by name
+        const spans = hits
+          .map((hit) => sanitizeSpan(hit._source as Record<string, unknown>))
+          .sort((a, b) => {
+            const byName = String(a.name ?? '').localeCompare(String(b.name ?? ''));
+            return byName !== 0 ? byName : JSON.stringify(a).localeCompare(JSON.stringify(b));
+          });
+
+        expect(JSON.stringify(spans, null, 2)).toMatchSnapshot('agent_builder_traces.json');
+      }
+    );
+  }
+);
