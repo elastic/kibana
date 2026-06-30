@@ -85,6 +85,9 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // open modal, filter and check
+    // Use force:true because EuiToolTip or the save-progress overlay can briefly
+    // cover the gear button after the save modal closes; the button is always
+    // enabled/visible at this point so actionability is not the concern.
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
 
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
