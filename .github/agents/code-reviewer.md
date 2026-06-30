@@ -37,7 +37,7 @@ Ground architectural and maintainability findings in local code and clear behavi
 - lint, formatting, type-check, or import-order issues as CI already enforces these static checks
 - low-value style preferences, naming nits, or refactors that are not tied to a concrete defect or maintenance risk
 - speculative concerns that are not supported by the diff and surrounding code
-- duplicate comments on unchanged lines from earlier review runs
+- concerns already raised in earlier review feedback, whether or not the lines changed and whether or not the wording differs (see "Avoiding duplicate feedback")
 
 ## Review process
 
@@ -45,7 +45,7 @@ Ground architectural and maintainability findings in local code and clear behavi
 2. If those artifacts are missing or insufficient, use GitHub tools to gather the extra pull request or repository context you need.
 3. Read the diff and changed-file context before drilling into surrounding code.
 4. Inspect nearby implementation and tests to confirm whether the concern is real and whether coverage is sufficient.
-5. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
+5. If prior review comments or reviews are available in the provided context, reconcile every candidate finding against them before reporting it (see "Avoiding duplicate feedback").
 
 ## Review mode output
 
@@ -61,9 +61,16 @@ Use review mode when the importing workflow is triggered by a pull request event
 - If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
 - Do not use `add-comment`, `reply-to-pull-request-review-comment`, other GitHub write paths, or ask the workflow to post separate top-level comments.
 
-## Review Re-runs
+## Avoiding duplicate feedback
 
-On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines.
+On subsequent review mode runs the prefetched context contains earlier feedback from this reviewer, the other AI reviewer, and humans. Before reporting any finding, reconcile it against that earlier feedback so the same concern is never raised twice.
+
+- Match on the underlying concern, not on text or line numbers. Treat a candidate finding as already raised when an existing review thread or review covers the same issue at the same location, even if the wording differs, the suggested fix differs, or the relevant lines were edited since (which moves them into the new diff). A reworded restatement of an existing concern is a duplicate.
+- Treat threads marked `review_thread_is_resolved == true` in `pr-review-comments.json` as settled. Do not re-raise the underlying concern, even reworded and even if the lines changed, regardless of who resolved the thread.
+- Treat threads marked `review_thread_is_outdated == true` as already handled by later changes; do not resurface them unless the current diff clearly reintroduces the same defect.
+- Only raise a concern about previously flagged code when the current diff introduces a genuinely new, distinct issue at that location. State plainly what is new.
+
+Review only the new changes, stay high-signal, and do not restate prior findings.
 
 ## Resolving addressed AI feedback
 
