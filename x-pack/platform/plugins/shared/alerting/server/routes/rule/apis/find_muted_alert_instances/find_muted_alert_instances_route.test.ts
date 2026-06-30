@@ -33,7 +33,7 @@ describe('findMutedAlertInstancesRoute', () => {
     expect(config.options).toEqual(expect.objectContaining({ access: 'internal' }));
   });
 
-  it('transforms the request body and returns id + muted_alert_ids + snoozed_alert_instances', async () => {
+  it('transforms the request body and returns id + muted_alert_instance_ids + snoozed_alert_instances', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -97,7 +97,7 @@ describe('findMutedAlertInstancesRoute', () => {
         data: [
           {
             id: 'rule-1',
-            muted_alert_ids: ['instance-1', 'instance-2'],
+            muted_alert_instance_ids: ['instance-1', 'instance-2'],
             snoozed_alert_instances: [
               {
                 instance_id: 'instance-3',
@@ -179,7 +179,7 @@ describe('findMutedAlertInstancesRoute', () => {
         page: 1,
         per_page: 10,
         total: 1,
-        data: [{ id: 'rule-1', muted_alert_ids: ['instance-1'], snoozed_alert_instances: [] }],
+        data: [{ id: 'rule-1', muted_alert_instance_ids: ['instance-1'], snoozed_alert_instances: [] }],
       },
     });
   });

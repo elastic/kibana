@@ -22,7 +22,7 @@ interface SnoozedAlertInstanceApiResponse {
 
 export interface MutedAlertRecord {
   id: string;
-  muted_alert_ids: string[];
+  muted_alert_instance_ids: string[];
   snoozed_alert_instances?: SnoozedAlertInstanceApiResponse[];
 }
 
@@ -66,7 +66,7 @@ export const getAlertSnoozeStateByRule = async ({
   return {
     data: data.map((rule) => ({
       id: rule.id,
-      mutedAlertIds: rule.muted_alert_ids,
+      mutedAlertIds: rule.muted_alert_instance_ids,
       snoozedInstances: (rule.snoozed_alert_instances ?? []).map(transformSnoozedInstance),
     })),
   };

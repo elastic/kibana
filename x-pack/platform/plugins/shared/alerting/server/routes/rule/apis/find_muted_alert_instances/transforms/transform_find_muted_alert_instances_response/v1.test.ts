@@ -40,7 +40,7 @@ describe('transformFindMutedAlertInstancesResponse', () => {
       data: [
         {
           id: 'rule-1',
-          muted_alert_ids: ['instance-1', 'instance-2'],
+          muted_alert_instance_ids: ['instance-1', 'instance-2'],
           snoozed_alert_instances: [
             {
               instance_id: 'instance-1',
@@ -52,12 +52,12 @@ describe('transformFindMutedAlertInstancesResponse', () => {
             },
           ],
         },
-        { id: 'rule-2', muted_alert_ids: ['instance-3'], snoozed_alert_instances: [] },
+        { id: 'rule-2', muted_alert_instance_ids: ['instance-3'], snoozed_alert_instances: [] },
       ],
     });
   });
 
-  it('defaults muted_alert_ids and snoozed_alert_instances to empty arrays when missing', () => {
+  it('defaults muted_alert_instance_ids and snoozed_alert_instances to empty arrays when missing', () => {
     const result = {
       page: 1,
       perPage: 10,
@@ -70,7 +70,7 @@ describe('transformFindMutedAlertInstancesResponse', () => {
       page: 1,
       per_page: 10,
       total: 1,
-      data: [{ id: 'rule-1', muted_alert_ids: [], snoozed_alert_instances: [] }],
+      data: [{ id: 'rule-1', muted_alert_instance_ids: [], snoozed_alert_instances: [] }],
     });
   });
 

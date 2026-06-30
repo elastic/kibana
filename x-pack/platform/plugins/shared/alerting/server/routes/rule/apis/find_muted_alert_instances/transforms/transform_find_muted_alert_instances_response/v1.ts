@@ -17,7 +17,7 @@ export const transformFindMutedAlertInstancesResponse = (
     total: result.total,
     data: result.data.map((rule) => ({
       id: rule.id,
-      muted_alert_ids: rule.mutedInstanceIds ?? [],
+      muted_alert_instance_ids: rule.mutedInstanceIds ?? [],
       snoozed_alert_instances: (rule.snoozedInstances ?? []).map((si) => ({
         instance_id: si.instanceId,
         ...(si.expiresAt !== undefined && { expires_at: si.expiresAt }),

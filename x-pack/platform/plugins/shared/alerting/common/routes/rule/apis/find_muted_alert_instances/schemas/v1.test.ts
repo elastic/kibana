@@ -98,7 +98,7 @@ describe('findMutedAlertInstancesResponseSchema', () => {
       page: 1,
       per_page: 10,
       total: 1,
-      data: [{ id: 'rule-1', muted_alert_ids: ['instance-1', 'instance-2'] }],
+      data: [{ id: 'rule-1', muted_alert_instance_ids: ['instance-1', 'instance-2'] }],
     };
     expect(findMutedAlertInstancesResponseSchema.validate(response)).toEqual(response);
   });
@@ -116,7 +116,7 @@ describe('findMutedAlertInstancesResponseSchema', () => {
       data: [
         {
           id: 'rule-1',
-          muted_alert_ids: ['instance-1'],
+          muted_alert_instance_ids: ['instance-1'],
           snoozed_alert_instances: [
             {
               instance_id: 'instance-2',
@@ -133,7 +133,7 @@ describe('findMutedAlertInstancesResponseSchema', () => {
     expect(findMutedAlertInstancesResponseSchema.validate(response)).toEqual(response);
   });
 
-  test('throws when muted_alert_ids is missing', () => {
+  test('throws when muted_alert_instance_ids is missing', () => {
     expect(() =>
       findMutedAlertInstancesResponseSchema.validate({
         page: 1,
@@ -142,20 +142,20 @@ describe('findMutedAlertInstancesResponseSchema', () => {
         data: [{ id: 'rule-1' }],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[data.0.muted_alert_ids]: expected value of type [array] but got [undefined]"`
+      `"[data.0.muted_alert_instance_ids]: expected value of type [array] but got [undefined]"`
     );
   });
 
-  test('throws when muted_alert_ids contains a non-string', () => {
+  test('throws when muted_alert_instance_ids contains a non-string', () => {
     expect(() =>
       findMutedAlertInstancesResponseSchema.validate({
         page: 1,
         per_page: 10,
         total: 1,
-        data: [{ id: 'rule-1', muted_alert_ids: [123] }],
+        data: [{ id: 'rule-1', muted_alert_instance_ids: [123] }],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[data.0.muted_alert_ids.0]: expected value of type [string] but got [number]"`
+      `"[data.0.muted_alert_instance_ids.0]: expected value of type [string] but got [number]"`
     );
   });
 });

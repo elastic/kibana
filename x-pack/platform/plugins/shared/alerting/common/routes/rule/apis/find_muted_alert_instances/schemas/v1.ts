@@ -38,7 +38,7 @@ export const findMutedAlertInstancesRequestBodySchema = schema.object(
 const findMutedAlertInstancesResponseDataSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
-    muted_alert_ids: schema.arrayOf(schema.string()),
+    muted_alert_instance_ids: schema.arrayOf(schema.string()),
     snoozed_alert_instances: schema.maybe(schema.arrayOf(snoozedAlertInstanceSchemaV1)),
   })
 );

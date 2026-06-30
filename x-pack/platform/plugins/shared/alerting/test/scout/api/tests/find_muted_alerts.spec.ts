@@ -35,7 +35,7 @@ interface FindMutedAlertsResponseBody {
   total: number;
   data: Array<{
     id: string;
-    muted_alert_ids: string[];
+    muted_alert_instance_ids: string[];
     snoozed_alert_instances: SnoozedAlertInstance[];
   }>;
 }
@@ -67,15 +67,15 @@ apiTest.describe('Find muted alerts', { tag: tags.deploymentAgnostic }, () => {
 
     for (const record of body.data) {
       // Each entry must expose exactly the muted/snoozed-alert contract
-      // (id + muted_alert_ids + snoozed_alert_instances) and never leak additional rule attributes.
+      // (id + muted_alert_instance_ids + snoozed_alert_instances) and never leak additional rule attributes.
       expect(Object.keys(record).sort()).toStrictEqual([
         'id',
-        'muted_alert_ids',
+        'muted_alert_instance_ids',
         'snoozed_alert_instances',
       ]);
       expect(typeof record.id).toBe('string');
-      expect(Array.isArray(record.muted_alert_ids)).toBe(true);
-      for (const alertId of record.muted_alert_ids) {
+      expect(Array.isArray(record.muted_alert_instance_ids)).toBe(true);
+      for (const alertId of record.muted_alert_instance_ids) {
         expect(typeof alertId).toBe('string');
       }
       expect(Array.isArray(record.snoozed_alert_instances)).toBe(true);
@@ -97,7 +97,7 @@ apiTest.describe('Find muted alerts', { tag: tags.deploymentAgnostic }, () => {
 
     const record = body.data.find((rule) => rule.id === ruleId);
     expect(record).toBeDefined();
-    expect(record!.muted_alert_ids).toContain(ES_QUERY_DEFAULT_INSTANCE_ID);
+    expect(record!.muted_alert_instance_ids).toContain(ES_QUERY_DEFAULT_INSTANCE_ID);
   });
 
   apiTest(
@@ -131,7 +131,7 @@ apiTest.describe('Find muted alerts', { tag: tags.deploymentAgnostic }, () => {
       const record = body.data.find((rule) => rule.id === ruleId);
       expect(record).toBeDefined();
       // The single API surfaces both muted and snoozed state for the instance.
-      expect(record!.muted_alert_ids).toContain(ES_QUERY_DEFAULT_INSTANCE_ID);
+      expect(record!.muted_alert_instance_ids).toContain(ES_QUERY_DEFAULT_INSTANCE_ID);
 
       const snoozed = record!.snoozed_alert_instances.find(
         (instance) => instance.instance_id === ES_QUERY_DEFAULT_INSTANCE_ID
