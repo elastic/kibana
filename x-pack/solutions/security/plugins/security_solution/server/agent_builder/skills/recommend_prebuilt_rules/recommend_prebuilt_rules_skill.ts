@@ -31,6 +31,20 @@ Use this skill to discover and recommend Elastic **prebuilt** detection rules to
 - **Install** — "what rules should I install?", "recommend rules for my Okta data", "fill my coverage gaps".
 - **Browse / count / coverage** — "what LLM rules can I install?", "how many critical ES|QL rules are available?", "which MITRE tactics am I missing?".
 
+## Tool-Call Contract (mandatory)
+
+**Every answer from this skill MUST be backed by at least one \`security.find_prebuilt_rules\` tool call made in this conversation.** Do not answer any recommend/browse/coverage question from your parametric knowledge alone — the installable catalog changes every release, and the customer's installed coverage is deployment-specific.
+
+**You MUST call a tool in the first turn that handles this skill.** Do not produce a prose-only recommendation. Specifically:
+
+- **Install recommendations** -> call \`security.get_user_data_inventory\` then \`security.find_prebuilt_rules\` (at minimum) before recommending anything. If you skip \`security.find_prebuilt_rules\`, the recommendation is invalid.
+- **Browse / count / "how many"** -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` and read the answer from \`total\`. Do not state a count you did not fetch.
+- **Coverage / "which MITRE am I missing"** -> call \`security.get_installed_rules_mitre_coverage\`. To recommend gap-fillers, follow with \`security.find_prebuilt_rules\`.
+
+If a tool call fails or returns zero results, say so plainly — do **not** fall back to recommending rules from memory. An honest "no results for that filter, try X" is always correct; a memory-based recommendation is never correct.
+
+**Why this is non-negotiable:** rule names, \`rule_id\`s, tag values, counts, and MITRE mappings are all catalog-specific and versioned. Inventing them produces a recommendation the user cannot act on (the rule may not exist, or may already be installed, or may be named differently in their version). Only tool results in *this* conversation are ground truth.
+
 ## Boundaries
 
 This skill only covers **not-yet-installed** prebuilt rules. Route elsewhere when:

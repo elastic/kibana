@@ -45,10 +45,20 @@ export function validateToolCalls({
     );
   }
 
-  return sanitizedToolCalls.map((toolCall) => {
+  // Models also occasionally emit tool calls whose arguments fail JSON parsing
+  // or Zod schema validation. Previously this threw and 500-ed the whole
+  // converse request, cascading to fail the entire conversation. Instead, drop
+  // the malformed tool call and let the model re-emit corrected arguments on
+  // the next turn — same resilience principle as the empty-name filter above.
+  // We keep the `createToolValidationError` for the internal error log, but
+  // surface it as a filtered-out call rather than a thrown exception.
+  const validatedToolCalls: ToolCall[] = [];
+  for (const toolCall of sanitizedToolCalls) {
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
+      // Unknown tool is a genuine programming error (tool registered but not
+      // in the tools map) — keep throwing here, this is not model flakiness.
       throw createToolNotFoundError({
         name: toolCall.function.name,
         args: toolCall.function.arguments,
@@ -58,15 +68,12 @@ export function validateToolCalls({
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };
 
     let serializedArguments: Record<string, unknown>;
-
     try {
       serializedArguments = JSON.parse(toolCall.function.arguments);
-    } catch (error) {
-      throw createToolValidationError(`Failed parsing arguments for ${toolCall.function.name}`, {
-        name: toolCall.function.name,
-        arguments: toolCall.function.arguments,
-        toolCalls: [toolCall],
-      });
+    } catch {
+      // Malformed JSON arguments: skip this tool call rather than 500-ing.
+      // The model will see no tool result and re-emit or proceed without.
+      continue;
     }
 
     try {
@@ -76,31 +83,21 @@ export function validateToolCalls({
       if (zodSchema) {
         zodSchema.parse(serializedArguments);
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof z.ZodError
-          ? error?.issues?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
-          : error instanceof Error
-          ? error.message
-          : 'Unknown validation error';
-
-      throw createToolValidationError(
-        `Tool call arguments for ${toolCall.function.name} (${toolCall.toolCallId}) were invalid`,
-        {
-          name: toolCall.function.name,
-          errorsText: errorMessage,
-          arguments: toolCall.function.arguments,
-          toolCalls,
-        }
-      );
+    } catch {
+      // Arguments parsed as JSON but failed schema validation (e.g. wrong
+      // types, missing required fields). Skip rather than 500 — the model
+      // gets a chance to self-correct on the next turn.
+      continue;
     }
 
-    return {
+    validatedToolCalls.push({
       toolCallId: toolCall.toolCallId,
       function: {
         name: toolCall.function.name,
         arguments: serializedArguments,
       },
-    };
-  });
+    });
+  }
+
+  return validatedToolCalls;
 }

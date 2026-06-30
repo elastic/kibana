@@ -27,6 +27,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
+import { CHAT_MODEL_MAX_RETRIES } from '../constants';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
@@ -180,6 +181,12 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
+        // Transient inference-endpoint failures (503, socket reset, fetch
+        // abort) are common under load and should not fail the whole converse
+        // request. The InferenceChatModel already implements bounded retry
+        // with exponential backoff via completionWithRetry — we just need to
+        // enable it. 2 retries on top of the initial attempt = 3 total.
+        maxRetries: CHAT_MODEL_MAX_RETRIES,
       },
     });
 
