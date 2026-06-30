@@ -10,8 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import { EntityType } from '@kbn/entity-store/common';
-import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
+import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -22,27 +21,26 @@ const AiSummaryHighlightItem = z.object({
   text: z.string(),
 });
 
-// Snapshot property names must stay in sync with enabled_signals enum values.
 const EntitySummaryStalenessSnapshotSchema = z.object({
   risk_score: z.number().nullable().optional(),
-  anomaly_job_ids: z.array(z.string()).nullable().optional(),
-  rule_names: z.array(z.string()).nullable().optional(),
 });
 
 const EntitySummaryStalenessSchema = z.object({
-  enabled_signals: z.array(z.enum(['risk_score', 'anomaly_job_ids', 'rule_names'])),
+  enabled_signals: z.array(z.literal('risk_score')),
   snapshot: EntitySummaryStalenessSnapshotSchema,
 });
 
 const SaveAiSummaryRequestBody = z.object({
   entityId: z.string(),
-  entityType: EntityType,
+  entityType: z.string(),
   summary: z.object({
     highlights: z.array(AiSummaryHighlightItem),
     recommendedActions: z.array(z.string()).nullable().optional(),
     generated_at: z.number(),
     // generated_by is intentionally excluded from the request body —
     // it is derived server-side from the authenticated user to prevent spoofing.
+    anomaly_job_ids: z.array(z.string()).optional(),
+    variant_id: z.string().optional(),
     staleness: EntitySummaryStalenessSchema,
   }),
 });
@@ -81,34 +79,43 @@ export const entityDetailsAiSummaryRoute = ({
           const [coreStart, { entityStore }] = await getStartServices();
           const coreContext = await context.core;
           const securitySolution = await context.securitySolution;
-          const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
           const spaceId = securitySolution.getSpaceId();
 
           // Derive the author server-side — never trust the client-supplied value.
           const generatedBy =
             coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
 
-          const crudClient = entityStore.createCRUDClient(esClient, spaceId);
-
-          // force=true bypasses field-level validation — required because
-          // entity.attributes.summary is not in getEntityFieldsDescriptions()
-          // (it is a purely API-written field, never present in source logs).
-          // preserveTimestamp avoids bumping @timestamp when only summary metadata changes.
-          await crudClient.updateEntity(
-            entityType,
-            {
-              entity: {
-                id: entityId,
-                attributes: {
-                  summary: { ...summary, generated_by: generatedBy },
-                },
-              },
-            } as Entity,
-            true,
-            { preserveTimestamp: true }
+          // Write via the internal ES client so the user's own metadata index write
+          // privilege is not required. Generation is fully backend-produced; the user
+          // cannot supply arbitrary content through this route.
+          const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+          const metadataClient = entityStore.createEntityMetadataClient(
+            internalEsClient,
+            spaceId
           );
 
-          return response.ok({ body: { updated: true } });
+          const doc: AiSummaryMetadataDoc = {
+            '@timestamp': new Date().toISOString(),
+            'event.kind': 'event',
+            'event.action': 'ai_summary_generated',
+            'entity.id': entityId,
+            'entity.type': entityType,
+            'ai_summary.generated_by': generatedBy,
+            'ai_summary.generated_at': summary.generated_at,
+            'ai_summary.highlights': summary.highlights,
+            ...(summary.recommendedActions != null && {
+              'ai_summary.recommendedActions': summary.recommendedActions,
+            }),
+            ...(summary.anomaly_job_ids != null && {
+              'ai_summary.anomaly_job_ids': summary.anomaly_job_ids,
+            }),
+            ...(summary.variant_id != null && { 'ai_summary.variant_id': summary.variant_id }),
+            'ai_summary.staleness': summary.staleness,
+          };
+
+          await metadataClient.bulkAppendMetadata([doc]);
+
+          return response.ok({ body: { created: true } });
         } catch (e) {
           const error = transformError(e);
           logger.error(`[EntityAiSummary] Failed to persist AI summary: ${error.message}`);

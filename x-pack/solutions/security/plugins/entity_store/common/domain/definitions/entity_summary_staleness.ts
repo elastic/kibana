@@ -11,11 +11,7 @@ import type { EntitySummaryAttribute } from './entity.gen';
  * Staleness signal ids stored on `entity.attributes.summary.staleness.enabled_signals`.
  * Snapshot property names in `entity.schema.yaml` must stay in sync with these values.
  */
-export const ENTITY_SUMMARY_STALENESS_SIGNALS = [
-  'risk_score',
-  'anomaly_job_ids',
-  'rule_names',
-] as const;
+export const ENTITY_SUMMARY_STALENESS_SIGNALS = ['risk_score'] as const;
 
 export type EntitySummaryStalenessSignal = (typeof ENTITY_SUMMARY_STALENESS_SIGNALS)[number];
 
@@ -45,15 +41,12 @@ export interface SaveEntityAiSummaryParams {
  */
 export const DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS: EntitySummaryStalenessSignal[] = [
   'risk_score',
-  'rule_names',
 ];
 
 /** Normalized entity fields used when capturing and comparing staleness snapshots. */
 export interface EntitySummaryStalenessEntitySnapshot {
   /** `entity.risk.calculated_score_norm` — same value shown in the entity flyout risk summary. */
   riskScoreNorm?: number | null;
-  anomalyJobIds?: string[];
-  ruleNames?: string[];
 }
 
 const RISK_SCORE_EPSILON = 0.01;
@@ -65,16 +58,6 @@ interface EntitySummaryStalenessSignalDefinition {
     current: EntitySummaryStalenessEntitySnapshot
   ) => string | undefined;
 }
-
-/**
- * Counts items present in `current` but not in `baseline`.
- * Removals are intentionally ignored — only new anomaly jobs / rules imply new context
- * worth regenerating the summary.
- */
-const countNewItemsSinceSnapshot = (
-  baseline: string[] | null | undefined,
-  current: string[] | undefined
-): number => (current ?? []).filter((item) => !(baseline ?? []).includes(item)).length;
 
 /**
  * Scalar signals (e.g. risk score) are only compared when both stored and current values are
@@ -107,20 +90,6 @@ const ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY = {
           ? undefined
           : `Risk score changed from ${baseline} to ${score}`
       ),
-  },
-  anomaly_job_ids: {
-    capture: (entity) => ({ anomaly_job_ids: entity.anomalyJobIds ?? [] }),
-    staleReason: (stored, current) => {
-      const count = countNewItemsSinceSnapshot(stored.anomaly_job_ids, current.anomalyJobIds);
-      return count > 0 ? `${count} new ML anomaly job(s) have fired` : undefined;
-    },
-  },
-  rule_names: {
-    capture: (entity) => ({ rule_names: entity.ruleNames ?? [] }),
-    staleReason: (stored, current) => {
-      const count = countNewItemsSinceSnapshot(stored.rule_names, current.ruleNames);
-      return count > 0 ? `${count} new detection rule(s) have triggered` : undefined;
-    },
   },
 } as const satisfies Record<EntitySummaryStalenessSignal, EntitySummaryStalenessSignalDefinition>;
 
