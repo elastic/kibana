@@ -76,7 +76,7 @@ export const getLinksEmbeddableFactory = () => {
         return {
           ...titleManager.getLatestState(),
           ref_id: libraryId,
-        };
+        } as LinksByReferenceState;
       }
 
       function serializeByValue() {
@@ -84,7 +84,7 @@ export const getLinksEmbeddableFactory = () => {
           ...titleManager.getLatestState(),
           layout: layout$.getValue(),
           links: serializeResolvedLinks(resolvedLinks$.getValue()),
-        };
+        } as LinksByValueState;
       }
 
       const stateApi = initializeStateApi<LinksEmbeddableState>({

@@ -51,13 +51,13 @@ export class LinksPlugin
   constructor() {}
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
-    plugins.embeddable.registerAddFromLibraryType({
+    plugins.embeddable.registerAddFromLibraryType<{ title: string }>({
       onAdd: async (container, savedObject) => {
         container.addNewPanel<LinksEmbeddableState>(
           {
             panelType: LINKS_EMBEDDABLE_TYPE,
             serializedState: {
-              title: savedObject.title,
+              title: savedObject.attributes.title ?? '',
               ref_id: savedObject.id,
             },
           },
@@ -78,7 +78,7 @@ export class LinksPlugin
 
     plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
       const { transformOut } = await import('../common/embeddable/transforms/transform_out');
-      return transformOut;
+      return () => transformOut;
     });
 
     plugins.visualizations.registerAlias({

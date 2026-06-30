@@ -17,7 +17,10 @@ import { transformOut } from '../../common/api/transforms';
 export function getLinksCRUResponseBody(
   savedObject: SavedObject<StoredLinksState> | SavedObjectsUpdateResponse<StoredLinksState>
 ) {
-  const transformedState = transformOut(savedObject.attributes, savedObject.references);
+  const transformedState = transformOut(
+    { title: '', ...savedObject.attributes },
+    savedObject.references
+  );
   return {
     id: savedObject.id,
     // Route does not apply defaults to response
