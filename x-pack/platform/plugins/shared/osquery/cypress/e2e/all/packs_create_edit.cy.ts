@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import {
@@ -22,7 +21,11 @@ import {
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, deleteAndConfirm, inputQuery } from '../../tasks/live_query';
-import { changePackActiveStatus, preparePack } from '../../tasks/packs';
+import {
+  changePackActiveStatus,
+  preparePack,
+  openScheduledPackExecutionDetails,
+} from '../../tasks/packs';
 import {
   closeModalIfVisible,
   closeToastIfVisible,
@@ -373,6 +376,10 @@ describe(
 
       it('', { tags: ['@ess', '@brokenInServerless'] }, () => {
         let lensUrl = '';
+        openScheduledPackExecutionDetails(packName);
+        // Stub window.open AFTER navigation. openScheduledPackExecutionDetails
+        // reloads the page while polling History, which would discard a stub
+        // installed on the earlier window object.
         cy.window().then((win) => {
           cy.stub(win, 'open')
             .as('windowOpen')
@@ -380,9 +387,6 @@ describe(
               lensUrl = url;
             });
         });
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
         cy.get(`[aria-label="View in Lens"]`).eq(0).click();
         cy.window()
           .its('open')
@@ -428,9 +432,7 @@ describe(
       });
 
       it('', () => {
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
+        openScheduledPackExecutionDetails(packName);
         cy.get(`[aria-label="View in Discover"]`)
           .eq(0)
           .should('have.attr', 'href')
@@ -514,40 +516,7 @@ describe(
       });
 
       it('', () => {
-        // The read-only "Pack details" page was removed. A scheduled pack
-        // execution now surfaces in the History tab; from there we open the
-        // scheduled execution's details page, which renders the same
-        // PackQueriesStatusTable with the per-query results.
-        navigateTo('/app/osquery');
-
-        // Poll the unified History table until the scheduled execution for this
-        // pack shows up. Scheduled results take a while to be indexed by ES, so
-        // we reload between attempts (same approach as the legacy details poll).
-        recurse<number>(
-          () =>
-            cy
-              .getBySel('unifiedHistoryTable')
-              .then(($table) => $table.find('tr:contains("' + packName + '")').length),
-          (rowCount) => rowCount > 0,
-          {
-            timeout: 300000,
-            post: () => {
-              cy.reload();
-            },
-          }
-        );
-
-        // Open the scheduled execution's details page via the row's "Details"
-        // action button (EuiButtonIcon with aria-label "Details" from
-        // HistoryDetailsButton in unified_history_table.tsx).
-        cy.contains('.euiTableRow', packName)
-          .find('[aria-label="Details"]')
-          .first()
-          .should('be.visible')
-          .click();
-
-        // ScheduledExecutionDetailsPage renders the "View history" back button.
-        cy.contains('View history').should('exist');
+        openScheduledPackExecutionDetails(packName);
 
         // The details page auto-expands the single query row into ResultTabs,
         // surfacing the osqueryResultsTable with at least one result row.
@@ -601,7 +570,13 @@ describe(
 
         cy.get('a').contains(packName).click();
         cy.contains(`Edit ${packName}`).should('exist');
-        cy.contains(/^No items found/).should('exist');
+        // The read-only "Pack details" page (which rendered a status table with
+        // a "No items found" empty prompt) was removed. The Edit page's queries
+        // field renders no table at all when the pack has no queries, so assert
+        // emptiness via the deleted query being gone while the "Add query"
+        // affordance remains.
+        cy.getBySel(ADD_QUERY_BUTTON).should('exist');
+        cy.contains(savedQueryName).should('not.exist');
       });
     });
 
