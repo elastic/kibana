@@ -57,11 +57,11 @@ spaceTest.describe(
           const headerLink = pageObjects.ruleFlyout.titleLink;
           await expect(headerLink).toBeVisible();
 
-          // The header link points at the rule details page and is configured to open a new tab.
-          await expect(headerLink).toHaveAttribute('target', '_blank');
+          // Read the rule id from the header link's href to build the expected destination URL.
+          // (Link presence and the target="_blank" attribute are already covered at the component
+          // level in rule/main/header.test.tsx; here we only need the href to assert navigation.)
           const href = await headerLink.getAttribute('href');
           const ruleId = href?.match(/security\/rules\/id\/([^/?#]+)/)?.[1];
-          expect(ruleId).toBeTruthy();
 
           // Clicking it opens a new browser tab navigated to that rule's details page.
           const newTabPromise = page.context().waitForEvent('page');

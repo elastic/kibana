@@ -17,23 +17,10 @@
 /** data-test-subj for the "Add to new case" Take Action menu item. */
 export const ADD_TO_NEW_CASE_TEST_SUBJ = 'add-to-new-case-action' as const;
 
-/** data-test-subj for the "Add to existing case" Take Action menu item. */
-export const ADD_TO_EXISTING_CASE_TEST_SUBJ = 'add-to-existing-case-action' as const;
-
 /* Alert tags */
 
 /** data-test-subj for the "Apply alert tags" Take Action menu item. */
 export const ALERT_TAGS_MENU_ITEM_TEST_SUBJ = 'alert-tags-context-menu-item' as const;
-
-/* Alert assignees */
-
-/** data-test-subj for the "Assign alert" Take Action menu item. */
-export const ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ = 'alert-assignees-context-menu-item' as const;
-
-/* Run workflow */
-
-/** data-test-subj for the "Run workflow" Take Action menu item (alert variant). */
-export const RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ = 'run-workflow-action' as const;
 
 /* Investigate in Timeline */
 

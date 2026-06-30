@@ -9,8 +9,6 @@ import {
   spaceTest,
   tags,
   CUSTOM_QUERY_RULE,
-  SIGNALS_STATUS_API_PATH,
-  ALERT_ASSIGNEES_API_PATH,
   CURRENT_USER_PROFILE_API_PATH,
   AlertWorkflowStatus,
   ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
@@ -66,8 +64,8 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'header status badge: closing with reason updates badge and sends reason in API request',
-      async ({ pageObjects, page }) => {
+      'header status badge: closing with a reason updates the badge to closed',
+      async ({ pageObjects }) => {
         await pageObjects.documentFlyout.openForRule(ruleName);
 
         // Navigate to the closing reason sub-panel
@@ -84,20 +82,12 @@ spaceTest.describe(
         );
         await expect(pageObjects.documentFlyout.closingReasonSubmitButton).toBeEnabled();
 
-        // Wire up response listener before submit
-        const statusApiCall = page.waitForResponse(
-          (resp) =>
-            resp.url().includes(SIGNALS_STATUS_API_PATH) && resp.request().method() === 'POST'
-        );
         await pageObjects.documentFlyout.submitClosingReason();
 
-        // API must return 200 and the request body must carry the chosen reason
-        const apiResponse = await statusApiCall;
-        expect(apiResponse.status()).toBe(200);
-        const requestBody = JSON.parse(apiResponse.request().postData() ?? '{}');
-        expect(requestBody.status).toBe(AlertWorkflowStatus.CLOSED);
-        expect(requestBody.reason).toBe(ClosingReasonOption.FALSE_POSITIVE.key);
-
+        // Assert only the user-visible reactions: a success toast and the status badge flipping to
+        // CLOSED. The request payload (status/reason wire format, including the invalid-reason 400
+        // case) is covered server-side in open_close_signals_route.test.ts, so we don't re-assert
+        // it from the UI.
         await pageObjects.toasts.waitFor();
         expect(await pageObjects.toasts.getHeaderText()).toContain(closedAlertsToastText(1));
         await expect(pageObjects.documentFlyout.statusBadge).toContainText(
@@ -136,7 +126,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'assignees: assigning the current user shows avatar and sends user id in API request',
+      'assignees: assigning the current user shows the avatar in the flyout header',
       async ({ pageObjects, page, kbnUrl }) => {
         await pageObjects.documentFlyout.openForRule(ruleName);
 
@@ -154,21 +144,11 @@ spaceTest.describe(
         await pageObjects.documentFlyout.selectAssignee(username);
         await expect(pageObjects.documentFlyout.assigneesApplyButton).toBeEnabled();
 
-        // Wire up listener before applying
-        const assigneesApiCall = page.waitForResponse(
-          (resp) =>
-            resp.url().includes(ALERT_ASSIGNEES_API_PATH) && resp.request().method() === 'POST'
-        );
         await pageObjects.documentFlyout.applyAssignees();
 
-        // API must succeed and the request must add exactly one user
-        const apiResponse = await assigneesApiCall;
-        expect(apiResponse.status()).toBe(200);
-        const requestBody = JSON.parse(apiResponse.request().postData() ?? '{}');
-        expect(requestBody.assignees.add).toHaveLength(1);
-        expect(requestBody.assignees.remove).toHaveLength(0);
-
-        // Avatar for the assigned user must appear in the flyout header
+        // The user-visible reaction: the assigned user's avatar appears in the flyout header. The
+        // assignees request payload (add/remove ids) is covered server-side in
+        // set_alert_assignees_route.test.ts, so we don't re-assert it from the UI.
         await expect(pageObjects.documentFlyout.getAssigneeAvatar(username)).toBeVisible({
           timeout: 10_000,
         });

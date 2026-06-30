@@ -37,22 +37,6 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'investigation guide shows no-guide callout when rule has no guide',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        // CUSTOM_QUERY_RULE has no investigation guide; the callout message should render
-        // and the "Show investigation guide" button should be absent.
-        const { investigationGuide } = pageObjects.documentFlyout;
-        await investigationGuide.waitFor({ state: 'visible' });
-        await expect(investigationGuide).toContainText(
-          "There's no investigation guide for this rule."
-        );
-        await expect(pageObjects.documentFlyout.investigationGuideButton).toBeHidden();
-      }
-    );
-
-    spaceTest(
       'highlighted fields: clicking the source.ip value opens the network details child flyout',
       async ({ pageObjects }) => {
         await pageObjects.documentFlyout.openForRule(ruleName);

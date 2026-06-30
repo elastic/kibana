@@ -12,10 +12,6 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Covers both the summary row in the Insights section and the full tool overlay panel.
  */
 export class ThreatIntelligenceTool {
-  /** Title link in the insights TI panel; only rendered when the alert has TI enrichments. */
-  public readonly titleLink: Locator;
-  /** Loading spinner while the insights TI panel's enrichment count query is in flight. */
-  public readonly enrichedLoading: Locator;
   /** "Fields enriched with threat intelligence" count button in the insights panel. */
   public readonly enrichedButton: Locator;
   /** Loading spinner while the TI tool overlay fetches event data. */
@@ -28,25 +24,13 @@ export class ThreatIntelligenceTool {
   public readonly detailsRangePicker: Locator;
   /** All enrichment accordions in the TI tool overlay. */
   public readonly detailsAccordions: Locator;
-  /** "This alert does not have threat intelligence." message shown when there are no enrichments. */
-  public readonly detailsNoEnrichmentFound: Locator;
   /** All rendered content sections inside the TI tool overlay; used to assert any content rendered. */
   public readonly detailsSections: Locator;
-  /** Clickable button in the tools flyout header showing the document icon and title. */
-  public readonly toolsFlyoutTitle: Locator;
-  /** Warning icon inside the tools flyout title button, confirming the document is an alert. */
-  public readonly toolsFlyoutTitleAlertIcon: Locator;
 
   private readonly page: ScoutPage;
 
   constructor(page: ScoutPage) {
     this.page = page;
-    this.titleLink = page.testSubj.locator(
-      'securitySolutionFlyoutInsightsThreatIntelligenceTitleLink'
-    );
-    this.enrichedLoading = page.testSubj.locator(
-      'securitySolutionFlyoutInsightsThreatIntelligenceEnrichedWithThreatIntelligenceLoading'
-    );
     this.enrichedButton = page.testSubj.locator(
       'securitySolutionFlyoutInsightsThreatIntelligenceEnrichedWithThreatIntelligenceButton'
     );
@@ -63,15 +47,8 @@ export class ThreatIntelligenceTool {
       'securitySolutionFlyoutThreatIntelligenceDetailsEnrichmentRangePicker'
     );
     this.detailsAccordions = page.testSubj.locator('enrichementAccordion');
-    this.detailsNoEnrichmentFound = page.testSubj.locator(
-      'securitySolutionFlyoutThreatIntelligenceDetailsNoEnrichmentFound'
-    );
     this.detailsSections = page.locator(
       '[data-test-subj^="securitySolutionFlyoutThreatIntelligenceDetails"]'
-    );
-    this.toolsFlyoutTitle = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeaderTitle');
-    this.toolsFlyoutTitleAlertIcon = page.testSubj.locator(
-      'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'
     );
   }
 

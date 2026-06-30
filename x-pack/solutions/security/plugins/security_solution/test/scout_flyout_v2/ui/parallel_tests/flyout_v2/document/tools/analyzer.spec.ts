@@ -40,22 +40,9 @@ spaceTest.describe(
       await apiServices.analyzer.cleanupAnalyzerFixture(scoutSpace.id);
     });
 
-    spaceTest(
-      'tools flyout header shows rule name with alert icon and opens child document flyout on click',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await pageObjects.documentFlyout.visualizationsSection.click();
-        await pageObjects.analyzerTool.titleLink.click();
-
-        await expect(pageObjects.analyzerTool.toolsFlyoutTitle).toContainText(ruleName);
-        await expect(pageObjects.analyzerTool.toolsFlyoutTitleAlertIcon).toBeVisible();
-
-        await pageObjects.analyzerTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
-      }
-    );
+    // Note: the shared tools-flyout header (title + alert icon → child document flyout) is the same
+    // `ToolsFlyoutTitle` component covered in tools_flyout_title.test.tsx and smoke-tested once in
+    // prevalence.spec.ts, so it's not duplicated here.
 
     spaceTest(
       'opens analyzer tool overlay and renders the resolver process tree',
@@ -65,6 +52,8 @@ spaceTest.describe(
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
+        // The analyzer overlay mounts asynchronously once the resolver tree fetch kicks off, so
+        // allow extra time for the header/graph to appear.
         await expect(pageObjects.analyzerTool.toolsFlyoutHeader).toBeVisible({ timeout: 10_000 });
         await expect(pageObjects.analyzerTool.analyzerGraph).toBeVisible();
 
@@ -86,6 +75,7 @@ spaceTest.describe(
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
+        // The resolver tree fetch is slow on first load; wait for it to settle before asserting.
         await expect(pageObjects.analyzerTool.resolverLoading).toHaveCount(0, { timeout: 15_000 });
         await expect(pageObjects.analyzerTool.resolverGraph).toBeVisible();
 
@@ -108,6 +98,7 @@ spaceTest.describe(
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
+        // The resolver tree fetch is slow on first load; wait for it to settle before asserting.
         await expect(pageObjects.analyzerTool.resolverLoading).toHaveCount(0, { timeout: 15_000 });
         await expect(pageObjects.analyzerTool.resolverGraph).toBeVisible();
 

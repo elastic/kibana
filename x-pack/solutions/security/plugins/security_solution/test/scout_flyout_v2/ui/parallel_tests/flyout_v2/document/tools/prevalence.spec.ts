@@ -33,6 +33,9 @@ spaceTest.describe(
       await apiServices.prevalence.cleanupPrevalenceFixture(scoutSpace.id);
     });
 
+    // This is the single integration smoke for the shared `ToolsFlyoutTitle` header (title + alert
+    // icon → child document flyout). The same behaviour previously repeated across every tool spec;
+    // it's now exercised once here and unit-covered in tools_flyout_title.test.tsx.
     spaceTest(
       'tools flyout header shows rule name with alert icon and opens child document flyout on click',
       async ({ pageObjects }) => {

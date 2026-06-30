@@ -78,7 +78,7 @@ export class PrevalenceTool {
       .locator('securitySolutionFlyoutPrevalenceDetailsTable')
       .locator('tr')
       .filter({ hasText: 'source.ip' })
-      .locator('[data-test-subj="securitySolutionFlyoutChildLink"]');
+      .locator('[data-test-subj="securitySolutionFlyoutOpenFlyoutLink"]');
     this.networkDetailsFlyoutHeaderText = page.testSubj.locator(
       'network-details-flyout-headerText'
     );

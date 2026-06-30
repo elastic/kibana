@@ -16,10 +16,6 @@ export class CorrelationsTool {
   public readonly titleLink: Locator;
   /** Header row of the tools flyout — use to confirm the overlay is open. */
   public readonly toolsFlyoutHeader: Locator;
-  /** Clickable button in the tools flyout header showing the document icon and title. */
-  public readonly toolsFlyoutTitle: Locator;
-  /** Warning icon inside the tools flyout title button, confirming the document is an alert. */
-  public readonly toolsFlyoutTitleAlertIcon: Locator;
 
   // --- Sections inside the correlations tool overlay ---
   /** Alerts table inside the "related by source event" section (visible when expanded). */
@@ -37,10 +33,6 @@ export class CorrelationsTool {
   constructor(page: ScoutPage) {
     this.titleLink = page.testSubj.locator('securitySolutionFlyoutCorrelationsTitleLink');
     this.toolsFlyoutHeader = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeader');
-    this.toolsFlyoutTitle = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeaderTitle');
-    this.toolsFlyoutTitleAlertIcon = page.testSubj.locator(
-      'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'
-    );
     this.sameSourceAlertsSectionTable = page.testSubj.locator(
       'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionTable'
     );

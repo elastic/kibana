@@ -35,24 +35,6 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'tools flyout header shows rule name with alert icon and opens child document flyout on click',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
-        await pageObjects.correlationsTool.titleLink.click();
-
-        // Header shows the rule name and the alert (warning) icon
-        await expect(pageObjects.correlationsTool.toolsFlyoutTitle).toContainText(ruleName);
-        await expect(pageObjects.correlationsTool.toolsFlyoutTitleAlertIcon).toBeVisible();
-
-        await pageObjects.correlationsTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
-      }
-    );
-
-    spaceTest(
       'opens correlations tool overlay and section row expand opens the correct child flyout',
       async ({ pageObjects }) => {
         await pageObjects.documentFlyout.openForRule(ruleName);

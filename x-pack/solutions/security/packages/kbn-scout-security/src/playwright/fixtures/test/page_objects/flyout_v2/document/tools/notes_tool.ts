@@ -15,10 +15,6 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 export class NotesTool {
   /** Tool overlay body — confirms the notes overlay is open. */
   public readonly content: Locator;
-  /** Clickable button in the tools flyout header showing the document icon and title. */
-  public readonly toolsFlyoutTitle: Locator;
-  /** Warning icon inside the tools flyout title button, confirming the document is an alert. */
-  public readonly toolsFlyoutTitleAlertIcon: Locator;
   /** Loading spinner shown while the document's notes are being fetched. */
   public readonly notesLoading: Locator;
   /** "No notes have been created for this {alert|event}." empty-state message. */
@@ -41,10 +37,6 @@ export class NotesTool {
   constructor(page: ScoutPage) {
     this.page = page;
     this.content = page.testSubj.locator('securitySolutionFlyoutNotesTabContent');
-    this.toolsFlyoutTitle = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeaderTitle');
-    this.toolsFlyoutTitleAlertIcon = page.testSubj.locator(
-      'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'
-    );
     this.notesLoading = page.testSubj.locator('securitySolutionNotesNotesLoading');
     this.noNotesMessage = this.content.getByText(/No notes have been created for this/);
     this.addNoteTextArea = this.content.getByRole('textbox');

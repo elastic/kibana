@@ -20,10 +20,6 @@ export class AnalyzerTool {
   public readonly titleLink: Locator;
   /** Header row of the tools flyout — use to confirm the overlay is open. */
   public readonly toolsFlyoutHeader: Locator;
-  /** Clickable button in the tools flyout header showing the document icon and title. */
-  public readonly toolsFlyoutTitle: Locator;
-  /** Warning icon inside the tools flyout title button, confirming the document is an alert. */
-  public readonly toolsFlyoutTitleAlertIcon: Locator;
 
   /** Container wrapping the resolver graph inside the analyzer tool overlay. */
   public readonly analyzerGraph: Locator;
@@ -56,10 +52,6 @@ export class AnalyzerTool {
     this.page = page;
     this.titleLink = page.testSubj.locator('securitySolutionFlyoutAnalyzerPreviewTitleLink');
     this.toolsFlyoutHeader = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeader');
-    this.toolsFlyoutTitle = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeaderTitle');
-    this.toolsFlyoutTitleAlertIcon = page.testSubj.locator(
-      'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'
-    );
     this.analyzerGraph = page.testSubj.locator('securitySolutionFlyoutAnalyzerGraph');
     this.resolverGraph = page.testSubj.locator('resolver:graph');
     this.resolverLoading = page.testSubj.locator('resolver:graph:loading');

@@ -61,8 +61,6 @@ export class DocumentFlyout {
   public readonly responseSection: Locator;
   /** "View response details" button in the response section. */
   public readonly responseButton: Locator;
-  /** Investigation guide button (opens guide overlay). */
-  public readonly investigationGuideButton: Locator;
   /** Analyzer preview panel content in the Visualizations section. */
   public readonly analyzerPreview: Locator;
   /** Session preview panel content in the Visualizations section. */
@@ -128,16 +126,10 @@ export class DocumentFlyout {
   /** Avatars panel shown when at least one user is assigned. */
   public readonly assigneesAvatarsPanel: Locator;
 
-  /** Investigation guide container in the Investigation section. */
-  public readonly investigationGuide: Locator;
   /** Workflow-status filter chip added to the page search bar by the status cell action. */
   public readonly workflowStatusFilterBadge: Locator;
   /** Tag-selection list inside the Take action "Apply alert tags" sub-panel. */
   public readonly alertTagsSelectable: Locator;
-  /** User-selection list inside the Take action "Assign alert" sub-panel. */
-  public readonly alertAssigneesSelectable: Locator;
-  /** Workflow picker sub-panel opened by the Take action "Run workflow" item. */
-  public readonly alertWorkflowPanel: Locator;
   /** "Add to existing case" case-selector modal. */
   public readonly allCasesModal: Locator;
   /** Heading of the "Add to new case" creation dialog. */
@@ -193,9 +185,6 @@ export class DocumentFlyout {
     this.insightsSection = page.testSubj.locator('securitySolutionFlyoutInsightsSectionHeader');
     this.responseSection = page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader');
     this.responseButton = page.testSubj.locator('securitySolutionFlyoutResponseButton');
-    this.investigationGuideButton = page.testSubj.locator(
-      'securitySolutionFlyoutInvestigationGuideButton'
-    );
     this.analyzerPreview = page.testSubj.locator('securitySolutionFlyoutAnalyzerPreviewContent');
     this.sessionPreview = page.testSubj.locator('securitySolutionFlyoutSessionPreviewContent');
     this.graphPreview = page.testSubj.locator('securitySolutionFlyoutGraphPreviewContent');
@@ -250,17 +239,12 @@ export class DocumentFlyout {
     this.assigneesSelectable = page.testSubj.locator('securitySolutionAssigneesSelectable');
     this.assigneesApplyButton = page.testSubj.locator('securitySolutionAssigneesApplyButton');
     this.assigneesAvatarsPanel = page.testSubj.locator('securitySolutionUsersAvatarsPanel');
-    this.investigationGuide = page.testSubj.locator('securitySolutionFlyoutInvestigationGuide');
     // The status cell-action adds a filter whose test subject is `filter-key-<field>`; match the
     // workflow_status field with the testSubj "contains word" (`~`) selector.
     this.workflowStatusFilterBadge = page.testSubj.locator(
       '~filter-key-kibana.alert.workflow_status'
     );
     this.alertTagsSelectable = page.testSubj.locator('alert-tags-selectable-menu');
-    this.alertAssigneesSelectable = page.testSubj.locator('alert-assignees-selectable-menu');
-    this.alertWorkflowPanel = this.takeActionMenu.locator(
-      '[data-test-subj="alert-workflow-context-menu-panel"]'
-    );
     this.allCasesModal = page.testSubj.locator('all-cases-modal');
     // The dialog renders the title both as a heading and on the submit button; scope to the heading.
     this.createCaseDialogTitle = page
@@ -336,7 +320,10 @@ export class DocumentFlyout {
     return this.highlightedFieldsTable
       .locator('tr')
       .filter({ hasText: field })
-      .locator('[data-test-subj="securitySolutionFlyoutChildLink"]');
+      // The shared OpenFlyoutLink component renders the linkable value as an EuiLink with this test
+      // subject (OPEN_FLYOUT_LINK_TEST_ID = `${PREFIX}OpenFlyoutLink`); the old
+      // `securitySolutionFlyoutChildLink` id no longer exists (renamed in PR #274017).
+      .locator('[data-test-subj="securitySolutionFlyoutOpenFlyoutLink"]');
   }
 
   /** Hover the status badge and wait for the cell-actions hover popover to appear. */

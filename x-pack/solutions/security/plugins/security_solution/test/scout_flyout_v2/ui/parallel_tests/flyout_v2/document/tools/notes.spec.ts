@@ -37,29 +37,6 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'shows the no-notes empty state and a header that opens the child document flyout',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await pageObjects.documentFlyout.openNotes();
-        await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
-
-        // Fetch resolves to no notes, so the empty-state message is shown and no comments render.
-        await expect(pageObjects.notesTool.noNotesMessage).toBeVisible({ timeout: 10_000 });
-        await expect(pageObjects.notesTool.noteComments).toHaveCount(0);
-
-        // Header shows the rule name and the alert (warning) icon
-        await expect(pageObjects.notesTool.toolsFlyoutTitle).toContainText(ruleName);
-        await expect(pageObjects.notesTool.toolsFlyoutTitleAlertIcon).toBeVisible();
-
-        // Clicking the header opens a child document flyout for the same alert
-        await pageObjects.notesTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
-      }
-    );
-
-    spaceTest(
       'adds a note which appears in the list and updates the header notes count',
       async ({ pageObjects }) => {
         const noteText = `Scout note ${Date.now()}`;

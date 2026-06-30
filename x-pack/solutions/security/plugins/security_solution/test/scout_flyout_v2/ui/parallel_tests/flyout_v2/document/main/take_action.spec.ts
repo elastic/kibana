@@ -17,10 +17,7 @@ import {
   ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
   ClosingReasonOption,
   ADD_TO_NEW_CASE_TEST_SUBJ,
-  ADD_TO_EXISTING_CASE_TEST_SUBJ,
   ALERT_TAGS_MENU_ITEM_TEST_SUBJ,
-  ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ,
-  RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ,
   INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
@@ -79,18 +76,6 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('assign alert — opens assignees sub-panel', async ({ pageObjects }) => {
-      await pageObjects.documentFlyout.openForRule(ruleName);
-
-      await pageObjects.documentFlyout.openTakeActionMenu();
-      await pageObjects.documentFlyout.clickTakeActionItem(ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ);
-
-      // Assignees sub-panel should appear inside the context menu
-      await expect(pageObjects.documentFlyout.alertAssigneesSelectable).toBeVisible({
-        timeout: 10_000,
-      });
-    });
-
     spaceTest('add to new case — opens case creation modal', async ({ pageObjects }) => {
       await pageObjects.documentFlyout.openForRule(ruleName);
 
@@ -102,25 +87,11 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('add to existing case — opens case selector modal', async ({ pageObjects }) => {
-      await pageObjects.documentFlyout.openForRule(ruleName);
-
-      await pageObjects.documentFlyout.openTakeActionMenu();
-      await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_EXISTING_CASE_TEST_SUBJ);
-
-      // Case selector (or empty-state) should appear
-      await expect(pageObjects.documentFlyout.allCasesModal).toBeVisible({ timeout: 10_000 });
-    });
-
-    spaceTest('run alert workflow — opens workflow picker panel', async ({ pageObjects }) => {
-      await pageObjects.documentFlyout.openForRule(ruleName);
-
-      await pageObjects.documentFlyout.openTakeActionMenu();
-      await pageObjects.documentFlyout.clickTakeActionItem(RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ);
-
-      // Workflow sub-panel should open in the context menu
-      await expect(pageObjects.documentFlyout.alertWorkflowPanel).toBeVisible({ timeout: 10_000 });
-    });
+    // Note: the other "menu item opens its sub-panel/modal" wiring checks (assign alert, add to
+    // existing case, run alert workflow) are thin and each sub-panel's rendering is covered at the
+    // component level, so they're dropped. What's kept exercises more than wiring: the status change
+    // above, the two representative panel/modal openers above (alert tags + new case), and the
+    // investigate-in-timeline case below, which actually opens Timeline.
 
     spaceTest('investigate in timeline — opens Timeline with document', async ({ pageObjects }) => {
       await pageObjects.documentFlyout.openForRule(ruleName);

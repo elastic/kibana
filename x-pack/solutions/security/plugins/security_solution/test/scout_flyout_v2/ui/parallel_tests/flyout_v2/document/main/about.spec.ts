@@ -24,9 +24,10 @@ spaceTest.describe(
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(

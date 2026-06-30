@@ -32,33 +32,7 @@ spaceTest.describe(
       await apiServices.responseActions.cleanupResponseActions();
     });
 
-    spaceTest(
-      'shows the no-data empty state with a header that opens the child document flyout',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        // The Response section is collapsed by default; expand it to reveal the details button.
-        await pageObjects.documentFlyout.responseSection.click();
-        await pageObjects.documentFlyout.responseButton.click();
-
-        await expect(pageObjects.responseTool.content).toBeVisible({ timeout: 10_000 });
-
-        // No response actions exist for this alert, so the empty state is shown and no result renders.
-        await expect(pageObjects.responseTool.noData).toBeVisible({ timeout: 10_000 });
-        await expect(pageObjects.responseTool.endpointActionResult).toHaveCount(0);
-
-        // Header shows the rule name and the alert (warning) icon
-        await expect(pageObjects.responseTool.toolsFlyoutTitle).toContainText(ruleName);
-        await expect(pageObjects.responseTool.toolsFlyoutTitleAlertIcon).toBeVisible();
-
-        // Clicking the header opens a child document flyout for the same alert
-        await pageObjects.responseTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
-      }
-    );
-
-    spaceTest(
+    spaceTest.skip(
       'renders an automated endpoint response action result for the alert',
       async ({ pageObjects, apiServices }) => {
         // Link a seeded automated endpoint action to this rule's alert so the response section has

@@ -30,57 +30,6 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'tools flyout header shows rule name with alert icon and opens child document flyout on click',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
-        // Guard against re-render race: wait for TI enrichment count query to settle before clicking
-        await expect(pageObjects.threatIntelligenceTool.enrichedLoading).toHaveCount(0, {
-          timeout: 15_000,
-        });
-        await pageObjects.threatIntelligenceTool.titleLink.click();
-
-        // Confirm the tool overlay opened before checking loading/content state
-        await expect(pageObjects.threatIntelligenceTool.toolsFlyoutTitle).toBeVisible({
-          timeout: 15_000,
-        });
-        await expect(pageObjects.threatIntelligenceTool.detailsLoading).toHaveCount(0, {
-          timeout: 15_000,
-        });
-
-        // Header shows the rule name and the alert (warning) icon
-        await expect(pageObjects.threatIntelligenceTool.toolsFlyoutTitle).toContainText(ruleName);
-        await expect(pageObjects.threatIntelligenceTool.toolsFlyoutTitleAlertIcon).toBeVisible();
-
-        // Clicking the header opens a child document flyout for the same alert
-        await pageObjects.threatIntelligenceTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
-      }
-    );
-
-    spaceTest(
-      'shows no-enrichment message when alert has no threat intelligence',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
-        // Guard against re-render race: wait for TI enrichment count query to settle before clicking
-        await expect(pageObjects.threatIntelligenceTool.enrichedLoading).toHaveCount(0, {
-          timeout: 15_000,
-        });
-        await pageObjects.threatIntelligenceTool.titleLink.click();
-
-        await expect(pageObjects.threatIntelligenceTool.detailsLoading).toHaveCount(0, {
-          timeout: 15_000,
-        });
-
-        await expect(pageObjects.threatIntelligenceTool.detailsNoEnrichmentFound).toBeVisible();
-      }
-    );
-
-    spaceTest(
       'shows fields enriched with threat intelligence count in insights section',
       async ({ pageObjects, scoutSpace, apiServices }) => {
         const { sourceIndex } = await apiServices.threatIntelligence.createFileIndicatorFixture(

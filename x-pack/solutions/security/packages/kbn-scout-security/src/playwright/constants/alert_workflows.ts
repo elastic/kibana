@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/** API path for the alerts workflow status endpoint. */
-export const SIGNALS_STATUS_API_PATH = '/api/detection_engine/signals/status';
-
-/** API path for the alert assignees endpoint. */
-export const ALERT_ASSIGNEES_API_PATH = '/api/detection_engine/signals/assignees';
-
 /** Kibana internal endpoint that returns the currently authenticated user's profile. */
 export const CURRENT_USER_PROFILE_API_PATH = '/internal/security/me';
 
