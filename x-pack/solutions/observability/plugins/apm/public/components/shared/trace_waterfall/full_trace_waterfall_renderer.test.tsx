@@ -8,10 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  FullTraceWaterfallRenderer,
-  FETCH_FULL_TRACE_WATERFALL_OPERATION_ID,
-} from './full_trace_waterfall_renderer';
+import { FullTraceWaterfallRenderer } from './full_trace_waterfall_renderer';
+import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import * as TraceWaterfallModule from '.';
 
@@ -118,7 +116,7 @@ describe('FullTraceWaterfallRenderer', () => {
     expect(mockUseFetcher).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Array),
-      expect.objectContaining({ operationId: FETCH_FULL_TRACE_WATERFALL_OPERATION_ID })
+      expect.objectContaining({ operationId: FETCHER_OPERATION_IDS.FETCH_FULL_TRACE_WATERFALL })
     );
   });
 

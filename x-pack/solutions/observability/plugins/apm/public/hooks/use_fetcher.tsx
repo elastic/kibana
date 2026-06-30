@@ -15,6 +15,7 @@ import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
 import { reportFetchError } from '../services/rest/report_fetch_error';
+import type { FetcherOperationId } from './fetcher_operation_ids';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -93,8 +94,8 @@ export function useFetcher<TReturn>(
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
     skipTimeRangeRefreshUpdate?: boolean;
-    /** When provided, non-aborted fetch failures are reported to APM RUM under this label. Use a stable, human-readable identifier (e.g. 'fetch-trace-waterfall'). */
-    operationId?: string;
+    /** When provided, non-aborted fetch failures are reported to APM RUM under this label. Register new values in `fetcher_operation_ids.ts`. */
+    operationId?: FetcherOperationId;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const {

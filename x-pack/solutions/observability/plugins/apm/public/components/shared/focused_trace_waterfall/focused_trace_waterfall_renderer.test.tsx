@@ -8,10 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  FocusedTraceWaterfallRenderer,
-  FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID,
-} from './focused_trace_waterfall_renderer';
+import { FocusedTraceWaterfallRenderer } from './focused_trace_waterfall_renderer';
+import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import * as FocusedTraceWaterfallModule from '.';
 
@@ -106,7 +104,7 @@ describe('FocusedTraceWaterfallRenderer', () => {
     expect(mockUseFetcher).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Array),
-      expect.objectContaining({ operationId: FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID })
+      expect.objectContaining({ operationId: FETCHER_OPERATION_IDS.FETCH_FOCUSED_TRACE_WATERFALL })
     );
   });
 

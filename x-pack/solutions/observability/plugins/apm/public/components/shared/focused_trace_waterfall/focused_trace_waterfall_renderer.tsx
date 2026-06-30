@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
 import { FocusedTraceWaterfall } from '.';
 import { Loading } from '../trace_waterfall/loading';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
@@ -19,8 +20,6 @@ import { useGetServiceBadgeHrefFromCore } from '../trace_waterfall/use_get_servi
 interface Props extends FocusedTraceWaterfallProps {
   core: CoreStart;
 }
-
-export const FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID = 'fetch-focused-trace-waterfall';
 
 export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, docId, core }: Props) {
   useEffectOnce(() => {
@@ -39,7 +38,7 @@ export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, doc
       });
     },
     [docId, rangeFrom, rangeTo, traceId],
-    { operationId: FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID }
+    { operationId: FETCHER_OPERATION_IDS.FETCH_FOCUSED_TRACE_WATERFALL }
   );
 
   if (isPending(status)) {

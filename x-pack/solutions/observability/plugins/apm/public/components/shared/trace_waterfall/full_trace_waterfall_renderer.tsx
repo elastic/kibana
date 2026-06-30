@@ -13,13 +13,12 @@ import type { CoreStart } from '@kbn/core/public';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { TraceWaterfall } from '.';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
 import { Loading } from './loading';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { useGetServiceBadgeHrefFromCore } from './use_get_service_badge_href_from_core';
 
 type Props = FullTraceWaterfallProps & { core: CoreStart };
-
-export const FETCH_FULL_TRACE_WATERFALL_OPERATION_ID = 'fetch-full-trace-waterfall';
 
 export function FullTraceWaterfallRenderer({
   traceId,
@@ -52,7 +51,7 @@ export function FullTraceWaterfallRenderer({
       });
     },
     [rangeFrom, rangeTo, traceId],
-    { operationId: FETCH_FULL_TRACE_WATERFALL_OPERATION_ID }
+    { operationId: FETCHER_OPERATION_IDS.FETCH_FULL_TRACE_WATERFALL }
   );
 
   if (isPending(status)) {

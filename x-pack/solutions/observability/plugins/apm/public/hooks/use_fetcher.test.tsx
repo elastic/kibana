@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
 import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
+import { FETCHER_OPERATION_IDS } from './fetcher_operation_ids';
 import * as reportFetchErrorModule from '../services/rest/report_fetch_error';
 
 // Wrap the hook with a provider so it can useKibana
@@ -155,9 +156,12 @@ describe('useFetcher', () => {
     }
 
     it('captures the error with the operationId label when operationId is provided', async () => {
-      const hook = renderHook(() => useFetcher(failingFn, [], { operationId: 'my-op' }), {
-        wrapper,
-      });
+      const hook = renderHook(
+        () => useFetcher(failingFn, [], { operationId: FETCHER_OPERATION_IDS.FETCH_SPAN_LINKS }),
+        {
+          wrapper,
+        }
+      );
 
       act(() => {
         jest.advanceTimersByTime(1000);
@@ -168,7 +172,7 @@ describe('useFetcher', () => {
       expect(reportFetchErrorSpy).toHaveBeenCalledTimes(1);
       expect(reportFetchErrorSpy).toHaveBeenCalledWith({
         error: expect.any(Error),
-        operationId: 'my-op',
+        operationId: FETCHER_OPERATION_IDS.FETCH_SPAN_LINKS,
       });
     });
 
@@ -185,9 +189,12 @@ describe('useFetcher', () => {
     });
 
     it('does not capture the error when the request is aborted before it fails', async () => {
-      const hook = renderHook(() => useFetcher(failingFn, [], { operationId: 'my-op' }), {
-        wrapper,
-      });
+      const hook = renderHook(
+        () => useFetcher(failingFn, [], { operationId: FETCHER_OPERATION_IDS.FETCH_SPAN_LINKS }),
+        {
+          wrapper,
+        }
+      );
 
       // Unmount triggers cleanup → controller.abort() → signal.aborted = true
       hook.unmount();
