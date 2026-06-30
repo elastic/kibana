@@ -397,7 +397,13 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
       titleElement="h3"
       titleSize="xs"
       hasBorder={true}
-      isDisabled={isAgentDisabled}
+      // Convey the disabled state with `aria-disabled` + styling and a guarded click rather than
+      // EuiCard's native `isDisabled` (which renders a `disabled` <button>). A native disabled
+      // control drops out of the tab order and suppresses the hover events EuiToolTip needs, so the
+      // explanatory tooltip would be unreachable — defeating the goal of signalling how to gain
+      // access. Keeping it focusable lets the tooltip surface on both hover and keyboard focus.
+      aria-disabled={isAgentDisabled || undefined}
+      css={isAgentDisabled ? actionPanelDisabledStyle : undefined}
       title={AI_AGENT_TITLE}
       description={AI_AGENT_DESCRIPTION}
       onClick={isAgentDisabled ? noop : onCreateWithAgent}

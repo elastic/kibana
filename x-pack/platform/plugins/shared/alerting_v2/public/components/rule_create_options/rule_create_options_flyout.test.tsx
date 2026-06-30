@@ -96,11 +96,12 @@ describe('RuleCreateOptionsFlyout', () => {
       </I18nProvider>
     );
 
-    const agentButton = screen.getByRole('button', { name: /create with ai agent/i });
-    expect(agentButton).toBeInTheDocument();
-    expect(agentButton).toBeDisabled();
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    // Kept focusable (aria-disabled) rather than natively disabled so the tooltip stays reachable.
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
-    fireEvent.click(agentButton);
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
     expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });

@@ -111,6 +111,29 @@ describe('RuleCreateOptionsPanel', () => {
 
     expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
   });
+
+  it('renders the agent card disabled and shows the tooltip on hover in the vertical (flyout) layout', async () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          layout="vertical"
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentTooltipText="Missing privileges"
+          onCreateThresholdAlert={onCreateThresholdAlert}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
+
+    fireEvent.mouseOver(agentCard);
+    expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
+  });
 });
 
 describe('getCreateWithAgentTooltipText', () => {
