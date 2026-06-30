@@ -97,4 +97,20 @@ describe('getWorkflowExecutionStatusTool', () => {
       ],
     });
   });
+
+  it('should return an error result when the API throws', async () => {
+    const tool = buildTool(createWorkflowsManagement());
+    getExecutionState.mockRejectedValue(new Error('ES unavailable'));
+
+    const result = await tool.handler({ executionId: 'exec-1' }, mockContext as any);
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: 'error',
+          data: { message: 'Failed to retrieve workflow execution status: ES unavailable' },
+        },
+      ],
+    });
+  });
 });

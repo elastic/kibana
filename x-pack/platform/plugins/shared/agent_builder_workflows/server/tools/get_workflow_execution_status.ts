@@ -42,26 +42,37 @@ export const getWorkflowExecutionStatusTool = ({
     `),
     schema: getWorkflowExecutionStatusSchema,
     handler: async ({ executionId }, { spaceId, request }) => {
-      const authorized = await hasWorkflowExecutionReadPrivilege({ getSecurity, request, spaceId });
-      if (!authorized) {
-        return {
-          results: [errorResult(`Workflow execution with ID '${executionId}' not found.`)],
-        };
-      }
+      try {
+        const authorized = await hasWorkflowExecutionReadPrivilege({
+          getSecurity,
+          request,
+          spaceId,
+        });
+        if (!authorized) {
+          return {
+            results: [errorResult(`Workflow execution with ID '${executionId}' not found.`)],
+          };
+        }
 
-      const execution = await getExecutionState({
-        executionId,
-        spaceId,
-        workflowApi,
-      });
+        const execution = await getExecutionState({
+          executionId,
+          spaceId,
+          workflowApi,
+        });
 
-      if (execution) {
+        if (execution) {
+          return {
+            results: [otherResult({ execution })],
+          };
+        } else {
+          return {
+            results: [errorResult(`Workflow execution with ID '${executionId}' not found.`)],
+          };
+        }
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
         return {
-          results: [otherResult({ execution })],
-        };
-      } else {
-        return {
-          results: [errorResult(`Workflow execution with ID '${executionId}' not found.`)],
+          results: [errorResult(`Failed to retrieve workflow execution status: ${message}`)],
         };
       }
     },
