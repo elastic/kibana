@@ -880,7 +880,7 @@ describe('RulesListPage', () => {
     expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
     const agentCard = screen.getByTestId('createWithAgentCard');
     expect(agentCard).toBeInTheDocument();
-    expect(agentCard).toBeDisabled();
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

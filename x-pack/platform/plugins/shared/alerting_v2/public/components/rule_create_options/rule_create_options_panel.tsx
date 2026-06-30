@@ -159,8 +159,11 @@ const RuleCreateOptionActionPanel: React.FC<{
       element="button"
       hasBorder
       paddingSize="none"
-      disabled={isDisabled}
-      onClick={item.onClick}
+      // EuiPanel has no built-in disabled appearance (unlike EuiCard's `isDisabled`), and a native
+      // `disabled` button would both leave it unstyled and suppress the hover events EuiToolTip
+      // needs. So we convey the disabled state with `aria-disabled` + styling and guard the click.
+      aria-disabled={isDisabled || undefined}
+      onClick={isDisabled ? noop : item.onClick}
       css={[actionPanelStyle, isDisabled && actionPanelDisabledStyle]}
       data-test-subj={item['data-test-subj']}
     >

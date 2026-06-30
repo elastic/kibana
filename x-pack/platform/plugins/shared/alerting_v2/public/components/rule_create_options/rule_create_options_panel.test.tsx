@@ -89,7 +89,7 @@ describe('RuleCreateOptionsPanel', () => {
 
     const agentCard = screen.getByTestId('createWithAgentCard');
     expect(agentCard).toBeInTheDocument();
-    expect(agentCard).toBeDisabled();
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
     fireEvent.click(agentCard);
     expect(onCreateWithAgent).not.toHaveBeenCalled();
