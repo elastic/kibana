@@ -1077,6 +1077,7 @@ x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-kibana
+x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-team
@@ -1175,7 +1176,7 @@ x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/kibana-presentation
 x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @elastic/workflows-eng
-x-pack/platform/plugins/shared/agent_context_layer @elastic/workchat-eng
+x-pack/platform/plugins/shared/agent_context_layer @elastic/context-eng
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
@@ -2043,6 +2044,7 @@ x-pack/platform/plugins/shared/streams/common/significant_events_tuning_config.t
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/data_lifecycle_helpers.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/pin_failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/doc_counts.ts @elastic/kibana-management
 /x-pack/performance/configs/streams_* @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/performance/journeys_e2e/streams_* @elastic/obs-sig-events-team @elastic/obs-onboarding-team
