@@ -122,7 +122,7 @@ User: "Remove user:jsmith123 from the Privileged Users watchlist."
 export const manageWatchlistsSkill = defineSkillType({
   id: 'manage-watchlists',
   name: 'manage-watchlists',
-  basePath: 'skills/security/manage_watchlists',
+  basePath: 'skills/security/watchlists',
   description:
     'Manage Entity Analytics watchlists: create, update, delete, and add/remove entity membership. Discovers existing watchlists via list_watchlists to resolve names to ids. All mutating actions in this skill require explicit user confirmation before executing. Do NOT use for read-only questions about which watchlists exist (the entity-analytics skill also covers those) or for which watchlists a specific entity belongs to.',
   content,

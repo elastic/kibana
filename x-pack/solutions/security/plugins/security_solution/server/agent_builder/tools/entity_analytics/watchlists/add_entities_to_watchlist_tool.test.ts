@@ -152,18 +152,6 @@ describe('addEntitiesToWatchlistTool', () => {
       );
       expect(result.status).toBe('unavailable');
     });
-
-    it('is unavailable when entity store V2 is disabled', async () => {
-      const disabled = addEntitiesToWatchlistTool(mocks.mockCore, mocks.mockLogger, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      });
-      const result = await disabled.availability!.handler(
-        createToolAvailabilityContext(mocks.mockRequest, 'default')
-      );
-      expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Entity Store V2');
-    });
   });
 
   describe('schema', () => {
@@ -236,7 +224,7 @@ describe('addEntitiesToWatchlistTool', () => {
         expect(mockAssignFn).not.toHaveBeenCalled();
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
         expect(askArgs).toMatchObject({
-          id: 'manage_watchlists.add_entities_to_watchlist.tool-call-add',
+          id: 'watchlists.add_entities_to_watchlist.tool-call-add',
           title: 'Add entities to watchlist',
           confirm_text: 'Add',
           cancel_text: 'Cancel',

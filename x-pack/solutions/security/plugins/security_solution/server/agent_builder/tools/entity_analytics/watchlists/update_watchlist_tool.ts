@@ -12,10 +12,14 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
+import {
+  MAX_WATCHLIST_DESCRIPTION_LENGTH,
+  MAX_WATCHLIST_NAME_LENGTH,
+} from '../../../../../common/entity_analytics/watchlists/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
 import { securityTool } from '../../constants';
+import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
@@ -29,19 +33,21 @@ const schema = z.object({
   name: z
     .string()
     .min(1)
-    .optional()
-    .describe('Optional new name for the watchlist. Pass only when the user asked to rename it.'),
-  description: z
-    .string()
+    .max(MAX_WATCHLIST_NAME_LENGTH)
     .optional()
     .describe(
-      'Optional new description. Pass only when the user asked to change the description. Pass an empty string to clear an existing description.'
+      `Optional new name for the watchlist. Pass only when the user asked to rename it. Up to ${MAX_WATCHLIST_NAME_LENGTH} characters.`
+    ),
+  description: z
+    .string()
+    .max(MAX_WATCHLIST_DESCRIPTION_LENGTH)
+    .optional()
+    .describe(
+      `Optional new description. Pass only when the user asked to change the description. Pass an empty string to clear an existing description. Up to ${MAX_WATCHLIST_DESCRIPTION_LENGTH} characters.`
     ),
   riskModifier: riskModifierSchema
     .optional()
-    .describe(
-      'Optional new risk modifier. Allowed values: 0, 0.5, 1, 1.5, or 2. Pass only when the user asked to change it.'
-    ),
+    .describe('Optional new risk modifier. Pass only when the user asked to change it.'),
 });
 
 export const SECURITY_UPDATE_WATCHLIST_TOOL_ID = securityTool('update_watchlist');
@@ -98,19 +104,15 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
 
-        const privileges = await getUserWatchlistPrivileges(request, security, spaceId);
-        if (!privileges.has_write_permissions) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: 'You do not have permission to update watchlists in this space.',
-                },
-              },
-            ],
-          };
+        const accessResult = await checkWatchlistAccess({
+          request,
+          security,
+          spaceId,
+          type: 'write',
+          action: 'update watchlists',
+        });
+        if (!accessResult.allowed) {
+          return { results: [accessResult.result] };
         }
 
         const client = new WatchlistConfigClient({
@@ -121,7 +123,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
           logger,
         });
 
-        const promptId = `manage_watchlists.update_watchlist.${callContext.toolCallId}`;
+        const promptId = `watchlists.update_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
 
         if (status === ConfirmationStatus.unprompted) {

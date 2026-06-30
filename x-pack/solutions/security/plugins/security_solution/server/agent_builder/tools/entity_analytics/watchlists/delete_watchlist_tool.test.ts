@@ -197,7 +197,7 @@ describe('deleteWatchlistTool', () => {
         expect(mockDeleteFn).not.toHaveBeenCalled();
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
         expect(askArgs).toMatchObject({
-          id: 'manage_watchlists.delete_watchlist.tool-call-delete',
+          id: 'watchlists.delete_watchlist.tool-call-delete',
           title: 'Delete watchlist',
           confirm_text: 'Delete',
           cancel_text: 'Cancel',
@@ -205,6 +205,33 @@ describe('deleteWatchlistTool', () => {
         });
         expect(askArgs.message).toContain('"Privileged Users"');
         expect(askArgs.message).toMatch(/cannot be undone/i);
+      });
+
+      it('on unprompted: confirmation message states how many linked entity sources will be cascade-deleted', async () => {
+        mockGetFn.mockResolvedValueOnce(
+          buildExistingWatchlist({ entitySourceIds: ['src-1', 'src-2', 'src-3'] })
+        );
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.message).toMatch(/3 linked entity sources/i);
+      });
+
+      it('on unprompted: with one linked source, message uses singular wording', async () => {
+        mockGetFn.mockResolvedValueOnce(buildExistingWatchlist({ entitySourceIds: ['src-1'] }));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1' }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.message).toMatch(/1 linked entity source/i);
+        expect(askArgs.message).not.toMatch(/1 linked entity sources/i);
       });
 
       it('refuses to delete a managed watchlist before prompting', async () => {
@@ -225,7 +252,7 @@ describe('deleteWatchlistTool', () => {
         expect(error.data.message).toMatch(/system-managed/i);
       });
 
-      it('on accept: cleans up entities then deletes without re-fetching', async () => {
+      it('on accept: cleans up entities then deletes watchlist without re-fetching', async () => {
         mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
         mockDeleteFn.mockResolvedValueOnce(undefined);
         const ctx = buildHandlerContextWithPrompts(mocks, {
@@ -278,9 +305,10 @@ describe('deleteWatchlistTool', () => {
       expect(error.data.message).toContain('not found');
     });
 
-    it('returns an error result when delete throws after accept', async () => {
+    it('on accept, when watchlist deletion fails: returns an error', async () => {
+      const errorMessage = 'test error';
       mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
-      mockDeleteFn.mockRejectedValueOnce(new Error('boom'));
+      mockDeleteFn.mockRejectedValueOnce(new Error(errorMessage));
       const ctx = buildHandlerContextWithPrompts(mocks, {
         checkStatus: ConfirmationStatus.accepted,
       });
@@ -290,9 +318,30 @@ describe('deleteWatchlistTool', () => {
         ctx
       )) as ToolHandlerStandardReturn;
 
+      expect(mockDeleteWatchlistEntitiesFn).toHaveBeenCalledWith('wl-1');
       const error = result.results[0] as ErrorResult;
       expect(error.type).toBe(ToolResultType.error);
-      expect(error.data.message).toContain('boom');
+      expect(error.data.message).toContain(errorMessage);
+    });
+
+    it('on accept, when entity cleanup fails: watchlist is still deleted and result carries a warning', async () => {
+      mockDeleteWatchlistEntitiesFn.mockRejectedValueOnce(new Error('cleanup-boom'));
+      mockDeleteFn.mockResolvedValueOnce(undefined);
+      const ctx = buildHandlerContextWithPrompts(mocks, {
+        checkStatus: ConfirmationStatus.accepted,
+      });
+
+      const result = (await tool.handler(
+        { watchlistId: 'wl-1' },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      const other = result.results[0] as OtherResult;
+      expect(other.type).toBe(ToolResultType.other);
+      expect(other.data.deleted).toBe(true);
+      expect(other.data.watchlistId).toBe('wl-1');
+      expect(other.data.warning).toContain('cleanup-boom');
+      expect(other.data.warning).toMatch(/entity source cleanup failed/i);
     });
   });
 });

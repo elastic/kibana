@@ -159,18 +159,6 @@ describe('removeEntitiesFromWatchlistTool', () => {
       );
       expect(result.status).toBe('unavailable');
     });
-
-    it('is unavailable when entity store V2 is disabled', async () => {
-      const disabled = removeEntitiesFromWatchlistTool(mocks.mockCore, mocks.mockLogger, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      });
-      const result = await disabled.availability!.handler(
-        createToolAvailabilityContext(mocks.mockRequest, 'default')
-      );
-      expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Entity Store V2');
-    });
   });
 
   describe('schema', () => {
@@ -226,7 +214,7 @@ describe('removeEntitiesFromWatchlistTool', () => {
 
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
         expect(askArgs).toMatchObject({
-          id: 'manage_watchlists.remove_entities_from_watchlist.tool-call-remove',
+          id: 'watchlists.remove_entities_from_watchlist.tool-call-remove',
           title: 'Remove entities from watchlist',
           confirm_text: 'Remove',
           cancel_text: 'Cancel',

@@ -160,6 +160,20 @@ describe('createWatchlistTool', () => {
       expect(tool.schema.safeParse({ name: 'x', riskModifier: 3 }).success).toBe(false);
       expect(tool.schema.safeParse({ name: 'x', riskModifier: 1.25 }).success).toBe(false);
     });
+
+    it('rejects a name longer than 256 characters', () => {
+      expect(tool.schema.safeParse({ name: 'x'.repeat(257) }).success).toBe(false);
+      expect(tool.schema.safeParse({ name: 'x'.repeat(256) }).success).toBe(true);
+    });
+
+    it('rejects a description longer than 1000 characters', () => {
+      expect(tool.schema.safeParse({ name: 'x', description: 'y'.repeat(1001) }).success).toBe(
+        false
+      );
+      expect(tool.schema.safeParse({ name: 'x', description: 'y'.repeat(1000) }).success).toBe(
+        true
+      );
+    });
   });
 
   describe('handler', () => {
@@ -176,7 +190,7 @@ describe('createWatchlistTool', () => {
 
         expect(ctx.prompts.askForConfirmation).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'manage_watchlists.create_watchlist.tool-call-123',
+            id: 'watchlists.create_watchlist.tool-call-123',
             title: 'Create watchlist',
             confirm_text: 'Create',
             cancel_text: 'Cancel',

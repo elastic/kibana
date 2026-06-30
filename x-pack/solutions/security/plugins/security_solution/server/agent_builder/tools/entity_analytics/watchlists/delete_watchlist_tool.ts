@@ -16,8 +16,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { createEntitySourcesService } from '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service';
 import { watchlistEntitySourceTypeName } from '../../../../lib/entity_analytics/watchlists/entity_sources/infra';
-import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
 import { securityTool } from '../../constants';
+import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const schema = z.object({
@@ -61,19 +61,15 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
         const [coreStart, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
 
-        const privileges = await getUserWatchlistPrivileges(request, security, spaceId);
-        if (!privileges.has_write_permissions) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: 'You do not have permission to delete watchlists in this space.',
-                },
-              },
-            ],
-          };
+        const accessResult = await checkWatchlistAccess({
+          request,
+          security,
+          spaceId,
+          type: 'write',
+          action: 'delete watchlists',
+        });
+        if (!accessResult.allowed) {
+          return { results: [accessResult.result] };
         }
 
         // The watchlist-entity-source saved-object type is registered as hidden=true.
@@ -91,7 +87,7 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
           logger,
         });
 
-        const promptId = `manage_watchlists.delete_watchlist.${callContext.toolCallId}`;
+        const promptId = `watchlists.delete_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
 
         if (status === ConfirmationStatus.unprompted) {
@@ -111,6 +107,7 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
             };
           }
 
+          const entitySourceCount = existing.entitySourceIds?.length ?? 0;
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Delete watchlist',
@@ -121,7 +118,13 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
               'This will:',
               '- Remove the watchlist',
               '- Disassociate the entities from it',
-              '- Cascade-delete any linked entity sources',
+              ...(entitySourceCount > 0
+                ? [
+                    `- Cascade-delete ${entitySourceCount} linked ${
+                      entitySourceCount === 1 ? 'entity source' : 'entity sources'
+                    }`,
+                  ]
+                : []),
               '',
               '**This action cannot be undone.**',
             ].join('\n'),
@@ -152,8 +155,16 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
           hasEncryptionKey,
         });
 
-        await entitySourcesService.deleteWatchlistEntities(params.watchlistId);
+        let warning: string | null = null;
+        try {
+          await entitySourcesService.deleteWatchlistEntities(params.watchlistId);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          warning = `The watchlist was deleted but entity source cleanup failed: ${errorMessage}. Some entities may still reference this watchlist.`;
+        }
+
         await client.delete(params.watchlistId);
+
         return {
           results: [
             {
@@ -162,6 +173,7 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
               data: {
                 deleted: true,
                 watchlistId: params.watchlistId,
+                ...(warning ? { warning } : {}),
               },
             },
           ],

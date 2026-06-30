@@ -124,7 +124,7 @@ describe('listWatchlistsTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(mockListFn).toHaveBeenCalledWith();
+      expect(mockListFn).toHaveBeenCalledWith(100);
       expect(result.results).toHaveLength(1);
       const other = result.results[0] as OtherResult;
       expect(other.type).toBe(ToolResultType.other);

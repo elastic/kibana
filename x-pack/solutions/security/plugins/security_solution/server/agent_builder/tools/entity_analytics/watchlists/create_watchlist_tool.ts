@@ -12,10 +12,14 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
+import {
+  MAX_WATCHLIST_DESCRIPTION_LENGTH,
+  MAX_WATCHLIST_NAME_LENGTH,
+} from '../../../../../common/entity_analytics/watchlists/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
 import { securityTool } from '../../constants';
+import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
@@ -25,19 +29,21 @@ const schema = z.object({
   name: z
     .string()
     .min(1)
+    .max(MAX_WATCHLIST_NAME_LENGTH)
     .describe(
-      'The watchlist name. Use the user\'s exact wording when they named the watchlist, e.g. "Privileged Users" or "Compromised Accounts".'
+      `The watchlist name. Use the user's exact wording when they named the watchlist, e.g. "Privileged Users" or "Compromised Accounts". Up to ${MAX_WATCHLIST_NAME_LENGTH} characters.`
     ),
   description: z
     .string()
+    .max(MAX_WATCHLIST_DESCRIPTION_LENGTH)
     .optional()
     .describe(
-      'Optional short description of the watchlist\'s purpose. Include this when the user supplied context, e.g. "Sensitive accounts under continuous review".'
+      `Optional short description of the watchlist's purpose. Include this when the user supplied context, e.g. "Sensitive accounts under continuous review". Up to ${MAX_WATCHLIST_DESCRIPTION_LENGTH} characters.`
     ),
   riskModifier: riskModifierSchema
     .optional()
     .describe(
-      `Optional risk score multiplier for entities on this watchlist. Allowed values: 0, 0.5, 1, 1.5, or 2 (steps of 0.5). 0 = scores zeroed out, 1 = no change, 2 = doubled. Defaults to ${DEFAULT_RISK_MODIFIER}; only pass a value when the user explicitly asks for a different multiplier.`
+      `Optional risk score multiplier. 0 = scores zeroed out, 1 = no change, 2 = doubled. Defaults to ${DEFAULT_RISK_MODIFIER}; only pass a value when the user explicitly asks for a different multiplier.`
     ),
 });
 
@@ -75,24 +81,20 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
 
-        const privileges = await getUserWatchlistPrivileges(request, security, spaceId);
-        if (!privileges.has_write_permissions) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: 'You do not have permission to create watchlists in this space.',
-                },
-              },
-            ],
-          };
+        const accessResult = await checkWatchlistAccess({
+          request,
+          security,
+          spaceId,
+          type: 'write',
+          action: 'create watchlists',
+        });
+        if (!accessResult.allowed) {
+          return { results: [accessResult.result] };
         }
 
         const riskModifier = params.riskModifier ?? DEFAULT_RISK_MODIFIER;
 
-        const promptId = `manage_watchlists.create_watchlist.${callContext.toolCallId}`;
+        const promptId = `watchlists.create_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
 
         if (status === ConfirmationStatus.unprompted) {

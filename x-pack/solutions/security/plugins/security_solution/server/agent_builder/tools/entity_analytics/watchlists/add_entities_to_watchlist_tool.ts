@@ -17,8 +17,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { getIndexForWatchlist } from '../../../../lib/entity_analytics/watchlists/entities/utils';
 import { createManualEntityService } from '../../../../lib/entity_analytics/watchlists/entity_sources/manual/service';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
 import { securityTool } from '../../constants';
+import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
@@ -59,23 +59,14 @@ Entities not present in the entity store are reported as \`not_found\` in the re
     tags: ['security', 'entity-analytics', 'watchlists'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => {
-        const result = await getWatchlistToolAvailability({
+      handler: ({ request }) =>
+        getWatchlistToolAvailability({
           core,
           request,
           logger,
           experimentalFeatures,
-        });
-        if (result.status !== 'available') return result;
-        if (!experimentalFeatures.entityAnalyticsEntityStoreV2) {
-          return {
-            status: 'unavailable',
-            reason:
-              'Entity Store V2 is not enabled (required to sync watchlist membership onto entity records).',
-          };
-        }
-        return { status: 'available' };
-      },
+          requireEntityStoreV2: true,
+        }),
     },
     handler: async (
       params,
@@ -91,20 +82,15 @@ Entities not present in the entity store are reported as \`not_found\` in the re
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
 
-        const privileges = await getUserWatchlistPrivileges(request, security, spaceId);
-        if (!privileges.has_write_permissions) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message:
-                    'You do not have permission to modify watchlist membership in this space.',
-                },
-              },
-            ],
-          };
+        const accessResult = await checkWatchlistAccess({
+          request,
+          security,
+          spaceId,
+          type: 'write',
+          action: 'modify watchlist membership',
+        });
+        if (!accessResult.allowed) {
+          return { results: [accessResult.result] };
         }
 
         const watchlistClient = new WatchlistConfigClient({
@@ -115,7 +101,7 @@ Entities not present in the entity store are reported as \`not_found\` in the re
         });
         const watchlist = await watchlistClient.get(params.watchlistId);
 
-        const promptId = `manage_watchlists.add_entities_to_watchlist.${callContext.toolCallId}`;
+        const promptId = `watchlists.add_entities_to_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
 
         if (status === ConfirmationStatus.unprompted) {

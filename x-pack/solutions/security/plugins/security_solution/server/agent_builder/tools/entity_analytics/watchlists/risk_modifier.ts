@@ -8,19 +8,17 @@
 import { z } from '@kbn/zod/v4';
 
 /**
- * The discrete `riskModifier` values accepted by watchlist tools. Mirrors the
- * server-side OpenAPI constraint (`z.number().min(0).max(2)`) but tightens it
- * to a 0.5-step ladder (as required by the UI, see `../../../../../public/flyout/entity_details/watchlists_right/watchlist_form.tsx`).
+ * Tightens the server-side OpenAPI constraint (`z.number().min(0).max(2)`) to the
+ * discrete 0.5-step ladder required by the UI (see
+ * `../../../../../public/flyout/entity_details/watchlists_right/watchlist_form.tsx`).
  */
-export const ALLOWED_RISK_MODIFIERS = [0, 0.5, 1, 1.5, 2] as const;
-
-type RiskModifier = (typeof ALLOWED_RISK_MODIFIERS)[number];
-
-export const riskModifierSchema = z
-  .number()
-  .refine((v): v is RiskModifier => ALLOWED_RISK_MODIFIERS.includes(v as RiskModifier), {
-    message: 'Must be one of: 0, 0.5, 1, 1.5, or 2',
-  });
+export const riskModifierSchema = z.union([
+  z.literal(0),
+  z.literal(0.5),
+  z.literal(1),
+  z.literal(1.5),
+  z.literal(2),
+]);
 
 /**
  * Renders a `riskModifier` as `<value> (<human-readable meaning>)` for HITL

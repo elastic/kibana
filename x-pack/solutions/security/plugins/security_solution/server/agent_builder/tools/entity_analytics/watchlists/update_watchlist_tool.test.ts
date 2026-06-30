@@ -153,6 +153,24 @@ describe('updateWatchlistTool', () => {
         false
       );
     });
+
+    it('rejects a name longer than 256 characters', () => {
+      expect(tool.schema.safeParse({ watchlistId: 'wl-1', name: 'x'.repeat(257) }).success).toBe(
+        false
+      );
+      expect(tool.schema.safeParse({ watchlistId: 'wl-1', name: 'x'.repeat(256) }).success).toBe(
+        true
+      );
+    });
+
+    it('rejects a description longer than 1000 characters', () => {
+      expect(
+        tool.schema.safeParse({ watchlistId: 'wl-1', description: 'y'.repeat(1001) }).success
+      ).toBe(false);
+      expect(
+        tool.schema.safeParse({ watchlistId: 'wl-1', description: 'y'.repeat(1000) }).success
+      ).toBe(true);
+    });
   });
 
   describe('handler', () => {
@@ -211,7 +229,7 @@ describe('updateWatchlistTool', () => {
         expect(mockUpdateFn).not.toHaveBeenCalled();
         expect(ctx.prompts.askForConfirmation).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'manage_watchlists.update_watchlist.tool-call-update',
+            id: 'watchlists.update_watchlist.tool-call-update',
             title: 'Update watchlist',
             confirm_text: 'Update',
             cancel_text: 'Cancel',

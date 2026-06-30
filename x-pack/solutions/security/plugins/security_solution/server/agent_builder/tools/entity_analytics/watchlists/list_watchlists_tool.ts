@@ -13,8 +13,8 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
 import { securityTool } from '../../constants';
+import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const schema = z.object({
@@ -31,6 +31,8 @@ const schema = z.object({
 });
 
 export const SECURITY_LIST_WATCHLISTS_TOOL_ID = securityTool('list_watchlists');
+
+const MAX_WATCHLISTS_RETURNED = 100;
 
 interface WatchlistSummary {
   id: string;
@@ -51,7 +53,7 @@ export const listWatchlistsTool = (
   return {
     id: SECURITY_LIST_WATCHLISTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `List the security Entity Analytics watchlists configured in the current space. Returns each watchlist's id, name, description, risk modifier, managed flag, source ids, and timestamps.
+    description: `List the security Entity Analytics watchlists configured in the current space. Returns up to ${MAX_WATCHLISTS_RETURNED} watchlists, each with its id, name, description, risk modifier, managed flag, source ids, and timestamps.
 
 Use this tool when the user asks to discover or enumerate watchlists, for example: "what watchlists do we have", "list watchlists", "show me the watchlists", "is there a watchlist called X". It is also the first step when the user asks about members of a named watchlist: list watchlists to resolve the name to an id, then call \`security.search_entities\` with \`watchlists: [<id>]\` to get the members.
 
@@ -72,19 +74,15 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
 
-        const privileges = await getUserWatchlistPrivileges(request, security, spaceId);
-        if (!privileges.has_read_permissions) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: 'You do not have permission to read watchlists in this space.',
-                },
-              },
-            ],
-          };
+        const accessResult = await checkWatchlistAccess({
+          request,
+          security,
+          spaceId,
+          type: 'read',
+          action: 'read watchlists',
+        });
+        if (!accessResult.allowed) {
+          return { results: [accessResult.result] };
         }
 
         const client = new WatchlistConfigClient({
@@ -94,7 +92,7 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
           logger,
         });
 
-        const allWatchlists = await client.list();
+        const allWatchlists = await client.list(MAX_WATCHLISTS_RETURNED);
         const nameFilter = params.nameContains?.toLowerCase();
         const filtered = nameFilter
           ? allWatchlists.filter((w) => w.name.toLowerCase().includes(nameFilter))
