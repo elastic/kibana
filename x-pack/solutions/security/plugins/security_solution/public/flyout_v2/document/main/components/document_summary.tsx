@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { AiButton } from '@kbn/shared-ux-ai-components';
