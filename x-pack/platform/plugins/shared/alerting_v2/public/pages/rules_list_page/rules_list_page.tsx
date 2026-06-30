@@ -73,7 +73,7 @@ export const RulesListPage = () => {
   const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
   // We always render the "Create with agent" entry points; when the skill is unavailable they
   // are shown disabled with a tooltip rather than hidden.
-  const createWithAgentDisabledReason = isRuleManagementABSkillAvailable
+  const createWithAgentTooltipText = isRuleManagementABSkillAvailable
     ? undefined
     : CREATE_WITH_AGENT_DISABLED_TOOLTIP;
 
@@ -225,7 +225,7 @@ export const RulesListPage = () => {
                                   ),
                                   icon: 'sparkles' as const,
                                   disabled: !isRuleManagementABSkillAvailable,
-                                  toolTipContent: createWithAgentDisabledReason,
+                                  toolTipContent: createWithAgentTooltipText,
                                   onClick: () => {
                                     closeCreateMenu();
                                     navigateToAgentBuilder();
@@ -274,7 +274,7 @@ export const RulesListPage = () => {
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabledReason={createWithAgentDisabledReason}
+          createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
@@ -328,7 +328,7 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
-          createWithAgentDisabledReason={createWithAgentDisabledReason}
+          createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}

@@ -244,7 +244,7 @@ const CreateRuleOptionsFlyoutInner = ({
     services.uiSettings
   );
   // Always render the "Create with agent" option; disable it with a tooltip when unavailable.
-  const createWithAgentDisabledReason = isRuleManagementABSkillAvailable
+  const createWithAgentTooltipText = isRuleManagementABSkillAvailable
     ? undefined
     : CREATE_WITH_AGENT_DISABLED_TOOLTIP;
 
@@ -293,7 +293,7 @@ const CreateRuleOptionsFlyoutInner = ({
       onClose={onClose}
       onCreateEsqlRule={() => setStep({ type: 'esql' })}
       onCreateWithAgent={navigateToAgentBuilder}
-      createWithAgentDisabledReason={createWithAgentDisabledReason}
+      createWithAgentTooltipText={createWithAgentTooltipText}
       onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
     />

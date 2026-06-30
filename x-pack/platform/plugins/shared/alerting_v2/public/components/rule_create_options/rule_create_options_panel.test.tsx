@@ -75,13 +75,13 @@ describe('RuleCreateOptionsPanel', () => {
     expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentDisabledReason is set', () => {
+  it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentTooltipText is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsPanel
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          createWithAgentDisabledReason="Missing privileges"
+          createWithAgentTooltipText="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
       </I18nProvider>
@@ -101,7 +101,7 @@ describe('RuleCreateOptionsPanel', () => {
         <RuleCreateOptionsPanel
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          createWithAgentDisabledReason="Missing privileges"
+          createWithAgentTooltipText="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
       </I18nProvider>

@@ -225,7 +225,7 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
-      expect(capturedSelectorProps.createWithAgentDisabledReason).toBeUndefined();
+      expect(capturedSelectorProps.createWithAgentTooltipText).toBeUndefined();
 
       fireEvent.click(screen.getByTestId('agentBtn'));
 
@@ -256,7 +256,7 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
-      expect(capturedSelectorProps.createWithAgentDisabledReason).toEqual(expect.any(String));
+      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
 
     it('disables (does not hide) the agent option when experimental features are disabled', async () => {
@@ -269,7 +269,7 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
-      expect(capturedSelectorProps.createWithAgentDisabledReason).toEqual(expect.any(String));
+      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
   });
 

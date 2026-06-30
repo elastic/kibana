@@ -39,12 +39,11 @@ interface RuleCreateOptionsPanelProps {
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
   /**
-   * When set, the "Create with AI Agent" option is rendered visible but disabled, with this
-   * string shown as a tooltip explaining why (e.g. the user is missing the required privilege).
-   * When unset, the option is enabled and `onCreateWithAgent` fires on click. The option is
-   * always rendered either way.
+   * Optional tooltip text for the "Create with AI Agent" option. When set, the option is always
+   * rendered but disabled, with this text shown as a tooltip explaining why (e.g. a missing
+   * prerequisite). When unset, the option is enabled and `onCreateWithAgent` fires on click.
    */
-  createWithAgentDisabledReason?: string;
+  createWithAgentTooltipText?: string;
   onCreateThresholdAlert?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -219,7 +218,7 @@ const RuleBuilderSectionDivider: React.FC = () => (
 const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabledReason,
+  createWithAgentTooltipText,
   onCreateThresholdAlert,
 }) => {
   const styles = useMemoCss(listEmptyStateStyles);
@@ -240,11 +239,11 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         title: AI_AGENT_TITLE,
         description: AI_AGENT_DESCRIPTION,
         onClick: onCreateWithAgent,
-        disabledReason: createWithAgentDisabledReason,
+        disabledReason: createWithAgentTooltipText,
         'data-test-subj': 'createWithAgentCard',
       },
     ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabledReason]
+    [onCreateEsqlRule, onCreateWithAgent, createWithAgentTooltipText]
   );
 
   const thresholdCreateOption = useMemo<RuleCreateOptionItem>(
@@ -352,11 +351,11 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabledReason,
+  createWithAgentTooltipText,
   onCreateThresholdAlert,
   legacyRuleTypes,
 }) => {
-  const isAgentDisabled = createWithAgentDisabledReason !== undefined;
+  const isAgentDisabled = createWithAgentTooltipText !== undefined;
   const agentCard = (
     <EuiCard
       layout="horizontal"
@@ -392,7 +391,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           {isAgentDisabled ? (
-            <EuiToolTip content={createWithAgentDisabledReason} display="block">
+            <EuiToolTip content={createWithAgentTooltipText} display="block">
               {agentCard}
             </EuiToolTip>
           ) : (
