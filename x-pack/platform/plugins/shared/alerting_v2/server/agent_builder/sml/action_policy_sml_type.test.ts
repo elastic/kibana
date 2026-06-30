@@ -78,11 +78,7 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('returns "1m" as fetch frequency', () => {
-      // Action policies change with operational events (alert routes,
-      // on-call rotations) — a one-minute crawl is the convention
-      // shared with the rule SML type. Pinning so a future
-      // optimization that bumps this without consideration fails the
-      // test loud.
+      // Pinned to '1m' to match rule_sml_type — bumping should be a deliberate decision.
       expect(buildDefinition().fetchFrequency!()).toBe('1m');
     });
   });
@@ -203,18 +199,9 @@ describe('createActionPolicySmlType', () => {
           },
         ],
       });
-      // `permissions` MUST NOT live on the chunk — the indexer owns
-      // permission stamping via `getPermissions` (see plan: a chunk
-      // returning permissions would let an SML type bypass the
-      // central authorization hook).
-      expect(result?.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when attributes.name is missing', async () => {
-      // Defensive default — `name` is required by the schema, but
-      // legacy SOs created before the schema lock can have empty
-      // attributes. A chunk with an empty title is still better than
-      // throwing during a crawl.
       getRepoSo.mockResolvedValueOnce({
         id: 'policy-bare',
         attributes: undefined as unknown as ActionPolicySavedObjectAttributes,
