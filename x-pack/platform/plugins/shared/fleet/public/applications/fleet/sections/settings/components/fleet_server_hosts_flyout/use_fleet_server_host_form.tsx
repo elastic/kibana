@@ -416,10 +416,15 @@ export function useFleetServerHostsForm(
     onSuccess,
   ]);
 
-  const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
+  const hasChanged =
+    Object.values(inputs).some((input) => input.hasChanged) ||
+    (usePrivateEndpointInput.hasChanged && !privateEndpointSwitchDisabled);
+
+  const privateEndpointToggleChanged =
+    usePrivateEndpointInput.hasChanged && !privateEndpointSwitchDisabled;
 
   const isDisabled =
-    isEditDisabled ||
+    (isEditDisabled && !privateEndpointToggleChanged) ||
     isLoading ||
     !hasChanged ||
     !nameInput.value ||

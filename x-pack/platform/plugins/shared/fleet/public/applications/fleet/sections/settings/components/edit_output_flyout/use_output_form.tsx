@@ -747,7 +747,9 @@ export function useOutputForm(
     writeToStreams,
   };
 
-  const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
+  const hasChanged =
+    Object.values(inputs).some((input) => input.hasChanged) ||
+    (usePrivateEndpointInput.hasChanged && !privateEndpointSwitchDisabled);
 
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
