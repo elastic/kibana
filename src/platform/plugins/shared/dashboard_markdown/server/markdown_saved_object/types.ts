@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MarkdownByValueState } from '../embeddable/schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { markdownLibraryItemSchema } from '../api/schema';
 
-export type StoredMarkdownState = MarkdownByValueState & {
-  title: string; // all saved objects have a title
-};
+export type StoredMarkdownState = TypeOf<typeof markdownLibraryItemSchema>;
