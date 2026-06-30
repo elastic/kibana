@@ -163,6 +163,7 @@ describe('getHistory()', () => {
         hash: '',
         fields: {
           hashed: [],
+          redacted: [],
         },
         snapshot: {
           id: ruleSO.id,
@@ -472,6 +473,7 @@ describe('getHistory()', () => {
           hash: '',
           fields: {
             hashed: [],
+            redacted: [],
           },
           snapshot: {
             references: ruleSO.references,
