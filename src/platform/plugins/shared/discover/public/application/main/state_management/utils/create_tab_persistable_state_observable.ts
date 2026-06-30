@@ -12,6 +12,11 @@ import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
 import { type DiscoverInternalState, selectTab, type TabState } from '../redux';
 import { isEqualState } from './state_comparators';
 
+export type TabPersistableState = Pick<
+  TabState,
+  'appState' | 'globalState' | 'attributes' | 'profileState'
+>;
+
 export const createTabPersistableStateObservable = ({
   tabId,
   internalState$,
@@ -20,11 +25,8 @@ export const createTabPersistableStateObservable = ({
   tabId: string;
   internalState$: Observable<DiscoverInternalState>;
   getState: () => DiscoverInternalState;
-}): Observable<Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>> => {
-  const getTabState = (): Pick<
-    TabState,
-    'appState' | 'globalState' | 'attributes' | 'profileState'
-  > => {
+}): Observable<TabPersistableState> => {
+  const getTabState = (): TabPersistableState => {
     const tabState = selectTab(getState(), tabId);
 
     return {
