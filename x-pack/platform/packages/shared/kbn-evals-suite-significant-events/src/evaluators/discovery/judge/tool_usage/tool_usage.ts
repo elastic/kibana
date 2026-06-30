@@ -15,8 +15,12 @@ import type { JudgeEvaluator } from '../../types';
 export const createToolUsageEvaluator = (): JudgeEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
-  evaluate: ({ input, output }) => {
-    const discoveries = input.discoveries ?? [];
+  evaluate: ({ output }) => {
+    // Use output.inputDiscoveries — the actual discoveries fed to the agent — rather than
+    // input.discoveries (canonical ground truth). In snapshot mode the two differ: snapshot
+    // discoveries may have different evidence/query coverage than the canonical dataset, so
+    // allEvidencesHaveQuery must reflect what the agent actually received.
+    const discoveries = output.inputDiscoveries ?? [];
 
     const allEvidencesHaveQuery =
       discoveries.length > 0 &&
