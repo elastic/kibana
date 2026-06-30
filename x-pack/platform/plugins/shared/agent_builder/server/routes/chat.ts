@@ -54,7 +54,7 @@ export const promptResponseEntrySchema = schema.oneOf([
     },
     {
       meta: {
-        availability: { stability: 'experimental' },
+        availability: { stability: 'tech_preview' },
         description: 'Answers to an `ask_user_question` prompt; one entry per question, in order.',
       },
     }
@@ -177,7 +177,7 @@ export const conversePayloadSchema = schema.object({
       ),
       {
         meta: {
-          availability: { stability: 'experimental', since: '9.3.0' },
+          availability: { stability: 'tech_preview', since: '9.3.0' },
           description: 'Optional attachments to send with the message.',
         },
       }
@@ -201,7 +201,7 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          availability: { stability: 'experimental', since: '9.5.0' },
+          availability: { stability: 'tech_preview', since: '9.5.0' },
           description: 'Optional conversation access control. Defaults to private.',
         },
       }
