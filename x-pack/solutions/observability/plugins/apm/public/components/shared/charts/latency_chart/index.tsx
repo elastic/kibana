@@ -31,7 +31,6 @@ import { getLatencyChartScreenContext } from './get_latency_chart_screen_context
 import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
-import { AnomalyThresholdSelect } from './anomaly_threshold_select';
 
 interface Props {
   height?: number;
@@ -137,17 +136,6 @@ export function LatencyChart({ height, kuery }: Props) {
                     urlHelpers.push(history, {
                       query: {
                         latencyAggregationType: type,
-                      },
-                    });
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AnomalyThresholdSelect
-                  onChange={(value) => {
-                    urlHelpers.push(history, {
-                      query: {
-                        anomalyThreshold: value,
                       },
                     });
                   }}

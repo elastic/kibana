@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSelect } from '@elastic/eui';
+import { EuiIconTip, EuiSelect } from '@elastic/eui';
 import { getEnvironmentLabel, type AnomalyThreshold } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import React from 'react';
-import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
+import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import type { AnomalyThresholdDisabledReason } from '../../../../hooks/use_anomaly_threshold';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
+import * as urlHelpers from '../../links/url_helpers';
 
 const options = [
   {
@@ -75,45 +76,51 @@ const getTooltipContent = (disabledReason: AnomalyThresholdDisabledReason, envir
 };
 
 export function AnomalyThresholdSelect({
-  onChange,
+  compressed,
+  fullWidth,
 }: {
-  onChange: (value: AnomalyThreshold) => void;
+  compressed?: boolean;
+  fullWidth?: boolean;
 }) {
+  const history = useHistory();
   const { preferredEnvironment } = useEnvironmentsContext();
   const { anomalyThreshold, isDisabled, disabledReason } = useAnomalyThreshold();
 
-  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
-
-  if (!shouldShowAnomalyUi) {
-    return null;
-  }
+  const handleChange: React.ChangeEventHandler<HTMLSelectElement> = useCallback(
+    (event) => {
+      const value = event.target.value as AnomalyThreshold;
+      urlHelpers.push(history, {
+        query: {
+          anomalyThreshold: value,
+        },
+      });
+    },
+    [history]
+  );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiSelect
-          data-test-subj="apmAnomalyThresholdSelect"
-          compressed
-          aria-label={i18n.translate('xpack.apm.anomalyThresholdSelect.ariaLabel', {
-            defaultMessage: 'Anomaly threshold selector',
-          })}
-          prepend={i18n.translate('xpack.apm.anomalyThresholdSelect.prepend', {
-            defaultMessage: 'Anomalies',
-          })}
-          options={options}
-          value={anomalyThreshold}
-          onChange={(nextOption) => onChange(nextOption.target.value as AnomalyThreshold)}
-          disabled={isDisabled}
-        />
-      </EuiFlexItem>
-      {isDisabled && (
-        <EuiFlexItem grow={false}>
+    <EuiSelect
+      data-test-subj="apmAnomalyThresholdSelect"
+      compressed={compressed}
+      fullWidth={fullWidth}
+      aria-label={i18n.translate('xpack.apm.anomalyThresholdSelect.ariaLabel', {
+        defaultMessage: 'Anomaly threshold selector',
+      })}
+      prepend={i18n.translate('xpack.apm.anomalyThresholdSelect.prepend', {
+        defaultMessage: 'Anomalies',
+      })}
+      options={options}
+      value={anomalyThreshold}
+      onChange={handleChange}
+      disabled={isDisabled}
+      append={
+        isDisabled ? (
           <EuiIconTip
             type="question"
             content={getTooltipContent(disabledReason, preferredEnvironment)}
           />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        ) : undefined
+      }
+    />
   );
 }
