@@ -18,15 +18,10 @@ import { isCollaborativeTemplateConversation } from './template_conversation_uti
 import { ConversationDetailAttachmentsTab } from './tabs/conversation_detail_attachments_tab';
 import { getDisplayableConversationAttachments } from './tabs/conversation_attachment_display_utils';
 import { ConversationDetailPlaceholderTab } from './tabs/conversation_detail_placeholder_tab';
-import {
-  ConversationDetailTimelineTab,
-  getConversationTimelineEntries,
-} from './tabs/conversation_detail_timeline_tab';
 
 enum ConversationDetailTab {
   activity = 'activity',
   attachments = 'attachments',
-  timeline = 'timeline',
   threads = 'threads',
   details = 'details',
 }
@@ -40,9 +35,6 @@ const labels = {
       defaultMessage: 'Attachments {count}',
       values: { count },
     }),
-  timeline: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.timeline', {
-    defaultMessage: 'Timeline',
-  }),
   threads: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.threads', {
     defaultMessage: 'Threads',
   }),
@@ -80,9 +72,6 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
   const tabsId = useGeneratedHtmlId({ prefix: 'conversationDetailTabs' });
 
   const attachmentCount = getDisplayableConversationAttachments(conversation?.attachments).length;
-  const timelineEntryCount = getConversationTimelineEntries(
-    conversation?.custom_fields?.timeline
-  ).length;
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
   const showDetailsTab = isEmbeddedContext;
 
@@ -125,7 +114,7 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
 
   const sidebarStyles = css`
     flex-shrink: 0;
-    width: 420px;
+    width: 520px;
     min-height: 0;
     overflow: hidden;
   `;
@@ -139,10 +128,6 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
       },
     ];
 
-    if (timelineEntryCount > 0) {
-      items.push({ id: ConversationDetailTab.timeline, label: labels.timeline });
-    }
-
     items.push({ id: ConversationDetailTab.threads, label: labels.threads });
 
     if (showDetailsTab) {
@@ -150,7 +135,7 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
     }
 
     return items;
-  }, [attachmentCount, showDetailsTab, timelineEntryCount]);
+  }, [attachmentCount, showDetailsTab]);
 
   if (!hasPersistedConversation) {
     return <Conversation layoutVariant="detail" />;
@@ -223,10 +208,6 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
                 attachments={conversation.attachments}
                 conversation={conversation}
               />
-            )}
-
-            {selectedTab === ConversationDetailTab.timeline && conversation && (
-              <ConversationDetailTimelineTab timeline={conversation.custom_fields?.timeline} />
             )}
 
             {selectedTab === ConversationDetailTab.threads && (

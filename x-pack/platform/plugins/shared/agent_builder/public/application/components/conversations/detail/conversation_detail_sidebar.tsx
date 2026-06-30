@@ -10,13 +10,16 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { usePatchConversationMetadata } from '../../../hooks/use_patch_conversation_metadata';
 import { ConversationMembers } from './conversation_members';
@@ -27,8 +30,20 @@ import {
   isCollaborativeTemplateConversation,
 } from './template_conversation_utils';
 import { ConversationWorkflowHooks } from './conversation_workflow_hooks';
+import { ConversationDetailTimelineTab } from './tabs/conversation_detail_timeline_tab';
+
+enum ConversationDetailSidebarTab {
+  metadata = 'metadata',
+  timeline = 'timeline',
+}
 
 const labels = {
+  metadataTab: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.metadataTab', {
+    defaultMessage: 'Metadata',
+  }),
+  timelineTab: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.timelineTab', {
+    defaultMessage: 'Timeline',
+  }),
   templateFields: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.templateFields', {
     defaultMessage: 'Template fields',
   }),
@@ -65,10 +80,14 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
   conversation,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const tabsId = useGeneratedHtmlId({ prefix: 'conversationDetailSidebarTabs' });
   const { mutate, isLoading } = usePatchConversationMetadata();
   const fieldDefinitions = getTemplateFieldDefinitions(conversation);
   const templateLabel = getTemplateLabel(conversation);
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
+  const [selectedTab, setSelectedTab] = useState<ConversationDetailSidebarTab>(
+    ConversationDetailSidebarTab.metadata
+  );
 
   const panelStyles = css`
     height: 100%;
@@ -83,6 +102,11 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
     },
     [mutate]
   );
+
+  const tabs = [
+    { id: ConversationDetailSidebarTab.metadata, label: labels.metadataTab },
+    { id: ConversationDetailSidebarTab.timeline, label: labels.timelineTab },
+  ];
 
   return (
     <EuiPanel css={panelStyles} paddingSize="m" hasShadow={false} hasBorder={false}>
@@ -102,45 +126,67 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
         </>
       )}
 
-      <EuiTitle size="xxs">
-        <h3>{labels.templateFields}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiTabs bottomBorder size="s" id={tabsId}>
+        {tabs.map((tab) => (
+          <EuiTab
+            key={tab.id}
+            onClick={() => setSelectedTab(tab.id)}
+            isSelected={selectedTab === tab.id}
+            data-test-subj={`conversationDetailSidebarTab-${tab.id}`}
+          >
+            {tab.label}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <EuiSpacer size="m" />
 
-      {fieldDefinitions.map((definition) => (
-        <TemplateFieldRow
-          key={definition.key}
-          definition={definition}
-          value={conversation.custom_fields?.[definition.key]}
-          isSaving={isLoading}
-          onChange={handleFieldChange}
-        />
-      ))}
-
-      {isCollaborative && (
+      {selectedTab === ConversationDetailSidebarTab.metadata && (
         <>
+          <EuiTitle size="xxs">
+            <h3>{labels.templateFields}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          {fieldDefinitions.map((definition) => (
+            <TemplateFieldRow
+              key={definition.key}
+              definition={definition}
+              value={conversation.custom_fields?.[definition.key]}
+              isSaving={isLoading}
+              onChange={handleFieldChange}
+            />
+          ))}
+
+          {isCollaborative && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <ConversationMembers conversation={conversation} />
+            </>
+          )}
+
           <EuiHorizontalRule margin="m" />
-          <ConversationMembers conversation={conversation} />
+
+          <EuiTitle size="xxs">
+            <h3>{labels.external}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {labels.externalPlaceholder}
+          </EuiText>
+
+          <EuiHorizontalRule margin="m" />
+
+          <EuiTitle size="xxs">
+            <h3>{labels.workflows}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <ConversationWorkflowHooks conversation={conversation} />
         </>
       )}
 
-      <EuiHorizontalRule margin="m" />
-
-      <EuiTitle size="xxs">
-        <h3>{labels.external}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        {labels.externalPlaceholder}
-      </EuiText>
-
-      <EuiHorizontalRule margin="m" />
-
-      <EuiTitle size="xxs">
-        <h3>{labels.workflows}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ConversationWorkflowHooks conversation={conversation} />
+      {selectedTab === ConversationDetailSidebarTab.timeline && (
+        <ConversationDetailTimelineTab timeline={conversation.custom_fields?.timeline} />
+      )}
     </EuiPanel>
   );
 };
