@@ -21,11 +21,15 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import userEvent from '@testing-library/user-event';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../use_case_observables', () => ({
   useCaseObservables: jest.fn(() => ({ observables: [], isLoading: false })),
+}));
+jest.mock('../../cases_redesign/case_view/components/sidebar_toggle_button', () => ({
+  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
@@ -656,5 +660,37 @@ describe('Case View Attachments tab', () => {
       'case-view-attachment-accordion-security.event', // Event
       'case-view-attachment-accordion-file', // File
     ]);
+  });
+
+  describe('sidebar toggle button', () => {
+    it('does not render the sidebar toggle button when redesign is disabled', () => {
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseData}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />
+      );
+
+      expect(screen.queryByTestId('case-view-sidebar-toggle')).not.toBeInTheDocument();
+    });
+
+    it('renders the sidebar toggle button when redesign is enabled', () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValueOnce({ casesRedesign: { details: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseData}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />
+      );
+
+      expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
+    });
   });
 });
