@@ -113,7 +113,12 @@ export const ExecutionHistoryPage = () => {
       </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === POLICIES_TAB_ID ? (
-        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
+        <PoliciesTabContent
+          activePolicyId={policyToViewId}
+          activeRuleId={ruleToViewId}
+          onPolicyClick={handlePolicyClick}
+          onRuleClick={handleRuleClick}
+        />
       ) : (
         <RulesPlaceholder />
       )}

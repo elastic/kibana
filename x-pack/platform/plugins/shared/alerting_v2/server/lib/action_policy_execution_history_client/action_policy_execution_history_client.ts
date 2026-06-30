@@ -32,7 +32,11 @@ import {
 import { ALERTING_V2_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
 import type { ResolvedSearchIds } from './build_execution_history_item';
-import { collectIdsFromEvents, buildExecutionHistoryItem, type NameMaps } from './build_execution_history_item';
+import {
+  collectIdsFromEvents,
+  buildExecutionHistoryItem,
+  type NameMaps,
+} from './build_execution_history_item';
 
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
