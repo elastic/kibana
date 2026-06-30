@@ -435,7 +435,7 @@ export const SimplifiedVarsSchema = schema.recordOf(
 );
 
 export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
-  schema.string(),
+  schema.string({ maxLength: 255 }),
   schema.object({
     enabled: schema.maybe(
       schema.boolean({
@@ -458,7 +458,7 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
     ),
     streams: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ maxLength: 255 }),
         schema.object({
           enabled: schema.maybe(
             schema.boolean({
