@@ -131,48 +131,37 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
 
   evaluate(
     'smoke tests: trace-based groundedness',
-    async ({ executorClient, agentBuilderClient, evaluatorClient, evaluationConnector }) => {
-      const result = await executorClient.runExperiment(
-        {
-          datasets: [
-            {
-              name: 'smoke tests: trace-based groundedness',
-              description:
-                'Scores a real Agent Builder trace via the evals evaluator execution API',
-              examples: [
-                {
-                  input: {
-                    question: 'What is the current status of the payment service?',
-                  } as { question: string },
-                  metadata: { expectGrounded: true },
-                },
-              ],
-            },
-          ],
-          task: async (example) => {
-            const { question } = example.input! as { question: string };
-            const response = await agentBuilderClient.converse({
-              agentId: 'elastic-ai-agent',
-              input: question,
-            });
-            return { response: response.message, traceId: response.traceId };
-          },
+    async ({ agentBuilderClient, evaluatorClient, evaluationConnector }) => {
+      const response = await agentBuilderClient.converse({
+        agentId: 'elastic-ai-agent',
+        input: 'What is the current status of the payment service?',
+      });
+      if (!response.traceId) {
+        throw new Error('Agent Builder response is missing traceId');
+      }
+
+      const result = await evaluatorClient.evaluate({
+        subject: {
+          mode: 'single-turn',
+          traces: [{ trace_id: response.traceId }],
         },
-        [
-          evaluatorClient.toEvaluator('groundedness', {
-            connectorId: 'azure-gpt4_1',
-          }),
-        ]
-      );
+        evaluators: [
+          {
+            name: 'groundedness',
+            connector_id: 'azure-gpt4_1',
+          },
+        ],
+      });
 
-      const run = result[0].evaluationRuns[0];
-      const metadata = run.result?.metadata as
-        | { evidence_source?: string; analysis?: Array<{ evidence?: { tool_id?: string } }> }
-        | undefined;
+      expect(result.results).toHaveLength(1);
 
-      expect(run.result?.label).toBeDefined();
-      expect(metadata?.evidence_source).toBe('trace');
-      expect(metadata?.analysis?.some((item) => Boolean(item.evidence?.tool_id))).toBe(true);
+      const groundedness = result.results.find((entry) => entry.name === 'groundedness');
+
+      expect(groundedness?.status).toBe('ok');
+
+      const groundednessScore = groundedness?.scores?.[0];
+
+      expect(groundednessScore?.label).toBeDefined();
     }
   );
 

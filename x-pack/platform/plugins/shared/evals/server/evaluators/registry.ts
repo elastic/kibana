@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import semverCompare from 'semver/functions/compare';
 import { groundednessEvaluator } from './groundedness';
+import { correctnessEvaluator } from './correctness';
 import {
   inputTokensEvaluatorDef,
   latencyEvaluatorDef,
@@ -15,16 +17,42 @@ import {
 import type { EvaluatorDefinition, EvaluatorRegistry } from './types';
 
 export const createEvaluatorRegistry = (): EvaluatorRegistry => {
-  const evaluators = new Map<string, EvaluatorDefinition>([
-    ['groundedness', groundednessEvaluator],
-    ['latency', latencyEvaluatorDef],
-    ['input_tokens', inputTokensEvaluatorDef],
-    ['output_tokens', outputTokensEvaluatorDef],
-    ['tool_calls', toolCallsEvaluatorDef],
-  ]);
+  const evaluators = new Map<string, Map<string, EvaluatorDefinition>>();
+
+  const register = (definition: EvaluatorDefinition) => {
+    const versionsForName =
+      evaluators.get(definition.name) ?? new Map<string, EvaluatorDefinition>();
+    versionsForName.set(definition.version, definition);
+    evaluators.set(definition.name, versionsForName);
+  };
+
+  register(groundednessEvaluator);
+  register(correctnessEvaluator);
+  register(latencyEvaluatorDef);
+  register(inputTokensEvaluatorDef);
+  register(outputTokensEvaluatorDef);
+  register(toolCallsEvaluatorDef);
 
   return {
-    list: () => [...evaluators.values()],
-    get: (name) => evaluators.get(name),
+    list: () =>
+      [...evaluators.values()]
+        .map((versionsForName) => {
+          const latestVersion = [...versionsForName.keys()].sort((a, b) => semverCompare(b, a))[0];
+          return latestVersion ? versionsForName.get(latestVersion) : undefined;
+        })
+        .filter((definition): definition is EvaluatorDefinition => definition !== undefined),
+    get: (name, version) => {
+      const versionsForName = evaluators.get(name);
+      if (!versionsForName) {
+        return undefined;
+      }
+
+      if (version) {
+        return versionsForName.get(version);
+      }
+
+      const latestVersion = [...versionsForName.keys()].sort((a, b) => semverCompare(b, a))[0];
+      return latestVersion ? versionsForName.get(latestVersion) : undefined;
+    },
   };
 };

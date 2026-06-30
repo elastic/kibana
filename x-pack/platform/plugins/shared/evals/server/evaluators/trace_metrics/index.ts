@@ -10,8 +10,6 @@ import pRetry from 'p-retry';
 import type { EvaluatorDefinition, EvaluatorResult } from '../types';
 import { createTraceAccessor } from '../groundedness/trace_accessor';
 
-const UNAVAILABLE_RESULT: EvaluatorResult = { label: 'unavailable' };
-
 const rowsFromEsqlResponse = (response: ESQLSearchResponse): Array<Record<string, unknown>> => {
   const columns = response.columns ?? [];
   const values = response.values ?? [];
@@ -79,13 +77,27 @@ const getTraceMetricResult = async ({
       }
     );
 
-    return { score };
+    return {
+      scores: [
+        {
+          name: evaluatorName,
+          score,
+        },
+      ],
+    };
   } catch (error) {
     log.warn(
       `Returning unavailable for evaluator "${evaluatorName}" on trace "${traceId}" due to missing/incomplete trace metrics`
     );
     log.debug(error);
-    return UNAVAILABLE_RESULT;
+    return {
+      scores: [
+        {
+          name: evaluatorName,
+          label: 'unavailable',
+        },
+      ],
+    };
   }
 };
 
@@ -98,7 +110,6 @@ export const latencyEvaluatorDef: EvaluatorDefinition = {
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
-| WHERE trace.id == "${accessor.traceId}"
 | STATS total_duration_ns = MAX(duration)
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`;
@@ -123,7 +134,6 @@ export const inputTokensEvaluatorDef: EvaluatorDefinition = {
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
-| WHERE trace.id == "${accessor.traceId}"
 | STATS input_tokens = SUM(attributes.gen_ai.usage.input_tokens)
 | KEEP input_tokens`;
 
@@ -147,7 +157,6 @@ export const outputTokensEvaluatorDef: EvaluatorDefinition = {
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
-| WHERE trace.id == "${accessor.traceId}"
 | STATS output_tokens = SUM(attributes.gen_ai.usage.output_tokens)
 | KEEP output_tokens`;
 
@@ -171,7 +180,7 @@ export const toolCallsEvaluatorDef: EvaluatorDefinition = {
   async evaluate({ trace, log }) {
     const accessor = createTraceAccessor(trace);
     const query = `FROM traces-*
-| WHERE trace.id == "${accessor.traceId}" AND attributes.elastic.inference.span.kind == "TOOL"
+| WHERE attributes.elastic.inference.span.kind == "TOOL"
 | STATS tool_call_count = COUNT(*)
 | KEEP tool_call_count`;
 

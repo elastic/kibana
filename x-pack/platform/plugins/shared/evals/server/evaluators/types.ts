@@ -22,10 +22,13 @@ export interface EvaluatorContext {
 }
 
 export interface EvaluatorResult {
-  score?: number | null;
-  label?: string;
-  explanation?: string;
-  metadata?: Record<string, unknown>;
+  scores: Array<{
+    name: string;
+    score?: number | null;
+    label?: string;
+    explanation?: string;
+    metadata?: Record<string, unknown>;
+  }>;
 }
 
 export interface EvaluatorDefinition {
@@ -39,5 +42,5 @@ export interface EvaluatorDefinition {
 
 export interface EvaluatorRegistry {
   list(): EvaluatorDefinition[];
-  get(name: string): EvaluatorDefinition | undefined;
+  get(name: string, version?: string): EvaluatorDefinition | undefined;
 }

@@ -6,35 +6,52 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import type { TraceAccessor } from '../types';
 
 export interface TraceAccessorWithEsql extends TraceAccessor {
   runEsql(query: string): Promise<ESQLSearchResponse>;
 }
 
-const hasRequiredTraceFilter = ({ query, traceId }: { query: string; traceId: string }) => {
-  const escapedTraceId = traceId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const TRACE_FILTER_FIELD: Record<string, string> = {
+  [TRACES_INDEX_PATTERN]: 'trace.id',
+  [LOGS_INDEX_PATTERN]: 'trace_id',
+};
 
-  const allowedPatterns = [
-    new RegExp(`trace\\.id\\s*==\\s*"${escapedTraceId}"`),
-    new RegExp(`trace_id\\s*==\\s*"${escapedTraceId}"`),
-    new RegExp(`trace_id\\s*:\\s*"${escapedTraceId}"`),
-  ];
+const injectTraceFilter = (query: string, traceId: string): string => {
+  const fromMatch = query.match(/FROM\s+([\w.*-]+)/i);
+  if (!fromMatch) {
+    throw new Error('ES|QL query must contain a FROM clause');
+  }
 
-  return allowedPatterns.some((pattern) => pattern.test(query));
+  const index = fromMatch[1];
+  const filterField = TRACE_FILTER_FIELD[index];
+  if (!filterField) {
+    throw new Error(
+      `Unknown index pattern "${index}". Expected one of: ${Object.keys(TRACE_FILTER_FIELD).join(
+        ', '
+      )}`
+    );
+  }
+
+  const traceFilter = `${filterField} == "${traceId}"`;
+  const whereMatch = query.match(/\|\s*WHERE\s+/i);
+
+  if (whereMatch) {
+    return query.replace(/\|\s*WHERE\s+/i, `| WHERE ${traceFilter} AND `);
+  }
+
+  return query.replace(/(FROM\s+[\w.*-]+)/i, `$1\n| WHERE ${traceFilter}`);
 };
 
 export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessorWithEsql => {
   return {
     ...traceAccessor,
     runEsql: async (query: string) => {
-      if (!hasRequiredTraceFilter({ query, traceId: traceAccessor.traceId })) {
-        throw new Error(
-          `Trace ES|QL query must include trace filter for traceId "${traceAccessor.traceId}"`
-        );
-      }
-
-      return (await traceAccessor.esClient.esql.query({ query })) as ESQLSearchResponse;
+      const scopedQuery = injectTraceFilter(query, traceAccessor.traceId);
+      return (await traceAccessor.esClient.esql.query({
+        query: scopedQuery,
+      })) as ESQLSearchResponse;
     },
   };
 };

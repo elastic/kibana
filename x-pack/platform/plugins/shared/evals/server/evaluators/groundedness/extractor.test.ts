@@ -90,12 +90,29 @@ describe('groundedness trace extractor', () => {
     });
   });
 
-  it('rejects ES|QL queries that do not enforce the trace filter', async () => {
-    const { esClient } = createEsClient();
+  it('automatically injects trace filter into queries without a WHERE clause', async () => {
+    const { esClient, queryMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
-    await expect(traceAccessor.runEsql('FROM traces-* | LIMIT 1')).rejects.toThrow(
-      `Trace ES|QL query must include trace filter for traceId "${traceId}"`
+    queryMock.mockResolvedValueOnce({ columns: [], values: [] });
+
+    await traceAccessor.runEsql('FROM traces-*\n| STATS count = COUNT(*)');
+
+    expect(queryMock.mock.calls[0][0]?.query).toContain(`trace.id == "${traceId}"`);
+  });
+
+  it('automatically injects trace filter into queries with an existing WHERE clause', async () => {
+    const { esClient, queryMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    queryMock.mockResolvedValueOnce({ columns: [], values: [] });
+
+    await traceAccessor.runEsql(
+      'FROM traces-*\n| WHERE attributes.elastic.inference.span.kind == "TOOL"\n| LIMIT 10'
     );
+
+    const executedQuery = queryMock.mock.calls[0][0]?.query;
+    expect(executedQuery).toContain(`trace.id == "${traceId}"`);
+    expect(executedQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
   });
 });

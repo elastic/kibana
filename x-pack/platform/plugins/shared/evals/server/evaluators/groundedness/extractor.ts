@@ -7,8 +7,9 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
-import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import { TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import pRetry from 'p-retry';
+import { extractChatEvidence } from '../chat_evidence';
 import type { TraceAccessor } from '../types';
 
 interface GroundednessEvidence {
@@ -30,8 +31,6 @@ export class IncompleteGroundednessEvidenceError extends Error {
   }
 }
 
-const USER_MESSAGE_CONTENT_COLUMN = 'attributes.content';
-const AGENT_RESPONSE_CONTENT_COLUMN = 'attributes.message.content';
 const TOOL_CALL_ID_COLUMN = 'attributes.gen_ai.tool.call.id';
 const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
 const TOOL_ARGUMENTS_COLUMN = 'attributes.gen_ai.tool.call.arguments';
@@ -82,25 +81,9 @@ const rowsFromEsqlResponse = (response: ESQLSearchResponse): Array<Record<string
   });
 };
 
-const buildUserMessageQuery = (traceId: string) => {
-  return `FROM ${LOGS_INDEX_PATTERN}
-| WHERE trace_id == "${traceId}" AND event_name == "gen_ai.user.message"
-| KEEP @timestamp, ${USER_MESSAGE_CONTENT_COLUMN}, span_id
-| SORT @timestamp ASC
-| LIMIT 1`;
-};
-
-const buildAgentResponseQuery = (traceId: string) => {
-  return `FROM ${LOGS_INDEX_PATTERN}
-| WHERE trace_id == "${traceId}" AND event_name == "gen_ai.choice"
-| KEEP @timestamp, ${AGENT_RESPONSE_CONTENT_COLUMN}, span_id
-| SORT @timestamp DESC
-| LIMIT 1`;
-};
-
-const buildToolSpansQuery = (traceId: string) => {
+const buildToolSpansQuery = () => {
   return `FROM ${TRACES_INDEX_PATTERN}
-| WHERE trace.id == "${traceId}" AND attributes.elastic.inference.span.kind == "TOOL"
+| WHERE attributes.elastic.inference.span.kind == "TOOL"
 | KEEP attributes.gen_ai.tool.call.id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments, attributes.gen_ai.tool.call.result, @timestamp
 | SORT @timestamp ASC`;
 };
@@ -113,27 +96,15 @@ export const extractGroundednessEvidence = async (
   let lastPartialEvidence: GroundednessEvidence | undefined;
 
   const fetchGroundednessEvidence = async (): Promise<GroundednessEvidence> => {
-    const userMsgResponse = await accessor.runEsql(buildUserMessageQuery(accessor.traceId));
-    const userMsgRows = rowsFromEsqlResponse(userMsgResponse);
-
-    if (userMsgRows.length === 0) {
-      throw new Error(`No user message span events found for trace ${accessor.traceId}`);
-    }
-
-    const userQuery = asString(userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN]);
-
-    const agentRespResponse = await accessor.runEsql(buildAgentResponseQuery(accessor.traceId));
-    const agentRespRows = rowsFromEsqlResponse(agentRespResponse);
-    const agentResponse =
-      agentRespRows.length > 0 ? asString(agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN]) : '';
+    const chatEvidence = await extractChatEvidence(traceAccessor, log);
 
     const baseEvidence: GroundednessEvidence = {
-      user_query: userQuery,
-      agent_response: agentResponse,
+      user_query: chatEvidence.user_query,
+      agent_response: chatEvidence.agent_response,
       tool_call_history: [],
     };
 
-    if (!agentResponse.trim()) {
+    if (!chatEvidence.agent_response.trim()) {
       lastPartialEvidence = {
         ...baseEvidence,
         agent_response: '',
@@ -141,7 +112,7 @@ export const extractGroundednessEvidence = async (
       throw new Error(`Missing agent response for trace ${accessor.traceId}`);
     }
 
-    const toolResponse = await accessor.runEsql(buildToolSpansQuery(accessor.traceId));
+    const toolResponse = await accessor.runEsql(buildToolSpansQuery());
     const toolRows = rowsFromEsqlResponse(toolResponse);
 
     const toolCallHistory = toolRows.map((toolRow) => {

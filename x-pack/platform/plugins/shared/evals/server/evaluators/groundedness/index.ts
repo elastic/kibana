@@ -33,8 +33,13 @@ export const groundednessEvaluator: EvaluatorDefinition = {
   async evaluate({ trace, inferenceClient, log }) {
     if (!inferenceClient) {
       return {
-        label: 'error',
-        explanation: 'Inference client is required for groundedness evaluator',
+        scores: [
+          {
+            name: 'groundedness',
+            label: 'error',
+            explanation: 'Inference client is required for groundedness evaluator',
+          },
+        ],
       };
     }
 
@@ -44,10 +49,15 @@ export const groundednessEvaluator: EvaluatorDefinition = {
     } catch (error) {
       if (error instanceof IncompleteGroundednessEvidenceError) {
         return {
-          label: 'potentially_incomplete',
-          metadata: {
-            incomplete: true,
-          },
+          scores: [
+            {
+              name: 'groundedness',
+              label: 'potentially_incomplete',
+              metadata: {
+                incomplete: true,
+              },
+            },
+          ],
         };
       }
 
@@ -76,18 +86,28 @@ export const groundednessEvaluator: EvaluatorDefinition = {
     const analysis = getGroundednessAnalysis(response);
     if (!analysis) {
       return {
-        label: 'error',
-        explanation: 'No tool call in judge response',
+        scores: [
+          {
+            name: 'groundedness',
+            label: 'error',
+            explanation: 'No tool call in judge response',
+          },
+        ],
       };
     }
 
     return {
-      score: calculateGroundednessScore(analysis),
-      label: analysis.summary_verdict,
-      explanation: analysis.summary_verdict,
-      metadata: {
-        ...analysis,
-      },
+      scores: [
+        {
+          name: 'groundedness',
+          score: calculateGroundednessScore(analysis),
+          label: analysis.summary_verdict,
+          explanation: analysis.summary_verdict,
+          metadata: {
+            ...analysis,
+          },
+        },
+      ],
     };
   },
 };

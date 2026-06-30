@@ -60,11 +60,19 @@ describe('GET /internal/evals/evaluators', () => {
         supportedInputs: ['trace'],
         evaluate: jest.fn(),
       },
+      {
+        name: 'correctness',
+        version: '1.0.0',
+        kind: 'llm',
+        description: 'Correctness evaluator',
+        supportedInputs: ['trace', 'reference_data'],
+        evaluate: jest.fn(),
+      },
     ],
-    get: jest.fn(),
+    get: jest.fn((_name: string, _version?: string) => undefined),
   });
 
-  const setup = ({ evaluatorRegistry }: { evaluatorRegistry?: EvaluatorRegistry } = {}) => {
+  const setup = ({ evaluatorRegistry }: { evaluatorRegistry?: EvaluatorRegistry | null } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -72,7 +80,10 @@ describe('GET /internal/evals/evaluators', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: evaluatorRegistry ?? (buildEvaluatorRegistry() as EvaluatorRegistry),
+      evaluatorRegistry:
+        evaluatorRegistry === undefined
+          ? (buildEvaluatorRegistry() as EvaluatorRegistry)
+          : (evaluatorRegistry as unknown as EvaluatorRegistry),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -103,7 +114,7 @@ describe('GET /internal/evals/evaluators', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload.evaluators).toHaveLength(5);
+    expect(response.payload.evaluators).toHaveLength(6);
     expect(response.payload.evaluators[0]).toEqual({
       name: 'groundedness',
       version: '1.0.0',
@@ -115,7 +126,7 @@ describe('GET /internal/evals/evaluators', () => {
 
   it('returns 500 when evaluator registry is unavailable', async () => {
     const { handler, logger } = setup({
-      evaluatorRegistry: undefined as unknown as EvaluatorRegistry,
+      evaluatorRegistry: null,
     });
 
     const response = await handler(

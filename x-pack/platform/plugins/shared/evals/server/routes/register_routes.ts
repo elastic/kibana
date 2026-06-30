@@ -32,7 +32,7 @@ import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
-import { registerExecuteEvaluatorRoute } from './evaluators/execute_evaluator';
+import { registerEvaluateRoute } from './evaluators/evaluate';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -65,6 +65,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
   registerListEvaluatorsRoute(dependencies);
-  registerExecuteEvaluatorRoute(dependencies);
+  registerEvaluateRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 };
