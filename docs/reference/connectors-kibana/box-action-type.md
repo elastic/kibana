@@ -111,6 +111,10 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get OAuth credentials [box-oauth-credentials]
 
+:::{important}
+The Box MCP server requires a Box enterprise account or a Box developer account. Personal (individual) Box accounts are not supported and will fail during authentication or when calling tools. However, all individual accounts can be turned into developer accounts by creating a custom OAuth app.
+:::
+
 The Box MCP server authenticates through the Box Admin Console integration, not a custom OAuth app. To get your credentials:
 
 1. Log in to your [Box Admin Console](https://app.box.com/master).

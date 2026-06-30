@@ -122,6 +122,46 @@ describe('action_type_model_utils', () => {
       expect(withIcon.iconClass).toBe('custom-icon');
       expect(transformSpecToActionTypeModel(baseSpec).iconClass).toBe('plugs');
     });
+
+    describe('docsUrl derivation', () => {
+      const DOCS_BASE = 'https://www.elastic.co/docs/reference/kibana/connectors-kibana/';
+
+      it('derives the docs url from a dot-prefixed connector id', () => {
+        const model = transformSpecToActionTypeModel({
+          ...baseSpec,
+          metadata: { ...baseSpec.metadata, id: '.box' },
+        });
+        expect(model.docsUrl).toBe(`${DOCS_BASE}box-action-type`);
+      });
+
+      it('converts underscores in the connector id to hyphens', () => {
+        const model = transformSpecToActionTypeModel({
+          ...baseSpec,
+          metadata: { ...baseSpec.metadata, id: '.google_drive' },
+        });
+        expect(model.docsUrl).toBe(`${DOCS_BASE}google-drive-action-type`);
+      });
+
+      it('converts camelCase in the connector id to kebab-case', () => {
+        const model = transformSpecToActionTypeModel({
+          ...baseSpec,
+          metadata: { ...baseSpec.metadata, id: '.myFancyConnector' },
+        });
+        expect(model.docsUrl).toBe(`${DOCS_BASE}my-fancy-connector-action-type`);
+      });
+
+      it('uses the explicit docsUrl from spec metadata when provided', () => {
+        const model = transformSpecToActionTypeModel({
+          ...baseSpec,
+          metadata: {
+            ...baseSpec.metadata,
+            id: '.box',
+            docsUrl: 'https://example.com/custom-docs',
+          },
+        });
+        expect(model.docsUrl).toBe('https://example.com/custom-docs');
+      });
+    });
   });
 
   describe('connectorForm serializer and deserializer', () => {

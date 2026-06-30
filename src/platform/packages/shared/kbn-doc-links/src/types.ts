@@ -504,6 +504,7 @@ export interface DocLinks {
     teamsAction: string;
     casesWebhookAction: string;
     connectors: string;
+    agentBuilderConnectors: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
