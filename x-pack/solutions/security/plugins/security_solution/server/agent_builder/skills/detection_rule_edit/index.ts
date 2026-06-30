@@ -34,7 +34,11 @@ export const getDetectionRuleEditSkill = ({
     ],
   });
 
-const buildSkillContent = ({ rulePreviewEnabled }: { rulePreviewEnabled: boolean }) => `# Detection Rule Creation and Editing
+const buildSkillContent = ({
+  rulePreviewEnabled,
+}: {
+  rulePreviewEnabled: boolean;
+}) => `# Detection Rule Creation and Editing
 
 ## When to Use This Skill
 
