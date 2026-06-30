@@ -447,16 +447,19 @@ export class TaskManagerRunner implements TaskRunner {
             modifiedContext.taskInstance
           );
           const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
+          const userName = modifiedContext.taskInstance.userScope?.userName;
 
           const fakeRequest = buildTaskFakeRequest({
             apiKey: apiKeyForRequest,
             spaceId: modifiedContext.taskInstance.userScope?.spaceId,
             userProfileId,
+            userName,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
           const enrichRequest = buildChildRequestEnricher({
             userProfileId,
+            userName,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
@@ -583,7 +586,22 @@ export class TaskManagerRunner implements TaskRunner {
     // mget claim strategy sets the task to `running` during the claim cycle
     // so this update to mark the task as running is unnecessary
     if (this.claimStrategy === CLAIM_STRATEGY_MGET) {
-      this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
+      const { task } = this.instance;
+      // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
+      // so we can diagnose the issue.
+      if (task.startedAt == null) {
+        this.logger.warn(
+          `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
+            `status=${task.status} attempts=${task.attempts} ` +
+            `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
+            `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
+            `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
+            `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
+            `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
+          { tags: [this.taskType, this.id] }
+        );
+      }
+      this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
       return true;
     }
 

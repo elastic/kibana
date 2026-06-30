@@ -40,7 +40,7 @@ test(
   { tag: tags.deploymentAgnostic },
   async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
 
     const { violations } = await page.checkA11y();
     expect(violations).toHaveLength(0);
@@ -90,7 +90,7 @@ test(
   { tag: tags.deploymentAgnostic },
   async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
 
     await test.step('no basic accessibility violations', async () => {
       const { violations } = await page.checkA11y();
