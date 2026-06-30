@@ -80,16 +80,6 @@ export const UserActionFindRequestRt = rt.intersection([
     rt.partial({
       types: rt.array(UserActionFindRequestTypesRt),
       sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-      author: limitedStringSchema({
-        fieldName: 'author',
-        min: 1,
-        max: MAX_USER_ACTION_AUTHOR_LENGTH,
-      }),
-      search: limitedStringSchema({
-        fieldName: 'search',
-        min: 1,
-        max: MAX_USER_ACTION_SEARCH_LENGTH,
-      }),
     })
   ),
   paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
