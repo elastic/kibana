@@ -20,7 +20,10 @@ export const CopyLegacySource: Task = {
 
   async run(config, log) {
     const select = [
-      'yarn.lock',
+      // NOTE: the repo pnpm-lock.yaml is intentionally NOT copied — the build
+      // regenerates package.json with `file:` deps and a pruned dependency list,
+      // so the repo lockfile no longer matches. The in-build install resolves
+      // fresh; determinism comes from exact-pinned versions + pnpm.overrides.
       '.npmrc',
       '.puppeteerrc',
       'config/kibana.yml',
