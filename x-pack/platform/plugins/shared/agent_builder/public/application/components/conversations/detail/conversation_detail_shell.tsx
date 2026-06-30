@@ -18,10 +18,15 @@ import { isCollaborativeTemplateConversation } from './template_conversation_uti
 import { ConversationDetailAttachmentsTab } from './tabs/conversation_detail_attachments_tab';
 import { getDisplayableConversationAttachments } from './tabs/conversation_attachment_display_utils';
 import { ConversationDetailPlaceholderTab } from './tabs/conversation_detail_placeholder_tab';
+import {
+  ConversationDetailTimelineTab,
+  getConversationTimelineEntries,
+} from './tabs/conversation_detail_timeline_tab';
 
 enum ConversationDetailTab {
   activity = 'activity',
   attachments = 'attachments',
+  timeline = 'timeline',
   threads = 'threads',
   details = 'details',
 }
@@ -35,6 +40,9 @@ const labels = {
       defaultMessage: 'Attachments {count}',
       values: { count },
     }),
+  timeline: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.timeline', {
+    defaultMessage: 'Timeline',
+  }),
   threads: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.threads', {
     defaultMessage: 'Threads',
   }),
@@ -72,6 +80,9 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
   const tabsId = useGeneratedHtmlId({ prefix: 'conversationDetailTabs' });
 
   const attachmentCount = getDisplayableConversationAttachments(conversation?.attachments).length;
+  const timelineEntryCount = getConversationTimelineEntries(
+    conversation?.custom_fields?.timeline
+  ).length;
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
   const showDetailsTab = isEmbeddedContext;
 
@@ -106,7 +117,7 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
   const tabContentStyles = css`
     flex: 1;
     min-height: 0;
-    overflow: hidden;
+    overflow: ${selectedTab === ConversationDetailTab.activity ? 'hidden' : 'auto'};
     padding: ${selectedTab === ConversationDetailTab.activity
       ? '0'
       : `${euiTheme.size.m} ${euiTheme.size.l}`};
@@ -114,7 +125,7 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
 
   const sidebarStyles = css`
     flex-shrink: 0;
-    width: 320px;
+    width: 420px;
     min-height: 0;
     overflow: hidden;
   `;
@@ -126,15 +137,20 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
         id: ConversationDetailTab.attachments,
         label: labels.attachments(attachmentCount),
       },
-      { id: ConversationDetailTab.threads, label: labels.threads },
     ];
+
+    if (timelineEntryCount > 0) {
+      items.push({ id: ConversationDetailTab.timeline, label: labels.timeline });
+    }
+
+    items.push({ id: ConversationDetailTab.threads, label: labels.threads });
 
     if (showDetailsTab) {
       items.push({ id: ConversationDetailTab.details, label: labels.details });
     }
 
     return items;
-  }, [attachmentCount, showDetailsTab]);
+  }, [attachmentCount, showDetailsTab, timelineEntryCount]);
 
   if (!hasPersistedConversation) {
     return <Conversation layoutVariant="detail" />;
@@ -207,6 +223,10 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
                 attachments={conversation.attachments}
                 conversation={conversation}
               />
+            )}
+
+            {selectedTab === ConversationDetailTab.timeline && conversation && (
+              <ConversationDetailTimelineTab timeline={conversation.custom_fields?.timeline} />
             )}
 
             {selectedTab === ConversationDetailTab.threads && (

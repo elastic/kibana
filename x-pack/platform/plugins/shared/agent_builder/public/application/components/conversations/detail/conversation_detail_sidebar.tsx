@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -27,6 +26,7 @@ import {
   getTemplateLabel,
   isCollaborativeTemplateConversation,
 } from './template_conversation_utils';
+import { ConversationWorkflowHooks } from './conversation_workflow_hooks';
 
 const labels = {
   templateFields: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.templateFields', {
@@ -44,12 +44,6 @@ const labels = {
   workflows: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.workflows', {
     defaultMessage: 'Workflows',
   }),
-  workflowsPlaceholder: i18n.translate(
-    'xpack.agentBuilder.conversationDetail.sidebar.workflowsPlaceholder',
-    {
-      defaultMessage: 'Workflow linking is coming in a follow-up.',
-    }
-  ),
   templateApplied: (template: string) =>
     i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.templateApplied', {
       defaultMessage: 'Template: {template}',
@@ -146,15 +140,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
         <h3>{labels.workflows}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        {labels.workflowsPlaceholder}
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty size="xs" iconType="plusInCircle" isDisabled>
-        {i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.linkWorkflow', {
-          defaultMessage: 'Link workflow',
-        })}
-      </EuiButtonEmpty>
+      <ConversationWorkflowHooks conversation={conversation} />
     </EuiPanel>
   );
 };
