@@ -9,6 +9,7 @@ import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TimeComparison } from '../../shared/time_comparison';
 import { MobileFilters } from './service_overview/filters';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
@@ -19,6 +20,7 @@ interface Props {
   showFilterBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
+  showEnvironmentFilter?: boolean;
   showQueryInput?: boolean;
   showMobileFilters?: boolean;
   searchBarPlaceholder?: string;
@@ -30,6 +32,7 @@ export function MobileSearchBar({
   showFilterBar = false,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  showEnvironmentFilter = false,
   showQueryInput = true,
   showMobileFilters = false,
   searchBarPlaceholder,
@@ -68,18 +71,22 @@ export function MobileSearchBar({
         gutterSize={isMedium ? 's' : 'm'}
         direction={isLarge || isMedium ? 'column' : 'row'}
       >
+        {showEnvironmentFilter && (
+          <EuiFlexItem grow={isSmall}>
+            <ApmEnvironmentFilter fullWidth compressed />
+          </EuiFlexItem>
+        )}
         {showTimeComparison && (
           <EuiFlexItem grow={isSmall}>
-            <TimeComparison />
+            <TimeComparison fullWidth compressed />
           </EuiFlexItem>
         )}
         {showMobileFilters && (
-          <EuiFlexItem style={{ minWidth: 300 }}>
+          <EuiFlexItem grow={isSmall}>
             <MobileFilters />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
     </>
   );
 }

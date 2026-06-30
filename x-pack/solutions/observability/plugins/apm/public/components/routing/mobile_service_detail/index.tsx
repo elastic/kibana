@@ -308,7 +308,9 @@ export const mobileServiceDetailRoute = {
           }),
           element: <AlertsOverview />,
           searchBarOptions: {
-            hidden: true,
+            showUnifiedSearchBar: false,
+            showTimeComparison: false,
+            showMobileFilters: false,
           },
           bottomHeaderContent: AlertsHeaderSearchBar,
           contentWrapper: AlertsSearchBarContextProvider,

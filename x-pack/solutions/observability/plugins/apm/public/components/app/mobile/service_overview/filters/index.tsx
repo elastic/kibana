@@ -55,7 +55,7 @@ const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
 
 export function MobileFilters() {
   const history = useHistory();
-  const { isLarge } = useBreakpoints();
+  const { isMedium, isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -107,7 +107,7 @@ export function MobileFilters() {
   return (
     <EuiFlexGroup
       justifyContent="flexEnd"
-      gutterSize="s"
+      gutterSize={isMedium ? 's' : 'm'}
       responsive={false}
       direction={groupDirection}
     >
@@ -120,6 +120,7 @@ export function MobileFilters() {
             <EuiSelect
               data-test-subj="apmMobileFiltersSelect"
               fullWidth
+              compressed
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}
               aria-label={label}
