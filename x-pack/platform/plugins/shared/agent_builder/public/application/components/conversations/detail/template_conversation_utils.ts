@@ -13,7 +13,7 @@ export type TemplateFieldRender = 'default' | 'badge' | 'severity_badge';
 export interface TemplateFieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'select' | 'assignees';
+  type: 'text' | 'readonly_text' | 'markdown' | 'json' | 'timeline' | 'select' | 'assignees';
   options?: readonly string[];
   render?: TemplateFieldRender;
   show_in_header?: boolean;
@@ -142,13 +142,17 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
         options: ['complete', 'in progress', 'needs review', 'closed'],
       },
       { key: 'service_name', label: 'Service', type: 'text', render: 'badge' },
-      { key: 'current_state', label: 'Current state', type: 'text' },
-      { key: 'outcome', label: 'Outcome', type: 'text' },
-      { key: 'timeline', label: 'Timeline', type: 'text' },
-      { key: 'workflow_hooks', label: 'Workflow hooks', type: 'text' },
-      { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'text' },
-      { key: 'incident_conversation_id', label: 'Incident conversation', type: 'text' },
-      { key: 'workflow_execution_id', label: 'Workflow execution', type: 'text' },
+      { key: 'current_state', label: 'Current state', type: 'markdown' },
+      { key: 'outcome', label: 'Outcome', type: 'markdown' },
+      { key: 'timeline', label: 'Timeline', type: 'timeline' },
+      { key: 'workflow_hooks', label: 'Workflow hooks', type: 'json' },
+      { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'json' },
+      {
+        key: 'incident_conversation_id',
+        label: 'Incident conversation',
+        type: 'readonly_text',
+      },
+      { key: 'workflow_execution_id', label: 'Workflow execution', type: 'readonly_text' },
     ],
   },
   'observability-incident-v1': {
@@ -168,16 +172,16 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
         options: ['open', 'in progress', 'mitigated', 'resolved'],
       },
       { key: 'service_name', label: 'Service', type: 'text', render: 'badge' },
-      { key: 'current_state', label: 'Current state', type: 'text' },
-      { key: 'timeline', label: 'Timeline', type: 'text' },
-      { key: 'workflow_hooks', label: 'Workflow hooks', type: 'text' },
-      { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'text' },
+      { key: 'current_state', label: 'Current state', type: 'markdown' },
+      { key: 'timeline', label: 'Timeline', type: 'timeline' },
+      { key: 'workflow_hooks', label: 'Workflow hooks', type: 'json' },
+      { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'json' },
       {
         key: 'investigation_conversation_id',
         label: 'Investigation conversation',
-        type: 'text',
+        type: 'readonly_text',
       },
-      { key: 'related_investigations', label: 'Related investigations', type: 'text' },
+      { key: 'related_investigations', label: 'Related investigations', type: 'json' },
     ],
   },
 };
