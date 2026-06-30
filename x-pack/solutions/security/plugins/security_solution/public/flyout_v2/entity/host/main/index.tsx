@@ -40,6 +40,7 @@ import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
+import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -302,6 +303,15 @@ export const Host: FC<HostProps> = memo(function Host({
             <RiskInputs
               entityType={EntityType.host}
               entityName={hostName}
+              entityId={entityStoreEntityId}
+              onOpenEntity={onShowHost}
+            />
+          );
+        case EntityDetailsLeftPanelTab.ANOMALIES:
+          return wrap(
+            <AnomalyInsights
+              entityType={EntityType.host}
+              value={hostName}
               entityId={entityStoreEntityId}
               onOpenEntity={onShowHost}
             />
