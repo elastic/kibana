@@ -13,7 +13,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { Streams, parseIndexPatterns } from '@kbn/streams-schema';
+import { parseIndexPatterns } from '@kbn/streams-schema';
 import { STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';

@@ -27,6 +27,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
+import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
@@ -90,7 +91,6 @@ import {
   STREAMS_INVESTIGATION_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/feature_flags';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
