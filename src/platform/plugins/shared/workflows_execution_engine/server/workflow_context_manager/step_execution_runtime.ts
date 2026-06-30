@@ -21,6 +21,7 @@ import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractTokenUsage, parseDuration } from '../utils';
 
@@ -231,7 +232,7 @@ export class StepExecutionRuntime {
     // parsed HTTP response — are never written to ES; only what an error explicitly puts in
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
     // (Covered by `step_execution_runtime.test.ts` > failStep > "persists status in details ...".)
-    const executionError = ExecutionError.fromError(error);
+    const executionError = toExecutionError(error);
     const serializedError = executionError.toSerializableObject();
 
     this.workflowExecutionState.setLastFailedStepContext({

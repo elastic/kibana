@@ -8,12 +8,12 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import {
   callKibanaApi,
   CallKibanaApiResponseTooLargeError,
   KibanaApiCallError,
 } from './call_kibana_api';
+import { toExecutionError } from '../step/errors';
 
 const originalFetch = global.fetch;
 const mockedFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
@@ -311,7 +311,7 @@ describe('callKibanaApi', () => {
     ).rejects.toBeInstanceOf(CallKibanaApiResponseTooLargeError);
   });
 
-  it('serializes only type/message/details:{status} via ExecutionError.fromError, never body/headers (ES guard)', async () => {
+  it('normalizes to type/message/details:{status} via toExecutionError, never body/headers (ES guard)', async () => {
     mockedFetch.mockResolvedValue(
       createMockResponse({ body: { secret: 'do-not-persist', big: 'x'.repeat(100) }, status: 500 })
     );
@@ -323,13 +323,14 @@ describe('callKibanaApi', () => {
         { method: 'GET', path: '/api/boom' }
       );
     } catch (err) {
-      // KibanaApiCallError extends ExecutionError, so fromError returns it as-is (instanceof short-circuit).
-      const serialized = ExecutionError.fromError(err as Error).toSerializableObject();
+      // The engine normalizes a thrown KibanaApiCallError via `toExecutionError` (not the generic
+      // `fromError`), lifting only the safe scalar `status` into `details`.
+      const serialized = toExecutionError(err as Error).toSerializableObject();
       expect(serialized.type).toBe('KibanaApiCallError');
-      // Only the safe scalar `status` is in details; the raw body/headers are NOT persisted.
       expect(serialized.details).toEqual({ status: 500 });
       expect(serialized as Record<string, unknown>).not.toHaveProperty('body');
       expect(serialized as Record<string, unknown>).not.toHaveProperty('headers');
+      // The raw body must not leak into the persisted `details`.
       expect(JSON.stringify(serialized.details)).not.toContain('do-not-persist');
     }
   });

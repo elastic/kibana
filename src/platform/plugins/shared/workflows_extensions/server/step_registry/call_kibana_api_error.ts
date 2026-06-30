@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionError } from '@kbn/workflows/server';
-
 /**
  * Thrown by `ContextManager.callKibanaApi` (and the engine helper that backs it) on a non-2xx
  * response (other than 304).
@@ -32,16 +30,16 @@ import { ExecutionError } from '@kbn/workflows/server';
  * }
  * ```
  *
- * Extends {@link ExecutionError} so an **uncaught** instance is persisted as a well-formed
- * structured error (`type: 'KibanaApiCallError'`, `details: { status }`) rather than being
- * flattened by the generic `ExecutionError.fromError` path.
+ * Intentionally a plain `Error` subclass (not `ExecutionError`) so this leaf module — which is
+ * re-exported from the `@kbn/workflows-extensions` server barrel — does not import the heavy
+ * `@kbn/workflows/server` barrel and create a class-init import cycle (`extends undefined`).
  *
- * Safety: only the safe scalar `status` is placed in `details` (which the engine *does* persist
- * to the workflow execution log in Elasticsearch). The potentially large/sensitive `body` and
- * `headers` are kept as plain instance fields **outside** `details`, so `toSerializableObject`
- * never writes them to ES — they exist purely for in-process `try/catch` recovery.
+ * When an uncaught instance reaches the engine, it is normalized to an `ExecutionError` that
+ * persists `type: 'KibanaApiCallError'` + `details: { status }`. Only the safe scalar `status`
+ * is persisted; the potentially large/sensitive `body` and `headers` stay as plain instance
+ * fields here (never serialized to ES), available purely for in-process `try/catch` recovery.
  */
-export class KibanaApiCallError extends ExecutionError {
+export class KibanaApiCallError extends Error {
   public readonly status: number;
   public readonly headers: Record<string, string>;
   public readonly body: unknown;
@@ -52,12 +50,7 @@ export class KibanaApiCallError extends ExecutionError {
     body: unknown;
     message: string;
   }) {
-    super({
-      type: 'KibanaApiCallError',
-      message: args.message,
-      // Only safe scalars here — never `body`/`headers`, which `details` would persist to ES.
-      details: { status: args.status },
-    });
+    super(args.message);
     this.name = 'KibanaApiCallError';
     this.status = args.status;
     this.headers = args.headers;
