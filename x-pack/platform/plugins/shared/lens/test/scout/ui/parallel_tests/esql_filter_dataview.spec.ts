@@ -170,14 +170,10 @@ spaceTest.describe.skip(
           await page.testSubj.click('addFilter');
           await expect(page.testSubj.locator('addFilterPopover')).toBeVisible();
 
-          await expect
-            .poll(
-              async () =>
-                (await page.components.comboBox('filterFieldSuggestionList').getAvailableOptions())
-                  .length,
-              { timeout: 10_000 }
-            )
-            .toBeGreaterThan(0);
+          const fieldOptions = await page.components
+            .comboBox('filterFieldSuggestionList')
+            .getAvailableOptions();
+          expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }
     );

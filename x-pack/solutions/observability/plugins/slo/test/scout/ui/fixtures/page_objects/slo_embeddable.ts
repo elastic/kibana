@@ -49,7 +49,8 @@ export class SLOEmbeddable {
 
   /** Selects an SLO definition by name in the configuration flyout. */
   async selectDefinition(name: string) {
-    await this.page.components.comboBox('sloDefinitionSelector').setSelectedOptions([name]);
+    // Definitions are fetched server-side via onSearchChange; type to surface the match.
+    await this.page.components.comboBox('sloDefinitionSelector').searchAndSelect(name);
   }
 
   /** Selects an SLO instance by name in the configuration flyout. */

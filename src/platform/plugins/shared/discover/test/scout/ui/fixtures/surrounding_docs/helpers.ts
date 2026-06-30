@@ -25,11 +25,16 @@ export async function addFilterWithoutStrictCheck(
 ): Promise<void> {
   await page.testSubj.click('addFilter');
   await page.testSubj.waitForSelector('addFilterPopover');
-  await page.components.comboBox('filterFieldSuggestionList').setSelectedOptions([field]);
+  // The filter field/operator combos are virtualized and use middle-truncation (no option
+  // `title` attribute), so they are keyed by stable option `data-test-subj`s rather than the
+  // EuiComboBoxObject's title-based selection. Keep the type-to-filter + click-by-test-subj flow.
+  await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', field);
+  await page.testSubj.click(`filterFieldOption-${field}`);
   await expect(page.testSubj.locator('filterOperatorList')).not.toHaveClass(
     /euiComboBox-isDisabled/
   );
-  await page.components.comboBox('filterOperatorList').setSelectedOptions(['is']);
+  await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'is');
+  await page.testSubj.click('filterOperatorOption-is');
   const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
   await expect(filterParamsInput).toBeEditable();
   await filterParamsInput.focus();
