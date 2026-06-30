@@ -149,16 +149,11 @@ function getStepContextSchemaEnrichmentEntries(
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);
 
-    if (isEnterForeach(node)) {
-      enrichments.push({
-        key: 'foreach',
-        value: getForeachStateSchema(stepContextSchema, node.configuration),
-      });
-    }
-
-    // A parallel step fans out over `foreach`, exposing the same
-    // `foreach.item` / `foreach.index` context to each branch body.
-    if (isEnterParallel(node)) {
+    // A dynamic `foreach` parallel step fans out over a list, exposing the same
+    // `foreach.item` / `foreach.index` context to each branch body as a foreach
+    // loop. (For static `branches`, `getForeachStateSchema` returns a permissive
+    // schema since there is no per-item context.)
+    if (isEnterForeach(node) || isEnterParallel(node)) {
       enrichments.push({
         key: 'foreach',
         value: getForeachStateSchema(stepContextSchema, node.configuration),

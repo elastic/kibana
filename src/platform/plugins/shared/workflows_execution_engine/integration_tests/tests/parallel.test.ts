@@ -24,6 +24,19 @@ const stepExecutionsFor = (fixture: WorkflowRunFixture, stepId: string) =>
     (se) => se.stepId === stepId
   );
 
+/**
+ * Re-ticks a parked parallel workflow until it leaves WAITING (or the guard trips).
+ * Parallel branches with timers/waits park in WAITING and resume across ticks, so
+ * tests must pump `resumeWorkflow()` to drive the step to a terminal state.
+ */
+const driveToTerminal = async (fixture: WorkflowRunFixture, maxGuard = 10): Promise<void> => {
+  let guard = 0;
+  while (getExecution(fixture)?.status === ExecutionStatus.WAITING && guard < maxGuard) {
+    await fixture.resumeWorkflow();
+    guard += 1;
+  }
+};
+
 describe('workflow with parallel (dynamic fan-out) step', () => {
   describe('run-to-completion branches', () => {
     let workflowRunFixture: WorkflowRunFixture;
@@ -164,11 +177,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      let guard = 0;
-      while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
-        await workflowRunFixture.resumeWorkflow();
-        guard += 1;
-      }
+      await driveToTerminal(workflowRunFixture);
     });
 
     it('completes the workflow', () => {
@@ -210,11 +219,7 @@ steps:
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
       // The concurrency window only admits `max` branches per tick, so the step
       // parks in WAITING and re-ticks via resume until every branch has run.
-      let guard = 0;
-      while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
-        await workflowRunFixture.resumeWorkflow();
-        guard += 1;
-      }
+      await driveToTerminal(workflowRunFixture);
     });
 
     it('completes the workflow', () => {
@@ -452,11 +457,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      let guard = 0;
-      while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
-        await workflowRunFixture.resumeWorkflow();
-        guard += 1;
-      }
+      await driveToTerminal(workflowRunFixture);
     });
 
     it('completes the workflow (parallel contains the branch timeouts)', () => {
@@ -536,11 +537,7 @@ steps:
         // Drive resumes until the workflow is no longer waiting. Each branch's
         // wait toggles closed on a later tick (resumeAt has passed), then the
         // post-wait step runs.
-        let guard = 0;
-        while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
-          await workflowRunFixture.resumeWorkflow();
-          guard += 1;
-        }
+        await driveToTerminal(workflowRunFixture);
       });
 
       it('completes the workflow', () => {
@@ -595,11 +592,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      let guard = 0;
-      while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
-        await workflowRunFixture.resumeWorkflow();
-        guard += 1;
-      }
+      await driveToTerminal(workflowRunFixture);
     });
 
     it('completes the workflow with both branches done', () => {
@@ -808,11 +801,7 @@ steps:
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-      let guard = 0;
-      while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
-        await workflowRunFixture.resumeWorkflow();
-        guard += 1;
-      }
+      await driveToTerminal(workflowRunFixture);
     });
 
     it('completes the workflow', () => {
@@ -902,14 +891,6 @@ steps:
           message: 'branch {{ foreach.index }}'
 `;
 
-    const driveToTerminal = async (fixture: WorkflowRunFixture) => {
-      let guard = 0;
-      while (getExecution(fixture)?.status === ExecutionStatus.WAITING && guard < 20) {
-        await fixture.resumeWorkflow();
-        guard += 1;
-      }
-    };
-
     describe('fail-fast (default): stops scheduling not-yet-started branches', () => {
       let workflowRunFixture: WorkflowRunFixture;
 
@@ -917,7 +898,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         jest.clearAllMocks();
         await workflowRunFixture.runWorkflow({ workflowYaml: buildFailingYaml() });
-        await driveToTerminal(workflowRunFixture);
+        await driveToTerminal(workflowRunFixture, 20);
       });
 
       it('contains branch failures: the parallel step completes and the workflow continues', () => {
@@ -961,7 +942,7 @@ steps:
         workflowRunFixture = new WorkflowRunFixture();
         jest.clearAllMocks();
         await workflowRunFixture.runWorkflow({ workflowYaml: buildFailingYaml('settled') });
-        await driveToTerminal(workflowRunFixture);
+        await driveToTerminal(workflowRunFixture, 20);
       });
 
       it('contains branch failures: the parallel step completes and the workflow continues', () => {

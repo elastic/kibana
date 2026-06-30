@@ -607,7 +607,12 @@ export const ParallelBranchSchema = z.object({
     .min(1)
     .describe('Branch body. v1 supports a straight-line sequence of steps per branch.'),
 });
-export type ParallelBranch = z.infer<typeof ParallelBranchSchema>;
+
+// Shared so the base config schema and the connector-aware `getParallelStepSchema`
+// variant surface the same validation message for a degenerate single-branch step.
+const PARALLEL_STATIC_MIN_BRANCHES_MESSAGE =
+  'A static `parallel` step must declare at least two branches; a single-branch parallel is ' +
+  'degenerate (use a plain step sequence instead).';
 
 // The `parallel` step has two mutually exclusive modes:
 // - Dynamic fan-out (`foreach` + `steps`): run the SAME branch body once per
@@ -631,11 +636,7 @@ export const ParallelStepConfigSchema = z.object({
     .describe('Dynamic fan-out branch body executed once per item. Used with `foreach`.'),
   branches: z
     .array(ParallelBranchSchema)
-    .min(2, {
-      message:
-        'A static `parallel` step must declare at least two branches; a single-branch parallel is ' +
-        'degenerate (use a plain step sequence instead).',
-    })
+    .min(2, { message: PARALLEL_STATIC_MIN_BRANCHES_MESSAGE })
     .optional()
     .describe(
       'Static scatter-gather: a fixed set of named branches, each with its own body, run ' +
@@ -711,11 +712,7 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
     steps: z.array(stepSchema).min(1).optional(),
     branches: z
       .array(ParallelBranchSchema.extend({ steps: z.array(stepSchema).min(1) }))
-      .min(2, {
-        message:
-          'A static `parallel` step must declare at least two branches; a single-branch parallel ' +
-          'is degenerate (use a plain step sequence instead).',
-      })
+      .min(2, { message: PARALLEL_STATIC_MIN_BRANCHES_MESSAGE })
       .optional(),
   });
 

@@ -33,18 +33,29 @@ const parallelBranchResultSchema = z.object({
   durationMs: z.number().optional(),
 });
 
+// Static-mode only: results keyed by branch name. Mirrors `ParallelNamedBranchResult`
+// in the execution engine so `steps.<id>.output.branches.<name>.{status,output,error}`
+// gets editor validation/autocomplete.
+const parallelNamedBranchResultSchema = z.object({
+  status: z.enum(['completed', 'failed', 'skipped', 'timed_out']),
+  output: z.unknown().optional(),
+  error: z.unknown().optional(),
+});
+
 export const structuralStepOutputSchemas: Record<string, z.ZodSchema> = {
   if: z.object({
     conditionResult: z.boolean(),
   }),
-  // Aggregate output of a dynamic `parallel` fan-out step. Mirrors
-  // `ParallelStepOutput` in the execution engine so authors get editor
-  // validation/autocomplete for `steps.<id>.output.{status,total,succeeded,...}`.
+  // Aggregate output of a `parallel` step (dynamic fan-out or static branches).
+  // Mirrors `ParallelStepOutput` in the execution engine so authors get editor
+  // validation/autocomplete for `steps.<id>.output.{status,total,succeeded,...}`
+  // and, in static mode, the name-keyed `branches` projection.
   parallel: z.object({
     results: z.array(parallelBranchResultSchema),
     total: z.number(),
     succeeded: z.number(),
     failed: z.number(),
     status: z.enum(['completed', 'failed']),
+    branches: z.record(z.string(), parallelNamedBranchResultSchema).optional(),
   }),
 };

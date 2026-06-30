@@ -556,11 +556,17 @@ describe('EnterParallelNodeImpl', () => {
         succeeded: number;
         status: string;
         results: Array<{ index: number; key: unknown; status: string }>;
+        branches: Record<string, { status: string }>;
       };
       expect(output).toMatchObject({ total: 2, succeeded: 2, status: 'completed' });
       expect(output.results.map((r) => r.index)).toEqual([0, 1]);
       expect(output.results.map((r) => r.key)).toEqual(['virustotal', 'geo']);
       expect(output.results.map((r) => r.status)).toEqual(['completed', 'completed']);
+      // Static mode also emits the name-keyed projection (#17834 contract).
+      expect(output.branches).toMatchObject({
+        virustotal: { status: 'completed' },
+        geo: { status: 'completed' },
+      });
     });
 
     it('starts each branch at its own start node (heterogeneous bodies)', async () => {
@@ -617,10 +623,6 @@ describe('EnterParallelNodeImpl', () => {
     });
 
     it('reports a failed static branch in the aggregate', async () => {
-      node = makeStaticNode([
-        { name: 'ok', startNodeId: 'ok_step' },
-        { name: 'bad', startNodeId: 'bad_step' },
-      ]);
       factory.createStepExecutionRuntime = jest.fn(({ nodeId }) => {
         const failed = nodeId === 'bad_step';
         return {
