@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
-import type { ChangeHistoryScope } from '../telemetry/types';
+import type { ChangeHistoryScope } from '../types/change_history_scope';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import {
   TEST_CHANGE_HISTORY_SCOPE,

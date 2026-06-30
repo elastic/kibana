@@ -16,7 +16,8 @@ import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { createChangeHistoryTelemetryReporter } from '../telemetry/create_change_history_telemetry_reporter';
-import type { ChangeHistoryScope } from '../telemetry/types';
+import type { ChangeHistoryScope } from '../types/change_history_scope';
+import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 import { ChangeHistoryConfigContext } from './change_history_config_context';
 import { ChangeHistoryModalContext } from './change_history_modal_context';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
@@ -31,6 +32,7 @@ export interface ChangeHistoryProviderProps {
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
   scope: ChangeHistoryScope;
+  listPageSize?: number;
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   children: React.ReactNode;
 }
@@ -44,6 +46,7 @@ export const ChangeHistoryProvider = ({
   features,
   permissions,
   scope,
+  listPageSize = DEFAULT_CHANGE_HISTORY_PAGE_SIZE,
   analytics,
   children,
 }: ChangeHistoryProviderProps): JSX.Element => {
@@ -96,11 +99,13 @@ export const ChangeHistoryProvider = ({
       supports,
       telemetry,
       scope,
+      listPageSize,
     }),
     [
       adapter,
       labels.previewBackLabel,
       labels.previewTitle,
+      listPageSize,
       objectId,
       renderBadge,
       renderPreview,

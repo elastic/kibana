@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { changeHistoryTelemetryEventNames, changeHistoryTelemetryEventSchemas } from './schemas';
+import { changeHistoryTelemetryEventNames } from './event_names';
+import { changeHistoryTelemetryEventSchemas } from './schemas';
 import { changeHistoryTelemetryEvents } from './events';
 import { ChangeHistoryTelemetryEventTypes } from './types';
 

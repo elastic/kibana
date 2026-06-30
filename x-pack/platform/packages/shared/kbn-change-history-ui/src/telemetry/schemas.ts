@@ -17,16 +17,6 @@ import {
   type ReportChangeHistoryRestoreFailedActionParams,
 } from './types';
 
-export const changeHistoryTelemetryEventNames = {
-  [ChangeHistoryTelemetryEventTypes.Opened]: 'Change history opened',
-  [ChangeHistoryTelemetryEventTypes.ChangeSelected]: 'Change history change selected',
-  [ChangeHistoryTelemetryEventTypes.FilterApplied]: 'Change history filter applied',
-  [ChangeHistoryTelemetryEventTypes.DiffViewed]: 'Change history diff viewed',
-  [ChangeHistoryTelemetryEventTypes.RestoreConfirmed]: 'Change history restore confirmed',
-  [ChangeHistoryTelemetryEventTypes.RestoreCompleted]: 'Change history restore completed',
-  [ChangeHistoryTelemetryEventTypes.RestoreFailed]: 'Change history restore failed',
-} as const;
-
 const eventNameSchema: RootSchema<{ eventName: string }> = {
   eventName: {
     type: 'keyword',

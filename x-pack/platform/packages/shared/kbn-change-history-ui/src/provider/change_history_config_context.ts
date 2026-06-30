@@ -11,7 +11,8 @@ import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type { ChangeHistorySupports } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
-import type { ChangeHistoryScope, ChangeHistoryTelemetryReporter } from '../telemetry/types';
+import type { ChangeHistoryScope } from '../types/change_history_scope';
+import type { ChangeHistoryTelemetryReporter } from '../telemetry/types';
 
 export interface ChangeHistoryResolvedLabels {
   previewBackLabel: string;
@@ -28,6 +29,7 @@ export interface ChangeHistoryConfigValue {
   supports: ChangeHistorySupports;
   telemetry: ChangeHistoryTelemetryReporter;
   scope: ChangeHistoryScope;
+  listPageSize: number;
 }
 
 export type { ChangeHistoryLabels };

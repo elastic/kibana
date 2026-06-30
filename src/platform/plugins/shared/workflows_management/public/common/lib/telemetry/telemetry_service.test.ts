@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  changeHistoryTelemetryEvents,
-  ChangeHistoryTelemetryEventTypes,
-} from '@kbn/change-history-ui';
+import { changeHistoryTelemetryEvents } from '@kbn/change-history-ui/src/telemetry/events';
+import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui/src/telemetry/types';
 import { analyticsServiceMock } from '@kbn/core/public/mocks';
 import { workflowsTelemetryEvents } from './events/workflows';
 import { TelemetryService } from './telemetry_service';

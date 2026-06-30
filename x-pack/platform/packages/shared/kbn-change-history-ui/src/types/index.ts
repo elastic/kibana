@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ChangeHistoryScope } from './change_history_scope';
 export type { ChangeHistoryListItem } from './change_history_list_item';
 export type { ChangeHistoryDetail } from './change_history_detail';
 export type {

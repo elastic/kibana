@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-/**
- * Scope discriminators aligned with `@kbn/change-history`:
- * - `module` / `dataset` — `ChangeHistoryClient` binding (`event.module`, `event.dataset`)
- * - `objectType` — `ObjectChange.objectType` / `object.type`
- */
-export interface ChangeHistoryScope {
-  module: string;
-  dataset: string;
-  objectType: string;
-}
+export type { ChangeHistoryScope } from '../types/change_history_scope';
 
 /** Fields merged into every change-history EBT payload (via reporter or explicit emit). */
 export interface ChangeHistoryTelemetryScopeFields {
@@ -115,41 +106,34 @@ export interface ChangeHistoryTelemetryEventsMap {
 export type ChangeHistoryTelemetryEventType =
   (typeof ChangeHistoryTelemetryEventTypes)[keyof typeof ChangeHistoryTelemetryEventTypes];
 
+/** Caller params for a given event — scope and eventName are merged by the reporter. */
+export type ChangeHistoryTelemetryReportParams<TEventType extends ChangeHistoryTelemetryEventType> =
+  Omit<
+    ChangeHistoryTelemetryEventsMap[TEventType],
+    keyof ChangeHistoryTelemetryScopeFields | 'eventName'
+  >;
+
 /** Caller params — scope and eventName are merged by the reporter. */
-export type ChangeHistoryTelemetryOpenedParams = Omit<
-  ReportChangeHistoryOpenedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryOpenedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.Opened>;
 
-export type ChangeHistoryTelemetryChangeSelectedParams = Omit<
-  ReportChangeHistoryChangeSelectedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryChangeSelectedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.ChangeSelected>;
 
-export type ChangeHistoryTelemetryFilterAppliedParams = Omit<
-  ReportChangeHistoryFilterAppliedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryFilterAppliedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.FilterApplied>;
 
-export type ChangeHistoryTelemetryDiffViewedParams = Omit<
-  ReportChangeHistoryDiffViewedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryDiffViewedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.DiffViewed>;
 
-export type ChangeHistoryTelemetryRestoreConfirmedParams = Omit<
-  ReportChangeHistoryRestoreConfirmedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryRestoreConfirmedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.RestoreConfirmed>;
 
-export type ChangeHistoryTelemetryRestoreCompletedParams = Omit<
-  ReportChangeHistoryRestoreCompletedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryRestoreCompletedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.RestoreCompleted>;
 
-export type ChangeHistoryTelemetryRestoreFailedParams = Omit<
-  ReportChangeHistoryRestoreFailedActionParams,
-  keyof ChangeHistoryTelemetryScopeFields | 'eventName'
->;
+export type ChangeHistoryTelemetryRestoreFailedParams =
+  ChangeHistoryTelemetryReportParams<ChangeHistoryTelemetryEventTypes.RestoreFailed>;
 
 export interface ChangeHistoryTelemetryReporter {
   reportOpened: (params?: ChangeHistoryTelemetryOpenedParams) => void;

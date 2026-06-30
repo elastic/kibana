@@ -6,9 +6,11 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import type { ChangeHistoryError } from '../types/change_history_error';
 import type { RestoreChangeParams } from '../types/restore_change_params';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
+import { getChangeHistoryNewSequenceAfterRestore } from '../utils/get_change_history_new_sequence_after_restore';
 import { mapChangeHistoryRestoreError } from '../utils/map_change_history_restore_error';
 import { useInvalidateChangeHistory } from './use_invalidate_change_history';
 
@@ -28,7 +30,8 @@ export interface UseChangeHistoryRestoreResult {
 export const useChangeHistoryRestore: (
   args?: UseChangeHistoryRestoreArgs
 ) => UseChangeHistoryRestoreResult = ({ onRestored } = {}) => {
-  const { adapter, objectId, supports, telemetry } = useChangeHistoryConfig();
+  const { adapter, objectId, scope, listPageSize, supports, telemetry } = useChangeHistoryConfig();
+  const queryClient = useQueryClient();
   const invalidateChangeHistory = useInvalidateChangeHistory();
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<ChangeHistoryError | undefined>();
@@ -72,10 +75,18 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
-        if (params.restoreTelemetry || durationMs !== undefined) {
+        const newSequence = getChangeHistoryNewSequenceAfterRestore({
+          queryClient,
+          objectId,
+          scope,
+          pageSize: listPageSize,
+        });
+
+        if (params.restoreTelemetry || durationMs !== undefined || newSequence !== undefined) {
           telemetry.reportRestoreCompleted({
             ...params.restoreTelemetry,
             ...(durationMs !== undefined ? { durationMs } : {}),
+            ...(newSequence !== undefined ? { newSequence } : {}),
           });
         }
 
@@ -98,7 +109,17 @@ export const useChangeHistoryRestore: (
         }
       }
     },
-    [adapter, invalidateChangeHistory, objectId, onRestored, supports.restore, telemetry]
+    [
+      adapter,
+      invalidateChangeHistory,
+      listPageSize,
+      objectId,
+      onRestored,
+      queryClient,
+      scope,
+      supports.restore,
+      telemetry,
+    ]
   );
 
   return {

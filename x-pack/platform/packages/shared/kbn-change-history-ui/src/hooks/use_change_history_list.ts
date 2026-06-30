@@ -10,7 +10,6 @@ import { useCallback, useMemo } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import type { ListChangeHistoryResult } from '../types/list_change_history_params';
-import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 import { changeHistoryListQueryKey } from './change_history_list_query_key';
 
@@ -18,6 +17,10 @@ export interface UseChangeHistoryListArgs {
   adapter: ChangeHistoryAdapter;
   objectId: string;
   enabled?: boolean;
+  /**
+   * Overrides provider `listPageSize` for this query only. Must match the provider value for
+   * `restore_completed.newSequence` telemetry (restore reads cache at provider `listPageSize`).
+   */
   pageSize?: number;
 }
 
@@ -38,9 +41,10 @@ export const useChangeHistoryList = ({
   adapter,
   objectId,
   enabled = true,
-  pageSize = DEFAULT_CHANGE_HISTORY_PAGE_SIZE,
+  pageSize: pageSizeArg,
 }: UseChangeHistoryListArgs): UseChangeHistoryListResult => {
-  const { scope } = useChangeHistoryConfig();
+  const { scope, listPageSize } = useChangeHistoryConfig();
+  const pageSize = pageSizeArg ?? listPageSize;
   const {
     data,
     error,

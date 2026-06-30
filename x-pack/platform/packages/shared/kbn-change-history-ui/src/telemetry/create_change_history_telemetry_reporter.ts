@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import { changeHistoryTelemetryEventNames } from './schemas';
+import { changeHistoryTelemetryEventNames } from './event_names';
 import {
   ChangeHistoryTelemetryEventTypes,
   type ChangeHistoryScope,
@@ -14,6 +14,7 @@ import {
   type ChangeHistoryTelemetryDiffViewedParams,
   type ChangeHistoryTelemetryFilterAppliedParams,
   type ChangeHistoryTelemetryOpenedParams,
+  type ChangeHistoryTelemetryReportParams,
   type ChangeHistoryTelemetryReporter,
   type ChangeHistoryTelemetryRestoreCompletedParams,
   type ChangeHistoryTelemetryRestoreConfirmedParams,
@@ -57,7 +58,7 @@ export const createChangeHistoryTelemetryReporter = ({
 
   const report = <TEventType extends ChangeHistoryTelemetryEventTypes>(
     eventType: TEventType,
-    params: Record<string, unknown>
+    params: ChangeHistoryTelemetryReportParams<TEventType>
   ): void => {
     try {
       reportEvent(eventType, {

@@ -127,6 +127,50 @@ describe('ChangeHistoryProvider', () => {
     expect(reportEvent).toHaveBeenCalledTimes(1);
   });
 
+  it('reports change_history_opened on each close then reopen transition', () => {
+    const reportEvent = jest.fn();
+
+    const Probe = () => {
+      const { openModal, closeModal } = useChangeHistoryModal();
+      return (
+        <>
+          <button type="button" data-test-subj="openModal" onClick={openModal} />
+          <button type="button" data-test-subj="closeModal" onClick={closeModal} />
+        </>
+      );
+    };
+
+    render(
+      <I18nProvider>
+        <QueryClientWrapper>
+          <ChangeHistoryProvider
+            objectId={TEST_OBJECT_ID_A}
+            adapter={adapter}
+            labels={{ previewTitle: TEST_OBJECT_TITLE }}
+            renderPreview={() => null}
+            scope={testScope}
+            analytics={{ reportEvent }}
+          >
+            <Probe />
+          </ChangeHistoryProvider>
+        </QueryClientWrapper>
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('openModal'));
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('closeModal'));
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('openModal'));
+    expect(reportEvent).toHaveBeenCalledTimes(2);
+    expect(reportEvent).toHaveBeenNthCalledWith(2, ChangeHistoryTelemetryEventTypes.Opened, {
+      eventName: 'Change history opened',
+      ...testScope,
+    });
+  });
+
   it('closes the modal when objectId changes', () => {
     const { rerender } = render(<Harness objectId={TEST_OBJECT_ID_A} />);
 
