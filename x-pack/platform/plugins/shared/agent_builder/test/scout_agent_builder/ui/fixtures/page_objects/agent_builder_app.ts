@@ -441,13 +441,7 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('agentSettingsIdInput', agent.id);
     await this.page.testSubj.fill('agentSettingsDisplayNameInput', agent.name);
     await this.page.testSubj.fill('agentSettingsDescriptionInput', `Agent for testing ${agent.id}`);
-    const labelsCombo = this.page.testSubj.locator('agentSettingsLabelsComboBox');
-    const labelsInput = labelsCombo.getByTestId('comboBoxSearchInput');
-    for (const label of agent.labels) {
-      await labelsInput.click();
-      await labelsInput.fill(label);
-      await this.page.keyboard.press('Enter');
-    }
+    await this.page.components.comboBox('agentSettingsLabelsComboBox').createOptions(agent.labels);
     await this.page.testSubj.click('agentFormSaveButton');
     await this.page.testSubj
       .locator('agentBuilderAgentsListPageTitle')

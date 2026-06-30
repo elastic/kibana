@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
@@ -530,11 +529,9 @@ export class RulesPage {
    * `comboBox.setCustom('ruleDetailsTagsInput', ...)`.
    */
   async addRuleTag(tag: string) {
-    const tagsComboBox = new EuiComboBoxWrapper(
-      this.page,
-      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_TAGS_INPUT
-    );
-    await tagsComboBox.setCustomMultiOption(tag);
+    await this.page.components
+      .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_TAGS_INPUT)
+      .createOptions([tag]);
   }
 
   /**

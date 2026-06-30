@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
+import type { ObjectScope } from '@elastic/eui-test-helpers';
+import type { KbnComboBoxObject } from '../../../../eui_components/combo_box_object';
 import type { Page } from '@playwright/test';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
@@ -147,7 +148,7 @@ export type ScoutPage = Page & {
    * await page.components.comboBox('roleComboBox', flyout).clear();
    */
   components: {
-    comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
+    comboBox: (testSubj: string, scope?: ObjectScope) => KbnComboBoxObject;
   };
 };
 
