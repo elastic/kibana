@@ -9,8 +9,8 @@ import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, skipWhile, Subject, switchMap } from 'rxjs';
 
-import { CURRENT_USER_DATA_PATH } from '@kbn/core-user-profile-browser';
 import type { HttpStart } from '@kbn/core/public';
+import { CURRENT_USER_DATA_PATH } from '@kbn/core-user-profile-browser';
 import type {
   UserProfileAPIClient as UserProfileAPIClientType,
   UserProfileBulkGetParams,

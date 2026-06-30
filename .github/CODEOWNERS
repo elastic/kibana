@@ -1003,8 +1003,8 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
-x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common @elastic/appex-ai-infra
-x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards @elastic/appex-ai-infra
+x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common @elastic/kibana-presentation
+x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards @elastic/kibana-presentation
 x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
@@ -1171,7 +1171,7 @@ x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
-x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/kibana-presentation
 x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @elastic/workflows-eng
 x-pack/platform/plugins/shared/agent_context_layer @elastic/workchat-eng
