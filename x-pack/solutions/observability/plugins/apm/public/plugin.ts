@@ -534,14 +534,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
     );
 
-    const projectRouting = isCpsEnabled ? plugins.cps?.cpsManager?.getProjectRouting() : undefined;
-
     // lazy proxy: APMClientV2 already returns a Promise, so this is type-compatible
     let _api: APMClientV2 | undefined;
     const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
       if (_api) return _api(endpoint, options);
       return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
-        _api = createCallApmApiV2(core, { projectRouting });
+        _api = createCallApmApiV2(core, {
+          cpsManager: isCpsEnabled ? plugins.cps?.cpsManager : undefined,
+        });
         return _api(endpoint, options);
       });
     }) as APMClientV2;

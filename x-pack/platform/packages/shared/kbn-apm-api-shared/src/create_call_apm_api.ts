@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { CoreStart, HttpFetchOptions } from '@kbn/core/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { type RouteRepositoryClient } from '@kbn/server-route-repository';
 import type { EndpointOf, ReturnOf } from '@kbn/server-route-repository-utils';
 import { formatRequest } from '@kbn/server-route-repository-utils';
-import type { ProjectRouting } from '@kbn/es-query';
 import type { CallApi } from './call_api';
 import { callApi } from './call_api';
 import type { SharedAPMRouteRepository } from './routes';
@@ -42,16 +42,17 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
 >;
 
 interface Dependencies {
-  projectRouting?: ProjectRouting;
+  cpsManager?: ICPSManager;
 }
 
-export function createCallApmApiV2(core: CoreStart, { projectRouting }: Dependencies): APMClientV2 {
+export function createCallApmApiV2(core: CoreStart, { cpsManager }: Dependencies): APMClientV2 {
   return ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
+    const projectRouting = cpsManager?.getProjectRouting();
 
     return callApi(core, {
       ...options,
