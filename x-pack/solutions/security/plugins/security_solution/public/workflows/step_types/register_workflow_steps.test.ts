@@ -48,7 +48,7 @@ describe('registerWorkflowSteps (public)', () => {
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
 
-  it('calls registerStepDefinition 4 times when publicAttacksApiEnabled is false', () => {
+  it('calls registerStepDefinition 5 times when publicAttacksApiEnabled is false', () => {
     const { core } = buildCoreMock(true);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
@@ -57,7 +57,7 @@ describe('registerWorkflowSteps (public)', () => {
     } as unknown as ExperimentalFeatures);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(4);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
   });
 
   it('async loader returns step definitions when feature flag is enabled', async () => {

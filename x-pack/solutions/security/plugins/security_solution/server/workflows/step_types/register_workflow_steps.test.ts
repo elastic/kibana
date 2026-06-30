@@ -71,12 +71,15 @@ describe('registerWorkflowSteps (server)', () => {
       setAlertStatusStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAlertTagsStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       assignAlertStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalledWith(
       setAttackStatusStepDefinition
     );
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(4);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
   });
 
   it('async loader returns step definitions when feature flag is enabled', async () => {
