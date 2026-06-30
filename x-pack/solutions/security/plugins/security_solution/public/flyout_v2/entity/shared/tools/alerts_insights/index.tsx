@@ -25,6 +25,7 @@ import { DocumentFlyoutWrapper } from '../../../../document/main/document_flyout
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsInsights.title', {
   defaultMessage: 'Alerts',
@@ -92,13 +93,15 @@ export const AlertsInsights = memo(
             iconType={ICON_TYPE[entityType]}
           />
         </EuiFlyoutHeader>
-        <AlertsDetailsTable
-          field={FIELD[entityType]}
-          value={value}
-          entityId={entityId}
-          entityType={entityType}
-          onShowAlert={onExpandAlert}
-        />
+        <div className="eui-yScroll" data-test-subj={ALERTS_INSIGHTS_TOOL_TEST_ID}>
+          <AlertsDetailsTable
+            field={FIELD[entityType]}
+            value={value}
+            entityId={entityId}
+            entityType={entityType}
+            onShowAlert={onExpandAlert}
+          />
+        </div>
       </>
     );
   }
