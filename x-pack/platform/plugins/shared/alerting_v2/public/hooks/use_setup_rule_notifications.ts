@@ -54,8 +54,7 @@ export const useSetupRuleNotifications = () => {
           await actionPoliciesApi.createActionPolicy({
             name: `${rule.metadata.name} notifications`,
             description: `Notifications for rule "${rule.metadata.name}"`,
-            type: 'single_rule',
-            ruleId: rule.id,
+            matcher: `rule.id: "${rule.id}"`,
             destinations: [{ type: 'workflow', id: workflowId }],
             groupingMode: 'per_episode',
             throttle: { strategy: 'on_status_change', interval: null },

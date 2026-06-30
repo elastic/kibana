@@ -140,15 +140,22 @@ and require a \`connector-id\` to specify which configured connector to use.
 **ALWAYS prefer connector steps over raw HTTP for integrations like Slack, Jira, etc.**
 Connector steps are simpler, more secure, and handle authentication automatically.
 
-Available connector types include: slack, jira, pagerduty, email, webhook, servicenow, opsgenie, teams, and more.
+Available connector types include: slack2, jira, pagerduty, email, webhook, servicenow, opsgenie, teams, and more.
+
+**Slack steps: ONLY use the \`slack2.*\` namespace.** Discovery may also surface
+\`slack\` (legacy webhook) and \`slack_api.*\` step types; these must NOT be used
+for new steps. Use \`slack2.sendMessage\`, \`slack2.listChannels\`,
+\`slack2.resolveChannelId\`, or \`slack2.searchMessages\` with a \`.slack2\`
+connector instance.
 
 **Slack connector example (PREFERRED):**
 \`\`\`yaml
 - name: send_slack_notification
-  type: slack
+  type: slack2.sendMessage
   connector-id: my-slack-connector
   with:
-    message: "Hello from the workflow!"
+    channel: "C0123456789"
+    text: "Hello from the workflow!"
 \`\`\`
 
 When asked to add Slack/Jira/etc integration, ALWAYS use connector steps first! \`${platformCoreTools.generateWorkflow}\` already knows the connectors configured on the current Kibana — pass the user's request directly. Only call \`${workflowTools.getConnectors}\` if the user explicitly asks "what connectors do I have".

@@ -31,6 +31,13 @@ export const STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID =
 
 const queryInputSchema = upsertStreamQueryRequestSchema.extend({
   id: z.string().optional(),
+  expires_at: z.iso
+    .datetime()
+    .optional()
+    .describe(
+      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+        'Omit to create a durable KI with no expiry.'
+    ),
 });
 
 const createQueryKnowledgeIndicatorSchema = z
@@ -111,7 +118,7 @@ export function createQueryKnowledgeIndicatorTool({
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getQueryClient, licensing, uiSettingsClient } =
+        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
           await getScopedClients({
             request,
           });
@@ -121,9 +128,9 @@ export function createQueryKnowledgeIndicatorTool({
         const definition = await streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const queryClient = await getQueryClient();
+        const kiClient = await getKnowledgeIndicatorClient();
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
-          queryClient,
+          kiClient,
           definition,
           queryInput,
           logger,

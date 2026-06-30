@@ -38,7 +38,7 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
 export type EmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
-> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | keyof CanLockHoverActions>;
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | 'relatedPanels$' | keyof CanLockHoverActions>;
 
 export interface BuildEmbeddableProps<
   SerializedState extends object = object,

@@ -11,7 +11,7 @@ import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata } from '@kbn/streams-schema';
-import { MATCH_LOOKBACK_MINUTES } from '../../../../sig_events/rules/esql/common';
+import { MATCH_LOOKBACK_MINUTES } from '../../../../significant_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
@@ -148,8 +148,9 @@ function toV2CreateBody(body: CreateRuleBody) {
     time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
-    evaluation: {
-      query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+    query: {
+      format: 'standalone' as const,
+      breach: { query: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
     },
   };
 }
@@ -163,8 +164,9 @@ function toV2UpdateBody(body: UpdateRuleBody) {
     time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
-    evaluation: {
-      query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+    query: {
+      format: 'standalone' as const,
+      breach: { query: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
     },
   };
 }

@@ -64,9 +64,16 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
+import type {
+  GetAnomalyOverviewRequestParamsInput,
+  GetAnomalyOverviewRequestBodyInput,
+  GetAnomalySummaryRequestParamsInput,
+  GetAnomalySummaryRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/anomaly_summary/anomaly_summary.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
 import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type { GetRiskScoreHistoryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/risk_score_history_route.gen';
 import type { GetWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/get.gen';
 import type { GetWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
 import type {
@@ -127,6 +134,10 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to check privileges for managing asset criticality.
+
+      */
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
@@ -159,7 +170,9 @@ is added to its existing source labels instead.
       .send(props.body as object);
   },
   /**
-      * Bulk upsert up to 1000 asset criticality records.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
+
+Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
@@ -200,7 +213,9 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-      * Create or update an asset criticality record for a specific entity.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
+
+Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
@@ -277,8 +292,11 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
-   * Delete the asset criticality record for a specific entity.
-   */
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
+
+Delete the asset criticality record for a specific entity.
+
+      */
   deleteAssetCriticalityRecord(
     props: DeleteAssetCriticalityRecordProps,
     kibanaSpace: string = 'default'
@@ -442,7 +460,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * List asset criticality records, paging, sorting and filtering as needed.
+   * **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
    */
   findAssetCriticalityRecords(
     props: FindAssetCriticalityRecordsProps,
@@ -456,7 +474,45 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .query(props.query);
   },
   /**
-   * Get the asset criticality record for a specific entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   */
+  getAnomalyOverview(props: GetAnomalyOverviewProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   */
+  getAnomalySummary(props: GetAnomalySummaryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
    */
   getAssetCriticalityRecord(
     props: GetAssetCriticalityRecordProps,
@@ -469,6 +525,10 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to get asset criticality status for a specific entity.
+
+      */
   getAssetCriticalityStatus(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
@@ -538,6 +598,17 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+   */
+  getRiskScoreHistory(props: GetRiskScoreHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/risk_score/history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
   },
   /**
    * Retrieves the details of an entity analytics watchlist by its unique identifier.
@@ -956,6 +1027,10 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
+
+      */
   uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
@@ -1104,6 +1179,14 @@ export interface EntityDetailsHighlightsProps {
 export interface FindAssetCriticalityRecordsProps {
   query: FindAssetCriticalityRecordsRequestQueryInput;
 }
+export interface GetAnomalyOverviewProps {
+  params: GetAnomalyOverviewRequestParamsInput;
+  body: GetAnomalyOverviewRequestBodyInput;
+}
+export interface GetAnomalySummaryProps {
+  params: GetAnomalySummaryRequestParamsInput;
+  body: GetAnomalySummaryRequestBodyInput;
+}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
@@ -1115,6 +1198,9 @@ export interface GetEntitySourceProps {
 }
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
+}
+export interface GetRiskScoreHistoryProps {
+  query: GetRiskScoreHistoryRequestQueryInput;
 }
 export interface GetWatchlistProps {
   params: GetWatchlistRequestParamsInput;

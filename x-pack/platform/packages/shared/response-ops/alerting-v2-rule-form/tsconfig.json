@@ -14,7 +14,6 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/esql-types",
     "@kbn/es-query",
@@ -41,6 +40,8 @@
     "@kbn/core-di",
     "@kbn/announcement-banner",
     "@kbn/kibana-react-plugin",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/cps-utils",
+    "@kbn/cps"
   ]
 }

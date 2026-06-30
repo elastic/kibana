@@ -11,7 +11,7 @@ describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
     const eventClient = {
       findById: jest.fn().mockResolvedValue({
-        hits: [{ event_id: 'event-1', verdict: 'promoted' }],
+        hits: [{ event_id: 'event-1', status: 'promoted' }],
       }),
       bulkCreate: jest.fn().mockResolvedValue({}),
     };
@@ -24,7 +24,7 @@ describe('updateEventStatusToolHandler', () => {
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ verdict: 'acknowledged' })],
+      [expect.objectContaining({ status: 'acknowledged' })],
       { throwOnFail: true }
     );
     expect(result.event_id).not.toBe('event-1');
@@ -49,9 +49,7 @@ describe('updateEventStatusToolHandler', () => {
     expect(missing).toEqual({ event_id: 'event-1', updated: 0, ignored: 1, status: 'demoted' });
 
     const eventClientSame = {
-      findById: jest
-        .fn()
-        .mockResolvedValue({ hits: [{ event_id: 'event-1', verdict: 'demoted' }] }),
+      findById: jest.fn().mockResolvedValue({ hits: [{ event_id: 'event-1', status: 'demoted' }] }),
       bulkCreate: jest.fn(),
     };
     const same = await updateEventStatusToolHandler({
