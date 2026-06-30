@@ -140,7 +140,13 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     const connectorName = `scout-tines-${Date.now()}`;
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj.locator('.tines-card').waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click('.tines-card');
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await fillTinesConnectorFields(page, { name: connectorName, url: TINES_CONFIG.url });
 
     const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');

@@ -35,12 +35,12 @@ import type { AgentContextLayerPluginStart } from '../types';
  *
  * Both branches are gated by two checks before the contract is invoked:
  *
- * 1. The `agentBuilder:enableExperimentalFeatures` UI setting (the same
- *    feature flag that gates every HTTP route via `withSmlFeatureFlag` and
- *    the SML crawler task). When disabled the step returns an error
- *    result without touching the indexer — keeping the workflow step in
- *    lockstep with the rest of the AGL surface so a deployment with the
- *    flag off cannot silently mutate the SML index via a workflow.
+ * 1. The `contextEngine:enabled` UI setting (the same feature flag that
+ *    gates every HTTP route via `withSmlFeatureFlag` and the SML crawler
+ *    task). When disabled the step returns an error result without
+ *    touching the indexer — keeping the workflow step in lockstep with the
+ *    rest of the AGL surface so a deployment with the flag off cannot
+ *    silently mutate the SML index via a workflow.
  * 2. The `agentContextLayer:write` Kibana privilege against the workflow's
  *    fake request. The HTTP upsert/delete routes already enforce the same
  *    privilege via route security; the workflow step is a second
@@ -71,10 +71,10 @@ export const createContextEngineAddEntryStepDefinition = ({
   getSpaces: () => SpacesPluginStart | undefined;
   getSecurity: () => SecurityPluginStart | undefined;
   /**
-   * Resolves whether the AGL/SML experimental UI setting is enabled for
-   * the calling request's space. Mirrors the gate applied to every HTTP
-   * route via `withSmlFeatureFlag` and to the SML crawler task. The check
-   * is request-scoped so per-space overrides of the setting are honored.
+   * Resolves whether the Context Engine UI setting is enabled for the
+   * calling request's space. Mirrors the gate applied to every HTTP route
+   * via `withSmlFeatureFlag` and to the SML crawler task. The check is
+   * request-scoped so per-space overrides of the setting are honored.
    */
   isFeatureEnabled: (request: KibanaRequest) => Promise<boolean>;
 }) =>
@@ -90,7 +90,7 @@ export const createContextEngineAddEntryStepDefinition = ({
         if (!featureEnabled) {
           return {
             error: new Error(
-              `Agent Context Layer experimental features are disabled — cannot ${action} Context Engine entry '${originId}'.`
+              `Context Engine (experimental feature) is disabled — cannot ${action} Context Engine entry '${originId}'.`
             ),
           };
         }
@@ -145,16 +145,20 @@ export const createContextEngineAddEntryStepDefinition = ({
             title: chunk.title,
             content: chunk.content,
             ...(chunk.description !== undefined ? { description: chunk.description } : {}),
+            ...(chunk.tags !== undefined ? { tags: chunk.tags } : {}),
             ...(chunk.user_id !== undefined ? { user_id: chunk.user_id } : {}),
             ...(chunk.references !== undefined
               ? { references: chunk.references.map((uri) => ({ uri })) }
               : {}),
-            // The workflow input carries flat Kibana privilege strings; map
-            // them into the nested permissions shape (no ES index gating is
-            // expressible via this step yet).
+            // Map the workflow input's flat permission lists into the nested
+            // SML permissions shape: `permissions` -> Kibana privilege names,
+            // `elasticsearchIndices` -> ES index / alias / data-stream names
+            // that gate the chunk behind the viewer's ES `read` privilege.
             permissions: {
               kibana: { privileges: (chunk.permissions ?? []).map((name) => ({ name })) },
-              elasticsearch: { indices: [] },
+              elasticsearch: {
+                indices: (chunk.elasticsearchIndices ?? []).map((name) => ({ name })),
+              },
             },
           }));
 

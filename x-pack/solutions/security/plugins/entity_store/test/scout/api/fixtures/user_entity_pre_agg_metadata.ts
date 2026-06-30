@@ -13,15 +13,20 @@ import {
 import {
   applyFieldEvaluations,
   getFieldEvaluationsFromDefinition,
+  getIdentityFieldEvaluationsFromDefinition,
 } from '../../../../common/domain/euid/field_evaluations';
 import { getEntityDefinitionWithoutId } from '../../../../common/domain/definitions/registry';
 
 const USER_ENTITY_TYPE = 'user' as const;
 
 /**
- * Mirrors user entity field evaluations (including condition whenClauses for entity.namespace) +
- * whenConditionTrueSetFieldsAfterStats (entity.name + entity.confidence; in-memory)
- * so DSL / Painless Scout tests can assert entity.namespace / entity.confidence / entity.name align with definitions.
+ * Mirrors the full user entity pre-agg pipeline in-memory:
+ * 1. Shared field evaluations (entity.source)
+ * 2. Identity-specific field evaluations (entity.namespace)
+ * 3. whenConditionTrueSetFieldsPreAgg / AfterStats (entity.name, entity.confidence)
+ *
+ * Used by DSL / Painless Scout tests to assert entity.namespace / entity.confidence /
+ * entity.name align with the ES|QL extraction definitions.
  */
 export function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
   namespace?: string;
@@ -30,10 +35,13 @@ export function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
 } {
   const doc = cloneDeep(getDocument(hit));
   const def = getEntityDefinitionWithoutId(USER_ENTITY_TYPE);
-  const fieldEvaluations = getFieldEvaluationsFromDefinition(def);
-  if (fieldEvaluations.length > 0) {
-    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
-    Object.assign(doc, evaluated);
+  const sharedEvaluations = getFieldEvaluationsFromDefinition(def);
+  if (sharedEvaluations.length > 0) {
+    Object.assign(doc, applyFieldEvaluations(doc, sharedEvaluations));
+  }
+  const identityEvaluations = getIdentityFieldEvaluationsFromDefinition(def);
+  if (identityEvaluations.length > 0) {
+    Object.assign(doc, applyFieldEvaluations(doc, identityEvaluations));
   }
   if (def.whenConditionTrueSetFieldsPreAgg?.length) {
     applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsPreAgg);

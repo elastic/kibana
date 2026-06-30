@@ -17,7 +17,10 @@ import type {
   WorkflowsManagementApi,
   WorkflowsServerPluginSetup,
 } from '@kbn/workflows-management-plugin/server';
-import { SigEventsWorkflowStatus, type SigEventsWorkflowStatusResult } from '@kbn/streams-schema';
+import {
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
+} from '@kbn/streams-schema';
 
 export interface WorkflowExecutionQueryParams {
   size?: number;
@@ -67,8 +70,8 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   static classifyExecutionStatus(
     status: ExecutionStatus
   ): Exclude<
-    SigEventsWorkflowStatus,
-    SigEventsWorkflowStatus.NotStarted | SigEventsWorkflowStatus.BeingCanceled
+    SignificantEventsWorkflowStatus,
+    SignificantEventsWorkflowStatus.NotStarted | SignificantEventsWorkflowStatus.BeingCanceled
   > {
     switch (status) {
       case ExecutionStatus.PENDING:
@@ -76,15 +79,15 @@ export class WorkflowExecutionService<TInput extends object = {}> {
       case ExecutionStatus.WAITING:
       case ExecutionStatus.WAITING_FOR_INPUT:
       case ExecutionStatus.WAITING_FOR_CHILD:
-        return SigEventsWorkflowStatus.InProgress;
+        return SignificantEventsWorkflowStatus.InProgress;
       case ExecutionStatus.COMPLETED:
-        return SigEventsWorkflowStatus.Completed;
+        return SignificantEventsWorkflowStatus.Completed;
       case ExecutionStatus.FAILED:
       case ExecutionStatus.TIMED_OUT:
-        return SigEventsWorkflowStatus.Failed;
+        return SignificantEventsWorkflowStatus.Failed;
       case ExecutionStatus.CANCELLED:
       case ExecutionStatus.SKIPPED:
-        return SigEventsWorkflowStatus.Canceled;
+        return SignificantEventsWorkflowStatus.Canceled;
       default: {
         const _exhaustiveCheck: never = status;
         throw new Error(`Unhandled ExecutionStatus: ${_exhaustiveCheck}`);
@@ -105,37 +108,47 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     return execution.error?.message ?? 'Unknown error';
   }
 
+  /**
+   * Maps an existing execution to a status result, attaching the failure message
+   * for failed runs.
+   */
+  static toStatusResult({
+    execution,
+    workflowId,
+  }: {
+    execution: WorkflowExecutionListItemDto;
+    workflowId: string;
+  }): SignificantEventsWorkflowStatusResult {
+    const status = WorkflowExecutionService.classifyExecutionStatus(execution.status);
+
+    if (status === SignificantEventsWorkflowStatus.Failed) {
+      return {
+        status: SignificantEventsWorkflowStatus.Failed,
+        executionId: execution.id,
+        error: WorkflowExecutionService.getFailureMessage({ execution, workflowId }),
+      };
+    }
+
+    return { status, executionId: execution.id };
+  }
+
   async getStatus({
     spaceId,
     queryParams,
   }: {
     spaceId: string;
     queryParams?: WorkflowExecutionQueryParams;
-  }): Promise<SigEventsWorkflowStatusResult> {
+  }): Promise<SignificantEventsWorkflowStatusResult> {
     const lastExecution = await this.getLastExecution(spaceId, queryParams);
 
     if (!lastExecution) {
-      return { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
+      return { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };
     }
 
-    const status = WorkflowExecutionService.classifyExecutionStatus(lastExecution.status);
-
-    if (status === SigEventsWorkflowStatus.Failed) {
-      return {
-        status: SigEventsWorkflowStatus.Failed,
-        executionId: lastExecution.id,
-        error: WorkflowExecutionService.getFailureMessage({
-          execution: lastExecution,
-          workflowId: this.workflowId,
-        }),
-      };
-    }
-
-    if (status === SigEventsWorkflowStatus.Completed) {
-      return { status: SigEventsWorkflowStatus.Completed, executionId: lastExecution.id };
-    }
-
-    return { status, executionId: lastExecution.id };
+    return WorkflowExecutionService.toStatusResult({
+      execution: lastExecution,
+      workflowId: this.workflowId,
+    });
   }
 
   /**
