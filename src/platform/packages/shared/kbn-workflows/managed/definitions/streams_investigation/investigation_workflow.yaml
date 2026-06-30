@@ -8,11 +8,7 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-<<<<<<< HEAD
-    key: 'streams-investigation-{{ inputs.concurrency_key | default: workflow.executionId }}'
-=======
-    key: "streams-investigation-{{ inputs.concurrency_key | default: execution.id }}"
->>>>>>> 446e735fb8c9 (fixup! fixup! [Investigation] Attach investigation results back to significant events)
+    key: 'streams-investigation-{{ inputs.concurrency_key | default: execution.id }}'
     strategy: cancel-in-progress
     max: 1
 tags:
@@ -48,8 +44,6 @@ triggers:
       additionalProperties: false
 
 steps:
-<<<<<<< HEAD
-=======
 
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
@@ -69,7 +63,6 @@ steps:
     on-failure:
       continue: true
 
->>>>>>> 446e735fb8c9 (fixup! fixup! [Investigation] Attach investigation results back to significant events)
   - name: investigate
     type: ai.agent
     agent-id: platform.streams.investigation
