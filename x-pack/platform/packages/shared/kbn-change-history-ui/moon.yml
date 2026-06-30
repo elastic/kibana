@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/react-query'
+  - '@kbn/logging-mocks'
 tags:
   - shared-browser
   - package
