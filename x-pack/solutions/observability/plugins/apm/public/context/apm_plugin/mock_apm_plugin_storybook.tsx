@@ -20,7 +20,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
@@ -218,7 +218,7 @@ export function MockApmPluginStorybook({
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
-  const callApmApi = mockCreateCallApmApiV2(contextMock.core);
+  const callApmApi = createCallApmApiV2(contextMock.core, { cpsManager: undefined });
   setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {

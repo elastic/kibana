@@ -11,8 +11,8 @@ import { EuiButton, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApmPluginStartDeps } from '../../../../plugin';
 import type { APIReturnType } from '@kbn/apm-api-shared';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isEdge } from './utils';

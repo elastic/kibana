@@ -10,7 +10,7 @@ import { getApmInternalServices } from '../../plugin';
 import { reportFetchError } from './report_fetch_error';
 import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
-export const fetchRootSpanByTraceId = (
+export const fetchRootSpanByTraceId = async (
   {
     traceId,
     start,
@@ -24,7 +24,7 @@ export const fetchRootSpanByTraceId = (
 ): Promise<TraceRootSpan | undefined> => {
   try {
     const { callApmApi } = getApmInternalServices();
-    return callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
+    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
       params: {
         path: { traceId },
         query: {

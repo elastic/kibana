@@ -25,7 +25,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { mockTelemetryClient } from '../../services/telemetry/__mocks__/telemetry_client_mock';
@@ -282,7 +282,7 @@ export function MockApmPluginContextWrapper({
   if (contextValue.core) {
     createCallApmApi(contextValue.core);
   }
-  const callApmApi = mockCreateCallApmApiV2(contextValue.core);
+  const callApmApi = createCallApmApiV2(contextValue.core, { cpsManager: undefined });
   setApmInternalServices({ callApmApi });
 
   performance.mark = jest.fn();

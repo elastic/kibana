@@ -15,7 +15,7 @@ import {
 } from 'react-router-dom-v5-compat';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { apmRouter } from '../components/routing/apm_route_config';
@@ -123,7 +123,7 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
-  const callApmApi = mockCreateCallApmApiV2(deps.coreStart);
+  const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager: undefined });
   setApmInternalServices({ callApmApi });
 
   return (

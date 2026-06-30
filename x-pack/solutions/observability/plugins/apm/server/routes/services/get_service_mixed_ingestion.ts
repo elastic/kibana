@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceMixedIngestionResponse } from '@kbn/apm-api-shared';
+import type { ServiceMixedIngestionResponse } from '@kbn/apm-api-shared';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {

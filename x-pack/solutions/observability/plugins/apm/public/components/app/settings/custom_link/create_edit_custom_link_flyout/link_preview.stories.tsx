@@ -8,7 +8,7 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { LinkPreview } from './link_preview';
 import { setApmInternalServices } from '../../../../../plugin';
@@ -27,7 +27,7 @@ export function Example({ filters, label, url }: ComponentProps<typeof LinkPrevi
   } as unknown as CoreStart;
 
   createCallApmApi(coreMock);
-  const callApmApi = mockCreateCallApmApiV2(coreMock);
+  const callApmApi = createCallApmApiV2(coreMock, { cpsManager: undefined });
   setApmInternalServices({ callApmApi });
 
   return <LinkPreview filters={filters} label={label} url={url} />;

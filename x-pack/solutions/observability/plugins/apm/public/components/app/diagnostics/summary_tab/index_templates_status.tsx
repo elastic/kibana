@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDiagnosticsContext } from '../context/use_diagnostics';

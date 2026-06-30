@@ -12,7 +12,7 @@ import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 
 type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
 
-export const fetchErrorsByTraceId = (
+export const fetchErrorsByTraceId = async (
   {
     traceId,
     docId,
@@ -28,7 +28,7 @@ export const fetchErrorsByTraceId = (
 ): Promise<ErrorsByTraceId> => {
   try {
     const { callApmApi } = getApmInternalServices();
-    return callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
+    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
       params: {
         path: { traceId },
         query: {

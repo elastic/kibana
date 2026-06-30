@@ -87,8 +87,8 @@ const createAutoAbortedAPMClientV2 = (
   signal: AbortSignal,
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): AutoAbortedAPMClientV2 => {
-  const { callApmApi: callApmApiV2 } = getApmInternalServices();
   return ((endpoint, options) => {
+    const { callApmApi: callApmApiV2 } = getApmInternalServices();
     return callApmApiV2(endpoint, {
       ...options,
       signal,

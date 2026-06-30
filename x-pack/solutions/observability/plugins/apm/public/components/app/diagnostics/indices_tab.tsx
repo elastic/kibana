@@ -97,7 +97,7 @@ export function DiagnosticsIndices() {
     },
   ];
 
-   return (
+  return (
     <>
       <EuiText>
         This section shows the concrete indices backing the data streams, and highlights mapping
