@@ -111,8 +111,10 @@ export type AsymmetricMatcher = ReturnType<typeof baseExpect.anything>;
 type PlaywrightPoll = Expect['poll'];
 type PlaywrightPollResult = ReturnType<PlaywrightPoll>;
 export type PollOptions = NonNullable<Parameters<PlaywrightPoll>[1]>;
-export type PollMatchers = Pick<PlaywrightPollResult, keyof GenericMatchers> & {
-  not: Pick<PlaywrightPollResult['not'], keyof GenericMatchers['not']>;
+export type PollMatchers = {
+  [K in keyof GenericMatchers]: K extends keyof PlaywrightPollResult
+    ? PlaywrightPollResult[K]
+    : GenericMatchers[K];
 };
 
 /**
