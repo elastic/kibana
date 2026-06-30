@@ -58,7 +58,11 @@ export class SearchMethodsService implements ISearchMethods {
       request,
       this.mapESQLOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY)
     );
-    return { rawResponse: response.rawResponse, requestParams: response.requestParams };
+    return {
+      rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
+      warning: response.warning,
+    };
   }
 
   /**
@@ -341,6 +345,7 @@ export class SearchMethodsService implements ISearchMethods {
       sessionId: options.sessionId,
       executionContext: options.executionContext,
       projectRouting: options.projectRouting,
+      approximation: options.approximation,
     };
   }
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
+import type { ConcurrencySettings, LiquidSettings, WorkflowContext } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   DEFAULT_CONCURRENCY_QUEUE_SIZE,
@@ -26,7 +26,6 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * - Implementing collision strategies (drop, cancel-in-progress, queue)
  */
 export class ConcurrencyManager {
-  private readonly templatingEngine: WorkflowTemplatingEngine;
   private readonly workflowTaskManager: WorkflowTaskManager;
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
 
@@ -34,7 +33,6 @@ export class ConcurrencyManager {
     workflowTaskManager: WorkflowTaskManager,
     workflowExecutionRepository: WorkflowExecutionRepository
   ) {
-    this.templatingEngine = new WorkflowTemplatingEngine();
     this.workflowTaskManager = workflowTaskManager;
     this.workflowExecutionRepository = workflowExecutionRepository;
   }
@@ -50,7 +48,8 @@ export class ConcurrencyManager {
    */
   public evaluateConcurrencyKey(
     concurrencySettings: ConcurrencySettings | undefined,
-    context: WorkflowContext
+    context: WorkflowContext,
+    liquidSettings?: LiquidSettings
   ): string | null {
     if (!concurrencySettings?.key) {
       return null;
@@ -59,10 +58,8 @@ export class ConcurrencyManager {
     const keyExpression = concurrencySettings.key.trim();
 
     try {
-      const rendered = this.templatingEngine.render(
-        keyExpression,
-        context as Record<string, unknown>
-      );
+      const templatingEngine = new WorkflowTemplatingEngine({ liquidSettings });
+      const rendered = templatingEngine.render(keyExpression, context as Record<string, unknown>);
 
       if (rendered === '') {
         return null;
