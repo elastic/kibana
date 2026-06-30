@@ -9,8 +9,8 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { createHash, randomUUID } from 'node:crypto';
 import type { estypes } from '@elastic/elasticsearch';
+import { createHash, randomUUID } from 'node:crypto';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
@@ -61,16 +61,16 @@ import {
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
+import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
+import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import {
   getWebhookCredentialDocumentId,
   getWebhookDispatchTaskId,
-  WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE,
   WORKFLOW_WEBHOOK_CREDENTIALS_INDEX,
+  WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE,
   WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
 } from './webhook/constants';
 import type { WebhookCredentialDocument, WebhookInvocationDocument } from './webhook/types';
-import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
-import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import type {
   SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
@@ -256,7 +256,10 @@ const isExecuteInlineWorkflowParams = (
 const getWebhookTrigger = (workflow: WorkflowDetailDto) =>
   workflow.definition?.triggers?.find((trigger) => trigger.type === 'webhook') as
     | {
-        auth?: { type: 'none' } | { type: 'apiKey'; id?: string } | { type: 'basic'; username: string; password: string };
+        auth?:
+          | { type: 'none' }
+          | { type: 'apiKey'; id?: string }
+          | { type: 'basic'; username: string; password: string };
       }
     | undefined;
 
@@ -586,7 +589,7 @@ export class WorkflowsManagementApi {
         taskType: WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE,
         params: { workflowId, spaceId },
         state: {},
-          schedule: { interval: '365d' },
+        schedule: { interval: '365d' },
         scope: ['workflows', `workflow:${workflowId}`],
       },
       { request }
@@ -595,15 +598,17 @@ export class WorkflowsManagementApi {
     let apiKey: WebhookPrepareResult['apiKey'];
     let apiKeyId = existingCredential?.apiKeyId;
     if (authType === 'apiKey' && !apiKeyId) {
-      const result = await coreStart.elasticsearch.client.asScoped(request).asCurrentUser.security.createApiKey({
-        name: `workflow-webhook:${spaceId}:${workflowId}`,
-        metadata: {
-          workflowId,
-          spaceId,
-          purpose: 'workflow_webhook_trigger',
-        },
-        role_descriptors: {},
-      });
+      const result = await coreStart.elasticsearch.client
+        .asScoped(request)
+        .asCurrentUser.security.createApiKey({
+          name: `workflow-webhook:${spaceId}:${workflowId}`,
+          metadata: {
+            workflowId,
+            spaceId,
+            purpose: 'workflow_webhook_trigger',
+          },
+          role_descriptors: {},
+        });
       apiKeyId = result.id;
       apiKey = { id: result.id, encoded: result.encoded };
     }
@@ -733,56 +738,55 @@ export class WorkflowsManagementApi {
     });
 
     for (const hit of invocations.hits.hits) {
-      if (!hit._id || !hit._source) {
-        continue;
-      }
-      const invocation = hit._source;
-      const now = new Date().toISOString();
-      await client.update({
-        index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
-        id: hit._id,
-        doc: { status: 'running', updatedAt: now },
-      });
-      try {
-        const workflow = await this.getWorkflow(workflowId, spaceId);
-        if (!workflow?.definition) {
-          throw new WorkflowNotFoundError(workflowId);
+      if (hit._id && hit._source) {
+        const invocation = hit._source;
+        const now = new Date().toISOString();
+        await client.update({
+          index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+          id: hit._id,
+          doc: { status: 'running', updatedAt: now },
+        });
+        try {
+          const workflow = await this.getWorkflow(workflowId, spaceId);
+          if (!workflow?.definition) {
+            throw new WorkflowNotFoundError(workflowId);
+          }
+          const workflowForExecution: WorkflowExecutionEngineModel = {
+            id: workflow.id,
+            name: workflow.name,
+            enabled: workflow.enabled,
+            definition: workflow.definition,
+            yaml: workflow.yaml,
+            ...pickManagedWorkflowFields(workflow),
+          };
+          const workflowExecutionId = await this.runWorkflow(
+            workflowForExecution,
+            spaceId,
+            invocation.inputs,
+            request,
+            'webhook',
+            { webhookInvocationId: hit._id }
+          );
+          await client.update({
+            index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+            id: hit._id,
+            doc: {
+              status: 'completed',
+              workflowExecutionId,
+              updatedAt: new Date().toISOString(),
+            },
+          });
+        } catch (error) {
+          await client.update({
+            index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+            id: hit._id,
+            doc: {
+              status: 'failed',
+              error: error instanceof Error ? error.message : String(error),
+              updatedAt: new Date().toISOString(),
+            },
+          });
         }
-        const workflowForExecution: WorkflowExecutionEngineModel = {
-          id: workflow.id,
-          name: workflow.name,
-          enabled: workflow.enabled,
-          definition: workflow.definition,
-          yaml: workflow.yaml,
-          ...pickManagedWorkflowFields(workflow),
-        };
-        const workflowExecutionId = await this.runWorkflow(
-          workflowForExecution,
-          spaceId,
-          invocation.inputs,
-          request,
-          'webhook',
-          { webhookInvocationId: hit._id }
-        );
-        await client.update({
-          index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
-          id: hit._id,
-          doc: {
-            status: 'completed',
-            workflowExecutionId,
-            updatedAt: new Date().toISOString(),
-          },
-        });
-      } catch (error) {
-        await client.update({
-          index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
-          id: hit._id,
-          doc: {
-            status: 'failed',
-            error: error instanceof Error ? error.message : String(error),
-            updatedAt: new Date().toISOString(),
-          },
-        });
       }
     }
   }
