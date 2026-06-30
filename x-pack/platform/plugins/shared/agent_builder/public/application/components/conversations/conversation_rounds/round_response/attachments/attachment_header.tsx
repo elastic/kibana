@@ -120,7 +120,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   return (
     <div ref={measureRef} style={{ width: '100%' }}>
-      <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+      <EuiSplitPanel.Inner color="plain" css={headerStyles} paddingSize="m">
         {previewBadgeState === 'preview_available' && (
           <EuiBadge iconType="readOnly" css={badgeStyles}>
             {PREVIEW_ONLY_LABEL}
