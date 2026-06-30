@@ -51,14 +51,16 @@ const createPrioritizeAlertsTool = (): BuiltinSkillBoundedTool<typeof prioritize
   type: ToolType.builtin,
   description:
     'Fetch the alert queue, score each alert using base risk score and MITRE tactic boost, ' +
-    'cluster alerts by shared entity (host/user), and return ranked groups with score breakdowns. ' +
-    'Use this as the first step for any alert queue prioritization request.',
+    'cluster alerts by shared entity (host/user), enrich groups with Entity Analytics ' +
+    '(entity risk level and asset criticality, when available), and return ranked groups with ' +
+    'score breakdowns. Use this as the first step for any alert queue prioritization request.',
   schema: prioritizeAlertsSchema,
   handler: async ({ timeWindowHours, maxAlerts, workflowStatus, alertIds }, context) => {
     try {
       const result = await prioritizeAlerts({
         esClient: context.esClient.asCurrentUser,
         spaceId: context.spaceId,
+        logger: context.logger,
         timeWindowHours,
         maxAlerts,
         workflowStatus,
@@ -118,12 +120,24 @@ Use this skill when:
   - \`workflowStatus\`: "open" (default) or "open+acknowledged"
   - \`alertIds\`: optional list of specific alert IDs when the user has a selection
 - The tool fetches open/acknowledged alerts sorted by risk score, applies MITRE tactic boosts,
-  clusters alerts by shared host or user entities, and returns ranked groups
+  clusters alerts by shared host or user entities, enriches each group with Entity Analytics
+  (entity risk level and asset criticality of the primary entity, when available), and returns
+  ranked groups
+
+### Scoring factors
+The group score combines (all computed by the tool, no LLM math needed):
+- \`baseRiskScore\`: the alert's \`kibana.alert.risk_score\`
+- \`mitreBoost\`: +10 to +30 based on the highest-severity MITRE tactic on the alert
+- \`statusModifier\`: −5 if acknowledged, −5 if already in a case
+- \`entityRiskBoost\`: from the primary entity's Entity Analytics risk level — Critical +25, High +15, Moderate +5 (0 when no entity risk data)
+- \`assetCriticalityBoost\`: from the primary entity's asset criticality (the "watchlist" signal) — extreme_impact +20, high_impact +12, medium_impact +6 (0 when unassigned)
+Entity Analytics enrichment is best-effort: if the Risk Engine or asset criticality is unavailable, those boosts are simply 0 and triage still works.
 
 ### 2. Present Ranked Groups
 For each group returned, explain:
 - The shared entity or context (e.g. "3 alerts on host WIN-SRV01")
-- The group score and what drove it (base risk score + MITRE tactic boost applied)
+- The group score and what drove it (base risk score + MITRE tactic boost + entity risk / asset criticality boosts applied)
+- The primary entity's risk level and asset criticality when present (e.g. "host WIN-SRV01: entity risk Critical, asset criticality high_impact")
 - Whether any alerts are acknowledged or already in a case (with score penalty noted)
 - The top alert rule names in the group
 
@@ -157,7 +171,9 @@ For each group returned, explain:
 
 ## Guardrails
 - Do not perform deep investigation — direct the user to alert-analysis for that
-- Always explain why a group is surfaced: cite the score components (base risk, MITRE boost)
+- Always explain why a group is surfaced: cite the score components (base risk, MITRE boost, entity risk boost, asset criticality boost)
+- When a group's primary entity carries an entity risk level or asset criticality, cite it — these are strong prioritization signals from Entity Analytics
+- Entity Analytics enrichment is internal to \`prioritize-alerts\`; never call \`security.entity_risk_score\` or any asset-criticality tool separately
 - Acknowledged alerts are deprioritized (−5) but not hidden; flag the modifier in your response
 - Alerts already in a case are deprioritized (−5) but remain visible — they may group with new open alerts
 - Building-block alerts are excluded automatically (they are sub-components of parent alerts)
@@ -171,7 +187,8 @@ Present results as ranked groups. **You MUST include the top alert _id for every
 
 **Group 1 — [entity or context]** (score: N)
 - Alerts: N alerts | Top rule: [rule name] | Severity: critical/high
-- Score drivers: base risk [N], MITRE tactic boost [+N for tactic name]
+- Score drivers: base risk [N], MITRE tactic boost [+N for tactic name], entity risk [+N, level], asset criticality [+N, level]
+- Entity signals: entity risk level [Critical/High/...], asset criticality [extreme_impact/...] (omit if none)
 - **Top alert ID: [exact _id string from the tool result]** ← always emit verbatim
 - Recommended next step: Investigate with alert-analysis
 

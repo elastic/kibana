@@ -6,22 +6,34 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
+import type { EntityEnrichmentMap } from './entity_enrichment';
+import { enrichEntities, entityKey } from './entity_enrichment';
 
-const ALERT_TRIAGE_SOURCE_FIELDS = [
+/**
+ * Fields requested via the ES `fields` API. We deliberately use `fields` rather than
+ * `_source` because security alert documents store `kibana.alert.*` as flattened dotted
+ * keys in `_source` (not nested objects), so nested `_source` traversal silently returns
+ * undefined. The `fields` API normalizes values from the index mapping regardless of how
+ * `_source` is shaped, and always returns arrays. This is the same pattern used by Attack
+ * Discovery and the entity-analytics lead-generation module.
+ */
+const ALERT_TRIAGE_FIELDS = [
   '@timestamp',
   'kibana.alert.risk_score',
   'kibana.alert.severity',
   'kibana.alert.workflow_status',
   'kibana.alert.rule.name',
-  'kibana.alert.rule.threat',
+  // Leaf of the nested threat object — yields a flat array of MITRE tactic names.
+  'kibana.alert.rule.threat.tactic.name',
   'kibana.alert.case_ids',
-  'kibana.alert.building_block_type',
   'host.name',
   'user.name',
-  'source.ip',
-  'destination.ip',
 ] as const;
+
+/** Shape of the `fields` entry on an ES search hit: each field is an array of values. */
+type HitFields = Record<string, unknown[]>;
 
 /** Additive boosts on top of kibana.alert.risk_score, by MITRE tactic name. */
 const MITRE_TACTIC_BOOST: Record<string, number> = {
@@ -37,10 +49,28 @@ const MITRE_TACTIC_BOOST: Record<string, number> = {
   'Initial Access': 10,
 };
 
+/** Additive group boost by Entity Analytics risk level (Risk Engine `calculated_level`). */
+const ENTITY_RISK_BOOST: Record<string, number> = {
+  Critical: 25,
+  High: 15,
+  Moderate: 5,
+};
+
+/** Additive group boost by asset criticality (the practical "watchlist" signal). */
+const ASSET_CRITICALITY_BOOST: Record<string, number> = {
+  extreme_impact: 20,
+  high_impact: 12,
+  medium_impact: 6,
+};
+
 export interface ScoreBreakdown {
   baseRiskScore: number;
   mitreBoost: number;
   statusModifier: number;
+  /** Group-level boost from the primary entity's Entity Analytics risk level. */
+  entityRiskBoost: number;
+  /** Group-level boost from the primary entity's asset criticality. */
+  assetCriticalityBoost: number;
   finalScore: number;
 }
 
@@ -74,6 +104,12 @@ export interface TriageGroupSummary {
   severity: string;
   /** Deduplicated rule names across all alerts in the group (up to 5). */
   ruleNames: string[];
+  /** Entity Analytics risk level of the primary entity, when available. */
+  entityRiskLevel?: string;
+  /** Normalized entity risk score (0-100) of the primary entity, when available. */
+  entityRiskScore?: number;
+  /** Asset criticality of the primary entity (the "watchlist" signal), when available. */
+  assetCriticality?: string;
   scoreBreakdown: ScoreBreakdown;
 }
 
@@ -86,61 +122,47 @@ export interface TriageResult {
 export interface AlertTriageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
+  logger: Logger;
   timeWindowHours: number;
   maxAlerts: number;
   workflowStatus: 'open' | 'open+acknowledged';
   alertIds?: string[];
 }
 
-function getValue(source: Record<string, unknown>, ...path: string[]): unknown {
-  let current: unknown = source;
-  for (const key of path) {
-    if (current == null || typeof current !== 'object') return undefined;
-    current = (current as Record<string, unknown>)[key];
-  }
-  return current;
-}
-
-function getStringValue(source: Record<string, unknown>, ...path: string[]): string {
-  const value = getValue(source, ...path);
+/** First value of a `fields` entry as a string, or '' when absent. */
+function getFirstString(fields: HitFields, key: string): string {
+  const value = fields[key]?.[0];
   return typeof value === 'string' ? value : '';
 }
 
-function getStringArray(source: Record<string, unknown>, ...path: string[]): string[] {
-  const value = getValue(source, ...path);
-  if (typeof value === 'string') return [value];
-  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === 'string');
-  return [];
-}
-
-function getNumber(source: Record<string, unknown>, ...path: string[]): number {
-  const value = getValue(source, ...path);
+/** First value of a `fields` entry as a number, or 0 when absent/non-numeric. */
+function getFirstNumber(fields: HitFields, key: string): number {
+  const value = fields[key]?.[0];
   return typeof value === 'number' ? value : 0;
 }
 
-function getMitreBoost(threat: unknown): number {
-  if (!Array.isArray(threat)) return 0;
+/** All string values of a `fields` entry (the `fields` API always returns arrays). */
+function getStrings(fields: HitFields, key: string): string[] {
+  const value = fields[key];
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === 'string');
+}
+
+/** Max MITRE tactic boost across the flattened tactic names on the alert. */
+function getMitreBoost(tacticNames: string[]): number {
   let maxBoost = 0;
-  for (const entry of threat) {
-    if (entry != null && typeof entry === 'object') {
-      const tactic = (entry as Record<string, unknown>).tactic;
-      if (tactic != null && typeof tactic === 'object') {
-        const name = (tactic as Record<string, unknown>).name;
-        if (typeof name === 'string') {
-          maxBoost = Math.max(maxBoost, MITRE_TACTIC_BOOST[name] ?? 0);
-        }
-      }
-    }
+  for (const name of tacticNames) {
+    maxBoost = Math.max(maxBoost, MITRE_TACTIC_BOOST[name] ?? 0);
   }
   return maxBoost;
 }
 
-function scoreAlert(id: string, source: Record<string, unknown>): TriageAlert {
-  const baseRiskScore = getNumber(source, 'kibana', 'alert', 'risk_score');
-  const mitreBoost = getMitreBoost(getValue(source, 'kibana', 'alert', 'rule', 'threat'));
+function scoreAlert(id: string, fields: HitFields): TriageAlert {
+  const baseRiskScore = getFirstNumber(fields, 'kibana.alert.risk_score');
+  const mitreBoost = getMitreBoost(getStrings(fields, 'kibana.alert.rule.threat.tactic.name'));
 
-  const workflowStatus = getStringValue(source, 'kibana', 'alert', 'workflow_status');
-  const caseIds = getStringArray(source, 'kibana', 'alert', 'case_ids');
+  const workflowStatus = getFirstString(fields, 'kibana.alert.workflow_status');
+  const caseIds = getStrings(fields, 'kibana.alert.case_ids');
   const inCase = caseIds.length > 0;
   const isAcknowledged = workflowStatus === 'acknowledged';
 
@@ -149,18 +171,21 @@ function scoreAlert(id: string, source: Record<string, unknown>): TriageAlert {
 
   return {
     id,
-    timestamp: getStringValue(source, '@timestamp'),
-    ruleName: getStringValue(source, 'kibana', 'alert', 'rule', 'name'),
-    severity: getStringValue(source, 'kibana', 'alert', 'severity'),
+    timestamp: getFirstString(fields, '@timestamp'),
+    ruleName: getFirstString(fields, 'kibana.alert.rule.name'),
+    severity: getFirstString(fields, 'kibana.alert.severity'),
     workflowStatus,
-    hostNames: getStringArray(source, 'host', 'name'),
-    userNames: getStringArray(source, 'user', 'name'),
+    hostNames: getStrings(fields, 'host.name'),
+    userNames: getStrings(fields, 'user.name'),
     mitreBoost,
     inCase,
     scoreBreakdown: {
       baseRiskScore,
       mitreBoost,
       statusModifier,
+      // Entity-level boosts are applied later at group granularity (see buildGroups).
+      entityRiskBoost: 0,
+      assetCriticalityBoost: 0,
       finalScore,
     },
   };
@@ -175,7 +200,7 @@ function getOrCreate<K>(map: Map<K, number[]>, key: K): number[] {
   return arr;
 }
 
-function buildGroups(alerts: TriageAlert[]): TriageGroupSummary[] {
+function buildGroups(alerts: TriageAlert[], enrichment: EntityEnrichmentMap): TriageGroupSummary[] {
   // Union-find to cluster alerts that share entities
   const parent: number[] = alerts.map((_, i) => i);
 
@@ -280,10 +305,23 @@ function buildGroups(alerts: TriageAlert[]): TriageGroupSummary[] {
     // Deduplicate rule names across the group (cap at 5 to stay compact)
     const ruleNames = [...new Set(groupAlerts.map((a) => a.ruleName).filter(Boolean))].slice(0, 5);
 
+    // Apply Entity Analytics boosts based on the group's primary entity.
+    const entityEnrichment =
+      entityType != null && entityName != null
+        ? enrichment.get(entityKey(entityType, entityName))
+        : undefined;
+    const entityRiskBoost = entityEnrichment?.riskLevel
+      ? ENTITY_RISK_BOOST[entityEnrichment.riskLevel] ?? 0
+      : 0;
+    const assetCriticalityBoost = entityEnrichment?.criticality
+      ? ASSET_CRITICALITY_BOOST[entityEnrichment.criticality] ?? 0
+      : 0;
+    const finalScore = groupScore + entityRiskBoost + assetCriticalityBoost;
+
     groups.push({
       groupKey,
       groupType,
-      groupScore,
+      groupScore: finalScore,
       entityType,
       entityName,
       sharedEntities,
@@ -292,7 +330,15 @@ function buildGroups(alerts: TriageAlert[]): TriageGroupSummary[] {
       topRuleName: topAlert.ruleName,
       severity: topAlert.severity,
       ruleNames,
-      scoreBreakdown: topAlert.scoreBreakdown,
+      entityRiskLevel: entityEnrichment?.riskLevel,
+      entityRiskScore: entityEnrichment?.riskScoreNorm,
+      assetCriticality: entityEnrichment?.criticality,
+      scoreBreakdown: {
+        ...topAlert.scoreBreakdown,
+        entityRiskBoost,
+        assetCriticalityBoost,
+        finalScore,
+      },
     });
   }
 
@@ -303,6 +349,7 @@ function buildGroups(alerts: TriageAlert[]): TriageGroupSummary[] {
 export const prioritizeAlerts = async ({
   esClient,
   spaceId,
+  logger,
   timeWindowHours,
   maxAlerts,
   workflowStatus,
@@ -349,16 +396,22 @@ export const prioritizeAlerts = async ({
       },
     },
     sort: [{ 'kibana.alert.risk_score': { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
-    _source: Array.from(ALERT_TRIAGE_SOURCE_FIELDS),
+    _source: false,
+    fields: Array.from(ALERT_TRIAGE_FIELDS),
     ignore_unavailable: true,
   });
 
   const hits = result.hits.hits;
   const scoredAlerts: TriageAlert[] = hits.map((hit) =>
-    scoreAlert(hit._id ?? '', (hit._source ?? {}) as Record<string, unknown>)
+    scoreAlert(hit._id ?? '', (hit.fields ?? {}) as HitFields)
   );
 
-  const groups = buildGroups(scoredAlerts);
+  // Best-effort Entity Analytics enrichment over the distinct entities in this batch.
+  const hostNames = scoredAlerts.flatMap((a) => a.hostNames);
+  const userNames = scoredAlerts.flatMap((a) => a.userNames);
+  const enrichment = await enrichEntities({ esClient, spaceId, logger, hostNames, userNames });
+
+  const groups = buildGroups(scoredAlerts, enrichment);
 
   return {
     groups,

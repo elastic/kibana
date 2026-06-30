@@ -232,6 +232,33 @@ function configureExperiment({
         };
       },
     },
+    {
+      // Deterministic guard that specific literal terms (e.g. seeded risk scores) appear in the
+      // final response. Used by alert-triage grounded evals to catch regressions where the tool
+      // silently reads 0 for fields like kibana.alert.risk_score.
+      name: 'RequiredTermsInResponse',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const raw = metadata?.requiredTerms;
+        const requiredTerms = Array.isArray(raw)
+          ? (raw as unknown[]).filter((term): term is string => typeof term === 'string')
+          : [];
+        if (requiredTerms.length === 0) return { score: 1 };
+
+        const answer = getFinalAssistantMessage(output as TaskOutput);
+        const allPresent = containsAllTerms(answer, requiredTerms);
+        const missing = requiredTerms.filter((term) => !answer.includes(term));
+
+        return {
+          score: allPresent ? 1 : 0,
+          metadata: {
+            requiredTerms,
+            missing,
+            answerPreview: answer.slice(0, 600),
+          },
+        };
+      },
+    },
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...ragEvaluators,

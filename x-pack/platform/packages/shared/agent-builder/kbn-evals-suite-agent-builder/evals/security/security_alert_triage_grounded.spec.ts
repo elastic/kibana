@@ -79,20 +79,18 @@ evaluate.describe(
               'kibana.alert.risk_score': 99,
               'kibana.alert.severity': 'critical',
               'kibana.alert.workflow_status': 'open',
-              'kibana.alert.rule': {
-                name: 'Remote Service Creation via Named Pipe',
-                uuid: 'alert-triage-eval-rule-lateral-001',
-                tags: [EVAL_TAG],
-                threat: [
-                  {
-                    tactic: {
-                      id: 'TA0008',
-                      name: 'Lateral Movement',
-                      reference: 'https://attack.mitre.org/tactics/TA0008/',
-                    },
+              'kibana.alert.rule.name': 'Remote Service Creation via Named Pipe',
+              'kibana.alert.rule.uuid': 'alert-triage-eval-rule-lateral-001',
+              'kibana.alert.rule.tags': [EVAL_TAG],
+              'kibana.alert.rule.threat': [
+                {
+                  tactic: {
+                    id: 'TA0008',
+                    name: 'Lateral Movement',
+                    reference: 'https://attack.mitre.org/tactics/TA0008/',
                   },
-                ],
-              },
+                },
+              ],
               host: { name: 'EVAL-DC01' },
               user: { name: 'Administrator' },
             },
@@ -106,20 +104,18 @@ evaluate.describe(
               'kibana.alert.risk_score': 75,
               'kibana.alert.severity': 'high',
               'kibana.alert.workflow_status': 'open',
-              'kibana.alert.rule': {
-                name: 'Credential Access via LSASS Memory',
-                uuid: 'alert-triage-eval-rule-cred-002',
-                tags: [EVAL_TAG],
-                threat: [
-                  {
-                    tactic: {
-                      id: 'TA0006',
-                      name: 'Credential Access',
-                      reference: 'https://attack.mitre.org/tactics/TA0006/',
-                    },
+              'kibana.alert.rule.name': 'Credential Access via LSASS Memory',
+              'kibana.alert.rule.uuid': 'alert-triage-eval-rule-cred-002',
+              'kibana.alert.rule.tags': [EVAL_TAG],
+              'kibana.alert.rule.threat': [
+                {
+                  tactic: {
+                    id: 'TA0006',
+                    name: 'Credential Access',
+                    reference: 'https://attack.mitre.org/tactics/TA0006/',
                   },
-                ],
-              },
+                },
+              ],
               host: { name: 'EVAL-WORKSTATION-01' },
             },
             refresh: 'true',
@@ -132,20 +128,18 @@ evaluate.describe(
               'kibana.alert.risk_score': 40,
               'kibana.alert.severity': 'medium',
               'kibana.alert.workflow_status': 'open',
-              'kibana.alert.rule': {
-                name: 'Network Port Scan Detected',
-                uuid: 'alert-triage-eval-rule-discovery-003',
-                tags: [EVAL_TAG],
-                threat: [
-                  {
-                    tactic: {
-                      id: 'TA0007',
-                      name: 'Discovery',
-                      reference: 'https://attack.mitre.org/tactics/TA0007/',
-                    },
+              'kibana.alert.rule.name': 'Network Port Scan Detected',
+              'kibana.alert.rule.uuid': 'alert-triage-eval-rule-discovery-003',
+              'kibana.alert.rule.tags': [EVAL_TAG],
+              'kibana.alert.rule.threat': [
+                {
+                  tactic: {
+                    id: 'TA0007',
+                    name: 'Discovery',
+                    reference: 'https://attack.mitre.org/tactics/TA0007/',
                   },
-                ],
-              },
+                },
+              ],
               host: { name: 'EVAL-SCANNER-01' },
             },
             refresh: 'true',
@@ -223,6 +217,9 @@ evaluate.describe(
                 // The CODE evaluator checks this ID appears verbatim in the final response.
                 // Empty array when seeding failed → evaluator skips with score 1.
                 requiredAlertIds: seededAlertIds ? [seededAlertIds.critical] : [],
+                // Regression guard for bug 1 (risk scores read as 0): the seeded base risk
+                // score must surface in the response. Skipped (score 1) when seeding failed.
+                requiredTerms: seededAlertIds ? ['99'] : [],
               },
             },
           ],
@@ -265,6 +262,8 @@ evaluate.describe(
                   requiredAlertIds: seededAlertIds
                     ? [seededAlertIds.critical, seededAlertIds.high]
                     : [],
+                  // Regression guard for bug 1: both seeded base risk scores must surface.
+                  requiredTerms: seededAlertIds ? ['99', '75'] : [],
                 },
               },
             ],
