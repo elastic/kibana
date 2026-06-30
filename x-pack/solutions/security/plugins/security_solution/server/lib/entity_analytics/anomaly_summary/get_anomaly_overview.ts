@@ -49,6 +49,7 @@ interface GetEntityAnomalyOverviewParams {
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
+  request: KibanaRequest;
   soClient: SavedObjectsClientContract;
 }
 
@@ -85,6 +86,7 @@ export const getEntityAnomalyOverview = async ({
   threatTactics,
   logger,
   ml,
+  request,
   soClient,
 }: GetEntityAnomalyOverviewParams): Promise<AnomalyOverview> => {
   const effectiveToMs = toMs ?? Date.now();
@@ -99,12 +101,18 @@ export const getEntityAnomalyOverview = async ({
     to: effectiveToMs,
   };
 
-  const mlSystem = ml.mlSystemProvider({} as KibanaRequest, soClient);
-  const allSecurityJobIds = await getSecurityMlJobIds({ ml, soClient });
+  const mlSystem = ml.mlSystemProvider(request, soClient);
+  const allSecurityJobIds = await getSecurityMlJobIds({ ml, request, soClient });
 
   if (allSecurityJobIds.length === 0) return empty;
 
-  const allJobConfigs = await getJobConfig({ jobIds: allSecurityJobIds, logger, ml, soClient });
+  const allJobConfigs = await getJobConfig({
+    jobIds: allSecurityJobIds,
+    logger,
+    ml,
+    request,
+    soClient,
+  });
 
   let resolvedJobIds = allSecurityJobIds;
   if (threatTactics && threatTactics.length > 0) {
