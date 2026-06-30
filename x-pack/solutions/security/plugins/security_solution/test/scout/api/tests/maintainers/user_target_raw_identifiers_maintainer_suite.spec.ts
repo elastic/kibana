@@ -13,8 +13,6 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
-  LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../fixtures/maintainers/constants';
 import {
   clearEntityStoreIndices,
@@ -72,10 +70,7 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
         defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
         internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
 
-        await esClient.indices.delete({
-          index: [LATEST_INDEX, UPDATES_INDEX],
-          ignore_unavailable: true,
-        });
+        await clearEntityStoreIndices(esClient);
 
         const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
           headers: defaultHeaders,

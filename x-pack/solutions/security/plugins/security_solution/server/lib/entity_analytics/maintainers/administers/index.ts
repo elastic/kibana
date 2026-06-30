@@ -82,6 +82,10 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       return status.state;
     }
 
+    // The ...result spread persists all of RunResult's fields (totalBuckets,
+    // totalRecords, totalWritten, totalNotFound, totalWriteErrors,
+    // totalDroppedTargets, totalIterations, truncated, but only
+    // lastProcessedTimestamp is read back on the next run (see above).
     return {
       ...result,
       lastProcessedTimestamp: result.lastRunTimestamp,

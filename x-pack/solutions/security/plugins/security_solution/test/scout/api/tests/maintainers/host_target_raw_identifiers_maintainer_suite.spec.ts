@@ -344,8 +344,8 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
   );
 };
 
-// Add a new entry here as each host-TARGET maintainer is onboarded (depends_on,
-// …); the shared suite seeds the host target, runs the maintainer, and asserts
+// For each new host-target maintainer, create a new spec file and call registerHostTargetRawIdentifiersMaintainerSuite from there.
+// the shared suite seeds the host target, runs the maintainer, and asserts
 // the entity.lifecycle.last_seen watermark gate end-to-end.
 //
 // administers sets userActorNamespace so the suite also covers the user → host
