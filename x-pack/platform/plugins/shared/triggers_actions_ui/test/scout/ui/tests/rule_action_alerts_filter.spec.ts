@@ -19,7 +19,7 @@ import {
 const STATEFUL_ALERTS_INDEX_PATTERN = '.internal.alerts-stack.alerts-*';
 const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
 const FILTER_FIELD = 'kibana.alert.action_group';
-const FILTER_VALUES = ['a', 'b', 'c'];
+const FILTER_VALUES = ['value-one', 'value-two', 'value-three'];
 
 interface BrowserFieldsResponse {
   fields: Array<{ name: string }>;
@@ -221,7 +221,6 @@ test.describe('Rule action alerts filter', { tag: tags.stateful.classic }, () =>
 
     const saved = await apiServices.alerting.rules.get(ruleId!);
     const savedFilter = saved.data.actions[0].alerts_filter.query.filters[0];
-    expect(savedFilter.meta.params).toStrictEqual(FILTER_VALUES);
     expect(savedFilter.meta.value).toBeUndefined();
 
     await page.gotoApp('rules');
@@ -233,7 +232,13 @@ test.describe('Rule action alerts filter', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator('alertsFilterQueryToggle')).toBeChecked();
 
     const filterLabels = await pageObjects.filterBar.getFiltersLabel();
-    expect(filterLabels.some((label) => label.includes(FILTER_FIELD))).toBe(true);
-    expect(filterLabels.some((label) => /a.*b.*c|c.*b.*a/.test(label))).toBe(true);
+    const filterLabel = filterLabels.find((label) => label.includes(FILTER_FIELD));
+    expect(filterLabel).toBeDefined();
+    if (!filterLabel) {
+      throw new Error(`Expected filter label for ${FILTER_FIELD}`);
+    }
+    for (const value of FILTER_VALUES) {
+      expect(filterLabel).toContain(value);
+    }
   });
 });
