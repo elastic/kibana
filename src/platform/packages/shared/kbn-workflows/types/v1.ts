@@ -62,6 +62,7 @@ export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
