@@ -19,8 +19,9 @@ export const entityAnalyticsLeadsSkill = defineSkillType({
   name: ENTITY_ANALYTICS_LEADS_SKILL_ID,
   basePath: 'skills/security/entity_analytics_leads',
   description:
-    'AI-generated investigation leads for security entities: list, triage, dismiss, and generate leads. ' +
-    'Use when the user asks to review, list, show, triage, dismiss, or generate AI-generated investigation leads.',
+    'AI-generated investigation leads for security entities. ' +
+    'Use when the user asks to review, list, show, triage, dismiss, or generate AI-generated investigation leads, ' +
+    'or when the user wants to find proactive threat hunting opportunities surfaced from entity data.',
   content: `
 # Investigation Leads Guide
 
@@ -31,6 +32,7 @@ Use this skill when the user asks to:
 - Triage open leads and decide which to investigate next
 - Check whether any new leads have been generated
 - Filter leads by status (active, dismissed, expired) or prioritize by score
+- Find proactive threat hunting opportunities from entity data (leads are AI-generated hypotheses that surface these opportunities)
 
 Do **not** use this skill when:
 - The user wants to find leads about a specific entity — \`list_leads\` has no entity filter; it returns all leads across the space. Retrieve leads, surface any that mention the entity, and follow up with the \`entity-analytics\` skill for a full profile.
