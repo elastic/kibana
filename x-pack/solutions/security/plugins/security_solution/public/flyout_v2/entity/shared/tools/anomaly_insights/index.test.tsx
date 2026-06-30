@@ -50,7 +50,9 @@ describe('<AnomalyInsights /> host', () => {
   });
 
   it('renders the header with the title, host label and storage icon', () => {
-    const { getByTestId } = render(<AnomalyInsights entityType={EntityType.host} value="my-host" />);
+    const { getByTestId } = render(
+      <AnomalyInsights entityType={EntityType.host} value="my-host" />
+    );
     const header = getByTestId('mockToolsFlyoutHeader');
     expect(header).toHaveAttribute('data-title', 'Behavioral anomalies');
     expect(header).toHaveAttribute('data-label', 'my-host');
@@ -58,7 +60,9 @@ describe('<AnomalyInsights /> host', () => {
   });
 
   it('renders the anomalies tab inside a scrollable flyout body', () => {
-    const { getByTestId } = render(<AnomalyInsights entityType={EntityType.host} value="my-host" />);
+    const { getByTestId } = render(
+      <AnomalyInsights entityType={EntityType.host} value="my-host" />
+    );
     const body = getByTestId(ANOMALY_INSIGHTS_TOOL_TEST_ID);
     expect(body).toBeInTheDocument();
     expect(body).toContainElement(getByTestId('mockAnomaliesTab'));
@@ -74,7 +78,9 @@ describe('<AnomalyInsights /> host', () => {
   });
 
   it('passes an empty entity id to the tab when none is provided', () => {
-    const { getByTestId } = render(<AnomalyInsights entityType={EntityType.host} value="my-host" />);
+    const { getByTestId } = render(
+      <AnomalyInsights entityType={EntityType.host} value="my-host" />
+    );
     expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-entity-id', '');
   });
 
@@ -94,7 +100,9 @@ describe('<AnomalyInsights /> user', () => {
   });
 
   it('renders the header with the user label and user icon', () => {
-    const { getByTestId } = render(<AnomalyInsights entityType={EntityType.user} value="my-user" />);
+    const { getByTestId } = render(
+      <AnomalyInsights entityType={EntityType.user} value="my-user" />
+    );
     const header = getByTestId('mockToolsFlyoutHeader');
     expect(header).toHaveAttribute('data-label', 'my-user');
     expect(header).toHaveAttribute('data-icon-type', 'user');
