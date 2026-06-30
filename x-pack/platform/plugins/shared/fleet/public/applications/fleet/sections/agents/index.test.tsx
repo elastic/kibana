@@ -32,11 +32,6 @@ jest.mock('./agent_list_page', () => {
     AgentListPage: () => <>AgentListPage</>,
   };
 });
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: ({ children }: { children?: React.ReactNode }) => (
-    <div data-test-subj="appHeader">{children}</div>
-  ),
-}));
 
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;

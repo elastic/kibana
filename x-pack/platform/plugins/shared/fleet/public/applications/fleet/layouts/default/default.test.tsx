@@ -6,21 +6,25 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { DefaultLayout, FLEET_TAB_IDS } from './default';
 
-let mockAppHeaderProps: Record<string, any> = {};
-
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: (props: any) => {
-    mockAppHeaderProps = props;
-    return <div data-test-subj="mockAppHeader" />;
-  },
-}));
-
 jest.mock('../../../../layouts', () => ({
-  WithoutHeaderLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  WithoutHeaderLayout: ({
+    header,
+    children,
+  }: {
+    header?: React.ReactNode;
+    children: React.ReactNode;
+  }) => (
+    <div>
+      {header}
+      {children}
+    </div>
+  ),
 }));
 
 jest.mock('../../../../hooks/use_dismissable_tour', () => ({
@@ -63,86 +67,98 @@ const defaultAuthz = {
   },
 };
 
-const setupMocks = (authzOverrides?: Record<string, any>) => {
+const setupMocks = (options?: { authz?: Record<string, any>; config?: Record<string, any> }) => {
   mockUseAuthz.mockReturnValue({
-    fleet: { ...defaultAuthz.fleet, ...authzOverrides },
+    fleet: { ...defaultAuthz.fleet, ...options?.authz },
   });
-  mockUseConfig.mockReturnValue({ agents: { enabled: true } });
+  mockUseConfig.mockReturnValue({ agents: { enabled: true }, ...options?.config });
   mockUseLink.mockReturnValue({ getHref: () => '/mock-href' });
   mockUseStartServices.mockReturnValue({
     docLinks: { links: { fleet: { guide: 'https://docs', roleAndPrivileges: 'https://docs' } } },
   });
 };
 
-describe('DefaultLayout', () => {
-  beforeEach(() => {
-    mockAppHeaderProps = {};
-  });
+const renderLayout = (section?: React.ComponentProps<typeof DefaultLayout>['section']) =>
+  render(
+    <I18nProvider>
+      <MockAppHeaderProvider>
+        <DefaultLayout section={section} />
+      </MockAppHeaderProvider>
+    </I18nProvider>
+  );
 
+describe('DefaultLayout', () => {
   describe('read-only badge', () => {
     it('shows read-only badge for agents section without allAgents', () => {
-      setupMocks({ allAgents: false });
-      render(<DefaultLayout section="agents" />);
+      setupMocks({ authz: { allAgents: false } });
+      renderLayout('agents');
 
-      expect(mockAppHeaderProps.badges).toEqual(
-        expect.arrayContaining([expect.objectContaining({ label: 'Read-only' })])
-      );
+      expect(screen.getByText('Read-only')).toBeInTheDocument();
     });
 
     it('shows read-only badge for agent_policies section without allAgentPolicies', () => {
-      setupMocks({ allAgentPolicies: false });
-      render(<DefaultLayout section="agent_policies" />);
+      setupMocks({ authz: { allAgentPolicies: false } });
+      renderLayout('agent_policies');
 
-      expect(mockAppHeaderProps.badges).toEqual(
-        expect.arrayContaining([expect.objectContaining({ label: 'Read-only' })])
-      );
+      expect(screen.getByText('Read-only')).toBeInTheDocument();
     });
 
     it('shows read-only badge for settings section without allSettings', () => {
-      setupMocks({ allSettings: false });
-      render(<DefaultLayout section="settings" />);
+      setupMocks({ authz: { allSettings: false } });
+      renderLayout('settings');
 
-      expect(mockAppHeaderProps.badges).toEqual(
-        expect.arrayContaining([expect.objectContaining({ label: 'Read-only' })])
-      );
+      expect(screen.getByText('Read-only')).toBeInTheDocument();
     });
 
     it('does not show read-only badge when user has full privileges', () => {
       setupMocks();
-      render(<DefaultLayout section="agents" />);
+      renderLayout('agents');
 
-      expect(mockAppHeaderProps.badges).toEqual([]);
+      expect(screen.queryByText('Read-only')).not.toBeInTheDocument();
     });
   });
 
   describe('tab visibility', () => {
     it('hides agents tab when readAgents is false', () => {
-      setupMocks({ readAgents: false });
-      render(<DefaultLayout section="settings" />);
+      setupMocks({ authz: { readAgents: false } });
+      renderLayout('settings');
 
-      const tabIds = mockAppHeaderProps.tabs.map((t: any) => t.id);
-      expect(tabIds).not.toContain(FLEET_TAB_IDS.agents);
+      expect(screen.queryByTestId(FLEET_TAB_IDS.agents)).not.toBeInTheDocument();
     });
 
     it('hides settings tab when readSettings is false', () => {
-      setupMocks({ readSettings: false });
-      render(<DefaultLayout section="agents" />);
+      setupMocks({ authz: { readSettings: false } });
+      renderLayout('agents');
 
-      const tabIds = mockAppHeaderProps.tabs.map((t: any) => t.id);
-      expect(tabIds).not.toContain(FLEET_TAB_IDS.settings);
+      expect(screen.queryByTestId(FLEET_TAB_IDS.settings)).not.toBeInTheDocument();
     });
 
     it('shows all standard tabs with full privileges', () => {
       setupMocks();
-      render(<DefaultLayout section="agents" />);
+      renderLayout('agents');
 
-      const tabIds = mockAppHeaderProps.tabs.map((t: any) => t.id);
-      expect(tabIds).toContain(FLEET_TAB_IDS.agents);
-      expect(tabIds).toContain(FLEET_TAB_IDS.agentPolicies);
-      expect(tabIds).toContain(FLEET_TAB_IDS.enrollmentTokens);
-      expect(tabIds).toContain(FLEET_TAB_IDS.uninstallTokens);
-      expect(tabIds).toContain(FLEET_TAB_IDS.dataStreams);
-      expect(tabIds).toContain(FLEET_TAB_IDS.settings);
+      expect(screen.getByTestId(FLEET_TAB_IDS.agents)).toBeInTheDocument();
+      expect(screen.getByTestId(FLEET_TAB_IDS.agentPolicies)).toBeInTheDocument();
+      expect(screen.getByTestId(FLEET_TAB_IDS.enrollmentTokens)).toBeInTheDocument();
+      expect(screen.getByTestId(FLEET_TAB_IDS.uninstallTokens)).toBeInTheDocument();
+      expect(screen.getByTestId(FLEET_TAB_IDS.dataStreams)).toBeInTheDocument();
+      expect(screen.getByTestId(FLEET_TAB_IDS.settings)).toBeInTheDocument();
+    });
+  });
+
+  describe('agents tab disabled state', () => {
+    it('disables the agents tab when agents config is disabled', () => {
+      setupMocks({ config: { agents: { enabled: false } } });
+      renderLayout('agents');
+
+      expect(screen.getByTestId(FLEET_TAB_IDS.agents)).toBeDisabled();
+    });
+
+    it('enables the agents tab when agents config is enabled', () => {
+      setupMocks();
+      renderLayout('agents');
+
+      expect(screen.getByTestId(FLEET_TAB_IDS.agents)).not.toBeDisabled();
     });
   });
 });

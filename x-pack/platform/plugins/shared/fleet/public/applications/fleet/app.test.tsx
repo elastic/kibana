@@ -11,12 +11,6 @@ import { createFleetTestRendererMock } from '../../mock';
 import { AppRoutes } from './app';
 import { useAuthz } from './hooks';
 
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: ({ children }: { children?: React.ReactNode }) => (
-    <div data-test-subj="appHeader">{children}</div>
-  ),
-}));
-
 jest.mock('./sections/agents', () => ({
   AgentsApp: () => <p>AgentsApp</p>,
 }));

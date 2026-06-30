@@ -18,7 +18,7 @@ import { WithoutHeaderLayout } from '../../../../layouts';
 
 import { useDismissableTour } from '../../../../hooks/use_dismissable_tour';
 import type { Section } from '../../sections';
-import { useLink, useAuthz, useStartServices } from '../../hooks';
+import { useLink, useAuthz, useConfig, useStartServices } from '../../hooks';
 import { TourManagerProvider } from '../../../../hooks/use_tour_manager';
 
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
@@ -45,6 +45,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   rightColumn,
 }) => {
   const { getHref } = useLink();
+  const { agents } = useConfig();
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
@@ -53,81 +54,72 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
   const contentWidth = section === 'settings' && isBiggerScreen ? '80%' : '100%';
 
-  const readOnlyBySection: Record<string, boolean> = {
-    agents: !authz.fleet.allAgents,
-    agent_policies: !authz.fleet.allAgentPolicies,
-    settings: !authz.fleet.allSettings,
-  };
+  const isReadOnly =
+    (section === 'agents' && !authz.fleet.allAgents) ||
+    (section === 'agent_policies' && !authz.fleet.allAgentPolicies) ||
+    (section === 'settings' && !authz.fleet.allSettings);
 
-  const tabVisibility: Record<string, boolean> = {
-    [FLEET_TAB_IDS.agents]: authz.fleet.readAgents,
-    [FLEET_TAB_IDS.agentPolicies]: authz.fleet.readAgentPolicies,
-    [FLEET_TAB_IDS.enrollmentTokens]: authz.fleet.allAgents,
-    [FLEET_TAB_IDS.uninstallTokens]: authz.fleet.allAgents,
-    [FLEET_TAB_IDS.dataStreams]: true,
-    [FLEET_TAB_IDS.settings]: authz.fleet.readSettings,
-  };
-
-  const isReadOnly = Boolean(section && readOnlyBySection[section]);
-
-  const tabs: AppHeaderTab[] = [
-    {
-      id: FLEET_TAB_IDS.agents,
-      label: i18n.translate('xpack.fleet.appNavigation.agentsLinkText', {
-        defaultMessage: 'Agents',
-      }),
-      isSelected: section === 'agents',
-      href: getHref('agent_list'),
-      'data-test-subj': FLEET_TAB_IDS.agents,
-    },
-    {
-      id: FLEET_TAB_IDS.agentPolicies,
-      label: i18n.translate('xpack.fleet.appNavigation.policiesLinkText', {
-        defaultMessage: 'Agent policies',
-      }),
-      isSelected: section === 'agent_policies',
-      href: getHref('policies_list'),
-      'data-test-subj': FLEET_TAB_IDS.agentPolicies,
-    },
-    {
-      id: FLEET_TAB_IDS.enrollmentTokens,
-      label: i18n.translate('xpack.fleet.appNavigation.enrollmentTokensText', {
-        defaultMessage: 'Enrollment tokens',
-      }),
-      isSelected: section === 'enrollment_tokens',
-      href: getHref('enrollment_tokens'),
-      'data-test-subj': FLEET_TAB_IDS.enrollmentTokens,
-    },
-    {
-      id: FLEET_TAB_IDS.uninstallTokens,
-      label: i18n.translate('xpack.fleet.appNavigation.uninstallTokensText', {
-        defaultMessage: 'Uninstall tokens',
-      }),
-      isSelected: section === 'uninstall_tokens',
-      href: getHref('uninstall_tokens'),
-      'data-test-subj': FLEET_TAB_IDS.uninstallTokens,
-    },
-    {
-      id: FLEET_TAB_IDS.dataStreams,
-      label: i18n.translate('xpack.fleet.appNavigation.dataStreamsLinkText', {
-        defaultMessage: 'Data streams',
-      }),
-      isSelected: section === 'data_streams',
-      href: getHref('data_streams'),
-      'data-test-subj': FLEET_TAB_IDS.dataStreams,
-    },
-    {
-      id: FLEET_TAB_IDS.settings,
-      label: i18n.translate('xpack.fleet.appNavigation.settingsLinkText', {
-        defaultMessage: 'Settings',
-      }),
-      isSelected: section === 'settings',
-      href: getHref('settings'),
-      'data-test-subj': FLEET_TAB_IDS.settings,
-    },
-  ]
-    // Removed hidden tabs
-    .filter((tab) => tabVisibility[tab.id] ?? true);
+  const tabs: AppHeaderTab[] = (
+    [
+      {
+        id: FLEET_TAB_IDS.agents,
+        label: i18n.translate('xpack.fleet.appNavigation.agentsLinkText', {
+          defaultMessage: 'Agents',
+        }),
+        isSelected: section === 'agents',
+        href: getHref('agent_list'),
+        disabled: !agents?.enabled,
+        isVisible: authz.fleet.readAgents,
+      },
+      {
+        id: FLEET_TAB_IDS.agentPolicies,
+        label: i18n.translate('xpack.fleet.appNavigation.policiesLinkText', {
+          defaultMessage: 'Agent policies',
+        }),
+        isSelected: section === 'agent_policies',
+        href: getHref('policies_list'),
+        isVisible: authz.fleet.readAgentPolicies,
+      },
+      {
+        id: FLEET_TAB_IDS.enrollmentTokens,
+        label: i18n.translate('xpack.fleet.appNavigation.enrollmentTokensText', {
+          defaultMessage: 'Enrollment tokens',
+        }),
+        isSelected: section === 'enrollment_tokens',
+        href: getHref('enrollment_tokens'),
+        isVisible: authz.fleet.allAgents,
+      },
+      {
+        id: FLEET_TAB_IDS.uninstallTokens,
+        label: i18n.translate('xpack.fleet.appNavigation.uninstallTokensText', {
+          defaultMessage: 'Uninstall tokens',
+        }),
+        isSelected: section === 'uninstall_tokens',
+        href: getHref('uninstall_tokens'),
+        isVisible: authz.fleet.allAgents,
+      },
+      {
+        id: FLEET_TAB_IDS.dataStreams,
+        label: i18n.translate('xpack.fleet.appNavigation.dataStreamsLinkText', {
+          defaultMessage: 'Data streams',
+        }),
+        isSelected: section === 'data_streams',
+        href: getHref('data_streams'),
+        isVisible: true,
+      },
+      {
+        id: FLEET_TAB_IDS.settings,
+        label: i18n.translate('xpack.fleet.appNavigation.settingsLinkText', {
+          defaultMessage: 'Settings',
+        }),
+        isSelected: section === 'settings',
+        href: getHref('settings'),
+        isVisible: authz.fleet.readSettings,
+      },
+    ] satisfies Array<Omit<AppHeaderTab, 'data-test-subj'> & { isVisible: boolean }>
+  )
+    .filter((tab) => tab.isVisible)
+    .map(({ isVisible, ...tab }) => ({ ...tab, 'data-test-subj': tab.id }));
 
   const badges: AppHeaderBadge[] = [];
   if (isReadOnly) {
@@ -173,13 +165,17 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           }
         />
       )}
-      <AppHeader
-        title={i18n.translate('xpack.fleet.overviewPageTitle', { defaultMessage: 'Fleet' })}
-        tabs={tabs}
-        docLink={docLinks.links.fleet.guide}
-        badges={badges}
-      />
-      <WithoutHeaderLayout restrictWidth={contentWidth}>
+      <WithoutHeaderLayout
+        restrictWidth={contentWidth}
+        header={
+          <AppHeader
+            title={i18n.translate('xpack.fleet.overviewPageTitle', { defaultMessage: 'Fleet' })}
+            tabs={tabs}
+            docLink={docLinks.links.fleet.guide}
+            badges={badges}
+          />
+        }
+      >
         {rightColumn}
         {children}
       </WithoutHeaderLayout>
