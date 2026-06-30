@@ -200,6 +200,40 @@ describe('useChangeHistoryRestore', () => {
     );
   });
 
+  it('measures restore duration before onRestored and cache invalidation', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const onRestored = jest.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 200)));
+    const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+    jest
+      .spyOn(queryClient, 'invalidateQueries')
+      .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 200)));
+
+    const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), { wrapper });
+
+    await act(async () => {
+      await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        confirmedAtMs: Date.now() - 30,
+      });
+    });
+
+    const completedCall = reportEvent.mock.calls.find(
+      ([eventType]) => eventType === ChangeHistoryTelemetryEventTypes.RestoreCompleted
+    );
+    expect(completedCall).toBeDefined();
+    const durationMs = completedCall?.[1]?.durationMs as number;
+    expect(durationMs).toBeGreaterThanOrEqual(25);
+    expect(durationMs).toBeLessThan(150);
+  });
+
   it('reports restore_failed telemetry when restore fails', async () => {
     const reportEvent = jest.fn();
     const restoreChange = jest.fn().mockRejectedValue({

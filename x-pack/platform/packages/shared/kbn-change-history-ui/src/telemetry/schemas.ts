@@ -200,7 +200,7 @@ const restoreCompletedSchema: RootSchema<ReportChangeHistoryRestoreCompletedActi
   durationMs: {
     type: 'integer',
     _meta: {
-      description: 'Elapsed time from confirm to success in milliseconds',
+      description: 'Elapsed time from confirm to restore API success in milliseconds',
       optional: true,
     },
   },

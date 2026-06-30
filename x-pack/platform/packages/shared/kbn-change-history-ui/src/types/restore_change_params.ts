@@ -18,6 +18,6 @@ export interface RestoreChangeParams {
   signal?: AbortSignal;
   /** Sequence context for restore KPI telemetry (confirm/complete events). */
   restoreTelemetry?: ChangeHistoryRestoreTelemetryParams;
-  /** Timestamp captured when the user confirmed restore — used for durationMs. */
+  /** Timestamp captured when the user confirmed restore — used to measure restore API duration. */
   confirmedAtMs?: number;
 }

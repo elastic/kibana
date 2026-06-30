@@ -62,6 +62,9 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
+        const durationMs =
+          params.confirmedAtMs !== undefined ? Date.now() - params.confirmedAtMs : undefined;
+
         await onRestored?.();
         await invalidateChangeHistory(objectId);
 
@@ -69,12 +72,10 @@ export const useChangeHistoryRestore: (
           return false;
         }
 
-        if (params.restoreTelemetry || params.confirmedAtMs !== undefined) {
+        if (params.restoreTelemetry || durationMs !== undefined) {
           telemetry.reportRestoreCompleted({
             ...params.restoreTelemetry,
-            ...(params.confirmedAtMs !== undefined
-              ? { durationMs: Date.now() - params.confirmedAtMs }
-              : {}),
+            ...(durationMs !== undefined ? { durationMs } : {}),
           });
         }
 
