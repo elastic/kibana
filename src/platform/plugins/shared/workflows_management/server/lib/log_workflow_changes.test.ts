@@ -13,7 +13,7 @@ import { logWorkflowChanges } from './log_workflow_changes';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WorkflowChangeHistoryAction,
-} from '../services/workflow_change_history_constants';
+} from '../../common/lib/workflow_change_history/constants';
 import type { IScopedWorkflowChangeHistoryService } from '../services/workflow_change_history_types';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -205,6 +205,32 @@ describe('logWorkflowChanges', () => {
       action: WorkflowChangeHistoryAction.workflowUpdate,
       spaceId: 'default',
       correlationId: 'bulk-123',
+    });
+  });
+
+  it('passes restore reason and metadata when restoring a workflow version', async () => {
+    await logChanges({
+      action: WorkflowChangeHistoryAction.workflowRestore,
+      restoreMetadata: {
+        eventId: 'event-v3',
+        sequence: 3,
+      },
+    });
+
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(expect.any(Array), {
+      action: WorkflowChangeHistoryAction.workflowRestore,
+      spaceId: 'default',
+      refresh: 'wait_for',
+      data: {
+        event: {
+          reason: 'Restored from v3',
+        },
+        metadata: {
+          restore: {
+            eventId: 'event-v3',
+          },
+        },
+      },
     });
   });
 
