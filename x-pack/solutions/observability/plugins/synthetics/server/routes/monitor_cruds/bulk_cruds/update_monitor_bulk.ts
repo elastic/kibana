@@ -51,12 +51,7 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: schema.object({
-        // `maxSize` matches the `perPage: 500` decrypt page in
-        // `monitorConfigRepository.findDecryptedMonitors`, so a single bulk
-        // call always fits in one PIT page and an arbitrarily large request
-        // can't be used as a DoS amplifier (each entry triggers decrypt +
-        // merge + io-ts validation). `maxLength` on `id` blocks the long-
-        // string DoS variant CodeQL flagged for the prior `ids` schema.
+        // `maxSize` matches the 500-per-page decrypt in `findDecryptedMonitors`;
         updates: schema.arrayOf(
           schema.object({
             id: schema.string({ minLength: 1, maxLength: 1024 }),
@@ -82,10 +77,6 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     const preprocess = await updateAPI.execute({ updates });
 
     if (preprocess.survivors.length === 0) {
-      /*
-       * Every requested id failed pre-processing. Skip the sync call and
-       * its private-location fetch entirely — there is nothing to write.
-       */
       return response.ok({
         body: buildResponseBody(ids, preprocess),
       });
@@ -104,12 +95,8 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
         body: buildResponseBody(ids, preprocess, sync),
       });
     } catch (error) {
-      /*
-       * `syncEditedMonitorBulk` already attempted a complete rollback before
-       * rethrowing, so the SO state is back to pre-call. Surface a 500 with
-       * the original message — this is a true server error, not a per-id
-       * failure (those are reported in `result[].error`).
-       */
+      // `syncEditedMonitorBulk` already attempted a SO-side rollback before
+      // rethrowing. Surface a 500 — per-id failures go in `result[].error`.
       server.logger.error(`Bulk update failed during sync: ${error.message}`, { error });
       return response.customError({
         statusCode: 500,
@@ -120,12 +107,9 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
 });
 
 /**
- * Request-level validation that the schema can't express:
- *   - each item's `attributes` must contain at least one field to patch
- *   - each `id` may appear at most once (a duplicate would make the applied
- *     patch ambiguous, since each id carries its own attributes)
- * Both are client mistakes (not per-id data conditions), so they fail the
- * whole request with a 400 rather than landing in `result[].error`.
+ * each `attributes` must be non-empty, and
+ * no duplicate `id`s are allowed.
+ * malformed request - fail fast with 400.
  */
 const validateUpdates = (updates: MonitorBulkUpdate[]): string | undefined => {
   const seen = new Set<string>();
@@ -142,9 +126,8 @@ const validateUpdates = (updates: MonitorBulkUpdate[]): string | undefined => {
 };
 
 /**
- * Compute the namespace set the sync needs to cover: the request space
- * plus every space any survivor monitor is shared to. Mirrors the
- * single-PUT flow at `edit_monitor.ts` (post-merge spaces, not pre).
+ * Private-location policies are namespace-scoped; cover the request space
+ * plus all spaces each surviving monitor will belong to after the patch.
  */
 const loadPrivateLocationsForSurvivors = async (
   routeContext: RouteContext,
@@ -182,12 +165,7 @@ const classifyId = (
   if (preError) {
     return { id, updated: false, error: preError.message };
   }
-
-  /*
-   * `failedConfigs` only contains entries where `syncEditedMonitorBulk`
-   * already rolled the SO back to its previous attributes, so `updated`
-   * is correctly `false` for these.
-   */
+  // `rollbackFailedUpdates` attempted to revert the SO after Fleet policy sync failed.
   const fleetFailure = sync?.failedConfigs?.[id];
   if (fleetFailure) {
     return {

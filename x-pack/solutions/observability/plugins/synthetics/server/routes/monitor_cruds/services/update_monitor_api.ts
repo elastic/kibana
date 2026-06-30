@@ -6,36 +6,12 @@
  */
 
 /**
- * Pre-processing service for the bulk update endpoint
- * (`PUT /api/synthetics/monitors/_bulk_update`).
+ * Pre-processing service for `PUT /api/synthetics/monitors/_bulk_update`.
  *
- * Mirrors the per-monitor pipeline that `editSyntheticsMonitorRoute` runs
- * for a single PUT, but produces a list of "survivors" and a per-id error
- * map so the route handler can hand survivors to `syncEditedMonitorBulk`
- * in one batch (Step 3 wires that up).
- *
- * Input is a list of `{ id, attributes }` updates; each id is merged with
- * its own partial `attributes` patch, so one request can apply a different
- * change per monitor.
- *
- * Pipeline per monitor id:
- *   1. Bulk decrypt (single round-trip via `findDecryptedMonitors`)
- *   2. `not_found` diff for ids missing from the result set
- *   3. Reject project-origin monitors (Option A — see kibana-34 bead)
- *   4. `mergeSourceMonitor` (deep-merge METADATA, shallow-merge ALERT_CONFIG,
- *      everything else overwrites) — this is what re-builds the AAD-bound
- *      attribute set so `syncEditedMonitorBulk` can re-encrypt safely
- *   5. `normalizeAPIConfig` on the merged payload to reject unknown/unsupported
- *      keys (mirrors the single-monitor PUT; io-ts `t.exact` would otherwise
- *      silently strip them)
- *   6. io-ts validation via `validateMonitor` on the merged payload
- *   7. Per-monitor permission checks (Elastic-managed locations + multi-space
- *      bulk_update privilege)
- *   8. Bump revision, reset CONFIG_HASH, run `formatSecrets` to produce the
- *      `monitorWithRevision` shape `syncEditedMonitorBulk` expects
- *
- * Survivors are the input shape for `syncEditedMonitorBulk` (see
- * `MonitorConfigUpdate` in `bulk_cruds/edit_monitor_bulk.ts`).
+ * Per id, mirrors the single-PUT (`editSyntheticsMonitorRoute`) pipeline so
+ * one bad monitor doesn't fail the whole batch. Returns a `{ survivors,
+ * perIdErrors }` result the route hands to `syncEditedMonitorBulk` for the
+ * ES write + Fleet sync in one shot.
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
