@@ -6,8 +6,29 @@
  */
 
 import { Comparator } from '@kbn/alerting-v2-rule-form';
+import { i18n } from '@kbn/i18n';
 import type { EpisodeTrendRow } from '../../queries/episode_trend_query';
 import { mapEventDataToSeries, deriveTrendThresholds } from './trend_data';
+
+jest.mock('@kbn/i18n', () => ({
+  i18n: {
+    translate: jest.fn(
+      (
+        id: string,
+        {
+          defaultMessage,
+          values = {},
+        }: { defaultMessage: string; values?: Record<string, number | string> }
+      ) =>
+        Object.entries(values).reduce(
+          (message, [key, value]) => message.replace(`{${key}}`, String(value)),
+          defaultMessage
+        )
+    ),
+  },
+}));
+
+const mockTranslate = jest.mocked(i18n.translate);
 
 describe('mapEventDataToSeries', () => {
   it('builds one series per label, reading values from each event metrics', () => {
@@ -49,29 +70,74 @@ describe('mapEventDataToSeries', () => {
 });
 
 describe('deriveTrendThresholds', () => {
+  beforeEach(() => {
+    mockTranslate.mockClear();
+  });
+
   it('builds a single-value labelled threshold for comparison operators', () => {
     const result = deriveTrendThresholds([
       { id: 'c1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
     ]);
     expect(result).toEqual([{ id: 'c1', metric: 'count', label: 'count > 100', values: [100] }]);
+    expect(mockTranslate).toHaveBeenCalledWith(
+      'xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel',
+      {
+        defaultMessage: '{metric} {comparator} {threshold}',
+        values: { metric: 'count', comparator: Comparator.GT, threshold: 100 },
+      }
+    );
   });
 
-  it('builds two-value labels for BETWEEN and NOT_BETWEEN', () => {
-    const [between] = deriveTrendThresholds([
+  it('builds individual threshold labels for BETWEEN bounds', () => {
+    const result = deriveTrendThresholds([
       { id: 'c1', metric: 'lat', comparator: Comparator.BETWEEN, threshold: [10, 20] },
     ]);
-    expect(between).toEqual({
-      id: 'c1',
-      metric: 'lat',
-      label: 'lat between 10 and 20',
-      values: [10, 20],
-    });
+    expect(result).toEqual([
+      { id: 'c1-gte', metric: 'lat', label: 'lat >= 10', values: [10] },
+      { id: 'c1-lte', metric: 'lat', label: 'lat <= 20', values: [20] },
+    ]);
+    expect(mockTranslate).toHaveBeenNthCalledWith(
+      1,
+      'xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel',
+      {
+        defaultMessage: '{metric} {comparator} {threshold}',
+        values: { metric: 'lat', comparator: Comparator.GTE, threshold: 10 },
+      }
+    );
+    expect(mockTranslate).toHaveBeenNthCalledWith(
+      2,
+      'xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel',
+      {
+        defaultMessage: '{metric} {comparator} {threshold}',
+        values: { metric: 'lat', comparator: Comparator.LTE, threshold: 20 },
+      }
+    );
+  });
 
-    const [notBetween] = deriveTrendThresholds([
+  it('builds individual threshold labels for NOT_BETWEEN bounds', () => {
+    const result = deriveTrendThresholds([
       { id: 'c2', metric: 'lat', comparator: Comparator.NOT_BETWEEN, threshold: [10, 20] },
     ]);
-    expect(notBetween.label).toBe('lat not between 10 and 20');
-    expect(notBetween.values).toEqual([10, 20]);
+    expect(result).toEqual([
+      { id: 'c2-lt', metric: 'lat', label: 'lat < 10', values: [10] },
+      { id: 'c2-gt', metric: 'lat', label: 'lat > 20', values: [20] },
+    ]);
+    expect(mockTranslate).toHaveBeenNthCalledWith(
+      1,
+      'xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel',
+      {
+        defaultMessage: '{metric} {comparator} {threshold}',
+        values: { metric: 'lat', comparator: Comparator.LT, threshold: 10 },
+      }
+    );
+    expect(mockTranslate).toHaveBeenNthCalledWith(
+      2,
+      'xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel',
+      {
+        defaultMessage: '{metric} {comparator} {threshold}',
+        values: { metric: 'lat', comparator: Comparator.GT, threshold: 20 },
+      }
+    );
   });
 
   it('skips conditions without a metric or threshold', () => {
@@ -79,6 +145,7 @@ describe('deriveTrendThresholds', () => {
       deriveTrendThresholds([
         { id: 'c1', metric: '', comparator: Comparator.GT, threshold: [1] },
         { id: 'c2', metric: 'x', comparator: Comparator.GT, threshold: [] },
+        { id: 'c3', metric: 'x', comparator: Comparator.BETWEEN, threshold: [1] },
       ])
     ).toEqual([]);
   });

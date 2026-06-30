@@ -7,6 +7,7 @@
 
 import { Comparator, type AlertCondition } from '@kbn/alerting-v2-rule-form';
 import type { EpisodeTrendRow } from '../../queries/episode_trend_query';
+import { getTrendChartThresholdComparatorLabel } from './translations';
 import type { TrendSeries, TrendThreshold } from './trend_types';
 
 /**
@@ -30,17 +31,46 @@ export const mapEventDataToSeries = (
   }));
 };
 
-const labelFor = (condition: AlertCondition): string => {
-  const { metric, comparator, threshold } = condition;
-  if (comparator === Comparator.BETWEEN)
-    return `${metric} between ${threshold[0]} and ${threshold[1]}`;
-  if (comparator === Comparator.NOT_BETWEEN)
-    return `${metric} not between ${threshold[0]} and ${threshold[1]}`;
-  return `${metric} ${comparator} ${threshold[0]}`;
+const singleThreshold = (
+  id: string,
+  metric: string,
+  comparator: Comparator,
+  threshold: number
+): TrendThreshold => ({
+  id,
+  metric,
+  label: getTrendChartThresholdComparatorLabel(metric, comparator, threshold),
+  values: [threshold],
+});
+
+const deriveTrendThreshold = (condition: AlertCondition): TrendThreshold[] => {
+  const { id, metric, comparator, threshold } = condition;
+
+  if (comparator === Comparator.BETWEEN) {
+    return [
+      singleThreshold(`${id}-gte`, metric, Comparator.GTE, threshold[0]),
+      singleThreshold(`${id}-lte`, metric, Comparator.LTE, threshold[1]),
+    ];
+  }
+
+  if (comparator === Comparator.NOT_BETWEEN) {
+    return [
+      singleThreshold(`${id}-lt`, metric, Comparator.LT, threshold[0]),
+      singleThreshold(`${id}-gt`, metric, Comparator.GT, threshold[1]),
+    ];
+  }
+
+  return [singleThreshold(id, metric, comparator, threshold[0])];
+};
+
+const hasThresholdValues = ({ comparator, metric, threshold }: AlertCondition): boolean => {
+  if (!metric) return false;
+  if (comparator === Comparator.BETWEEN || comparator === Comparator.NOT_BETWEEN) {
+    return threshold.length > 1;
+  }
+  return threshold.length > 0;
 };
 
 /** Converts parsed alert conditions into horizontal threshold lines. */
 export const deriveTrendThresholds = (conditions: AlertCondition[]): TrendThreshold[] =>
-  conditions
-    .filter((c) => c.metric && c.threshold.length > 0)
-    .map((c) => ({ id: c.id, metric: c.metric, label: labelFor(c), values: [...c.threshold] }));
+  conditions.filter(hasThresholdValues).flatMap((c) => deriveTrendThreshold(c));

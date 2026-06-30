@@ -24,7 +24,7 @@ export interface TrendThreshold {
   metric: string;
   /** Human-readable label, e.g. "count > 100". */
   label: string;
-  /** One value for comparison operators, two for (NOT_)BETWEEN. */
+  /** Y-axis values for this threshold annotation. */
   values: number[];
 }
 

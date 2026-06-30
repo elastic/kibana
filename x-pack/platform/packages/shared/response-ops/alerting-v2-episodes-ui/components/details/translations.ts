@@ -408,3 +408,13 @@ export const TREND_CHART_LOAD_ERROR = i18n.translate(
     defaultMessage: 'Unable to load the trend chart.',
   }
 );
+
+export const getTrendChartThresholdComparatorLabel = (
+  metric: string,
+  comparator: string,
+  threshold: number
+): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel', {
+    defaultMessage: '{metric} {comparator} {threshold}',
+    values: { metric, comparator, threshold },
+  });
