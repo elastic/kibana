@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { getActiveAttachments } from '@kbn/agent-builder-common/attachments';
 import { useMemo } from 'react';
 import { useConversationContext } from '../context/conversation/conversation_context';
-import { upsertAttachmentsIntoList } from '../context/conversation/upsert_attachments_into_list';
+import { getMergedCartAttachments } from './get_merged_cart_attachments';
 import { useConversation } from './use_conversation';
 
 export const useActiveConversationAttachmentCount = (): number => {
   const { attachments: pendingAttachments } = useConversationContext();
   const { conversation } = useConversation();
 
-  return useMemo(() => {
-    const activePersisted = getActiveAttachments(conversation?.attachments ?? []);
-    const merged = upsertAttachmentsIntoList(activePersisted, pendingAttachments ?? []);
-    return merged.length;
-  }, [conversation?.attachments, pendingAttachments]);
+  return useMemo(
+    () => getMergedCartAttachments(conversation?.attachments, pendingAttachments).length,
+    [conversation?.attachments, pendingAttachments]
+  );
 };
