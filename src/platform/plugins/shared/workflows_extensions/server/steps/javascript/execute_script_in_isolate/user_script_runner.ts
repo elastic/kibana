@@ -13,8 +13,31 @@ import type ivm from 'isolated-vm';
 // unsupported: top-level `await` throws a SyntaxError, and returning a Promise
 // fails the structured-clone copy-out. Keeping execution synchronous means the
 // in-isolate CPU `timeout` fully bounds every script (no suspended-promise hangs).
+// Sanitize the returned value in-isolate, before the structured-clone copy-out,
+// so a user script cannot smuggle a prototype-pollution payload (own keys named
+// __proto__ / constructor / prototype) into the host where a downstream
+// deep-merge or path-assign could pollute Object.prototype. Only plain objects
+// and arrays are rebuilt; other built-ins (Date, Map, etc.) are left untouched
+// so the copy-out preserves their type, and a returned Promise still fails the
+// copy-out (async scripts remain unsupported).
 const USER_SCRIPT_RUNNER = `
-  return new Function($0)();
+  const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+  const isPlainObject = (value) => {
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+  };
+  const sanitize = (value) => {
+    if (Array.isArray(value)) return value.map(sanitize);
+    if (value === null || typeof value !== 'object' || !isPlainObject(value)) return value;
+    const clean = {};
+    for (const key of Object.keys(value)) {
+      if (FORBIDDEN_KEYS.has(key)) continue;
+      clean[key] = sanitize(value[key]);
+    }
+    return clean;
+  };
+  const functionResult = new Function($0)();
+  return sanitize(functionResult);
 `;
 
 export const runUserScript = (

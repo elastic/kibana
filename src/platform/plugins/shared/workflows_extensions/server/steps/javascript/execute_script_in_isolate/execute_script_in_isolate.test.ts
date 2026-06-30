@@ -135,6 +135,24 @@ describe('executeScriptInIsolate', () => {
     ).rejects.toThrow();
   });
 
+  it('does not let async side effects escape: microtasks never run before copy-out', async () => {
+    // `Promise` exists in the isolate, but the script body runs synchronously and
+    // the result is copied out before the microtask queue is flushed, so a value
+    // set inside a `.then` callback can never be observed by the host.
+    const result = await executeScriptInIsolate({
+      script: `
+        let captured = 'sync';
+        Promise.resolve('async').then(() => { captured = 'async'; });
+        return captured;
+      `,
+      logger: createLogger(),
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    expect(result).toBe('sync');
+  });
+
   it('returns primitive values from user scripts', async () => {
     const result = await executeScriptInIsolate({
       script: 'return 42;',
@@ -198,5 +216,90 @@ describe('executeScriptInIsolate', () => {
         ...defaultIsolateParams,
       })
     ).rejects.toThrow(createScriptOutOfMemoryMessage(CODE_MEMORY_LIMIT_MB));
+  });
+
+  describe('prototype pollution prevention', () => {
+    const runScript = (script: string): Promise<unknown> =>
+      executeScriptInIsolate({
+        script,
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        ...defaultIsolateParams,
+      });
+
+    // Catch global pollution of the host realm regardless of which forbidden
+    // key a test injects. Snapshot the descriptors before each test and assert
+    // nothing new leaked onto Object.prototype afterwards.
+    const protoKeys = ['polluted', 'isAdmin', 'injected'] as const;
+
+    afterEach(() => {
+      for (const key of protoKeys) {
+        expect(({} as Record<string, unknown>)[key]).toBeUndefined();
+        expect(Object.getOwnPropertyDescriptor(Object.prototype, key)).toBeUndefined();
+      }
+    });
+
+    it('strips an own __proto__ key from the returned object', async () => {
+      const result = await runScript(`return { ['__proto__']: { polluted: true }, safe: 1 };`);
+
+      expect(result).toEqual({ safe: 1 });
+      expect(JSON.stringify(result)).not.toContain('__proto__');
+    });
+
+    it('strips own constructor and prototype keys from the returned object', async () => {
+      const result = await runScript(
+        `return { constructor: { evil: true }, prototype: { evil: true }, safe: 2 };`
+      );
+
+      expect(result).toEqual({ safe: 2 });
+    });
+
+    it('strips forbidden keys nested deep in the returned object', async () => {
+      const result = await runScript(
+        `return { a: { b: { ['__proto__']: { isAdmin: true }, keep: 'value' } } };`
+      );
+
+      expect(result).toEqual({ a: { b: { keep: 'value' } } });
+    });
+
+    it('strips forbidden keys nested inside arrays', async () => {
+      const result = await runScript(
+        `return { items: [{ ['__proto__']: { polluted: true }, id: 1 }, { id: 2 }] };`
+      );
+
+      expect(result).toEqual({ items: [{ id: 1 }, { id: 2 }] });
+    });
+
+    it('strips forbidden keys reached via constructor.prototype chains', async () => {
+      const result = await runScript(
+        `return { constructor: { prototype: { injected: true } }, ok: true };`
+      );
+
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('preserves arrays and ordinary nested structures untouched', async () => {
+      const result = await runScript(`return { items: [1, 2, { ok: true }], nested: { a: 1 } };`);
+
+      expect(result).toEqual({ items: [1, 2, { ok: true }], nested: { a: 1 } });
+    });
+
+    it('preserves a property whose value is the string "__proto__"', async () => {
+      const result = await runScript(`return { label: '__proto__', count: 3 };`);
+
+      expect(result).toEqual({ label: '__proto__', count: 3 });
+    });
+
+    it('preserves built-in object types such as Date (does not flatten to {})', async () => {
+      const iso = '2026-01-02T03:04:05.000Z';
+      const result = (await runScript(`return { when: new Date('${iso}') };`)) as {
+        when: Date;
+      };
+
+      // The copied-out Date originates from the isolate realm, so cross-realm
+      // `instanceof` is unreliable; assert on the structural tag and value.
+      expect(Object.prototype.toString.call(result.when)).toBe('[object Date]');
+      expect(result.when.toISOString()).toBe(iso);
+    });
   });
 });
