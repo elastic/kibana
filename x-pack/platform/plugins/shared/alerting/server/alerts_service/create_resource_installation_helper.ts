@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger } from '@kbn/core/server';
 import type { IRuleTypeAlerts } from '../types';
@@ -13,6 +14,12 @@ export interface InitializationPromise {
   result: boolean;
   error?: string;
 }
+
+// Cap on concurrent resource installations. Each install holds a large (~MB)
+// resolved alerts mapping in memory while it runs, so an unbounded fan-out (many
+// spaces x contexts) could keep enough alive at once to OOM Kibana. Bounding it
+// caps peak heap; installs beyond the limit queue and run as slots free up.
+const MAX_CONCURRENT_RESOURCE_INSTALLATIONS = 5;
 
 // get multiples of 2 min
 const DEFAULT_RETRY_BACKOFF_PER_ATTEMPT = 2 * 60 * 1000;
@@ -45,11 +52,15 @@ export interface ResourceInstallationHelper {
 export function createResourceInstallationHelper(
   logger: Logger,
   commonResourcesInitPromise: Promise<InitializationPromise>,
-  installFn: (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => Promise<void>
+  installFn: (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => Promise<void>,
+  // Override only in tests; production uses the default. Must be >= 1.
+  maxConcurrentInstallations: number = MAX_CONCURRENT_RESOURCE_INSTALLATIONS
 ): ResourceInstallationHelper {
   let commonInitPromise: Promise<InitializationPromise> = commonResourcesInitPromise;
   const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
   const lastRetry: Map<string, Retry> = new Map();
+
+  const installLimit = pLimit(Math.max(1, maxConcurrentInstallations));
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
@@ -59,7 +70,9 @@ export function createResourceInstallationHelper(
     try {
       const { result: commonInitResult, error: commonInitError } = await commonInitPromise;
       if (commonInitResult) {
-        await installFn(context, namespace, timeoutMs);
+        // Gate through installLimit to bound concurrent installs (and peak heap).
+        // Unbounded equivalent (can OOM): await installFn(context, namespace, timeoutMs);
+        await installLimit(() => installFn(context, namespace, timeoutMs));
         return successResult();
       } else {
         logger.warn(
