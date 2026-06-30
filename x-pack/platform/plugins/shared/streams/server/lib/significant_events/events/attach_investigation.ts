@@ -31,6 +31,26 @@ const normalizeInvestigation = (
   return normalized;
 };
 
+const mergeInvestigation = ({
+  existing,
+  incoming,
+}: {
+  existing: SignificantEventInvestigation;
+  incoming: SignificantEventInvestigation;
+}): SignificantEventInvestigation => {
+  if (existing.status !== 'pending' && incoming.status === 'pending') {
+    return {
+      ...existing,
+      conversation_id: existing.conversation_id ?? incoming.conversation_id,
+    };
+  }
+
+  return {
+    ...existing,
+    ...incoming,
+  };
+};
+
 export const attachInvestigationToEvent = async ({
   eventClient,
   eventId,
@@ -68,10 +88,10 @@ export const attachInvestigationToEvent = async ({
 
   let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
-    const nextInvestigation = {
-      ...existing[existingIdx],
-      ...normalizedInvestigation,
-    };
+    const nextInvestigation = mergeInvestigation({
+      existing: existing[existingIdx],
+      incoming: normalizedInvestigation,
+    });
     if (isEqual(existing[existingIdx], nextInvestigation)) {
       return { event_id: eventId, updated: 0, ignored: 1 };
     }

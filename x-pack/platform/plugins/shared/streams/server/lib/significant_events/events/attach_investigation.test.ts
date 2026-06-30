@@ -153,6 +153,37 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
+  it('does not downgrade a terminal investigation when a stale pending callback arrives later', async () => {
+    const terminal = createInvestigation({
+      workflow_execution_id: 'exec-1',
+      status: 'success',
+      completed_at: '2026-01-01T02:00:00.000Z',
+      conversation_id: 'conversation-1',
+      incident_conversation_id: 'incident-1',
+      outcome: 'Root cause found',
+      current_state: 'Incident linked',
+    });
+    const existing = createEvent({ event_id: 'event-1', investigations: [terminal] });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const stalePending = createInvestigation({
+      workflow_execution_id: 'exec-1',
+      status: 'pending',
+      conversation_id: 'conversation-1',
+      current_state: 'Investigation workflow is running.',
+    });
+
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'event-1',
+      investigation: stalePending,
+    });
+
+    expect(result.updated).toBe(0);
+    expect(result.ignored).toBe(1);
+    expect(dataStreamClient.create).not.toHaveBeenCalled();
+  });
+
   it('returns ignored when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 
