@@ -469,10 +469,11 @@ describe('runRulePreviewTool', () => {
     });
 
     const result = await tool.handler(
-      { command: '--type esql --query "FROM logs-* | LIMIT 10"' },
+      { command: 'esql --query "FROM logs-* | LIMIT 10"' },
       context
     );
 
+    expect(runRulePreviewMock).toHaveBeenCalledTimes(1);
     expect(context.attachments.add).not.toHaveBeenCalled();
     const [firstResult] = getResults(result);
     expect(firstResult.type).toBe(ToolResultType.error);
