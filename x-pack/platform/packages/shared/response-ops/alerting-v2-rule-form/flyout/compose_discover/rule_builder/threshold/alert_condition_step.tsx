@@ -27,7 +27,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ComposeFormValues } from '../../compose_form_types';
+import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import type { RuleBuilderStepProps } from '../types';
@@ -71,7 +71,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
 
   const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
@@ -199,10 +199,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         next,
         thresholdValues.evaluations
       );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            statLabels,
+            index,
+            oldLabel,
+            newLabel,
+            next,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -232,10 +246,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         remainingStats,
         thresholdValues.evaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              remainingStats,
+              thresholdValues.evaluations
+            ),
+            remainingStats,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: remainingStats,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -269,10 +298,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         thresholdValues.stats,
         next
       );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            evalLabels,
+            index,
+            oldLabel,
+            newLabel,
+            thresholdValues.stats,
+            next
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -292,10 +335,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         thresholdValues.stats,
         remainingEvaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              thresholdValues.stats,
+              remainingEvaluations
+            ),
+            thresholdValues.stats,
+            remainingEvaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: remainingEvaluations,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
