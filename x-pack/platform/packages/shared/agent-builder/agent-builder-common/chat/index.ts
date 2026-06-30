@@ -61,6 +61,9 @@ export type {
   ConversationChatMode,
   ConversationTemplateDefinition,
   TemplateSnapshot,
+  ConversationWorkflowHookDefinition,
+  ConversationWorkflowHookExecutionState,
+  ConversationWorkflowHookTrigger,
   ConversationMetadataFields,
   ConversationMetadataUpdate,
 } from './conversation_metadata';

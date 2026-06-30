@@ -26,8 +26,8 @@ export const OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID = 'observability.synthetic
 export const OBSERVABILITY_INVESTIGATION_TEMPLATE_ID = 'observability-investigation-v1';
 export const OBSERVABILITY_INCIDENT_TEMPLATE_ID = 'observability-incident-v1';
 
-// Periodic updater for persisted investigation conversations.
-export const OBSERVABILITY_INVESTIGATION_UPDATE_TASK_TYPE =
-  'observability-agent-builder:investigation-state-updater';
-export const OBSERVABILITY_INVESTIGATION_UPDATE_TASK_ID =
-  'observability-agent-builder:investigation-state-updater';
+// Periodic workflow hook runner for persisted group conversations.
+export const OBSERVABILITY_CONVERSATION_WORKFLOW_HOOK_TASK_TYPE =
+  'observability-agent-builder:conversation-workflow-hooks';
+export const OBSERVABILITY_CONVERSATION_WORKFLOW_HOOK_TASK_ID =
+  'observability-agent-builder:conversation-workflow-hooks';

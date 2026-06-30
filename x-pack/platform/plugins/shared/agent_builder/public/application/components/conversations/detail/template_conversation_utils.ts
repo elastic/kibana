@@ -145,6 +145,8 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
       { key: 'current_state', label: 'Current state', type: 'text' },
       { key: 'outcome', label: 'Outcome', type: 'text' },
       { key: 'timeline', label: 'Timeline', type: 'text' },
+      { key: 'workflow_hooks', label: 'Workflow hooks', type: 'text' },
+      { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'text' },
       { key: 'incident_conversation_id', label: 'Incident conversation', type: 'text' },
       { key: 'workflow_execution_id', label: 'Workflow execution', type: 'text' },
     ],
@@ -168,6 +170,8 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
       { key: 'service_name', label: 'Service', type: 'text', render: 'badge' },
       { key: 'current_state', label: 'Current state', type: 'text' },
       { key: 'timeline', label: 'Timeline', type: 'text' },
+      { key: 'workflow_hooks', label: 'Workflow hooks', type: 'text' },
+      { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'text' },
       {
         key: 'investigation_conversation_id',
         label: 'Investigation conversation',

@@ -291,6 +291,9 @@ export {
   type ConversationChatMode,
   type ConversationTemplateDefinition,
   type TemplateSnapshot,
+  type ConversationWorkflowHookDefinition,
+  type ConversationWorkflowHookExecutionState,
+  type ConversationWorkflowHookTrigger,
   type ConversationMetadataFields,
   type ConversationMetadataUpdate,
 } from './chat';

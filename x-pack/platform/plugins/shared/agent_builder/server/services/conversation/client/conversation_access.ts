@@ -17,6 +17,26 @@ import {
 import type { ConversationCreateRequest } from './types';
 import type { ConversationProperties } from './storage';
 
+const OBSERVABILITY_CURRENT_STATE_WORKFLOW_YAML = `name: Observability conversation current state refresh
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        conversation_id:
+          type: string
+        title:
+          type: string
+        current_state:
+          type: string
+        custom_fields:
+          type: object
+steps:
+  - name: current_state
+    type: console
+    with:
+      message: "{{ inputs.current_state }}"
+`;
+
 /**
  * POC conversation templates — replaced by B2 template registry.
  * @see docs/agent_builder_option_b_access_model.md
@@ -39,11 +59,33 @@ const POC_CONVERSATION_TEMPLATES: Record<
     profile: 'investigation',
     chat_mode: 'collaborative',
     write_privileges: ['write_observability_investigation'],
+    workflow_hooks: [
+      {
+        id: 'observability-investigation-current-state',
+        trigger: 'schedule',
+        interval: '5m',
+        inline_workflow_yaml: OBSERVABILITY_CURRENT_STATE_WORKFLOW_YAML,
+        workflow_name: 'Observability investigation current state refresh',
+        wait_for_completion: true,
+        merge_output: true,
+      },
+    ],
   },
   'observability-incident-v1': {
     profile: 'incident',
     chat_mode: 'collaborative',
     write_privileges: ['write_observability_incident'],
+    workflow_hooks: [
+      {
+        id: 'observability-incident-current-state',
+        trigger: 'schedule',
+        interval: '5m',
+        inline_workflow_yaml: OBSERVABILITY_CURRENT_STATE_WORKFLOW_YAML,
+        workflow_name: 'Observability incident current state refresh',
+        wait_for_completion: true,
+        merge_output: true,
+      },
+    ],
   },
 };
 

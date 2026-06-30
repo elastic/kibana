@@ -34,10 +34,53 @@ export interface TemplateSnapshot {
   chat_mode?: ConversationChatMode;
   /** Privilege names required to append — enforced at request time, copied for audit/UI. */
   write_privileges?: string[];
+  /** Default workflow hooks copied from the template into the conversation execution context. */
+  workflow_hooks?: ConversationWorkflowHookDefinition[];
 }
 
 /** Chat behavior for investigation templates (see access model doc). */
 export type ConversationChatMode = 'single' | 'collaborative';
+
+export type ConversationWorkflowHookTrigger =
+  | 'conversation.created'
+  | 'incident.created'
+  | 'manual_refresh'
+  | 'schedule'
+  | string;
+
+/**
+ * POC workflow hook definition. Templates provide defaults via
+ * `template_snapshot.workflow_hooks`; individual conversations can override or
+ * add hooks with `custom_fields.workflow_hooks`.
+ *
+ * A completed workflow may return:
+ * - `current_state`: string
+ * - `status`: string
+ * - `severity`: string
+ * - `timeline`: string | object | array
+ * - `custom_fields`: object merged into conversation custom fields
+ */
+export interface ConversationWorkflowHookDefinition {
+  id: string;
+  trigger: ConversationWorkflowHookTrigger;
+  enabled?: boolean;
+  interval?: string;
+  workflow_id?: string;
+  inline_workflow_yaml?: string;
+  workflow_name?: string;
+  wait_for_completion?: boolean;
+  completion_timeout_sec?: number;
+  params?: Record<string, unknown>;
+  merge_output?: boolean;
+}
+
+export interface ConversationWorkflowHookExecutionState {
+  last_run_at?: string;
+  last_execution_id?: string;
+  last_status?: string;
+  last_error?: string;
+  run_count?: number;
+}
 
 /**
  * Template definition (B2). Privilege fields gate create/list and conversation access scope.

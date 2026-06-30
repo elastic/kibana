@@ -35,6 +35,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -54,6 +55,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   taskManager: TaskManagerSetupContract;
   cloud?: CloudSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {

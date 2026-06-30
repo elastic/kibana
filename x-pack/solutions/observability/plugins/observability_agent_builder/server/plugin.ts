@@ -28,8 +28,8 @@ import {
   observabilityAiInsightsInferenceFeatures,
 } from './inference_feature';
 import {
-  registerInvestigationConversationUpdateTask,
-  scheduleInvestigationConversationUpdateTask,
+  registerConversationWorkflowHookTask,
+  scheduleConversationWorkflowHookTask,
 } from './investigation_conversations/investigation_update_task';
 
 export class ObservabilityAgentBuilderPlugin
@@ -78,9 +78,10 @@ export class ObservabilityAgentBuilderPlugin
 
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 
-    registerInvestigationConversationUpdateTask({
+    registerConversationWorkflowHookTask({
       core,
       taskManager: plugins.taskManager,
+      workflowsManagement: plugins.workflowsManagement,
       logger: this.logger,
     });
 
@@ -116,11 +117,11 @@ export class ObservabilityAgentBuilderPlugin
     _core: CoreStart,
     plugins: ObservabilityAgentBuilderPluginStartDependencies
   ): ObservabilityAgentBuilderPluginStart {
-    scheduleInvestigationConversationUpdateTask({
+    scheduleConversationWorkflowHookTask({
       taskManager: plugins.taskManager,
       logger: this.logger,
     }).catch((error) => {
-      this.logger.warn(`Error scheduling observability investigation updater task: ${error}`);
+      this.logger.warn(`Error scheduling observability conversation workflow hook task: ${error}`);
     });
 
     return {};

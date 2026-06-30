@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import {
   agentBuilderDefaultAgentId,
@@ -16,7 +16,10 @@ import {
 } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import type { ConversationClient } from '@kbn/agent-builder-server';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
 import {
   OBSERVABILITY_INCIDENT_TEMPLATE_ID,
   OBSERVABILITY_INVESTIGATION_TEMPLATE_ID,
@@ -28,6 +31,7 @@ import {
   buildInvestigationSeedMessage,
   buildManualRefreshFields,
 } from '../../investigation_conversations/conversation_metadata';
+import { runConversationWorkflowHooksForTrigger } from '../../investigation_conversations/investigation_update_task';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 
 const metadataRt = t.record(t.string, t.unknown);
@@ -44,6 +48,7 @@ const createInvestigationBodyRt = t.partial({
   severity: t.string,
   status: t.string,
   timeline: t.unknown,
+  workflowHooks: t.unknown,
   metadata: metadataRt,
 });
 
@@ -51,6 +56,7 @@ const refreshInvestigationBodyRt = t.partial({
   currentState: t.string,
   status: t.string,
   timeline: t.unknown,
+  workflowHooks: t.unknown,
   metadata: metadataRt,
 });
 
@@ -108,6 +114,44 @@ const buildIncidentTitle = (investigation: Conversation): string => {
   return `Incident: ${investigation.title}`;
 };
 
+const runConfiguredWorkflowHooks = async ({
+  plugins,
+  client,
+  request,
+  logger,
+  conversation,
+  trigger,
+}: {
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  client: ConversationClient;
+  request: KibanaRequest;
+  logger: Logger;
+  conversation: Conversation;
+  trigger: string;
+}): Promise<Conversation> => {
+  if (!plugins.workflowsManagement) {
+    return conversation;
+  }
+
+  try {
+    const customFields = await runConversationWorkflowHooksForTrigger({
+      conversation,
+      trigger,
+      workflowApi: plugins.workflowsManagement.management,
+      request,
+      logger,
+    });
+
+    return client.update({
+      id: conversation.id,
+      custom_fields: customFields,
+    });
+  } catch (error) {
+    logger.debug(`Failed to run conversation workflow hooks for ${trigger}: ${error}`);
+    return conversation;
+  }
+};
+
 export function getObservabilityAgentBuilderInvestigationConversationRouteRepository(): ServerRouteRepository {
   const createInvestigationFromWorkflowRoute = createObservabilityAgentBuilderServerRoute({
     endpoint:
@@ -123,7 +167,7 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
     params: t.type({
       body: createInvestigationBodyRt,
     }),
-    handler: async ({ core, request, params, response }) => {
+    handler: async ({ core, plugins, request, params, response, logger }) => {
       const now = new Date().toISOString();
       const {
         title,
@@ -137,6 +181,7 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         severity,
         status,
         timeline,
+        workflowHooks,
         metadata,
       } = params.body;
       const client = await getConversationClient({ core, request });
@@ -152,6 +197,7 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         severity,
         status,
         timeline,
+        workflowHooks,
         metadata,
       });
 
@@ -169,10 +215,18 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         conversationId: conversation.id,
         message: buildInvestigationSeedMessage(customFields),
       });
+      const hookedConversation = await runConfiguredWorkflowHooks({
+        plugins,
+        client,
+        request,
+        logger,
+        conversation: seededConversation.conversation,
+        trigger: 'conversation.created',
+      });
 
       return response.ok({
         body: {
-          conversation: seededConversation.conversation,
+          conversation: hookedConversation,
         },
       });
     },
@@ -194,7 +248,7 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         conversationId: t.string,
       }),
     }),
-    handler: async ({ core, request, params, response, logger }) => {
+    handler: async ({ core, plugins, request, params, response, logger }) => {
       const now = new Date().toISOString();
       const client = await getConversationClient({ core, request });
       const investigation = await client.get(params.path.conversationId);
@@ -247,11 +301,27 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         conversationId: linkedInvestigation.id,
         message: `Incident conversation created: ${incidentConversation.id}`,
       });
+      const hookedIncident = await runConfiguredWorkflowHooks({
+        plugins,
+        client,
+        request,
+        logger,
+        conversation: incidentWithMessage.conversation,
+        trigger: 'incident.created',
+      });
+      const hookedInvestigation = await runConfiguredWorkflowHooks({
+        plugins,
+        client,
+        request,
+        logger,
+        conversation: investigationWithMessage.conversation,
+        trigger: 'incident.created',
+      });
 
       return response.ok({
         body: {
-          incidentConversation: incidentWithMessage.conversation,
-          investigationConversation: investigationWithMessage.conversation,
+          incidentConversation: hookedIncident,
+          investigationConversation: hookedInvestigation,
           created: true,
         },
       });
@@ -275,7 +345,7 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
       }),
       body: refreshInvestigationBodyRt,
     }),
-    handler: async ({ core, request, params, response }) => {
+    handler: async ({ core, plugins, request, params, response, logger }) => {
       const now = new Date().toISOString();
       const client = await getConversationClient({ core, request });
       const investigation = await client.get(params.path.conversationId);
@@ -289,13 +359,22 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
           currentState: params.body.currentState,
           status: params.body.status,
           timeline: params.body.timeline,
+          workflowHooks: params.body.workflowHooks,
           metadata: params.body.metadata,
         }),
+      });
+      const hookedConversation = await runConfiguredWorkflowHooks({
+        plugins,
+        client,
+        request,
+        logger,
+        conversation,
+        trigger: 'manual_refresh',
       });
 
       return response.ok({
         body: {
-          conversation,
+          conversation: hookedConversation,
         },
       });
     },

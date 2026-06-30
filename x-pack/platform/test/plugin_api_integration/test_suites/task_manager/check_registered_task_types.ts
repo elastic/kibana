@@ -232,6 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
         'maintenance-window:generate-events',
+        'observability-agent-builder:conversation-workflow-hooks',
         'osquery:backfillScheduleIds',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',

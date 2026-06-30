@@ -35,6 +35,7 @@ interface BuildInvestigationCustomFieldsOptions {
   severity?: string;
   status?: string;
   timeline?: unknown;
+  workflowHooks?: unknown;
   metadata?: Record<string, unknown>;
 }
 
@@ -44,6 +45,7 @@ interface BuildManualRefreshFieldsOptions {
   currentState?: string;
   status?: string;
   timeline?: unknown;
+  workflowHooks?: unknown;
   metadata?: Record<string, unknown>;
 }
 
@@ -53,6 +55,10 @@ const UPDATER_ACTOR = 'observability investigation updater';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const normalizeWorkflowHooks = (value: unknown): unknown[] => {
+  return Array.isArray(value) ? value : [];
 };
 
 const getString = (value: unknown): string | undefined => {
@@ -163,6 +169,7 @@ export const buildInvestigationCustomFields = ({
   severity,
   status,
   timeline,
+  workflowHooks,
   metadata,
 }: BuildInvestigationCustomFieldsOptions): Record<string, unknown> => {
   const timelineEntries = normalizeTimelineInput({
@@ -197,6 +204,7 @@ export const buildInvestigationCustomFields = ({
     ...(connectorId ? { connector_id: connectorId } : {}),
     ...(initialContext ? { initial_context: initialContext } : {}),
     ...(report ? { outcome: report } : {}),
+    ...(workflowHooks ? { workflow_hooks: normalizeWorkflowHooks(workflowHooks) } : {}),
     ...(metadata ? { workflow_metadata: metadata } : {}),
   };
 };
@@ -285,6 +293,7 @@ export const buildManualRefreshFields = ({
   currentState,
   status,
   timeline,
+  workflowHooks,
   metadata,
 }: BuildManualRefreshFieldsOptions): Record<string, unknown> => {
   const timelineEntries = normalizeTimelineInput({
@@ -303,6 +312,7 @@ export const buildManualRefreshFields = ({
       last_refreshed_at: now,
       last_state_update_source: 'manual_refresh',
       ...(status ? { status } : {}),
+      ...(workflowHooks ? { workflow_hooks: normalizeWorkflowHooks(workflowHooks) } : {}),
       ...(metadata ? { refresh_metadata: metadata } : {}),
     },
     entries:
