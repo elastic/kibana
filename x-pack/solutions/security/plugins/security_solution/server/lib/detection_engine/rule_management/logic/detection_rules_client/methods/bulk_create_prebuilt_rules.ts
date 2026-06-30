@@ -84,16 +84,20 @@ export const bulkCreatePrebuiltRules = async ({
 
     for (const rule of chunk) {
       const id = uuidv4();
-      itemById.set(id, rule);
-      const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
-      const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
-      const data = {
-        ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
-        alertTypeId,
-        consumer: SERVER_APP_ID,
-        enabled: false,
-      };
-      bulkInputs.push({ data, options: { id } });
+      try {
+        const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
+        const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
+        const data = {
+          ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
+          alertTypeId,
+          consumer: SERVER_APP_ID,
+          enabled: false,
+        };
+        itemById.set(id, rule);
+        bulkInputs.push({ data, options: { id } });
+      } catch (e) {
+        errors.push({ item: rule, error: e instanceof Error ? e : new Error(String(e)) });
+      }
     }
 
     try {
