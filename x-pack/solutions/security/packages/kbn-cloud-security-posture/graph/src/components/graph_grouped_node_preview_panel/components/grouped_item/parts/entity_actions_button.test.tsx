@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EntityActionsButton } from './entity_actions_button';
+import { EntityActionsButton as BaseEntityActionsButton } from './entity_actions_button';
 import type { EntityItem } from '../types';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 import {
@@ -56,13 +56,12 @@ const mockIsEntityRelationshipExpandedForScope =
     typeof isEntityRelationshipExpandedForScope
   >;
 
-// Mock useExpandableFlyoutApi
-const mockOpenPreviewPanel = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  })),
-}));
+const mockOnShowEntity = jest.fn();
+
+// Test wrapper supplying a default `onShowEntity` so cases stay terse.
+const EntityActionsButton = (
+  props: Omit<React.ComponentProps<typeof BaseEntityActionsButton>, 'onShowEntity'>
+) => <BaseEntityActionsButton {...props} onShowEntity={mockOnShowEntity} />;
 
 describe('EntityActionsButton', () => {
   const mockEntityItem: EntityItem = {
@@ -107,7 +106,7 @@ describe('EntityActionsButton', () => {
       expect(screen.getByText('Show entity details')).toBeInTheDocument();
     });
 
-    it('should open preview panel when entity details is clicked', () => {
+    it('should call onShowEntity when entity details is clicked', () => {
       render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
 
       // Click the button to open the popover
@@ -116,13 +115,8 @@ describe('EntityActionsButton', () => {
       const entityDetailsButton = screen.getByText('Show entity details');
       fireEvent.click(entityDetailsButton);
 
-      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            entityId: mockEntityItem.id,
-            scopeId,
-          }),
-        })
+      expect(mockOnShowEntity).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: mockEntityItem.id })
       );
     });
 
@@ -154,7 +148,7 @@ describe('EntityActionsButton', () => {
         );
         fireEvent.click(entityDetailsItem);
 
-        expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
+        expect(mockOnShowEntity).not.toHaveBeenCalled();
       });
     });
   });
