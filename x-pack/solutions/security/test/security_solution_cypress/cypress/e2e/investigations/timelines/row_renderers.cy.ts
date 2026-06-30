@@ -62,13 +62,19 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Selected renderer can be disabled and enabled', () => {
+    // The netflow renderer checkbox has id="netflow" per EuiCheckbox id={item.id}
+    const NETFLOW_CHECKBOX = '[data-test-subj="row-renderers-modal"] #netflow';
+
     cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).should('have.length', 0);
     enableAllRowRenderersWithSwitch();
-    cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).should('have.length.gt', 1);
+    // Wait for at least one row renderer to appear before proceeding
+    cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).should('have.length.gt', 0);
     cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).first().should('be.visible');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
+    // Wait for the table to filter and verify the netflow checkbox is present and checked
+    cy.get(NETFLOW_CHECKBOX).should('be.checked');
 
     // Register the intercept for the first save (excluding netflow) before triggering it
     cy.intercept('PATCH', '/api/timeline').as('excludeNetflow');
@@ -84,10 +90,14 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
 
     // open modal, filter and check
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
-
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
-    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();
+    // Wait for the table to filter and verify the netflow checkbox is present and unchecked
+    cy.get(NETFLOW_CHECKBOX).should('not.be.checked');
+
+    // Register the intercept for the second save (including netflow) before triggering it
+    cy.intercept('PATCH', '/api/timeline').as('includeNetflow');
+    cy.get(NETFLOW_CHECKBOX).check();
 
     // close modal and save timeline changes
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
