@@ -55,7 +55,7 @@ groups:
       - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
         description: |
           Allow to configure the max file upload size for use with the Upload File Response action available with the Defend Integration. To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
-        datatype: string
+        datatype: int
         applies_to:
           stack: ga 8.9
           ech: ga
