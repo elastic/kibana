@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import { publicApiPath } from '../../../common/constants';
-import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/attachments';
+import type { CheckStaleAttachmentsResponse, DeleteAttachmentResponse } from '../../../common/http_api/attachments';
 
 /**
  * Internal service for managing attachment UI definitions and API operations.
@@ -84,6 +84,18 @@ export class AttachmentsService {
       {
         body: JSON.stringify({ origin }),
       }
+    );
+  }
+
+  /**
+   * Soft-deletes an attachment from a conversation.
+   */
+  async deleteAttachment(
+    conversationId: string,
+    attachmentId: string
+  ): Promise<DeleteAttachmentResponse> {
+    return await this.http.delete<DeleteAttachmentResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`
     );
   }
 
