@@ -246,6 +246,29 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations![1].status).toBe('success');
   });
 
+  it('does not exceed the 100-entry cap: ignores a new entry when already at 100 investigations', async () => {
+    const fullInvestigations = Array.from({ length: 100 }, (_, i) =>
+      createInvestigation({
+        workflow_execution_id: `exec-${i}`,
+        status: 'success',
+        completed_at: '2026-01-01T01:30:00.000Z',
+      })
+    );
+    const existing = createEvent({ event_id: 'event-1', investigations: fullInvestigations });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const newInvestigation = createInvestigation({ workflow_execution_id: 'exec-100' });
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'event-1',
+      investigation: newInvestigation,
+    });
+
+    expect(result.updated).toBe(0);
+    expect(result.ignored).toBe(1);
+    expect(dataStreamClient.create).not.toHaveBeenCalled();
+  });
+
   it('resolves lineage: terminal attach targets the latest slug version, not the frozen caller version', async () => {
     /**
      * Regression: the investigation workflow passes the frozen inputs.context.event_id (E0) to

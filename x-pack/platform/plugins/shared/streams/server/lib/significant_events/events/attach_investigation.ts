@@ -60,8 +60,12 @@ export const attachInvestigationToEvent = async ({
   let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
     investigations = reconciled.map((entry, idx) => (idx === existingIdx ? investigation : entry));
-  } else {
+  } else if (reconciled.length < 100) {
     investigations = [...reconciled, investigation];
+  } else {
+    // At the schema-enforced 100-entry cap; still write any reconciliation changes but
+    // cannot append a new entry without exceeding investigations.max(100).
+    investigations = reconciled;
   }
 
   if (isEqual(investigations, existing)) {
