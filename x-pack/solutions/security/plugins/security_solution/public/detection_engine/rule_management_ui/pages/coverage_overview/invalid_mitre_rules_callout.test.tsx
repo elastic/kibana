@@ -40,12 +40,13 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       },
     });
 
-    expect(screen.getByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeInTheDocument();
+    const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+    expect(callout).toBeInTheDocument();
+    expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK® IDs');
+    expect(callout.textContent).toContain('currently supported version (v19.1)');
+    expect(callout.textContent).toContain('Elastic prebuilt rule mappings were updated');
     expect(
-      screen.getByText(
-        'You have 1 rule that references MITRE ATT&CK® IDs not present in the currently supported version. They may not appear correctly in the coverage matrix.',
-        { exact: false }
-      )
+      screen.getByTestId('coverageOverviewInvalidMitreRulesLearnMoreLink')
     ).toBeInTheDocument();
     expect(screen.getByTestId('coverageOverviewInvalidMitreRulesViewButton')).toBeInTheDocument();
     expect(screen.queryByTestId('coverageOverviewInvalidMitreRulesModal')).not.toBeInTheDocument();
@@ -59,12 +60,19 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       },
     });
 
-    expect(
-      screen.getByText(
-        'You have 2 rules that reference MITRE ATT&CK® IDs not present in the currently supported version. They may not appear correctly in the coverage matrix.',
-        { exact: false }
-      )
-    ).toBeInTheDocument();
+    const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+    expect(callout.textContent).toContain('You have 2 rules that reference MITRE ATT&CK® IDs');
+  });
+
+  it('mentions the currently supported MITRE version in the callout title', () => {
+    renderCallout({
+      invalidlyMappedRules: {
+        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        disabledRules: [],
+      },
+    });
+
+    expect(screen.getByText(/currently supported: v19\.1/)).toBeInTheDocument();
   });
 
   it('opens the modal with all invalid rules grouped by status', async () => {
@@ -94,9 +102,18 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     expect(screen.getByTestId('coverageOverviewInvalidMitreRulesModal')).toBeInTheDocument();
     expect(screen.getByText('Enabled rule with bad MITRE')).toBeInTheDocument();
     expect(screen.getByText('Disabled rule with bad MITRE')).toBeInTheDocument();
-    expect(screen.getByText('TA9999')).toBeInTheDocument();
-    expect(screen.getByText('T9999')).toBeInTheDocument();
-    expect(screen.getByText('T1234.999')).toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewInvalidMitreBadge-TA9999')).toHaveAttribute(
+      'href',
+      'https://attack.mitre.org/tactics/TA9999/'
+    );
+    expect(screen.getByTestId('coverageOverviewInvalidMitreBadge-T9999')).toHaveAttribute(
+      'href',
+      'https://attack.mitre.org/techniques/T9999/'
+    );
+    expect(screen.getByTestId('coverageOverviewInvalidMitreBadge-T1234.999')).toHaveAttribute(
+      'href',
+      'https://attack.mitre.org/techniques/T1234/999/'
+    );
     expect(screen.getByRole('heading', { name: 'Enabled rules' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Disabled rules' })).toBeInTheDocument();
   });
