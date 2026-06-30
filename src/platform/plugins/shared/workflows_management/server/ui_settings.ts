@@ -12,7 +12,6 @@ import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
-  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
   WORKFLOWS_VERSIONING_SETTING_ID,
@@ -107,22 +106,6 @@ export const registerUISettings = (
       readonlyMode: 'ui',
       requiresPageReload: true,
       scope: 'global',
-    },
-
-    [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.library.name', {
-        defaultMessage: 'Workflow Template Library',
-      }),
-      description: i18n.translate('workflowsManagement.uiSettings.library.description', {
-        defaultMessage:
-          'Enables the in-product library of curated workflow templates. Templates are fetched from the Elastic-hosted catalog and rendered in the Workflows app. This is a technical preview; behavior and API surfaces may change.',
-      }),
-      scope: 'global',
-      category: ['workflows'],
-      schema: schema.boolean(),
-      value: false,
-      requiresPageReload: true,
-      technicalPreview: true,
     },
   });
 };
