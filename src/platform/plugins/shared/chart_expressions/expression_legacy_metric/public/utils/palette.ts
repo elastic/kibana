@@ -37,7 +37,15 @@ export const getLegacyMetricDataBounds = (
     return value < 0 ? { min: value * 2, max: 0 } : { min: 0, max: value * 2 };
   }
 
-  return { min: Math.min(...metricValues), max: Math.max(...metricValues) };
+  const minMaxBounds = metricValues.reduce(
+    (bounds, value) => ({
+      min: Math.min(bounds.min, value),
+      max: Math.max(bounds.max, value),
+    }),
+    { min: Infinity, max: -Infinity }
+  );
+
+  return minMaxBounds;
 };
 
 export const parseRgbString = (rgb: string) => {
