@@ -114,8 +114,8 @@ export class AlertsTablePage {
       .locator(SUBJ.TABLE_LOADING)
       .waitFor({ state: 'hidden', timeout: 30_000 });
     await Promise.race([
-      this.table.waitFor({ state: 'visible' }),
-      this.noDataState.waitFor({ state: 'visible' }),
+      this.table.waitFor({ state: 'visible', timeout: 30_000 }),
+      this.noDataState.waitFor({ state: 'visible', timeout: 30_000 }),
     ]);
   }
 
