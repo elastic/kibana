@@ -9,11 +9,6 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  DEFAULT_PARALLEL_CONCURRENCY,
-  DEFAULT_PARALLEL_MAX_CONCURRENCY,
-  DEFAULT_PARALLEL_MAX_FAN_OUT,
-} from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
@@ -66,11 +61,6 @@ describe('setupDependencies', () => {
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
     eviction: {
       minPayloadSize: new ByteSizeValue(10 * 1024),
-    },
-    parallel: {
-      defaultConcurrency: DEFAULT_PARALLEL_CONCURRENCY,
-      maxConcurrency: DEFAULT_PARALLEL_MAX_CONCURRENCY,
-      maxFanOut: DEFAULT_PARALLEL_MAX_FAN_OUT,
     },
     collectQueueMetrics: false,
   };

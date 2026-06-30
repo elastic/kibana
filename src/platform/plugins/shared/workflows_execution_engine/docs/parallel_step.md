@@ -54,8 +54,8 @@
 | `DEFAULT_PARALLEL_MAX_CONCURRENCY` | `20` | hard ceiling; schema rejects above, runtime clamps |
 | `DEFAULT_PARALLEL_MAX_FAN_OUT` | `100` | max branches; exceeding throws at init |
 
-Operator overrides (`xpack.workflowsExecutionEngine.parallel.*`):
-`defaultConcurrency`, `maxConcurrency`, `maxFanOut`.
+These ceilings are currently fixed constants in `@kbn/workflows`; there are no
+operator config overrides yet.
 
 ---
 
