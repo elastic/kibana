@@ -37,6 +37,7 @@ For endpoint artifacts, use one of the following values:
 * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
 * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
 * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+* `endpoint_custom_yara_signatures`: [Custom YARA signatures list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/custom-yara-signatures)
 
   */
 export const ExceptionListHumanId = lazySchema(() =>
@@ -57,6 +58,7 @@ export const ExceptionListType = lazySchema(() =>
     'endpoint_events',
     'endpoint_host_isolation_exceptions',
     'endpoint_blocklists',
+    'endpoint_custom_yara_signatures',
   ])
 );
 export type ExceptionListType = z.infer<typeof ExceptionListType>;
