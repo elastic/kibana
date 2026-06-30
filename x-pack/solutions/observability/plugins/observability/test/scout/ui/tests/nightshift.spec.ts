@@ -35,7 +35,7 @@ test.describe(
 
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: 'true',
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
         },
       });
       await kbnClient.uiSettings.update({
