@@ -13,7 +13,12 @@ export type { LibraryFetchErrorReason } from './errors';
 export { LibraryFetcher } from './library_fetcher';
 export type { LibraryFetcherDeps, LibraryFetcherRetryOptions } from './library_fetcher';
 
-export type { LibraryHealth } from './library_cache';
+export { LibraryBundleReader } from './library_bundle_reader';
+export type { LibraryBundleReaderDeps } from './library_bundle_reader';
+
+export type { LibrarySource } from './library_source';
+
+export type { LibraryHealth, LibrarySourceMode } from './library_cache';
 
 export { LibraryService } from './library_service';
 export type { TemplateFilters } from './library_service';

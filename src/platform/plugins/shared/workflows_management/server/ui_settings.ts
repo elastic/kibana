@@ -107,21 +107,5 @@ export const registerUISettings = (
       requiresPageReload: true,
       scope: 'global',
     },
-
-    [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.library.name', {
-        defaultMessage: 'Workflow Template Library',
-      }),
-      description: i18n.translate('workflowsManagement.uiSettings.library.description', {
-        defaultMessage:
-          'Enables the in-product library of curated workflow templates. Templates are fetched from the Elastic-hosted catalog and rendered in the Workflows app. This is a technical preview; behavior and API surfaces may change.',
-      }),
-      scope: 'global',
-      category: ['workflows'],
-      schema: schema.boolean(),
-      value: false,
-      requiresPageReload: true,
-      technicalPreview: true,
-    },
   });
 };

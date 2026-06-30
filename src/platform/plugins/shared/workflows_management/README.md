@@ -360,6 +360,47 @@ illustration:
 Pointing the server at that directory is a useful smoke test until the Phase 1
 generator output is on disk.
 
+**Air-gapped deployments (local bundle mode).** Instead of fetching from a URL,
+the server can read the catalog from an extracted release tarball on the Kibana
+host's filesystem. The bundle is a faithful mirror of the CDN `/v1` tree, so
+`bundlePath` is simply a local equivalent of `registryUrl` (mutually exclusive
+with it):
+
+```yaml
+workflowsManagement:
+  library:
+    bundlePath: "/usr/share/kibana/workflows-library/v1"
+```
+
+The bundle has the same layout the CDN serves — `kibana-versions.json`, a
+per-version `<version>/catalogs/templates.json`, and shared bodies at
+`templates/<slug>/<version>.yaml` — so version selection and `definitionUrl`
+resolution are identical to HTTP mode. `bundlePath` may point either at that
+`/v1` root (the directory holding `kibana-versions.json`) or at its parent that
+contains a single `v1/` directory, which is what extracting the release tarball
+produces. The running Kibana version selects its catalog from
+`kibana-versions.json` exactly as over HTTP. Bundle mode has no TTL/refresh: the
+catalog is read once at first request and cached for the process lifetime —
+replace the directory and restart Kibana to update.
+
+To produce a bundle locally from the Phase 1 generator output (`dist/v1/` in
+`elastic/workflows`), just archive that tree and extract it on the host:
+
+```sh
+# in elastic/workflows, after `node scripts/build-catalog.mjs`
+tar -czf workflows-library.tar.gz -C dist v1
+# on the (air-gapped) Kibana host
+tar -xzf workflows-library.tar.gz -C /usr/share/kibana/workflows-library
+# → bundlePath: /usr/share/kibana/workflows-library/v1
+```
+
+Because the bundle is a mirror of the `/v1` tree, both source modes share one
+test fixture — the HTTP fetcher serves it over HTTP and the bundle reader reads
+it from disk:
+[`server/library/tests/__fixtures__/dist/v1/`](./server/library/tests/__fixtures__/dist/v1).
+`GET /internal/workflows/library/health` reports `sourceMode: "bundle"` when
+this mode is active.
+
 **Exercise the API once enabled:**
 
 ```sh

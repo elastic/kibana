@@ -10,7 +10,6 @@
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
 import pRetry, { AbortError } from 'p-retry';
-import semver from 'semver';
 import type { Logger } from '@kbn/core/server';
 import type {
   KibanaVersionsManifest,
@@ -28,6 +27,8 @@ import { ZodError } from '@kbn/zod/v4';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
 import { LibraryCache, type LibraryHealth } from './library_cache';
+import type { LibrarySource } from './library_source';
+import { resolveVersionId } from './resolve_version_id';
 
 /**
  * Default CDN URL the Workflow Template Library fetches its catalog from when
@@ -80,13 +81,13 @@ type FetchResult<T> = { status: 'fresh'; payload: T; etag?: string } | { status:
  * Errors are wrapped in {@link LibraryFetchError} with a typed `reason` so
  * route handlers can branch without inspecting messages.
  */
-export class LibraryFetcher {
+export class LibraryFetcher implements LibrarySource {
   private readonly cache: LibraryCache;
   private readonly etags = new Map<string, string>();
   private refreshing?: Promise<void>;
 
   constructor(private readonly deps: LibraryFetcherDeps) {
-    this.cache = new LibraryCache(deps.ttlMs);
+    this.cache = new LibraryCache(deps.ttlMs, 'http');
   }
 
   async listTemplates(): Promise<Template[]> {
@@ -137,7 +138,11 @@ export class LibraryFetcher {
       const manifestResult = await this.fetchKibanaVersionsManifest();
       let versionId = this.cache.versionId;
       if (manifestResult.status === 'fresh') {
-        versionId = this.resolveVersionId(manifestResult.payload);
+        versionId = resolveVersionId(
+          this.deps.kibanaVersion,
+          this.deps.isServerless,
+          manifestResult.payload
+        );
         this.cache.setVersionId(versionId);
       }
       if (!versionId) {
@@ -160,31 +165,6 @@ export class LibraryFetcher {
       // to serve. Once we have one, refresh failures are non-fatal.
       if (!this.cache.catalog) throw err;
     }
-  }
-
-  /**
-   * Resolves which per-Kibana-version directory id to fetch from based on the
-   * runtime's own Kibana semver and deployment mode.
-   *
-   * - Serverless deployments always resolve to {@link KibanaVersionsManifest.latest}
-   *   (`/v1/main/`) — serverless runs Kibana@HEAD and the `main` catalog
-   *   tracks its semver.
-   * - Stack deployments match against each manifest entry's explicit
-   *   `kibana` semver, matching the same minor (`~9.5.0` = `9.5.x`,
-   *   patch-independent) — order-independent, unlike a caret range.
-   * - Unrecognized runtime versions fall back to `manifest.latest` so dev
-   *   builds against Kibana@HEAD still get a working catalog.
-   */
-  private resolveVersionId(manifest: KibanaVersionsManifest): string {
-    if (this.deps.isServerless) {
-      return manifest.latest;
-    }
-    for (const entry of manifest.versions) {
-      if (semver.satisfies(this.deps.kibanaVersion, `~${entry.kibana}`)) {
-        return entry.id;
-      }
-    }
-    return manifest.latest;
   }
 
   private async fetchKibanaVersionsManifest(): Promise<FetchResult<KibanaVersionsManifest>> {
