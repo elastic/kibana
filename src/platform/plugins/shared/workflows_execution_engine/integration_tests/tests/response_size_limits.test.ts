@@ -281,6 +281,64 @@ steps:
       });
     });
 
+    describe('Layer 1: transport limit (typed ConnectorResponseSizeLimitError)', () => {
+      describe('http connector routes to StepSizeLimitExceeded', () => {
+        let workflowRunFixture: WorkflowRunFixture;
+
+        beforeAll(async () => {
+          workflowRunFixture = new WorkflowRunFixture();
+
+          const workflowYaml = `
+steps:
+  - name: http_transport_limit
+    type: ${FakeConnectors.transport_limit_http.actionTypeId}
+    connector-id: ${FakeConnectors.transport_limit_http.name}
+    with:
+      limitBytes: 1048576
+      contentLengthBytes: 10485760
+`;
+          await workflowRunFixture.runWorkflow({ workflowYaml });
+        });
+
+        it('fails with StepSizeLimitExceeded (workflow transport limit applies)', () => {
+          const stepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          );
+          const step = stepExecutions.find((s) => s.stepId === 'http_transport_limit');
+          expect(step?.status).toBe(ExecutionStatus.FAILED);
+          expect(step?.error?.type).toBe('StepSizeLimitExceeded');
+        });
+      });
+
+      describe('spec connector without max-step-size routes to ActionsResponseContentLengthExceeded', () => {
+        let workflowRunFixture: WorkflowRunFixture;
+
+        beforeAll(async () => {
+          workflowRunFixture = new WorkflowRunFixture();
+
+          const workflowYaml = `
+steps:
+  - name: spec_transport_limit
+    type: ${FakeConnectors.transport_limit_spec.actionTypeId}
+    connector-id: ${FakeConnectors.transport_limit_spec.name}
+    with:
+      limitBytes: 1048576
+      contentLengthBytes: 10485760
+`;
+          await workflowRunFixture.runWorkflow({ workflowYaml });
+        });
+
+        it('fails with ActionsResponseContentLengthExceeded (actions HTTP limit fired first)', () => {
+          const stepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          );
+          const step = stepExecutions.find((s) => s.stepId === 'spec_transport_limit');
+          expect(step?.status).toBe(ExecutionStatus.FAILED);
+          expect(step?.error?.type).toBe('ActionsResponseContentLengthExceeded');
+        });
+      });
+    });
+
     describe('input size check rejects oversized inputs before _run()', () => {
       let workflowRunFixture: WorkflowRunFixture;
 

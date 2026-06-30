@@ -31,7 +31,7 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { ConnectorAuthorizationError } from '@kbn/connector-specs';
+import { ConnectorAuthorizationError, ConnectorResponseSizeLimitError } from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
@@ -1557,6 +1557,46 @@ describe('Action Executor', () => {
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
         tags: ['test', '1', 'action-run-failed', 'user-error'],
+      });
+    });
+
+    test(`${label} returns structured error result when executor throws ConnectorResponseSizeLimitError`, async () => {
+      const err = new ConnectorResponseSizeLimitError({
+        message: 'maxContentLength size of 1048576 exceeded',
+        limitBytes: 1048576,
+        contentLengthBytes: 10 * 1024 * 1024,
+        estimatedOutputBytes: 14 * 1024 * 1024,
+      });
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult).toEqual({
+        actionId: CONNECTOR_ID,
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'maxContentLength size of 1048576 exceeded',
+        errorName: 'ConnectorResponseSizeLimitError',
+        errorMeta: {
+          connectorName: '1',
+          limitBytes: 1048576,
+          contentLengthBytes: 10 * 1024 * 1024,
+          estimatedOutputBytes: 14 * 1024 * 1024,
+        },
+        retry: false,
+        errorSource: TaskErrorSource.USER,
       });
     });
 

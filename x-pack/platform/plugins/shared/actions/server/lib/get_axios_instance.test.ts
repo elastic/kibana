@@ -17,6 +17,7 @@ import { requestOAuthClientCredentialsToken } from './request_oauth_client_crede
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
+import { ConnectorResponseSizeLimitError } from '@kbn/connector-specs';
 
 jest.mock('./get_custom_agents', () => ({
   getCustomAgents: jest.fn().mockReturnValue({
@@ -120,11 +121,35 @@ describe('getAxiosInstance', () => {
 
     // @ts-expect-error accessing internal axios interceptor handlers
     const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
-    await expect(rejectionHandler(error)).rejects.toBe(error);
+    await expect(rejectionHandler(error)).rejects.toMatchObject({
+      name: 'ConnectorResponseSizeLimitError',
+      limitBytes: 20971520,
+      contentLengthBytes: 104857600,
+    });
+    await expect(rejectionHandler(error)).rejects.toBeInstanceOf(ConnectorResponseSizeLimitError);
 
     expect(logger.debug).toHaveBeenCalledWith(
       'Actions Axios request exceeded maxContentLength: maxContentLength size of 20971520 exceeded; metadata: {"connectorId":"1","configuredMaxContentLength":20971520,"errorCode":"ERR_BAD_RESPONSE","responseStatus":200,"responseHeaders":{"content-length":"104857600","content-type":"application/octet-stream"},"requestResponseHeaders":{"Content-Length":"104857600"}}'
     );
+  });
+
+  test('passes through non-size errors from the response interceptor unchanged', async () => {
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const result = await getAxios({
+      connectorId: '1',
+      secrets: {},
+      maxContentLength: 20 * 1024 * 1024,
+    });
+
+    const error = new Error('some other network error');
+
+    // @ts-expect-error accessing internal axios interceptor handlers
+    const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
+    await expect(rejectionHandler(error)).rejects.toBe(error);
   });
 
   test('throws error when auth type is not supported', async () => {
