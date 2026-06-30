@@ -97,11 +97,25 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
   });
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'Metric - Color ranges');
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
+
+    // Open the metric dimension editor and verify converted palette color stops
+    await dimensions.locator('nth=0').click();
+    await lens.openPalettePanel();
+    const colorStops = await lens.getPaletteColorStops();
+    expect(colorStops).toHaveLength(2);
+    // Converted color rule from TSVB background_color_rules
+    expect(colorStops[0].stop).toBe('10');
+    expect(colorStops[0].color).toBeDefined();
+    // Sentinel (end-of-range marker)
+    expect(colorStops[1].stop).toBe('');
+    expect(colorStops[1].color).toBeUndefined();
+    await lens.closePalettePanel();
+    await lens.closeDimensionEditorPanel();
   });
 
   spaceTest(

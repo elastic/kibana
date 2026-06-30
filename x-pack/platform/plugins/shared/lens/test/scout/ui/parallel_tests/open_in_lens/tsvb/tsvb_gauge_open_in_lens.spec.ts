@@ -92,12 +92,31 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
   });
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'Gauge - Color ranges');
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
 
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(3);
+
+    // Open the primary metric dimension editor and verify converted palette color stops
+    await dimensions.locator('nth=0').click();
+    await lens.openPalettePanel();
+    const colorStops = await lens.getPaletteColorStops();
+    expect(colorStops).toHaveLength(4);
+    // First entry: default series color with no minimum
+    expect(colorStops[0].stop).toBe('');
+    expect(colorStops[0].color).toBeDefined();
+    // Converted color rules from the TSVB gauge_color_rules
+    expect(colorStops[1].stop).toBe('10');
+    expect(colorStops[1].color).toBeDefined();
+    expect(colorStops[2].stop).toBe('100');
+    expect(colorStops[2].color).toBeDefined();
+    // Sentinel (end-of-range marker)
+    expect(colorStops[3].stop).toBe('');
+    expect(colorStops[3].color).toBeUndefined();
+    await lens.closePalettePanel();
+    await lens.closeDimensionEditorPanel();
   });
 
   spaceTest(

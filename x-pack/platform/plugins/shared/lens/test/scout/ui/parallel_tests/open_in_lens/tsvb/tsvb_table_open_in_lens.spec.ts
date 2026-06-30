@@ -166,7 +166,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   });
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'Table - Color ranges');
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
@@ -174,6 +174,20 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       .locator('lnsDatatable_metrics')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(dimensions).toHaveCount(1);
+
+    // Open the metric dimension editor and verify converted palette color stops
+    await dimensions.locator('nth=0').click();
+    await lens.openPalettePanel();
+    const colorStops = await lens.getPaletteColorStops();
+    expect(colorStops).toHaveLength(3);
+    expect(colorStops[0].stop).toBe('10');
+    expect(colorStops[0].color).toBeDefined();
+    expect(colorStops[1].stop).toBe('100');
+    expect(colorStops[1].color).toBeDefined();
+    expect(colorStops[2].stop).toBe('');
+    expect(colorStops[2].color).toBeUndefined();
+    await lens.closePalettePanel();
+    await lens.closeDimensionEditorPanel();
   });
 
   spaceTest(
