@@ -13,7 +13,7 @@ export type TemplateFieldRender = 'default' | 'badge' | 'severity_badge';
 export interface TemplateFieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'readonly_text' | 'markdown' | 'json' | 'timeline' | 'select' | 'assignees';
+  type: 'text' | 'readonly_text' | 'markdown' | 'json' | 'select' | 'assignees';
   options?: readonly string[];
   render?: TemplateFieldRender;
   show_in_header?: boolean;

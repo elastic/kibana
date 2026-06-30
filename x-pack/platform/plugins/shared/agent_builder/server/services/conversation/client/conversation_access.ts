@@ -59,17 +59,6 @@ const POC_CONVERSATION_TEMPLATES: Record<
     profile: 'investigation',
     chat_mode: 'collaborative',
     write_privileges: ['write_observability_investigation'],
-    workflow_hooks: [
-      {
-        id: 'observability-investigation-current-state',
-        trigger: 'schedule',
-        interval: '5m',
-        inline_workflow_yaml: OBSERVABILITY_CURRENT_STATE_WORKFLOW_YAML,
-        workflow_name: 'Observability investigation current state refresh',
-        wait_for_completion: true,
-        merge_output: true,
-      },
-    ],
   },
   'observability-incident-v1': {
     profile: 'incident',

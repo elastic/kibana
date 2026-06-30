@@ -27,23 +27,23 @@ describe('ConversationDetailTimelineTab', () => {
       getConversationTimelineEntries([
         {
           at: '2026-06-30T13:30:00.000Z',
-          actor: 'workflow',
-          source: 'workflow_hook',
-          summary: 'State refreshed',
+          actor: 'incident commander',
+          source: 'incident',
+          summary: 'Mitigation started',
         },
       ])
     ).toEqual([
       {
         at: '2026-06-30T13:30:00.000Z',
-        actor: 'workflow',
+        actor: 'incident commander',
         metadata: {
-          actor: 'workflow',
+          actor: 'incident commander',
           at: '2026-06-30T13:30:00.000Z',
-          source: 'workflow_hook',
-          summary: 'State refreshed',
+          source: 'incident',
+          summary: 'Mitigation started',
         },
-        source: 'workflow_hook',
-        summary: 'State refreshed',
+        source: 'incident',
+        summary: 'Mitigation started',
       },
     ]);
   });
@@ -54,18 +54,18 @@ describe('ConversationDetailTimelineTab', () => {
         timeline={[
           {
             at: '2026-06-30T13:30:00.000Z',
-            actor: 'workflow',
-            source: 'workflow_hook',
-            summary: 'State refreshed',
+            actor: 'incident commander',
+            source: 'incident',
+            summary: 'Mitigation started',
           },
         ]}
       />
     );
 
     expect(screen.getByTestId('conversationDetailTimeline')).toBeInTheDocument();
-    expect(screen.getByText('workflow')).toBeInTheDocument();
-    expect(screen.getByText('workflow_hook')).toBeInTheDocument();
-    expect(screen.getByText('State refreshed')).toBeInTheDocument();
+    expect(screen.getByText('incident commander')).toBeInTheDocument();
+    expect(screen.getByText('incident')).toBeInTheDocument();
+    expect(screen.getByText('Mitigation started')).toBeInTheDocument();
   });
 
   it('renders an empty state when no timeline metadata exists', () => {

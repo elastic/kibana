@@ -62,18 +62,6 @@ const createInvestigationConversation = async ({
       confidence: event.confidence,
       recommendations: event.recommendations,
       last_refreshed_at: now,
-      timeline: [
-        {
-          at: now,
-          actor: 'significant events',
-          source: 'significant_events',
-          summary: 'Investigation workflow started',
-          metadata: {
-            event_id: event.event_id,
-            discovery_slug: event.discovery_slug,
-          },
-        },
-      ],
     },
   });
 

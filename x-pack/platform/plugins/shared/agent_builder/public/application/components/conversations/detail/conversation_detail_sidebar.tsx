@@ -28,9 +28,12 @@ import {
   getTemplateFieldDefinitions,
   getTemplateLabel,
   isCollaborativeTemplateConversation,
+  resolveTemplateId,
 } from './template_conversation_utils';
 import { ConversationWorkflowHooks } from './conversation_workflow_hooks';
 import { ConversationDetailTimelineTab } from './tabs/conversation_detail_timeline_tab';
+
+const OBSERVABILITY_INVESTIGATION_TEMPLATE_ID = 'observability-investigation-v1';
 
 enum ConversationDetailSidebarTab {
   metadata = 'metadata',
@@ -85,9 +88,12 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
   const fieldDefinitions = getTemplateFieldDefinitions(conversation);
   const templateLabel = getTemplateLabel(conversation);
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
+  const showTimelineTab =
+    resolveTemplateId(conversation) === OBSERVABILITY_INVESTIGATION_TEMPLATE_ID;
   const [selectedTab, setSelectedTab] = useState<ConversationDetailSidebarTab>(
     ConversationDetailSidebarTab.metadata
   );
+  const selectedSidebarTab = showTimelineTab ? selectedTab : ConversationDetailSidebarTab.metadata;
 
   const panelStyles = css`
     height: 100%;
@@ -105,7 +111,9 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
 
   const tabs = [
     { id: ConversationDetailSidebarTab.metadata, label: labels.metadataTab },
-    { id: ConversationDetailSidebarTab.timeline, label: labels.timelineTab },
+    ...(showTimelineTab
+      ? [{ id: ConversationDetailSidebarTab.timeline, label: labels.timelineTab }]
+      : []),
   ];
 
   return (
@@ -131,7 +139,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
           <EuiTab
             key={tab.id}
             onClick={() => setSelectedTab(tab.id)}
-            isSelected={selectedTab === tab.id}
+            isSelected={selectedSidebarTab === tab.id}
             data-test-subj={`conversationDetailSidebarTab-${tab.id}`}
           >
             {tab.label}
@@ -140,7 +148,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
       </EuiTabs>
       <EuiSpacer size="m" />
 
-      {selectedTab === ConversationDetailSidebarTab.metadata && (
+      {selectedSidebarTab === ConversationDetailSidebarTab.metadata && (
         <>
           <EuiTitle size="xxs">
             <h3>{labels.templateFields}</h3>
@@ -184,7 +192,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
         </>
       )}
 
-      {selectedTab === ConversationDetailSidebarTab.timeline && (
+      {selectedSidebarTab === ConversationDetailSidebarTab.timeline && (
         <ConversationDetailTimelineTab timeline={conversation.custom_fields?.timeline} />
       )}
     </EuiPanel>

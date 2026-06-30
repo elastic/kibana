@@ -44,26 +44,6 @@ describe('TemplateFieldRow', () => {
     expect(screen.queryByRole('textbox', { name: 'Current state' })).not.toBeInTheDocument();
   });
 
-  it('renders timeline entries without object coercion', () => {
-    renderField({
-      definition: { key: 'timeline', label: 'Timeline', type: 'timeline' },
-      value: [
-        {
-          at: '2026-06-30T13:22:00.000Z',
-          actor: 'investigation workflow',
-          source: 'workflow',
-          summary: 'Investigation workflow completed',
-        },
-      ],
-    });
-
-    expect(screen.getByText('Investigation workflow completed')).toBeInTheDocument();
-    expect(
-      screen.getByText('investigation workflow | workflow | 2026-06-30T13:22:00.000Z')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('[object Object]')).not.toBeInTheDocument();
-  });
-
   it('renders structured metadata as formatted JSON', () => {
     renderField({
       definition: { key: 'workflow_hook_state', label: 'Workflow hook state', type: 'json' },

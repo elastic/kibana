@@ -25,11 +25,13 @@ import {
   OBSERVABILITY_INVESTIGATION_TEMPLATE_ID,
 } from '../../../common/constants';
 import {
+  appendTimelineEntries,
   buildIncidentCustomFields,
   buildInvestigationCustomFields,
   buildInvestigationFieldsWithIncidentLink,
   buildInvestigationSeedMessage,
   buildManualRefreshFields,
+  type ObservabilityInvestigationTimelineEntry,
 } from '../../investigation_conversations/conversation_metadata';
 import { runConversationWorkflowHooksForTrigger } from '../../investigation_conversations/investigation_update_task';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
@@ -115,6 +117,56 @@ const buildIncidentTitle = (investigation: Conversation): string => {
   return `Incident: ${investigation.title}`;
 };
 
+const appendHookTimelineToInvestigation = async ({
+  client,
+  conversation,
+  customFields,
+  timelineEntries,
+  now,
+  logger,
+}: {
+  client: ConversationClient;
+  conversation: Conversation;
+  customFields: Record<string, unknown>;
+  timelineEntries: ObservabilityInvestigationTimelineEntry[];
+  now: string;
+  logger: Logger;
+}): Promise<Conversation | undefined> => {
+  if (!timelineEntries.length) {
+    return undefined;
+  }
+
+  const targetInvestigationConversationId =
+    getTemplateId(conversation) === OBSERVABILITY_INVESTIGATION_TEMPLATE_ID
+      ? conversation.id
+      : getString(customFields.investigation_conversation_id);
+
+  if (!targetInvestigationConversationId) {
+    return undefined;
+  }
+
+  try {
+    const targetConversation =
+      targetInvestigationConversationId === conversation.id
+        ? conversation
+        : await client.get(targetInvestigationConversationId);
+
+    return client.update({
+      id: targetConversation.id,
+      custom_fields: appendTimelineEntries({
+        customFields: targetConversation.custom_fields ?? {},
+        entries: timelineEntries,
+        now,
+      }),
+    });
+  } catch (error) {
+    logger.debug(
+      `Failed to append workflow timeline entries to investigation ${targetInvestigationConversationId}: ${error}`
+    );
+    return undefined;
+  }
+};
+
 const runConfiguredWorkflowHooks = async ({
   plugins,
   client,
@@ -135,7 +187,8 @@ const runConfiguredWorkflowHooks = async ({
   }
 
   try {
-    const customFields = await runConversationWorkflowHooksForTrigger({
+    const now = new Date().toISOString();
+    const hookResult = await runConversationWorkflowHooksForTrigger({
       conversation,
       trigger,
       workflowApi: plugins.workflowsManagement.management,
@@ -143,10 +196,22 @@ const runConfiguredWorkflowHooks = async ({
       logger,
     });
 
-    return client.update({
+    const updatedConversation = await client.update({
       id: conversation.id,
-      custom_fields: customFields,
+      custom_fields: hookResult.customFields,
     });
+    const investigationWithTimeline = await appendHookTimelineToInvestigation({
+      client,
+      conversation: updatedConversation,
+      customFields: hookResult.customFields,
+      timelineEntries: hookResult.timelineEntries,
+      now,
+      logger,
+    });
+
+    return investigationWithTimeline?.id === updatedConversation.id
+      ? investigationWithTimeline
+      : updatedConversation;
   } catch (error) {
     logger.debug(`Failed to run conversation workflow hooks for ${trigger}: ${error}`);
     return conversation;
@@ -282,7 +347,7 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         template_id: OBSERVABILITY_INCIDENT_TEMPLATE_ID,
         conversation_mode: 'group',
         status: ConversationRoundStatus.completed,
-        custom_fields: buildIncidentCustomFields({ investigation, now }),
+        custom_fields: buildIncidentCustomFields({ investigation }),
       });
 
       const linkedInvestigation = await client.update({
@@ -310,19 +375,19 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
         conversation: incidentWithMessage.conversation,
         trigger: 'incident.created',
       });
-      const hookedInvestigation = await runConfiguredWorkflowHooks({
-        plugins,
-        client,
-        request,
-        logger,
-        conversation: investigationWithMessage.conversation,
-        trigger: 'incident.created',
-      });
+      let responseInvestigation = investigationWithMessage.conversation;
+      try {
+        responseInvestigation = await client.get(investigationWithMessage.conversation.id);
+      } catch (error) {
+        logger.debug(
+          `Unable to reload investigation conversation ${investigationWithMessage.conversation.id}: ${error}`
+        );
+      }
 
       return response.ok({
         body: {
           incidentConversation: hookedIncident,
-          investigationConversation: hookedInvestigation,
+          investigationConversation: responseInvestigation,
           created: true,
         },
       });

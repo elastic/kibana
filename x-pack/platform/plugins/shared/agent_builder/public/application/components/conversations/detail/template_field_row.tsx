@@ -37,14 +37,6 @@ interface TemplateFieldRowProps {
   onChange: (key: string, value: unknown) => void;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-};
-
-const getString = (value: unknown): string | undefined => {
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
-};
-
 const stringifyValue = (value: unknown): string => {
   if (value === undefined || value === null || value === '') {
     return labels.notSet;
@@ -59,44 +51,6 @@ const stringifyValue = (value: unknown): string => {
   } catch {
     return String(value);
   }
-};
-
-const getTimelineSummary = (entry: unknown): string => {
-  if (!isRecord(entry)) {
-    return stringifyValue(entry);
-  }
-
-  return (
-    getString(entry.summary) ??
-    getString(entry.message) ??
-    getString(entry.description) ??
-    getString(entry.event) ??
-    stringifyValue(entry)
-  );
-};
-
-const getTimelineMetadata = (entry: unknown): string | undefined => {
-  if (!isRecord(entry)) {
-    return undefined;
-  }
-
-  const metadata = [getString(entry.actor), getString(entry.source), getString(entry.at)].filter(
-    (item): item is string => item !== undefined
-  );
-
-  return metadata.length > 0 ? metadata.join(' | ') : undefined;
-};
-
-const getTimelineEntries = (value: unknown): unknown[] => {
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (value === undefined || value === null) {
-    return [];
-  }
-
-  return [value];
 };
 
 export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
@@ -132,15 +86,6 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       word-break: break-word;
-    }
-  `;
-
-  const timelineListStyles = css`
-    margin: 0;
-    padding-inline-start: ${euiTheme.size.l};
-
-    li + li {
-      margin-top: ${euiTheme.size.s};
     }
   `;
 
@@ -248,40 +193,6 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
         >
           {stringifyValue(value)}
         </EuiCodeBlock>
-      </EuiFormRow>
-    );
-  }
-
-  if (definition.type === 'timeline') {
-    const entries = getTimelineEntries(value);
-
-    return (
-      <EuiFormRow label={definition.label} fullWidth>
-        <div css={readonlyValueStyles}>
-          {entries.length > 0 ? (
-            <ol css={timelineListStyles}>
-              {entries.map((entry, index) => {
-                const metadata = getTimelineMetadata(entry);
-                return (
-                  <li key={index}>
-                    <EuiText size="s">
-                      <p>{getTimelineSummary(entry)}</p>
-                      {metadata && (
-                        <p>
-                          <small>{metadata}</small>
-                        </p>
-                      )}
-                    </EuiText>
-                  </li>
-                );
-              })}
-            </ol>
-          ) : (
-            <EuiText size="s" color="subdued">
-              {labels.notSet}
-            </EuiText>
-          )}
-        </div>
       </EuiFormRow>
     );
   }
