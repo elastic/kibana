@@ -33,11 +33,17 @@ import type {
   RuleExecutionStatus,
   RuleTypeRegistry,
 } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRuleWithEs,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
+import { AlertAuditAction, alertAuditSystemEvent } from '../lib/alert_audit_events';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -70,6 +76,8 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
+  evaluatePerAlertSnoozeExpiry,
+  evaluatePerAlertSnoozeConditions,
 } from './lib';
 import {
   ErrorWithType,
@@ -209,6 +217,9 @@ export class TaskRunner<
     this.ruleResult = new RuleResultService();
   }
 
+  /**
+   * Persists the post-run rule attributes to Elasticsearch.
+   */
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
     attributes: {
@@ -216,8 +227,10 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstancesToRemove?: Array<{ instanceId: string; snoozedAt: string }>;
     }
-  ) {
+  ): Promise<boolean> {
+    const { snoozedInstancesToRemove, ...docAttributes } = attributes;
     const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
@@ -232,14 +245,23 @@ export class TaskRunner<
       await partiallyUpdateRuleWithEs(
         client,
         ruleId,
-        { ...attributes, running: false },
+        { ...docAttributes, running: false },
         {
           ignore404: true,
           refresh: false,
         }
       );
+      if (snoozedInstancesToRemove?.length) {
+        // Per-alert snooze expiry is applied via an atomic Painless script.
+        await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstancesToRemove, {
+          ignore404: true,
+          refresh: false,
+        });
+      }
+      return true;
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
+      return false;
     }
   }
 
@@ -270,6 +292,39 @@ export class TaskRunner<
     }
   }
 
+  /**
+   * Emits one `alert_auto_unsnooze` audit event per per-alert snooze entry that
+   * the task runner has just decided to drop, attributed to `System` with the
+   * supplied reason. Wrapped defensively so a misconfigured audit sink can never
+   * break rule execution; failures are logged at warn level only.
+   */
+  private logAutoUnsnoozeAuditEvents(
+    instances: RawRuleSnoozedInstance[],
+    reason: 'ttl_expired' | 'condition_met',
+    rule: { id: string; name: string }
+  ): void {
+    if (instances.length === 0 || !this.context.auditService) {
+      return;
+    }
+    try {
+      for (const instance of instances) {
+        this.context.auditService.withoutRequest.log(
+          alertAuditSystemEvent({
+            action: AlertAuditAction.AUTO_UNSNOOZE,
+            id: instance.instanceId,
+            outcome: 'success',
+            reason,
+            ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.name },
+          })
+        );
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Failed to emit alert_auto_unsnooze audit event(s) for rule [id=${rule.id}]: ${e.message}`
+      );
+    }
+  }
+
   private async runRule({
     fakeRequest,
     rule,
@@ -277,6 +332,11 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
+      rule.snoozedInstances,
+      this.runDate
+    );
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
     }
@@ -347,6 +407,7 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: activeInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
@@ -401,6 +462,36 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
+    for (const instance of activeInstances) {
+      if (!instance.conditions?.length) {
+        continue;
+      }
+      const data = alertsClient.getBuiltActiveAlertDataByInstanceId(instance.instanceId);
+      if (data) {
+        alertAsDataByInstanceId.set(instance.instanceId, data);
+      }
+    }
+
+    const { conditionExpiredInstances } = evaluatePerAlertSnoozeConditions(
+      activeInstances,
+      alertAsDataByInstanceId
+    );
+
+    const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
+    const updatedActiveInstances =
+      conditionExpiredInstances.length > 0
+        ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
+        : activeInstances;
+
+    // Condition evaluation happens after persistAlerts(), so alerts for condition-expired
+    // instances were already written with kibana.alert.snoozed: true. Correct that now.
+    if (conditionExpiredInstances.length > 0) {
+      await alertsClient.clearSnoozedStatusForAlerts(
+        conditionExpiredInstances.map((i) => i.instanceId)
+      );
+    }
+
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
@@ -416,6 +507,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
+      activeSnoozedIds: new Set(updatedActiveInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -475,6 +567,28 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      expiredSnoozedInstances:
+        expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+          ? [
+              ...expiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+              ...conditionExpiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+            ]
+          : undefined,
+      ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+        ? {
+            autoUnsnoozeAudit: {
+              expired: expiredInstances,
+              conditionExpired: conditionExpiredInstances,
+              ruleName: rule.name,
+            },
+          }
+        : {}),
     };
   }
 
@@ -685,6 +799,13 @@ export class TaskRunner<
         });
       }
 
+      const expiredSnoozedInstances = isOk(runRuleResult)
+        ? runRuleResult.value.expiredSnoozedInstances
+        : undefined;
+      const autoUnsnoozeAudit = isOk(runRuleResult)
+        ? runRuleResult.value.autoUnsnoozeAudit
+        : undefined;
+
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
         if (outcome === 'failure') {
@@ -698,12 +819,26 @@ export class TaskRunner<
           );
         }
 
-        await this.updateRuleSavedObjectPostRun(ruleId, {
+        const updatePersisted = await this.updateRuleSavedObjectPostRun(ruleId, {
           executionStatus: ruleExecutionStatusToRaw(executionStatus),
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          ...(expiredSnoozedInstances !== undefined
+            ? { snoozedInstancesToRemove: expiredSnoozedInstances }
+            : {}),
         });
+
+        // Only emit `alert_auto_unsnooze` events after the SO update.
+        if (updatePersisted && autoUnsnoozeAudit !== undefined) {
+          const ruleRef = { id: ruleId, name: autoUnsnoozeAudit.ruleName };
+          this.logAutoUnsnoozeAuditEvents(autoUnsnoozeAudit.expired, 'ttl_expired', ruleRef);
+          this.logAutoUnsnoozeAuditEvents(
+            autoUnsnoozeAudit.conditionExpired,
+            'condition_met',
+            ruleRef
+          );
+        }
       }
 
       if (startedAt) {
