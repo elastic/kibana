@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Os from 'os';
+
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
-const batchSize = 250;
-const maxParallelism = 8;
+import { eslintBinPath } from './eslint_bin_path';
+
+const maxParallelism = Math.max(1, Os.cpus().length - 1);
+// ARG_MAX on macOS is 1MB; cap batch size to stay well under it on low-core machines.
+const maxBatchSize = 4000;
 
 run(
   async ({ log, flags }) => {
     const bail = !!(flags.bail || false);
 
-    const { batches, files } = getLintableFileBatches(flags._);
+    const { batches, files } = getLintableFileBatches(flags._, maxParallelism);
     log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
 
     const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
@@ -28,7 +33,6 @@ run(
     log.info(
       `Running ESLint with args: ${pretty({
         args: eslintArgs.concat(flags._),
-        batchSize,
         maxParallelism,
       })}`
     );
@@ -64,7 +68,7 @@ run(
   }
 );
 
-function getLintableFileBatches(filePatterns: string[]) {
+function getLintableFileBatches(filePatterns: string[], workerCount: number) {
   const files = execa
     .sync('git', ['ls-files', ...filePatterns], {
       cwd: REPO_ROOT,
@@ -73,6 +77,7 @@ function getLintableFileBatches(filePatterns: string[]) {
     .stdout.trim()
     .split('\n')
     .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
+  const batchSize = Math.min(Math.ceil(files.length / workerCount), maxBatchSize);
   const batches = [];
   for (let i = 0; i < files.length; i += batchSize) {
     batches.push(files.slice(i, i + batchSize));
@@ -99,7 +104,7 @@ async function lintFileBatch({
   log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
 
   const timeBefore = Date.now();
-  const args = ['scripts/eslint'].concat(eslintArgs).concat(batch);
+  const args = [eslintBinPath, '--quiet', ...eslintArgs, ...batch];
   const { stdout, stderr, exitCode } = await execa('node', args, {
     cwd: REPO_ROOT,
     env: {

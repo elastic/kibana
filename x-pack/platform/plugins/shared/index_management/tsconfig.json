@@ -66,6 +66,7 @@
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/ml-common-types",
     "@kbn/failure-store-modal",
+    "@kbn/data-lifecycle-phases",
     "@kbn/react-query",
     "@kbn/scout",
     "@kbn/deeplinks-management",
@@ -75,6 +76,7 @@
     "@kbn/search-index-documents",
     "@kbn/cloud-connect-plugin",
     "@kbn/shared-ux-column-presets",
+    "@kbn/index-lifecycle-management-common-shared",
   ],
   "exclude": ["target/**/*"]
 }

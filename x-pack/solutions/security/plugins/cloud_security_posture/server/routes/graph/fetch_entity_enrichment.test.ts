@@ -52,6 +52,23 @@ describe('fetchEntityEnrichment', () => {
     expect(esClient.asInternalUser.helpers.esql).not.toHaveBeenCalled();
   });
 
+  it('never sets project_routing — entity enrichment is always origin-only via asInternalUser', async () => {
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({ records: [] }),
+    });
+
+    await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
+
+    const [args] = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock.calls[0];
+    expect(args).not.toHaveProperty('project_routing');
+  });
+
   it('returns enrichment data for known entity IDs', async () => {
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({

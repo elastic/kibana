@@ -62,16 +62,72 @@ is no size knob to set.
 
 ## Padding
 
-`padding` controls the header's **horizontal** layout only. Vertical padding is standardized
-internally (independent of the `padding` prop and the title size) so the header keeps a consistent
-height — 48px for a single row, regardless of title size or whether only a back button is present.
+`padding` controls the header's **outer** spacing. The scalar values only add symmetric horizontal
+padding; the `bleed` variant additionally breaks the header out of a surrounding padded container.
+The header's **internal vertical padding** is standardized regardless of this prop (and of the title
+size), so the header keeps a consistent height — 48px for a single row, whether or not only a back
+button is present.
 
 - `'none'` — no horizontal padding, no bleed.
+- `'s'` — symmetric horizontal padding (compact).
 - `'m'` — symmetric horizontal padding (default for inline headers).
-- `{ bleed: 'm' | 'l' }` — negative margin on left/right + top, cancelling a padded container so the
-  header spans to its edges and sits flush at the top; content is auto re-inset to stay aligned with
-  the page gutter. Set `bleed` to your container's padding when rendering inline inside a padded page
-  template.
+- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. an
+  `EuiPageSection`). Set `bleed` to the section's **symmetric** padding: the header breaks out to that
+  section's top/left/right edges via negative margin so it spans full width and sits flush at the top,
+  and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
+  single value applies to both the sides and the top because the section's padding is symmetric.)
+
+## Testing
+
+`AppHeader` reads chrome from context, so rendering it without a `ChromeServiceProvider` throws
+`"useChromeService must be used within a ChromeServiceProvider"`.
+
+**If your harness renders through `KibanaRenderContextProvider {...coreStart}`, you need nothing.** That
+provider forwards `chrome.withProvider`, and the chrome mock (`chromeServiceMock.createStartContract()`)
+implements it just like production — wrapping children in `ChromeServiceProvider`. So any test using the
+standard core-mock render harness already has chrome context, exactly as the app does at runtime.
+
+**For components rendered in isolation** (a bare `render(<Component />)` with no core-mock render
+context), wrap with `MockAppHeaderProvider`, which supplies everything an `AppHeader` needs in tests
+(today just the chrome context):
+
+```tsx
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+
+render(
+  <MockAppHeaderProvider>
+    <MyComponentThatRendersAnAppHeader />
+  </MockAppHeaderProvider>
+);
+```
+
+Pass `chrome` to override the default mock chrome service when a test needs custom chrome behavior:
+
+```tsx
+<MockAppHeaderProvider chrome={myChromeMock}>{children}</MockAppHeaderProvider>
+```
+
+`MockChromeContextProvider` (the generic chrome-only provider it wraps) is also re-exported here, and
+lives in `@kbn/core-chrome-browser-context-mocks` for non-header code.
+
+Assert against `APP_HEADER_TEST_SUBJECTS` (from the package root) so component and test can't drift:
+
+```ts
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+
+expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
+```
+
+Menu items — including the header's own documentation/feedback/integrations — collapse into the app
+menu overflow popover at narrow widths (the default in jsdom). Open it with the helper from
+`@kbn/app-header/test_helpers` before querying those items:
+
+```ts
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
+await openAppMenuOverflow();
+expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+```
 
 ## Chrome Next flag and runtime checks
 

@@ -12,7 +12,7 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 /**
  * Defaults used by `buildCreateRuleData` so the integration specs only have to
  * spell out what makes each rule unique (typically `metadata.name`, the
- * `evaluation.query.base`, and the `state_transition` policy under test).
+ * `query.breach`, and the `state_transition` policy under test).
  *
  * Notes:
  * - `schedule` uses the fast test-harness interval (5s every / 1m lookback)
@@ -22,14 +22,24 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
  *   want. Tests that care about the lifecycle override it explicitly. Signal
  *   rules must opt out via `state_transition: undefined` because the schema
  *   forbids state_transition for `kind: 'signal'`.
+ * - `recovery_strategy: 'no_breach'` so that, by default, rules recover
+ *   whenever a previously-breaching group stops appearing in the breach query
+ *   results. Signal rules must opt out by passing
+ *   `recovery_strategy: undefined` (or `'none'`) because the schema forbids
+ *   recovery strategies on `kind: 'signal'`. Tests that override `query`
+ *   should include `recovery_strategy: 'no_breach'` (or another valid
+ *   strategy) if they want the executor to emit recovery events.
  */
 const DEFAULTS: CreateRuleData = {
   kind: 'alert',
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+  recovery_strategy: 'no_breach',
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | LIMIT 10' },
+  },
   time_field: '@timestamp',
-  recovery_policy: { type: 'no_breach' },
   grouping: { fields: ['host.name'] },
   state_transition: { pending_count: 0, recovering_count: 0 },
 };

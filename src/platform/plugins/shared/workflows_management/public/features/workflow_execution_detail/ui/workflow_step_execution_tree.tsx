@@ -124,6 +124,7 @@ function convertTreeToEuiTreeViewItems(
           selected={selected}
           status={status}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
+          usage={stepExecution?.usage}
           onClick={selectStepExecution}
         />
       ),

@@ -9,8 +9,7 @@ import { identifyFeatures, toPreviouslyIdentifiedFeature } from '@kbn/streams-ai
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { createSpanLatencyEvaluator, getCurrentTraceId } from '@kbn/evals';
-import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/streams-schema';
-import { v4 as uuidv4 } from 'uuid';
+import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -228,19 +227,9 @@ evaluate.describe(
                         }
                         const merged = mergeFeature(existing, baseFeature);
 
-                        accumulated.update({
-                          ...merged,
-                          uuid: existing.uuid,
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.update(merged);
                       } else {
-                        accumulated.add({
-                          ...baseFeature,
-                          uuid: uuidv4(),
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.add(baseFeature);
                       }
                     }
                   }

@@ -46,8 +46,6 @@ import type {
   UserActivityParams,
   UserActivitySortOrder,
 } from '../../user_actions_activity_bar/types';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
@@ -55,18 +53,13 @@ import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { TemplateFields } from './template_fields';
+import { GlobalCaseFields } from './global_case_fields';
 import { useStatusAction } from '../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
-export const CaseViewActivity = ({
-  caseData,
-  searchTerm,
-}: {
-  caseData: CaseUI;
-  searchTerm?: string;
-}) => {
+export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
   const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
     LOCALSTORAGE_SORT_ORDER_KEY,
     'asc'
@@ -224,11 +217,6 @@ export const CaseViewActivity = ({
           max-width: 75%;
         `}
       >
-        <CaseViewTabs
-          caseData={caseData}
-          activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY}
-          searchTerm={searchTerm}
-        />
         <EuiSpacer size="l" />
         <Description
           isLoadingDescription={isLoadingDescription}
@@ -272,7 +260,7 @@ export const CaseViewActivity = ({
                   ) : null
                 }
                 // Permission gating lives inside `CaseViewAttachButton`.
-                attachActionButton={<CaseViewAttachButton caseId={caseData.id} />}
+                attachActionButton={<CaseViewAttachButton caseData={caseData} />}
                 userActivityQueryParams={userActivityQueryParams}
                 userActionsStats={userActionsStats}
               />
@@ -349,7 +337,10 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitCustomField}
           />
           {isTemplatesV2Enabled && (
-            <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
+            <EuiFlexItem grow={false}>
+              <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
+              <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
