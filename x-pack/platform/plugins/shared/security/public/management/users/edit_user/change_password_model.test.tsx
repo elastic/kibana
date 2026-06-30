@@ -184,20 +184,17 @@ describe('ChangePasswordModal', () => {
         isLoading: false,
         user: {
           username: 'different_user',
-          roles: [],
-          full_name: '',
-          email: '',
-          enabled: true,
-          authentication_realm: { name: 'native', type: 'native' },
-          lookup_realm: { name: 'native', type: 'native' },
-          authentication_provider: { type: 'basic', name: 'basic' },
-          authentication_type: 'realm',
-          elastic_cloud_user: false,
-          profileUid: null,
+          displayName: 'different_user',
+          isAnonymous: false,
           avatar: null,
           userSettings: null,
         },
-        error: null,
+        rawAuthQuery: {
+          isLoading: false,
+          state: { username: 'different_user' },
+          error: undefined,
+        },
+        rawProfileQuery: { isLoading: false, state: null, error: undefined },
       });
     });
 
@@ -321,20 +318,17 @@ describe('ChangePasswordModal', () => {
           isLoading: false,
           user: {
             username: 'currentuser',
-            roles: [],
-            full_name: '',
-            email: '',
-            enabled: true,
-            authentication_realm: { name: 'native', type: 'native' },
-            lookup_realm: { name: 'native', type: 'native' },
-            authentication_provider: { type: 'basic', name: 'basic' },
-            authentication_type: 'realm',
-            elastic_cloud_user: false,
-            profileUid: null,
+            displayName: 'currentuser',
+            isAnonymous: false,
             avatar: null,
             userSettings: null,
           },
-          error: null,
+          rawAuthQuery: {
+            isLoading: false,
+            state: { username: 'currentuser' },
+            error: undefined,
+          },
+          rawProfileQuery: { isLoading: false, state: null, error: undefined },
         });
       });
 
