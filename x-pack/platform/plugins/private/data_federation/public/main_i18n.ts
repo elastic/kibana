@@ -61,7 +61,8 @@ export const mainTranslations = {
         defaultMessage: 'Data sources',
       }),
       noItems: i18n.translate('xpack.dataFederation.table.noItems', {
-        defaultMessage: 'You don't have any data sources yet. Connect to a data source to get started.',
+        defaultMessage:
+          "You don't have any data sources yet. Connect to a data source to get started.",
       }),
       searchPlaceholder: i18n.translate('xpack.dataFederation.search.placeholder', {
         defaultMessage: 'Search data sources…',
