@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import fetch from 'node-fetch';
-import type { RequestInit } from 'node-fetch';
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { API_VERSIONS } from '../../../common';
@@ -52,7 +49,7 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
     const options: RequestInit = {
       headers: {
         'kbn-xsrf': 'true',
-        'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
+        'User-Agent': `Kibana/${appContextService.getKibanaVersion()}`,
         'Content-Type': 'application/json',
         'Elastic-Api-Version': API_VERSIONS.public.v1,
         Authorization: `ApiKey ${kibanaApiKey}`,

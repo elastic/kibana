@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
