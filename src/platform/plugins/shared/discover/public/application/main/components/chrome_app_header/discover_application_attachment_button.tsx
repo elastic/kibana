@@ -16,20 +16,14 @@ import {
   useCurrentTabSelector,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { buildScreenContext } from '../single_tab_view/discover_agent_builder_config';
-
-const getDiscoverScreenContextAttachmentId = ({
-  sessionId,
-  tabId,
-}: {
-  sessionId?: string;
-  tabId: string;
-}) => (sessionId ? `discover-screen-context-${sessionId}` : `discover-screen-context-tab-${tabId}`);
+import { getDiscoverSessionAttachmentId } from '../../../../../common/discover_session_attachment';
+import { buildDiscoverSessionAttachment } from '../single_tab_view/discover_agent_builder_config';
 
 export const DiscoverApplicationAttachmentButton = () => {
   const { agentBuilder } = useDiscoverServices();
   const dataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const sessionId = useInternalStateSelector((state) => state.persistedDiscoverSession?.id);
+  const sessionTitle = useInternalStateSelector((state) => state.persistedDiscoverSession?.title);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [columns, dataSource, query] = useAppStateSelector((state) => [
     state.columns,
@@ -40,7 +34,7 @@ export const DiscoverApplicationAttachmentButton = () => {
 
   const linkDescriptor = useMemo<ApplicationAttachmentLinkDescriptor>(
     () => ({
-      attachmentId: getDiscoverScreenContextAttachmentId({
+      attachmentId: getDiscoverSessionAttachmentId({
         sessionId,
         tabId: currentTabId,
       }),
@@ -54,23 +48,27 @@ export const DiscoverApplicationAttachmentButton = () => {
       return null;
     }
 
-    const screenContext = buildScreenContext(
-      dataView.getIndexPattern(),
+    return buildDiscoverSessionAttachment({
+      dataViewTitle: dataView.getIndexPattern(),
+      dataViewId: dataView.id,
       query,
       columns,
-      dataSource?.type,
-      timeRange
-    );
-
-    return {
-      ...screenContext,
-      id: getDiscoverScreenContextAttachmentId({
-        sessionId,
-        tabId: currentTabId,
-      }),
-      origin: sessionId ?? currentTabId,
-    };
-  }, [columns, currentTabId, dataSource?.type, dataView, query, sessionId, timeRange]);
+      dataSourceType: dataSource?.type,
+      timeRange,
+      sessionId,
+      sessionTitle,
+      tabId: currentTabId,
+    });
+  }, [
+    columns,
+    currentTabId,
+    dataSource?.type,
+    dataView,
+    query,
+    sessionId,
+    sessionTitle,
+    timeRange,
+  ]);
 
   if (!agentBuilder?.ApplicationAttachmentButton) {
     return null;

@@ -13,6 +13,10 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
+import {
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  type DiscoverSessionAttachmentData,
+} from '../../common/discover_session_attachment';
 
 const columnSchema = z.object({
   name: z.string(),
@@ -133,6 +137,88 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
   return lines.join('\n');
 };
 
+const discoverSessionAttachmentDataSchema = z.object({
+  dataViewTitle: z.string(),
+  dataViewId: z.string().optional(),
+  query: z.string().optional(),
+  queryLanguage: z.string(),
+  columns: z.array(z.string()).optional(),
+  dataSourceType: z.string().optional(),
+  timeRange: timeRangeSchema.optional(),
+  url: z.string(),
+  sessionTitle: z.string().optional(),
+  savedSearchId: z.string().optional(),
+  tabId: z.string().optional(),
+});
+
+type DiscoverSessionAttachmentDataParsed = z.infer<typeof discoverSessionAttachmentDataSchema>;
+
+const isDiscoverSessionAttachmentData = (
+  data: unknown
+): data is DiscoverSessionAttachmentDataParsed => {
+  return discoverSessionAttachmentDataSchema.safeParse(data).success;
+};
+
+const formatDiscoverSessionData = (data: DiscoverSessionAttachmentData): string => {
+  const parts: string[] = [];
+
+  parts.push('App: discover');
+  if (data.url) {
+    parts.push(`Url: ${data.url}`);
+  }
+  if (data.sessionTitle) {
+    parts.push(`Session title: ${data.sessionTitle}`);
+  }
+  parts.push(`Data view: ${data.dataViewTitle}`);
+  parts.push(`Query language: ${data.queryLanguage}`);
+  if (data.query) {
+    parts.push(`Query: ${data.query}`);
+  }
+  if (data.timeRange) {
+    parts.push(`Time range: ${data.timeRange.from} to ${data.timeRange.to}`);
+  }
+  if (data.columns?.length) {
+    parts.push(`Columns: ${data.columns.join(', ')}`);
+  }
+  if (data.dataSourceType) {
+    parts.push(`Data source type: ${data.dataSourceType}`);
+  }
+
+  return parts.join('\n');
+};
+
+const createDiscoverSessionAttachmentType = (): AttachmentTypeDefinition => {
+  return {
+    id: DISCOVER_SESSION_ATTACHMENT_TYPE,
+    validate: (input) => {
+      const parseResult = discoverSessionAttachmentDataSchema.safeParse(input);
+      if (parseResult.success) {
+        return { valid: true, data: parseResult.data };
+      }
+      return { valid: false, error: parseResult.error.message };
+    },
+    format: (attachment: Attachment<string, unknown>) => {
+      const data = attachment.data;
+      if (!isDiscoverSessionAttachmentData(data)) {
+        throw new Error(
+          `Invalid Discover session attachment data for attachment ${attachment.id}`
+        );
+      }
+      return {
+        getRepresentation: () => {
+          return { type: 'text' as const, value: formatDiscoverSessionData(data) };
+        },
+      };
+    },
+    isReadonly: true,
+    getTools: () => [],
+    getAgentDescription: () => {
+      return `This attachment represents a pinned Discover session: the data view, query, columns, and time range the user was exploring when they pinned it. Use it to understand what Discover context the user wants the conversation to reference.`;
+    },
+  };
+};
+
 export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
   agentBuilder.attachments.registerType(createEsqlQueryResultsAttachmentType());
+  agentBuilder.attachments.registerType(createDiscoverSessionAttachmentType());
 };
