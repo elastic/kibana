@@ -24,6 +24,8 @@ const TIMESTAMP_FIELD = '@timestamp';
 const DEFAULT_SAMPLER_PROBABILITY = 0.1;
 const STATISTICAL_ERROR_THRESHOLD = 0.01;
 
+const MAX_BACKING_INDICES = 1000;
+
 export interface StreamAggregations {
   buckets: Array<{ key: number; doc_count: number }>;
   interval: string;
@@ -177,7 +179,7 @@ export const useIngestionRatePerTier = ({
               },
               aggs: {
                 indices: {
-                  terms: { field: '_index', size: 1000 },
+                  terms: { field: '_index', size: MAX_BACKING_INDICES },
                 },
               },
             },
@@ -245,7 +247,7 @@ export const useIngestionRatePerTier = ({
                         },
                         aggs: {
                           indices: {
-                            terms: { field: '_index' },
+                            terms: { field: '_index', size: MAX_BACKING_INDICES },
                           },
                         },
                       },
