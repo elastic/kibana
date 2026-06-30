@@ -232,18 +232,13 @@ apiTest.describe(
           )
           .toBe(EXPECTED_SPAN_COUNT);
 
-        // Sanitize the spans and sort them by name
-        const getSpanKind = (span: Record<string, unknown>): string => {
-          const attrs = span.attributes as Record<string, unknown> | undefined;
-          return String(attrs?.['elastic.inference.span.kind'] ?? '');
-        };
-
         const spans = hits
-          .map((hit) => sanitizeSpan(hit._source as Record<string, unknown>))
+          .map((hit, i) => ({ span: sanitizeSpan(hit._source as Record<string, unknown>), i }))
           .sort((a, b) => {
-            const byName = String(a.name ?? '').localeCompare(String(b.name ?? ''));
-            return byName !== 0 ? byName : getSpanKind(a).localeCompare(getSpanKind(b));
-          });
+            const cmp = JSON.stringify(a.span).localeCompare(JSON.stringify(b.span));
+            return cmp !== 0 ? cmp : a.i - b.i;
+          })
+          .map(({ span }) => span);
 
         const expectedSpans = JSON.parse(
           readFileSync(resolve(__dirname, './fixtures/expected_trace_spans.json'), 'utf-8')
