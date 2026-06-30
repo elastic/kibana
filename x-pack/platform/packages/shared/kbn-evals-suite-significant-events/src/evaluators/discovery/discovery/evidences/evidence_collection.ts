@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AnalystEvaluator } from '../../types';
+import type { DiscoveryEvaluator } from '../../types';
 
 /** CODE evaluator: every detection rule must carry ≥1 attributed evidence. Score = covered / total rules. */
-export const evidenceCollectionEvaluator: AnalystEvaluator = {
+export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
   evaluate: ({ output }) => {

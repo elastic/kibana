@@ -794,7 +794,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
       },
     },
   ],
-  discoveryAnalyst: [],
+  discovery: [],
   discoveryJudge: [],
   kiQueryGeneration: [
     {
