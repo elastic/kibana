@@ -217,9 +217,6 @@ steps:
   # Step 4: Correlate detections into discoveries.
   # -----------------------------------------------------------------------
   - name: run_investigator_agent
-    # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
-    # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
-    # supports template rendering for config fields.
     type: ai.agent
     agent-id: "platform.streams.significant-events.discovery.investigator"
     connector-id: "${{ inputs.agentConnectorId }}"

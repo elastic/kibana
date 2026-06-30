@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import judgeUserPrompt from './user_prompt.text';
 
 export interface JudgeInputParams {

@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import type { Detection, Discovery } from '@kbn/streams-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import investigatorUserPrompt from './user_prompt.text';
 
 export interface InvestigatorInputParams {

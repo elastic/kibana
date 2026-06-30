@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery, Detection } from '@kbn/streams-schema';
+import type { Discovery, Detection } from '@kbn/significant-events-schema';
 import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
 const buildDiscovery = (...ruleNames: string[]): Partial<Discovery> => ({

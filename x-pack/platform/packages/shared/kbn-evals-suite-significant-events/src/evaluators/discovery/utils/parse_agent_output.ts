@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery, SignificantEvent } from '@kbn/streams-schema';
+import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
 
 /**
  * The discovery investigator/judge agents have no emit tool and no enforced `structured_output` on
