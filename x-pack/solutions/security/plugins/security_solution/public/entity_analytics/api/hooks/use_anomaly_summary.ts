@@ -11,6 +11,11 @@ import type {
   GetAnomalySummaryRequestBodyInput,
 } from '../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../api';
+// MOCK DATA — revert the commit that introduced this import to remove.
+import {
+  MOCK_ANOMALY_SUMMARY,
+  USE_MOCK_ANOMALY_DATA,
+} from '../../components/anomalies/dev_anomaly_data';
 
 export const ANOMALY_SUMMARY_QUERY_KEY = ['POST', 'FETCH_ANOMALY_SUMMARY'] as const;
 
@@ -39,7 +44,11 @@ export const useAnomalySummary = ({
 
   return useQuery(
     [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityId, resolvedBody],
-    ({ signal }) => fetchAnomalySummary({ entityType, entityId, body: resolvedBody, signal }),
+    ({ signal }) =>
+      // MOCK DATA — revert the commit that introduced this branch to remove.
+      USE_MOCK_ANOMALY_DATA
+        ? Promise.resolve(MOCK_ANOMALY_SUMMARY)
+        : fetchAnomalySummary({ entityType, entityId, body: resolvedBody, signal }),
     { enabled: enabled && !!entityId, keepPreviousData: true }
   );
 };

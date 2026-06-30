@@ -7,6 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../api';
+// MOCK DATA — revert the commit that introduced this import to remove.
+import {
+  MOCK_ANOMALY_OVERVIEW,
+  USE_MOCK_ANOMALY_DATA,
+} from '../../components/anomalies/dev_anomaly_data';
 
 export const ANOMALY_OVERVIEW_QUERY_KEY = ['POST', 'FETCH_ANOMALY_OVERVIEW'] as const;
 
@@ -54,7 +59,11 @@ export const useAnomalyOverview = ({
       minScore,
       maxScore,
     ],
-    ({ signal }) => fetchAnomalyOverview({ entityType, entityId, body, signal }),
+    ({ signal }) =>
+      // MOCK DATA — revert the commit that introduced this branch to remove.
+      USE_MOCK_ANOMALY_DATA
+        ? Promise.resolve(MOCK_ANOMALY_OVERVIEW)
+        : fetchAnomalyOverview({ entityType, entityId, body, signal }),
     { enabled: enabled && !!entityId, keepPreviousData: true }
   );
 };
