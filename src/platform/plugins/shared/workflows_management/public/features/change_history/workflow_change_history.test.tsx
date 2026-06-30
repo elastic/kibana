@@ -179,10 +179,14 @@ const openHistoryModal = async () => {
 };
 
 const selectHistoricalVersion = async (changeId = 'evt-previous') => {
-  fireEvent.click(screen.getByTestId(`changeHistoryItem-${changeId}`));
+  fireEvent.click(screen.getByTestId(`changeHistoryItemSelect-${changeId}`));
 
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
+  });
+
+  await waitFor(() => {
+    expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
   });
 };
 
@@ -358,7 +362,11 @@ describe('WorkflowChangeHistoryListItem', () => {
     );
 
     await openHistoryModal();
-    await selectHistoricalVersion();
+    fireEvent.click(screen.getByTestId('changeHistoryItemSelect-evt-previous'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
+    });
 
     expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
   });
