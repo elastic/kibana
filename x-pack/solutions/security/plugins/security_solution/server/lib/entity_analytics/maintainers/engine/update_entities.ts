@@ -122,6 +122,12 @@ export interface WriteEntityIdsResult {
    * EUID, so we hash each entityId to match against the failed-hash set.
    */
   relationshipTypeApplied: Record<string, number>;
+  /**
+   * Set of target EUIDs confirmed to exist in the entity store. Only populated
+   * when `validateTargetIds` was true. Callers can use this to filter downstream
+   * writes (e.g. metadata) to the same validated set.
+   */
+  validTargetIds?: Set<string>;
 }
 
 /**
@@ -180,6 +186,7 @@ export const writeEntityIds = async (
   // fields — log-based maintainers derive targets from real ECS identity fields
   // that extraction already indexed, so the round-trip is unnecessary there.
   let droppedTargets = 0;
+  let validTargetIds: Set<string> | undefined;
   if (validateTargetIds) {
     const allCandidateIds = new Set<string>();
     for (const mergedRels of merged.values()) {
@@ -190,8 +197,8 @@ export const writeEntityIds = async (
       }
     }
 
-    const existingIds = await matchExistingTargetIds(esClient, namespace, allCandidateIds);
-    droppedTargets = pruneNonExistingTargets(merged, existingIds);
+    validTargetIds = await matchExistingTargetIds(esClient, namespace, allCandidateIds);
+    droppedTargets = pruneNonExistingTargets(merged, validTargetIds);
     if (droppedTargets > 0) {
       logger.info(
         `Dropped ${droppedTargets} target EUIDs that have no entity document in the store`
@@ -221,7 +228,7 @@ export const writeEntityIds = async (
   }
 
   if (objects.length === 0)
-    return { updated: 0, notFound: 0, errors: 0, droppedTargets, relationshipTypeApplied: {} };
+    return { updated: 0, notFound: 0, errors: 0, droppedTargets, relationshipTypeApplied: {}, validTargetIds };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);
   const responseErrors = await crudClient.bulkUpdateEntity({ objects, force: true });
@@ -265,5 +272,6 @@ export const writeEntityIds = async (
     errors: realErrors.length,
     droppedTargets,
     relationshipTypeApplied,
+    validTargetIds,
   };
 };
