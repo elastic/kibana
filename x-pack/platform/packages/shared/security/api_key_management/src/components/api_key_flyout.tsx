@@ -551,7 +551,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                               <strong>
                                 <FormattedMessage
                                   id="xpack.security.accountManagement.apiKeyFlyout.certificateIdentityOverviewLabel"
-                                  defaultMessage="Certificate identity"
+                                  defaultMessage="Identity verification"
                                 />
                               </strong>
                             </EuiText>
@@ -916,7 +916,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       </EuiTitle>
                     }
                     checked={Boolean(formik.values.customExpiration)}
-                    disabled={readOnly || (apiKey && !canEdit)}
+                    disabled={readOnly || (apiKey && !canEdit) || (!!apiKey && !!apiKey.expiration)}
                     onChange={(e) => formik.setFieldValue('customExpiration', e.target.checked)}
                   />
                   <EuiSpacer size="xs" />
