@@ -22,7 +22,7 @@ import type {
   RegistryVarGroup,
 } from '../types';
 
-import { DATASET_VAR_NAME } from '../constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 
 import {
   isValidNamespace,
@@ -33,7 +33,7 @@ import {
   buildInputKey,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
-import { isValidDataset } from './is_valid_namespace';
+import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
@@ -269,7 +269,7 @@ const isVarRequiredByVarGroup = (
 };
 
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -828,6 +828,17 @@ export const validatePackagePolicyConfig = (
       parsedValue.dataset ? parsedValue.dataset : parsedValue,
       false
     );
+    if (!valid && error) {
+      errors.push(error);
+    }
+  }
+
+  if (
+    varName === DATA_STREAM_TYPE_VAR_NAME &&
+    packageType === 'input' &&
+    parsedValue !== undefined
+  ) {
+    const { valid, error } = isValidDataStreamType(parsedValue, false);
     if (!valid && error) {
       errors.push(error);
     }
