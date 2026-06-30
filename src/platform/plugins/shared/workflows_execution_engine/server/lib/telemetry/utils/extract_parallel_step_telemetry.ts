@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_PARALLEL_CONCURRENCY } from '@kbn/workflows';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { DEFAULT_PARALLEL_CONCURRENCY, getStepByNameFromNestedSteps } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import type { ParallelStepExecutedParams } from '../events/workflows_execution/types';
 
 const PARALLEL_STEP_TYPE = 'parallel';
@@ -53,37 +53,24 @@ const resolveConcurrency = (
 /**
  * Finds the `parallel` step configuration in the workflow definition by step id.
  * Returns undefined when the definition is unavailable or the step is not found.
+ * Delegates the nested-step walk to the shared `getStepByNameFromNestedSteps`, so
+ * parallel steps nested under any construct (static `branches`, switch cases,
+ * merge, loops, if/else) are resolved consistently with the rest of the engine.
  */
 const findParallelConfig = (
   workflowExecution: EsWorkflowExecution,
   stepId: string
 ): ParallelConfig | undefined => {
-  const steps = workflowExecution.workflowDefinition?.steps as
-    | Array<Record<string, unknown>>
-    | undefined;
+  const steps = workflowExecution.workflowDefinition?.steps as WorkflowYaml['steps'] | undefined;
   if (!steps) {
     return undefined;
   }
 
-  const walk = (nodes: Array<Record<string, unknown>>): ParallelConfig | undefined => {
-    for (const node of nodes) {
-      if (node.type === PARALLEL_STEP_TYPE && node.name === stepId) {
-        return node as ParallelConfig;
-      }
-      const childArrays = [node.steps, node.else, node.default].filter(Array.isArray) as Array<
-        Array<Record<string, unknown>>
-      >;
-      for (const children of childArrays) {
-        const found = walk(children);
-        if (found) {
-          return found;
-        }
-      }
-    }
+  const step = getStepByNameFromNestedSteps(steps, stepId);
+  if (step?.type !== PARALLEL_STEP_TYPE) {
     return undefined;
-  };
-
-  return walk(steps);
+  }
+  return step as ParallelConfig;
 };
 
 /**

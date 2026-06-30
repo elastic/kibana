@@ -23,7 +23,6 @@ export const ParallelBranchDescriptorSchema = z.object({
   name: z.string(),
   startNodeId: z.string(),
 });
-export type ParallelBranchDescriptor = z.infer<typeof ParallelBranchDescriptorSchema>;
 
 export const EnterParallelNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

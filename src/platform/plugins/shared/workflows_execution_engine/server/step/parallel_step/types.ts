@@ -8,17 +8,16 @@
  */
 
 /**
- * Lifecycle of a single parallel branch (one fan-out item).
- * `skipped` is reserved for branches that never started because a prior branch
- * failed under fail-fast mode.
+ * The terminal states a branch can settle in. `skipped` is reserved for branches
+ * that never started because a prior branch failed under fail-fast mode.
  */
-export type ParallelBranchStatus =
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'skipped'
-  | 'timed_out';
+export type ParallelTerminalBranchStatus = 'completed' | 'failed' | 'skipped' | 'timed_out';
+
+/**
+ * Lifecycle of a single parallel branch (one fan-out item): the terminal states
+ * plus the two in-flight states the durable tick tracks.
+ */
+type ParallelBranchStatus = ParallelTerminalBranchStatus | 'pending' | 'running';
 
 /**
  * Per-branch bookkeeping persisted in the parallel step's own step state.
@@ -71,7 +70,7 @@ export interface ParallelBranchResult {
   index: number;
   /** The fan-out item for this branch, for correlation in the execution view. */
   key?: unknown;
-  status: 'completed' | 'failed' | 'skipped' | 'timed_out';
+  status: ParallelTerminalBranchStatus;
   output?: unknown;
   error?: unknown;
   /** Epoch ms when the branch started, when known. */
@@ -88,7 +87,7 @@ export interface ParallelBranchResult {
  * (#17834) so authors can read `steps.<p>.output.branches.<name>.output`.
  */
 export interface ParallelNamedBranchResult {
-  status: 'completed' | 'failed' | 'skipped' | 'timed_out';
+  status: ParallelTerminalBranchStatus;
   output?: unknown;
   error?: unknown;
 }

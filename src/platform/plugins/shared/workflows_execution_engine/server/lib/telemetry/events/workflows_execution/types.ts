@@ -125,8 +125,8 @@ export enum WorkflowExecutionTelemetryEventTypes {
    */
   TriggerEventDispatched = 'workflows_trigger_event_dispatched',
   /**
-   * When a parallel (dynamic fan-out) step reaches a terminal state.
-   * Captures adoption, fan-out size, concurrency, rejection rate, and mode split.
+   * When a parallel step (dynamic fan-out or static branches) reaches a terminal
+   * state. Captures adoption, fan-out size, concurrency, rejection rate, and mode.
    */
   ParallelStepExecuted = 'workflows_execution_parallel_step_executed',
 }
@@ -578,8 +578,9 @@ export interface TriggerEventDispatchedParams {
 }
 
 /**
- * Telemetry event reported when a parallel (dynamic fan-out) step terminates.
- * One event per parallel step execution, enabling adoption and shape analysis.
+ * Telemetry event reported when a parallel step (dynamic fan-out or static
+ * branches) terminates. One event per parallel step execution, enabling adoption
+ * and shape analysis.
  */
 export interface ParallelStepExecutedParams {
   eventName: string;

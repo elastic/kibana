@@ -9,10 +9,3 @@
 
 export { EnterParallelNodeImpl } from './enter_parallel_node_impl';
 export { ExitParallelNodeImpl } from './exit_parallel_node_impl';
-export type {
-  ParallelBranchResult,
-  ParallelBranchState,
-  ParallelBranchStatus,
-  ParallelStepOutput,
-  ParallelStepState,
-} from './types';
