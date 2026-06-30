@@ -12,7 +12,7 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 const MAX_BROWSE_RESULTS = 15;
 
-const toOption = (tag: string): SelectionOption<string> => ({ value: tag, label: tag });
+const toOption = (tag: string): SelectionOption<string> => ({ value: tag });
 
 // Non-error sentinel for valid values with nothing to decorate (e.g. an empty array): an empty
 // label suppresses the inline "✓" while staying non-null so the validator doesn't flag an error.

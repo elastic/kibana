@@ -39,9 +39,9 @@ describe('alertTagsSelection', () => {
       const results = await alertTagsSelection.search('   ', createSelectionContext());
 
       expect(results).toEqual([
-        { value: 'Duplicate', label: 'Duplicate' },
-        { value: 'False positive', label: 'False positive' },
-        { value: 'Further investigation required', label: 'Further investigation required' },
+        { value: 'Duplicate' },
+        { value: 'False positive' },
+        { value: 'Further investigation required' },
       ]);
     });
 
@@ -50,7 +50,7 @@ describe('alertTagsSelection', () => {
 
       const results = await alertTagsSelection.search('FALSE', createSelectionContext());
 
-      expect(results).toEqual([{ value: 'False positive', label: 'False positive' }]);
+      expect(results).toEqual([{ value: 'False positive' }]);
     });
 
     it('returns an empty list when the UI setting is missing or not an array', async () => {
@@ -76,7 +76,7 @@ describe('alertTagsSelection', () => {
 
       const resolved = await alertTagsSelection.resolve('Duplicate', createSelectionContext());
 
-      expect(resolved).toEqual({ value: 'Duplicate', label: 'Duplicate' });
+      expect(resolved).toEqual({ value: 'Duplicate' });
     });
 
     it('accepts a free-form tag that is not configured', async () => {
@@ -84,7 +84,7 @@ describe('alertTagsSelection', () => {
 
       const resolved = await alertTagsSelection.resolve('custom-tag', createSelectionContext());
 
-      expect(resolved).toEqual({ value: 'custom-tag', label: 'custom-tag' });
+      expect(resolved).toEqual({ value: 'custom-tag' });
     });
 
     it('treats an empty value as valid with no decoration (not an error)', async () => {
@@ -102,7 +102,6 @@ describe('alertTagsSelection', () => {
 
       const details = await alertTagsSelection.getDetails('Duplicate', createSelectionContext(), {
         value: 'Duplicate',
-        label: 'Duplicate',
       });
 
       expect(details.message).toContain('Duplicate');
@@ -138,7 +137,7 @@ describe('alertTagsSelection', () => {
 
       const resolved = await alertTagsSelection.resolve(asValue(['Duplicate']), ctx());
 
-      expect(resolved).toEqual({ value: 'Duplicate', label: 'Duplicate' });
+      expect(resolved).toEqual({ value: 'Duplicate' });
     });
 
     it('treats an empty array value as valid with no decoration (not an error)', async () => {
@@ -154,7 +153,7 @@ describe('alertTagsSelection', () => {
 
       const results = await alertTagsSelection.search(asValue(['false']), ctx());
 
-      expect(results).toEqual([{ value: 'False positive', label: 'False positive' }]);
+      expect(results).toEqual([{ value: 'False positive' }]);
     });
 
     it('produces details for an array value without throwing', async () => {
