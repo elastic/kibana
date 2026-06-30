@@ -6,30 +6,10 @@
  */
 
 /**
- * Bulk update (PUT) endpoint for Synthetics monitors.
+ * Public `PUT /api/synthetics/monitors/_bulk_update` route.
  *
- * Named `update_monitor_bulk` to mirror the URL path word `_bulk_update`,
- * matching the file→path convention used by `delete_monitor_bulk.ts` /
- * `reset_monitor_bulk.ts`. The plugin's internal vocabulary uses `edit`
- * (e.g. `editSyntheticsMonitorRoute`, `syncEditedMonitorBulk`); we keep
- * `update` here to (a) match the URL path and (b) avoid colliding with
- * `bulk_cruds/edit_monitor_bulk.ts`, which is the helper module that exports
- * `syncEditedMonitorBulk` (the orchestrator this route reuses).
- *
- * Request body: `{ updates: [{ id, attributes }, ...] }` — each entry carries
- * its own partial `attributes` patch, so a single request can apply a
- * different change per monitor. The response is keyed by id (`result[]`).
- *
- * Pipeline (see kibana-34 v3 diagram):
- *   1. `UpdateMonitorAPI.execute` — decrypt, merge each id's own patch,
- *      re-encrypt; produces `MonitorConfigUpdate` survivors and per-id
- *      pre-errors.
- *   2. If any survivors, fetch private locations covering every namespace
- *      involved in the patch, then call `syncEditedMonitorBulk` to write
- *      to ES + sync Fleet/Synthetics service in one shot.
- *   3. Merge per-id pre-errors with rolled-back-on-Fleet-failure ids and
- *      with successful SO write ids into one ordered `result` array. Top-
- *      level `errors` carries service-level (not per-id) sync failures.
+ * Reuses the existing `syncEditedMonitorBulk` orchestrator (in
+ * `./edit_monitor_bulk.ts`) for the ES write + Fleet sync.
  */
 
 import { schema } from '@kbn/config-schema';
