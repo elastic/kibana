@@ -638,12 +638,13 @@ describe('StepExecutionRuntime', () => {
 
     // Guardrail: errors thrown by custom steps may carry arbitrary, large, or sensitive
     // payloads (e.g. `KibanaApiCallError` exposes the full parsed HTTP response on `.body`).
-    // `failStep` runs every error through `ExecutionError.fromError(...).toSerializableObject()`,
-    // which keeps only `type` (the error name) and `message`. Combined with `BaseSerializedErrorSchema`
-    // (no `body`/`headers`/`status` field), this ensures such fields are never persisted to ES —
-    // neither on the step execution nor on the workflow execution. The recovered response body
-    // therefore only ever reaches ES through the (capped) `message`, not as a structured field.
-    it('strips non-standard fields (e.g. KibanaApiCallError body/headers/status) before persisting', () => {
+    // `KibanaApiCallError` extends `ExecutionError`, so an uncaught instance persists a
+    // well-formed structured error — but only the safe scalar `status` is in `details`. The
+    // potentially large/sensitive `body` and `headers` live as instance fields outside
+    // `details`, so `toSerializableObject` never writes them to ES — neither on the step
+    // execution nor on the workflow execution. The recovered response body therefore only ever
+    // reaches ES through the (capped) `message`, not as a structured field.
+    it('persists status in details but never the body/headers of a KibanaApiCallError', () => {
       const error = new KibanaApiCallError({
         status: 500,
         headers: { 'x-trace-id': 'trace-secret' },
@@ -656,17 +657,22 @@ describe('StepExecutionRuntime', () => {
       const expectedSerializedError = {
         type: 'KibanaApiCallError',
         message: 'HTTP 500: {"secret":"do-not-persist"}',
+        details: { status: 500 },
       };
 
-      // Persisted on the step execution: only type + message, no structured body/headers/status/details.
+      // Persisted on the step execution: type + message + details:{status}; no body/headers.
       const [persistedStep] = (workflowExecutionState.upsertStep as jest.Mock).mock.calls.at(
         -1
       ) as [EsWorkflowStepExecution];
       expect(persistedStep.error).toEqual(expectedSerializedError);
-      expect(persistedStep.error).not.toHaveProperty('body');
-      expect(persistedStep.error).not.toHaveProperty('headers');
-      expect(persistedStep.error).not.toHaveProperty('status');
-      expect(persistedStep.error).not.toHaveProperty('details');
+      expect(persistedStep.error?.details).toEqual({ status: 500 });
+      expect(persistedStep.error?.details).not.toHaveProperty('body');
+      expect(persistedStep.error?.details).not.toHaveProperty('headers');
+      // The raw body/headers must not leak into `details` (the only structured field persisted to ES).
+      // Note: the body text still appears inside the capped `message` string — that is the unchanged
+      // `HTTP <status>: <body>` OOTB behavior, not a structured field.
+      expect(JSON.stringify(persistedStep.error?.details)).not.toContain('do-not-persist');
+      expect(JSON.stringify(persistedStep.error?.details)).not.toContain('x-trace-id');
 
       // Also guarded at the workflow-execution level.
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({

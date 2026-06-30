@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionError } from '@kbn/workflows/server';
+
 /**
  * Thrown by `ContextManager.callKibanaApi` (and the engine helper that backs it) on a non-2xx
  * response (other than 304).
@@ -30,11 +32,16 @@
  * }
  * ```
  *
- * This intentionally extends `Error` (not `ExecutionError`). When an uncaught instance bubbles
- * to the engine, `ExecutionError.fromError` copies only `name`/`message`, so the raw `body` is
- * never persisted to the workflow execution log in Elasticsearch.
+ * Extends {@link ExecutionError} so an **uncaught** instance is persisted as a well-formed
+ * structured error (`type: 'KibanaApiCallError'`, `details: { status }`) rather than being
+ * flattened by the generic `ExecutionError.fromError` path.
+ *
+ * Safety: only the safe scalar `status` is placed in `details` (which the engine *does* persist
+ * to the workflow execution log in Elasticsearch). The potentially large/sensitive `body` and
+ * `headers` are kept as plain instance fields **outside** `details`, so `toSerializableObject`
+ * never writes them to ES — they exist purely for in-process `try/catch` recovery.
  */
-export class KibanaApiCallError extends Error {
+export class KibanaApiCallError extends ExecutionError {
   public readonly status: number;
   public readonly headers: Record<string, string>;
   public readonly body: unknown;
@@ -45,7 +52,12 @@ export class KibanaApiCallError extends Error {
     body: unknown;
     message: string;
   }) {
-    super(args.message);
+    super({
+      type: 'KibanaApiCallError',
+      message: args.message,
+      // Only safe scalars here — never `body`/`headers`, which `details` would persist to ES.
+      details: { status: args.status },
+    });
     this.name = 'KibanaApiCallError';
     this.status = args.status;
     this.headers = args.headers;

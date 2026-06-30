@@ -311,25 +311,26 @@ describe('callKibanaApi', () => {
     ).rejects.toBeInstanceOf(CallKibanaApiResponseTooLargeError);
   });
 
-  it('does not persist the structured body as a field when serialized via ExecutionError.fromError (ES guard)', async () => {
+  it('serializes only type/message/details:{status} via ExecutionError.fromError, never body/headers (ES guard)', async () => {
     mockedFetch.mockResolvedValue(
       createMockResponse({ body: { secret: 'do-not-persist', big: 'x'.repeat(100) }, status: 500 })
     );
 
-    expect.assertions(4);
+    expect.assertions(5);
     try {
       await callKibanaApi(
         { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
         { method: 'GET', path: '/api/boom' }
       );
     } catch (err) {
+      // KibanaApiCallError extends ExecutionError, so fromError returns it as-is (instanceof short-circuit).
       const serialized = ExecutionError.fromError(err as Error).toSerializableObject();
-      // Only `type` + `message` survive the engine boundary.
       expect(serialized.type).toBe('KibanaApiCallError');
-      expect(serialized.details).toBeUndefined();
-      // The parsed structured body is NOT carried as its own field (no `body`/`headers`/`status`).
+      // Only the safe scalar `status` is in details; the raw body/headers are NOT persisted.
+      expect(serialized.details).toEqual({ status: 500 });
       expect(serialized as Record<string, unknown>).not.toHaveProperty('body');
       expect(serialized as Record<string, unknown>).not.toHaveProperty('headers');
+      expect(JSON.stringify(serialized.details)).not.toContain('do-not-persist');
     }
   });
 

@@ -224,12 +224,13 @@ export class StepExecutionRuntime {
    */
   public failStep(error: Error, partialOutput?: unknown): void {
     // Guardrail: this is the single choke point where a thrown error becomes the persisted
-    // error for both the step and the workflow execution. `fromError` keeps only `type`
-    // (the error name) and `message` for any non-`ExecutionError`, and the persisted shape is
-    // further constrained by `BaseSerializedErrorSchema` (`type` / `message` / optional `details`).
-    // So arbitrary fields a custom error may carry — e.g. `KibanaApiCallError.body` holding a full
-    // parsed HTTP response — are dropped here and never written to ES as structured fields.
-    // (Covered by `step_execution_runtime.test.ts` > failStep > "strips non-standard fields ...".)
+    // error for both the step and the workflow execution. The persisted shape is constrained by
+    // `BaseSerializedErrorSchema` (`type` / `message` / optional `details`) and produced by
+    // `toSerializableObject`, which only ever serializes those three fields. So arbitrary instance
+    // fields a custom error may carry — e.g. `KibanaApiCallError.body`/`.headers` holding a full
+    // parsed HTTP response — are never written to ES; only what an error explicitly puts in
+    // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
+    // (Covered by `step_execution_runtime.test.ts` > failStep > "persists status in details ...".)
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
 
