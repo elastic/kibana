@@ -15,7 +15,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
  * href: '/app/security/rules'
  * basePath: ''
  * Result: '/app/security/rules'
- * 
+ *
  * @example
  * href: '/app/security/rules'
  * basePath: '/kbn/s/my-space'
