@@ -96,21 +96,6 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Path or identifier for the dataset resource.',
     }),
 
-  settingsSectionHelp: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSectionHelp', {
-      defaultMessage: 'Optional format and parsing settings for this dataset.',
-    }),
-
-  optionalSettingsShow: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.optionalSettingsShow', {
-      defaultMessage: 'Show optional settings',
-    }),
-
-  optionalSettingsHide: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.optionalSettingsHide', {
-      defaultMessage: 'Hide optional settings',
-    }),
-
   settingsFormatLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatLabel', {
       defaultMessage: 'Format',

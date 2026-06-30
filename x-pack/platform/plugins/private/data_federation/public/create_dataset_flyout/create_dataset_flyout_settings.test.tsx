@@ -42,14 +42,19 @@ const renderSettings = () => {
 const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
   JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
 
-const openOptional = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
-  fireEvent.click(getByTestId('createDatasetFlyoutOptionalSettingsToggle'));
+const openAdvanced = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
+  fireEvent.click(getByTestId('createDatasetFlyoutAdvancedSettingsToggle'));
 
 describe('CreateDatasetFlyoutSettings', () => {
-  it('hides optional settings by default and shows them when toggled', () => {
+  it('shows the format select at the top level without opening anything', () => {
+    const { getByTestId } = renderSettings();
+    expect(getByTestId('createDatasetFlyoutSettingsFormat')).toBeVisible();
+  });
+
+  it('hides the advanced section by default and shows it when toggled', () => {
     const { getByTestId } = renderSettings();
 
-    const toggle = getByTestId('createDatasetFlyoutOptionalSettingsToggle');
+    const toggle = getByTestId('createDatasetFlyoutAdvancedSettingsToggle');
     const partitionDetection = getByTestId('createDatasetFlyoutSettingsPartitionDetection');
 
     expect(partitionDetection).not.toBeVisible();
@@ -57,10 +62,20 @@ describe('CreateDatasetFlyoutSettings', () => {
     expect(partitionDetection).toBeVisible();
   });
 
+  it('updates format in form state', () => {
+    const { getByTestId } = renderSettings();
+
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      target: { value: 'parquet' },
+    });
+
+    expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
+  });
+
   it('updates partition_detection in form state', () => {
     const { getByTestId } = renderSettings();
 
-    openOptional(getByTestId);
+    openAdvanced(getByTestId);
     fireEvent.change(getByTestId('createDatasetFlyoutSettingsPartitionDetection'), {
       target: { value: 'hive' },
     });
@@ -68,95 +83,70 @@ describe('CreateDatasetFlyoutSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
-  it('shows no format-specific fields until a format is selected', () => {
-    const { getByTestId, queryByTestId } = renderSettings();
-    openOptional(getByTestId);
-
+  it('shows no format-specific fields when no format is selected', () => {
+    const { queryByTestId } = renderSettings();
+    // format-specific fields are not in the DOM until a format is chosen
     expect(queryByTestId('createDatasetFlyoutSettingsDelimiter')).toBeNull();
     expect(queryByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeNull();
     expect(queryByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeNull();
   });
 
   describe('CSV format', () => {
-    it('shows commonly-changed CSV fields directly', () => {
+    it('shows CSV fields inside the advanced section', () => {
       const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
+
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'csv' },
       });
+      openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsDelimiter')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsMode')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsHeaderRow')).toBeVisible();
+      expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
+      expect(getByTestId('createDatasetFlyoutSettingsMaxErrors')).toBeVisible();
     });
 
-    it('hides schema_sample_size behind the CSV advanced toggle', () => {
+    it('updates a CSV field in form state', () => {
       const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
+
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'csv' },
       });
+      openAdvanced(getByTestId);
+      fireEvent.change(getByTestId('createDatasetFlyoutSettingsDelimiter'), {
+        target: { value: '|' },
+      });
 
-      expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).not.toBeVisible();
-
-      fireEvent.click(getByTestId('createDatasetFlyoutCsvAdvancedToggle'));
-
-      expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
+      expect(getSettingsValue(getByTestId)).toMatchObject({ delimiter: '|' });
     });
   });
 
   describe('NDJSON format', () => {
-    it('shows schema_sample_size directly for NDJSON', () => {
+    it('shows schema_sample_size and segment_size inside the advanced section', () => {
       const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
+
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'ndjson' },
       });
+      openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
-    });
-
-    it('hides segment_size behind the NDJSON advanced toggle', () => {
-      const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
-      fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
-        target: { value: 'ndjson' },
-      });
-
-      expect(getByTestId('createDatasetFlyoutSettingsSegmentSize')).not.toBeVisible();
-
-      fireEvent.click(getByTestId('createDatasetFlyoutNdjsonAdvancedToggle'));
-
       expect(getByTestId('createDatasetFlyoutSettingsSegmentSize')).toBeVisible();
     });
   });
 
   describe('Parquet format', () => {
-    it('hides optimized_reader and late_materialization behind the Parquet advanced toggle', () => {
+    it('shows optimized_reader and late_materialization inside the advanced section', () => {
       const { getByTestId } = renderSettings();
-      openOptional(getByTestId);
+
       fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
         target: { value: 'parquet' },
       });
-
-      expect(getByTestId('createDatasetFlyoutSettingsOptimizedReader')).not.toBeVisible();
-      expect(getByTestId('createDatasetFlyoutSettingsLateMaterialization')).not.toBeVisible();
-
-      fireEvent.click(getByTestId('createDatasetFlyoutParquetAdvancedToggle'));
+      openAdvanced(getByTestId);
 
       expect(getByTestId('createDatasetFlyoutSettingsOptimizedReader')).toBeVisible();
       expect(getByTestId('createDatasetFlyoutSettingsLateMaterialization')).toBeVisible();
     });
-  });
-
-  it('updates format in form state', () => {
-    const { getByTestId } = renderSettings();
-    openOptional(getByTestId);
-
-    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
-      target: { value: 'parquet' },
-    });
-
-    expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
   });
 });

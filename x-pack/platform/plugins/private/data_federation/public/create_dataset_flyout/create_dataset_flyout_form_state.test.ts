@@ -61,42 +61,51 @@ describe('create_dataset_flyout_form_state', () => {
       ).toBeUndefined();
     });
 
-    it('includes schema_sample_size when set to a positive integer', () => {
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), schema_sample_size: '10' })).toEqual({
-        schema_sample_size: 10,
-      });
+    it('includes schema_sample_size when set to a positive integer (csv)', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', schema_sample_size: '10' })
+      ).toEqual({ format: 'csv', schema_sample_size: 10 });
+    });
+
+    it('includes schema_sample_size when set to a positive integer (ndjson)', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'ndjson', schema_sample_size: '10' })
+      ).toEqual({ format: 'ndjson', schema_sample_size: 10 });
     });
 
     it('converts header_row boolean form values correctly', () => {
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), header_row: 'true' })).toEqual({
-        header_row: true,
-      });
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), header_row: 'false' })).toEqual({
-        header_row: false,
-      });
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), header_row: '' })).toBeUndefined();
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', header_row: 'true' })
+      ).toEqual({ format: 'csv', header_row: true });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', header_row: 'false' })
+      ).toEqual({ format: 'csv', header_row: false });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', header_row: '' })
+      ).toEqual({ format: 'csv' });
     });
 
     it('converts optimized_reader and late_materialization boolean form values correctly', () => {
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
+          format: 'parquet',
           optimized_reader: 'false',
           late_materialization: 'true',
         })
-      ).toEqual({ optimized_reader: false, late_materialization: true });
+      ).toEqual({ format: 'parquet', optimized_reader: false, late_materialization: true });
     });
 
     it('includes max_errors of 0 (valid non-negative)', () => {
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), max_errors: '0' })).toEqual({
-        max_errors: 0,
-      });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_errors: '0' })
+      ).toEqual({ format: 'csv', max_errors: 0 });
     });
 
     it('includes max_error_ratio as a float', () => {
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), max_error_ratio: '0.5' })).toEqual({
-        max_error_ratio: 0.5,
-      });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_error_ratio: '0.5' })
+      ).toEqual({ format: 'csv', max_error_ratio: 0.5 });
     });
 
     it('includes format and CSV fields together', () => {

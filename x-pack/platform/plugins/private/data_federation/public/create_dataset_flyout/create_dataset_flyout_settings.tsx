@@ -92,47 +92,14 @@ export function CreateDatasetFlyoutSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const contentId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutOptionalSettings' });
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutAdvancedSettings' });
+
+  const { field: formatField } = useController({ name: 'settings.format', control });
 
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isOpen}
-        aria-controls={contentId}
-        onClick={() => setIsOpen((value) => !value)}
-        data-test-subj="createDatasetFlyoutOptionalSettingsToggle"
-      >
-        {isOpen
-          ? createDatasetFlyoutStrings.optionalSettingsHide()
-          : createDatasetFlyoutStrings.optionalSettingsShow()}
-      </EuiButtonEmpty>
-      <div id={contentId} hidden={!isOpen}>
-        <EuiSpacer size="s" />
-        <FormatAndPartitionFields control={control} />
-        <FormatSpecificSettings control={control} />
-      </div>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Format + partition detection — always visible inside the optional section
-// ---------------------------------------------------------------------------
-
-function FormatAndPartitionFields({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: formatField } = useController({ name: 'settings.format', control });
-  const { field: partitionDetectionField } = useController({
-    name: 'settings.partition_detection',
-    control,
-  });
-
-  return (
-    <>
       <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
         <EuiSelect
           options={FORMAT_OPTIONS()}
@@ -145,19 +112,52 @@ function FormatAndPartitionFields({ control }: { control: Control<CreateDatasetF
           inputRef={formatField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
-        <EuiSelect
-          options={PARTITION_DETECTION_OPTIONS()}
-          data-test-subj="createDatasetFlyoutSettingsPartitionDetection"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
-          value={partitionDetectionField.value}
-          onChange={(e) => partitionDetectionField.onChange(e.target.value)}
-          name={partitionDetectionField.name}
-          inputRef={partitionDetectionField.ref}
-        />
-      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiButtonEmpty
+        size="s"
+        flush="left"
+        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
+        aria-expanded={isAdvancedOpen}
+        aria-controls={advancedId}
+        onClick={() => setIsAdvancedOpen((v) => !v)}
+        data-test-subj="createDatasetFlyoutAdvancedSettingsToggle"
+      >
+        {isAdvancedOpen
+          ? createDatasetFlyoutStrings.advancedSettingsHide()
+          : createDatasetFlyoutStrings.advancedSettingsShow()}
+      </EuiButtonEmpty>
+      <div id={advancedId} hidden={!isAdvancedOpen}>
+        <EuiSpacer size="s" />
+        <PartitionDetectionField control={control} />
+        <FormatSpecificSettings control={control} />
+      </div>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Partition detection — always visible inside the advanced section
+// ---------------------------------------------------------------------------
+
+function PartitionDetectionField({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const { field: partitionDetectionField } = useController({
+    name: 'settings.partition_detection',
+    control,
+  });
+
+  return (
+    <EuiFormRow label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()} fullWidth>
+      <EuiSelect
+        options={PARTITION_DETECTION_OPTIONS()}
+        data-test-subj="createDatasetFlyoutSettingsPartitionDetection"
+        fullWidth
+        aria-label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
+        value={partitionDetectionField.value}
+        onChange={(e) => partitionDetectionField.onChange(e.target.value)}
+        name={partitionDetectionField.name}
+        inputRef={partitionDetectionField.ref}
+      />
+    </EuiFormRow>
   );
 }
 
@@ -175,25 +175,55 @@ function FormatSpecificSettings({ control }: { control: Control<CreateDatasetFor
     return <NdjsonSettings control={control} />;
   }
   if (format === 'parquet') {
-    return <ParquetAdvancedSettings control={control} />;
+    return <ParquetSettings control={control} />;
   }
   // orc, empty (no format selected), and any future format: no additional settings
   return null;
 }
 
 // ---------------------------------------------------------------------------
-// CSV / TSV
+// CSV / TSV — all fields flat
 // ---------------------------------------------------------------------------
 
 function CsvTsvSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutCsvAdvanced' });
-
   const { field: delimiterField } = useController({ name: 'settings.delimiter', control });
   const { field: modeField } = useController({ name: 'settings.mode', control });
   const { field: headerRowField } = useController({ name: 'settings.header_row', control });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
   const { field: encodingField } = useController({ name: 'settings.encoding', control });
+  const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
+    name: 'settings.schema_sample_size',
+    control,
+    rules: { validate: validateSchemaSampleSize },
+  });
+  const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
+  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
+    name: 'settings.max_errors',
+    control,
+    rules: { validate: validateMaxErrors },
+  });
+  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
+    name: 'settings.max_error_ratio',
+    control,
+    rules: { validate: validateMaxErrorRatio },
+  });
+  const { field: quoteField } = useController({ name: 'settings.quote', control });
+  const { field: escapeField } = useController({ name: 'settings.escape', control });
+  const { field: commentField } = useController({ name: 'settings.comment', control });
+  const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
+  const { field: datetimeFormatField } = useController({
+    name: 'settings.datetime_format',
+    control,
+  });
+  const { field: multiValueSyntaxField } = useController({
+    name: 'settings.multi_value_syntax',
+    control,
+  });
+  const { field: maxFieldSizeField, fieldState: maxFieldSizeState } = useController({
+    name: 'settings.max_field_size',
+    control,
+    rules: { validate: validateMaxFieldSize },
+  });
 
   return (
     <>
@@ -263,65 +293,6 @@ function CsvTsvSettings({ control }: { control: Control<CreateDatasetFormValues>
           inputRef={encodingField.ref}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isAdvancedOpen}
-        aria-controls={advancedId}
-        onClick={() => setIsAdvancedOpen((v) => !v)}
-        data-test-subj="createDatasetFlyoutCsvAdvancedToggle"
-      >
-        {isAdvancedOpen
-          ? createDatasetFlyoutStrings.advancedSettingsHide()
-          : createDatasetFlyoutStrings.advancedSettingsShow()}
-      </EuiButtonEmpty>
-      <div id={advancedId} hidden={!isAdvancedOpen}>
-        <EuiSpacer size="s" />
-        <CsvTsvAdvancedSettings control={control} />
-      </div>
-    </>
-  );
-}
-
-function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
-    name: 'settings.schema_sample_size',
-    control,
-    rules: { validate: validateSchemaSampleSize },
-  });
-  const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
-  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
-    name: 'settings.max_errors',
-    control,
-    rules: { validate: validateMaxErrors },
-  });
-  const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
-    name: 'settings.max_error_ratio',
-    control,
-    rules: { validate: validateMaxErrorRatio },
-  });
-  const { field: quoteField } = useController({ name: 'settings.quote', control });
-  const { field: escapeField } = useController({ name: 'settings.escape', control });
-  const { field: commentField } = useController({ name: 'settings.comment', control });
-  const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
-  });
-  const { field: multiValueSyntaxField } = useController({
-    name: 'settings.multi_value_syntax',
-    control,
-  });
-  const { field: maxFieldSizeField, fieldState: maxFieldSizeState } = useController({
-    name: 'settings.max_field_size',
-    control,
-    rules: { validate: validateMaxFieldSize },
-  });
-
-  return (
-    <>
       <EuiFormRow
         label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
         helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
@@ -498,13 +469,10 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
 }
 
 // ---------------------------------------------------------------------------
-// NDJSON
+// NDJSON — all fields flat
 // ---------------------------------------------------------------------------
 
 function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutNdjsonAdvanced' });
-
   const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
     name: 'settings.schema_sample_size',
     control,
@@ -533,49 +501,29 @@ function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues>
           inputRef={schemaSampleSizeField.ref}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isAdvancedOpen}
-        aria-controls={advancedId}
-        onClick={() => setIsAdvancedOpen((v) => !v)}
-        data-test-subj="createDatasetFlyoutNdjsonAdvancedToggle"
+      <EuiFormRow
+        label={createDatasetFlyoutStrings.settingsSegmentSizeLabel()}
+        helpText={createDatasetFlyoutStrings.settingsSegmentSizeHelp()}
+        fullWidth
       >
-        {isAdvancedOpen
-          ? createDatasetFlyoutStrings.advancedSettingsHide()
-          : createDatasetFlyoutStrings.advancedSettingsShow()}
-      </EuiButtonEmpty>
-      <div id={advancedId} hidden={!isAdvancedOpen}>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={createDatasetFlyoutStrings.settingsSegmentSizeLabel()}
-          helpText={createDatasetFlyoutStrings.settingsSegmentSizeHelp()}
+        <EuiFieldText
+          data-test-subj="createDatasetFlyoutSettingsSegmentSize"
           fullWidth
-        >
-          <EuiFieldText
-            data-test-subj="createDatasetFlyoutSettingsSegmentSize"
-            fullWidth
-            value={segmentSizeField.value}
-            onChange={(e) => segmentSizeField.onChange(e.target.value)}
-            name={segmentSizeField.name}
-            inputRef={segmentSizeField.ref}
-          />
-        </EuiFormRow>
-      </div>
+          value={segmentSizeField.value}
+          onChange={(e) => segmentSizeField.onChange(e.target.value)}
+          name={segmentSizeField.name}
+          inputRef={segmentSizeField.ref}
+        />
+      </EuiFormRow>
     </>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Parquet
+// Parquet — all fields flat
 // ---------------------------------------------------------------------------
 
-function ParquetAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutParquetAdvanced' });
-
+function ParquetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { field: optimizedReaderField } = useController({
     name: 'settings.optimized_reader',
     control,
@@ -587,58 +535,40 @@ function ParquetAdvancedSettings({ control }: { control: Control<CreateDatasetFo
 
   return (
     <>
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isAdvancedOpen}
-        aria-controls={advancedId}
-        onClick={() => setIsAdvancedOpen((v) => !v)}
-        data-test-subj="createDatasetFlyoutParquetAdvancedToggle"
-      >
-        {isAdvancedOpen
-          ? createDatasetFlyoutStrings.advancedSettingsHide()
-          : createDatasetFlyoutStrings.advancedSettingsShow()}
-      </EuiButtonEmpty>
-      <div id={advancedId} hidden={!isAdvancedOpen}>
-        <EuiSpacer size="s" />
-        <EuiFormRow label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()} fullWidth>
-          <EuiSelect
-            options={BOOLEAN_OPTIONS(
-              createDatasetFlyoutStrings.settingsOptimizedReaderPlaceholder(),
-              createDatasetFlyoutStrings.settingsOptimizedReaderEnabled(),
-              createDatasetFlyoutStrings.settingsOptimizedReaderDisabled()
-            )}
-            data-test-subj="createDatasetFlyoutSettingsOptimizedReader"
-            fullWidth
-            aria-label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()}
-            value={optimizedReaderField.value}
-            onChange={(e) =>
-              optimizedReaderField.onChange(e.target.value as DatasetBooleanFormValue)
-            }
-            name={optimizedReaderField.name}
-            inputRef={optimizedReaderField.ref}
-          />
-        </EuiFormRow>
-        <EuiFormRow label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()} fullWidth>
-          <EuiSelect
-            options={BOOLEAN_OPTIONS(
-              createDatasetFlyoutStrings.settingsLateMaterializationPlaceholder(),
-              createDatasetFlyoutStrings.settingsLateMaterializationEnabled(),
-              createDatasetFlyoutStrings.settingsLateMaterializationDisabled()
-            )}
-            data-test-subj="createDatasetFlyoutSettingsLateMaterialization"
-            fullWidth
-            aria-label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()}
-            value={lateMaterializationField.value}
-            onChange={(e) =>
-              lateMaterializationField.onChange(e.target.value as DatasetBooleanFormValue)
-            }
-            name={lateMaterializationField.name}
-            inputRef={lateMaterializationField.ref}
-          />
-        </EuiFormRow>
-      </div>
+      <EuiFormRow label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()} fullWidth>
+        <EuiSelect
+          options={BOOLEAN_OPTIONS(
+            createDatasetFlyoutStrings.settingsOptimizedReaderPlaceholder(),
+            createDatasetFlyoutStrings.settingsOptimizedReaderEnabled(),
+            createDatasetFlyoutStrings.settingsOptimizedReaderDisabled()
+          )}
+          data-test-subj="createDatasetFlyoutSettingsOptimizedReader"
+          fullWidth
+          aria-label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()}
+          value={optimizedReaderField.value}
+          onChange={(e) => optimizedReaderField.onChange(e.target.value as DatasetBooleanFormValue)}
+          name={optimizedReaderField.name}
+          inputRef={optimizedReaderField.ref}
+        />
+      </EuiFormRow>
+      <EuiFormRow label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()} fullWidth>
+        <EuiSelect
+          options={BOOLEAN_OPTIONS(
+            createDatasetFlyoutStrings.settingsLateMaterializationPlaceholder(),
+            createDatasetFlyoutStrings.settingsLateMaterializationEnabled(),
+            createDatasetFlyoutStrings.settingsLateMaterializationDisabled()
+          )}
+          data-test-subj="createDatasetFlyoutSettingsLateMaterialization"
+          fullWidth
+          aria-label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()}
+          value={lateMaterializationField.value}
+          onChange={(e) =>
+            lateMaterializationField.onChange(e.target.value as DatasetBooleanFormValue)
+          }
+          name={lateMaterializationField.name}
+          inputRef={lateMaterializationField.ref}
+        />
+      </EuiFormRow>
     </>
   );
 }
