@@ -131,7 +131,7 @@ export function EditorFrame(props: EditorFrameProps) {
                   kind: 'suggestion',
                   datasourceId: suggestionDatasourceId,
                   datasourceState: suggestionDatasourceState,
-                  // Intentional `as FormBasedPrivateState` type assertion as the redux store carries datasource state opaquely (`unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
+                  // Intentional `as FormBasedPrivateState` type assertion as the redux store carries datasource state opaquely (`unknown`);
                   previousDatasourceState: datasourceStates[suggestionDatasourceId]?.state as
                     | FormBasedPrivateState
                     | undefined,

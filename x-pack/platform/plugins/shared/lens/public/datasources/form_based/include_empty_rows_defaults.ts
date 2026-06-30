@@ -177,7 +177,8 @@ export function applyEmptyRowsDefaultsToSuggestionState(
 function getPersistedFormBasedLayers(
   persistedDoc: LensDocument | undefined
 ): FormBasedPersistedState['layers'] | undefined {
-  // Intentional `as FormBasedPersistedState` type assertion as `LensDocument.state.datasourceStates` is the persisted saved object payload typed `Record<string, unknown>`; keyed by the form-based datasource id it is the form-based persisted state, and only its typed `layers` are read below.
+  // Intentional `as FormBasedPersistedState` type assertion as `LensDocument.state.datasourceStates`
+  // is the persisted saved object payload typed `Record<string, unknown>`;
   const formBased = persistedDoc?.state?.datasourceStates?.[LENS_DATASOURCE_ID.FORM_BASED] as
     | FormBasedPersistedState
     | undefined;

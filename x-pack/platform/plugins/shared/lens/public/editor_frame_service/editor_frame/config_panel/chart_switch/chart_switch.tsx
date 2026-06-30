@@ -142,7 +142,7 @@ export const ChartSwitch = memo(function ChartSwitch({
     // existing datasource state, so the defaults are reconciled through a
     // follow-up datasource update.
     if (selection.sameDatasources && !selection.datasourceState && activeDatasourceId) {
-      // Intentional `as FormBasedPrivateState` type assertion as the redux datasource state is opaque (`DatasourceState['state']` is `unknown`); `applyVizTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
+      // Intentional `as FormBasedPrivateState` type assertion as the redux datasource state is opaque (`DatasourceState['state']` is `unknown`);
       const currentState = datasourceStates[activeDatasourceId]?.state as
         | FormBasedPrivateState
         | undefined;
