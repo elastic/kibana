@@ -13,6 +13,7 @@ import { registerExecutionOptionsListRoute } from './execution_options_list';
 import { registerGetConfigRoute } from './get_config';
 import { registerGetWorkflowHistoryRoute } from './get_workflow_history';
 import { registerInternalSearchExecutionsRoute } from './search_executions';
+import { registerPrepareWebhookRoute } from './prepare_webhook';
 import { registerTriggerEventsLogRoutes } from './trigger_events_log';
 import type { RouteDependencies } from '../types';
 
@@ -24,4 +25,5 @@ export function registerInternalRoutes(deps: RouteDependencies) {
   registerInternalSearchExecutionsRoute(deps);
   registerGetWorkflowHistoryRoute(deps);
   registerTriggerEventsLogRoutes(deps);
+  registerPrepareWebhookRoute(deps);
 }

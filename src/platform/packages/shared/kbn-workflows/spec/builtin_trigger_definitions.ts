@@ -12,6 +12,7 @@ import {
   AlertRuleTriggerSchema,
   ManualTriggerSchema,
   ScheduledTriggerSchema,
+  WebhookTriggerSchema,
 } from './schema/triggers';
 
 export interface TriggerDocumentation {
@@ -108,6 +109,32 @@ steps:
         type: console
         with:
           message: "Alert ID: {{ foreach.item._id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'webhook',
+    label: 'Webhook',
+    description: 'Trigger a workflow from an external HTTP request',
+    schema: WebhookTriggerSchema,
+    documentation: {
+      details:
+        'Webhook triggers expose a public workflow-specific endpoint. POST requests pass the raw JSON body as inputs; GET requests pass query parameters as inputs.',
+      examples: [
+        `triggers:
+  - type: webhook
+    auth:
+      type: none`,
+        `triggers:
+  - type: webhook
+    auth:
+      type: apiKey
+    inputs:
+      properties:
+        message:
+          type: string
+      required:
+        - message`,
       ],
     },
   },

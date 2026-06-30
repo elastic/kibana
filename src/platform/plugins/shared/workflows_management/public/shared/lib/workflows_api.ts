@@ -24,3 +24,17 @@ export const updateWorkflow = (http: HttpSetup, id: string, yaml: string) =>
   http.put<void>(`/api/workflows/${id}`, {
     body: JSON.stringify({ yaml }),
   });
+
+export interface PrepareWebhookResponse {
+  urlPath: string;
+  authType: 'none' | 'apiKey' | 'basic';
+  apiKey?: {
+    id: string;
+    encoded: string;
+  };
+}
+
+export const prepareWebhook = (http: HttpSetup, id: string) =>
+  http.post<PrepareWebhookResponse>(`/internal/workflows/workflow/${id}/webhook/prepare`, {
+    version: '1',
+  });

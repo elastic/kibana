@@ -25,6 +25,7 @@ const TRIGGERS_ICONS: Record<string, string> = {
   alert: 'warning',
   manual: 'play',
   scheduled: 'clock',
+  webhook: 'globe',
 };
 
 const DEFAULT_TRIGGER_ICON = 'bolt';

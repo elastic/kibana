@@ -21,6 +21,7 @@ import {
 } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
+import { WebhookTriggerPanel } from './webhook_trigger_panel';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
@@ -125,13 +126,20 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     <>
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem css={styles.yamlEditor}>
-          <React.Suspense fallback={<EuiLoadingSpinner />}>
-            <WorkflowYAMLEditor
-              highlightDiff={highlightDiff}
-              onStepRun={handleStepRun}
-              editorRef={editorRef}
-            />
-          </React.Suspense>
+          <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
+            <EuiFlexItem grow={false}>
+              <WebhookTriggerPanel />
+            </EuiFlexItem>
+            <EuiFlexItem css={styles.yamlEditor}>
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
+                <WorkflowYAMLEditor
+                  highlightDiff={highlightDiff}
+                  onStepRun={handleStepRun}
+                  editorRef={editorRef}
+                />
+              </React.Suspense>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {isVisualEditorEnabled && (
           <EuiFlexItem css={styles.visualEditor}>

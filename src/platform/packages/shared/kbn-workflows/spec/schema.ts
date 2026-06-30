@@ -17,6 +17,7 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import { isWebhookTrigger } from './schema/triggers/webhook_trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -764,7 +765,7 @@ export const WorkflowSchema = WorkflowSchemaBase.extend({
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
   const mappedTriggers = (data.triggers ?? []).map((trigger) => {
-    if (!isManualTrigger(trigger) || !trigger.inputs) {
+    if ((!isManualTrigger(trigger) && !isWebhookTrigger(trigger)) || !trigger.inputs) {
       return trigger;
     }
 

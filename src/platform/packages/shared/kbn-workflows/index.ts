@@ -65,6 +65,7 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
+  WebhookTriggerSchema,
   TriggerSchema,
   getTriggerSchema,
   TriggerTypes,

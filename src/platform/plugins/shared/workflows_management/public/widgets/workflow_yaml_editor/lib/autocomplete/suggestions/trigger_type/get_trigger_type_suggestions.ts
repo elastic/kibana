@@ -14,6 +14,7 @@ import {
   isTriggerType,
   ManualTriggerSchema,
   ScheduledTriggerSchema,
+  WebhookTriggerSchema,
 } from '@kbn/workflows';
 import { triggerSchemas } from '../../../../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
@@ -142,6 +143,11 @@ export function getBuiltInTriggerTypesFromSchema(): Array<{
       schema: ManualTriggerSchema,
       description: 'Trigger workflow manually',
       icon: monaco.languages.CompletionItemKind.TypeParameter, // Manual/keyword icon
+    },
+    {
+      schema: WebhookTriggerSchema,
+      description: 'Trigger workflow from an external HTTP webhook',
+      icon: monaco.languages.CompletionItemKind.Event,
     },
   ];
 

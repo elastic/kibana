@@ -22,6 +22,7 @@ import {
   type LegacyWorkflowInput,
   type WorkflowInput,
 } from '../schema/triggers/manual_trigger_schema';
+import { isWebhookTrigger } from '../schema/triggers/webhook_trigger_schema';
 
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
@@ -150,7 +151,7 @@ export function normalizeFieldsToJsonSchema(
  * {@link normalizeFieldsToJsonSchema}.
  *
  * Falls back to root-level `inputs` on the definition for backward compatibility when the manual
- * trigger block has no inputs.
+ * and webhook trigger blocks have no inputs.
  */
 export const getInputsFromDefinition = (
   definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
@@ -158,7 +159,10 @@ export const getInputsFromDefinition = (
   const manualTriggerInDefinition = definition?.triggers?.find((trigger) =>
     isManualTrigger(trigger)
   );
-  let inputsInDefinition = manualTriggerInDefinition?.inputs;
+  const webhookTriggerInDefinition = definition?.triggers?.find((trigger) =>
+    isWebhookTrigger(trigger)
+  );
+  let inputsInDefinition = manualTriggerInDefinition?.inputs ?? webhookTriggerInDefinition?.inputs;
 
   if (!inputsInDefinition) {
     // Backward compatibility with workflows that still use root-level inputs

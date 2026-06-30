@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
 import { ScheduledTriggerSchema } from './scheduled_trigger_schema';
+import { WebhookTriggerSchema } from './webhook_trigger_schema';
 
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
@@ -19,11 +20,13 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
 } from './scheduled_trigger_schema';
+export { WebhookTriggerSchema } from './webhook_trigger_schema';
 
 export const TriggerSchema = z.discriminatedUnion('type', [
   AlertRuleTriggerSchema,
   ScheduledTriggerSchema,
   ManualTriggerSchema,
+  WebhookTriggerSchema,
 ]);
 
 export type Trigger = z.infer<typeof TriggerSchema>;
@@ -67,6 +70,7 @@ export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
     AlertRuleTriggerSchema,
     ScheduledTriggerSchema,
     ManualTriggerSchema,
+    WebhookTriggerSchema,
     ...customSchemas,
   ]);
 }
@@ -75,5 +79,6 @@ export const TriggerTypes = [
   AlertRuleTriggerSchema.shape.type.value,
   ScheduledTriggerSchema.shape.type.value,
   ManualTriggerSchema.shape.type.value,
+  WebhookTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];

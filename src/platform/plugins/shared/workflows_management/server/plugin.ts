@@ -18,6 +18,8 @@ import { defineRoutes } from './api/routes';
 import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
+import { WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE } from './api/webhook/constants';
+import type { WebhookDispatchTaskParams } from './api/webhook/types';
 import { AvailabilityUpdater } from './availability';
 import {
   createManagedWorkflowsSystemApiProvider,
@@ -83,6 +85,26 @@ export class WorkflowsPlugin
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
+
+    plugins.taskManager?.registerTaskDefinitions({
+      [WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE]: {
+        title: 'Dispatch workflow webhook invocations',
+        description: 'Executes workflows that were invoked through public webhook trigger routes',
+        timeout: '5m',
+        maxAttempts: 3,
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          if (!fakeRequest) {
+            throw new Error('Cannot dispatch workflow webhook without Kibana Request');
+          }
+          return {
+            run: async () => {
+              const { workflowId, spaceId } = taskInstance.params as WebhookDispatchTaskParams;
+              await api.runWebhookDispatchTask(workflowId, spaceId, fakeRequest);
+            },
+          };
+        },
+      },
+    });
 
     if (plugins.actions) {
       plugins.actions.registerType(getWorkflowsConnectorType(api));

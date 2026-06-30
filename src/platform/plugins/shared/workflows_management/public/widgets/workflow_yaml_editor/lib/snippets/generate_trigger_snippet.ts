@@ -79,6 +79,19 @@ export function generateTriggerSnippet(
       parameters = {};
       break;
 
+    case 'webhook':
+      parameters = {
+        auth: { type: 'none' },
+        inputs: {
+          properties: {
+            message: {
+              type: 'string',
+            },
+          },
+        },
+      };
+      break;
+
     default:
       // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {

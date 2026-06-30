@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { createHash, randomUUID } from 'node:crypto';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   SmlIndexAction,
@@ -60,6 +61,14 @@ import {
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
+import {
+  getWebhookCredentialDocumentId,
+  getWebhookDispatchTaskId,
+  WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE,
+  WORKFLOW_WEBHOOK_CREDENTIALS_INDEX,
+  WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+} from './webhook/constants';
+import type { WebhookCredentialDocument, WebhookInvocationDocument } from './webhook/types';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import type {
@@ -226,9 +235,52 @@ export interface ExecuteWorkflowResult {
   timedOut?: boolean;
 }
 
+export interface WebhookPrepareResult {
+  urlPath: string;
+  authType: 'none' | 'apiKey' | 'basic';
+  apiKey?: {
+    id: string;
+    encoded: string;
+  };
+}
+
+export interface WebhookInvocationResult {
+  invocationId: string;
+  accepted: true;
+}
+
 const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
+
+const getWebhookTrigger = (workflow: WorkflowDetailDto) =>
+  workflow.definition?.triggers?.find((trigger) => trigger.type === 'webhook') as
+    | {
+        auth?: { type: 'none' } | { type: 'apiKey'; id?: string } | { type: 'basic'; username: string; password: string };
+      }
+    | undefined;
+
+const hashSecret = (secret: string): string => createHash('sha256').update(secret).digest('hex');
+
+const getAuthorizationHeader = (request: KibanaRequest): string | undefined => {
+  const value = request.headers.authorization;
+  return Array.isArray(value) ? value[0] : value;
+};
+
+const getQueryValue = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    return typeof value[0] === 'string' ? value[0] : undefined;
+  }
+  return typeof value === 'string' ? value : undefined;
+};
+
+const getPresentedApiKey = (request: KibanaRequest): string | undefined => {
+  const authorization = getAuthorizationHeader(request);
+  if (authorization?.toLowerCase().startsWith('apikey ')) {
+    return authorization.slice('apikey '.length).trim();
+  }
+  return getQueryValue((request.query as Record<string, unknown> | undefined)?.apiKey);
+};
 
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
@@ -238,6 +290,84 @@ export class WorkflowsManagementApi {
     private readonly workflowsService: WorkflowsService,
     public readonly isWorkflowsAvailable: boolean
   ) {}
+
+  private async ensureWebhookIndices(): Promise<void> {
+    const coreStart = await this.workflowsService.getCoreStart();
+    const client = coreStart.elasticsearch.client.asInternalUser;
+
+    if (!(await client.indices.exists({ index: WORKFLOW_WEBHOOK_CREDENTIALS_INDEX }))) {
+      await client.indices.create({
+        index: WORKFLOW_WEBHOOK_CREDENTIALS_INDEX,
+        settings: { hidden: true },
+        mappings: {
+          dynamic: false,
+          properties: {
+            spaceId: { type: 'keyword' },
+            workflowId: { type: 'keyword' },
+            authType: { type: 'keyword' },
+            apiKeyId: { type: 'keyword' },
+            username: { type: 'keyword' },
+            passwordHash: { type: 'keyword' },
+            dispatchTaskId: { type: 'keyword' },
+            createdAt: { type: 'date' },
+            updatedAt: { type: 'date' },
+          },
+        },
+      });
+    }
+
+    if (!(await client.indices.exists({ index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX }))) {
+      await client.indices.create({
+        index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+        settings: { hidden: true },
+        mappings: {
+          dynamic: false,
+          properties: {
+            spaceId: { type: 'keyword' },
+            workflowId: { type: 'keyword' },
+            status: { type: 'keyword' },
+            createdAt: { type: 'date' },
+            updatedAt: { type: 'date' },
+            workflowExecutionId: { type: 'keyword' },
+            error: { type: 'text' },
+          },
+        },
+      });
+    }
+  }
+
+  private async getWebhookCredential(
+    workflowId: string,
+    spaceId: string
+  ): Promise<WebhookCredentialDocument | undefined> {
+    await this.ensureWebhookIndices();
+    const coreStart = await this.workflowsService.getCoreStart();
+    const client = coreStart.elasticsearch.client.asInternalUser;
+    const id = getWebhookCredentialDocumentId(spaceId, workflowId);
+    const result = await client
+      .get<WebhookCredentialDocument>({
+        index: WORKFLOW_WEBHOOK_CREDENTIALS_INDEX,
+        id,
+      })
+      .catch(() => undefined);
+    return result?._source;
+  }
+
+  private async authenticatePresentedApiKey(request: KibanaRequest): Promise<string | undefined> {
+    const presentedApiKey = getPresentedApiKey(request);
+    if (!presentedApiKey) {
+      return undefined;
+    }
+    const coreStart = await this.workflowsService.getCoreStart();
+    const result = await coreStart.elasticsearch.client.asInternalUser.security.authenticate(
+      undefined,
+      {
+        headers: { authorization: `ApiKey ${presentedApiKey}` },
+      }
+    );
+    const apiKey = (result as { api_key?: { id?: string } }).api_key;
+    return apiKey?.id;
+  }
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
     return this.workflowsService.getWorkflowsExecutionEngine();
@@ -424,6 +554,237 @@ export class WorkflowsManagementApi {
     failures: Array<{ id: string; error: string }>;
   }> {
     return this.workflowsService.disableAllWorkflows(spaceId);
+  }
+
+  public async prepareWebhookTrigger(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WebhookPrepareResult> {
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+    if (!workflow) {
+      throw new WorkflowNotFoundError(workflowId);
+    }
+    const trigger = getWebhookTrigger(workflow);
+    if (!trigger) {
+      throw new Error(`Workflow '${workflowId}' does not define a webhook trigger.`);
+    }
+
+    await this.ensureWebhookIndices();
+    const coreStart = await this.workflowsService.getCoreStart();
+    const pluginsStart = await this.workflowsService.getPluginsStart();
+    const client = coreStart.elasticsearch.client.asInternalUser;
+    const now = new Date().toISOString();
+    const authType = trigger.auth?.type ?? 'none';
+    const dispatchTaskId = getWebhookDispatchTaskId(spaceId, workflowId);
+    const existingCredential = await this.getWebhookCredential(workflowId, spaceId);
+
+    await pluginsStart.taskManager.removeIfExists(dispatchTaskId);
+    await pluginsStart.taskManager.schedule(
+      {
+        id: dispatchTaskId,
+        taskType: WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE,
+        params: { workflowId, spaceId },
+        state: {},
+        runAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        scope: ['workflows', `workflow:${workflowId}`],
+      },
+      { request }
+    );
+
+    let apiKey: WebhookPrepareResult['apiKey'];
+    let apiKeyId = existingCredential?.apiKeyId;
+    if (authType === 'apiKey' && !apiKeyId) {
+      const result = await coreStart.elasticsearch.client.asScoped(request).asCurrentUser.security.createApiKey({
+        name: `workflow-webhook:${spaceId}:${workflowId}`,
+        metadata: {
+          workflowId,
+          spaceId,
+          purpose: 'workflow_webhook_trigger',
+        },
+        role_descriptors: {},
+      });
+      apiKeyId = result.id;
+      apiKey = { id: result.id, encoded: result.encoded };
+    }
+
+    const credential: WebhookCredentialDocument = {
+      spaceId,
+      workflowId,
+      authType,
+      ...(apiKeyId ? { apiKeyId } : {}),
+      ...(authType === 'basic' && trigger.auth?.type === 'basic'
+        ? {
+            username: trigger.auth.username,
+            passwordHash: hashSecret(trigger.auth.password),
+          }
+        : {}),
+      dispatchTaskId,
+      createdAt: existingCredential?.createdAt ?? now,
+      updatedAt: now,
+    };
+
+    await client.index({
+      index: WORKFLOW_WEBHOOK_CREDENTIALS_INDEX,
+      id: getWebhookCredentialDocumentId(spaceId, workflowId),
+      document: credential,
+      refresh: 'wait_for',
+    });
+
+    return {
+      urlPath: `/api/workflows/workflow/${encodeURIComponent(workflowId)}/execute`,
+      authType,
+      ...(apiKey ? { apiKey } : {}),
+    };
+  }
+
+  public async enqueueWebhookInvocation(params: {
+    workflowId: string;
+    spaceId: string;
+    inputs: Record<string, unknown>;
+    request: KibanaRequest;
+  }): Promise<WebhookInvocationResult> {
+    const { workflowId, spaceId, inputs, request } = params;
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+    if (!workflow) {
+      throw new WorkflowNotFoundError(workflowId);
+    }
+    const trigger = getWebhookTrigger(workflow);
+    if (!trigger) {
+      throw new Error(`Workflow '${workflowId}' does not define a webhook trigger.`);
+    }
+    if (!workflow.valid) {
+      throw new Error(`Workflow '${workflowId}' has validation errors and cannot be executed.`);
+    }
+    if (!workflow.enabled) {
+      throw new Error(`Workflow '${workflowId}' is disabled and cannot be executed.`);
+    }
+
+    const credential = await this.getWebhookCredential(workflowId, spaceId);
+    const authType = trigger.auth?.type ?? 'none';
+    if (!credential || credential.authType !== authType) {
+      throw new Error('Webhook credentials have not been prepared for this workflow.');
+    }
+
+    if (authType === 'apiKey') {
+      const apiKeyId = await this.authenticatePresentedApiKey(request);
+      if (!apiKeyId || apiKeyId !== credential.apiKeyId) {
+        throw new Error('Webhook API key is not authorized for this workflow.');
+      }
+    } else if (authType === 'basic') {
+      const authorization = getAuthorizationHeader(request);
+      const encoded = authorization?.toLowerCase().startsWith('basic ')
+        ? authorization.slice('basic '.length)
+        : undefined;
+      const decoded = encoded ? Buffer.from(encoded, 'base64').toString('utf8') : '';
+      const separatorIndex = decoded.indexOf(':');
+      const username = separatorIndex >= 0 ? decoded.slice(0, separatorIndex) : '';
+      const password = separatorIndex >= 0 ? decoded.slice(separatorIndex + 1) : '';
+      if (username !== credential.username || hashSecret(password) !== credential.passwordHash) {
+        throw new Error('Webhook basic credentials are not authorized for this workflow.');
+      }
+    }
+
+    await this.ensureWebhookIndices();
+    const coreStart = await this.workflowsService.getCoreStart();
+    const pluginsStart = await this.workflowsService.getPluginsStart();
+    const invocationId = randomUUID();
+    const now = new Date().toISOString();
+
+    await coreStart.elasticsearch.client.asInternalUser.index<WebhookInvocationDocument>({
+      index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+      id: invocationId,
+      document: {
+        spaceId,
+        workflowId,
+        inputs,
+        status: 'pending',
+        createdAt: now,
+        updatedAt: now,
+      },
+      refresh: 'wait_for',
+    });
+
+    await pluginsStart.taskManager.runSoon(credential.dispatchTaskId);
+    return { invocationId, accepted: true };
+  }
+
+  public async runWebhookDispatchTask(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    await this.ensureWebhookIndices();
+    const coreStart = await this.workflowsService.getCoreStart();
+    const client = coreStart.elasticsearch.client.asInternalUser;
+    const invocations = await client.search<WebhookInvocationDocument>({
+      index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+      size: 20,
+      query: {
+        bool: {
+          filter: [
+            { term: { workflowId } },
+            { term: { spaceId } },
+            { term: { status: 'pending' } },
+          ],
+        },
+      },
+      sort: [{ createdAt: { order: 'asc' } }],
+    });
+
+    for (const hit of invocations.hits.hits) {
+      if (!hit._id || !hit._source) {
+        continue;
+      }
+      const invocation = hit._source;
+      const now = new Date().toISOString();
+      await client.update({
+        index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+        id: hit._id,
+        doc: { status: 'running', updatedAt: now },
+      });
+      try {
+        const workflow = await this.getWorkflow(workflowId, spaceId);
+        if (!workflow?.definition) {
+          throw new WorkflowNotFoundError(workflowId);
+        }
+        const workflowForExecution: WorkflowExecutionEngineModel = {
+          id: workflow.id,
+          name: workflow.name,
+          enabled: workflow.enabled,
+          definition: workflow.definition,
+          yaml: workflow.yaml,
+          ...pickManagedWorkflowFields(workflow),
+        };
+        const workflowExecutionId = await this.runWorkflow(
+          workflowForExecution,
+          spaceId,
+          invocation.inputs,
+          request,
+          'webhook',
+          { webhookInvocationId: hit._id }
+        );
+        await client.update({
+          index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+          id: hit._id,
+          doc: {
+            status: 'completed',
+            workflowExecutionId,
+            updatedAt: new Date().toISOString(),
+          },
+        });
+      } catch (error) {
+        await client.update({
+          index: WORKFLOW_WEBHOOK_INVOCATIONS_INDEX,
+          id: hit._id,
+          doc: {
+            status: 'failed',
+            error: error instanceof Error ? error.message : String(error),
+            updatedAt: new Date().toISOString(),
+          },
+        });
+      }
+    }
   }
 
   public async runWorkflow(

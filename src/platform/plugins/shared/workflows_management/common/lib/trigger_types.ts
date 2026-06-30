@@ -8,7 +8,7 @@
  */
 
 export interface WorkflowTrigger {
-  type: 'alert' | 'scheduled' | 'manual';
+  type: 'alert' | 'scheduled' | 'manual' | 'webhook';
   with?: Record<string, unknown>;
 }
 

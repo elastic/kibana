@@ -9,6 +9,7 @@
 
 import { registerCancelExecutionRoute } from './cancel_execution';
 import { registerCancelWorkflowExecutionsRoute } from './cancel_workflow_executions';
+import { registerExecuteWebhookRoutes } from './execute_webhook';
 import { registerGetChildrenExecutionsRoute } from './get_children_executions';
 import { registerGetExecutionRoute } from './get_execution';
 import { registerGetExecutionLogsRoute } from './get_execution_logs';
@@ -22,6 +23,7 @@ import { registerTestWorkflowRoute } from './test_workflow';
 import type { RouteDependencies } from '../types';
 
 export function registerExecutionRoutes(deps: RouteDependencies) {
+  registerExecuteWebhookRoutes(deps);
   registerRunWorkflowRoute(deps);
   registerTestWorkflowRoute(deps);
   registerTestStepRoute(deps);
