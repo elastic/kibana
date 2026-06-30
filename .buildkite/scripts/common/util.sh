@@ -250,7 +250,10 @@ upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
   local region pids=() failures=0
 
-  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
+  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+    echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
+    return 0
+  fi
 
   for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
     upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" &
