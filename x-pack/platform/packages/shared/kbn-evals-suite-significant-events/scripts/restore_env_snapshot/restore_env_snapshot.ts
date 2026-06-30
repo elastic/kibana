@@ -13,7 +13,7 @@ import type { LoadResult } from '@kbn/es-snapshot-loader';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { GCS_BUCKET, SIGEVENTS_DATA_STREAMS } from '../lib/constants';
+import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
 import {
   ensureCleanEnvironment,
   ensureKnownAliases,
@@ -229,7 +229,7 @@ export const restoreEnvSnapshot = async ({
     await ensureCleanEnvironment({
       esClient: sysClient,
       log,
-      systemIndices: [...systemIndices, ...SIGEVENTS_DATA_STREAMS],
+      systemIndices: [...systemIndices, ...SIGNIFICANT_EVENTS_DATA_STREAMS],
       alertIndices,
       logsIndex,
       clean,
@@ -282,7 +282,7 @@ export const restoreEnvSnapshot = async ({
     log.info('');
     log.info('Step 4/7 — Restoring SigEvents data streams (reindex into data streams)...');
     const dataStreamStatuses: string[] = [];
-    for (const dataStream of SIGEVENTS_DATA_STREAMS) {
+    for (const dataStream of SIGNIFICANT_EVENTS_DATA_STREAMS) {
       dataStreamStatuses.push(
         await restoreDataStream({ esClient, log, repository, snapshotName, dataStream })
       );

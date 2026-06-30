@@ -1,6 +1,6 @@
 # Capture Environment Snapshot
 
-Captures the current Streams/SigEvents environment into a GCS snapshot. `.kibana` system indices are reindexed to snapshot-safe names with mappings preserved, then everything is snapshotted together.
+Captures the current Streams/Significant Events environment into a GCS snapshot. `.kibana` system indices are reindexed to snapshot-safe names with mappings preserved, then everything is snapshotted together.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ node scripts/capture_sigevents_env_snapshot.js \
 
 1. Creates a temporary Elasticsearch user (`restore_sigevents_env_snapshot_tmp`) with the `system_indices_superuser` role. This user is deleted on script exit (success or failure).
 2. Resolves wildcard patterns to concrete index names via `GET _resolve/index`.
-3. For each fixed system index (`.kibana_streams_tasks-*`) and each SigEvents data stream (`.significant_events-knowledge_indicators`, `.significant_events-discoveries`, `.significant_events-detections`), fetches its mapping, creates a `snapshot-*` copy, and reindexes the data. `--logs-index` and `--alert-indices` targets are included directly in the snapshot without reindexing.
+3. For each fixed system index (`.kibana_streams_tasks-*`) and each Significant Events data stream (`.significant_events-knowledge_indicators`, `.significant_events-discoveries`, `.significant_events-detections`), fetches its mapping, creates a `snapshot-*` copy, and reindexes the data. `--logs-index` and `--alert-indices` targets are included directly in the snapshot without reindexing.
 4. Registers a GCS snapshot repository and creates the snapshot containing all captured indices.
 
 ### Naming convention

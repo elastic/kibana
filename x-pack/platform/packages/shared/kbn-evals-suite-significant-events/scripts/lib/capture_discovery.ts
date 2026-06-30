@@ -12,10 +12,10 @@ import type { ConnectionConfig } from './get_connection_config';
 import { DISCOVERY_TIMEOUT_MS } from './constants';
 import {
   configureModelSelectionSettings,
-  persistSigEventsDetectionsForSnapshot,
-  persistSigEventsDiscoveriesForSnapshot,
-  triggerSigEventsDiscovery,
-  waitForSigEventsDiscovery,
+  persistDetectionsForSnapshot,
+  persistDiscoveriesForSnapshot,
+  triggerDiscovery,
+  waitForDiscovery,
 } from './significant_events_workflow';
 
 export interface CaptureDiscoveryResult {
@@ -44,13 +44,21 @@ export async function captureDiscoveryForScenario({
   // (the otel-demo flow already configures it earlier).
   await configureModelSelectionSettings(config, log, connectorId);
 
-  await triggerSigEventsDiscovery(config, log);
-  await waitForSigEventsDiscovery(config, log, timeoutMs);
+  await triggerDiscovery(config, log);
+  await waitForDiscovery(config, log, timeoutMs);
 
-  const { index: discoveriesIndex, count: discoveriesCount } =
-    await persistSigEventsDiscoveriesForSnapshot(config, esClient, log, scenarioId);
-  const { index: detectionsIndex, count: detectionsCount } =
-    await persistSigEventsDetectionsForSnapshot(config, esClient, log, scenarioId);
+  const { index: discoveriesIndex, count: discoveriesCount } = await persistDiscoveriesForSnapshot(
+    config,
+    esClient,
+    log,
+    scenarioId
+  );
+  const { index: detectionsIndex, count: detectionsCount } = await persistDetectionsForSnapshot(
+    config,
+    esClient,
+    log,
+    scenarioId
+  );
 
   return { discoveriesIndex, discoveriesCount, detectionsIndex, detectionsCount };
 }

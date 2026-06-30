@@ -12,9 +12,9 @@ import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import {
-  getSigeventsSnapshotKnowledgeIndicatorsIndex,
-  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-} from './sigevents_snapshot_indices';
+  getSnapshotKnowledgeIndicatorsIndex,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+} from './snapshot_indices';
 
 const REINDEX_REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
 // Generous TTL so replayed KIs aren't filtered out by the reader's `expires_at >= NOW()` gate
@@ -44,7 +44,7 @@ export async function replayKnowledgeIndicatorsSnapshot(
 ): Promise<KnowledgeIndicatorReplayStats> {
   const basePath = resolveBasePath(gcs);
   const repository = createGcsRepository({ bucket: gcs.bucket, basePath });
-  const snapshotIndex = getSigeventsSnapshotKnowledgeIndicatorsIndex(snapshotName);
+  const snapshotIndex = getSnapshotKnowledgeIndicatorsIndex(snapshotName);
   const tempIndex = `sigevents-replay-temp-knowledge-indicators-${randomUUID()}`;
 
   try {
@@ -78,17 +78,17 @@ export async function replayKnowledgeIndicatorsSnapshot(
       {
         wait_for_completion: true,
         source: { index: tempIndex },
-        dest: { index: SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM, op_type: 'create' },
+        dest: { index: KNOWLEDGE_INDICATORS_DATA_STREAM, op_type: 'create' },
         script: { lang: 'painless', source: KI_REPLAY_SCRIPT, params: { ttl_millis: TTL_MILLIS } },
       },
       { requestTimeout: REINDEX_REQUEST_TIMEOUT_MS }
     );
 
-    await esClient.indices.refresh({ index: SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM });
+    await esClient.indices.refresh({ index: KNOWLEDGE_INDICATORS_DATA_STREAM });
 
     const stats = { total: reindexResult.total ?? 0, created: reindexResult.created ?? 0 };
     log.info(
-      `Replayed ${stats.created}/${stats.total} knowledge indicators into ${SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM}`
+      `Replayed ${stats.created}/${stats.total} knowledge indicators into ${KNOWLEDGE_INDICATORS_DATA_STREAM}`
     );
     return stats;
   } finally {

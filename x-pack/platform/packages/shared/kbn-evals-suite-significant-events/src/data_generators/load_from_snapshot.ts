@@ -14,11 +14,11 @@ import type { Detection, Discovery, Feature } from '@kbn/streams-schema';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import {
-  getSigeventsSnapshotKIFeaturesIndex,
-  getSigeventsSnapshotDiscoveriesIndex,
-  getSigeventsSnapshotDetectionsIndex,
-  getSigeventsSnapshotKnowledgeIndicatorsIndex,
-} from './sigevents_snapshot_indices';
+  getSnapshotKIFeaturesIndex,
+  getSnapshotDiscoveriesIndex,
+  getSnapshotDetectionsIndex,
+  getSnapshotKnowledgeIndicatorsIndex,
+} from './snapshot_indices';
 import { DEFAULT_LOGS_INDEX } from '../constants';
 
 /**
@@ -152,7 +152,7 @@ export async function loadKIFeaturesFromSnapshot(
     log,
     snapshotName,
     gcs,
-    index: getSigeventsSnapshotKIFeaturesIndex(snapshotName),
+    index: getSnapshotKIFeaturesIndex(snapshotName),
     tempIndexPrefix: 'sigevents-replay-temp-features',
     label: 'KI feature(s)',
     query: { term: { stream_name: streamName } },
@@ -175,7 +175,7 @@ export async function loadKnowledgeIndicatorsFromSnapshot(
     log,
     snapshotName,
     gcs,
-    index: getSigeventsSnapshotKnowledgeIndicatorsIndex(snapshotName),
+    index: getSnapshotKnowledgeIndicatorsIndex(snapshotName),
     tempIndexPrefix: 'sigevents-replay-temp-knowledge-indicators',
     label: 'knowledge indicator(s)',
   });
@@ -195,7 +195,7 @@ export async function loadDiscoveriesFromSnapshot(
     log,
     snapshotName,
     gcs,
-    index: getSigeventsSnapshotDiscoveriesIndex(snapshotName),
+    index: getSnapshotDiscoveriesIndex(snapshotName),
     tempIndexPrefix: 'sigevents-replay-temp-discoveries',
     label: 'discovery document(s)',
   });
@@ -216,7 +216,7 @@ export async function loadDetectionsFromSnapshot(
     log,
     snapshotName,
     gcs,
-    index: getSigeventsSnapshotDetectionsIndex(snapshotName),
+    index: getSnapshotDetectionsIndex(snapshotName),
     tempIndexPrefix: 'sigevents-replay-temp-detections',
     label: 'detection document(s)',
     query:

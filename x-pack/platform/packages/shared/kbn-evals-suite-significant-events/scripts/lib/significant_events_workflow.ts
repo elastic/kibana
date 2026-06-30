@@ -12,7 +12,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Discovery, Feature } from '@kbn/streams-schema';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import {
+  STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  StreamsKIsOnboardingStep,
+} from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';
@@ -24,19 +29,19 @@ import {
   DEFAULT_LOGS_INDEX,
 } from './constants';
 import {
-  getSigeventsSnapshotKIFeaturesIndex,
-  getSigeventsSnapshotDiscoveriesIndex,
-  getSigeventsSnapshotDetectionsIndex,
-  getSigeventsSnapshotKnowledgeIndicatorsIndex,
-  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-  SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN,
-  SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
-  SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
-  SIGEVENTS_DISCOVERIES_DATA_STREAM,
-  SIGEVENTS_DETECTIONS_DATA_STREAM,
-  SIGEVENTS_EVENTS_DATA_STREAM,
-  SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
-} from '../../src/data_generators/sigevents_snapshot_indices';
+  getSnapshotKIFeaturesIndex,
+  getSnapshotDiscoveriesIndex,
+  getSnapshotDetectionsIndex,
+  getSnapshotKnowledgeIndicatorsIndex,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+  FEATURES_TEMP_INDEX_PATTERN,
+  DISCOVERIES_TEMP_INDEX_PATTERN,
+  DETECTIONS_TEMP_INDEX_PATTERN,
+  DISCOVERIES_DATA_STREAM,
+  DETECTIONS_DATA_STREAM,
+  EVENTS_DATA_STREAM,
+  KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
+} from '../../src/data_generators/snapshot_indices';
 
 const RAW_DATA_STREAM_SEARCH_LIMIT = 1000;
 
@@ -126,7 +131,7 @@ export async function configureModelSelectionSettings(
 
   throw new Error(`Failed to configure inference settings: ${status} ${JSON.stringify(data)}`);
 }
-export async function triggerSigEventsKIExtraction(
+export async function triggerKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX,
@@ -155,7 +160,7 @@ export async function triggerSigEventsKIExtraction(
   throw new Error(`Failed to trigger KI onboarding: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function waitForSigEventsKIExtraction(
+export async function waitForKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX,
@@ -196,19 +201,19 @@ export async function waitForSigEventsKIExtraction(
   );
 }
 
-export async function logSigEventsExtractedKIFeatures(
+export async function logExtractedKIFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  const kis = await fetchSigEventsFeatures(config, log, streamName);
+  const kis = await fetchKIFeatures(config, log, streamName);
   log.info(`Extracted ${kis.length} KIs:`);
   for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
   }
 }
 
-async function fetchSigEventsFeatures(
+async function fetchKIFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string
@@ -221,18 +226,18 @@ async function fetchSigEventsFeatures(
   return features.filter(Boolean) as Feature[];
 }
 
-export async function persistSigEventsFeaturesForSnapshot(
+export async function persistKIFeaturesForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
-  const features = await fetchSigEventsFeatures(config, log, streamName);
+  const features = await fetchKIFeatures(config, log, streamName);
   return persistDocsForSnapshot(
     esClient,
     log,
-    getSigeventsSnapshotKIFeaturesIndex(snapshotName),
+    getSnapshotKIFeaturesIndex(snapshotName),
     features as unknown as Array<Record<string, unknown>>,
     'id',
     'feature KI(s)',
@@ -240,32 +245,27 @@ export async function persistSigEventsFeaturesForSnapshot(
   );
 }
 
-export async function persistSigEventsDetectionsForSnapshot(
+export async function persistDetectionsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
   snapshotName: string
 ): Promise<{ index: string; count: number }> {
   const detectionDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
-    readRawDataStreamDocs(
-      sysClient,
-      SIGEVENTS_DETECTIONS_DATA_STREAM,
-      { match_all: {} },
-      'detection(s)'
-    )
+    readRawDataStreamDocs(sysClient, DETECTIONS_DATA_STREAM, { match_all: {} }, 'detection(s)')
   );
 
   return persistDocsForSnapshot(
     esClient,
     log,
-    getSigeventsSnapshotDetectionsIndex(snapshotName),
+    getSnapshotDetectionsIndex(snapshotName),
     detectionDocs,
     undefined,
     'detection(s)'
   );
 }
 
-export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
+export async function persistKnowledgeIndicatorsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
@@ -275,7 +275,7 @@ export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
   const kiDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
     readRawDataStreamDocs(
       sysClient,
-      SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+      KNOWLEDGE_INDICATORS_DATA_STREAM,
       { term: { 'stream.name': streamName } },
       'knowledge indicator(s)'
     )
@@ -284,14 +284,14 @@ export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
   return persistDocsForSnapshot(
     esClient,
     log,
-    getSigeventsSnapshotKnowledgeIndicatorsIndex(snapshotName),
+    getSnapshotKnowledgeIndicatorsIndex(snapshotName),
     kiDocs,
     'id',
     'knowledge indicator(s)'
   );
 }
 
-export async function persistSigEventsDiscoveriesForSnapshot(
+export async function persistDiscoveriesForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
@@ -305,31 +305,28 @@ export async function persistSigEventsDiscoveriesForSnapshot(
   return persistDocsForSnapshot(
     esClient,
     log,
-    getSigeventsSnapshotDiscoveriesIndex(snapshotName),
+    getSnapshotDiscoveriesIndex(snapshotName),
     discoveries as unknown as Array<Record<string, unknown>>,
     'discovery_id',
     'discovery(s)'
   );
 }
 
-export async function cleanupSigEventsExtractedData(
-  esClient: Client,
-  log: ToolingLog
-): Promise<void> {
+export async function cleanupExtractedData(esClient: Client, log: ToolingLog): Promise<void> {
   log.info('Cleaning up ES data...');
 
   const dataStreamTargets = [
     'logs*',
-    SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-    SIGEVENTS_DISCOVERIES_DATA_STREAM,
-    SIGEVENTS_DETECTIONS_DATA_STREAM,
-    SIGEVENTS_EVENTS_DATA_STREAM,
+    KNOWLEDGE_INDICATORS_DATA_STREAM,
+    DISCOVERIES_DATA_STREAM,
+    DETECTIONS_DATA_STREAM,
+    EVENTS_DATA_STREAM,
   ];
   const indexTargets = [
-    SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN,
-    SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
-    SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
-    SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
+    FEATURES_TEMP_INDEX_PATTERN,
+    DISCOVERIES_TEMP_INDEX_PATTERN,
+    DETECTIONS_TEMP_INDEX_PATTERN,
+    KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
   ];
 
   for (const name of dataStreamTargets) {
@@ -380,7 +377,7 @@ export async function promoteQueries(config: ConnectionConfig): Promise<void> {
 
 export async function resetQueriesPromotion({ esClient }: { esClient: Client }): Promise<void> {
   await esClient.updateByQuery({
-    index: SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+    index: KNOWLEDGE_INDICATORS_DATA_STREAM,
     conflicts: 'proceed',
     refresh: true,
     query: { term: { type: 'query' } },
@@ -391,10 +388,7 @@ export async function resetQueriesPromotion({ esClient }: { esClient: Client }):
   });
 }
 
-export async function triggerSigEventsDiscovery(
-  config: ConnectionConfig,
-  log: ToolingLog
-): Promise<void> {
+export async function triggerDiscovery(config: ConnectionConfig, log: ToolingLog): Promise<void> {
   log.info('Triggering significant events discovery...');
   const { status, data } = await kibanaRequest(
     config,
@@ -411,7 +405,7 @@ export async function triggerSigEventsDiscovery(
   throw new Error(`Failed to trigger discovery: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function waitForSigEventsDiscovery(
+export async function waitForDiscovery(
   config: ConnectionConfig,
   log: ToolingLog,
   timeoutMs: number = DISCOVERY_TIMEOUT_MS
@@ -427,7 +421,7 @@ export async function waitForSigEventsDiscovery(
       '/internal/streams/significant_events/discovery/_status'
     );
 
-    // SigEventsWorkflowStatus: not_started | running | failed | completed
+    // status: not_started | running | failed | completed
     const taskStatus = (data as Record<string, unknown>)?.status;
 
     if (taskStatus === 'completed') {

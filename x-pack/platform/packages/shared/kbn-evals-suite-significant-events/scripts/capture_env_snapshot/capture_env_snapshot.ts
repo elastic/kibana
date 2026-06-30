@@ -13,7 +13,7 @@ import { extractDataStreamName } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET, SIGEVENTS_DATA_STREAMS } from '../lib/constants';
+import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
 import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
 import { withTempSuperuser } from '../lib/user_utils';
 
@@ -44,8 +44,8 @@ async function captureSystemIndex({
 
     const mappings = await fetchMapping(sysClient, sourceIndex);
     if (!mappings) {
-      const hint = SIGEVENTS_DATA_STREAMS.includes(
-        sourceIndex as (typeof SIGEVENTS_DATA_STREAMS)[number]
+      const hint = SIGNIFICANT_EVENTS_DATA_STREAMS.includes(
+        sourceIndex as (typeof SIGNIFICANT_EVENTS_DATA_STREAMS)[number]
       )
         ? ' The Significant Events data stream has no backing indices — run the feature extraction / ' +
           'discovery workflow before capturing.'
@@ -110,7 +110,7 @@ export async function captureEnvSnapshot({
 
   const resolvedSystemIndices = await resolvePatterns(esClient, log, [
     ...systemIndices,
-    ...SIGEVENTS_DATA_STREAMS,
+    ...SIGNIFICANT_EVENTS_DATA_STREAMS,
   ]);
   const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 

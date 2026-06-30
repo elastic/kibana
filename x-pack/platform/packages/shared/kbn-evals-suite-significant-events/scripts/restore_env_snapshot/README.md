@@ -1,6 +1,6 @@
 # Restore Environment Snapshot
 
-Restores a Streams/SigEvents environment from a GCS snapshot. Automates the full restore workflow: restoring system indices, recreating aliases, enabling streams, restoring the SigEvents data streams, replaying data indices with timestamp transformation, recreating alert aliases, and repromoting query rules.
+Restores a Streams/Significant Events environment from a GCS snapshot. Automates the full restore workflow: restoring system indices, recreating aliases, enabling streams, restoring the Significant Events data streams, replaying data indices with timestamp transformation, recreating alert aliases, and repromoting query rules.
 
 ## Prerequisites
 
@@ -12,12 +12,12 @@ Restores a Streams/SigEvents environment from a GCS snapshot. Automates the full
 
 ## Why
 
-Restoring a SigEvents snapshot involves several distinct steps that previously had to be run manually in sequence:
+Restoring a Significant Events snapshot involves several distinct steps that previously had to be run manually in sequence:
 
 1. **Restore** plain system indices (e.g. `.kibana_streams_tasks-*`) — renames them back from `snapshot-*` to `.*`.
 2. **Recreate** `.kibana_*` aliases — system index aliases cannot be baked into the snapshot; they must be recreated after restore.
 3. **Enable streams** — calls the Kibana Streams API to ensure streams are enabled before replaying data.
-4. **Restore the SigEvents data streams** (`.significant_events-knowledge_indicators`, `.significant_events-discoveries`, `.significant_events-detections`) — each reindexed into its data stream so it is not left as a plain index squatting the data-stream name. No-op for any data stream absent from an older snapshot.
+4. **Restore the Significant Events data streams** (`.significant_events-knowledge_indicators`, `.significant_events-discoveries`, `.significant_events-detections`) — each reindexed into its data stream so it is not left as a plain index squatting the data-stream name. No-op for any data stream absent from an older snapshot.
 5. **Replay** data indices (e.g. `logs.otel`) — restores with timestamp transformation so alerts fire on current data.
 6. **Recreate** alert-index aliases.
 7. **Repromote** query rules so the Streams rule engine reflects the restored state.
@@ -68,7 +68,7 @@ All steps run inside a temporary-user context: the script creates `restore_sigev
 
 3. **Step 3/7 — Enable streams**: calls `ensureStreamsEnabled` to enable Streams via the Kibana API (`POST /api/streams/_enable`). This must happen before replaying data so that Streams-managed data streams are properly configured.
 
-4. **Step 4/7 — Restore the SigEvents data streams**: `.significant_events-knowledge_indicators`, `.significant_events-discoveries`, and `.significant_events-detections` are each captured as a plain `snapshot-*` index but are data streams owned by the streams plugin. Restoring one under its real name would create a concrete index squatting the data-stream name (which ES cannot then materialize as a data stream), so each snapshot is restored to a temp index and reindexed into the data-stream name — ES auto-creates the data stream from the always-present template. No-op for any data stream absent from an older snapshot — logs a notice and continues.
+4. **Step 4/7 — Restore the Significant Events data streams**: `.significant_events-knowledge_indicators`, `.significant_events-discoveries`, and `.significant_events-detections` are each captured as a plain `snapshot-*` index but are data streams owned by the streams plugin. Restoring one under its real name would create a concrete index squatting the data-stream name (which ES cannot then materialize as a data stream), so each snapshot is restored to a temp index and reindexed into the data-stream name — ES auto-creates the data stream from the always-present template. No-op for any data stream absent from an older snapshot — logs a notice and continues.
 
 5. **Step 5/7 — Replay data indices**: calls `replaySnapshot` from `@kbn/es-snapshot-loader` with a GCS repository and the resolved `--patterns`. This restores data streams (e.g. `logs.otel`) with timestamp transformation so timestamps are shifted to the current time window.
 

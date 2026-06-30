@@ -34,24 +34,24 @@ import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../l
 import { captureDiscoveryForScenario } from '../lib/capture_discovery';
 import { sleep } from '../lib/sleep';
 import {
-  cleanupSigEventsExtractedData,
+  cleanupExtractedData,
   configureModelSelectionSettings,
   disableStreams,
   enableLogsNativeStream,
   enableSignificantEvents,
-  logSigEventsExtractedKIFeatures,
-  persistSigEventsFeaturesForSnapshot,
-  persistSigEventsKnowledgeIndicatorsForSnapshot,
-  triggerSigEventsKIExtraction,
-  waitForSigEventsKIExtraction,
+  logExtractedKIFeatures,
+  persistKIFeaturesForSnapshot,
+  persistKnowledgeIndicatorsForSnapshot,
+  triggerKIExtraction,
+  waitForKIExtraction,
 } from '../lib/significant_events_workflow';
 import type { Scenario } from '../lib/types';
 import {
-  SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN,
-  SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
-  SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
-  SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
-} from '../../src/data_generators/sigevents_snapshot_indices';
+  FEATURES_TEMP_INDEX_PATTERN,
+  KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
+  DISCOVERIES_TEMP_INDEX_PATTERN,
+  DETECTIONS_TEMP_INDEX_PATTERN,
+} from '../../src/data_generators/snapshot_indices';
 import { parseDurationFlag } from '../lib/snapshot_utils';
 
 run(
@@ -187,17 +187,13 @@ run(
     log.info('');
     log.info('Each snapshot contains:');
     log.info('  logs*                        - OTel Demo log data');
-    log.info(
-      `  ${SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN} - Extracted KI features (inferred + computed)`
-    );
+    log.info(`  ${FEATURES_TEMP_INDEX_PATTERN} - Extracted KI features (inferred + computed)`);
 
-    log.info(
-      `  ${SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN} - Extracted Knowledge Indicators`
-    );
+    log.info(`  ${KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN} - Extracted Knowledge Indicators`);
 
     if (withDiscovery) {
-      log.info(`  ${SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN} - Discovery workflow discoveries`);
-      log.info(`  ${SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN} - Discovery workflow detections`);
+      log.info(`  ${DISCOVERIES_TEMP_INDEX_PATTERN} - Discovery workflow discoveries`);
+      log.info(`  ${DETECTIONS_TEMP_INDEX_PATTERN} - Discovery workflow detections`);
     }
     log.info('');
     log.info(`To use in evals, update SIGEVENTS_SNAPSHOT_RUN in replay.ts to "${runId}"`);
@@ -330,10 +326,10 @@ async function processScenario(
 
     // Step 6 — Run KI onboarding (persists features for the snapshot)
     log.info(`[6/8] Running KI onboarding (${onboardingSteps.join(', ')})...`);
-    await triggerSigEventsKIExtraction(config, log, logsIndex, onboardingSteps);
-    await waitForSigEventsKIExtraction(config, log, logsIndex, extractionTimeoutMs);
-    await logSigEventsExtractedKIFeatures(config, log, logsIndex);
-    const featuresResult = await persistSigEventsFeaturesForSnapshot(
+    await triggerKIExtraction(config, log, logsIndex, onboardingSteps);
+    await waitForKIExtraction(config, log, logsIndex, extractionTimeoutMs);
+    await logExtractedKIFeatures(config, log, logsIndex);
+    const featuresResult = await persistKIFeaturesForSnapshot(
       config,
       esClient,
       log,
@@ -344,7 +340,7 @@ async function processScenario(
     snapshotIndices.push(featuresResult.index);
 
     log.info('[6/8] Persisting knowledge indicators for snapshot...');
-    const knowledgeIndicatorsResult = await persistSigEventsKnowledgeIndicatorsForSnapshot(
+    const knowledgeIndicatorsResult = await persistKnowledgeIndicatorsForSnapshot(
       config,
       esClient,
       log,
@@ -390,7 +386,7 @@ async function processScenario(
   } finally {
     log.info('[8/8] Cleaning up...');
     await disableStreams(config, log).catch((e) => log.error(`disableStreams failed: ${e}`));
-    await cleanupSigEventsExtractedData(esClient, log).catch((e) =>
+    await cleanupExtractedData(esClient, log).catch((e) =>
       log.error(`cleanupSigEventsExtractedData failed: ${e}`)
     );
     await teardownDemo({ demoType, log }).catch((e) => log.error(`teardownDemo failed: ${e}`));

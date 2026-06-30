@@ -7,10 +7,10 @@
 import type { IndicesUpdateAliasesAddAction } from '@elastic/elasticsearch/lib/api/types';
 import type { Scenario } from './types';
 import {
-  SIGEVENTS_DISCOVERIES_DATA_STREAM,
-  SIGEVENTS_DETECTIONS_DATA_STREAM,
-  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-} from '../../src/data_generators/sigevents_snapshot_indices';
+  DISCOVERIES_DATA_STREAM,
+  DETECTIONS_DATA_STREAM,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+} from '../../src/data_generators/snapshot_indices';
 
 export {
   DEFAULT_LOGS_INDEX,
@@ -39,12 +39,12 @@ export const DISCOVERY_WAIT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
-// SigEvents data streams captured/restored faithfully (reindex → snapshot-*, restore as
+// Significant events data streams captured/restored faithfully (reindex → snapshot-*, restore as
 // data stream) by the env snapshot tooling — not the plain-index path used for eval data.
-export const SIGEVENTS_DATA_STREAMS = [
-  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-  SIGEVENTS_DISCOVERIES_DATA_STREAM,
-  SIGEVENTS_DETECTIONS_DATA_STREAM,
+export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+  DISCOVERIES_DATA_STREAM,
+  DETECTIONS_DATA_STREAM,
 ] as const;
 
 export const VALID_SYSTEM_INDICES = ['.kibana_streams_tasks-*'] as const;
