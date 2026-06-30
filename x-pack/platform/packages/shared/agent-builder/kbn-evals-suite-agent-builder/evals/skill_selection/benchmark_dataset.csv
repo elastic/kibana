@@ -38,11 +38,11 @@ streams-management,streams,Update the retention policy on the logs.ecs.android s
 streams-management,streams,Some of my log events are being dropped at ingestion — what is going wrong with my pipeline?,indirect,streams-management,
 streams-management,streams,Why is the data quality for my web access logs so poor and how do I fix the field mapping issues?,indirect,streams-management,
 streams-management,streams,My checkout service has been throwing a lot of 500 errors lately — what is causing the slowdowns?,distractor,investigation,Distractor: service health question maps to observability.investigation not streams-management
-sig-events-management,streams,Create a new significant event to record the Kafka outage that started yesterday at 14:00 UTC,direct,sig-events-management,
-sig-events-management,streams,Search for all significant events related to the payments service in the last 30 days,direct,sig-events-management,
-sig-events-management,streams,Log that we had a major database failover last Tuesday that affected the order processing pipeline,indirect,sig-events-management,
-sig-events-management,streams,Find all recorded incidents that impacted the auth service this quarter,indirect,sig-events-management,
-sig-events-management,streams,What does the system know about our database cluster's normal behavior patterns?,distractor,sig-events-memory,AMBIGUOUS: event search vs knowledge base read are structurally similar; distractor targets sig-events-memory
+significant-events-management,streams,Create a new significant event to record the Kafka outage that started yesterday at 14:00 UTC,direct,significant-events-management,
+significant-events-management,streams,Search for all significant events related to the payments service in the last 30 days,direct,significant-events-management,
+significant-events-management,streams,Log that we had a major database failover last Tuesday that affected the order processing pipeline,indirect,significant-events-management,
+significant-events-management,streams,Find all recorded incidents that impacted the auth service this quarter,indirect,significant-events-management,
+significant-events-management,streams,What does the system know about our database cluster's normal behavior patterns?,distractor,significant-events-memory,AMBIGUOUS: event search vs knowledge base read are structurally similar; distractor targets significant-events-memory
 knowledge-indicators-management,streams,Create a new knowledge indicator that tracks the p95 latency of the checkout service,direct,knowledge-indicators-management,
 knowledge-indicators-management,streams,List all existing knowledge indicators for the payments domain,direct,knowledge-indicators-management,
 knowledge-indicators-management,streams,I want the system to automatically flag unusual patterns in our auth service login rate,indirect,knowledge-indicators-management,
