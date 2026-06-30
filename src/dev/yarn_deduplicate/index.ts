@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve } from 'path';
-import { writeFileSync, readFileSync } from 'fs';
-import { fixDuplicates } from 'yarn-deduplicate';
+import { spawnSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-const yarnLockFile = resolve(REPO_ROOT, 'yarn.lock');
-const yarnLock = readFileSync(yarnLockFile, 'utf-8');
-const output = fixDuplicates(yarnLock, {
-  useMostCommon: false,
-  excludeScopes: ['@types'],
-  excludePackages: ['axe-core', '@babel/types', 'csstype', 'yaml', 'zod'],
+// pnpm has built-in, range-aware deduplication. It only collapses versions when
+// the declared ranges allow it and respects pnpm.overrides, so the per-package
+// excludes the old yarn-deduplicate needed are no longer required.
+const result = spawnSync('pnpm', ['dedupe'], {
+  cwd: REPO_ROOT,
+  stdio: 'inherit',
+  shell: false,
 });
 
-writeFileSync(yarnLockFile, output);
+if (result.status !== 0) {
+  process.exit(result.status ?? 1);
+}

@@ -9,49 +9,38 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
+
+import { parse as parseYaml } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
-const YARN_LOCK_PATH = resolve(REPO_ROOT, 'yarn.lock');
+const PNPM_LOCK_PATH = resolve(REPO_ROOT, 'pnpm-lock.yaml');
 const DEPENDENCIES_FIELDS = ['dependencies', 'devDependencies'] as const;
+
+interface ImporterDep {
+  specifier: string;
+  version: string;
+}
 
 export function checkSemverRanges(
   runOptions: {
     fix?: boolean;
     pkgJsonContent?: string;
-    yarnLockContent?: string;
+    pnpmLockContent?: string;
   } = {}
 ) {
   const pkgJsonContent =
     runOptions.pkgJsonContent ?? readFileSync(PKG_JSON_PATH, { encoding: 'utf-8' });
-  const yarnLockContent =
-    runOptions.yarnLockContent ?? readFileSync(YARN_LOCK_PATH, { encoding: 'utf-8' });
+  const pnpmLockContent =
+    runOptions.pnpmLockContent ?? readFileSync(PNPM_LOCK_PATH, { encoding: 'utf-8' });
   const fix = runOptions.fix ?? false;
 
-  if (!yarnLockContent || !pkgJsonContent) {
-    throw new Error('Both package.json and yarn.lock contents must be provided.');
+  if (!pnpmLockContent || !pkgJsonContent) {
+    throw new Error('Both package.json and pnpm-lock.yaml contents must be provided.');
   }
 
   const pkg = JSON.parse(pkgJsonContent);
-  const yarnLockLines = yarnLockContent.split('\n');
-  const resolveVersionFromYarnLock = (name: string, version: string): string | null => {
-    const versionSpec = `${name}@${version}`;
-    const versionLineIndex = yarnLockLines.findIndex(
-      (line) =>
-        (line.includes(versionSpec) || line.includes(`"${versionSpec}"`)) &&
-        !line.match(/^\s+#/) &&
-        !line.includes('@types/' + name)
-    );
-    if (versionLineIndex === -1) {
-      return null;
-    }
-
-    const versionMatch = yarnLockLines[versionLineIndex + 1].match('^\\s+version "(.*?)"$');
-    if (versionMatch && versionMatch[1]) {
-      return versionMatch[1];
-    }
-    return null;
-  };
+  const resolveVersionFromLock = makeResolver(pnpmLockContent);
 
   let totalFixes = 0;
   type FieldName = (typeof DEPENDENCIES_FIELDS)[number];
@@ -65,12 +54,12 @@ export function checkSemverRanges(
       if (typeof version !== 'string') continue;
 
       if (version.startsWith('^') || version.startsWith('~')) {
-        const resolvedVersion = resolveVersionFromYarnLock(name, version);
+        const resolvedVersion = resolveVersionFromLock(name, version);
         if (!resolvedVersion) {
           throw new Error(
-            `Could not resolve version for ${name} with version ${version} from yarn.lock` +
+            `Could not resolve version for ${name} with version ${version} from pnpm-lock.yaml` +
               '\n' +
-              `Please ensure that your yarn.lock is up to date.`
+              `Please ensure that your pnpm-lock.yaml is up to date.`
           );
         }
 
@@ -103,28 +92,56 @@ export function checkSemverRanges(
     }
   }
 
-  if (pkg.resolutions && typeof pkg.resolutions === 'object') {
-    const resolutions = pkg.resolutions;
-    const resolutionsErrors = [];
+  // pnpm.overrides must also be pinned (no ranges).
+  const overrides = pkg.pnpm?.overrides;
+  if (overrides && typeof overrides === 'object') {
+    const overridesErrors = [];
 
-    for (const [name, version] of Object.entries(resolutions)) {
+    for (const [name, version] of Object.entries(overrides)) {
       if (typeof version !== 'string') continue;
       if (version.startsWith('^') || version.startsWith('~')) {
-        const depName = name.split('**/').pop()!;
-        const suggestedVersion = resolveVersionFromYarnLock(depName, version);
-        resolutionsErrors.push(`${name}: ${version} => installed: ${suggestedVersion ?? '?'}`);
+        // override keys can be `name`, `parent>child`, etc. The resolved package
+        // is the last segment of the key.
+        const depName = name.split('>').pop()!;
+        const suggestedVersion = resolveVersionFromLock(depName, version);
+        overridesErrors.push(`${name}: ${version} => installed: ${suggestedVersion ?? '?'}`);
       }
     }
 
-    if (resolutionsErrors.length > 0) {
+    if (overridesErrors.length > 0) {
       throw new Error(
-        `[no-pkg-semver-ranges] Found ${resolutionsErrors.length} version(s) ` +
-          `with ^/~ in package.json's resolutions field:\n` +
-          resolutionsErrors.join('\n') +
-          `\n ^-- Please remove semver ranges and pin the resolutions manually.`
+        `[no-pkg-semver-ranges] Found ${overridesErrors.length} version(s) ` +
+          `with ^/~ in package.json's pnpm.overrides field:\n` +
+          overridesErrors.join('\n') +
+          `\n ^-- Please remove semver ranges and pin the overrides manually.`
       );
     }
   }
 
   return { totalFixes, fixesPerField };
+}
+
+/**
+ * Builds a resolver that, given a package name and the exact specifier range
+ * declared in package.json, returns the resolved version recorded for the root
+ * importer in pnpm-lock.yaml. Peer suffixes (e.g. `(zod@4.4.3)`) are stripped.
+ */
+function makeResolver(pnpmLockContent: string) {
+  const lock = (parseYaml(pnpmLockContent) ?? {}) as {
+    importers?: Record<string, { dependencies?: Record<string, ImporterDep> }>;
+  };
+  const rootDeps = lock.importers?.['.']?.dependencies ?? {};
+
+  return (name: string, specifier: string): string | null => {
+    const dep = rootDeps[name];
+    if (!dep || dep.specifier !== specifier) {
+      return null;
+    }
+    return stripPeerSuffix(dep.version);
+  };
+}
+
+function stripPeerSuffix(version: string): string {
+  const paren = version.indexOf('(');
+  return paren === -1 ? version : version.slice(0, paren);
 }
