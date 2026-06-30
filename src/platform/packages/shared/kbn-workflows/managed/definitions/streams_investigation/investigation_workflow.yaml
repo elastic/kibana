@@ -60,6 +60,8 @@ steps:
         workflow_execution_id: "{{ execution.id }}"
         status: "pending"
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        conversation_id: "{{ inputs.context.conversation_id }}"
+        current_state: "Investigation workflow is running."
     on-failure:
       continue: true
 
@@ -125,6 +127,27 @@ steps:
     on-failure:
       continue: true
 
+  - name: refresh_investigation_conversation
+    type: kibana.request
+    if: "${{ inputs.context.conversation_id != null }}"
+    with:
+      method: POST
+      path: "/internal/observability_agent_builder/investigation_conversations/{{ inputs.context.conversation_id }}/refresh"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        status: "{% if steps.investigate.error == null %}complete{% else %}failed{% endif %}"
+        outcome: "{{ steps.investigate.output.structured_output.mechanism | default: '' }}"
+        currentState: "{% if steps.investigate.error == null %}{{ steps.investigate.output.structured_output.evidence_summary | default: 'Investigation completed' }}{% else %}Investigation failed{% endif %}"
+        timeline:
+          - summary: "{% if steps.investigate.error == null %}Investigation workflow completed{% else %}Investigation workflow failed{% endif %}"
+            source: "streams_investigation"
+            metadata:
+              workflow_execution_id: "{{ execution.id }}"
+              conversation_id: "{{ inputs.context.conversation_id }}"
+    on-failure:
+      continue: true
+
   # Connects this investigation back to the Significant Event that triggered it, so the
   # UI can surface investigation history and link to the full RCA result. Only runs when
   # a sig-event context was supplied (i.e. the investigation was triggered from triage or
@@ -143,5 +166,8 @@ steps:
         status: "{% if steps.investigate.error == null %}success{% else %}failed{% endif %}"
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        conversation_id: "{{ inputs.context.conversation_id }}"
+        outcome: "{{ steps.investigate.output.structured_output.mechanism | default: '' }}"
+        current_state: "{% if steps.investigate.error == null %}{{ steps.investigate.output.structured_output.evidence_summary | default: 'Investigation completed' }}{% else %}Investigation failed{% endif %}"
     on-failure:
       continue: true

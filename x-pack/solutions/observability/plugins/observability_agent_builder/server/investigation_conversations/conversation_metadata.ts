@@ -43,6 +43,7 @@ interface BuildManualRefreshFieldsOptions {
   customFields: Record<string, unknown>;
   now: string;
   currentState?: string;
+  outcome?: string;
   status?: string;
   timeline?: unknown;
   workflowHooks?: unknown;
@@ -291,6 +292,7 @@ export const buildManualRefreshFields = ({
   customFields,
   now,
   currentState,
+  outcome,
   status,
   timeline,
   workflowHooks,
@@ -303,7 +305,7 @@ export const buildManualRefreshFields = ({
     source: 'manual_refresh',
   });
   const nextCurrentState =
-    currentState ?? getString(customFields.current_state) ?? 'State refreshed';
+    currentState ?? outcome ?? getString(customFields.current_state) ?? 'State refreshed';
 
   return appendTimelineEntries({
     customFields: {
@@ -312,6 +314,7 @@ export const buildManualRefreshFields = ({
       last_refreshed_at: now,
       last_state_update_source: 'manual_refresh',
       ...(status ? { status } : {}),
+      ...(outcome ? { outcome } : {}),
       ...(workflowHooks ? { workflow_hooks: normalizeWorkflowHooks(workflowHooks) } : {}),
       ...(metadata ? { refresh_metadata: metadata } : {}),
     },

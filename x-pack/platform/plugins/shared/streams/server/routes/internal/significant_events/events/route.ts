@@ -274,7 +274,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ executionId: string }> => {
+  }): Promise<{ executionId: string; conversationId?: string }> => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -284,21 +284,23 @@ const eventsTriggerInvestigationRoute = createServerRoute({
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
 
-    const executionId = await triggerInvestigationWorkflow({
+    const result = await triggerInvestigationWorkflow({
       workflowsManagement: server.workflowsManagement,
+      agentBuilder: server.agentBuilder,
       spaces: server.spaces,
       request,
       logger,
+      eventClient: getEventClient(),
       event: hits[0],
     });
 
-    if (!executionId) {
+    if (!result) {
       throw serverUnavailable(
         'Investigation workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
       );
     }
 
-    return { executionId };
+    return result;
   },
 });
 

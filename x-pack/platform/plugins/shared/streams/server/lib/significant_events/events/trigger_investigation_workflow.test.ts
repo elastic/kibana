@@ -48,6 +48,28 @@ const createSpaces = (spaceId = 'default') => ({
   },
 });
 
+const createAgentBuilder = () => {
+  const conversationClient = {
+    create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+    appendMessage: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn().mockResolvedValue({ id: 'conversation-1', custom_fields: {} }),
+    update: jest.fn().mockResolvedValue({ id: 'conversation-1', custom_fields: {} }),
+  };
+
+  return {
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue(conversationClient),
+    },
+    conversationClient,
+  };
+};
+
+const createEventClient = (event = createEvent()) => ({
+  findById: jest.fn().mockResolvedValue({ hits: [event] }),
+  findByDiscoverySlug: jest.fn().mockResolvedValue({ hits: [event] }),
+  bulkCreate: jest.fn().mockResolvedValue({}),
+});
+
 const createRequest = () => ({} as KibanaRequest);
 const createLogger = () =>
   ({
@@ -62,16 +84,20 @@ describe('triggerInvestigationWorkflow', () => {
     const event = createEvent();
     const workflowsManagement = createWorkflowsManagement();
     const spaces = createSpaces();
+    const agentBuilder = createAgentBuilder();
+    const eventClient = createEventClient(event);
 
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: agentBuilder as never,
       spaces: spaces as never,
       request: createRequest(),
       logger: createLogger(),
+      eventClient: eventClient as never,
       event,
     });
 
-    expect(result).toBe('exec-abc');
+    expect(result).toEqual({ executionId: 'exec-abc', conversationId: 'conversation-1' });
     expect(workflowsManagement.management.runWorkflow).toHaveBeenCalledTimes(1);
   });
 
@@ -82,12 +108,16 @@ describe('triggerInvestigationWorkflow', () => {
       root_cause: 'Bad deploy.',
     });
     const workflowsManagement = createWorkflowsManagement();
+    const agentBuilder = createAgentBuilder();
+    const eventClient = createEventClient(event);
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: agentBuilder as never,
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
+      eventClient: eventClient as never,
       event,
     });
 
@@ -100,12 +130,16 @@ describe('triggerInvestigationWorkflow', () => {
   it('uses discovery_slug as the concurrency_key', async () => {
     const event = createEvent({ discovery_slug: 'my-slug' });
     const workflowsManagement = createWorkflowsManagement();
+    const agentBuilder = createAgentBuilder();
+    const eventClient = createEventClient(event);
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: agentBuilder as never,
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
+      eventClient: eventClient as never,
       event,
     });
 
@@ -116,27 +150,35 @@ describe('triggerInvestigationWorkflow', () => {
   it('includes event_id in the context so the workflow can attach investigations', async () => {
     const event = createEvent({ event_id: 'event-42' });
     const workflowsManagement = createWorkflowsManagement();
+    const agentBuilder = createAgentBuilder();
+    const eventClient = createEventClient(event);
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: agentBuilder as never,
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
+      eventClient: eventClient as never,
       event,
     });
 
     const [, , inputs] = workflowsManagement.management.runWorkflow.mock.calls[0];
     expect(inputs.context.event_id).toBe('event-42');
     expect(inputs.context.source).toBe('significant_event');
+    expect(inputs.context.conversation_id).toBe('conversation-1');
   });
 
   it('returns undefined when workflowsManagement is not available', async () => {
+    const event = createEvent();
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: undefined,
+      agentBuilder: createAgentBuilder() as never,
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
-      event: createEvent(),
+      eventClient: createEventClient(event) as never,
+      event,
     });
 
     expect(result).toBeUndefined();
@@ -144,13 +186,16 @@ describe('triggerInvestigationWorkflow', () => {
 
   it('returns undefined when the managed workflow is not installed', async () => {
     const workflowsManagement = createWorkflowsManagement({ workflowExists: false });
+    const event = createEvent();
 
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder() as never,
       spaces: createSpaces() as never,
       request: createRequest(),
       logger: createLogger(),
-      event: createEvent(),
+      eventClient: createEventClient(event) as never,
+      event,
     });
 
     expect(result).toBeUndefined();
@@ -160,12 +205,16 @@ describe('triggerInvestigationWorkflow', () => {
   it('uses DEFAULT_SPACE_ID when spaces plugin is not available', async () => {
     const event = createEvent();
     const workflowsManagement = createWorkflowsManagement();
+    const agentBuilder = createAgentBuilder();
+    const eventClient = createEventClient(event);
 
     await triggerInvestigationWorkflow({
       workflowsManagement: workflowsManagement as never,
+      agentBuilder: agentBuilder as never,
       spaces: undefined,
       request: createRequest(),
       logger: createLogger(),
+      eventClient: eventClient as never,
       event,
     });
 

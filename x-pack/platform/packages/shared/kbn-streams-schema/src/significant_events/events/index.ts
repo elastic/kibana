@@ -49,6 +49,10 @@ export const significantEventInvestigationSchema = z.object({
   status: significantEventInvestigationStatusSchema,
   started_at: z.iso.datetime({ offset: true }),
   completed_at: z.iso.datetime({ offset: true }).optional(),
+  conversation_id: z.string().max(MAX_ID_LENGTH).optional(),
+  incident_conversation_id: z.string().max(MAX_ID_LENGTH).optional(),
+  outcome: z.string().max(MAX_TEXT_LENGTH).optional(),
+  current_state: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
 

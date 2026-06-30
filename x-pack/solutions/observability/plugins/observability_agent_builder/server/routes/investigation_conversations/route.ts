@@ -54,6 +54,7 @@ const createInvestigationBodyRt = t.partial({
 
 const refreshInvestigationBodyRt = t.partial({
   currentState: t.string,
+  outcome: t.string,
   status: t.string,
   timeline: t.unknown,
   workflowHooks: t.unknown,
@@ -353,10 +354,15 @@ export function getObservabilityAgentBuilderInvestigationConversationRouteReposi
 
       const conversation = await client.update({
         id: investigation.id,
+        status:
+          params.body.status && !['pending', 'running'].includes(params.body.status)
+            ? ConversationRoundStatus.completed
+            : investigation.status,
         custom_fields: buildManualRefreshFields({
           customFields: investigation.custom_fields ?? {},
           now,
           currentState: params.body.currentState,
+          outcome: params.body.outcome,
           status: params.body.status,
           timeline: params.body.timeline,
           workflowHooks: params.body.workflowHooks,

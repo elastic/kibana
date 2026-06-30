@@ -144,7 +144,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
           <EuiHorizontalRule margin="none" />
 
-          <EventInvestigations event={latestEvent} />
+          <EventInvestigations event={latestEvent} onIncidentCreated={refetchLifecycle} />
 
           <EuiHorizontalRule margin="none" />
 

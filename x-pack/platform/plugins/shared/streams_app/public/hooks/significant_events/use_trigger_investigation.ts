@@ -11,6 +11,7 @@ import { useKibana } from '../use_kibana';
 
 interface TriggerInvestigationResult {
   executionId: string;
+  conversationId?: string;
 }
 
 const TRIGGER_SUCCESS_TOAST_TITLE = i18n.translate(

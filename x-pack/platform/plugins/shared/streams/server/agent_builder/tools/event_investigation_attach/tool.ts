@@ -62,6 +62,50 @@ const eventInvestigationAttachSchema = z.object({
         }
       )
     ),
+  conversation_id: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.conversationId',
+        {
+          defaultMessage:
+            'Agent Builder group conversation id for the persisted investigation workspace.',
+        }
+      )
+    ),
+  incident_conversation_id: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.incidentConversationId',
+        {
+          defaultMessage:
+            'Agent Builder incident group conversation id linked from this investigation, if one exists.',
+        }
+      )
+    ),
+  outcome: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.outcome', {
+        defaultMessage: 'Short investigation outcome or root cause summary.',
+      })
+    ),
+  current_state: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.currentState',
+        {
+          defaultMessage:
+            'Current investigation or incident state for display in Significant Events.',
+        }
+      )
+    ),
 });
 
 export const createEventInvestigationAttachTool = ({
@@ -100,6 +144,10 @@ export const createEventInvestigationAttachTool = ({
           status: toolParams.status,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
+          conversationId: toolParams.conversation_id,
+          incidentConversationId: toolParams.incident_conversation_id,
+          outcome: toolParams.outcome,
+          currentState: toolParams.current_state,
         });
 
         telemetry.trackAgentToolEventInvestigationAttach({

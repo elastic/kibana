@@ -16,6 +16,10 @@ export const attachEventInvestigationToolHandler = async ({
   status,
   startedAt,
   completedAt,
+  conversationId,
+  incidentConversationId,
+  outcome,
+  currentState,
 }: {
   eventClient: EventClient;
   eventId: string;
@@ -23,6 +27,10 @@ export const attachEventInvestigationToolHandler = async ({
   status: SignificantEventInvestigationStatus;
   startedAt: string;
   completedAt?: string;
+  conversationId?: string;
+  incidentConversationId?: string;
+  outcome?: string;
+  currentState?: string;
 }): Promise<{ event_id: string; updated: number; ignored: number }> => {
   return attachInvestigationToEvent({
     eventClient,
@@ -32,6 +40,10 @@ export const attachEventInvestigationToolHandler = async ({
       status,
       started_at: startedAt,
       completed_at: completedAt,
+      conversation_id: conversationId,
+      incident_conversation_id: incidentConversationId,
+      outcome,
+      current_state: currentState,
     },
   });
 };

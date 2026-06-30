@@ -10,6 +10,27 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventInvestigation } from '@kbn/streams-schema';
 import type { EventClient } from './event_client';
 
+const optionalStringFields = [
+  'conversation_id',
+  'incident_conversation_id',
+  'outcome',
+  'current_state',
+] as const;
+
+const normalizeInvestigation = (
+  investigation: SignificantEventInvestigation
+): SignificantEventInvestigation => {
+  const normalized = { ...investigation };
+
+  for (const field of optionalStringFields) {
+    if (normalized[field] === '') {
+      delete normalized[field];
+    }
+  }
+
+  return normalized;
+};
+
 export const attachInvestigationToEvent = async ({
   eventClient,
   eventId,
@@ -37,21 +58,28 @@ export const attachInvestigationToEvent = async ({
   const latest = lineageHits[lineageHits.length - 1] ?? referenced;
 
   const existing = latest.investigations ?? [];
+  const normalizedInvestigation = normalizeInvestigation(investigation);
 
-  // Replace-by-workflow_execution_id: callers always send the full investigation object.
-  // If an entry with the same execution id already exists and is identical, this is a no-op.
+  // Replace-by-workflow_execution_id. Terminal workflow callbacks may only know status/timing,
+  // while the initial trigger path owns the conversation linkage. Merge so those links survive.
   const existingIdx = existing.findIndex(
-    (i) => i.workflow_execution_id === investigation.workflow_execution_id
+    (i) => i.workflow_execution_id === normalizedInvestigation.workflow_execution_id
   );
 
   let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
-    if (isEqual(existing[existingIdx], investigation)) {
+    const nextInvestigation = {
+      ...existing[existingIdx],
+      ...normalizedInvestigation,
+    };
+    if (isEqual(existing[existingIdx], nextInvestigation)) {
       return { event_id: eventId, updated: 0, ignored: 1 };
     }
-    investigations = existing.map((entry, idx) => (idx === existingIdx ? investigation : entry));
+    investigations = existing.map((entry, idx) =>
+      idx === existingIdx ? nextInvestigation : entry
+    );
   } else {
-    investigations = [...existing, investigation];
+    investigations = [...existing, normalizedInvestigation];
   }
 
   const nextEventId = uuidv4();
