@@ -8,4 +8,5 @@
 export { isolateHostTool } from './isolate_host';
 export { unisolateHostTool } from './unisolate_host';
 export { getEndpointStatusTool } from './get_endpoint_status';
+export { listEndpointsTool } from './list_endpoints';
 export type { EndpointNotFoundResult, HostLookupReason } from './types';
