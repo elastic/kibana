@@ -36,17 +36,29 @@ const createInvestigation = (
   ...overrides,
 });
 
-const createEventClient = (hits: SignificantEvent[]) => {
+/**
+ * @param hits - results returned for the first esql query (findById)
+ * @param lineageHits - when provided, returned for the second query (findByDiscoverySlug);
+ *   when omitted both queries return the same `hits` (backward-compat behaviour).
+ */
+const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
   const dataStreamClient = { create: jest.fn().mockResolvedValue(okResponse) };
-  const esClient = {
-    esql: {
-      query: jest.fn().mockResolvedValue({
-        columns: [{ name: '_source' }],
-        values: hits.map((h) => [{ ...h }]),
-      }),
-    },
-  };
+
+  const makeResult = (h: SignificantEvent[]) => ({
+    columns: [{ name: '_source' }],
+    values: h.map((event) => [{ ...event }]),
+  });
+
+  const queryMock = jest.fn().mockResolvedValue(makeResult(hits));
+  if (lineageHits !== undefined) {
+    // Sequence the two internal esql calls: findById first, findByDiscoverySlug second.
+    queryMock
+      .mockResolvedValueOnce(makeResult(hits))
+      .mockResolvedValueOnce(makeResult(lineageHits));
+  }
+
+  const esClient = { esql: { query: queryMock } };
   const client = new EventClient({
     dataStreamClient: dataStreamClient as never,
     esClient: esClient as never,
@@ -118,7 +130,7 @@ describe('attachInvestigationToEvent', () => {
     });
 
     const [[callArg]] = dataStreamClient.create.mock.calls;
-    const written: SigEvent = callArg.documents[0];
+    const written: SignificantEvent = callArg.documents[0];
 
     expect(written.investigations).toHaveLength(2);
     expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
@@ -167,5 +179,49 @@ describe('attachInvestigationToEvent', () => {
 
     expect(result.updated).toBe(1);
     expect(result.event_id).not.toBe('event-3');
+  });
+
+  it('resolves lineage: terminal attach targets the latest slug version, not the frozen caller version', async () => {
+    /**
+     * Regression: the investigation workflow passes the frozen inputs.context.event_id (E0) to
+     * both its pending and terminal kibana.request steps. Without lineage resolution, findById(E0)
+     * always returns E0, so the terminal write branches off E0 instead of chaining off the
+     * pending-written E1 — producing siblings that lose prior investigation history.
+     */
+    const pending = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+    const e0 = createEvent({ event_id: 'event-0', discovery_slug: 'slug-1' });
+    const e1 = createEvent({
+      event_id: 'event-1',
+      discovery_slug: 'slug-1',
+      previous_event_id: 'event-0',
+      '@timestamp': '2026-01-01T00:01:00.000Z',
+      investigations: [pending],
+    });
+    // findById returns only E0 (the frozen stale ref); findByDiscoverySlug returns the full lineage
+    const { client, dataStreamClient } = createEventClient([e0], [e0, e1]);
+
+    const terminal = createInvestigation({
+      workflow_execution_id: 'exec-1',
+      status: 'success',
+      completed_at: '2026-01-01T02:00:00.000Z',
+    });
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'event-0', // frozen stale reference as passed by the workflow
+      investigation: terminal,
+    });
+
+    expect(result.updated).toBe(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    // Must chain off E1 (the true latest), not E0 (the frozen caller reference)
+    expect(written.previous_event_id).toBe('event-1');
+    // Replace-by-execution-id: pending entry replaced with terminal, not duplicated
+    expect(written.investigations).toHaveLength(1);
+    expect(written.investigations![0].status).toBe('success');
+    expect(written.investigations![0].started_at).toBe(pending.started_at);
+    expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
   });
 });

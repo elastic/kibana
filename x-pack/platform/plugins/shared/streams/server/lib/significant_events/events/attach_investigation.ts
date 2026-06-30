@@ -20,11 +20,21 @@ export const attachInvestigationToEvent = async ({
   investigation: SignificantEventInvestigation;
 }): Promise<{ event_id: string; updated: number; ignored: number }> => {
   const { hits } = await eventClient.findById(eventId);
-  const latest = hits[hits.length - 1];
+  const referenced = hits[hits.length - 1];
 
-  if (!latest) {
+  if (!referenced) {
     return { event_id: eventId, updated: 0, ignored: 1 };
   }
+
+  /**
+   * event_id is unique per append-only version; discovery_slug is the stable lineage key.
+   * Resolve the true latest version for this slug so pending and terminal attaches build a
+   * single chain rather than branching as siblings off the same frozen caller-supplied version.
+   * (The workflow passes the frozen inputs.context.event_id to both its pending and terminal
+   * steps, so without this re-resolution both writes would branch off the same old version.)
+   */
+  const { hits: lineageHits } = await eventClient.findByDiscoverySlug(referenced.discovery_slug);
+  const latest = lineageHits[lineageHits.length - 1] ?? referenced;
 
   const existing = latest.investigations ?? [];
 

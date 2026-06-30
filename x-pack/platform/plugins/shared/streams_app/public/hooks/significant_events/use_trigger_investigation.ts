@@ -67,7 +67,10 @@ export const useTriggerInvestigation = ({
       toasts.addError(error, { title: TRIGGER_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['sigEventLifecycle'], exact: false });
+      await queryClient.invalidateQueries({
+        queryKey: ['significantEventLifecycle'],
+        exact: false,
+      });
     },
   });
 
