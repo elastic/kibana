@@ -338,27 +338,6 @@ export const RULE_OVERVIEW_VIEW_DETAILS = i18n.translate(
   }
 );
 
-export const RULE_OVERVIEW_KIND_SIGNAL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.signal',
-  {
-    defaultMessage: 'Signal',
-  }
-);
-
-export const RULE_OVERVIEW_KIND_ALERTING = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.alerting',
-  {
-    defaultMessage: 'Alert',
-  }
-);
-
-export const RULE_OVERVIEW_KIND_TOOLTIP = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.tooltip',
-  {
-    defaultMessage: 'Mode can be changed in the rule edit form',
-  }
-);
-
 export const RULE_OVERVIEW_ENABLED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.enabled',
   {
