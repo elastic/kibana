@@ -119,6 +119,8 @@ import type {
 } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 import type { FindGapAutoFillSchedulerLogsParams } from '../application/gaps/auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
 import { findGapAutoFillSchedulerLogs } from '../application/gaps/auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
+import { execute as executeAdHoc } from '../application/ad_hoc/methods/execute/execute';
+import type { ExecuteParams as ExecuteAdHocParams } from '../application/ad_hoc/methods/execute/schemas';
 
 export type ConstructorOptions = Omit<RulesClientContext, 'minimumScheduleIntervalInMs'>;
 
@@ -241,6 +243,8 @@ export class RulesClient {
   public findBackfill = (params: FindBackfillParams) => findBackfill(this.context, params);
 
   public deleteBackfill = (id: string) => deleteBackfill(this.context, id);
+
+  public executeAdHocRule = (params: ExecuteAdHocParams) => executeAdHoc(this.context, params);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;
