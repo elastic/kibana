@@ -346,6 +346,126 @@ apiTest.describe(
       }
     );
 
+    // --- name uniqueness -----------------------------------------------------
+
+    apiTest(
+      'rejects a name patch that collides with another existing monitor',
+      async ({ apiClient }) => {
+        const existing = await createUiMonitor(apiClient);
+        const target = await createUiMonitor(apiClient);
+
+        const res = await bulkUpdateMonitors(
+          apiClient,
+          editorHeaders,
+          uniform([target.config_id], { name: existing.name })
+        );
+
+        const results = res.body.result as BulkUpdateResult[];
+        expect(results).toHaveLength(1);
+        expect(results[0].updated).toBe(false);
+        expect(results[0].error).toMatch(/already exists/i);
+
+        // the rejected patch must leave the monitor's name untouched
+        const { body: refreshed } = await getMonitor(apiClient, editorHeaders, target.config_id);
+        expect((refreshed as { name: string }).name).toBe(target.name);
+      }
+    );
+
+    apiTest('renames a monitor to a brand-new unique name', async ({ apiClient }) => {
+      const monitor = await createUiMonitor(apiClient);
+      const newName = `bulk-patch-renamed-${uuidv4()}`;
+
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        uniform([monitor.config_id], { name: newName })
+      );
+
+      expect(res.body.result).toStrictEqual([{ id: monitor.config_id, updated: true }]);
+
+      const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+      expect((refreshed as { name: string }).name).toBe(newName);
+    });
+
+    apiTest('allows a patch that keeps the monitor its own current name', async ({ apiClient }) => {
+      // The uniqueness check must exclude the monitor being patched, so a
+      // no-op rename alongside another field change should succeed.
+      const monitor = await createUiMonitor(apiClient, { tags: ['before'] });
+
+      const res = await bulkUpdateMonitors(
+        apiClient,
+        editorHeaders,
+        uniform([monitor.config_id], { name: monitor.name, tags: ['after'] })
+      );
+
+      expect(res.body.result).toStrictEqual([{ id: monitor.config_id, updated: true }]);
+
+      const { body: refreshed } = await getMonitor(apiClient, editorHeaders, monitor.config_id);
+      expect((refreshed as { name: string }).name).toBe(monitor.name);
+      expect((refreshed as { tags: string[] }).tags).toStrictEqual(['after']);
+    });
+
+    apiTest(
+      'rejects every entry when two updates set the same name in one batch',
+      async ({ apiClient }) => {
+        const m1 = await createUiMonitor(apiClient);
+        const m2 = await createUiMonitor(apiClient);
+        const sharedName = `bulk-patch-shared-${uuidv4()}`;
+
+        const res = await bulkUpdateMonitors(
+          apiClient,
+          editorHeaders,
+          uniform([m1.config_id, m2.config_id], { name: sharedName })
+        );
+
+        const results = res.body.result as BulkUpdateResult[];
+        expect(results).toHaveLength(2);
+        for (const entry of results) {
+          expect(entry.updated).toBe(false);
+          expect(entry.error).toMatch(/duplicate monitor name/i);
+        }
+
+        // neither monitor may be renamed when the batch is internally ambiguous
+        const { body: r1 } = await getMonitor(apiClient, editorHeaders, m1.config_id);
+        const { body: r2 } = await getMonitor(apiClient, editorHeaders, m2.config_id);
+        expect((r1 as { name: string }).name).toBe(m1.name);
+        expect((r2 as { name: string }).name).toBe(m2.name);
+      }
+    );
+
+    apiTest('isolates a name conflict to the offending id', async ({ apiClient }) => {
+      const existing = await createUiMonitor(apiClient);
+      const conflicting = await createUiMonitor(apiClient);
+      const valid = await createUiMonitor(apiClient);
+      const newName = `bulk-patch-isolated-${uuidv4()}`;
+
+      const res = await bulkUpdateMonitors(apiClient, editorHeaders, {
+        updates: [
+          // collides with an untouched existing monitor -> per-id error
+          { id: conflicting.config_id, attributes: { name: existing.name } },
+          // unique name -> applied normally
+          { id: valid.config_id, attributes: { name: newName } },
+        ],
+      });
+
+      const results = res.body.result as BulkUpdateResult[];
+      expect(resultFor(results, conflicting.config_id)!.updated).toBe(false);
+      expect(resultFor(results, conflicting.config_id)!.error).toMatch(/already exists/i);
+      expect(resultFor(results, valid.config_id)).toStrictEqual({
+        id: valid.config_id,
+        updated: true,
+      });
+
+      const { body: refreshedConflicting } = await getMonitor(
+        apiClient,
+        editorHeaders,
+        conflicting.config_id
+      );
+      const { body: refreshedValid } = await getMonitor(apiClient, editorHeaders, valid.config_id);
+      expect((refreshedConflicting as { name: string }).name).toBe(conflicting.name);
+      expect((refreshedValid as { name: string }).name).toBe(newName);
+    });
+
     // --- input validation ----------------------------------------------------
 
     apiTest('returns 400 when an update has empty attributes', async ({ apiClient }) => {
