@@ -80,7 +80,7 @@ describe('Panels toggle component', () => {
       isCollapsed: true,
       toggle: jest.fn(),
     });
-    await renderComponent({
+    const toolkit = await renderComponent({
       hideChart: false,
       hideTable: false,
       omitChartButton: false,
@@ -97,9 +97,14 @@ describe('Panels toggle component', () => {
     expect(screen.getByTestId('dscHideTableButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
 
+    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
+
     await user.click(screen.getByTestId('dscShowSidebarButton'));
 
-    expect(sidebarToggleState$.getValue().toggle).toHaveBeenCalledWith(false);
+    await waitFor(() => {
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:sidebarClosed', false);
+      expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(false);
+    });
   });
 
   it('should render correctly when sidebar is visible and chart/table toggles are omitted', async () => {

@@ -22,7 +22,7 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 const setup = async ({
   dataView,
@@ -130,12 +130,12 @@ describe('Discover component', () => {
   }, 10000);
 
   describe('sidebar', () => {
-    test('should be opened if discover:sidebarClosed was not set', async () => {
+    test('should be opened if hideSidebar is not set', async () => {
       await setup({ dataView: dataViewWithTimefieldMock });
       expect(screen.queryByTestId('fieldList')).toBeInTheDocument();
     }, 10000);
 
-    test('should be opened if discover:sidebarClosed is false', async () => {
+    test('should be opened if hideSidebar is false', async () => {
       await setup({
         dataView: dataViewWithTimefieldMock,
         prevSidebarClosed: false,
@@ -143,12 +143,14 @@ describe('Discover component', () => {
       expect(screen.queryByTestId('fieldList')).toBeInTheDocument();
     }, 10000);
 
-    test('should be closed if discover:sidebarClosed is true', async () => {
+    test('should be closed if hideSidebar is true', async () => {
       await setup({
         dataView: dataViewWithTimefieldMock,
         prevSidebarClosed: true,
       });
-      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+      });
     }, 10000);
   });
 
