@@ -291,7 +291,7 @@ export const Main: FunctionComponent<MainProps> = ({
     );
     if (hasRelatedDataSets) {
       setDeleteDataSourcesError(
-        'Unable to delete one or more data sources because they have related data sets.'
+        'Unable to delete one or more data sources because datasets read from them. Delete those datasets first.'
       );
       return;
     }
@@ -734,7 +734,7 @@ export const Main: FunctionComponent<MainProps> = ({
         description={
           <>
             {mainTranslations.pageDescription}{' '}
-            <EuiLink href="https://ela.st/esql-data-federation" target="_blank">
+            <EuiLink href="https://www.elastic.co/docs/reference/query-languages/esql/esql-federated-data" target="_blank">
               {mainTranslations.docsLink}
             </EuiLink>
           </>

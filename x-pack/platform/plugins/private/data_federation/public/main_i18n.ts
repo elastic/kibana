@@ -13,7 +13,8 @@ export const mainTranslations = {
   }),
 
   pageDescription: i18n.translate('xpack.dataFederation.pageDescription', {
-    defaultMessage: 'Manage data sources and data sets to query external data with ES|QL.',
+    defaultMessage:
+      'Connect to external data sources and add specific datasets to query with ES|QL, just like your indexed data. No ingestion required.',
   }),
 
   technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
@@ -33,7 +34,7 @@ export const mainTranslations = {
         defaultMessage: 'Type',
       }),
       dataSetsCount: i18n.translate('xpack.dataFederation.table.columnDataSetsCount', {
-        defaultMessage: 'Data sets',
+        defaultMessage: 'Datasets',
       }),
       description: i18n.translate('xpack.dataFederation.table.columnDescription', {
         defaultMessage: 'Description',
@@ -60,7 +61,8 @@ export const mainTranslations = {
         defaultMessage: 'Data sources',
       }),
       noItems: i18n.translate('xpack.dataFederation.table.noItems', {
-        defaultMessage: 'No data sources found',
+        defaultMessage:
+          "You don't have any data sources yet. Connect to a data source to get started.",
       }),
       searchPlaceholder: i18n.translate('xpack.dataFederation.search.placeholder', {
         defaultMessage: 'Search data sources…',
@@ -97,7 +99,7 @@ export const mainTranslations = {
       editActionDescription: i18n.translate(
         'xpack.dataFederation.setsTable.editActionDescription',
         {
-          defaultMessage: 'Edit data set',
+          defaultMessage: 'Edit dataset',
         }
       ),
       deleteAction: i18n.translate('xpack.dataFederation.setsTable.deleteAction', {
@@ -106,27 +108,27 @@ export const mainTranslations = {
       deleteActionDescription: i18n.translate(
         'xpack.dataFederation.setsTable.deleteActionDescription',
         {
-          defaultMessage: 'Delete data set',
+          defaultMessage: 'Delete dataset',
         }
       ),
       caption: i18n.translate('xpack.dataFederation.setsTable.caption', {
-        defaultMessage: 'Data sets',
+        defaultMessage: 'Datasets',
       }),
       noItems: i18n.translate('xpack.dataFederation.setsTable.noItems', {
-        defaultMessage: 'No data sets found',
+        defaultMessage: 'Add a dataset to start querying your data sources.',
       }),
       searchPlaceholder: i18n.translate('xpack.dataFederation.setsSearch.placeholder', {
-        defaultMessage: 'Search data sets…',
+        defaultMessage: 'Search datasets…',
       }),
       addButtonLabel: i18n.translate('xpack.dataFederation.setsAddButtonLabel', {
-        defaultMessage: 'Add data set',
+        defaultMessage: 'Add dataset',
       }),
     },
   },
 
   tabs: {
     sets: i18n.translate('xpack.dataFederation.tabs.sets', {
-      defaultMessage: 'Data sets',
+      defaultMessage: 'Datasets',
     }),
     sources: i18n.translate('xpack.dataFederation.tabs.sources', {
       defaultMessage: 'Data sources',
@@ -147,7 +149,7 @@ export const mainTranslations = {
       defaultMessage: 'Data source',
     }),
     allDataSources: i18n.translate('xpack.dataFederation.filters.allDataSources', {
-      defaultMessage: 'All data sources',
+      defaultMessage: 'Data sources',
     }),
   },
 
@@ -202,10 +204,10 @@ export const mainTranslations = {
 
   confirmDeleteDataSet: {
     title: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.title', {
-      defaultMessage: 'Delete data set',
+      defaultMessage: 'Delete dataset',
     }),
     prompt: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.prompt', {
-      defaultMessage: 'Are you sure you want to delete this data set?',
+      defaultMessage: 'Are you sure you want to delete this dataset?',
     }),
     warning: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.warning', {
       defaultMessage: 'This action cannot be undone.',
@@ -223,11 +225,11 @@ export const mainTranslations = {
 
   confirmDeleteDataSets: {
     title: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.title', {
-      defaultMessage: 'Delete data sets',
+      defaultMessage: 'Delete datasets',
     }),
     prompt: (count: number) =>
       i18n.translate('xpack.dataFederation.confirmDeleteDataSets.prompt', {
-        defaultMessage: 'Are you sure you want to delete {count} data sets?',
+        defaultMessage: 'Are you sure you want to delete {count} datasets?',
         values: { count },
       }),
     warning: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.warning', {

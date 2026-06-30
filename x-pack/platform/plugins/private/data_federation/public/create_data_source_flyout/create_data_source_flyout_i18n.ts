@@ -11,7 +11,13 @@ import { i18n } from '@kbn/i18n';
 export const createDataSourceFlyoutStrings = {
   createTitle: () =>
     i18n.translate('xpack.dataFederation.createFlyout.title', {
-      defaultMessage: 'Configure cloud data source',
+      defaultMessage: 'Connect external data source',
+    }),
+
+  createDescription: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.createDescription', {
+      defaultMessage:
+        'Define where your external data is stored and how Elasticsearch connects to it.',
     }),
 
   editTitle: () =>
@@ -52,6 +58,11 @@ export const createDataSourceFlyoutStrings = {
   cancelButton: () =>
     i18n.translate('xpack.dataFederation.createFlyout.cancelButton', {
       defaultMessage: 'Cancel',
+    }),
+
+  connectButton: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.connectButton', {
+      defaultMessage: 'Connect',
     }),
 
   saveButton: () =>

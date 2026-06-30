@@ -209,6 +209,14 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         <EuiTitle size="m">
           <h2 id="createDatasetFlyoutTitle">{flyoutTitle}</h2>
         </EuiTitle>
+        {!isEditMode && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>{createDatasetFlyoutStrings.createDescription()}</p>
+            </EuiText>
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <div ref={flyoutTopRef} />
@@ -309,7 +317,9 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               isLoading={isSaving}
               disabled={isSaving || dataSources.length === 0}
             >
-              {createDatasetFlyoutStrings.saveButton()}
+              {isEditMode
+                ? createDatasetFlyoutStrings.saveButton()
+                : createDatasetFlyoutStrings.addButton()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
