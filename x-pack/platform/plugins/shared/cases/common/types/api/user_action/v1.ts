@@ -80,6 +80,18 @@ export const UserActionFindRequestRt = rt.intersection([
     rt.partial({
       types: rt.array(UserActionFindRequestTypesRt),
       sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
+]);
+
+export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;
+
+export const UserActionInternalFindRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      types: rt.array(UserActionFindRequestTypesRt),
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
       author: limitedStringSchema({
         fieldName: 'author',
         min: 1,
@@ -95,7 +107,7 @@ export const UserActionFindRequestRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
 ]);
 
-export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;
+export type UserActionInternalFindRequest = rt.TypeOf<typeof UserActionInternalFindRequestRt>;
 
 export const UserActionFindResponseRt = rt.strict({
   userActions: UserActionsRt,

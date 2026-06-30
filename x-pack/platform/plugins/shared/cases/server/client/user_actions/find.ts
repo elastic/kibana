@@ -6,8 +6,14 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import type { UserActionFindRequest, UserActionFindResponse } from '../../../common/types/api';
-import { UserActionFindRequestRt, UserActionFindResponseRt } from '../../../common/types/api';
+import type {
+  UserActionInternalFindRequest,
+  UserActionFindResponse,
+} from '../../../common/types/api';
+import {
+  UserActionInternalFindRequestRt,
+  UserActionFindResponseRt,
+} from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
@@ -21,7 +27,7 @@ import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 interface FindWithSearchParams {
   caseId: string;
   search: string;
-  queryParams: Omit<UserActionFindRequest, 'search'>;
+  queryParams: Omit<UserActionInternalFindRequest, 'search'>;
   authorizationFilter?: KueryNode;
   ensureSavedObjectsAreAuthorized: (entities: Array<{ owner: string; id: string }>) => void;
   userActionService: CasesClientArgs['services']['userActionService'];
@@ -41,7 +47,10 @@ export const find = async (
   try {
     const types = asArray(params.types);
 
-    const queryParams = decodeWithExcessOrThrow(UserActionFindRequestRt)({ ...params, types });
+    const queryParams = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
+      ...params,
+      types,
+    });
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),
