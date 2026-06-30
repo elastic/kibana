@@ -15,12 +15,11 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiPageHeader,
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import type { HttpSetup, ToastsStart } from '@kbn/core/public';
@@ -64,7 +63,12 @@ export interface MainProps {
   };
 }
 
-export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudInfo, featureFlags }) => {
+export const Main: FunctionComponent<MainProps> = ({
+  httpClient,
+  toasts,
+  cloudInfo,
+  featureFlags,
+}) => {
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
@@ -711,27 +715,25 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, cloudIn
 
   return (
     <>
-      <EuiPageSection paddingSize="m">
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <>
+            <span data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</span>
+            &nbsp;
             <EuiBetaBadge label={mainTranslations.technicalPreview} size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
+          </>
+        }
+        description={
+          <>
             {mainTranslations.pageDescription}{' '}
             <EuiLink href="https://ela.st/esql-data-federation" target="_blank">
               {mainTranslations.docsLink}
             </EuiLink>
-          </p>
-        </EuiText>
-        <EuiSpacer size="l" />
+          </>
+        }
+      />
+      <EuiPageSection paddingSize="m">
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={selectedTab}

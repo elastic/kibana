@@ -47,7 +47,8 @@ describe('buildFederatedIdentityClusterInfo', () => {
     } as unknown as CloudSetup;
 
     expect(buildFederatedIdentityClusterInfo(cloud)).toEqual({
-      jwtIssuer: 'https://workload-identity-issuer.europe-west1.gcp.svc.elastic.cloud/orgs/org-abc123',
+      jwtIssuer:
+        'https://workload-identity-issuer.europe-west1.gcp.svc.elastic.cloud/orgs/org-abc123',
       cloudOrgId: 'org-abc123',
       deploymentId: 'project:proj-789',
       isServerless: true,
