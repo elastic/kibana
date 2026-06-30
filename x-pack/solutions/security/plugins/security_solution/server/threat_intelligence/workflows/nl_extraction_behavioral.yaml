@@ -88,6 +88,12 @@ steps:
             elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
           body:
+            # html primary: body_html is stored index:false (not searchable) but
+            # is retrievable from _source. The route converts it via htmlToStructured()
+            # which preserves table rows / headers / lists so IOC values in vendor
+            # HTML tables survive extraction. body_text is the fallback — the route
+            # uses it when html is absent (STIX, manual ingest, text-only sources).
+            html: "{{ foreach.item._source.content.body_html }}"
             text: "{{ foreach.item._source.content.body_text }}"
             defang: true
         on-failure:

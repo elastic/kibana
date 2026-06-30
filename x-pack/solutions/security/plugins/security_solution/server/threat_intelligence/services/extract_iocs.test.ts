@@ -1094,3 +1094,99 @@ describe('extract_iocs — URL tier inherits from host', () => {
     expect(url?.tier_basis).toMatch(/url_host_inherited:defanged_source/);
   });
 });
+
+// ── Leak test (critical gate) ────────────────────────────────────────────────
+// Exercises the htmlToStructured → extractIocs path (as the route does) and
+// asserts that NO emitted anchor value contains raw markdown artifacts.
+// This is the gate: if a markdown artifact survives into a stored IOC value,
+// it would corrupt anchor matching and downstream correlation.
+
+describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)', () => {
+  // Import the helper to wire up the same transformation the route uses.
+  // We call it here explicitly to simulate the route's html→structured→extractIocs flow.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { htmlToStructured } = require('../adapters/text') as typeof import('../adapters/text');
+
+  const MARKDOWN_ARTIFACT_PATTERN = /[\[\]|`#()]/;
+
+  const extractFromHtml = (html: string) => extractIocs({ text: htmlToStructured(html) });
+
+  test('IOC table cells produce clean domain values (no pipe, bracket, hash artifacts)', () => {
+    const html = `
+      <table>
+        <tr><th>Type</th><th>Indicator</th><th>Context</th></tr>
+        <tr><td>Domain</td><td>evil.com</td><td>C2 server</td></tr>
+        <tr><td>Domain</td><td>bad[.]example.net</td><td>Dropper host</td></tr>
+        <tr><td>IP</td><td>192.0.2.55</td><td>Pivot host</td></tr>
+        <tr><td>Hash</td><td>d41d8cd98f00b204e9800998ecf8427e</td><td>Loader</td></tr>
+      </table>
+    `;
+    const r = extractFromHtml(html);
+
+    // Known good values must be present
+    expect(domainValues(r)).toContain('evil.com');
+    expect(domainValues(r)).toContain('bad.example.net');
+    expect(valuesOf(r, 'ip')).toContain('192.0.2.55');
+    expect(hashValues(r)).toContain('d41d8cd98f00b204e9800998ecf8427e');
+
+    // LEAK GATE: no emitted value may contain markdown artifact chars
+    for (const ioc of r.iocs) {
+      if (ioc.tier === 'reference' || ioc.tier === 'denied') continue; // noise entries OK to skip
+      expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+      // Clean canonical form: domain must exactly match the refanged value
+      if (ioc.type === 'domain') {
+        expect(ioc.value).toMatch(/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/);
+      }
+    }
+  });
+
+  test('heading and list HTML produce clean IOC values', () => {
+    const html = `
+      <h2>Indicators</h2>
+      <ul>
+        <li>Domain: evil2.com</li>
+        <li>IP: 203.0.113.7</li>
+      </ul>
+    `;
+    const r = extractFromHtml(html);
+
+    expect(domainValues(r)).toContain('evil2.com');
+    expect(valuesOf(r, 'ip')).toContain('203.0.113.7');
+
+    for (const ioc of r.iocs) {
+      if (ioc.tier === 'reference' || ioc.tier === 'denied') continue;
+      expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+    }
+  });
+
+  test('anchor href URLs are extractable and value is clean', () => {
+    const html = `
+      <p>Command-and-control: <a href="https://c2.evil.com/beacon">C2 link</a></p>
+    `;
+    const r = extractFromHtml(html);
+
+    const urlIoc = r.iocs.find((i) => i.type === 'url' && i.value.includes('c2.evil.com'));
+    expect(urlIoc).toBeDefined();
+    // Must NOT be [C2 link](https://c2.evil.com/beacon) markdown form
+    expect(urlIoc?.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+    expect(urlIoc?.value).toBe('https://c2.evil.com/beacon');
+  });
+
+  test('defanged IOC in table cell survives refang and is clean', () => {
+    const html = `
+      <table>
+        <tr><td>C2 Domain</td><td>evil[.]attacker[.]top</td></tr>
+        <tr><td>C2 IP</td><td>198[.]51[.]100[.]99</td></tr>
+      </table>
+    `;
+    const r = extractFromHtml(html);
+
+    expect(domainValues(r)).toContain('evil.attacker.top');
+    expect(valuesOf(r, 'ip')).toContain('198.51.100.99');
+
+    for (const ioc of r.iocs) {
+      if (ioc.tier === 'reference' || ioc.tier === 'denied') continue;
+      expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+    }
+  });
+});

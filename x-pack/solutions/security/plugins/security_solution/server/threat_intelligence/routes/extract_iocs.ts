@@ -10,11 +10,18 @@ import {
   EXTRACT_IOCS_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../common/threat_intelligence/hub';
+import { htmlToStructured } from '../adapters/text';
 import { extractIocs } from '../services';
 import type { RouteRegistrationDeps } from '.';
 
 const extractIocsBodySchema = schema.object({
+  // `text` is the body_text fallback (STIX/manual/text-only sources and the gold-eval path).
   text: schema.string({ minLength: 1 }),
+  // `html` is the primary path: body_html from stored reports. When present the route
+  // converts it to structured text via htmlToStructured() and passes THAT to extractIocs.
+  // The html field is optional so existing callers (STIX ingestion, the eval script, manual
+  // API calls) continue to work without change.
+  html: schema.maybe(schema.string()),
   defang: schema.maybe(schema.boolean()),
 });
 
@@ -56,8 +63,14 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
       },
       async (_context, request, response) => {
         try {
+          // html primary / body_text fallback: the route owns the conversion so
+          // extractIocs stays a pure string-in function.
+          const inputText =
+            request.body.html != null
+              ? htmlToStructured(request.body.html)
+              : request.body.text;
           const result = extractIocs({
-            text: request.body.text,
+            text: inputText,
             defang: request.body.defang,
           });
           return response.ok({ body: result });

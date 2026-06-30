@@ -89,6 +89,85 @@ export const truncate = (input: string, maxLength: number): string => {
   return `${slice.trimEnd()}\u2026`;
 };
 
+/**
+ * Convert HTML to a structured text form that preserves block boundaries,
+ * table rows, headers, and lists so that IOC extraction can see table-cell
+ * values as recoverable tokens rather than a collapsed space-run.
+ *
+ * TRANSIENT — the result is used only inside `extract_iocs`; it is never
+ * stored, indexed, or emitted to any search field. `body_text` storage and
+ * `stripHtml` are UNCHANGED.
+ *
+ * Transformations:
+ *   <script>/<style>          → stripped (mirrors stripHtml pre-pass)
+ *   <h1>–<h6>                 → ## heading text
+ *   <tr> with <td>/<th> cells → | cell1 | cell2 | pipe-delimited row
+ *   <li>                      → - item text
+ *   block elements (p, div, br, …) → newline boundary
+ *   inline tags               → removed; content kept
+ *   HTML entities             → decoded (reuses decodeEntities)
+ */
+export const htmlToStructured = (html: string | undefined | null): string => {
+  if (!html) return '';
+
+  // 1. Drop script/style bodies (same pre-pass as stripHtml).
+  let s = html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ');
+
+  // 2. Headings → "## text\n"
+  s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, ' ').trim();
+    return text ? `\n## ${collapseWhitespace(text)}\n` : '';
+  });
+
+  // 3. Table rows → "| cell | cell |\n"
+  // Process each <tr> independently; extract <td>/<th> cell content.
+  s = s.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/gi, (_m, inner: string) => {
+    const cellTexts: string[] = [];
+    const cellPattern = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
+    let cellMatch: RegExpExecArray | null;
+    while ((cellMatch = cellPattern.exec(inner)) !== null) {
+      const cellContent = cellMatch[1].replace(/<[^>]+>/g, ' ').trim();
+      cellTexts.push(collapseWhitespace(cellContent));
+    }
+    return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
+  });
+
+  // 4. List items → "- text\n"
+  s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, ' ').trim();
+    return text ? `\n- ${collapseWhitespace(text)}\n` : '';
+  });
+
+  // 5. Block-level elements → newline boundary (br, p, div, section, article, …)
+  s = s.replace(/<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi, '\n');
+  s = s.replace(/<br\s*\/?>/gi, '\n');
+
+  // 6a. Lift <a href="URL"> hrefs into plain text so IOC URLs are extractable.
+  //     Produces "anchortext URL" — the URL appears as a bare token the regex
+  //     patterns can match. No markdown [label](url) syntax is emitted.
+  s = s.replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, ' ').trim();
+    return `${text} ${href} `;
+  });
+
+  // 6b. Strip remaining tags (inline and any leftovers).
+  s = s.replace(/<[^>]+>/g, '');
+
+  // 7. Decode HTML entities.
+  s = decodeEntities(s);
+
+  // 8. Normalise runs within each line (collapse intra-line spaces) but
+  //    preserve the newlines that carry structural meaning.
+  const lines = s
+    .split('\n')
+    .map((line) => line.replace(/[ \t]+/g, ' ').trim())
+    .filter((line) => line.length > 0);
+
+  return lines.join('\n');
+};
+
 /** `content` block written by every ingest path (adapters + manual ingest). */
 export interface ReportContentDocument {
   title: string;
