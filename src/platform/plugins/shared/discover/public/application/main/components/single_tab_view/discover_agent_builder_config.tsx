@@ -27,6 +27,11 @@ import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
 import {
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  getDiscoverSessionAttachmentId,
+  type DiscoverSessionAttachmentData,
+} from '../../../../../common/discover_session_attachment';
+import {
   useProfileAccessor,
   type DeepAnalysisPlaybookExtension,
 } from '../../../../context_awareness';
@@ -68,6 +73,50 @@ const getQueryText = (query: AggregateQuery | Query | undefined): string => {
   if (!query) return '';
   if (isOfAggregateQueryType(query)) return query.esql;
   return String(query.query);
+};
+
+export const buildDiscoverSessionAttachment = ({
+  dataViewTitle,
+  dataViewId,
+  query,
+  columns,
+  dataSourceType,
+  timeRange,
+  sessionId,
+  sessionTitle,
+  tabId,
+}: {
+  dataViewTitle: string;
+  dataViewId?: string;
+  query: AggregateQuery | Query | undefined;
+  columns: string[] | undefined;
+  dataSourceType: string | undefined;
+  timeRange: { from: string; to: string } | undefined;
+  sessionId?: string;
+  sessionTitle?: string;
+  tabId: string;
+}): AttachmentInput => {
+  const queryLanguage = getQueryLanguage(query);
+  const data: DiscoverSessionAttachmentData = {
+    dataViewTitle,
+    dataViewId,
+    query: getQueryText(query),
+    queryLanguage,
+    columns,
+    dataSourceType,
+    timeRange,
+    url: window.location.href,
+    sessionTitle,
+    savedSearchId: sessionId,
+    tabId,
+  };
+
+  return {
+    id: getDiscoverSessionAttachmentId({ sessionId, tabId }),
+    origin: sessionId ?? tabId,
+    type: DISCOVER_SESSION_ATTACHMENT_TYPE,
+    data,
+  };
 };
 
 export const buildScreenContext = (
