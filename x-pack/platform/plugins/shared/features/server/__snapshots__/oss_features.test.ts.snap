@@ -361,10 +361,6 @@ Array [
     "subFeatures": undefined,
   },
   Object {
-    "id": "data_sets",
-    "subFeatures": undefined,
-  },
-  Object {
     "id": "filesSharedImage",
     "subFeatures": undefined,
   },
@@ -1012,10 +1008,6 @@ Array [
     "subFeatures": undefined,
   },
   Object {
-    "id": "data_sets",
-    "subFeatures": undefined,
-  },
-  Object {
     "id": "filesSharedImage",
     "subFeatures": undefined,
   },
@@ -1370,47 +1362,6 @@ Array [
       "ui": Array [
         "show",
       ],
-    },
-    "privilegeId": "read",
-  },
-]
-`;
-
-exports[`buildOSSFeatures with a basic license returns the data_sets feature augmented with appropriate sub feature privileges 1`] = `
-Array [
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "kibana",
-      ],
-      "management": Object {
-        "kibana": Array [
-          "data_sets",
-        ],
-      },
-      "savedObject": Object {
-        "all": Array [],
-        "read": Array [],
-      },
-      "ui": Array [],
-    },
-    "privilegeId": "all",
-  },
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "kibana",
-      ],
-      "management": Object {
-        "kibana": Array [
-          "data_sets",
-        ],
-      },
-      "savedObject": Object {
-        "all": Array [],
-        "read": Array [],
-      },
-      "ui": Array [],
     },
     "privilegeId": "read",
   },
@@ -2570,47 +2521,6 @@ Array [
       "ui": Array [
         "show",
       ],
-    },
-    "privilegeId": "read",
-  },
-]
-`;
-
-exports[`buildOSSFeatures with a enterprise license returns the data_sets feature augmented with appropriate sub feature privileges 1`] = `
-Array [
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "kibana",
-      ],
-      "management": Object {
-        "kibana": Array [
-          "data_sets",
-        ],
-      },
-      "savedObject": Object {
-        "all": Array [],
-        "read": Array [],
-      },
-      "ui": Array [],
-    },
-    "privilegeId": "all",
-  },
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "kibana",
-      ],
-      "management": Object {
-        "kibana": Array [
-          "data_sets",
-        ],
-      },
-      "savedObject": Object {
-        "all": Array [],
-        "read": Array [],
-      },
-      "ui": Array [],
     },
     "privilegeId": "read",
   },
