@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';

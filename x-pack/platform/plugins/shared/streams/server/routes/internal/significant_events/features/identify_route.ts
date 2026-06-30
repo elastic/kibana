@@ -7,12 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
+import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
-  getStreamSamplingSource,
-  getStreamTypeFromDefinition,
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';

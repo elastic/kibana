@@ -7,12 +7,12 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/significant-events-schema';
 import {
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import {

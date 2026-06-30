@@ -12,7 +12,7 @@ import {
   SignificantEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type StreamsKIsOnboardingStatusResult,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
 import { useKibana } from '../../../../hooks/use_kibana';

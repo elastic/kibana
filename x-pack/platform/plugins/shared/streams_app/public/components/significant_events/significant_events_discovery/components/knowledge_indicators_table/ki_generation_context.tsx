@@ -6,16 +6,15 @@
  */
 
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import { Streams, streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import {
-  Streams,
   StreamsKIsOnboardingStep,
   SignificantEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  streamMatchesIndexPatterns,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import React, {
   createContext,
   useCallback,

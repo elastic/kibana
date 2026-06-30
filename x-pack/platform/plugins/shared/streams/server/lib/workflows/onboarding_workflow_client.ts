@@ -18,7 +18,7 @@ import {
   type StreamsKIsOnboardingStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';

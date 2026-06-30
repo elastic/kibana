@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import {
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import React from 'react';
 import { useInferenceFeatureConnectors } from '../../../../hooks/significant_events/use_inference_feature_connectors';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
