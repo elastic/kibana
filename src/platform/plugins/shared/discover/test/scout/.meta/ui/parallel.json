@@ -27,7 +27,9 @@
       "id": "750b17767d3a6aa-73d820470653fb4",
       "title": "Discover data grid - dashboard context view navigates to context view from a saved-search dashboard panel",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_context_dashboard.spec.ts",
         "line": 45,
@@ -38,7 +40,9 @@
       "id": "5a0f166e1b5e864-ffca7c9d8c50834",
       "title": "Discover data grid - context view opens the context view with Discover columns, disabled filters, toolbar, and anchor document",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_context.spec.ts",
         "line": 91,
@@ -49,7 +53,9 @@
       "id": "917ace32c40ccca-14690366b4b888f",
       "title": "Discover data grid - copy to clipboard copies a column values to clipboard",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_copy_to_clipboard.spec.ts",
         "line": 72,
@@ -60,7 +66,9 @@
       "id": "917ace32c40ccca-254b0abf57b701d",
       "title": "Discover data grid - copy to clipboard copies a column name to clipboard",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_copy_to_clipboard.spec.ts",
         "line": 94,
@@ -71,7 +79,9 @@
       "id": "5b8cb292af9f1b3-0ba93f4efdf4dda",
       "title": "Discover data grid density - saved search saves and reverts unsaved densities properly",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_density_saved_search.spec.ts",
         "line": 43,
@@ -82,7 +92,9 @@
       "id": "eeb0c47a06fec03-39ef969a07136c2",
       "title": "Discover data grid - document navigation opens the single-document view from the selected row",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_navigation.spec.ts",
         "line": 42,
@@ -93,7 +105,9 @@
       "id": "eeb0c47a06fec03-5d44726fe884076",
       "title": "Discover data grid - document navigation creates an exists filter from the selected document flyout",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_doc_navigation.spec.ts",
         "line": 54,
@@ -304,7 +318,9 @@
       "id": "155025c9260e066-60e5abddc8ce924",
       "title": "Discover data grid footer - date nanos works for date nanos too",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_footer_date_nanos.spec.ts",
         "line": 79,
@@ -315,7 +331,9 @@
       "id": "34e5a0c490cc193-53cc131b1497b39",
       "title": "Discover data grid footer shows the footer only on the last page and allows loading more",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_footer.spec.ts",
         "line": 49,
@@ -326,7 +344,9 @@
       "id": "34e5a0c490cc193-a16406d2cb374db",
       "title": "Discover data grid footer disables \"Load more\" while the refresh interval is on",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_footer.spec.ts",
         "line": 88,
@@ -337,7 +357,9 @@
       "id": "45814a090cfee80-734edbac723d57a",
       "title": "Discover data grid in-table search shows highlights for in-table search",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_in_table_search.spec.ts",
         "line": 40,
@@ -348,7 +370,9 @@
       "id": "45814a090cfee80-064e444ea74a819",
       "title": "Discover data grid in-table search can navigate between matches",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_in_table_search.spec.ts",
         "line": 62,
@@ -359,7 +383,9 @@
       "id": "45814a090cfee80-c25fa4a4fce097a",
       "title": "Discover data grid in-table search overrides cmd+f if a grid element was in focus",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_in_table_search.spec.ts",
         "line": 90,
@@ -370,7 +396,9 @@
       "id": "ac72ef1eaf67e1f-ecd16b6814c7ce1",
       "title": "Discover data grid new line support does not show new lines for the Document column",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_new_line.spec.ts",
         "line": 70,
@@ -381,7 +409,9 @@
       "id": "ac72ef1eaf67e1f-f2a38546ca63796",
       "title": "Discover data grid new line support shows new lines for the \"message\" column except for the single-line row height",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_new_line.spec.ts",
         "line": 78,
@@ -392,7 +422,9 @@
       "id": "5aa74561c84adb6-70dd1c7ac71b7e7",
       "title": "Discover data grid pagination - saved search uses rows per page from settings or from the saved search",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_pagination_saved_search.spec.ts",
         "line": 51,
@@ -403,7 +435,9 @@
       "id": "5aa74561c84adb6-c1e8937477a4cd0",
       "title": "Discover data grid pagination - saved search does not split ES|QL results into pages",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_pagination_saved_search.spec.ts",
         "line": 122,
@@ -414,7 +448,9 @@
       "id": "843892120f801a2-ebb88c8be9ffe35",
       "title": "Discover data grid row height uses the default row height",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
         "line": 40,
@@ -425,7 +461,9 @@
       "id": "843892120f801a2-dde367457628316",
       "title": "Discover data grid row height allows changing the row height",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
         "line": 47,
@@ -436,7 +474,9 @@
       "id": "843892120f801a2-c95a0ab1c147189",
       "title": "Discover data grid row height persists the row height selection after reloading the page",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
         "line": 68,
@@ -447,7 +487,9 @@
       "id": "843892120f801a2-8076b01ad2a157e",
       "title": "Discover data grid row height uses the default header row height",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
         "line": 88,
@@ -458,7 +500,9 @@
       "id": "843892120f801a2-7cf53bba34d2429",
       "title": "Discover data grid row height allows changing the header row height",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
         "line": 95,
@@ -469,7 +513,9 @@
       "id": "843892120f801a2-50b0609fc03a16d",
       "title": "Discover data grid row height persists the header row height selection after reloading the page",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_height.spec.ts",
         "line": 115,
@@ -480,7 +526,9 @@
       "id": "5acb3144fa6460c-88a14ce9b10745a",
       "title": "Discover data grid row navigation navigates through rows with the same document id but different indices",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_navigation.spec.ts",
         "line": 104,
@@ -491,7 +539,9 @@
       "id": "5aae2cd96d8b1b7-72df4bf4ef35aeb",
       "title": "Discover data grid row selection clipboard actions copies selected rows as JSON",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
         "line": 136,
@@ -502,7 +552,9 @@
       "id": "5aae2cd96d8b1b7-4acc231adede368",
       "title": "Discover data grid row selection clipboard actions copies selected rows as tabular text",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
         "line": 156,
@@ -513,7 +565,9 @@
       "id": "5aae2cd96d8b1b7-ef5fca32191ccae",
       "title": "Discover data grid row selection clipboard actions copies selected rows as Markdown text",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
         "line": 169,
@@ -524,7 +578,9 @@
       "id": "5aae2cd96d8b1b7-fc34b3eceb534f2",
       "title": "Discover data grid row selection clipboard actions copies visible columns for selected rows as tabular text",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
         "line": 182,
@@ -535,7 +591,9 @@
       "id": "5aae2cd96d8b1b7-1047d521c5030f9",
       "title": "Discover data grid row selection clipboard actions copies visible columns for selected rows as Markdown text",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection_clipboard.spec.ts",
         "line": 198,
@@ -546,7 +604,9 @@
       "id": "79711292dda0b7e-521ef55b6e9e04a",
       "title": "Discover data grid row selection allows selecting and deselecting rows manually",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection.spec.ts",
         "line": 66,
@@ -557,7 +617,9 @@
       "id": "79711292dda0b7e-6cd638ab6012b75",
       "title": "Discover data grid row selection allows selecting multiple rows with the Shift key",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection.spec.ts",
         "line": 88,
@@ -568,7 +630,9 @@
       "id": "79711292dda0b7e-0e8acb9e2632496",
       "title": "Discover data grid row selection allows selecting and clearing rows in bulk",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_row_selection.spec.ts",
         "line": 132,
@@ -579,7 +643,9 @@
       "id": "1bd51040dfd96ad-a966b4d2472039f",
       "title": "Discover data grid sample size - saved search and Dashboard saves a custom sample size with a search",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 53,
@@ -590,7 +656,9 @@
       "id": "1bd51040dfd96ad-ee4ba796528cd50",
       "title": "Discover data grid sample size - saved search and Dashboard uses the default sample size on Dashboard",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 112,
@@ -601,7 +669,9 @@
       "id": "1bd51040dfd96ad-185cc2b7dabf234",
       "title": "Discover data grid sample size - saved search and Dashboard uses a custom sample size on Dashboard when specified",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 125,
@@ -612,7 +682,9 @@
       "id": "acb687b59317814-2936e749ada598b",
       "title": "Discover data grid sample size uses the default sample size",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size.spec.ts",
         "line": 51,
@@ -623,7 +695,9 @@
       "id": "acb687b59317814-b80c4960701f6fd",
       "title": "Discover data grid sample size allows changing the sample size",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size.spec.ts",
         "line": 59,
@@ -634,7 +708,9 @@
       "id": "acb687b59317814-11fb37df8153537",
       "title": "Discover data grid sample size persists the sample-size selection after reloading",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size.spec.ts",
         "line": 72,
@@ -645,7 +721,9 @@
       "id": "c940fcf19222c46-300713bd1f76e1f",
       "title": "Discover data grid can add fields to the table",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid.spec.ts",
         "line": 79,
@@ -656,7 +734,9 @@
       "id": "c940fcf19222c46-94b04c1668fdc54",
       "title": "Discover data grid should hide elements beneath the table when in full screen mode regardless of their z-index",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid.spec.ts",
         "line": 98,
@@ -667,7 +747,9 @@
       "id": "c940fcf19222c46-620b0984645151e",
       "title": "Discover data grid should show the grid toolbar",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid.spec.ts",
         "line": 120,
@@ -678,7 +760,10 @@
       "id": "eeef9afe3528fb0-cf1d0ab3767cdfd",
       "title": "Data view without timefield should not display a timepicker",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 39,
@@ -689,7 +774,10 @@
       "id": "eeef9afe3528fb0-4dcd58d4d17dc8f",
       "title": "Data view without timefield should adapt sidebar fields when switching",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 45,
@@ -700,7 +788,10 @@
       "id": "eeef9afe3528fb0-689e4102c9d0f2c",
       "title": "Data view without timefield should display a timepicker after switching to an index pattern with timefield",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 61,
@@ -711,7 +802,10 @@
       "id": "eeef9afe3528fb0-2cb55638133f42c",
       "title": "Data view without timefield should switch between with and without timefield using the browser back button",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 74,
@@ -722,7 +816,10 @@
       "id": "eeef9afe3528fb0-23036590bd0ebdb",
       "title": "Data view without timefield should disable the auto refresh interval when switching to a data view without a time field",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 111,
@@ -733,7 +830,10 @@
       "id": "eeef9afe3528fb0-00c5477088e960e",
       "title": "Data view without timefield should allow switching from a saved search with a time field to a saved search without a time field",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 133,
@@ -744,7 +844,10 @@
       "id": "eeef9afe3528fb0-c5b17d1e26ed8de",
       "title": "Data view without timefield should allow switching from data views with different timefields and sort correctly",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
         "line": 163,
@@ -755,9 +858,11 @@
       "id": "4c54a2ad0ea60f4-accb5de6e8f51ae",
       "title": "Discover tabs - opening a new tab should create a new tab in classic mode",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/new_tab.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
         "line": 35,
         "column": 12
       }
@@ -766,9 +871,11 @@
       "id": "4c54a2ad0ea60f4-4eba405f9b363af",
       "title": "Discover tabs - opening a new tab should create a new tab in ES|QL mode",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/new_tab.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
         "line": 93,
         "column": 12
       }
@@ -777,9 +884,11 @@
       "id": "4c54a2ad0ea60f4-5e52b578914cfc3",
       "title": "Discover tabs - opening a new tab should be able to complete all quickly opened tabs",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/new_tab.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
         "line": 129,
         "column": 12
       }
@@ -788,7 +897,10 @@
       "id": "88c32aed1321ce6-66666d295105cc2",
       "title": "Discover context - accessibility should give focus to the Load link when Tab is pressed",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_accessibility.spec.ts",
         "line": 35,
@@ -799,7 +911,10 @@
       "id": "0bdfab4a120a00b-f8999ee310ebfdf",
       "title": "Discover context - date_nanos custom timestamp displays predecessors - anchor - successors in right order",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos_custom.spec.ts",
         "line": 42,
@@ -810,7 +925,10 @@
       "id": "a7558f1dba1d1db-b4663abcbac685f",
       "title": "Discover context - date_nanos displays predecessors - anchor - successors in right order",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos.spec.ts",
         "line": 39,
@@ -821,7 +939,10 @@
       "id": "a7558f1dba1d1db-05fb7425e05259b",
       "title": "Discover context - date_nanos displays correctly when predecessors and successors are loaded",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/surrounding_docs/context_date_nanos.spec.ts",
         "line": 54,
@@ -1248,9 +1369,11 @@
       "id": "c52bd9ea218bca3-16c7641de80acbd",
       "title": "Discover tabs - tab duplication should restore the previous app and global states",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic"
+      ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/tab_duplication.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tab_duplication.spec.ts",
         "line": 36,
         "column": 12
       }
@@ -1259,7 +1382,10 @@
       "id": "49c22da29b5800c-8b9c03c82c9a60e",
       "title": "Data view with unmapped fields unmapped fields exist on a new saved search",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
         "line": 45,
@@ -1270,7 +1396,10 @@
       "id": "49c22da29b5800c-f0f2d7d9751d7e2",
       "title": "Data view with unmapped fields unmapped fields exist on an existing saved search",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
         "line": 70,
