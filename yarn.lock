@@ -23218,10 +23218,10 @@ functions-have-names@^1.2.3:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-fuse.js@7.1.0:
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.1.0.tgz#306228b4befeee11e05b027087c2744158527d09"
-  integrity sha512-trLf4SzuuUxfusZADLINj+dE8clK1frKdmqiJNb1Es75fmI5oY6X2mxLVUciLLjxqw/xr72Dhy+lER6dGd02FQ==
+fuse.js@7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.2.0.tgz#53f0cd2655f20aae811f6c081bdf90c94517d7b4"
+  integrity sha512-zf4vdcIGpjNKTuXwug33Hm2okqX6a0t2ZEbez+o9oBJQSNhVJ5AqERfeiRD3r8HcLqP66MrjdkmzxrncbAOTUQ==
 
 gaxios@^6.0.0, gaxios@^6.1.1:
   version "6.6.0"
