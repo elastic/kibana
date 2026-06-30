@@ -8,10 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from './ftr_provider_context';
 
-export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext) {
+export function SearchIndexDetailPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const pageObjects = getPageObjects(['appMenu']);
 
   const expectIndexDetailPageHeader = async function () {
     await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
@@ -83,13 +84,13 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     },
 
     async expectManageIndexButtonExists() {
-      await testSubjects.existOrFail('indexActionsContextMenuButton');
+      await pageObjects.appMenu.existOrFail('indexActionsContextMenuButton');
     },
     async clickManageIndexButton() {
-      await testSubjects.click('indexActionsContextMenuButton');
+      await pageObjects.appMenu.clickMenuItem('indexActionsContextMenuButton');
     },
     async expectManageIndexContextMenuIsShown() {
-      await testSubjects.existOrFail('indexContextMenu');
+      await testSubjects.existOrFail('deleteIndexMenuButton');
     },
     async expectDeleteIndexButtonExists() {
       await testSubjects.existOrFail('deleteIndexMenuButton');
