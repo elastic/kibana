@@ -370,6 +370,103 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should block saving a logstash output when client cert is set but key is missing', async () => {
+    // Regression guard: cert without key must not save — mTLS requires both fields.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should block saving a logstash output when key is set but client cert is missing', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        key: 'key',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should block saving an elasticsearch output when client cert is set but key is missing', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+      target: { value: 'elasticsearch output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUseFleetStatus.mockReturnValue({
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
