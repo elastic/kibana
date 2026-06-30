@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RuleCreateOptionsPanel } from './rule_create_options_panel';
+import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_create_options_panel';
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -110,5 +110,47 @@ describe('RuleCreateOptionsPanel', () => {
     fireEvent.mouseOver(screen.getByTestId('createWithAgentCard'));
 
     expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
+  });
+});
+
+describe('getCreateWithAgentTooltipText', () => {
+  it('returns undefined when both prerequisites are met', () => {
+    expect(
+      getCreateWithAgentTooltipText({
+        hasAgentBuilderCapability: true,
+        isExperimentalFeaturesEnabled: true,
+      })
+    ).toBeUndefined();
+  });
+
+  it('names only the privilege when only the capability is missing', () => {
+    const tooltip = getCreateWithAgentTooltipText({
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
+    });
+
+    expect(tooltip).toContain('Agent Builder: Read');
+    expect(tooltip).not.toContain('advanced setting');
+  });
+
+  it('names only the advanced setting when only the experimental feature is missing', () => {
+    const tooltip = getCreateWithAgentTooltipText({
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: false,
+    });
+
+    expect(tooltip).toContain('Elastic Agent Builder: Experimental Features');
+    expect(tooltip).toContain('advanced setting');
+    expect(tooltip).not.toContain('Agent Builder: Read');
+  });
+
+  it('names both prerequisites when neither is met', () => {
+    const tooltip = getCreateWithAgentTooltipText({
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: false,
+    });
+
+    expect(tooltip).toContain('Agent Builder: Read');
+    expect(tooltip).toContain('Elastic Agent Builder: Experimental Features');
   });
 });

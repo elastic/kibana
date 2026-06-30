@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleManagementABSkillRequirements } from '../../hooks/use_is_rule_management_ab_skill_available';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
@@ -123,18 +124,48 @@ const AI_AGENT_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
   { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
 );
-/**
- * Tooltip shown on the disabled "Create with agent" entry points when the agent builder
- * experimental feature is enabled but the user lacks the privilege backing
- * `capabilities.agentBuilder.show`. Exported so all entry points share one message id.
- */
-export const CREATE_WITH_AGENT_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptions.createWithAgentDisabledTooltip',
+const CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingPrivilegeTooltip',
   {
     defaultMessage:
-      'To create rules with the AI Agent, you need read access to the Agent Builder feature.',
+      'To create rules with the AI Agent, you need the "Agent Builder: Read" privilege.',
   }
 );
+const CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingSettingTooltip',
+  {
+    defaultMessage:
+      'To create rules with the AI Agent, enable the "Elastic Agent Builder: Experimental Features" advanced setting.',
+  }
+);
+const CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingAllTooltip',
+  {
+    defaultMessage:
+      'To create rules with the AI Agent, you need the "Agent Builder: Read" privilege and the "Elastic Agent Builder: Experimental Features" advanced setting enabled.',
+  }
+);
+
+/**
+ * Builds the tooltip shown on the disabled "Create with agent" entry points, naming the specific
+ * prerequisite(s) the user is missing. Returns `undefined` when the skill is fully available (the
+ * option should then be enabled). Shared so all entry points produce the same message.
+ */
+export const getCreateWithAgentTooltipText = ({
+  hasAgentBuilderCapability,
+  isExperimentalFeaturesEnabled,
+}: RuleManagementABSkillRequirements): string | undefined => {
+  if (hasAgentBuilderCapability && isExperimentalFeaturesEnabled) {
+    return undefined;
+  }
+  if (!hasAgentBuilderCapability && !isExperimentalFeaturesEnabled) {
+    return CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP;
+  }
+  if (!hasAgentBuilderCapability) {
+    return CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
+  }
+  return CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP;
+};
 const THRESHOLD_ALERT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle',
   { defaultMessage: 'Threshold Alert' }

@@ -30,7 +30,10 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { useIsRuleManagementABSkillAvailable } from '../../hooks/use_is_rule_management_ab_skill_available';
+import {
+  useIsRuleManagementABSkillAvailable,
+  useRuleManagementABSkillRequirements,
+} from '../../hooks/use_is_rule_management_ab_skill_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 
 import { RulesListTableContainer } from './rules_list_table_container';
@@ -41,7 +44,7 @@ import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_pop
 import { buildRulesListFilter } from './utils';
 import {
   RuleCreateOptionsPanel,
-  CREATE_WITH_AGENT_DISABLED_TOOLTIP,
+  getCreateWithAgentTooltipText,
 } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 
@@ -71,11 +74,10 @@ export const RulesListPage = () => {
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
+  const abSkillRequirements = useRuleManagementABSkillRequirements();
   // We always render the "Create with agent" entry points; when the skill is unavailable they
-  // are shown disabled with a tooltip rather than hidden.
-  const createWithAgentTooltipText = isRuleManagementABSkillAvailable
-    ? undefined
-    : CREATE_WITH_AGENT_DISABLED_TOOLTIP;
+  // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
