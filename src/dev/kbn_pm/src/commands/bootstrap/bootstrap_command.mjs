@@ -32,7 +32,7 @@ const IS_CI = process.env.CI?.match(/(1|true)/i);
 
 const hasNodeModulePatches = async () => {
   try {
-    const entries = await readdir('patches', { withFileTypes: true });
+    const entries = await readdir('patches', { recursive: true, withFileTypes: true });
     return entries.some((entry) => entry.isFile() && entry.name.endsWith('.patch'));
   } catch (error) {
     if (error?.code === 'ENOENT') {

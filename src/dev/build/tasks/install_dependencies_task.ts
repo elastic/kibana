@@ -18,7 +18,7 @@ const NODE_EXEC = process.execPath || 'node';
 
 const hasNodeModulePatches = async (patchesDir: string) => {
   try {
-    const entries = await readdir(patchesDir, { withFileTypes: true });
+    const entries = await readdir(patchesDir, { recursive: true, withFileTypes: true });
     return entries.some((entry) => entry.isFile() && entry.name.endsWith('.patch'));
   } catch (error) {
     if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
