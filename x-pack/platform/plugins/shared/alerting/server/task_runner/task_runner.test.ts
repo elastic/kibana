@@ -627,6 +627,60 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
+  test('enqueues actions with the decoded UIAM credential when rule uses a UIAM API key', async () => {
+    const uiamApiKey = Buffer.from('456:essu_uiam_api_key').toString('base64');
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: {
+        ...taskRunnerFactoryInitializerParams,
+        apiKeyType: ApiKeyType.UIAM,
+        shouldGrantUiam: true,
+      },
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        apiKey: null,
+        uiamApiKey,
+      },
+    });
+
+    await taskRunner.run();
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    const [enqueuedActions] = actionsClient.bulkEnqueueExecution.mock.calls[0];
+    expect(enqueuedActions).toHaveLength(1);
+    expect(enqueuedActions[0]).toEqual(
+      expect.objectContaining({
+        id: '1',
+        apiKey: 'essu_uiam_api_key',
+      })
+    );
+  });
+
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
