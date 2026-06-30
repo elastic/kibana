@@ -135,6 +135,7 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - .storybook/**/*
@@ -148,4 +149,9 @@ fileGroups:
     - test/scout/**/*
     - test/scout_automatic_import/**/*
     - '!target/**/*'
+  jest-config:
+    - common/jest.config.js
+    - public/jest.config.js
+    - scripts/jest.config.js
+    - server/jest.config.js
 tasks: {}

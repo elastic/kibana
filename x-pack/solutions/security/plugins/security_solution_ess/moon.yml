@@ -42,6 +42,7 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -50,4 +51,7 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
+  jest-config:
+    - public/jest.config.js
+    - server/jest.config.js
 tasks: {}

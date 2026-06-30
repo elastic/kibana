@@ -10,7 +10,7 @@ tasks:
     args:
       - scripts/jest.js
       - '--passWithNoTests'
-      - '--config'
+      - '--projects'
       - '@files(jest-config)'
     deps:
       - '~:source'

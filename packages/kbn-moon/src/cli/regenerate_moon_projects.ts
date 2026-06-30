@@ -15,6 +15,7 @@ import deepmerge from 'deepmerge';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import type { Package } from '@kbn/repo-packages';
 import type { PackageManifestBaseFields } from '@kbn/repo-packages/modern/types';
 import { getPackages } from '@kbn/repo-packages';
@@ -25,9 +26,9 @@ import type { MoonProjectConfig } from './moon_project_type';
 import {
   compactFilePathsToGlobs,
   filterPackages,
+  findAllMatchingConfigs,
   readFile,
   readJsonWithComments,
-  resolveFirstExisting,
   sortObjectByKeyPriority,
   writeYaml,
 } from '../util';
@@ -57,6 +58,8 @@ const cliOptions = {
 
 let logger: ToolingLog;
 
+const IGNORED_JEST_CONFIG_DIRS = new Set(['node_modules', 'target', '.git']);
+
 export function regenerateMoonProjects() {
   return run(async ({ log, flags, flagsReader }) => {
     logger = log;
@@ -80,6 +83,9 @@ export function regenerateMoonProjects() {
     const allPackages = getPackages(REPO_ROOT);
     const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const allPackageIds = allPackages.map((pkg) => pkg.name);
+    const selectedProjectDirs = filter?.length
+      ? packages.map((pkg) => pkg.normalizedRepoRelativeDir)
+      : undefined;
 
     for (const pkg of packages) {
       log.verbose(`Generating project configuration for ${pkg.name}`);
@@ -113,6 +119,10 @@ export function regenerateMoonProjects() {
         }
       );
       projectResults[result].push(pkg.name);
+    }
+
+    if (!clear) {
+      verifyJestConfigCoverage(selectedProjectDirs);
     }
 
     log.success(
@@ -228,7 +238,7 @@ function applyTsConfigSettings(
         })
       ),
     };
-    logger.warning(`Skipping ${projectConfig.id} - no tsconfig.json found.`);
+    logger.debug(`Skipping ${projectConfig.id} - no tsconfig.json found.`);
     return;
   }
 
@@ -265,20 +275,168 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
     return;
   }
 
-  const jestConfigName = resolveFirstExisting(
+  const jestConfigs = findAllMatchingConfigs(
     projectConfig.project.sourceRoot,
     MOON_CONST.JEST_CONFIG_FILES
   );
 
-  if (!jestConfigName) {
-    logger.warning(
+  if (jestConfigs.length === 0) {
+    logger.debug(
       `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
     );
   } else {
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
 
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
+    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': jestConfigs };
   }
+}
+
+const normalizeRepoRelativePath = (repoRelativePath: string) =>
+  repoRelativePath.split(path.sep).join('/');
+
+const findAllJestConfigs = (dir: string): string[] => {
+  const results: string[] = [];
+
+  const walk = (currentDir: string) => {
+    let entries: string[];
+    try {
+      entries = fs.readdirSync(currentDir);
+    } catch {
+      return;
+    }
+
+    for (const configName of MOON_CONST.JEST_CONFIG_FILES) {
+      if (entries.includes(configName)) {
+        const fullPath = path.join(currentDir, configName);
+        try {
+          if (fs.statSync(fullPath).isFile()) {
+            results.push(normalizeRepoRelativePath(path.relative(dir, fullPath)));
+          }
+        } catch {
+          // skip if stat fails
+        }
+      }
+    }
+
+    for (const entry of entries) {
+      if (IGNORED_JEST_CONFIG_DIRS.has(entry)) {
+        continue;
+      }
+
+      const fullPath = path.join(currentDir, entry);
+      try {
+        if (fs.statSync(fullPath).isDirectory()) {
+          walk(fullPath);
+        }
+      } catch {
+        // skip if stat fails
+      }
+    }
+  };
+
+  walk(dir);
+  return results.sort();
+};
+
+const findOwningProject = (configRelPath: string): string | undefined => {
+  let dir = path.dirname(path.resolve(REPO_ROOT, configRelPath));
+
+  while (dir !== REPO_ROOT && dir !== path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, KIBANA_JSONC_FILENAME))) {
+      return normalizeRepoRelativePath(path.relative(REPO_ROOT, dir));
+    }
+
+    dir = path.dirname(dir);
+  }
+
+  return undefined;
+};
+
+const readMoonJestConfigs = (projectDir: string): string[] => {
+  const moonPath = path.resolve(REPO_ROOT, projectDir, MOON_CONST.MOON_CONFIG_FILE_NAME);
+
+  try {
+    const parsed = yaml.load(readFile(moonPath)) as MoonProjectConfig | undefined;
+    const jestConfigs = parsed?.fileGroups?.['jest-config'];
+
+    return Array.isArray(jestConfigs)
+      ? jestConfigs.filter((config): config is string => typeof config === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+const findJestConfigsForProject = (projectDir: string): string[] =>
+  findAllMatchingConfigs(path.resolve(REPO_ROOT, projectDir), MOON_CONST.JEST_CONFIG_FILES).map(
+    (configPath) => normalizeRepoRelativePath(path.join(projectDir, configPath))
+  );
+
+function verifyJestConfigCoverage(selectedProjectDirs?: string[]) {
+  const selectedProjectDirSet = selectedProjectDirs
+    ? new Set(selectedProjectDirs.map(normalizeRepoRelativePath))
+    : undefined;
+  const allConfigs = selectedProjectDirs
+    ? selectedProjectDirs.flatMap(findJestConfigsForProject).sort()
+    : findAllJestConfigs(REPO_ROOT);
+  const uncovered: string[] = [];
+  const orphaned: string[] = [];
+  let checkedConfigCount = 0;
+
+  for (const configRelPath of allConfigs) {
+    const projectDir = findOwningProject(configRelPath);
+
+    if (!projectDir) {
+      if (!selectedProjectDirSet) {
+        orphaned.push(configRelPath);
+      }
+      continue;
+    }
+
+    if (selectedProjectDirSet && !selectedProjectDirSet.has(projectDir)) {
+      continue;
+    }
+
+    checkedConfigCount += 1;
+    const moonConfigs = readMoonJestConfigs(projectDir);
+    const configRelToProject = normalizeRepoRelativePath(path.relative(projectDir, configRelPath));
+
+    if (!moonConfigs.includes(configRelToProject)) {
+      uncovered.push(configRelPath);
+    }
+  }
+
+  if (orphaned.length > 0) {
+    logger.error(
+      `${orphaned.length} jest config(s) are not inside any Moon project (no kibana.jsonc ancestor):\n` +
+        orphaned.map((config) => `  - ${config}`).join('\n')
+    );
+  }
+
+  if (uncovered.length > 0) {
+    logger.error(
+      `${uncovered.length} jest config(s) are inside a Moon project but missing from its jest-config file group.\n` +
+        `Run 'node scripts/regenerate_moon_projects.js --update' to fix.\n` +
+        uncovered.map((config) => `  - ${config}`).join('\n')
+    );
+  }
+
+  if (orphaned.length > 0 || uncovered.length > 0) {
+    throw createFailError(
+      [
+        orphaned.length ? `${orphaned.length} orphaned jest config(s)` : undefined,
+        uncovered.length ? `${uncovered.length} jest config(s) not covered by Moon` : undefined,
+      ]
+        .filter(Boolean)
+        .join('; ') + '. See above for details.'
+    );
+  }
+
+  logger.success(
+    `All ${checkedConfigCount} jest configs in ${
+      selectedProjectDirSet ? 'selected Moon projects' : 'Moon projects'
+    } are properly covered`
+  );
 }
 
 type ProjectCreationResult = 'create' | 'update' | 'intact' | 'delete' | 'skip';
@@ -303,17 +461,18 @@ function writeProjectConfigFile(
   if (projectExists) {
     if (update) {
       if (dryRun) {
-        logger.info(`Would update ${name} project configuration.`);
+        logger.debug(`Would update ${name} project configuration.`);
       } else {
         const didUpdate = writeYaml(
           targetPath,
           projectConfig,
           getGeneratedPreambleForProject(projectConfig.id)
         );
-        logger.info(`Updated ${name} project configuration.`);
         if (!didUpdate) {
+          logger.debug(`${name} project configuration is already up to date.`);
           return 'intact';
         }
+        logger.info(`Updated ${name} project configuration.`);
       }
       return 'update';
     } else if (clear) {
@@ -325,7 +484,7 @@ function writeProjectConfigFile(
       }
       return 'delete';
     } else {
-      logger.info(
+      logger.debug(
         `'${MOON_CONST.MOON_CONFIG_FILE_NAME}' already exists at ${targetPath} - skipping creation.`
       );
       return 'skip';
@@ -346,7 +505,7 @@ function applyDevOverrides(projectConfig: MoonProjectConfig, devOverridesPath: s
     return projectConfig;
   }
 
-  logger.info(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
+  logger.debug(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
   try {
     const devOverrides = parse(readFile(devOverridesPath));
     return deepmerge(projectConfig, devOverrides, {

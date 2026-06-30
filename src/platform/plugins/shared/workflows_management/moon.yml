@@ -137,4 +137,5 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+    - server/jest.config.js
 tasks: {}

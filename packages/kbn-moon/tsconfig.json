@@ -20,6 +20,7 @@
     "@kbn/dev-utils",
     "@kbn/dev-cli-runner",
     "@kbn/repo-packages",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-errors"
   ]
 }

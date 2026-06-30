@@ -188,6 +188,7 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - public/**/*
@@ -198,4 +199,7 @@ fileGroups:
     - utils/**/*
     - index.ts
     - '!target/**/*'
+  jest-config:
+    - public/jest.config.js
+    - server/jest.config.js
 tasks: {}
