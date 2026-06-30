@@ -401,6 +401,87 @@ steps:
     });
   });
 
+  describe('branch killed by branch-timeout records a terminal branch step', () => {
+    // Regression: a branch terminated by `branch-timeout` left its underlying
+    // branch step execution stuck in WAITING/RUNNING forever (spinner in the
+    // UI) even though the parallel aggregate correctly reported `timed_out`.
+    // The branch step must be transitioned to a terminal TIMED_OUT status.
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['x', 'y'];
+
+    // A poll step that never completes on its own; only `branch-timeout` ends it.
+    const neverCompletingPoll = createPollServerStepDefinition({
+      id: 'integration.parallelNeverPoll',
+      category: StepCategory.Kibana,
+      label: 'Never-completing poll branch (integration)',
+      description: 'Always asks to poll again',
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+      poll: async ({ state }) => {
+        const count = (state as { count?: number } | undefined)?.count ?? 0;
+        return { state: { count: count + 1 } };
+      },
+      policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+      ceilings: { maxAttempts: 100, maxWaitMs: 600_000 },
+    });
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      (
+        workflowRunFixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock
+      ).mockImplementation((id: string) =>
+        id === 'integration.parallelNeverPoll' ? neverCompletingPoll : undefined
+      );
+      (
+        workflowRunFixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock
+      ).mockImplementation((id: string) => id === 'integration.parallelNeverPoll');
+
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: fanOut
+    type: parallel
+    foreach: '{{ consts.items }}'
+    mode: settled
+    branch-timeout: '1ms'
+    steps:
+      - name: timeoutBranch
+        type: integration.parallelNeverPoll
+        with: {}
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      let guard = 0;
+      while (getExecution(workflowRunFixture)?.status === ExecutionStatus.WAITING && guard < 10) {
+        await workflowRunFixture.resumeWorkflow();
+        guard += 1;
+      }
+    });
+
+    it('completes the workflow (parallel contains the branch timeouts)', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('records each branch step as TIMED_OUT, not left RUNNING/WAITING', () => {
+      const branchExecutions = stepExecutionsFor(workflowRunFixture, 'timeoutBranch');
+      expect(branchExecutions.length).toBeGreaterThan(0);
+      expect(branchExecutions.every((se) => se.status === ExecutionStatus.TIMED_OUT)).toBe(true);
+      expect(
+        branchExecutions.some(
+          (se) => se.status === ExecutionStatus.RUNNING || se.status === ExecutionStatus.WAITING
+        )
+      ).toBe(false);
+    });
+
+    it('aggregate output reports every branch timed_out', () => {
+      const parallel = stepExecutionsFor(workflowRunFixture, 'fanOut')[0];
+      const output = parallel?.output as { failed: number; status: string } | undefined;
+      expect(output?.status).toBe('failed');
+      expect(output?.failed).toBe(items.length);
+    });
+  });
+
   describe('timer-based wait inside a branch body', () => {
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['a', 'b', 'c'];

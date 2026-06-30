@@ -100,6 +100,7 @@ describe('EnterParallelNodeImpl', () => {
             return { status: branchOutcome(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }),
     } as unknown as jest.Mocked<StepExecutionRuntimeFactory>;
@@ -250,6 +251,7 @@ describe('EnterParallelNodeImpl', () => {
           return { status: ExecutionStatus.COMPLETED, state: {} };
         },
         getCurrentStepResult: () => ({ output: { node: nodeId, branch: index }, error: undefined }),
+        timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
     nodesFactory.create = jest.fn(
@@ -314,11 +316,14 @@ describe('EnterParallelNodeImpl', () => {
   it('aborts and times out a blocking branch that exceeds its branch-timeout', async () => {
     node = makeNode({ 'branch-timeout': '20ms', mode: 'settled' });
     const aborts: boolean[] = [];
+    const timeoutStepCalls: jest.Mock[] = [];
     factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       const abortController = new AbortController();
+      const timeoutStep = jest.fn();
+      timeoutStepCalls.push(timeoutStep);
       return {
         abortController,
         contextManager: { ensureContextReady: jest.fn() },
@@ -327,6 +332,7 @@ describe('EnterParallelNodeImpl', () => {
           return { status: ExecutionStatus.RUNNING, state: {} };
         },
         getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+        timeoutStep,
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
     nodesFactory.create = jest.fn(
@@ -354,6 +360,9 @@ describe('EnterParallelNodeImpl', () => {
     };
     expect(output.status).toBe('failed');
     expect(output.results.every((r) => r.status === 'timed_out')).toBe(true);
+    // Each timed-out branch's step execution must be marked terminal so it does
+    // not leak in RUNNING (regression: branch http step stuck "running" in UI).
+    expect(timeoutStepCalls.some((fn) => fn.mock.calls.length > 0)).toBe(true);
   });
 
   it('suspends (enterWaitUntil) and does not finish while a branch is still in flight', async () => {
@@ -568,6 +577,7 @@ describe('EnterParallelNodeImpl', () => {
             return { status: ExecutionStatus.COMPLETED, state: {} };
           },
           getCurrentStepResult: () => ({ output: { node: nodeId }, error: undefined }),
+          timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -625,6 +635,7 @@ describe('EnterParallelNodeImpl', () => {
             output: failed ? undefined : { node: nodeId },
             error: failed ? { message: 'boom' } : undefined,
           }),
+          timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 

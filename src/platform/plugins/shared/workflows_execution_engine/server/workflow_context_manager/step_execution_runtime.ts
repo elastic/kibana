@@ -266,6 +266,44 @@ export class StepExecutionRuntime {
   }
 
   /**
+   * Marks the step as TIMED_OUT.
+   *
+   * Used when a deadline aborts the step's in-flight work before it could
+   * write its own terminal status (e.g. a parallel branch killed by
+   * `branch-timeout`). Unlike {@link failStep}, this does NOT set the
+   * workflow-level error: the owner of the deadline (the parallel step)
+   * accounts for the timeout itself and decides final disposition, so a leaked
+   * workflow error here would be escalated by the execution loop's
+   * `catchError` and fail the whole workflow. The lifecycle / IO split mirrors
+   * {@link failStep}.
+   *
+   * @param error - The timeout error to record on the step execution.
+   */
+  public timeoutStep(error: Error): void {
+    const executionError = ExecutionError.fromError(error);
+    const serializedError = executionError.toSerializableObject();
+
+    const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
+    const finishedAt = new Date().toISOString();
+    const executionTimeMs = startedStepExecution?.startedAt
+      ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
+      : undefined;
+
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      status: ExecutionStatus.TIMED_OUT,
+      scopeStack: this.stackFrames,
+      finishedAt,
+      error: serializedError,
+      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
+    });
+    this.stepIoService.setStepOutput(this.stepExecutionId, null);
+    this.logStepFail(executionError);
+  }
+
+  /**
    * Normalizes any LLM token usage the step reported (`output.metadata.usage`)
    * and rolls it into the per-execution total. Returns the normalized usage so
    * the caller can also persist it on the step execution. No-op (returns

@@ -306,6 +306,10 @@ export class EnterParallelNodeImpl implements NodeImplementation {
           branch.status = 'timed_out';
           branch.timedOut = true;
           branch.finishedAt = checkNow;
+          // The branch parked in a durable wait/poll and never reached a
+          // terminal status; mark its current step execution TIMED_OUT so the
+          // per-branch step record does not leak in WAITING/RUNNING.
+          this.markBranchNodeTimedOut(branch);
         }
       }
     }
@@ -483,6 +487,12 @@ export class EnterParallelNodeImpl implements NodeImplementation {
     );
 
     if (timedOut) {
+      // The deadline aborted the branch's in-flight work mid-run, so the branch
+      // node never wrote its own terminal status — its step execution would leak
+      // in RUNNING forever. Mark it TIMED_OUT here so the per-branch step record
+      // matches the aggregate `results[]`. This does not set the workflow error
+      // (the parallel step owns timeout disposition); see `timeoutStep`.
+      branchRuntime.timeoutStep(new Error(`Parallel branch was terminated by a timeout.`));
       return 'timed_out';
     }
 
@@ -572,6 +582,22 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       this.wfExecutionRuntimeManager.setScopeStack(previousScope);
       this.branchScopeActive = false;
     }
+  }
+
+  /**
+   * Marks a branch's current step execution TIMED_OUT. Used for branches that
+   * parked in a durable wait/poll across ticks and then blew their
+   * `branch-timeout`, so they never returned through `runBranchNode`'s in-tick
+   * timeout path. Recreates the branch runtime for its current node and records
+   * the timeout without touching the workflow-level error.
+   */
+  private markBranchNodeTimedOut(branch: ParallelBranchState): void {
+    const nodeId = branch.currentNodeId ?? this.getBranchStartNodeId(branch.index);
+    const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+      nodeId,
+      stackFrames: this.buildBranchStackFrames(branch.index),
+    });
+    branchRuntime.timeoutStep(new Error(`Parallel branch was terminated by a timeout.`));
   }
 
   private buildBranchStackFrames(index: number): StackFrame[] {
