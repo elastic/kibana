@@ -30,7 +30,7 @@ export interface ChangeHistoryProviderProps {
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
   permissions?: ChangeHistoryPermissions;
-  scope?: ChangeHistoryScope;
+  scope: ChangeHistoryScope;
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   children: React.ReactNode;
 }
@@ -95,6 +95,7 @@ export const ChangeHistoryProvider = ({
       },
       supports,
       telemetry,
+      scope,
     }),
     [
       adapter,
@@ -103,6 +104,7 @@ export const ChangeHistoryProvider = ({
       objectId,
       renderBadge,
       renderPreview,
+      scope,
       supports,
       telemetry,
     ]

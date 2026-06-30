@@ -11,7 +11,11 @@ import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
 import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
-import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../test_utils/change_history_test_fixtures';
+import {
+  TEST_CHANGE_HISTORY_SCOPE,
+  TEST_OBJECT_ID,
+  TEST_OBJECT_TITLE,
+} from '../test_utils/change_history_test_fixtures';
 import { changeHistoryObjectQueryKeyPrefix } from './change_history_list_query_key';
 import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
 
@@ -46,7 +50,7 @@ const createHarness = (
         permissions={permissions}
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => null}
-        scope={reportEvent ? testScope : undefined}
+        scope={TEST_CHANGE_HISTORY_SCOPE}
         analytics={reportEvent ? { reportEvent } : undefined}
       >
         {children}
@@ -91,7 +95,7 @@ describe('useChangeHistoryRestore', () => {
     });
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID),
+      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID, TEST_CHANGE_HISTORY_SCOPE),
       refetchType: 'active',
     });
     expect(onRestored).toHaveBeenCalledTimes(1);

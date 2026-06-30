@@ -58,17 +58,6 @@ describe('createChangeHistoryTelemetryReporter', () => {
     expect(() => telemetry.reportOpened()).not.toThrow();
   });
 
-  it('is a no-op when scope is omitted', () => {
-    const reportEvent = jest.fn();
-    const telemetry = createChangeHistoryTelemetryReporter({
-      analytics: { reportEvent },
-    });
-
-    telemetry.reportOpened();
-
-    expect(reportEvent).not.toHaveBeenCalled();
-  });
-
   it('is a no-op when enabled is false', () => {
     const reportEvent = jest.fn();
     const telemetry = createChangeHistoryTelemetryReporter({

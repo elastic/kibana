@@ -23,7 +23,7 @@ import {
 
 export interface CreateChangeHistoryTelemetryReporterOptions {
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
-  scope?: ChangeHistoryScope;
+  scope: ChangeHistoryScope;
   /** When false, all reports are no-ops. Defaults to true. */
   enabled?: boolean;
 }
@@ -43,7 +43,7 @@ export const createChangeHistoryTelemetryReporter = ({
   scope,
   enabled = true,
 }: CreateChangeHistoryTelemetryReporterOptions): ChangeHistoryTelemetryReporter => {
-  if (!enabled || !analytics?.reportEvent || !scope) {
+  if (!enabled || !analytics?.reportEvent) {
     return noopChangeHistoryTelemetryReporter;
   }
 

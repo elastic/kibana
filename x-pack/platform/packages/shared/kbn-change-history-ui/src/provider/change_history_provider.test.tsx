@@ -52,7 +52,7 @@ const Harness = ({
         adapter={adapter}
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => <div data-test-subj="previewPanel" />}
-        scope={reportEvent ? testScope : undefined}
+        scope={testScope}
         analytics={reportEvent ? { reportEvent } : undefined}
         features={{ telemetry: telemetryEnabled }}
       >
@@ -153,6 +153,7 @@ describe('ChangeHistoryProvider', () => {
             adapter={adapter}
             labels={{ previewTitle: TEST_OBJECT_TITLE }}
             renderPreview={() => null}
+            scope={testScope}
           >
             <Probe />
           </ChangeHistoryProvider>

@@ -11,6 +11,7 @@ import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import type { ListChangeHistoryResult } from '../types/list_change_history_params';
 import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
+import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 import { changeHistoryListQueryKey } from './change_history_list_query_key';
 
 export interface UseChangeHistoryListArgs {
@@ -39,6 +40,7 @@ export const useChangeHistoryList = ({
   enabled = true,
   pageSize = DEFAULT_CHANGE_HISTORY_PAGE_SIZE,
 }: UseChangeHistoryListArgs): UseChangeHistoryListResult => {
+  const { scope } = useChangeHistoryConfig();
   const {
     data,
     error,
@@ -49,7 +51,7 @@ export const useChangeHistoryList = ({
     hasNextPage,
     refetch: refetchQuery,
   } = useInfiniteQuery<ListChangeHistoryResult, Error>(
-    changeHistoryListQueryKey({ objectId, pageSize }),
+    changeHistoryListQueryKey({ objectId, pageSize, scope }),
     ({ signal, pageParam = 0 }) =>
       adapter.listChanges({
         objectId,

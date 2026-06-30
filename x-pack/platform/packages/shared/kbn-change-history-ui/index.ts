@@ -39,11 +39,10 @@ export {
   useInvalidateChangeHistory,
   useChangeHistoryAutoSelection,
   CHANGE_HISTORY_QUERY_KEY,
-  CHANGE_HISTORY_LIST_QUERY_KEY,
   changeHistoryObjectQueryKeyPrefix,
   changeHistoryListQueryKey,
   changeHistoryDetailQueryKey,
-  changeHistoryListQueryKeyPrefix,
+  changeHistoryScopeQueryKeyPrefix,
 } from './src/hooks';
 export {
   getChangeHistoryErrorCode,

@@ -17,16 +17,13 @@ import { ChangeHistoryRestoreButton } from './change_history_restore_button';
 import {
   TEST_OBJECT_ID,
   TEST_OBJECT_TITLE,
+  TEST_CHANGE_HISTORY_SCOPE,
   TEST_SNAPSHOT_OLD,
 } from '../../test_utils/change_history_test_fixtures';
 import { createQueryClientWrapper } from '../../test_utils/create_query_client_wrapper';
 import { ChangeHistoryTelemetryEventTypes } from '../../telemetry/types';
 
-const testScope = {
-  module: 'stack',
-  dataset: 'workflows',
-  objectType: 'workflow',
-};
+const testScope = TEST_CHANGE_HISTORY_SCOPE;
 
 const historicalChange: ChangeHistoryDetail = {
   id: 'evt-3',
@@ -77,7 +74,7 @@ const renderButton = ({
           features={features}
           permissions={permissions}
           renderPreview={() => null}
-          scope={reportEvent ? testScope : undefined}
+          scope={testScope}
           analytics={reportEvent ? { reportEvent } : undefined}
         >
           <ChangeHistoryRestoreButton change={change} currentChange={currentChange} />

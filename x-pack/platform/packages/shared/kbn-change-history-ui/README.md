@@ -8,7 +8,7 @@ List, detail, and restore flows use **react-query** (`@kbn/react-query`) for cac
 
 1. **Mount `QueryClientProvider`** — once at the app root (or any ancestor of change history UI). Most Kibana apps already do this; if yours does not, add it before `ChangeHistoryProvider`.
 2. **Implement `ChangeHistoryAdapter`** — `listChanges` and `getChange`, optional `restoreChange`.
-3. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, `labels.previewTitle`, optional `renderBadge`, `features`, and `permissions`.
+3. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, `labels.previewTitle`, **`scope`**, optional `renderBadge`, `features`, `permissions`, and optional `analytics` for telemetry.
    Enable restore with **both** `features={{ restore: true }}` and `permissions={{ canRestore: true }}`.
 4. **Render `ChangeHistoryTrigger` + `ChangeHistoryModal`** — modal overlay; no dedicated route required.
 
@@ -27,6 +27,11 @@ import {
     renderPreview={renderWorkflowYamlPreview}
     renderBadge={renderWorkflowBadge}
     labels={{ previewTitle: workflowName }}
+    scope={{
+      module: 'stack',
+      dataset: 'workflows',
+      objectType: 'workflow',
+    }}
   >
     <ChangeHistoryTrigger />
     <ChangeHistoryModal />
@@ -42,15 +47,16 @@ Wrap components under test with a `QueryClientProvider`. See `src/test_utils/cre
 
 Hooks read from the nearest `QueryClientProvider`. Multiple consumers in the same app **share one client**; cache entries are isolated by query key, not by adapter instance.
 
-Query keys are scoped per object:
+Query keys are namespaced by **change-history scope** and `objectId`:
 
 ```
-['change-history', <objectId>, 'list', pageSize]
-['change-history', <objectId>, 'detail', <changeId>]
+['change-history', module, dataset, objectType, objectId, 'list', pageSize]
+['change-history', module, dataset, objectType, objectId, 'detail', changeId]
 ```
 
-- **`objectId` must be unique** among all change-history consumers under the same `QueryClient`. Use the domain's real saved-object id, or prefix it (e.g. `workflow:${id}`) if ids could collide across features.
-- **`adapter` is not part of the key** — do not reuse the same `objectId` with different adapters.
+- Pass **`scope`** to `ChangeHistoryProvider` — same triple as telemetry and `@kbn/change-history` server clients (`module` / `dataset` / `objectType`). Workflows: `stack` / `workflows` / `workflow`.
+- **`objectId`** must be unique within that scope under the shared `QueryClient`.
+- **`adapter` is not part of the key** — do not reuse the same `objectId` + `scope` with different adapters.
 - After a successful restore, `useChangeHistoryRestore` calls `useInvalidateChangeHistory(objectId)` to refetch active list and detail queries. Consumers do not need to call invalidation unless they mutate history outside the restore button.
 
 ## HTTP adapter
@@ -73,6 +79,6 @@ node scripts/jest x-pack/platform/packages/shared/kbn-change-history-ui/src/comp
 - Types (`ChangeHistoryAdapter`, DTOs, …)
 - `ChangeHistoryProvider`, `useChangeHistoryConfig`, `useChangeHistoryList`, `useChangeHistoryDetail`, `useChangeHistoryRestore`
 - `useInvalidateChangeHistory`, `useChangeHistoryAutoSelection`
-- Query key helpers (`changeHistoryListQueryKey`, `changeHistoryDetailQueryKey`, `changeHistoryObjectQueryKeyPrefix`, …)
+- Query key helpers (`changeHistoryListQueryKey`, `changeHistoryDetailQueryKey`, `changeHistoryObjectQueryKeyPrefix`, `changeHistoryScopeQueryKeyPrefix`, …)
 - `ChangeHistoryModal`, `ChangeHistoryTrigger`, `ChangeHistoryPreviewPanel`
 - `createChangeHistoryHttpAdapter`

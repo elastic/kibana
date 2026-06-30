@@ -17,17 +17,14 @@ import { ChangeHistoryTrigger } from './change_history_trigger';
 import {
   TEST_OBJECT_ID,
   TEST_OBJECT_TITLE,
+  TEST_CHANGE_HISTORY_SCOPE,
   TEST_SNAPSHOT,
   TEST_SNAPSHOT_OLDER,
 } from '../../test_utils/change_history_test_fixtures';
 import { createQueryClientWrapper } from '../../test_utils/create_query_client_wrapper';
 import { ChangeHistoryTelemetryEventTypes } from '../../telemetry/types';
 
-const testScope = {
-  module: 'stack',
-  dataset: 'workflows',
-  objectType: 'workflow',
-};
+const testScope = TEST_CHANGE_HISTORY_SCOPE;
 
 const listItem = {
   id: 'evt-1',
@@ -66,6 +63,7 @@ const renderModal = ({
           objectId={TEST_OBJECT_ID}
           adapter={adapter}
           labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          scope={testScope}
           renderPreview={({ change }) => (
             <pre data-test-subj="previewYaml">{JSON.stringify(change.snapshot)}</pre>
           )}
