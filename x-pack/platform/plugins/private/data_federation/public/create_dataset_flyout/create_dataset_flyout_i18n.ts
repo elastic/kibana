@@ -77,7 +77,7 @@ export const createDatasetFlyoutStrings = {
 
   dataSourceHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceHelp', {
-      defaultMessage: 'Select the external connection this dataset belongs to.',
+      defaultMessage: 'Select the external data source this dataset belongs to.',
     }),
 
   resourceLabel: () =>

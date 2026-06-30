@@ -61,7 +61,7 @@ export const mainTranslations = {
         defaultMessage: 'Data sources',
       }),
       noItems: i18n.translate('xpack.dataFederation.table.noItems', {
-        defaultMessage: "You don't have any data sources yet.",
+        defaultMessage: 'You don't have any data sources yet. Connect to a data source to get started.',
       }),
       searchPlaceholder: i18n.translate('xpack.dataFederation.search.placeholder', {
         defaultMessage: 'Search data sources…',
@@ -114,7 +114,7 @@ export const mainTranslations = {
         defaultMessage: 'Datasets',
       }),
       noItems: i18n.translate('xpack.dataFederation.setsTable.noItems', {
-        defaultMessage: "You don't have any datasets yet.",
+        defaultMessage: 'Add a dataset to start querying your data sources.',
       }),
       searchPlaceholder: i18n.translate('xpack.dataFederation.setsSearch.placeholder', {
         defaultMessage: 'Search datasets…',
