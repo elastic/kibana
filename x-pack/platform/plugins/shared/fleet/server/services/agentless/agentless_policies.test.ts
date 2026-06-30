@@ -550,7 +550,8 @@ describe('AgentlessPoliciesService', () => {
           perPage: 5,
           sortField: 'name',
           sortOrder: 'asc',
-          kuery: '(fleet-package-policies.supports_agentless:true) AND (name:foo)',
+          kuery:
+            '(fleet-package-policies.supports_agentless:true) AND (fleet-package-policies.name: foo)',
         })
       );
     });
