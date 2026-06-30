@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse, RuleSignatureId } from '../../../../common/api/detection_engine';
+import { prepareKQLStringParam } from '../../../../common/utils/kql';
 import { useFindRulesQuery } from '../api/hooks/use_find_rules_query';
 
 export const useFindInstalledPrebuiltRuleByRuleId = (
@@ -14,7 +15,9 @@ export const useFindInstalledPrebuiltRuleByRuleId = (
 ): { rule: RuleResponse | undefined; isFetching: boolean; isFetched: boolean } => {
   const queryResult = useFindRulesQuery(
     {
-      filter: ruleId ? { term: `alert.attributes.params.ruleId: "${ruleId}"` } : undefined,
+      filter: ruleId
+        ? { term: `alert.attributes.params.ruleId: ${prepareKQLStringParam(ruleId)}` }
+        : undefined,
       pagination: { page: 1, perPage: 1 },
     },
     { enabled: Boolean(ruleId) && (options?.enabled ?? true) }
