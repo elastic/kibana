@@ -95,6 +95,9 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.alertActions.popoverAriaLabel', {
+        defaultMessage: 'Alert actions menu',
+      })}
     >
       <EuiContextMenuPanel size="s" items={items} />
     </EuiPopover>
