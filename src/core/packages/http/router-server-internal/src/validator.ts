@@ -38,8 +38,8 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   private static ResultFactory: RouteValidationResultFactory = {
     ok: <T>(value: T) => ({ value }),
-    badRequest: (error: Error | string, path?: string[]) => ({
-      error: new RouteValidationError(error, path),
+    badRequest: (error: unknown, path?: string[]) => ({
+      error: createRouteValidationError(error, path),
     }),
   };
 
@@ -142,7 +142,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     try {
       result = validateFn(data, RouteValidator.ResultFactory);
     } catch (err) {
-      result = { error: new RouteValidationError(err) };
+      result = { error: createRouteValidationError(err) };
     }
 
     if (result.error) {
@@ -162,4 +162,8 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
       return schema.maybe(schema.nullable(schema.any({})));
     }
   }
+}
+
+function createRouteValidationError(error: unknown, path?: string[]): RouteValidationError {
+  return new RouteValidationError(error, path);
 }

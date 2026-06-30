@@ -9,19 +9,32 @@
 
 import { type ObjectType, SchemaTypeError, type Type } from '@kbn/config-schema';
 import type { ZodType } from '@kbn/zod/v4';
+import type { IKibanaResponse } from './response';
+import type { KibanaResponseFactory } from './response_factory';
+import type { KibanaRequest } from './request';
 
 /**
  * Error to return when the validation is not successful.
  * @public
  */
 export class RouteValidationError extends SchemaTypeError {
-  constructor(error: Error | string, path: string[] = []) {
-    super(error, path);
+  public readonly rawError: unknown;
+
+  constructor(error: unknown, path: string[] = []) {
+    super(normalizeRouteValidationErrorMessage(error), path);
+    this.rawError = error;
 
     // Set the prototype explicitly, see:
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, RouteValidationError.prototype);
   }
+}
+
+function normalizeRouteValidationErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
 }
 
 /**
@@ -33,7 +46,7 @@ export class RouteValidationError extends SchemaTypeError {
  */
 export interface RouteValidationResultFactory {
   ok: <T>(value: T) => { value: T };
-  badRequest: (error: Error | string, path?: string[]) => { error: RouteValidationError };
+  badRequest: (error: unknown, path?: string[]) => { error: RouteValidationError };
 }
 
 /**
@@ -186,6 +199,34 @@ export interface RouteValidatorFullConfigResponse {
 }
 
 /**
+ * Normalized request validation error passed to {@link OnRequestValidationError}.
+ * @public
+ */
+export interface RequestValidationError {
+  message: string;
+  source: 'params' | 'query' | 'body' | 'unknown';
+  rawError: unknown;
+}
+
+/**
+ * Maps a request validation failure to a Kibana response.
+ * @public
+ */
+export type RequestValidationErrorHandler = (
+  error: RequestValidationError,
+  request: KibanaRequest,
+  response: KibanaResponseFactory
+) => IKibanaResponse | Promise<IKibanaResponse>;
+
+/**
+ * Maps request validation failures to documented Kibana responses.
+ *
+ * Response metadata is declared in {@link RouteValidatorRequestAndResponses.response}.
+ * @public
+ */
+export type OnRequestValidationError = RequestValidationErrorHandler;
+
+/**
  * An alternative form to register both request schema and all response schemas.
  * @public
  */
@@ -195,6 +236,10 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
    * Response schemas for your route.
    */
   response?: RouteValidatorFullConfigResponse;
+  /**
+   * Maps request validation failures to responses declared in {@link RouteValidatorRequestAndResponses.response}.
+   */
+  onRequestValidationError?: OnRequestValidationError;
 }
 
 /**

@@ -22,6 +22,7 @@ import type {
   RouteSecurity,
 } from '../..';
 import type { RouteDeprecationInfo } from '../router/route';
+import type { RequestValidationErrorHandler } from '../router/route_validator';
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
@@ -324,6 +325,12 @@ export interface VersionedRouteValidation<P, Q, B> {
    * @public
    */
   response?: VersionedRouteResponseValidation;
+  /**
+   * Maps request validation failures to responses declared in {@link VersionedRouteValidation.response}.
+   *
+   * @public
+   */
+  onRequestValidationError?: RequestValidationErrorHandler;
 }
 
 /**
