@@ -13,7 +13,7 @@ const baseConfig = createPlaywrightConfig({
 
 const config: ReturnType<typeof createPlaywrightConfig> = {
   ...baseConfig,
-  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}{ext}',
+  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}_snapshots/{arg}_{projectName}{ext}',
 };
 
 export default config;

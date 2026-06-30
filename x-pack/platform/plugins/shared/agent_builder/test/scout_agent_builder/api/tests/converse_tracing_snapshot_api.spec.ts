@@ -234,7 +234,7 @@ apiTest.describe('Agent Builder — tracing snapshot', { tag: [...tags.stateful.
           return byName !== 0 ? byName : JSON.stringify(a).localeCompare(JSON.stringify(b));
         });
 
-      expect(JSON.stringify(spans, null, 2)).toMatchSnapshot('agent-builder-traces.json');
+      expect(JSON.stringify(spans, null, 2)).toMatchSnapshot('agent_builder_traces.json');
     }
   );
 });
