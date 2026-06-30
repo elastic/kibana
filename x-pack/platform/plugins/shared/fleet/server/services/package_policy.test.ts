@@ -2383,6 +2383,109 @@ describe('Package policy service', () => {
       });
     });
 
+    it('should inject data_stream.dataset into templateVars when absent from stream vars (composable integration)', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-composable-no-dataset-var',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  // data_stream.dataset intentionally absent — composable integration case
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'dsvarpkg.customds' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
+    it('should not overwrite data_stream.dataset in templateVars when already present in stream vars', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-existing-dataset-var',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': { value: 'user.custom_dataset', type: 'text' },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      // stream.data_stream.dataset is 'dsvarpkg.customds' but the user-set var should win
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'user.custom_dataset' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
     it('should work with a two level dataset name', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
@@ -12960,6 +13063,14 @@ describe('_applyIndexPrivileges()', () => {
 });
 
 describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
   const pkgInfo = {
     name: 'custom_logs',
     title: 'Custom Logs',
@@ -13082,6 +13193,72 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         oldPackagePolicy,
         packagePolicyUpdate: newPackagePolicy,
         pkgInfo: { ...pkgInfo, type: 'integration' },
+      })
+    ).not.toThrow();
+  });
+
+  it('should throw if data stream type is modified', () => {
+    const makePolicyWithType = (streamType: string) => ({
+      ...createInputPkgPolicy({ namespace: 'default', dataset: 'custom_logs.logs' }),
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'custom_logs.logs' },
+              vars: {
+                'data_stream.dataset': { type: 'text', value: 'custom_logs.logs' },
+                'data_stream.type': { type: 'text', value: streamType },
+              },
+              id: 'logfile-custom_logs.logs-1',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy: makePolicyWithType('logs'),
+        packagePolicyUpdate: makePolicyWithType('metrics'),
+        pkgInfo,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Package policy data stream type cannot be modified for input only packages, please create a new package policy."`
+    );
+  });
+
+  it('should not throw if data stream type is unchanged', () => {
+    const makePolicyWithType = (streamType: string) => ({
+      ...createInputPkgPolicy({ namespace: 'default', dataset: 'custom_logs.logs' }),
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'custom_logs.logs' },
+              vars: {
+                'data_stream.dataset': { type: 'text', value: 'custom_logs.logs' },
+                'data_stream.type': { type: 'text', value: streamType },
+              },
+              id: 'logfile-custom_logs.logs-1',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy: makePolicyWithType('logs'),
+        packagePolicyUpdate: makePolicyWithType('logs'),
+        pkgInfo,
       })
     ).not.toThrow();
   });
