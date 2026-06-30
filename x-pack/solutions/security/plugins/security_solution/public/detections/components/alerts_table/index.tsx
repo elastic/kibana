@@ -187,6 +187,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     uiSettings,
     settings,
     cases,
+    agentBuilder,
   } = kibanaServices;
 
   const { from, to, setQuery } = useGlobalTime();
@@ -613,6 +614,14 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   );
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
+
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const pathway =
+    tableType === TableId.alertsOnRuleDetailsPage
+      ? ('bulk_alerts_rule_details' as const)
+      : ('bulk_alerts_alerts_page' as const);
+  const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
