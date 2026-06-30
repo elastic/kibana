@@ -10,10 +10,7 @@ import pMap from 'p-map';
 
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 import { appContextService, packagePolicyService } from '../../services';
-import type {
-  FleetRequestHandler,
-  ListAgentlessPoliciesRequestSchema,
-} from '../../types';
+import type { FleetRequestHandler, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
   DeleteAgentlessPolicyRequestSchema,
