@@ -27,8 +27,18 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import Papa from 'papaparse';
 
 type QueryType = 'direct' | 'indirect' | 'distractor';
+
+interface CsvRow {
+  skill_id: string;
+  category: string;
+  query: string;
+  query_type: QueryType;
+  expected_skill: string;
+  notes: string;
+}
 
 export interface BenchmarkExample {
   input: { question: string };
@@ -48,35 +58,27 @@ export interface BenchmarkExample {
 
 function parseCsv(): BenchmarkExample[] {
   const csvPath = path.join(__dirname, 'benchmark_dataset.csv');
-  const lines = fs
-    .readFileSync(csvPath, 'utf-8')
-    .split('\n')
-    .filter((line) => line.trim() && !line.startsWith('skill_id'));
+  const csvString = fs.readFileSync(csvPath, 'utf-8');
 
-  return lines.map((line) => {
-    // Anchor on query_type values to correctly handle any commas within the query text.
-    const match = line.match(/^([^,]+),([^,]+),(.+),(direct|indirect|distractor),([^,]*),(.*)$/);
-    if (!match) {
-      throw new Error(`Failed to parse CSV row: ${line}`);
-    }
-
-    const [, skillId, category, query, queryType, , notes] = match;
-    const queryTyped = queryType as QueryType;
-
-    return {
-      input: { question: query.trim() },
-      output:
-        queryTyped === 'distractor'
-          ? { shouldNotActivateSkill: skillId }
-          : { expectedSkill: skillId },
-      metadata: {
-        skillId,
-        category,
-        queryType: queryTyped,
-        ...(notes.trim() ? { notes: notes.trim() } : {}),
-      },
-    };
+  const { data } = Papa.parse<CsvRow>(csvString, {
+    header: true,
+    dynamicTyping: false,
+    skipEmptyLines: true,
   });
+
+  return data.map(({ skill_id, category, query, query_type, notes }) => ({
+    input: { question: query.trim() },
+    output:
+      query_type === 'distractor'
+        ? { shouldNotActivateSkill: skill_id }
+        : { expectedSkill: skill_id },
+    metadata: {
+      skillId: skill_id,
+      category,
+      queryType: query_type,
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
+    },
+  }));
 }
 
 const ALL_EXAMPLES: BenchmarkExample[] = parseCsv();

@@ -67,9 +67,10 @@ export const getSkillsLoadedFromSteps = (output: TaskOutput): string[] => {
  */
 const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
   const lower = skillName.toLowerCase();
+  const pathSegment = lower.replace(/\./g, '/');
   return loadedNames.some((n) => {
     const nl = n.toLowerCase();
-    return nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${lower}/skill.md`);
+    return nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${pathSegment}/skill.md`);
   });
 };
 
@@ -143,7 +144,11 @@ export const skillSelectionEvaluator: Evaluator = {
       (expected as BenchmarkExample['output']) ?? {};
 
     if (!expectedSkill && !shouldNotActivateSkill) {
-      return { score: 1, label: 'SKIP', explanation: 'No skill routing assertion in expected output' };
+      return {
+        score: 1,
+        label: 'SKIP',
+        explanation: 'No skill routing assertion in expected output',
+      };
     }
 
     const loadedNames = getSkillsLoadedFromSteps(output);
@@ -154,8 +159,12 @@ export const skillSelectionEvaluator: Evaluator = {
         score: loaded ? 1 : 0,
         label: loaded ? 'PASS' : 'FAIL',
         explanation: loaded
-          ? `Expected skill '${expectedSkill}' was loaded. Identifiers seen: ${loadedNames.join(', ')}`
-          : `Expected skill '${expectedSkill}' was NOT loaded. Identifiers seen: ${loadedNames.join(', ') || 'none'}`,
+          ? `Expected skill '${expectedSkill}' was loaded. Identifiers seen: ${loadedNames.join(
+              ', '
+            )}`
+          : `Expected skill '${expectedSkill}' was NOT loaded. Identifiers seen: ${
+              loadedNames.join(', ') || 'none'
+            }`,
         metadata: { expectedSkill, loadedNames, loaded },
       };
     }
@@ -166,8 +175,12 @@ export const skillSelectionEvaluator: Evaluator = {
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Skill '${shouldNotActivateSkill}' correctly did not activate. Identifiers seen: ${loadedNames.join(', ') || 'none'}`
-        : `Skill '${shouldNotActivateSkill}' incorrectly activated. Identifiers seen: ${loadedNames.join(', ')}`,
+        ? `Skill '${shouldNotActivateSkill}' correctly did not activate. Identifiers seen: ${
+            loadedNames.join(', ') || 'none'
+          }`
+        : `Skill '${shouldNotActivateSkill}' incorrectly activated. Identifiers seen: ${loadedNames.join(
+            ', '
+          )}`,
       metadata: { shouldNotActivateSkill, loadedNames, loaded },
     };
   },
