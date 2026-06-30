@@ -398,6 +398,72 @@ describe('dagLayout — cycle detection', () => {
   });
 });
 
+// ─── analyzeSiblings asymmetric prevCross comparison ──────────────────────────
+//
+// Regression: the `firstSibling`/`lastSibling` reduce in `analyzeSiblings` was
+// comparing the candidate in `prevCross ?? cross` space against the accumulator
+// in raw `cross` space. This can pick the wrong outermost sibling when one sibling
+// was shifted by an earlier pass — causing mis-centering in handleSingleChild and
+// handleMultipleParents. The fix makes both sides of the comparison use
+// `prevCross ?? cross` so both candidate and accumulator are always evaluated in
+// the same pre-shift coordinate space.
+
+describe('dagLayout — analyzeSiblings prevCross symmetry', () => {
+  it('3-way merge node is horizontally centered between its outermost parents', () => {
+    // Topology (TB):
+    //   root → pa, root → pb, root → pc
+    //   pa → merge, pb → merge, pc → merge
+    //   pa → sideA (leaf)        ← forces pa into handleMultipleChildren
+    //   pc → sideC (leaf)        ← forces pc into handleMultipleChildren
+    //
+    // After pa and pc are shifted by handleMultipleChildren, analyzeSiblings([pa,pb,pc])
+    // is called. With the bug the asymmetric comparison can select the wrong outermost
+    // parent, corrupting edgesSpan and centering merge between the wrong pair.
+    const nodes = [
+      node('root'),
+      node('pa'),
+      node('pb'),
+      node('pc'),
+      node('merge'),
+      node('sideA'),
+      node('sideC'),
+    ];
+    const edges = [
+      edge('r-pa', 'root', 'pa'),
+      edge('r-pb', 'root', 'pb'),
+      edge('r-pc', 'root', 'pc'),
+      edge('pa-m', 'pa', 'merge'),
+      edge('pb-m', 'pb', 'merge'),
+      edge('pc-m', 'pc', 'merge'),
+      edge('pa-sA', 'pa', 'sideA'),
+      edge('pc-sC', 'pc', 'sideC'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, [], { direction: 'TB' });
+
+    const pa = findNode(laid, 'pa');
+    const pb = findNode(laid, 'pb');
+    const pc = findNode(laid, 'pc');
+    const merge = findNode(laid, 'merge');
+
+    // All nodes must be non-overlapping.
+    for (let i = 0; i < laid.length; i++) {
+      for (let j = i + 1; j < laid.length; j++) {
+        const a = laid[i];
+        const b = laid[j];
+        const overlapX = a.x < b.x + b.width && a.x + a.width > b.x;
+        const overlapY = a.y < b.y + b.height && a.y + a.height > b.y;
+        expect(overlapX && overlapY).toBe(false);
+      }
+    }
+
+    // merge should be horizontally centered between the outermost parents.
+    const leftMost = Math.min(centerX(pa), centerX(pb), centerX(pc));
+    const rightMost = Math.max(centerX(pa), centerX(pb), centerX(pc));
+    const expectedCenter = (leftMost + rightMost) / 2;
+    expect(Math.abs(centerX(merge) - expectedCenter)).toBeLessThanOrEqual(CENTER_TOLERANCE);
+  });
+});
+
 // ─── Invariants ───────────────────────────────────────────────────────────────
 
 describe('dagLayout — layout invariants', () => {

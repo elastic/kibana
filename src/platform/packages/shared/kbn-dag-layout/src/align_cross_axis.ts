@@ -80,14 +80,24 @@ function analyzeSiblings(
   cross: (id: string) => number,
   crossSpan: (id: string) => number
 ) {
+  // Both sides of each comparison must use the same coordinate space.
+  // `prevCross[id]` holds the pre-shift position when a node was moved earlier
+  // in the reverse-topo pass; `cross(id)` is the live (possibly already-shifted)
+  // position. Using `prevCross ?? cross` consistently on both candidate and
+  // accumulator prevents the wrong first/last sibling being selected when the
+  // accumulator was shifted in a prior iteration.
   const firstSibling = siblings.reduce(
     (min, siblingNode) =>
-      (prevCross[siblingNode] ?? cross(siblingNode)) < cross(min) ? siblingNode : min,
+      (prevCross[siblingNode] ?? cross(siblingNode)) < (prevCross[min] ?? cross(min))
+        ? siblingNode
+        : min,
     siblings[0]
   );
   const lastSibling = siblings.reduce(
     (max, siblingNode) =>
-      (prevCross[siblingNode] ?? cross(siblingNode)) > cross(max) ? siblingNode : max,
+      (prevCross[siblingNode] ?? cross(siblingNode)) > (prevCross[max] ?? cross(max))
+        ? siblingNode
+        : max,
     siblings[0]
   );
 
