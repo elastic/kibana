@@ -20,6 +20,7 @@ import {
   minimalTraceCorrelatedLogs,
   deepTrace,
 } from '../fixtures/traces_experience';
+import { createSecurityTestIndices } from '../fixtures/security_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -85,6 +86,12 @@ globalSetupHook(
         ? '[setup:metrics] companion metrics test index created successfully'
         : '[setup:metrics] companion metrics test index already exists, skipping'
     );
+
+    // Security-in-Discover setup: synthetic alert / event / IOC indices for the Security Solution
+    // context-awareness profile (detected purely by document fields, so plain indices suffice).
+    log.debug('[setup:security] (re)creating security test indices...');
+    await createSecurityTestIndices(esClient);
+    log.debug('[setup:security] security test indices ready');
 
     // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
     const hasFleetSupport = !config.serverless || config.projectType === 'oblt';
