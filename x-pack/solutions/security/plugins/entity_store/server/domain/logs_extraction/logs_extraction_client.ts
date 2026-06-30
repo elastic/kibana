@@ -181,6 +181,7 @@ export class LogsExtractionClient {
         logsCapDeferred,
         logsCapApplied,
         logsProcessed,
+        hasRealExtractionSources,
       } = await this.runQueryAndIngestDocs({
         type,
         config,
@@ -213,11 +214,26 @@ export class LogsExtractionClient {
           error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
         });
       } else {
+        // POC source-discovery gate: while a type has no real discovered source set
+        // (empty, or `.alerts`-only) and no additional patterns configured, hold the
+        // watermark instead of advancing it. Empty per-minute runs would otherwise push
+        // `lastExecutionTimestamp` to ~now; once discovery later surfaces real sources
+        // (cache TTL up to 15m) their back-dated docs already sit behind the watermark
+        // and are never extracted. Holding it preserves the lookback anchor so the data
+        // is swept on the first run that observes real sources.
+        if (!hasRealExtractionSources) {
+          this.logger.debug(
+            `Holding extraction watermark for entity type "${type}": no real discovered sources yet (empty or .alerts-only).`
+          );
+        }
+
         await this.engineDescriptorClient.update(type, {
           logExtractionState: {
             checkpointTimestamp: null,
             paginationId: null,
-            lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
+            lastExecutionTimestamp: hasRealExtractionSources
+              ? lastSearchTimestamp || moment().utc().toISOString()
+              : engineState.lastExecutionTimestamp,
           },
           error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
         });
@@ -298,8 +314,13 @@ export class LogsExtractionClient {
     logsCapDeferred: boolean;
     logsCapApplied: boolean;
     logsProcessed: number;
+    hasRealExtractionSources: boolean;
   }> {
     const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
+    const hasRealExtractionSources = this.hasRealExtractionSources(
+      discoveredSourcePatterns,
+      config.additionalIndexPatterns ?? []
+    );
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns,
       config.excludedIndexPatterns,
@@ -343,6 +364,7 @@ export class LogsExtractionClient {
       isRemote: remoteStrategyIndexPatterns.length > 0,
       indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
       remoteError: remoteResult.error,
+      hasRealExtractionSources,
     };
   }
 
@@ -985,6 +1007,29 @@ export class LogsExtractionClient {
       logger: this.logger,
     });
     return sources[type];
+  }
+
+  /**
+   * POC source-discovery gate helper. Returns whether the engine has at least one
+   * "real" log source to extract from on this run: a discovered source other than the
+   * alerts index, or a user-configured additional index pattern.
+   *
+   * Returns `true` for the legacy path (deterministic discovery disabled — sources are
+   * resolved from the Security data view / `logs-*`) so the gate only engages under
+   * deterministic discovery, where a type can legitimately have no real sources yet.
+   */
+  private hasRealExtractionSources(
+    discoveredSourcePatterns: string[] | undefined,
+    additionalIndexPatterns: string[]
+  ): boolean {
+    if (discoveredSourcePatterns === undefined) {
+      return true;
+    }
+    if (additionalIndexPatterns.length > 0) {
+      return true;
+    }
+    const alertsIndex = getAlertsIndexName(this.namespace);
+    return discoveredSourcePatterns.some((pattern) => pattern !== '' && pattern !== alertsIndex);
   }
 
   /**

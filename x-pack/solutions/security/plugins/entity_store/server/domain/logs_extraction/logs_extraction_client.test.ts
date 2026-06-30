@@ -1421,6 +1421,125 @@ describe('LogsExtractionClient', () => {
         expect(subWindow3).toContain(effectiveWindowEnd);
       });
     });
+
+    // POC source-discovery watermark gate: while deterministic discovery has not yet
+    // surfaced a real source for a type (empty set, or `.alerts`-only), an empty run
+    // must NOT advance `lastExecutionTimestamp`. Otherwise the per-minute ticks push the
+    // watermark to ~now and, once discovery later observes a real source (cache TTL up to
+    // 15m), its back-dated docs already sit behind the watermark and are never extracted.
+    describe('watermark gate when discovery finds no real sources (POC)', () => {
+      const fixedNow = new Date('2025-06-15T12:00:00.000Z');
+      const effectiveWindowEnd = '2025-06-15T11:59:00.000Z'; // now - 1m delay
+      const heldLastExecution = '2025-06-15T11:00:00.000Z';
+      const ALERTS_INDEX = '.alerts-security.alerts-default';
+
+      beforeEach(() => {
+        clearDiscoveredSourceCache();
+        jest.useFakeTimers({ now: fixedNow.getTime() });
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      // Drives deterministic discovery so that the `user` type resolves to exactly one
+      // source (`sourceName`), qualifying via `user.name` at keyword.
+      const mockUserSourceDiscovery = ({
+        sourceName,
+        asDataStream,
+        backingIndex,
+      }: {
+        sourceName: string;
+        asDataStream: boolean;
+        backingIndex?: string;
+      }) => {
+        const concrete = backingIndex ?? sourceName;
+        (mockEsClient as unknown as { indices: unknown }).indices = {
+          resolveIndex: jest.fn().mockResolvedValue({
+            indices: asDataStream ? [] : [{ name: sourceName }],
+            aliases: [],
+            data_streams: asDataStream ? [{ name: sourceName, backing_indices: [concrete] }] : [],
+          }),
+        };
+        (mockEsClient as unknown as { fieldCaps: unknown }).fieldCaps = jest
+          .fn()
+          .mockResolvedValue({
+            indices: [concrete],
+            fields: { 'user.name': { keyword: { type: 'keyword', indices: [concrete] } } },
+          });
+      };
+
+      const setupDiscoveryOnEngine = (additionalIndexPatterns: string[] = []) => {
+        const globalState = {
+          logsExtraction: LogExtractionConfig.parse({
+            lookbackPeriod: '3h',
+            delay: '1m',
+            maxTimeWindowSize: '999d',
+            useDiscoveredIndexSource: true,
+            additionalIndexPatterns,
+          }),
+        } as EntityStoreGlobalState;
+        mockGlobalStateClient.find.mockResolvedValue(globalState);
+        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+          createMockEngineDescriptor('user', {
+            lastExecutionTimestamp: heldLastExecution,
+          }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+        );
+        mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+        mockIngestEntities.mockResolvedValue(undefined);
+      };
+
+      it('holds the watermark when the discovered source set is .alerts-only', async () => {
+        setupDiscoveryOnEngine();
+        mockUserSourceDiscovery({ sourceName: ALERTS_INDEX, asDataStream: false });
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
+        expect(finalUpdate[1].logExtractionState).toMatchObject({
+          checkpointTimestamp: null,
+          paginationId: null,
+          lastExecutionTimestamp: heldLastExecution,
+        });
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Holding extraction watermark for entity type "user"')
+        );
+      });
+
+      it('advances the watermark when discovery finds a real (non-alerts) source', async () => {
+        setupDiscoveryOnEngine();
+        mockUserSourceDiscovery({
+          sourceName: 'logs-okta.system-default',
+          asDataStream: true,
+          backingIndex: '.ds-logs-okta.system-default-2025.06.15-000001',
+        });
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
+        expect(finalUpdate[1].logExtractionState).toMatchObject({
+          lastExecutionTimestamp: effectiveWindowEnd,
+        });
+      });
+
+      it('advances the watermark when additional patterns are configured, even if discovery is .alerts-only', async () => {
+        setupDiscoveryOnEngine(['custom-logs-*']);
+        mockUserSourceDiscovery({ sourceName: ALERTS_INDEX, asDataStream: false });
+
+        await client.extractLogs('user');
+
+        const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
+        expect(finalUpdate[1].logExtractionState).toMatchObject({
+          lastExecutionTimestamp: effectiveWindowEnd,
+        });
+        expect(mockLogger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('Holding extraction watermark')
+        );
+      });
+    });
   });
 
   describe('getLocalAndRemoteIndexPatterns', () => {
