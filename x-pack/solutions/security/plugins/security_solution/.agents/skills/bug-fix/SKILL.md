@@ -39,6 +39,8 @@ reproduction before fix work can begin."_
 |-------|-------------|----------------|
 | **4 — Fix (TDD)** | Root cause analysis → fix plan → user approval → red test → green fix | User explicitly approves plan; test passes |
 | **5 — Verify** | Clean environment, browser re-reproduction, test suite | All pass + bug gone in browser |
+| **Controller Check** *(serverless only)* | Identify whether controller repo PRs are also required | All gates answered; follow-up PRs noted if needed |
+| **MKI Verification** *(serverless only)* | Reproduce on real MKI before PR; verify fix on MKI post-deploy | Pre-fix: bug reproduced on MKI. Post-deploy: bug gone on MKI |
 | **6 — PR** | Open draft PR with description and before/after screenshots | PR URL presented to user |
 | **7 — Review** | Respond to reviewer comments; push back when justified | All reviewer threads resolved |
 
@@ -171,14 +173,17 @@ Keep fixes simple — prefer the smallest change that resolves the bug. Stop and
 
 Restart services for a clean environment — stale reproduction state produces false positives:
 
-1. Stop and restart the Scout server. Read `server_args` from `.bug-fixer-session/analysis.json` first:
+1. Stop and restart the Scout server. Read `server_args`, `arch`, `domain`, and `kb_user` from `.bug-fixer-session/analysis.json` first:
 
    **No feature flags** (`server_args` empty):
    ```bash
    pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
-   node scripts/scout.js start-server --arch stateful --domain classic &
+   ARCH=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('arch','stateful'))")
+   DOMAIN=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('domain','classic'))")
+   node scripts/scout.js start-server --arch "${ARCH}" --domain "${DOMAIN}" &
+   KB_USER=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('kb_user','elastic'))")
    TIMEOUT=60; COUNT=0
-   until curl -s -u elastic:changeme http://localhost:5620/api/status \
+   until curl -s -u "${KB_USER}:changeme" http://localhost:5620/api/status \
      | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
      echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
      COUNT=$((COUNT + 1))
@@ -191,9 +196,12 @@ Restart services for a clean environment — stale reproduction state produces f
    pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
    mkdir -p config_sets/bug_fixer
    # Write kibana.yml from server_args in analysis.json (same content as reproduction session)
-   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
+   ARCH=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('arch','stateful'))")
+   DOMAIN=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('domain','classic'))")
+   node scripts/scout.js start-server --arch "${ARCH}" --domain "${DOMAIN}" --serverConfigSet bug_fixer &
+   KB_USER=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('kb_user','elastic'))")
    TIMEOUT=60; COUNT=0
-   until curl -s -u elastic:changeme http://localhost:5620/api/status \
+   until curl -s -u "${KB_USER}:changeme" http://localhost:5620/api/status \
      | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
      echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
      COUNT=$((COUNT + 1))
@@ -204,7 +212,7 @@ Restart services for a clean environment — stale reproduction state produces f
 3. Browser reproduction — bug should not reproduce; `browser_take_screenshot` → `.bug-fixer-session/after.png`
 
    **Known environment conditions** (expected — not failures):
-   - After server restart the browser may redirect to the SAML mock IDP. Always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`.
+   - After server restart the browser may redirect to the SAML mock IDP. Always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`. Use credentials from `analysis.json` (`kb_user` / `changeme`): `elastic` for stateful, `elastic_serverless` for serverless.
    - An "AI Agent" modal overlay may intercept Playwright clicks on first page load. Take a `browser_snapshot` to locate the modal's selector, then close it with `browser_evaluate('document.querySelector(\'[YOUR_SELECTOR]\')?.remove()')`.
 4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
 5. **Lifecycle edge case** — if the fix involves startup or boot-time seeding, create a new
@@ -221,6 +229,134 @@ Restart services for a clean environment — stale reproduction state produces f
 | Tests pass + browser still repros | **Fix incomplete** |
 | Tests fail | **Fix broke something** |
 | Related tests fail | **Regression** |
+
+## Controller Check (serverless bugs only)
+
+**Only run this step if `deployment_type` in `analysis.json` is `serverless`.** Skip entirely for stateful bugs.
+
+A fix that only touches the Kibana repo will be correct in local dev but wrong in MKI if either controller repo is the real source of truth. Two private Elastic repos own critical serverless configuration that is not deployed from Kibana:
+
+- **`elastic/elasticsearch-controller`** — owns predefined roles, SAML realm config, and internal system users for all serverless projects
+- **`elastic/kibana-controller`** — owns the `kibana.yml` config injected into MKI pods (SAML auth providers, UIAM, encryption keys, audit logging, agentless API, etc.)
+
+Run through each gate before opening the PR:
+
+**Gate 1 — Does the bug involve a user missing or wrongly having a privilege?**
+
+Check `elasticsearch-controller/internal/config/roles/<project_type>.yaml`. The predefined roles (`viewer`, `editor`, `t1_analyst`, `platform_engineer`, etc.) are defined there — the Kibana mirror at `src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/<type>/roles.yml` is for local dev only and has no effect in MKI.
+
+→ If the fix requires changing a role's index or Kibana feature privileges: open a PR to `elasticsearch-controller` with the role change **and** a matching PR to Kibana updating the mirror file. The `elasticsearch-controller` PR is what actually fixes MKI.
+
+**Gate 2 — Is the bug specific to a Security AI SOC Engine / Search AI Lake project?**
+
+→ The roles file is `security.ai_soc_engine.yaml` in `elasticsearch-controller`, with its Kibana mirror at `project_roles/security/search_ai_lake/roles.yml`. Note: `xpack.ml.ad.enabled` and `xpack.ml.dfa.enabled` are forced `false` at the ES level for this tier — anomaly detection features do not work there regardless of role.
+
+**Gate 3 — Does the bug only reproduce in MKI, not in local serverless?**
+
+→ The likely cause is a `kibana.yml` value that `kibana-controller` injects and that is absent locally. Check `kibana-controller/internal/controllers/kibana/config/config_settings.go`. MKI-only values include: SAML auth provider config (`xpack.security.authc.providers.saml.*`), UIAM (`xpack.security.uiam.*`), encryption keys, audit log appender, agentless API TLS, AutoOps, UsageAPI, cloud integrations.
+
+→ If the fix requires changing any of these, it goes in `kibana-controller`, not in Kibana's `kibana.yml` or plugin config.
+
+**Gate 4 — Does the Kibana PR rename, deprecate, or split a feature privilege?**
+
+→ The privilege name is referenced by name in `elasticsearch-controller` role YAML files. Renaming `feature_siemV5` (or any other feature privilege) without updating the controller roles will silently break those roles in MKI. A PR to `elasticsearch-controller` is required.
+
+**Controller check summary:**
+
+| Symptom | Where the fix lives |
+|---|---|
+| User missing/having wrong privilege in MKI | `elasticsearch-controller` roles YAML + Kibana mirror |
+| Feature privilege renamed/split in Kibana | `elasticsearch-controller` roles YAML (must stay in sync) |
+| Kibana config correct locally, wrong in MKI | `kibana-controller` `config_settings.go` |
+| SAML / SSO broken in MKI | Both controllers (ES owns realm, Kibana controller owns auth provider) |
+| AI SOC Engine / Search AI Lake role issue | `security.ai_soc_engine.yaml` in `elasticsearch-controller` |
+| New internal role needs to be blocked from SAML | `samlExcludedRoles` in `elasticsearch-controller` `saml.go` |
+
+If any gate triggers, note the required follow-up PRs explicitly in the PR description and link them. **Do not mark the bug as fixed until all controller PRs are also merged.**
+
+## MKI Verification (serverless bugs only)
+
+**Only run this step if `deployment_type` in `analysis.json` is `serverless`.** Skip entirely for stateful bugs.
+
+Local serverless uses a mock SAML IdP and role files from the local repo. MKI uses the real configurations from `elasticsearch-controller` and `kibana-controller`. A fix that passes Phase 5 locally is not confirmed until it is verified on a real MKI project running the PR's Docker image. MKI verification has two parts.
+
+### Part 1 — Pre-fix MKI reproduction (recommended, before opening the PR)
+
+Confirm the bug actually occurs on a real MKI project — rules out local-only artefacts and ensures the repro is representative of production. Skip if the local serverless reproduction was unambiguous and you have no MKI access.
+
+Ask the user: *"Do you have access to an existing MKI project where this bug should reproduce? If yes, provide the URL."*
+
+If the user provides a URL:
+1. `browser_navigate` → `<MKI project URL>` (MKI redirects to SSO automatically)
+2. MKI uses real SAML/SSO — the agent cannot complete login autonomously. Tell the user: *"Please log in to the MKI project in the browser window, then let me know when you're authenticated."* Wait for explicit confirmation before continuing.
+3. Once the user confirms login: follow `reproduction_steps` from `analysis.json` against MKI
+4. `browser_take_screenshot` → `.bug-fixer-session/mki-before.png`
+5. Record result: add `mki_pre_fix_reproduced: true | false` to `.bug-fixer-session/reproduction-report.md`
+
+If the bug does **not** reproduce on MKI: this is significant — tell the user and revisit Gate 3 of the Controller Check (the fix may need to target `kibana-controller` config, not the Kibana repo).
+
+### Part 2 — Fix verification on MKI with the PR Docker image (before merging)
+
+MKI verification does not require waiting for the PR to merge. CI builds a Docker image from the PR branch that can be deployed to a QA MKI project immediately.
+
+**Step 1 — Build the PR Docker image**
+
+Tell the user: *"Add the `ci:build-serverless-image` label to the PR and trigger CI. Once the CI run completes, paste the Kibana Serverless Image tag shown in the CI output (format: `docker.elastic.co/kibana-ci/kibana-serverless:pr-<PR_NUMBER>-<COMMIT>`)."*
+
+Wait for the user to provide the image tag before continuing.
+
+**Step 2 — Create a QA project with the PR image**
+
+The project must be created via API (not the cloud console UI) to belong to the `testing` channel, which is required for image overrides.
+
+```bash
+curl --location --request POST "https://console.qa.cld.elstc.co/api/v1/serverless/projects/security" \
+  --header "Authorization: ApiKey <YOUR_API_KEY>" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "fix-<issue-number>-verify",
+    "region_id": "aws-eu-west-1",
+    "overrides": {
+        "channel": "testing",
+        "kibana": {
+            "docker_image": "docker.elastic.co/kibana-ci/kibana-serverless:pr-<PR_NUMBER>-<COMMIT>"
+        }
+    }
+  }'
+```
+
+Note the `id` and the project URL from the response — you will need the `id` to override the image if the PR receives new commits.
+
+⚠️ Projects are created as `Complete` tier by default. If the bug is tier-specific (`security_essentials` or `security_ease`), ask the user to follow the [Essentials/Ease configuration doc](https://github.com/elastic/security-team/blob/main/docs-codex/analyst-experience-team/manual-testing/serverless/3.complete-essentials-on-mki.md) before proceeding.
+
+Ask the user to provide their QA organization API key if they haven't already.
+
+**Step 3 — Verify the fix**
+
+1. `browser_navigate` → `<project URL>` (MKI redirects to SSO)
+2. Tell the user: *"Please log in to the QA MKI project in the browser window, then let me know when you're authenticated."* Wait for confirmation.
+3. Follow `reproduction_steps` — the bug must not reproduce
+4. `browser_take_screenshot` → `.bug-fixer-session/mki-after.png`
+5. Post a comment on the GitHub issue: *"Verified fixed on MKI QA project (PR image `pr-<PR_NUMBER>-<COMMIT>`) — [date]."*
+
+**If new commits are pushed to the PR** after this step, the image must be rebuilt (re-add `ci:build-serverless-image` and trigger CI) and the project updated:
+
+```bash
+curl --location --request PATCH 'https://console.qa.cld.elstc.co/api/v1/serverless/projects/security/<YOUR_PROJECT_ID>' \
+  --header 'Authorization: ApiKey <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "overrides": {
+        "kibana": {
+            "docker_image": "docker.elastic.co/kibana-ci/kibana-serverless:pr-<PR_NUMBER>-<NEW_COMMIT>"
+        }
+    }
+  }'
+```
+
+**Do not open the PR until Part 2 is complete.** Add this to the PR description:
+
+> ✅ MKI verified on QA project with PR image `pr-<PR_NUMBER>-<COMMIT>`.
 
 ## Phase 6: Open PR
 
@@ -267,6 +403,13 @@ gh pr create --draft \
 
 Fixes #<number>
 <similar_issues and related_prs from .bug-fixer-session/analysis.json, if any>
+
+<!-- Serverless bugs only — remove this block for stateful fixes: -->
+<!-- ✅ MKI verified on QA project with PR image `pr-<PR_NUMBER>-<COMMIT>` -->
+<!-- MKI pre-fix repro: <mki-before.png attached, or "skipped — local repro unambiguous"> -->
+<!-- If any Controller Check gate triggered, list required follow-up PRs: -->
+<!-- - [ ] elasticsearch-controller PR: <link> -->
+<!-- - [ ] kibana-controller PR: <link> -->
 
 🤖 Generated with [Claude Code](https://claude.ai/claude-code)
 EOF
