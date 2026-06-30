@@ -13,8 +13,12 @@ import axios from 'axios';
 
 // Version of the ci-stats _pick_test_group_run_order endpoint. v3 is a
 // drop-in replacement for v2 (same request/response/auth) with server-side
-// caching and compression. Override to roll back, e.g. `v2`.
-const PICK_RUN_ORDER_VERSION = 'v3';
+// caching and gzip request support. Switch to 'v2' to roll back; everything
+// version-specific is keyed off this constant below.
+const PICK_RUN_ORDER_VERSION: 'v2' | 'v3' = 'v3';
+
+// v3 accepts gzip-compressed request bodies (Content-Encoding: gzip); v2 does not.
+const PICK_RUN_ORDER_GZIP_REQUEST = PICK_RUN_ORDER_VERSION === 'v3';
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
@@ -189,22 +193,38 @@ export class CiStatsClient {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 
-    // gzip the request body; v3 accepts Content-Encoding: gzip and is backward
-    // compatible with uncompressed bodies. axios sends Accept-Encoding: gzip by
-    // default and decompresses the response transparently.
-    const compressedBody = gzipSync(Buffer.from(JSON.stringify(body)));
+    // axios sends Accept-Encoding: gzip by default and decompresses the
+    // response transparently, regardless of how we send the request.
+    const json = JSON.stringify(body);
+    let data;
+    let headers = {};
+    if (PICK_RUN_ORDER_GZIP_REQUEST) {
+      console.time('gzip');
+      data = gzipSync(Buffer.from(json));
+      headers = { 'Content-Encoding': 'gzip' };
+      console.timeEnd('gzip');
+    } else {
+      data = json;
+    }
 
+    if (PICK_RUN_ORDER_VERSION === 'v3') {
+      console.time('request');
+    }
     const resp = await axios.request<TestGroupRunOrderResponse>({
       method: 'POST',
       baseURL: this.baseUrl,
       headers: {
         ...this.defaultHeaders,
         'Content-Type': 'application/json',
-        'Content-Encoding': 'gzip',
+        ...headers,
       },
       url: `/${PICK_RUN_ORDER_VERSION}/_pick_test_group_run_order`,
-      data: compressedBody,
+      data,
     });
+
+    if (PICK_RUN_ORDER_VERSION === 'v3') {
+      console.timeEnd('request');
+    }
 
     return resp.data;
   };
