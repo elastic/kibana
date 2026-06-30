@@ -209,7 +209,10 @@ export class LibraryFetcher {
     try {
       // Passthrough: keep the typed metadata, the full parsed workflow body, and
       // the raw YAML. No field enumeration so nothing is silently dropped.
-      const { metadata, body, raw } = parseTemplateYaml(text);
+      // `lenient` strips unknown `template-metadata` fields instead of rejecting
+      // them, mirroring the catalog consumption schemas so a newer publisher
+      // field doesn't 503 a template the catalog already lists (forward-compat).
+      const { metadata, body, raw } = parseTemplateYaml(text, { lenient: true });
       return { metadata, body, raw };
     } catch (err) {
       if (err instanceof TemplateParseError) {

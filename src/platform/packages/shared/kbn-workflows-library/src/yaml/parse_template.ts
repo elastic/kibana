@@ -44,6 +44,17 @@ export interface ParsedTemplate {
   raw: string;
 }
 
+export interface ParseTemplateOptions {
+  /**
+   * When `true`, unknown top-level `template-metadata` fields are stripped
+   * rather than rejected. Used on the runtime consumption path (the server
+   * fetching a body from the CDN) so a field added by a newer publisher does
+   * not 503 a template the catalog already lists. Authoring / CI keeps the
+   * default strict validation. Defaults to `false`.
+   */
+  lenient?: boolean;
+}
+
 /**
  * Parse a raw template YAML string into its `template-metadata` block (typed
  * and Zod-validated) and the remaining workflow body (preserved as-is).
@@ -53,7 +64,10 @@ export interface ParsedTemplate {
  * schema failures (metadata present but malformed); the `cause` field carries
  * the underlying error (e.g. the `ZodError`) for diagnostics.
  */
-export function parseTemplateYaml(raw: string): ParsedTemplate {
+export function parseTemplateYaml(
+  raw: string,
+  { lenient = false }: ParseTemplateOptions = {}
+): ParsedTemplate {
   let doc: unknown;
   try {
     doc = yaml.parse(raw);
@@ -77,9 +91,13 @@ export function parseTemplateYaml(raw: string): ParsedTemplate {
     );
   }
 
+  // Strict by default (authoring/CI: reject unknown fields). On the runtime
+  // consumption path `lenient` strips unknown top-level `template-metadata`
+  // keys instead, so a newer publisher field doesn't 503 a listed template.
+  const metadataSchema = lenient ? TemplateMetadataSchema.strip() : TemplateMetadataSchema;
   let metadata: TemplateMetadata;
   try {
-    metadata = TemplateMetadataSchema.parse(metaRaw) as TemplateMetadata;
+    metadata = metadataSchema.parse(metaRaw) as TemplateMetadata;
   } catch (err) {
     const message =
       err instanceof ZodError

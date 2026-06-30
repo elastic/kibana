@@ -415,6 +415,24 @@ describe('LibraryFetcher.getTemplate', () => {
     );
   });
 
+  it('tolerates an unknown `template-metadata` field in the fetched body (forward-compat)', async () => {
+    // A body published by a newer Kibana that adds a `template-metadata` field
+    // this (older) runtime does not know about must still parse, so a template
+    // the catalog lists does not 503 when opened.
+    const futureBodyYaml = sampleBodyYaml.replace(
+      '  categories: [utility]',
+      '  categories: [utility]\n  someFutureField: hello'
+    );
+    queueRefresh(sampleManifest, sampleCatalog());
+    mockedFetch.mockResolvedValueOnce(jsonResponse(futureBodyYaml));
+    const fetcher = buildFetcher();
+
+    const result = await fetcher.getTemplate('demo');
+
+    expect(result.metadata.slug).toBe('demo');
+    expect(result.metadata).not.toHaveProperty('someFutureField');
+  });
+
   it('throws `LibraryNotFoundError` when the slug is absent from the catalog', async () => {
     queueRefresh(sampleManifest, sampleCatalog());
     const fetcher = buildFetcher();
