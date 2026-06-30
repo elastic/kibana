@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SigEvent, SignificantEventInvestigation } from '@kbn/streams-schema';
@@ -33,12 +34,7 @@ const formatDuration = (startedAt: string, completedAt?: string): string => {
   const start = new Date(startedAt).getTime();
   const end = completedAt ? new Date(completedAt).getTime() : Date.now();
   const diffMs = Math.max(0, end - start);
-  const totalSeconds = Math.floor(diffMs / 1000);
-  if (totalSeconds < 60) return `${totalSeconds}s`;
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  if (totalMinutes < 60) return `${totalMinutes}m`;
-  const hours = Math.floor(totalMinutes / 60);
-  return `${hours}h ${totalMinutes % 60}m`;
+  return moment.duration(diffMs).humanize();
 };
 
 const InvestigationRow = ({ investigation }: { investigation: SignificantEventInvestigation }) => {

@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
@@ -27,12 +28,12 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/streams-schema';
 import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
-import { RunInvestigationButton } from './run_investigation_button';
 import { EventInvestigations } from './event_investigations';
 import { hasPendingInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
@@ -45,6 +46,10 @@ const LIFECYCLE_ERROR = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecy
 });
 const CLOSE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
   defaultMessage: 'Close',
+});
+
+const RUN_LABEL = i18n.translate('xpack.streams.sigEventsTab.runInvestigationButton.label', {
+  defaultMessage: 'Run investigation',
 });
 const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
   defaultMessage: 'Criticality',
@@ -95,6 +100,8 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     clearTimeout(triggerPollTimeoutRef.current);
     triggerPollTimeoutRef.current = setTimeout(() => setIsPollingAfterTrigger(false), 30_000);
   }, []);
+
+  const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
 
   useInterval(
     refetchLifecycle,
@@ -168,7 +175,19 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             <EuiButtonEmpty onClick={onClose}>{CLOSE_LABEL}</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RunInvestigationButton event={latestEvent} onTriggerSuccess={onTriggerSuccess} />
+            <EuiButton
+              iconType="inspect"
+              onClick={() => {
+                if (!isTriggering) triggerInvestigation(latestEvent.event_id);
+              }}
+              isDisabled={isTriggering}
+              isLoading={isTriggering}
+              fill
+              size="s"
+              data-test-subj="sigEventRunInvestigationButton"
+            >
+              {RUN_LABEL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
