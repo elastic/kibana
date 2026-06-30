@@ -121,6 +121,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
+  billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
@@ -323,6 +324,7 @@ export const EsWorkflowSchema = z.object({
   enabled: z.boolean(),
   managed: z.boolean().optional(),
   managedBy: z.string().nullable().optional(),
+  billable: z.boolean().nullable().optional(),
   originManagedWorkflowId: z.string().nullable().optional(),
   managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
@@ -488,6 +490,7 @@ export interface WorkflowExecutionEngineModel
     | 'yaml'
     | 'managed'
     | 'managedBy'
+    | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
     | 'version'

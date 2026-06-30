@@ -67,7 +67,7 @@ import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
-import { SearchModeSelector } from '../search_bar/search_mode_selector';
+import { EsqlApproximationToggle } from './esql_approximation_toggle';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
@@ -265,6 +265,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   esqlApproximation?: {
     useApproximation: boolean;
     onChange: (useApproximation: boolean) => void;
+    additionalText?: string;
+    disabled?: boolean;
   };
 }
 
@@ -1050,9 +1052,11 @@ export const QueryBarTopRow = React.memo(
                 <>
                   {shouldRenderUpdateButton() ? button : null}
                   {props.esqlApproximation && (
-                    <SearchModeSelector
+                    <EsqlApproximationToggle
                       useApproximation={props.esqlApproximation.useApproximation}
                       onChange={props.esqlApproximation.onChange}
+                      additionalText={props.esqlApproximation.additionalText}
+                      disabled={props.esqlApproximation.disabled}
                     />
                   )}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
@@ -1315,9 +1319,11 @@ export const QueryBarTopRow = React.memo(
                 {props.renderQueryInputAppend?.()}
                 {shouldShowDatePickerAsBadge() && props.filterBar}
                 {props.esqlApproximation && (
-                  <SearchModeSelector
+                  <EsqlApproximationToggle
                     useApproximation={props.esqlApproximation.useApproximation}
                     onChange={props.esqlApproximation.onChange}
+                    additionalText={props.esqlApproximation.additionalText}
+                    disabled={props.esqlApproximation.disabled}
                   />
                 )}
                 {renderDatePickerWithUpdateBtn()}
