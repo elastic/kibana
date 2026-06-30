@@ -25,6 +25,12 @@ export const expectSampleSizeFooter = async ({
   await expect.poll(() => dataGrid.getDataGridFooterText()).toContain(String(sampleSize));
 };
 
+export const clearStoredQueryMode = async (page: ScoutPage): Promise<void> => {
+  await page.evaluate((storageKey) => {
+    window.localStorage.removeItem(storageKey);
+  }, DISCOVER_QUERY_MODE_KEY);
+};
+
 export const getStoredQueryMode = async (page: ScoutPage): Promise<'classic' | 'esql' | null> => {
   return await page.evaluate((storageKey) => {
     const storedValue = window.localStorage.getItem(storageKey);
@@ -33,6 +39,16 @@ export const getStoredQueryMode = async (page: ScoutPage): Promise<'classic' | '
       return null;
     }
 
-    return JSON.parse(storedValue) as 'classic' | 'esql';
+    try {
+      const parsedValue = JSON.parse(storedValue);
+
+      if (parsedValue === 'classic' || parsedValue === 'esql') {
+        return parsedValue;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
   }, DISCOVER_QUERY_MODE_KEY);
 };

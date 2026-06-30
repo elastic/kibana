@@ -15,7 +15,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage, ScoutTestFixtures } from '@kbn/scout';
-import { getStoredQueryMode } from '../../fixtures/common/helpers';
+import { clearStoredQueryMode, getStoredQueryMode } from '../../fixtures/common/helpers';
 import { spaceTest } from '../../fixtures/common';
 
 const gotoDiscoverAndWait = async ({
@@ -46,8 +46,10 @@ spaceTest.describe('Discover query mode', { tag: '@local-stateful-classic' }, ()
     await discoverScoutSpace.setupDiscoverDefaults();
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  spaceTest.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
+    await page.gotoApp('discover');
+    await clearStoredQueryMode(page);
   });
 
   spaceTest.afterAll(async ({ discoverScoutSpace }) => {

@@ -637,7 +637,12 @@ export class DiscoverApp {
       await this.clickAppMenuItem('select-classic-mode-btn');
 
       const discardModal = this.page.testSubj.locator('discover-esql-to-dataview-modal');
-      if (await discardModal.isVisible().catch(() => false)) {
+      const discardModalVisible = await discardModal
+        .waitFor({ state: 'visible', timeout: 1_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (discardModalVisible) {
         await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
         await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
           state: 'hidden',
