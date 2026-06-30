@@ -802,12 +802,16 @@ const buildSmlEsqlQuery = ({
       params.push(trimmed);
       return `MATCH(${field}, ?)`;
     }).join(' OR ');
-    lines.push(`  (WHERE ${bm25Conditions} | SORT _score DESC | LIMIT ${size * MAX_SCAN_MULTIPLIER})`);
+    lines.push(
+      `  (WHERE ${bm25Conditions} | SORT _score DESC | LIMIT ${size * MAX_SCAN_MULTIPLIER})`
+    );
     const semanticConditions = SML_SEMANTIC_FIELDS.map((field) => {
       params.push(trimmed);
       return `MATCH(${field}, ?)`;
     }).join(' OR ');
-    lines.push(`  (WHERE ${semanticConditions} | SORT _score DESC | LIMIT ${size * MAX_SCAN_MULTIPLIER})`);
+    lines.push(
+      `  (WHERE ${semanticConditions} | SORT _score DESC | LIMIT ${size * MAX_SCAN_MULTIPLIER})`
+    );
     lines.push('| FUSE');
     lines.push('| SORT _score DESC, id ASC');
   }
