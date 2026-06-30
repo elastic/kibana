@@ -6,11 +6,10 @@
  */
 
 import { selectEvaluators } from '@kbn/evals';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import type { InvestigatorEvaluator } from '../types';
-import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grouding';
+import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createInvestigatorToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
   createCriticalityCalibrationEvaluator,
@@ -25,7 +24,6 @@ import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
  * Factory that creates the full set of evaluators for the investigator agent eval suite.
  */
 export const createInvestigatorEvaluators = (
-  esClient: ElasticsearchClient,
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
 ): InvestigatorEvaluator[] => {
   const codeEvaluators: InvestigatorEvaluator[] = [

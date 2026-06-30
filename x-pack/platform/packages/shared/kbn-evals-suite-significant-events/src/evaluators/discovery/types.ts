@@ -21,6 +21,7 @@ export interface ExampleOutputBase {
 
 export interface InvestigatorAgentOutput extends AgentOutputBase {
   discoveries: Discovery[];
+  inputDetections?: Detection[];
 }
 
 export interface InvestigatorEvaluationExample {
@@ -30,7 +31,6 @@ export interface InvestigatorEvaluationExample {
     continuationCandidates?: Array<Partial<Discovery>>;
   };
   output: ExampleOutputBase & {
-    expected_min_evidence_count?: number;
     /**
      * Canonical expected discoveries (detections + evidences + cause_kis) — the grouping check
      * derives its expected groups from these discoveries' `detections[].rule_name`s.

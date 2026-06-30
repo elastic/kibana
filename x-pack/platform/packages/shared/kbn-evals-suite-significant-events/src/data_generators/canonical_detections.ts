@@ -21,7 +21,7 @@ export const canonicalDetectionsFromGroundTruth = ({
     kind: rule.kind ?? 'detection',
     processed: rule.processed ?? false,
     detection_id: rule.detection_id ?? `${rule.rule_uuid ?? `rule-${index}`}-canonical-${index}`,
-    rule_uuid: rule.rule_uuid ?? '',
+    rule_uuid: rule.rule_uuid ?? `rule-${index}`,
     rule_name: rule.rule_name ?? '',
     stream_name: rule.stream_name ?? streamName,
     alert_count: rule.alert_count ?? 0,

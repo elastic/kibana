@@ -9,7 +9,7 @@ import { selectEvaluators } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import type { JudgeEvaluator } from '../types';
-import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grouding';
+import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
   createCriticalityCalibrationEvaluator,

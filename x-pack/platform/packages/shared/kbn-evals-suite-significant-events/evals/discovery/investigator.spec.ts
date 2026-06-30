@@ -283,6 +283,8 @@ evaluate.describe(
                     return {
                       // Agent returns JSON in the final message (no emit tool on converse); parse it.
                       discoveries: parseDiscoveries(converseResult.message),
+                      // Thread the input detections through so snapshot-mode evaluators can access them.
+                      inputDetections: detections,
                       // Raw steps — trajectory/grounding evaluators read tool calls from these.
                       steps: converseResult.steps,
                       // Agent runs inline, so its gen_ai spans nest under the eval's trace.
@@ -291,7 +293,7 @@ evaluate.describe(
                   },
                 },
                 [
-                  ...createInvestigatorEvaluators(esClient, {
+                  ...createInvestigatorEvaluators({
                     criteriaFn: evaluators.criteria.bind(evaluators),
                   }),
                   ...traceCostEvaluators(evaluators.traceBasedEvaluators),

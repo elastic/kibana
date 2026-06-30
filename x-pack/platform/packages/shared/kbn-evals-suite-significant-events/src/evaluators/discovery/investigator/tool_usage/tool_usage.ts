@@ -16,7 +16,7 @@ export const createInvestigatorToolUsageEvaluator = (): InvestigatorEvaluator =>
   name: 'trajectory',
   kind: 'CODE',
   evaluate: ({ input, output }) => {
-    const detections = input.detections ?? [];
+    const detections = output.inputDetections ?? input.detections ?? [];
 
     const calledTools = new Set(extractToolCallIds(output.steps ?? []));
     const calledKiSearch = calledTools.has(TOOL_ID_KI_SEARCH);
