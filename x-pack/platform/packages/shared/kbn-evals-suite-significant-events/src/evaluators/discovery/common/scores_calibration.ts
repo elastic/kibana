@@ -11,7 +11,7 @@ import {
   type CreateScenarioCriteriaLlmEvaluatorOptions,
 } from '../../scenario_criteria/evaluators';
 
-/** Static calibration criteria, shared by the investigator and judge, run as their own tracked signals. */
+/** Static calibration criteria, shared by the analyst and judge, run as their own tracked signals. */
 const CRITICALITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'criticality_reflects_user_impact',

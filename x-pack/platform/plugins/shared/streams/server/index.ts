@@ -14,7 +14,7 @@ import { config } from './config';
 export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
 export { config };
 export { SIGEVENTS_JUDGE_AGENT_ID } from './agent_builder/agents/discovery/judge';
-export { SIGEVENTS_INVESTIGATOR_AGENT_ID } from './agent_builder/agents/discovery/investigator';
+export { SIGEVENTS_ANALYST_AGENT_ID } from './agent_builder/agents/discovery/analyst';
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {
   const { StreamsPlugin } = await import('./plugin');

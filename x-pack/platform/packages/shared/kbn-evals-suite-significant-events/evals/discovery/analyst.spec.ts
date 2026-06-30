@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGEVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
+import { SIGEVENTS_ANALYST_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, Discovery } from '@kbn/significant-events-schema';
@@ -30,18 +30,18 @@ import {
   snapshotSourceKey,
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
-import type { DiscoveryInvestigatorScenario } from '../../src/datasets';
+import type { DiscoveryAnalystScenario } from '../../src/datasets';
 import {
-  createInvestigatorEvaluators,
+  createAnalystEvaluators,
   createContinuationEvaluators,
 } from '../../src/evaluators/discovery';
 import { parseDiscoveries } from '../../src/evaluators/discovery/utils/parse_agent_output';
-import { buildInvestigatorInput } from '../../src/evaluators/discovery/investigator/build_agent_input';
+import { buildAnalystInput } from '../../src/evaluators/discovery/analyst/build_agent_input';
 import {
   toContinuationCandidate,
   mergeContinuationCandidates,
-} from '../../src/evaluators/discovery/investigator/continuation/continuation_candidate';
-import type { ContinuationCycle } from '../../src/evaluators/discovery/investigator/continuation/continuation_stability';
+} from '../../src/evaluators/discovery/analyst/continuation/continuation_candidate';
+import type { ContinuationCycle } from '../../src/evaluators/discovery/analyst/continuation/continuation_stability';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
@@ -59,7 +59,7 @@ evaluate.describe(
 
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
-        (dataset) => dataset.discoveryInvestigator,
+        (dataset) => dataset.discoveryAnalyst,
         esClient,
         log
       );
@@ -67,14 +67,14 @@ evaluate.describe(
     });
 
     for (const dataset of activeDatasets) {
-      if (dataset.discoveryInvestigator.length === 0) {
+      if (dataset.discoveryAnalyst.length === 0) {
         continue;
       }
 
       for (const source of ['canonical', 'snapshot'] as const) {
         evaluate.describe(`${dataset.id} (${source})`, () => {
           interface CollectedExample {
-            scenario: DiscoveryInvestigatorScenario;
+            scenario: DiscoveryAnalystScenario;
             detections: Detection[];
             snapshotKey: string;
           }
@@ -83,7 +83,7 @@ evaluate.describe(
           const snapshotSources = new Map<string, { snapshotName: string; gcs: GcsConfig }>();
 
           evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
-            for (const scenario of dataset.discoveryInvestigator) {
+            for (const scenario of dataset.discoveryAnalyst) {
               const snapshotSource = resolveScenarioSnapshotSource({
                 scenarioId: scenario.input.scenario_id,
                 datasetGcs: dataset.gcs,
@@ -164,7 +164,7 @@ evaluate.describe(
           });
 
           evaluate(
-            'Discovery investigator',
+            'Discovery analyst',
             async ({
               executorClient,
               evaluators,
@@ -188,8 +188,8 @@ evaluate.describe(
                 {
                   datasets: [
                     {
-                      name: `sigevents: Discovery investigator (${dataset.id}) (${source})`,
-                      description: `[${dataset.id}] Investigator agent across scenarios (${source})`,
+                      name: `sigevents: Discovery analyst (${dataset.id}) (${source})`,
+                      description: `[${dataset.id}] analyst agent across scenarios (${source})`,
                       examples: collectedExamples.map(({ scenario }) => ({
                         id: scenario.input.scenario_id,
                         input: { ...scenario.input, snapshot_source: scenario.snapshot_source },
@@ -203,7 +203,7 @@ evaluate.describe(
                   ],
                   concurrency: 1,
                   trustUpstreamDataset: TRUST_UPSTREAM,
-                  task: async ({ input }: { input: DiscoveryInvestigatorScenario['input'] }) => {
+                  task: async ({ input }: { input: DiscoveryAnalystScenario['input'] }) => {
                     const data = detectionsByScenario.get(input.scenario_id);
                     if (!data) {
                       throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
@@ -251,14 +251,14 @@ evaluate.describe(
                     );
 
                     // Same message shape as the production batch.
-                    const agentInput = buildInvestigatorInput({
+                    const agentInput = buildAnalystInput({
                       episodeSuffix: Date.now().toString(36).slice(-8),
                       detections,
                       continuationCandidates: input.continuation_candidates ?? [],
                     });
 
                     const converseResult = await agentBuilderClient.converse({
-                      agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
+                      agentId: SIGEVENTS_ANALYST_AGENT_ID,
                       input: agentInput,
                     });
 
@@ -275,7 +275,7 @@ evaluate.describe(
                   },
                 },
                 [
-                  ...createInvestigatorEvaluators({
+                  ...createAnalystEvaluators(esClient, {
                     criteriaFn: evaluators.criteria.bind(evaluators),
                   }),
                   evaluators.traceBasedEvaluators.inputTokens,
@@ -363,7 +363,7 @@ evaluate.describe(
                   task: async ({
                     input,
                   }: {
-                    input: DiscoveryInvestigatorScenario['input'] & { continuation_run: string };
+                    input: DiscoveryAnalystScenario['input'] & { continuation_run: string };
                   }) => {
                     const run = runById.get(input.continuation_run);
                     if (!run) {
@@ -423,14 +423,14 @@ evaluate.describe(
                         ...base,
                         detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
                       };
-                      const agentInput = buildInvestigatorInput({
+                      const agentInput = buildAnalystInput({
                         episodeSuffix: `${Date.now().toString(36).slice(-6)}${i}`,
                         detections: [detection],
                         continuationCandidates,
                       });
 
                       const converseResult = await agentBuilderClient.converse({
-                        agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
+                        agentId: SIGEVENTS_ANALYST_AGENT_ID,
                         input: agentInput,
                       });
 
@@ -472,7 +472,7 @@ evaluate.describe(
           );
 
           evaluate.afterAll(async ({ esClient, apiServices, log }) => {
-            log.debug('Cleaning up investigator test data');
+            log.debug('Cleaning up analyst test data');
             await deleteTemporaryReplayIndices(esClient, log);
             await apiServices.streams.disable().catch(() => {});
             await cleanSignificantEventsDataStreams(esClient, log);

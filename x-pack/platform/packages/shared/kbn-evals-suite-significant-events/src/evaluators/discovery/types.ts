@@ -24,12 +24,12 @@ export interface ExampleOutputBase {
   criteria: EvaluationCriterion[];
 }
 
-export interface InvestigatorAgentOutput extends AgentOutputBase {
+export interface AnalystAgentOutput extends AgentOutputBase {
   discoveries: Discovery[];
   inputDetections?: Detection[];
 }
 
-export interface InvestigatorEvaluationExample {
+export interface AnalystEvaluationExample {
   input: {
     episodeSuffix?: string;
     detections: Array<Partial<Detection>>;
@@ -45,10 +45,7 @@ export interface InvestigatorEvaluationExample {
   metadata: Record<string, unknown> | null;
 }
 
-export type InvestigatorEvaluator = Evaluator<
-  InvestigatorEvaluationExample,
-  InvestigatorAgentOutput
->;
+export type AnalystEvaluator = Evaluator<AnalystEvaluationExample, AnalystAgentOutput>;
 
 export interface DiscoveryJudgeAgentOutput extends AgentOutputBase {
   significantEvents: SignificantEvent[];

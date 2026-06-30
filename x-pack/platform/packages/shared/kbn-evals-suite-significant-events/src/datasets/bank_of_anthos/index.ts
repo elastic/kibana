@@ -13,7 +13,7 @@ import {
 import type { DatasetConfig } from '../types';
 import { kiFeatureExtraction, kiFeatureDeduplication, kiFeatureExclusion } from './ki_features';
 import { kiQueryGeneration } from './ki_queries';
-import { discoveryInvestigator, discoveryJudge } from './discovery';
+import { discoveryAnalyst, discoveryJudge } from './discovery';
 
 export const bankOfAnthosDataset: DatasetConfig = {
   id: BANK_OF_ANTHOS_NAMESPACE,
@@ -22,7 +22,7 @@ export const bankOfAnthosDataset: DatasetConfig = {
   kiFeatureExtraction,
   kiFeatureDeduplication,
   kiFeatureExclusion,
-  discoveryInvestigator,
+  discoveryAnalyst,
   discoveryJudge,
   kiQueryGeneration,
 };

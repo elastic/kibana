@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InvestigatorEvaluator } from '../../types';
+import type { AnalystEvaluator } from '../../types';
 
 function detectionKey(d: { rule_uuid?: string }): string {
   return d.rule_uuid ?? '';
@@ -36,7 +36,7 @@ function intersectionSize(a: Set<string>, b: Set<string>): number {
 }
 
 /** CODE evaluator: scores how well grouped detection-key pairs match the expected groups (F1 over same-group pairs). */
-export const groupingCorrectnessEvaluator: InvestigatorEvaluator = {
+export const groupingCorrectnessEvaluator: AnalystEvaluator = {
   name: 'grouping_correctness',
   kind: 'CODE',
   evaluate: ({ output, expected }) => {

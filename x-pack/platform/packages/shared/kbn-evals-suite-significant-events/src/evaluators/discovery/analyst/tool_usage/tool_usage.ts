@@ -10,9 +10,9 @@ import { extractToolCallIds } from '../../utils/tool_usage';
 
 const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
 const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH } = platformStreamsSigEventsTools;
-import type { InvestigatorEvaluator } from '../../types';
+import type { AnalystEvaluator } from '../../types';
 
-export const createInvestigatorToolUsageEvaluator = (): InvestigatorEvaluator => ({
+export const createAnalystToolUsageEvaluator = (): AnalystEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
   evaluate: ({ input, output }) => {
