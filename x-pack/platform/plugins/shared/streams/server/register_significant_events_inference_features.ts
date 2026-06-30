@@ -10,10 +10,10 @@ import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-
 import { i18n } from '@kbn/i18n';
 import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
@@ -83,7 +83,7 @@ export function registerSignificantEventsInferenceFeatures(
     ignoreGlobalDefault: boolean;
   }> = [
     {
-      featureId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+      featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.kiExtractionName', {
         defaultMessage: 'Knowledge Indicator extraction',
       }),
@@ -94,7 +94,7 @@ export function registerSignificantEventsInferenceFeatures(
       ignoreGlobalDefault: true,
     },
     {
-      featureId: STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+      featureId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.kiQueryGenerationName', {
         defaultMessage: 'Knowledge Indicator Query generation',
       }),
@@ -108,7 +108,7 @@ export function registerSignificantEventsInferenceFeatures(
       ignoreGlobalDefault: true,
     },
     {
-      featureId: STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+      featureId: SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.discoveryName', {
         defaultMessage: 'Discovery',
       }),
@@ -119,7 +119,7 @@ export function registerSignificantEventsInferenceFeatures(
       ignoreGlobalDefault: true,
     },
     {
-      featureId: STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+      featureId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.investigationName', {
         defaultMessage: 'Investigation',
       }),

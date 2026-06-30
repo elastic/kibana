@@ -12,8 +12,8 @@ import {
   SignificantEventsWorkflowStatus,
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
-  STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import React, {
   createContext,
@@ -85,10 +85,10 @@ export function KiGenerationProvider({
   const { indexPatterns } = useIndexPatternsConfig();
 
   const featuresConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
+    SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
   );
   const queriesConnectors = useInferenceFeatureConnectors(
-    STREAMS_SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
+    SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
   );
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
