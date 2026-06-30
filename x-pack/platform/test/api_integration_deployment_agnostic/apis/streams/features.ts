@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { BaseFeature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import { emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -137,7 +138,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(found).to.be.ok();
         expect(found!.excluded).to.be(undefined);
         expect(found!.updated_at).to.be.a('string');
-        expect(found!.expires_at).to.be.a('string');
 
         // Cleanup
         await deleteFeature(apiClient, STREAM_NAME, uuid);
