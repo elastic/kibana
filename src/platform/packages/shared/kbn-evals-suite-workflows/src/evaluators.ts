@@ -1212,10 +1212,18 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       const isNegativeCase = metadata?.category === 'negative';
       const responseText = output.messages?.map((m) => m.message).join('\n') ?? '';
 
+      // Normalize WeightedCriterion entries into the shared evaluator's
+      // EvaluationCriterion shape. Strings are weight-1; structured entries
+      // get an auto id (the shared evaluator requires `id` on structured
+      // criteria but case authors shouldn't have to invent one).
+      const normalizedCriteria = criteria.map((c, i) =>
+        typeof c === 'string' ? c : { id: `c${i}`, text: c.text, score: c.score }
+      );
+
       // Judge LLM calls can fail with transient infra errors (malformed
       // streaming chunks, fetch failed, 5xx). Convert those to N/A so a
       // single judge blip doesn't fail the whole Playwright shard.
-      const judge = evaluators.criteria(criteria);
+      const judge = evaluators.criteria(normalizedCriteria);
       const evaluateWithCriteria = async (judgeInput: Parameters<typeof judge.evaluate>[0]) => {
         try {
           return await judge.evaluate(judgeInput);

@@ -10,6 +10,17 @@
 import type { Example, TaskOutput } from '@kbn/evals';
 
 /**
+ * A criterion line for the LLM judge. Plain strings get weight 1; the
+ * structured form lets a case mark a single criterion as load-bearing so the
+ * Criteria score actually moves when frontier models miss the implicit
+ * constraint (instead of being diluted by easy adjacent criteria that they
+ * always pass). Per-criterion weights are handled by the shared
+ * `createCriteriaEvaluator` in `@kbn/evals` — sum of passing weights / sum of
+ * all weights.
+ */
+export type WeightedCriterion = string | { text: string; score: number };
+
+/**
  * Which authoring approach an example targets.
  * - `shared` (default): scored on the final artifact, applicable in any mode.
  * - `tools-only`: relies on a specific multi-tool trajectory.
@@ -58,7 +69,7 @@ export interface WorkflowEditExample extends Example {
     initialYaml: string;
   };
   output: {
-    criteria: string[];
+    criteria: WeightedCriterion[];
     expectedToolIds?: string[];
     preservedStepNames?: string[];
   } & StructuralExpectations &
@@ -74,7 +85,7 @@ export interface WorkflowCreateExample extends Example {
     instruction: string;
   };
   output: {
-    criteria: string[];
+    criteria: WeightedCriterion[];
   } & StructuralExpectations &
     EfficiencyExpectations;
   metadata?: {
@@ -105,7 +116,7 @@ export interface MultiTurnWorkflowEditExample extends Example {
     turns: Array<{ instruction: string }>;
   };
   output: {
-    criteria: string[];
+    criteria: WeightedCriterion[];
     preservedStepNames?: string[];
   } & StructuralExpectations &
     EfficiencyExpectations;
@@ -126,7 +137,7 @@ export interface SelfCorrectionExample extends Example {
   output: {
     /** Max conversation turns before scoring recovery as failed */
     maxTurns: number;
-    criteria: string[];
+    criteria: WeightedCriterion[];
   };
   metadata?: {
     category?: string;
@@ -153,7 +164,7 @@ export interface NegativeWorkflowExample extends Example {
       | 'unsupported-feature'
       | 'unsafe';
     /** LLM-judge criteria applied to the agent's refusal / clarification text, NOT to resultYaml */
-    criteria: string[];
+    criteria: WeightedCriterion[];
   };
   metadata?: {
     category: 'negative';

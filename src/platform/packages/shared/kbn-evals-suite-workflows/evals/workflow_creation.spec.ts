@@ -949,3 +949,354 @@ evaluate.describe(
     );
   }
 );
+
+// ---------------------------------------------------------------------------
+// Second wave of frontier-challenge cases. Each one uses a weighted criterion
+// (score: 3) on the single "load-bearing" check the case is actually
+// measuring — so a frontier model that nails the surrounding plumbing but
+// misses THE point lands at ~0.4 instead of 0.85. Authoring shape:
+//
+//   criteria: [
+//     'easy criterion the model always passes',
+//     { text: 'load-bearing criterion the case is about', score: 3 },
+//   ]
+//
+// Aggregation is sum(pass_weights) / sum(all_weights), so a 3-weighted miss
+// against three 1-weighted passes scores 3/6 = 0.5, then the existing -0.15
+// near-perfect clip floors it lower.
+// ---------------------------------------------------------------------------
+
+evaluate.describe(
+  'Hidden-constraint creation: weighted frontier-challenge cases (wave 2)',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate(
+      'schedule trigger uses cron with explicit timezone, not naive interval',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: schedule-with-timezone',
+            description:
+              'Daily-at-time schedules are timezone-sensitive. Models default to UTC interval triggers that silently drift on DST or run at the wrong wall-clock time.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a "Morning Report" workflow that runs every weekday at 9:00 AM Europe/Berlin time, runs an esql.query against logs-* to count error events from the prior business day, and emails the summary to ops@example.com. The 9 AM Berlin time must hold across DST transitions.',
+                },
+                output: {
+                  criteria: [
+                    'The workflow has an esql.query step against logs-*.',
+                    'There is an email step to ops@example.com.',
+                    {
+                      text: 'The trigger uses a scheduled cron expression (not a fixed-interval `every: 24h`) AND explicitly sets the timezone to Europe/Berlin (e.g. timezone: Europe/Berlin), so 9 AM Berlin time is preserved across DST. A naive UTC schedule or an `every: 24h` interval does NOT pass.',
+                      score: 3,
+                    },
+                    {
+                      text: 'The cron expression matches Monday-through-Friday only (not seven-day) and fires at 09:00 local — e.g. `0 9 * * 1-5` or equivalent, NOT `0 9 * * *` and NOT `0 0 * * *`.',
+                      score: 3,
+                    },
+                  ],
+                  expectedStepTypes: ['esql.query', 'email'],
+                  expectedStepCount: { min: 2, max: 4 },
+                  expectedMaxToolCalls: 6,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-schedule-timezone' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate('paginated API fetch with loop-until-empty', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-hard: paginated-fetch',
+          description:
+            'Pagination requires a loop that keeps fetching while the API returns more pages. Models often issue one fetch and call it done.',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create an "Issue Sync" workflow on manual trigger that pulls ALL open issues from https://api.example.com/issues (the API paginates with ?page=N&per_page=100 and returns an empty array when there are no more pages) and indexes each issue into the issues-mirror index. Make sure no page is skipped and the loop terminates correctly.',
+              },
+              output: {
+                criteria: [
+                  'There is an HTTP step that fetches from https://api.example.com/issues.',
+                  'There is an indexing step (elasticsearch.index or elasticsearch.bulk) targeting issues-mirror.',
+                  {
+                    text: 'The workflow loops or iterates pagination so multiple pages are fetched — i.e. NOT a single HTTP call with `?page=1` and stop. Acceptable shapes: a foreach over a pre-computed page list, OR a recursive/until-empty pattern via a loop step with an exit condition on the previous response being empty.',
+                    score: 3,
+                  },
+                  {
+                    text: 'The pagination is correct: page number increments on each iteration (uses `{{ foreach.index + 1 }}` or equivalent), and the loop terminates when the API returns no more issues — not an infinite loop, not a hard-coded "fetch 5 pages".',
+                    score: 3,
+                  },
+                ],
+                expectedStepTypes: ['http'],
+                expectedStepCount: { min: 3, max: 8 },
+                expectedLiquidChains: [{ ref: 'foreach.', resolvesTo: 'foreach-item' }],
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'hard-pagination' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate(
+      'idempotent indexing uses deterministic _id (or pre-check)',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: idempotent-indexing',
+            description:
+              'A workflow that has to be re-runnable without duplicating documents. Models default to elasticsearch.index without _id which gives a fresh autogenerated id every run.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a "User Mirror" workflow that runs daily, fetches the user list from https://api.example.com/users, and indexes each user into the users-mirror index. The workflow will run every day so re-runs must NOT create duplicate documents for the same user — running it twice in a row should leave exactly one document per user, not two.',
+                },
+                output: {
+                  criteria: [
+                    'There is an HTTP step fetching users.',
+                    'There is a foreach (or batch) step processing the fetched users.',
+                    'There is an indexing step targeting users-mirror.',
+                    {
+                      text: 'The indexing step uses a deterministic id derived from the user record — e.g. `id: "{{ foreach.item.id }}"` or `id: "{{ foreach.item.email }}"`. An auto-generated id (no id field) does NOT pass: it would create a new document on each re-run. Alternatively, a pre-check via elasticsearch.search-by-id + skip-if-exists pattern is acceptable.',
+                      score: 3,
+                    },
+                  ],
+                  expectedStepTypes: ['http', 'foreach'],
+                  expectedStepCount: { min: 3, max: 5 },
+                  expectedLiquidChains: [{ ref: 'foreach.item', resolvesTo: 'foreach-item' }],
+                  expectedMaxToolCalls: 6,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-idempotency' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'nested Liquid with default fallback when upstream may be missing',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: nested-liquid-default',
+            description:
+              'When a step may return a missing field, the downstream consumer needs a `| default:` fallback or an `if:` guard. Models often plumb the field through naively and emit "Hello, {{ undefined }}" at runtime.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a "User Greeting" workflow on manual trigger that fetches a user record from https://api.example.com/user/123 (the API may or may not include a `nickname` field) and sends a Slack message that greets the user by nickname if it is set, otherwise by their first name (also from the user record). Do NOT send an empty greeting if both happen to be missing — log a console warning instead.',
+                },
+                output: {
+                  criteria: [
+                    'There is an HTTP step fetching the user.',
+                    'There is a Slack step that sends the greeting.',
+                    {
+                      text: 'The Slack message uses a Liquid `default:` filter chain or equivalent fallback — e.g. `{{ steps.fetch.output.body.nickname | default: steps.fetch.output.body.first_name }}` — so a missing nickname falls back to first_name rather than literally rendering "undefined" or an empty value.',
+                      score: 3,
+                    },
+                    {
+                      text: 'There is a guard (an `if:` step-level condition OR a final `default:` after first_name) that prevents an empty greeting from being sent when BOTH fields are missing. A console warning step is logged in that case.',
+                      score: 3,
+                    },
+                  ],
+                  expectedStepTypes: ['http', 'slack.postMessage', 'console'],
+                  expectedStepCount: { min: 3, max: 5 },
+                  expectedMaxToolCalls: 5,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-liquid-default' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'multi-channel routing via switch / nested if on a single key',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: multi-channel-switch',
+            description:
+              'A switch over a single tag/severity field is the right shape — not a chain of overlapping if-blocks that can match multiple branches at once.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create an "Alert Router" workflow triggered by alerts that, based on the alert\'s priority (P1, P2, P3, or other), sends to PagerDuty for P1, Slack for P2, email for P3, and console-log only for anything else. An alert should land in EXACTLY ONE channel — never two — and an alert with no priority field should still log to console.',
+                },
+                output: {
+                  criteria: [
+                    'The workflow has an alert trigger.',
+                    {
+                      text: 'The routing is mutually exclusive — exactly one channel fires per alert. Acceptable shapes: a single `switch` step on priority, OR a chain of `if/else-if` steps where each branch excludes the prior ones. A list of independent `if:` blocks each checking equality is NOT acceptable (an alert with priority="P1" must not also trigger Slack/email/console).',
+                      score: 3,
+                    },
+                    'There is a PagerDuty step gated to fire only for P1.',
+                    'There is a Slack step gated to fire only for P2.',
+                    'There is an email step gated to fire only for P3.',
+                    {
+                      text: 'The "other / missing priority" fallback hits the console step. Specifically, an alert with no priority field (priority is undefined) routes to console, not to nothing. This requires either an explicit `else` branch or a default switch case — not just three positive equality checks.',
+                      score: 3,
+                    },
+                  ],
+                  expectedStepTypes: [
+                    'pagerduty.triggerEvent',
+                    'slack.postMessage',
+                    'email',
+                    'console',
+                  ],
+                  expectedStepCount: { min: 4, max: 8 },
+                  expectedMaxToolCalls: 6,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-multi-channel-switch' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate('esql-based dedup before insert', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-hard: esql-dedup-then-insert',
+          description:
+            'An esql.query step needs to actually FILTER the incoming records, not just SELECT them all. Models often emit `FROM ... | LIMIT 1` (or just FROM) and call it deduplication.',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a "Webhook Sink" workflow on manual trigger that receives an event payload via HTTP, checks the events-archive index with an esql.query to see if an event with the same correlation_id already exists there, and only indexes the new event if it does NOT. If a match is found, log "duplicate, skipping" to console instead.',
+              },
+              output: {
+                criteria: [
+                  'There is an HTTP step receiving the payload.',
+                  'There is an esql.query step against events-archive.',
+                  {
+                    text: 'The esql.query actually filters on correlation_id from the incoming payload via Liquid — e.g. `FROM events-archive | WHERE correlation_id == "{{ steps.<receive>.output.body.correlation_id }}" | STATS count = COUNT(*)`. A query that just selects everything (`FROM events-archive`) or selects without filtering on correlation_id does NOT pass.',
+                    score: 3,
+                  },
+                  {
+                    text: 'There is an `if:` gate (on a subsequent step) that branches on the query result: insert when the count is 0, log a "duplicate" console message when the count is > 0. Both branches must be present and the conditions must be mutually exclusive.',
+                    score: 3,
+                  },
+                  'The insert path uses elasticsearch.index targeting events-archive.',
+                ],
+                expectedStepTypes: ['http', 'esql.query', 'elasticsearch.index', 'console'],
+                expectedStepCount: { min: 4, max: 7 },
+                expectedLiquidChains: [{ ref: 'steps.', resolvesTo: 'step-output' }],
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'hard-esql-dedup' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate(
+      'alert trigger field-name precision (kibana.alert.* vs alert.*)',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-hard: alert-field-name-precision',
+            description:
+              'In an alert-triggered workflow, the alert document fields are namespaced `kibana.alert.*` (not `alert.*` and not `event.alerts.<n>.alert.*`). Models pattern-match the wrong shape and the Liquid refs resolve to nothing at runtime.',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create an "Alert Acknowledge" workflow triggered by Elastic Security alerts. When the alert fires, look up the alert\'s rule name, severity, and reason fields, and send a Slack message that includes all three. The Slack message must use the actual field names from the alert document, not made-up paths.',
+                },
+                output: {
+                  criteria: [
+                    'The workflow has an alert trigger.',
+                    'There is a Slack step that sends the acknowledgment.',
+                    {
+                      text: 'The Slack message references the alert fields using the correct `kibana.alert.*` namespace via `{{ event.kibana.alert.rule.name }}` (or the equivalent path on the alert document) — NOT `{{ alert.rule.name }}`, NOT `{{ event.alert.rule.name }}`, NOT `{{ event.rule.name }}`. The rule_name field is at `kibana.alert.rule.name` (or `kibana.alert.rule.parameters.name`).',
+                      score: 3,
+                    },
+                    {
+                      text: 'The severity is referenced via `kibana.alert.severity` (NOT plain `severity`, NOT `event.severity`).',
+                      score: 2,
+                    },
+                    {
+                      text: 'The reason is referenced via `kibana.alert.reason` (NOT plain `reason`, NOT `event.reason`).',
+                      score: 2,
+                    },
+                  ],
+                  expectedStepTypes: ['slack.postMessage'],
+                  expectedStepCount: { min: 1, max: 3 },
+                  expectedLiquidChains: [{ ref: 'kibana.alert', resolvesTo: 'event-field' }],
+                  expectedMaxToolCalls: 6,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'hard-alert-field-precision' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate('foreach iterator path read from a const', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-hard: foreach-iterator-from-const',
+          description:
+            'A foreach whose iterator collection is declared in `consts:` so changing the const swaps the loop input. Models inline the literal array into foreach instead.',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a "Region Healthcheck" workflow on a 10-minute schedule that pings the /health endpoint on a list of regions: us-east, us-west, eu-west, ap-south. Each region\'s endpoint is `https://{region}.api.example.com/health`. Use a configurable region list — declared once at the top of the workflow — so adding/removing regions is a single-line change. Log the result per region to console.',
+              },
+              output: {
+                criteria: [
+                  'The workflow has a scheduled trigger every 10 minutes.',
+                  {
+                    text: 'There is a top-level `consts:` block declaring the region list (e.g. `consts: { regions: [us-east, us-west, eu-west, ap-south] }`) — NOT a `data.set` step that builds the list at runtime, and NOT an inline array embedded directly in foreach.',
+                    score: 3,
+                  },
+                  {
+                    text: 'The foreach iterates via `{{ consts.regions }}` (or the equivalent const reference) — NOT `foreach: [us-east, us-west, ...]` with the literal list inlined.',
+                    score: 3,
+                  },
+                  'The HTTP URL uses `{{ foreach.item }}` to construct the per-region endpoint.',
+                  'There is a console step inside the loop logging the per-region result.',
+                ],
+                expectedStepTypes: ['foreach', 'http', 'console'],
+                expectedStepCount: { min: 1, max: 3 },
+                expectedLiquidChains: [
+                  { ref: 'consts.regions', resolvesTo: 'consts' },
+                  { ref: 'foreach.item', resolvesTo: 'foreach-item' },
+                ],
+                expectedMaxToolCalls: 5,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'hard-foreach-from-const' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);
