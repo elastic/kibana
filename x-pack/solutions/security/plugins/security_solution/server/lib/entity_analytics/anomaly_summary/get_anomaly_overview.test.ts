@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getEntityAnomalyOverview } from './get_anomaly_overview';
@@ -33,6 +34,7 @@ const mockLogger: Logger = {
 } as unknown as Logger;
 
 const mockSoClient = {} as SavedObjectsClientContract;
+const mockRequest = httpServerMock.createKibanaRequest();
 
 const FROM_MS = 1_700_000_000_000;
 const TO_MS = FROM_MS + 7 * 24 * 60 * 60 * 1000; // 7 days later
@@ -44,6 +46,7 @@ const baseParams = {
   toMs: TO_MS,
   logger: mockLogger,
   ml: mockMl,
+  request: mockRequest,
   soClient: mockSoClient,
 };
 
@@ -450,6 +453,7 @@ describe('getEntityAnomalyOverview', () => {
         entityType: 'host' as const,
         logger: mockLogger,
         ml: mockMl,
+        request: mockRequest,
         soClient: mockSoClient,
       });
       const after = Date.now();
