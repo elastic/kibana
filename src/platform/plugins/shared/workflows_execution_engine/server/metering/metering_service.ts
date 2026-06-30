@@ -112,6 +112,9 @@ export class WorkflowsMeteringService {
       triggered_by: execution.triggeredBy || 'unknown',
       is_test_run: String(execution.isTestRun),
       is_managed: String(managedWorkflowFields.managed === true),
+      is_billable: String(
+        managedWorkflowFields.managed !== true || managedWorkflowFields.billable === true
+      ),
       workflow_id: execution.workflowId,
       space_id: execution.spaceId,
       step_count: String(stepCount),
@@ -138,6 +141,11 @@ export class WorkflowsMeteringService {
     if (instanceGroupType !== 'serverless_project') {
       source.provider = cloudSetup?.csp;
       source.region = cloudSetup?.region;
+
+      const clusterId = cloudSetup?.elasticsearchClusterId;
+      if (clusterId) {
+        source.metadata = { cluster_id: clusterId };
+      }
     }
 
     return {
