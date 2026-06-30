@@ -106,6 +106,6 @@ export const continuationStabilityEvaluator: ContinuationEvaluator = {
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
 
-/** Factory mirroring `createAnalystEvaluators` so the spec wires it the same way. */
+/** Factory mirroring `createDiscoveryEvaluators` so the spec wires it the same way. */
 export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
   selectEvaluators([continuationStabilityEvaluator]);

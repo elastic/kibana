@@ -89,7 +89,7 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface DiscoveryAnalystScenario {
+export interface DiscoveryScenario {
   input: {
     scenario_id: string;
     stream_name: string;
@@ -139,6 +139,6 @@ export interface DatasetConfig {
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
-  discoveryAnalyst: DiscoveryAnalystScenario[];
+  discovery: DiscoveryScenario[];
   discoveryJudge: DiscoveryJudgeScenario[];
 }

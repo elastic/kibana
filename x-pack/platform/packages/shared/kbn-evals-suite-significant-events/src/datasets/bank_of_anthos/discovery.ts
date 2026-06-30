@@ -211,7 +211,7 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   ],
 };
 
-export const discoveryAnalyst: DatasetConfig['discoveryAnalyst'] = [
+export const discoveryData: DatasetConfig['discovery'] = [
   {
     input: {
       scenario_id: 'ledger-db-disconnect',

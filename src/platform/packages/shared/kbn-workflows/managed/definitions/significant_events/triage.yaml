@@ -129,7 +129,7 @@ steps:
     # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
     # supports template rendering for config fields.
     type: ai.agent
-    agent-id: "platform.streams.significant-events.discovery.judge"
+    agent-id: "platform.streams.significant-events.judge"
     connector-id: "${{ inputs.agentConnectorId }}"
     # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
     # (STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
