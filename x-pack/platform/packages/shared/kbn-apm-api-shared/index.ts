@@ -59,7 +59,3 @@ export {
   transactionDataSourceRt,
   filtersRt,
 } from './src/default_api_types';
-export {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from './src/cps_feature_flag';

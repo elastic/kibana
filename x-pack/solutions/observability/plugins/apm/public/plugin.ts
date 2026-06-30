@@ -90,11 +90,6 @@ import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
-import { createCallApmApiV2 } from '@kbn/apm-api-shared';
-import {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '@kbn/apm-api-shared';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -113,6 +108,10 @@ import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_compo
 import { registerEmbeddables } from './embeddable/register_embeddables';
 import { registerServiceMapAttachment } from './agent_builder/attachment_types';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -535,7 +534,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
     );
 
-    const callApmApi = createCallApmApiV2(core, { cpsManager: plugins.cps?.cpsManager });
+    const projectRouting = isCpsEnabled ? plugins.cps?.cpsManager?.getProjectRouting() : undefined;
+
+    // lazy proxy: APMClientV2 already returns a Promise, so this is type-compatible
+    let _api: APMClientV2 | undefined;
+    const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
+      if (_api) return _api(endpoint, options);
+      return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
+        _api = createCallApmApiV2(core, { projectRouting });
+        return _api(endpoint, options);
+      });
+    }) as APMClientV2;
+
     const ApmInternalServices: ApmInternalServices = {
       callApmApi,
     };
