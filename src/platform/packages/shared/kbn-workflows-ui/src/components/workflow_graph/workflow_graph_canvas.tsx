@@ -575,7 +575,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               panOnScroll
               panOnDrag
               zoomOnScroll={false}
-              zoomOnPinch={false}
+              zoomOnPinch={true}
               zoomOnDoubleClick={false}
               translateExtent={translateExtent}
             >
