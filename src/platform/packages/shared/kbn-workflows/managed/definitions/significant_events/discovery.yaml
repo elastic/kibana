@@ -1,5 +1,5 @@
 version: '1'
-name: '.significant-events-discovery'
+name: 'Significant Events Discovery'
 description: 'Correlates unhandled detections into discoveries using an investigator agent and propagates rule-level resolutions.'
 enabled: true
 settings:
