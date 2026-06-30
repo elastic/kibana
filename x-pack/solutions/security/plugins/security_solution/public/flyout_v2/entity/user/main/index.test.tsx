@@ -8,7 +8,10 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { mockUserEntityRiskScores, mockUserRiskScoreState } from '../../../../flyout/entity_details/mocks';
+import {
+  mockUserEntityRiskScores,
+  mockUserRiskScoreState,
+} from '../../../../flyout/entity_details/mocks';
 import {
   mockObservedUser,
   mockManagedUserData,

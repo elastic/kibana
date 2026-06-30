@@ -190,7 +190,17 @@ export const EntityDetails = memo(
                 />
               );
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
-              return openToolFlyout(<VulnerabilityInsights value={name} entityId={entityId} />);
+              return openToolFlyout(
+                <VulnerabilityInsights
+                  value={name}
+                  entityId={entityId}
+                  onShowHost={() =>
+                    openEntityFlyout(
+                      <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />
+                    )
+                  }
+                />
+              );
           }
         },
         linkRenderer: LinkRenderer,
