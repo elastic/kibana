@@ -163,6 +163,7 @@ describe('getHistory()', () => {
         hash: '',
         fields: {
           hashed: [],
+          redacted: [],
         },
         snapshot: {
           id: ruleSO.id,
@@ -330,7 +331,7 @@ describe('getHistory()', () => {
           id: ruleSO.id,
           type: RULE_SAVED_OBJECT_TYPE,
           hash: '',
-          fields: { hashed: [] },
+          fields: { hashed: [], redacted: [] },
           snapshot: {
             id: ruleSO.id,
             alertTypeId: mergedAttrs.alertTypeId,
@@ -472,6 +473,7 @@ describe('getHistory()', () => {
           hash: '',
           fields: {
             hashed: [],
+            redacted: [],
           },
           snapshot: {
             references: ruleSO.references,
