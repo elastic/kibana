@@ -17,6 +17,7 @@ import { setTimeout } from 'timers/promises';
 import type { Headers } from 'node-fetch';
 import fetch from 'node-fetch';
 import chalk from 'chalk';
+import { SingleBar } from 'cli-progress';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { cache } from './utils/cache';
@@ -27,6 +28,15 @@ const asyncPipeline = promisify(pipeline);
 const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+
+const PROGRESS_BAR_RENDER_INTERVAL_MS = 500;
+const PROGRESS_LOG_INTERVAL_MS = 5_000;
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 type ChecksumType = 'sha512';
 export type ArtifactLicense = 'basic' | 'trial';
@@ -377,25 +387,85 @@ export class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
-    await asyncPipeline(
-      resp.body,
-      new Transform({
-        transform(chunk, encoding, cb) {
-          contentLength += Buffer.byteLength(chunk);
+    const totalBytes = parseInt(resp.headers.get('content-length') ?? '0', 10);
+    const isTTY = Boolean(process.stdout.isTTY);
+    const log = this.log;
 
-          if (first500Bytes.length < 500) {
-            first500Bytes = Buffer.concat(
-              [first500Bytes, chunk],
-              first500Bytes.length + chunk.length
-            ).slice(0, 500);
-          }
+    let progressBar: SingleBar | undefined;
+    let lastBarUpdate = Date.now();
+    let lastBarBytes = 0;
+    let lastLogTime = Date.now();
+    let lastLogBytes = 0;
 
-          hash.update(chunk, encoding);
-          cb(null, chunk);
-        },
-      }),
-      fs.createWriteStream(tmpPath)
-    );
+    if (isTTY && totalBytes > 0) {
+      progressBar = new SingleBar({
+        barsize: 30,
+        format: ' Downloading [{bar}] {percentage}% | {received}/{size} | {speed}/s',
+        hideCursor: true,
+        clearOnComplete: true,
+      });
+      progressBar.start(totalBytes, 0, {
+        received: formatBytes(0),
+        size: formatBytes(totalBytes),
+        speed: '?',
+      });
+    }
+
+    try {
+      await asyncPipeline(
+        resp.body,
+        new Transform({
+          transform(chunk, encoding, cb) {
+            contentLength += Buffer.byteLength(chunk);
+
+            if (first500Bytes.length < 500) {
+              first500Bytes = Buffer.concat(
+                [first500Bytes, chunk],
+                first500Bytes.length + chunk.length
+              ).slice(0, 500);
+            }
+
+            hash.update(chunk, encoding);
+
+            const now = Date.now();
+            if (progressBar) {
+              const elapsed = now - lastBarUpdate;
+              if (elapsed >= PROGRESS_BAR_RENDER_INTERVAL_MS) {
+                const speed =
+                  elapsed > 0 ? Math.round(((contentLength - lastBarBytes) / elapsed) * 1000) : 0;
+                lastBarUpdate = now;
+                lastBarBytes = contentLength;
+                progressBar.update(contentLength, {
+                  received: formatBytes(contentLength),
+                  size: formatBytes(totalBytes),
+                  speed: formatBytes(speed),
+                });
+              }
+            } else if (!isTTY && totalBytes > 0) {
+              const elapsed = now - lastLogTime;
+              if (elapsed >= PROGRESS_LOG_INTERVAL_MS) {
+                const speed =
+                  elapsed > 0 ? Math.round(((contentLength - lastLogBytes) / elapsed) * 1000) : 0;
+                lastLogTime = now;
+                lastLogBytes = contentLength;
+                log.info(
+                  'downloading: %s of %s (%d%%) at %s/s',
+                  formatBytes(contentLength),
+                  formatBytes(totalBytes),
+                  Math.round((contentLength / totalBytes) * 100),
+                  formatBytes(speed)
+                );
+              }
+            }
+
+            cb(null, chunk);
+          },
+        }),
+        fs.createWriteStream(tmpPath)
+      );
+    } finally {
+      progressBar?.stop();
+    }
 
     // Detect truncated downloads that closed cleanly (e.g. the server reset
     // the connection after sending partial data). The checksum would also catch
