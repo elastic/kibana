@@ -450,13 +450,9 @@ export const DiscoverTopNav = ({
             ? {
                 useApproximation,
                 onChange: onUseApproximationChange,
-                additionalText: i18n.translate(
-                  'discover.esqlApproximationToggle.additionalText',
-                  {
-                    defaultMessage:
-                      'Only applies to queries that use exactly one STATS command.',
-                  }
-                ),
+                additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
+                  defaultMessage: 'Only applies to queries that use exactly one STATS command.',
+                }),
               }
             : undefined
         }

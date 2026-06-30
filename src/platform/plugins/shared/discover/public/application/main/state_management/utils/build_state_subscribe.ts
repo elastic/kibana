@@ -87,7 +87,8 @@ export const buildStateSubscribe =
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
-    const approximationChanged = (nextState.useApproximation ?? false) !== (useApproximation ?? false) && isEsqlMode;
+    const approximationChanged =
+      (nextState.useApproximation ?? false) !== (useApproximation ?? false) && isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
@@ -138,7 +139,13 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged || approximationChanged) {
+    if (
+      sampleSizeChanged ||
+      docTableSortChanged ||
+      dataSourceChanged ||
+      queryChanged ||
+      approximationChanged
+    ) {
       const logData = {
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
