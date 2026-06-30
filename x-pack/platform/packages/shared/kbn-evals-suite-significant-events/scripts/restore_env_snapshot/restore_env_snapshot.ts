@@ -64,6 +64,13 @@ async function repromoteQueries({
   await promoteQueries(config);
 }
 
+/**
+ * Restores one SigEvents data stream (KI / discoveries / detections) from its captured
+ * `snapshot-*` plain index. The plugin owns the data-stream template, so we restore the
+ * captured docs into a temp index and reindex them into the data-stream name (op_type:
+ * create) — letting ES materialize the data stream. `allowNoMatches` makes this a no-op
+ * for older snapshots that predate a given data stream.
+ */
 async function restoreDataStream({
   esClient,
   log,
