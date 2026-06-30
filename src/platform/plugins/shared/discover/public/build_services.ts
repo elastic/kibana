@@ -78,6 +78,7 @@ import {
   EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
+import { ESQL_APPROXIMATION_FEATURE_FLAG_KEY } from '@kbn/esql-utils';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 
 /**
@@ -97,6 +98,7 @@ export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
   getEmbeddableTransformsEnabled: () => boolean;
+  getEsqlApproximationEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -218,6 +220,8 @@ export const buildServices = ({
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
       getEmbeddableTransformsEnabled: () =>
         core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
+      getEsqlApproximationEnabled: () =>
+        core.featureFlags.getBooleanValue(ESQL_APPROXIMATION_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

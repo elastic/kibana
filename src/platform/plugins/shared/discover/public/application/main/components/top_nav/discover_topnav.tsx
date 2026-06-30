@@ -446,7 +446,7 @@ export const DiscoverTopNav = ({
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         esqlApproximation={
-          isEsqlMode
+          isEsqlMode && services.discoverFeatureFlags.getEsqlApproximationEnabled()
             ? {
                 useApproximation,
                 onChange: onUseApproximationChange,
