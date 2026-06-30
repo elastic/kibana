@@ -15,6 +15,10 @@
 - Utility scripts live in `scripts/` (e.g., `node scripts/generate.js`).
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
+## Saved Objects
+- Do not eagerly add Saved Object type mappings. Ask the feature author to confirm each mapped field is needed for feature search; mapped fields are not SQL columns and cannot be removed once added.
+- Do not map fields already covered by root mappings (for example, `created_at`). Inspect the authoritative source by searching for `getBaseMappings` in `src/core/packages/saved-objects`.
+
 ## Testing
 Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jest, types, linting).
 
