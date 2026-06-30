@@ -90,11 +90,9 @@ describe('invalidate api keys task - in-use guard', () => {
         {} as unknown as TaskManagerPluginsStart,
         {} as unknown as TaskManagerStartContract,
       ],
-      getEncryptedSavedObjectsClient: () => undefined,
       invalidateApiKeyFn,
-      invalidateUiamApiKeyFn: () => undefined,
       removalDelay: '1s',
-    })({ taskInstance: { state: {} } });
+    })();
 
     await runner.run();
 

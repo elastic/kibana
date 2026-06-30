@@ -21,7 +21,7 @@ const runInvalidateMock = runInvalidate as jest.Mock;
 describe('invalidate api keys task runner', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    runInvalidateMock.mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} });
+    runInvalidateMock.mockResolvedValue(0);
   });
 
   it('builds the saved objects client with the hidden `task` type so the in-use guard works', async () => {
@@ -38,11 +38,9 @@ describe('invalidate api keys task runner', () => {
       logger: loggingSystemMock.createLogger(),
       configInterval: '5m',
       coreStartServices,
-      getEncryptedSavedObjectsClient: () => undefined,
       invalidateApiKeyFn: jest.fn(),
-      invalidateUiamApiKeyFn: () => undefined,
       removalDelay: '1h',
-    })({ taskInstance: { state: {} } });
+    })();
 
     await runner.run();
 
