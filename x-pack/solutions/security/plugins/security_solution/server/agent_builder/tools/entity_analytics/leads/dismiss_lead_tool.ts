@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import { getLeadToolAvailability } from './lead_availability';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import { securityTool } from '../../constants';
@@ -45,25 +45,8 @@ export const dismissLeadTool = (
     tags: ['security', 'entity-analytics', 'leads'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status !== 'available') {
-            return availability;
-          }
-          if (!experimentalFeatures.leadGenerationEnabled) {
-            return { status: 'unavailable', reason: 'Lead generation is not enabled.' };
-          }
-          return { status: 'available' };
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check ${SECURITY_DISMISS_LEAD_TOOL_ID} availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: ({ request }) =>
+        getLeadToolAvailability({ core, request, logger, experimentalFeatures }),
     },
     handler: async (params, { request, spaceId, esClient, prompts, callContext }) => {
       logger.debug(`${SECURITY_DISMISS_LEAD_TOOL_ID} tool called for lead ${params.id}`);

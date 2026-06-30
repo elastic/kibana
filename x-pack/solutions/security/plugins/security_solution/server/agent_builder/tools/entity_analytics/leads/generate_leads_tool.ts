@@ -9,18 +9,18 @@ import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { isSupportedConnectorType } from '@kbn/inference-common';
 import { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
-import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   StartPlugins,
 } from '../../../../plugin_contract';
+import { getLeadToolAvailability } from './lead_availability';
 import {
   getLeadGenerationConfig,
   upsertLeadGenerationConfig,
@@ -102,25 +102,8 @@ export const generateLeadsTool = (
     tags: ['security', 'entity-analytics', 'leads'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status !== 'available') {
-            return availability;
-          }
-          if (!experimentalFeatures.leadGenerationEnabled) {
-            return { status: 'unavailable', reason: 'Lead generation is not enabled.' };
-          }
-          return { status: 'available' };
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check ${SECURITY_GENERATE_LEADS_TOOL_ID} availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: ({ request }) =>
+        getLeadToolAvailability({ core, request, logger, experimentalFeatures }),
     },
     handler: async (
       params,
