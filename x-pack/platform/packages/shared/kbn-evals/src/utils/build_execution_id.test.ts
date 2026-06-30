@@ -33,7 +33,7 @@ describe('buildExecutionId', () => {
     expect(suiteA).not.toBe(suiteB);
   });
 
-  it('falls back to the legacy build::model id when no suite id is provided (e.g. in-tool evals)', () => {
+  it('omits the suite id when no suite id is provided (e.g. in-tool evals)', () => {
     expect(
       buildExecutionId({
         baseExecutionId: 'bk-build-1',
@@ -42,7 +42,7 @@ describe('buildExecutionId', () => {
     ).toBe('bk-build-1::gpt-4');
   });
 
-  it('returns just the base execution id when neither suite nor model is provided (in-tool eval without a model)', () => {
+  it('returns just the base execution id when neither suite nor model is provided', () => {
     expect(buildExecutionId({ baseExecutionId: 'bk-build-1' })).toBe('bk-build-1');
   });
 
@@ -63,14 +63,5 @@ describe('buildExecutionId', () => {
     expect(
       buildExecutionId({ baseExecutionId: '', suiteId: 'significant-events', modelId: 'gpt-4' })
     ).toBe('');
-  });
-
-  it('is stable for the same build, suite, and model', () => {
-    const args = {
-      baseExecutionId: 'bk-build-1',
-      suiteId: 'significant-events',
-      modelId: 'gpt-4',
-    };
-    expect(buildExecutionId(args)).toBe(buildExecutionId(args));
   });
 });

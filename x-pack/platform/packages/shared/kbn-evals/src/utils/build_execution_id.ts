@@ -22,9 +22,9 @@ interface BuildExecutionIdArgs {
  * `(build, suite, model)` tuple its own execution id, and therefore its own row.
  *
  * `suiteId` and `modelId` are both optional — e.g. in-tool evals run without an
- * `EVAL_SUITE_ID`. Missing segments are dropped, so a run without a suite keeps
- * the legacy `${baseExecutionId}::${modelId}` id (no behavior change) and a run
- * without a model collapses to `${baseExecutionId}::${suiteId}`.
+ * `EVAL_SUITE_ID`. Missing segments are dropped, so a run without a suite yields
+ * `${baseExecutionId}::${modelId}` and a run without a model yields
+ * `${baseExecutionId}::${suiteId}`.
  *
  * Returns `baseExecutionId` unchanged when it is not set (e.g. local runs), which
  * lets downstream code fall back to a random per-task experiment id.
