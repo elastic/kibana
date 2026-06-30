@@ -88,7 +88,7 @@ groups:
       - setting: xpack.securitySolution.enableExperimental
         description: |
           A list of experimental feature flags to enable.
-        datatype: string
+        datatype: array of strings
         applies_to:
           stack: ga
           ech: ga
