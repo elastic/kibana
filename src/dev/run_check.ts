@@ -187,11 +187,12 @@ const runLintTsProjects = async (
   };
 };
 
-const runMoonRegeneration = async (): Promise<{ passed: boolean; output: string }> => {
+const runMoonRegeneration = async (fix: boolean): Promise<{ passed: boolean; output: string }> => {
   const execa = (await import('execa')).default;
+  // --update writes regenerated configs; --check fails on drift without writing.
   const result = await execa(
     process.execPath,
-    ['scripts/regenerate_moon_projects.js', '--update'],
+    ['scripts/regenerate_moon_projects.js', fix ? '--update' : '--check'],
     { cwd: REPO_ROOT, reject: false }
   );
 
@@ -346,10 +347,10 @@ run(
     {
       const moonProgress = startProgress('moon');
       try {
-        const result = await runMoonRegeneration();
+        const result = await runMoonRegeneration(fix);
         if (result.passed) {
           moonProgress.writeResult(
-            line('moon', '✓', 'projects regenerated', moonProgress.elapsed())
+            line('moon', '✓', fix ? 'projects regenerated' : 'up to date', moonProgress.elapsed())
           );
         } else {
           moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
