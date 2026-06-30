@@ -31,6 +31,7 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
     });
 

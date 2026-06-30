@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   RiskEngineStatusResponse,
@@ -15,7 +15,10 @@ import type {
 
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
+const ENTITY_STORE_V2_UNINSTALL_URL = '/api/security/entity_store/uninstall';
 const ENTITY_STORE_V2_STATUS_URL = '/api/security/entity_store/status';
+const ENTITY_STORE_V2_FF_KEY = 'securitySolution:entityStoreEnableV2';
+const KIBANA_INTERNAL_SETTINGS_URL = '/internal/kibana/settings';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
@@ -48,18 +51,24 @@ export interface EntityAnalyticsApiService {
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
+  // v2 entity-store helpers (only relevant when `securitySolution:entityStoreEnableV2` is true)
+  setEntityStoreV2Enabled: (enabled: boolean) => Promise<void>;
+  uninstallEntityStoreV2: () => Promise<void>;
 }
 
 export const getEntityAnalyticsApiService = ({
+  esClient,
   kbnClient,
   log,
   scoutSpace,
 }: {
+  esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): EntityAnalyticsApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
+  const spaceId = scoutSpace?.id ?? 'default';
 
   const service: EntityAnalyticsApiService = {
     deleteEntityStoreEngines: async () => {
@@ -77,6 +86,30 @@ export const getEntityAnalyticsApiService = ({
           });
           // Wait for cleanup to complete - ensure server state is fully cleaned up
           await service.waitForEntityStoreCleanup();
+
+          // Belt-and-suspenders: ensure no entity-store transforms (both latest
+          // and history) are left in this space. The production delete path can
+          // orphan transforms if the entity-definition SO lookup races with a
+          // partial install failure (saw the SO=0 / transforms=stopped pattern
+          // in 10x repeats). Without this cleanup, the next init fails with
+          // `resource_already_exists`. Uses the admin esClient — bypasses any
+          // role-cache issues affecting the test user.
+          try {
+            const { transforms } = await esClient.transform.getTransform({
+              transform_id: `entities-v1-*-security_*_${spaceId}`,
+              allow_no_match: true,
+            });
+            await Promise.all(
+              transforms.map(({ id }) =>
+                esClient.transform.deleteTransform({
+                  transform_id: id,
+                  force: true,
+                })
+              )
+            );
+          } catch (error) {
+            log.debug(`Fallback transform cleanup failed: ${error}`);
+          }
         }
       );
     },
@@ -142,7 +175,14 @@ export const getEntityAnalyticsApiService = ({
             headers: {
               'elastic-api-version': API_VERSIONS.internal.v1,
             },
+            // The risk engine status API returns 400 when Entity Store V2 is
+            // enabled. Treat that as NOT_INSTALLED — callers (deleteRiskEngineConfiguration,
+            // waitForRiskEngineCleanup) will short-circuit correctly.
+            ignoreErrors: [400],
           });
+          if (response.status === 400) {
+            return { risk_engine_status: 'NOT_INSTALLED' } as RiskEngineStatusResponse;
+          }
           return response.data;
         }
       );
@@ -353,6 +393,50 @@ export const getEntityAnalyticsApiService = ({
               lastStatus
             )}`
           );
+        }
+      );
+    },
+
+    setEntityStoreV2Enabled: async (enabled: boolean) => {
+      await kbnClient.request({
+        method: 'POST',
+        path: `${basePath}${KIBANA_INTERNAL_SETTINGS_URL}/${ENTITY_STORE_V2_FF_KEY}`,
+        body: { value: enabled },
+        headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
+      });
+    },
+
+    uninstallEntityStoreV2: async () => {
+      await measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.uninstallEntityStoreV2',
+        async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: `${basePath}${ENTITY_STORE_V2_UNINSTALL_URL}`,
+            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            body: {},
+            ignoreErrors: [404, 500],
+          });
+
+          // Same belt-and-suspenders pattern as v1: clean any leaked transforms
+          // (latest + history) for this space directly via the admin esClient.
+          try {
+            const { transforms } = await esClient.transform.getTransform({
+              transform_id: `entities-v1-*-security_*_${spaceId}`,
+              allow_no_match: true,
+            });
+            await Promise.all(
+              transforms.map(({ id }) =>
+                esClient.transform.deleteTransform({
+                  transform_id: id,
+                  force: true,
+                })
+              )
+            );
+          } catch (error) {
+            log.debug(`v2 fallback transform cleanup failed: ${error}`);
+          }
         }
       );
     },

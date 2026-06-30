@@ -75,6 +75,7 @@ export const spaceTest = securityParallelFixtures.extend<
         scoutSpace,
       });
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        esClient,
         kbnClient,
         log,
         scoutSpace,

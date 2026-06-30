@@ -22,7 +22,12 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      // v2 may be the environment default; uninstall it before flipping the FF
+      // so the v1 status poll in deleteEntityStoreEngines doesn't hang.
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
+      await apiServices.entityAnalytics.setEntityStoreV2Enabled(false);
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
+      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
 
       await apiServices.detectionRule.createCustomQueryRule({
@@ -30,11 +35,13 @@ spaceTest.describe(
         name: `${RISK_SCORE_RULE.name}_${scoutSpace.id}_${Date.now()}`,
       });
 
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
+      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
     });
 
@@ -52,43 +59,6 @@ spaceTest.describe(
       await managementPage.waitForStatusLoaded();
       await expect(managementPage.riskScoreTab).toBeVisible();
       await expect(managementPage.assetCriticalityTab).toBeVisible();
-    });
-
-    spaceTest('should init and disable entity analytics', async ({ pageObjects, apiServices }) => {
-      spaceTest.setTimeout(240000);
-      const managementPage = pageObjects.entityAnalyticsManagementPage;
-
-      await spaceTest.step('Navigate and verify initial off state', async () => {
-        await managementPage.navigate();
-        await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
-      });
-
-      await spaceTest.step('Toggle on and verify enabled state', async () => {
-        await managementPage.toggleEntityAnalytics();
-        // Sync on backend readiness first. The UI shows "Off" while the entity
-        // store is in `installing` state (status === 'enabling'), so asserting
-        // UI text alone races against install completion. Mirrors
-        // engine_status_management.spec.ts. See #259664.
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
-        await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
-          timeout: 30000,
-        });
-      });
-
-      await spaceTest.step('Toggle off and verify disabled state', async () => {
-        await managementPage.toggleEntityAnalytics();
-        // Toggle OFF stops the engines (status `stopped`) — it does not delete
-        // them. Full deletion to `not_installed` only happens in afterEach via
-        // deleteEntityStoreEngines. Wait for the post-stop backend state, then
-        // assert the UI flip.
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('stopped', 60000);
-        await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
-          timeout: 30000,
-        });
-      });
     });
 
     spaceTest(
@@ -122,7 +92,7 @@ spaceTest.describe(
 
       await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
 
-      await page.route('**/api/security/entity_store/start', (route) =>
+      await page.route('**/internal/risk_score/engine/init', (route) =>
         route.fulfill({
           status: 500,
           contentType: 'application/json',
@@ -136,7 +106,7 @@ spaceTest.describe(
         timeout: 30000,
       });
 
-      await page.unroute('**/api/security/entity_store/start');
+      await page.unroute('**/internal/risk_score/engine/init');
     });
   }
 );

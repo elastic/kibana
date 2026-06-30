@@ -16,6 +16,11 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
 import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
 import {
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+} from '../constants';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
+import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
   uninstallElasticsearchAssets,
@@ -228,6 +233,24 @@ describe('AssetManagerClient', () => {
       expect(indexKeys).toContain('.entities.entities-default');
       expect(indexKeys).not.toContain('-logs-cloud_security_posture.*');
       expect(indexKeys).not.toContain('-logs-excluded-*');
+    });
+
+    it('preserves positive patterns and passes correct cluster privileges', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue(['logs-*', 'filebeat-*']);
+
+      await getPrivilegesClient.getPrivileges({} as KibanaRequest);
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+      expect(calledWith.elasticsearch.index['logs-*']).toEqual(
+        ENTITY_STORE_SOURCE_INDICES_PRIVILEGES
+      );
+      expect(calledWith.elasticsearch.index['filebeat-*']).toEqual(
+        ENTITY_STORE_SOURCE_INDICES_PRIVILEGES
+      );
+      expect(
+        calledWith.elasticsearch.index[getEntitiesAlias(ENTITY_LATEST, namespace)]
+      ).toBeDefined();
+      expect(calledWith.elasticsearch.cluster).toEqual(ENTITY_STORE_CLUSTER_PRIVILEGES);
     });
   });
 

@@ -65,6 +65,14 @@ export const createElasticsearchCustomRole = async (
     name: customRoleName,
     ...role,
   });
+  // ES caches role lookups and realm-mapped role assignments separately.
+  // Without invalidating both, a freshly-created role can resolve to "not found"
+  // for users whose SAML session predates the previous cache miss — leaving the
+  // user with empty effective roles even though the role exists in .security.
+  await Promise.all([
+    client.security.clearCachedRoles({ name: customRoleName }),
+    client.security.clearCachedRealms({ realms: '*' }),
+  ]);
 };
 
 export const isElasticsearchRole = (

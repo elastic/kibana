@@ -64,6 +64,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        esClient,
         kbnClient,
         log,
       });
