@@ -19,7 +19,9 @@ const esqlStep: ConverseStep = {
 
 const evaluate = (significantEvents: unknown, steps: ConverseStep[]) =>
   confirmedEvidencesEvaluator.evaluate({
-    input: {},
+    input: {
+      discoveries: [],
+    },
     output: { significantEvents, steps, inputDiscoveries: [] } as never,
     expected: {} as never,
     metadata: null,

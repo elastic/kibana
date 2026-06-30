@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/streams-schema';
 import type { JudgeEvaluator } from '../../types';
 
-const VALID_STATUSES = new Set<SigEvent['status']>([
+const VALID_STATUSES = new Set<SignificantEvent['status']>([
   'promoted',
   'acknowledged',
   'demoted',
   'resolved',
 ]);
-const REQUIRED_FIELDS: Array<keyof SigEvent> = [
+const REQUIRED_FIELDS: Array<keyof SignificantEvent> = [
   'discovery_id',
   'discovery_slug',
   'status',

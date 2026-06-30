@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery, SigEvent } from '@kbn/streams-schema';
+import type { Discovery, SignificantEvent } from '@kbn/streams-schema';
 
 /**
  * The discovery investigator/judge agents have no emit tool and no enforced `structured_output` on
@@ -56,7 +56,7 @@ export function parseDiscoveries(message: string): Discovery[] {
   return parseArrayProperty<Discovery>(message, 'discoveries');
 }
 
-/** Parse the judge's `{ "significant_events": [...] }` message into `SigEvent[]`. */
-export function parseSignificantEvents(message: string): SigEvent[] {
-  return parseArrayProperty<SigEvent>(message, 'significant_events');
+/** Parse the judge's `{ "significant_events": [...] }` message into `SignificantEvent[]`. */
+export function parseSignificantEvents(message: string): SignificantEvent[] {
+  return parseArrayProperty<SignificantEvent>(message, 'significant_events');
 }
