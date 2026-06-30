@@ -23,7 +23,7 @@ import {
   SelfLinkError,
 } from '../../../domain/errors';
 import { ENTITY_STORE_RESOLUTION_LINK_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './resolution_telemetry';
+import { reportResolutionError } from './utils/resolution_telemetry';
 
 const bodySchema = z.object({
   target_id: z.string().describe('The entity identifier to resolve the linked entities to.'),

@@ -16,7 +16,7 @@ import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
 import { ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './resolution_telemetry';
+import { reportResolutionError } from './utils/resolution_telemetry';
 
 const querySchema = z.object({
   entity_id: z.string().describe('The entity identifier to look up the resolution group for.'),

@@ -16,7 +16,7 @@ import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, MixedEntityTypesError } from '../../../domain/errors';
 import { ENTITY_STORE_RESOLUTION_UNLINK_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './resolution_telemetry';
+import { reportResolutionError } from './utils/resolution_telemetry';
 
 const bodySchema = z.object({
   entity_ids: z

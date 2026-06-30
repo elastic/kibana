@@ -13,9 +13,9 @@ import {
   ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
-} from '../../../domain/errors';
-import type { TelemetryReporter } from '../../../telemetry/events';
-import { ENTITY_STORE_RESOLUTION_ERROR_EVENT } from '../../../telemetry/events';
+} from '../../../../domain/errors';
+import type { TelemetryReporter } from '../../../../telemetry/events';
+import { ENTITY_STORE_RESOLUTION_ERROR_EVENT } from '../../../../telemetry/events';
 
 export type ResolutionOperation = 'link' | 'unlink' | 'group';
 
