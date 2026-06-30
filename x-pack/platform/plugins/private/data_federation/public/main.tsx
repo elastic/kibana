@@ -113,6 +113,10 @@ export const Main: FunctionComponent<MainProps> = ({
         if (!cancelled) {
           setItems(nextItems);
         }
+      } catch {
+        if (!cancelled) {
+          setItems([]);
+        }
       } finally {
         if (!cancelled) {
           setHasLoadedDataSources(true);
@@ -369,9 +373,12 @@ export const Main: FunctionComponent<MainProps> = ({
   }, [dataSetsClient, pendingDeleteDataSet, toasts]);
 
   const cancelDeleteDataSets = useCallback(() => {
+    if (isDeletingDataSets) {
+      return;
+    }
     setPendingDeleteDataSets(null);
     setDeleteDataSetsError(null);
-  }, []);
+  }, [isDeletingDataSets]);
 
   const confirmDeleteDataSets = useCallback(async () => {
     if (!pendingDeleteDataSets || pendingDeleteDataSets.length === 0) {
