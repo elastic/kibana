@@ -323,7 +323,9 @@ function buildFieldMappingPainless(
   const branches = Object.entries(then.mapping)
     .map(
       ([from, to], i) =>
-        `${i === 0 ? 'if' : 'else if'} (_mappedField == "${escapePainlessString(from)}") { ${varName} = "${escapePainlessString(to)}"; }`
+        `${i === 0 ? 'if' : 'else if'} (_mappedField == "${escapePainlessString(
+          from
+        )}") { ${varName} = "${escapePainlessString(to)}"; }`
     )
     .join(' ');
   return `if (${varName} == null && (${cond})) { String _mappedField = ${fieldRead}; if (_mappedField != null) { ${branches} } }`;
@@ -360,13 +362,17 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
           .map((v) => `_src == "${escapePainlessString(v)}"`)
           .join(' || ');
         stmts.push(
-          `if (${varName} == null && _src != null && (${conds})) { ${varName} = "${escapePainlessString(clause.then)}"; }`
+          `if (${varName} == null && _src != null && (${conds})) { ${varName} = "${escapePainlessString(
+            clause.then
+          )}"; }`
         );
       } else {
         const cond = streamlangConditionToPainlessDoc(clause.condition);
         if (typeof clause.then === 'string') {
           stmts.push(
-            `if (${varName} == null && (${cond})) { ${varName} = "${escapePainlessString(clause.then)}"; }`
+            `if (${varName} == null && (${cond})) { ${varName} = "${escapePainlessString(
+              clause.then
+            )}"; }`
           );
         } else {
           stmts.push(buildFieldMappingPainless(varName, cond, clause.then));
@@ -375,7 +381,9 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
     }
 
     stmts.push(
-      `if (${varName} == null && _src != null) { ${varName} = _src; } else if (${varName} == null) { ${varName} = ${toPainlessNullableStringLiteral(ev.fallbackValue)}; }`
+      `if (${varName} == null && _src != null) { ${varName} = _src; } else if (${varName} == null) { ${varName} = ${toPainlessNullableStringLiteral(
+        ev.fallbackValue
+      )}; }`
     );
 
     parts.push(stmts.join(' '));

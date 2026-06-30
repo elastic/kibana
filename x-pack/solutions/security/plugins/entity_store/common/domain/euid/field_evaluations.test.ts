@@ -295,10 +295,7 @@ describe('applyFieldEvaluations', () => {
     it('falls through to source value when cloud.provider is not in the mapping', () => {
       // event.module = 'asset_discovery' becomes the namespace when provider is unknown
       expect(
-        applyFieldEvaluations(
-          { ...assetBase, cloud: { provider: 'ibm' } },
-          userEvaluations
-        )
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'ibm' } }, userEvaluations)
       ).toEqual({ 'entity.namespace': 'asset_discovery' });
     });
 

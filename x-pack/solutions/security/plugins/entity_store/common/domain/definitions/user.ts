@@ -128,7 +128,10 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           },
           {
             condition: { field: 'event.kind', includes: 'asset' },
-            then: { field: 'cloud.provider', mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' } },
+            then: {
+              field: 'cloud.provider',
+              mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' },
+            },
           },
           { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },

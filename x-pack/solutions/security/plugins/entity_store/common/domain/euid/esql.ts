@@ -211,7 +211,12 @@ export function buildSourcePickerEsql(sourceVariablesBaseName: string, count: nu
  */
 function buildFieldMappingEsql(then: FieldEvaluationWhenClauseFieldMappingThen): string {
   const arms = Object.entries(then.mapping)
-    .map(([from, to]) => `MV_FIRST(TO_STRING(${then.field})) == "${escapeEsqlString(from)}", "${escapeEsqlString(to)}"`)
+    .map(
+      ([from, to]) =>
+        `MV_FIRST(TO_STRING(${then.field})) == "${escapeEsqlString(from)}", "${escapeEsqlString(
+          to
+        )}"`
+    )
     .join(', ');
   return `CASE(${arms})`;
 }

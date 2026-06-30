@@ -686,7 +686,9 @@ apiTest.describe(
         expect(get(byId['user:ccs-cloud-gcp@gcp'], ['entity', 'namespace'])).toBe('gcp');
 
         // 3. azure → namespace entra_id (normalised by the mapping)
-        expect(get(byId['user:ccs-cloud-azure@entra_id'], ['entity', 'namespace'])).toBe('entra_id');
+        expect(get(byId['user:ccs-cloud-azure@entra_id'], ['entity', 'namespace'])).toBe(
+          'entra_id'
+        );
         expect(get(byId['user:ccs-cloud-azure@entra_id'], ['cloud', 'provider'])).toBe('azure');
 
         // 4. ibm not in mapping → falls through to source value (event.module = asset_discovery)

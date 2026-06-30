@@ -1290,7 +1290,13 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         cloud: { provider: 'aws' },
       });
 
-      const extractionResponse = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        from,
+        to
+      );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ success: true, count: 6 });
 
@@ -1298,7 +1304,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const awsHit = await searchDocById(esClient, 'user:cloud-aws-user@aws');
       expect(awsHit.hits.hits).toHaveLength(1);
       expect(awsHit.hits.hits[0]._source).toMatchObject({
-        entity: { id: 'user:cloud-aws-user@aws', namespace: 'aws', confidence: ENTITY_CONFIDENCE.High },
+        entity: {
+          id: 'user:cloud-aws-user@aws',
+          namespace: 'aws',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
         cloud: { provider: 'aws' },
       });
 
@@ -1306,14 +1316,22 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const gcpHit = await searchDocById(esClient, 'user:cloud-gcp-user@gcp');
       expect(gcpHit.hits.hits).toHaveLength(1);
       expect(gcpHit.hits.hits[0]._source).toMatchObject({
-        entity: { id: 'user:cloud-gcp-user@gcp', namespace: 'gcp', confidence: ENTITY_CONFIDENCE.High },
+        entity: {
+          id: 'user:cloud-gcp-user@gcp',
+          namespace: 'gcp',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
       });
 
       // 3. azure → namespace entra_id
       const azureHit = await searchDocById(esClient, 'user:cloud-azure-user@entra_id');
       expect(azureHit.hits.hits).toHaveLength(1);
       expect(azureHit.hits.hits[0]._source).toMatchObject({
-        entity: { id: 'user:cloud-azure-user@entra_id', namespace: 'entra_id', confidence: ENTITY_CONFIDENCE.High },
+        entity: {
+          id: 'user:cloud-azure-user@entra_id',
+          namespace: 'entra_id',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
         cloud: { provider: 'azure' },
       });
 
@@ -1321,15 +1339,26 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const ibmHit = await searchDocById(esClient, 'user:cloud-ibm-user@asset_discovery');
       expect(ibmHit.hits.hits).toHaveLength(1);
       expect(ibmHit.hits.hits[0]._source).toMatchObject({
-        entity: { id: 'user:cloud-ibm-user@asset_discovery', namespace: 'asset_discovery', confidence: ENTITY_CONFIDENCE.High },
+        entity: {
+          id: 'user:cloud-ibm-user@asset_discovery',
+          namespace: 'asset_discovery',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
         cloud: { provider: 'ibm' },
       });
 
       // 5. cloud.provider absent → source value used as namespace
-      const noProviderHit = await searchDocById(esClient, 'user:cloud-no-provider-user@asset_discovery');
+      const noProviderHit = await searchDocById(
+        esClient,
+        'user:cloud-no-provider-user@asset_discovery'
+      );
       expect(noProviderHit.hits.hits).toHaveLength(1);
       expect(noProviderHit.hits.hits[0]._source).toMatchObject({
-        entity: { id: 'user:cloud-no-provider-user@asset_discovery', namespace: 'asset_discovery', confidence: ENTITY_CONFIDENCE.High },
+        entity: {
+          id: 'user:cloud-no-provider-user@asset_discovery',
+          namespace: 'asset_discovery',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
       });
 
       // 6. event.kind ≠ 'asset' → cloud.provider mapping condition does not fire;
@@ -1337,7 +1366,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const nonAssetHit = await searchDocById(esClient, 'user:cloud-non-asset-user@custom-module');
       expect(nonAssetHit.hits.hits).toHaveLength(1);
       expect(nonAssetHit.hits.hits[0]._source).toMatchObject({
-        entity: { id: 'user:cloud-non-asset-user@custom-module', namespace: 'custom-module', confidence: ENTITY_CONFIDENCE.High },
+        entity: {
+          id: 'user:cloud-non-asset-user@custom-module',
+          namespace: 'custom-module',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
         cloud: { provider: 'aws' },
       });
     }
