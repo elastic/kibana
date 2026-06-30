@@ -169,6 +169,37 @@ describe('aggregationStats', () => {
     } as unknown as EntityField;
     expect(() => aggregationStats([invalidField])).toThrow('unknown field operation');
   });
+
+  describe('managed × allowAPIUpdate matrix', () => {
+    // The 2×2 matrix: managed retention controls ESQL inclusion; allowAPIUpdate is orthogonal.
+    it('log-derived allowAPIUpdate:false — field is included in STATS (normal log field)', () => {
+      const field = keywordField({ allowAPIUpdate: false });
+      expect(aggregationStats([field], false)).toContain('host.name');
+    });
+
+    it('log-derived allowAPIUpdate:true — field is included in STATS (API-updatable + from logs)', () => {
+      const field = keywordField({ allowAPIUpdate: true });
+      expect(aggregationStats([field], false)).toContain('host.name');
+    });
+
+    it('managed allowAPIUpdate:false — field is excluded from STATS (maintainer-written)', () => {
+      const field = keywordField({ retention: { operation: 'managed' }, allowAPIUpdate: false });
+      expect(aggregationStats([field], false)).toBe('');
+    });
+
+    it('managed allowAPIUpdate:true — field is excluded from STATS (pure API-only)', () => {
+      const field = keywordField({ retention: { operation: 'managed' }, allowAPIUpdate: true });
+      expect(aggregationStats([field], false)).toBe('');
+    });
+
+    it('allowAPIUpdate alone does not affect STATS output', () => {
+      const withoutAPIUpdate = keywordField({ allowAPIUpdate: false });
+      const withAPIUpdate = keywordField({ allowAPIUpdate: true });
+      expect(aggregationStats([withoutAPIUpdate], false)).toBe(
+        aggregationStats([withAPIUpdate], false)
+      );
+    });
+  });
 });
 
 describe('fieldsToKeep', () => {
@@ -189,6 +220,24 @@ describe('fieldsToKeep', () => {
       { source: 's', destination: 'name', retention: { operation: 'prefer_newest_value' } },
     ];
     expect(fieldsToKeep(definitionFields, ['id'])).toBe('name,\nid');
+  });
+
+  it('should omit managed fields from KEEP patterns', () => {
+    const definitionFields: EntityField[] = [
+      {
+        source: 'a',
+        destination: 'included.field',
+        retention: { operation: 'prefer_newest_value' },
+      },
+      {
+        source: 'b',
+        destination: 'skipped.field',
+        retention: { operation: 'managed' },
+      },
+    ];
+    const result = fieldsToKeep(definitionFields, []);
+    expect(result).toContain('included*');
+    expect(result).not.toContain('skipped*');
   });
 });
 
@@ -262,12 +311,13 @@ describe('buildFieldEvaluations', () => {
     expect(fragment).toContain('NULL');
   });
 
-  it('should return an EVAL pipeline fragment when shared and identity field evaluations exist', () => {
+  it('should return only entity.source for user (entity.namespace moved to getEuidEsqlEvaluation)', () => {
     const fragment = buildFieldEvaluations(getEntityDefinition('user', 'default'));
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment.length).toBeGreaterThan('| EVAL '.length);
     expect(fragment).toContain('entity.source = CASE(');
-    expect(fragment).toContain('entity.namespace');
+    // entity.namespace is now part of getEuidEsqlEvaluation, not shared field evals
+    expect(fragment).not.toContain('entity.namespace');
   });
 });
 
@@ -327,7 +377,7 @@ describe('buildPostStatsLogicalToColumnMap', () => {
     expect(m.get('user.name')).toBe(recentData('user.name'));
   });
 
-  it('should use plain destination names when useRecentDataPrefix is false (CCS)', () => {
+  it('should use plain destination names when useRecentDataPrefix is false (remote)', () => {
     const m = buildPostStatsLogicalToColumnMap(postStatsSampleFields, false);
     expect(m.get('entity.namespace')).toBe('entity.namespace');
     expect(m.get('user.name')).toBe('user.name');
@@ -348,7 +398,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
     );
   });
 
-  it('should use plain column names when useRecentDataPrefix is false (CCS)', () => {
+  it('should use plain column names when useRecentDataPrefix is false (remote)', () => {
     const fragment = buildSetFieldsByCondition(
       {
         condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
@@ -444,6 +494,24 @@ describe('statsFieldDestinations', () => {
     expect(dest.has('event.kind')).toBe(true);
     expect(dest.has('user.name')).toBe(true);
     expect(dest.has('entity.name')).toBe(true);
+  });
+
+  it('should exclude managed fields from the destination set', () => {
+    const fields: EntityField[] = [
+      {
+        source: 'a',
+        destination: 'included.field',
+        retention: { operation: 'prefer_newest_value' },
+      },
+      {
+        source: 'b',
+        destination: 'skipped.field',
+        retention: { operation: 'managed' },
+      },
+    ];
+    const dest = statsFieldDestinations(fields);
+    expect(dest.has('included.field')).toBe(true);
+    expect(dest.has('skipped.field')).toBe(false);
   });
 });
 

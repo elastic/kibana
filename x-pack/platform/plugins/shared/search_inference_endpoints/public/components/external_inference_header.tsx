@@ -11,10 +11,12 @@ import React from 'react';
 import { docLinks } from '../../common/doc_links';
 
 interface ExternalInferenceHeaderProps {
+  canManage: boolean;
   onFlyoutOpen: () => void;
 }
 
 export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = ({
+  canManage,
   onFlyoutOpen,
 }) => {
   return (
@@ -45,18 +47,20 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
               })}
             </EuiLink>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="plusInCircle"
-              fill
-              data-test-subj="add-inference-endpoint-header-button"
-              onClick={onFlyoutOpen}
-            >
-              {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
-                defaultMessage: 'Add endpoint',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          {canManage && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="plusInCircle"
+                fill
+                data-test-subj="add-inference-endpoint-header-button"
+                onClick={onFlyoutOpen}
+              >
+                {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
+                  defaultMessage: 'Add endpoint',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>,
       ]}
     />

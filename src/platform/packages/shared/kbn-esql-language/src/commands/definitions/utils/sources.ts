@@ -57,6 +57,19 @@ function getSafeInsertSourceText(text: string) {
   return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
+const buildDocumentation = (
+  description?: string,
+  links?: Array<{ label: string; url: string }>
+): { value: string } | undefined => {
+  const linkParts = links?.length ? links.map(({ label, url }) => `[${label}](${url})`) : [];
+  const parts = [
+    ...linkParts,
+    ...(description && linkParts.length > 0 ? [''] : []),
+    ...(description ? [description] : []),
+  ];
+  return parts.length > 0 ? { value: parts.join('\n') } : undefined;
+};
+
 export const buildSourcesDefinitions = (
   sources: Array<{
     name: string;
@@ -102,16 +115,6 @@ export const buildSourcesDefinitions = (
       };
     }
 
-    // Build markdown documentation from description and links (shown in detail popup)
-    const linkParts = links?.length ? links.map(({ label, url }) => `[${label}](${url})`) : [];
-    const parts = [
-      ...linkParts,
-      ...(description && linkParts.length > 0 ? [''] : []),
-      ...(description ? [description] : []),
-    ];
-
-    const documentation = parts.length > 0 ? { value: parts.join('\n') } : undefined;
-
     // Map type to Monaco CompletionItemKind for visual differentiation
     const kindByType = new Map<string, ISuggestionItem['kind']>([
       [SOURCES_TYPES.WIRED_STREAM, 'Folder'],
@@ -136,7 +139,7 @@ export const buildSourcesDefinitions = (
               type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
-      documentation,
+      documentation: buildDocumentation(description, links),
       ...(command && { command }),
     });
   });
@@ -151,15 +154,16 @@ export const buildViewsDefinitions = (
 ): ISuggestionItem[] =>
   views
     .filter(({ name }) => !alreadyUsed.includes(name))
-    .map(({ name }) => {
-      const text = getSafeInsertSourceText(name);
+    .map(({ name, description, links, type }) => {
       return withAutoSuggest({
         label: name,
-        text,
+        text: getSafeInsertSourceText(name),
         kind: 'Issue',
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
-          defaultMessage: 'View',
+          defaultMessage: '{type}',
+          values: { type: type ?? 'View' },
         }),
+        documentation: buildDocumentation(description, links),
       });
     });
 

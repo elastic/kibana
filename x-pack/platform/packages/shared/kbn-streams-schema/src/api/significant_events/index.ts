@@ -14,8 +14,9 @@ import {
   type StreamQuery,
 } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
-import type { Discovery } from '../../sig_events/discoveries';
-import type { SigEvent } from '../../sig_events/events';
+import type { Discovery } from '../../significant_events/discoveries';
+import type { Detection } from '../../significant_events/detections';
+import type { SignificantEvent } from '../../significant_events/events';
 
 /**
  * SignificantEvents Get Response
@@ -95,13 +96,14 @@ interface LifecycleDetection {
   rule_name?: string;
   stream_name?: string;
   change_point_type?: string;
-  detected_at: string;
+  kind: Extract<Detection['kind'], 'detection' | 'quiet'>;
+  '@timestamp': string;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
   discoveries: Discovery[];
-  events: SigEvent[];
+  events: SignificantEvent[];
 }
 
 export type {

@@ -7,12 +7,13 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiPanel,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 
@@ -71,24 +72,34 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${observableType.key}-observable-type-edit`}
-                          aria-label={`${observableType.key}-observable-type-edit`}
-                          iconType="pencil"
-                          color="primary"
-                          disabled={props.disabled}
-                          onClick={() => onEditObservableType(observableType.key)}
-                        />
+                        <EuiToolTip
+                          content={`${observableType.key}-observable-type-edit`}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj={`${observableType.key}-observable-type-edit`}
+                            aria-label={`${observableType.key}-observable-type-edit`}
+                            iconType="pencil"
+                            color="primary"
+                            disabled={props.disabled}
+                            onClick={() => onEditObservableType(observableType.key)}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${observableType.key}-observable-type-delete`}
-                          aria-label={`${observableType.key}-observable-type-delete`}
-                          iconType="minusCircle"
-                          color="danger"
-                          disabled={props.disabled}
-                          onClick={() => setSelectedItem(observableType)}
-                        />
+                        <EuiToolTip
+                          content={`${observableType.key}-observable-type-delete`}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj={`${observableType.key}-observable-type-delete`}
+                            aria-label={`${observableType.key}-observable-type-delete`}
+                            iconType="minusCircle"
+                            color="danger"
+                            disabled={props.disabled}
+                            onClick={() => setSelectedItem(observableType)}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

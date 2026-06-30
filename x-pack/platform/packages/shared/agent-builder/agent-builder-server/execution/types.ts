@@ -14,10 +14,12 @@ import type {
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
   ConversationAction,
+  ConversationAccessControl,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -39,6 +41,12 @@ export interface BaseExecutionParams {
   configurationOverrides?: AgentConfigurationOverrides;
   /** Id of the parent execution that spawned this execution. */
   parentExecutionId?: string;
+  /**
+   * Connector telemetry to attribute this execution's LLM calls to a specific feature
+   * (sets `metadata.connectorTelemetry` on inference calls). When omitted, the default
+   * Agent Builder telemetry is used.
+   */
+  telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
 /**
@@ -51,6 +59,8 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   storeConversation?: boolean;
   /** Create conversation with specified ID if not found. */
   autoCreateConversationWithId?: boolean;
+  /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
+  accessControl?: ConversationAccessControl;
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */

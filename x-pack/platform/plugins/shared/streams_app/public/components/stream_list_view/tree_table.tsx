@@ -95,14 +95,6 @@ import {
   TechnicalPreviewBadge,
 } from '../stream_badges';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
-
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -154,6 +146,7 @@ export function StreamsTreeTable({
     getCanReadFailureStore: (streamName: string | undefined) =>
       streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+    fetchIngestionDocCounts: true,
   });
 
   const docCountsFetch = getStreamDocCounts();
@@ -219,16 +212,10 @@ export function StreamsTreeTable({
   const qualityLoaded =
     !!totalDocsResult.value && !!degradedDocsResult.value && !!failedDocsResult.value;
 
-  const streamNamesWithData = React.useMemo(
-    () => streams.filter((s) => !!s.data_stream).map((s) => s.stream.name),
-    [streams]
-  );
-
-  const { ingestionByStream, ingestionLoaded } = useStreamsIngestionRates({
-    streamNames: streamNamesWithData,
+  const { ingestionByStream, ingestionLoaded, ingestionError } = useStreamsIngestionRates({
+    ingestionDocCount: docCountsFetch.ingestionDocCount,
     timeStart: timeState.start,
     timeEnd: timeState.end,
-    getStreamHistogram,
   });
 
   const { storageByStream, storageLoaded } = useStreamsStorageStats();
@@ -430,6 +417,7 @@ export function StreamsTreeTable({
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
+              compressed
               incremental
               aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
               value={searchText}
@@ -437,7 +425,7 @@ export function StreamsTreeTable({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
+            <EuiFilterGroup compressed>
               {qualityLoaded && hasFailureStoreAccess && (
                 <FilterGroup
                   label={DATA_QUALITY_FILTER_LABEL}
@@ -461,9 +449,7 @@ export function StreamsTreeTable({
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <div className={datePickerStyle}>
-              <StreamsAppSearchBar showDatePicker />
-            </div>
+            <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -658,9 +644,10 @@ export function StreamsTreeTable({
               field: 'ingestionRate',
               name: INGESTION_COLUMN_HEADER,
               width: '112px',
-              sortable: ingestionLoaded
-                ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
-                : false,
+              sortable:
+                ingestionLoaded && !ingestionError
+                  ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
+                  : false,
               align: 'right',
               dataType: 'number',
               render: (_: unknown, item: TableRow) =>
@@ -668,6 +655,7 @@ export function StreamsTreeTable({
                   <IngestionColumn
                     rate={ingestionByStream[item.stream.name] ?? 0}
                     isLoading={!ingestionLoaded}
+                    hasError={ingestionError}
                   />
                 ) : (
                   '-'
