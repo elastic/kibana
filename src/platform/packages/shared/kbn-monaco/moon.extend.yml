@@ -24,13 +24,13 @@ tasks:
       CI_STATS_DISABLED: 'true'
     inputs:
       - /package.json
-      - /yarn.lock
+      - /pnpm-lock.yaml
     outputs:
       - version_dependencies.txt
     options:
       runFromWorkspaceRoot: true
   build-webpack:
-    command: yarn
+    command: pnpm
     args:
       - build
     deps:
@@ -50,7 +50,7 @@ tasks:
     type: run
     options:
       persistent: true
-    command: yarn
+    command: pnpm
     args:
       - build
       - '--watch'
