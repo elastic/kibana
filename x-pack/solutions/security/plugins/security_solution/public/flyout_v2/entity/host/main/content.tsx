@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
+import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
@@ -24,6 +26,7 @@ import type { ObservedEntityData } from '../../../../flyout/entity_details/share
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
+import { AnomaliesSection } from '../../../../entity_analytics/components/anomalies/anomalies_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -86,6 +89,13 @@ export const Content = ({
   enableGraphAndResolutionNavigation = true,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
+
+  const anomalyOverview = useAnomalyOverview({
+    entityId: entityStoreEntityId ?? '',
+    entityType: EntityType.host,
+    enabled: isAnomalyDetailsEnabled && !!entityStoreEntityId,
+  });
 
   // Extract hostName from identityFields for components that need a string
   // Priority: identityFields['host.name'] > identityFields[first key]
@@ -116,6 +126,19 @@ export const Content = ({
               prefetchedResolutionRisk={prefetchedResolutionRisk}
             />
             <EuiHorizontalRule />
+          </>
+        )}
+      {isAnomalyDetailsEnabled &&
+        entityStoreEntityId &&
+        anomalyOverview.data &&
+        anomalyOverview.data.totalAnomaliesCount > 0 && (
+          <>
+            <AnomaliesSection
+              data={anomalyOverview.data}
+              entityId={entityStoreEntityId}
+              isPreviewMode={isPreviewMode}
+              openDetailsPanel={openDetailsPanel}
+            />
           </>
         )}
       {entityStoreEntityId && (
