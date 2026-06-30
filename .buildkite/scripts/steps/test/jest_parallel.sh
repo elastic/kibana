@@ -59,7 +59,7 @@ while read -r config; do
 
   maxOldSpaceSize=12288
   if [[ "$TEST_TYPE" == "unit" ]]; then
-    maxOldSpaceSize=24576
+    maxOldSpaceSize=16384
   fi
 
   # --trace-warnings to debug

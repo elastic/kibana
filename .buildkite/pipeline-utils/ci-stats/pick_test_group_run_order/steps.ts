@@ -44,7 +44,7 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
     key: opts.key,
     agents: {
       ...expandAgentQueue('n2-4-spot', opts.agentDiskSize),
-      ...(opts.key === STEP_KEYS.JEST_UNIT ? { machineType: 'n2-highmem-4' } : {}),
+      ...(opts.key === STEP_KEYS.JEST_UNIT ? { machineType: 'n2-custom-4-20480' } : {}),
     },
     env: opts.envFromLabels,
     depends_on: opts.dependsOn,
