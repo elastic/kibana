@@ -1076,6 +1076,7 @@ x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-kibana
+x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-team
@@ -1229,6 +1230,7 @@ x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-kibana
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
+x-pack/platform/plugins/shared/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/slo_shared @elastic/actionable-obs-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
