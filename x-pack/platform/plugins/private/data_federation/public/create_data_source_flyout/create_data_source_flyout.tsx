@@ -244,6 +244,14 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         <EuiTitle size="m">
           <h2 id="createDataSourceFlyoutTitle">{flyoutTitle}</h2>
         </EuiTitle>
+        {!isEditMode && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>{createDataSourceFlyoutStrings.createDescription()}</p>
+            </EuiText>
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>

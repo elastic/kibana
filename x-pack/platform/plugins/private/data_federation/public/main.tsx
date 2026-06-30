@@ -727,7 +727,7 @@ export const Main: FunctionComponent<MainProps> = ({
         description={
           <>
             {mainTranslations.pageDescription}{' '}
-            <EuiLink href="https://ela.st/esql-data-federation" target="_blank">
+            <EuiLink href="https://www.elastic.co/docs/reference/query-languages/esql/esql-federated-data" target="_blank">
               {mainTranslations.docsLink}
             </EuiLink>
           </>

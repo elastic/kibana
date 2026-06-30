@@ -14,6 +14,12 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Add dataset',
     }),
 
+  createDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.createDescription', {
+      defaultMessage:
+        'Select the data within a connected data source you want to query with ES|QL.',
+    }),
+
   editTitle: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.editTitle', {
       defaultMessage: 'Edit dataset',

@@ -14,6 +14,12 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Connect external data source',
     }),
 
+  createDescription: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.createDescription', {
+      defaultMessage:
+        'Define where your external data is stored and how Elasticsearch connects to it.',
+    }),
+
   editTitle: () =>
     i18n.translate('xpack.dataFederation.createFlyout.editTitle', {
       defaultMessage: 'Edit data source',
