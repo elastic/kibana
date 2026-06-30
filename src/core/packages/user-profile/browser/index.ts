@@ -19,6 +19,7 @@ export type {
 
 export {
   buildCurrentUser,
+  currentUserMock,
   CurrentUserContext,
   CurrentUserProvider,
   useCurrentUser,

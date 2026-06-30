@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { useCurrentUser } from '@kbn/core-user-profile-browser';
+import { currentUserMock, useCurrentUser } from '@kbn/core-user-profile-browser';
 
 import type { ChangePasswordFormValues } from './change_password_modal';
 import { ChangePasswordModal, validateChangePasswordForm } from './change_password_modal';
@@ -180,22 +180,11 @@ describe('ChangePasswordModal', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       // Mock useCurrentUser to return a different user by default
-      useCurrentUserMock.mockReturnValue({
-        isLoading: false,
-        user: {
-          username: 'different_user',
-          displayName: 'different_user',
-          isAnonymous: false,
-          avatar: null,
-          userSettings: null,
-        },
-        rawAuthQuery: {
-          isLoading: false,
-          state: { username: 'different_user' },
-          error: undefined,
-        },
-        rawProfileQuery: { isLoading: false, state: null, error: undefined },
-      });
+      useCurrentUserMock.mockReturnValue(
+        currentUserMock.createResultWithRaw({
+          rawAuthQuery: { isLoading: false, state: { username: 'different_user' } as any, error: undefined },
+        })
+      );
     });
 
     it(`does not render the current password field when changing another user's password`, () => {
@@ -314,22 +303,11 @@ describe('ChangePasswordModal', () => {
     describe('when rendered for current user', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
-        useCurrentUserMock.mockReturnValue({
-          isLoading: false,
-          user: {
-            username: 'currentuser',
-            displayName: 'currentuser',
-            isAnonymous: false,
-            avatar: null,
-            userSettings: null,
-          },
-          rawAuthQuery: {
-            isLoading: false,
-            state: { username: 'currentuser' },
-            error: undefined,
-          },
-          rawProfileQuery: { isLoading: false, state: null, error: undefined },
-        });
+        useCurrentUserMock.mockReturnValue(
+          currentUserMock.createResultWithRaw({
+            rawAuthQuery: { isLoading: false, state: { username: 'currentuser' } as any, error: undefined },
+          })
+        );
       });
 
       it('renders current password field when changing own password', () => {

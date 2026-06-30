@@ -8,6 +8,7 @@
  */
 
 export { buildCurrentUser } from './build_current_user';
+export { currentUserMock } from './mocks';
 export { CurrentUserContext } from './current_user_context';
 export type { CurrentUserServices } from './current_user_context';
 export { CurrentUserProvider } from './current_user_provider';
