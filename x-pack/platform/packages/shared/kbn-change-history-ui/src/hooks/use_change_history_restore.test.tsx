@@ -234,6 +234,80 @@ describe('useChangeHistoryRestore', () => {
     expect(durationMs).toBeLessThan(150);
   });
 
+  it('reports restore_completed and returns true when post-restore steps fail', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const onRestored = jest.fn().mockRejectedValue(new Error('callback failed'));
+    const adapter = createAdapter(restoreChange);
+    const { wrapper } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+
+    const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), { wrapper });
+
+    await act(async () => {
+      const succeeded = await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: { rollbackDistance: 4 },
+      });
+      expect(succeeded).toBe(true);
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+      expect.objectContaining({
+        eventName: 'Change history restore completed',
+        rollbackDistance: 4,
+      })
+    );
+    expect(reportEvent).not.toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreFailed,
+      expect.anything()
+    );
+    expect(result.current.error).toBeUndefined();
+  });
+
+  it('reports restore_completed and returns true when cache invalidation fails', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const adapter = createAdapter(restoreChange);
+    const { wrapper, queryClient } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+    jest.spyOn(queryClient, 'invalidateQueries').mockRejectedValue(new Error('network error'));
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
+
+    await act(async () => {
+      const succeeded = await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: { rollbackDistance: 2 },
+      });
+      expect(succeeded).toBe(true);
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+      expect.objectContaining({
+        eventName: 'Change history restore completed',
+        rollbackDistance: 2,
+      })
+    );
+    expect(reportEvent).not.toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreFailed,
+      expect.anything()
+    );
+    expect(result.current.error).toBeUndefined();
+  });
+
   it('reports restore_failed telemetry when restore fails', async () => {
     const reportEvent = jest.fn();
     const restoreChange = jest.fn().mockRejectedValue({

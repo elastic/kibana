@@ -65,19 +65,22 @@ export const useChangeHistoryRestore: (
         const durationMs =
           params.confirmedAtMs !== undefined ? Date.now() - params.confirmedAtMs : undefined;
 
-        await onRestored?.();
-
-        await invalidateChangeHistory(objectId);
-
-        if (abortController.signal.aborted) {
-          return false;
-        }
-
         if (params.restoreTelemetry || durationMs !== undefined) {
           telemetry.reportRestoreCompleted({
             ...params.restoreTelemetry,
             ...(durationMs !== undefined ? { durationMs } : {}),
           });
+        }
+
+        try {
+          await onRestored?.();
+          await invalidateChangeHistory(objectId);
+        } catch {
+          // Post-restore refresh failures must not affect restore outcome or telemetry.
+        }
+
+        if (abortController.signal.aborted) {
+          return false;
         }
 
         return true;
