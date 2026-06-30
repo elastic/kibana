@@ -102,6 +102,11 @@ function getExpressionForLayer(
         isTextBased: [true],
       },
     });
+    textBasedQueryToAst.chain.push({
+      type: 'function',
+      function: 'lens_drop_partial_buckets_textbased',
+      arguments: {},
+    });
     textBasedQueryToAst.chain.push(...formatterOverrides);
     return textBasedQueryToAst;
   } else {
@@ -122,6 +127,11 @@ function getExpressionForLayer(
             idMap: [JSON.stringify(idMapper)],
             isTextBased: [true],
           },
+        },
+        {
+          type: 'function',
+          function: 'lens_drop_partial_buckets_textbased',
+          arguments: {},
         },
         ...formatterOverrides,
       ],
