@@ -33,9 +33,11 @@ const createWorkflowsManagement = ({
   executionId?: string;
 } = {}) => ({
   management: {
-    getWorkflow: jest.fn().mockResolvedValue(
-      workflowExists ? { id: 'system-streams-investigation', definition: 'yaml: ...' } : null
-    ),
+    getWorkflow: jest
+      .fn()
+      .mockResolvedValue(
+        workflowExists ? { id: 'system-streams-investigation', definition: 'yaml: ...' } : null
+      ),
     runWorkflow: jest.fn().mockResolvedValue(executionId),
   },
 });
@@ -90,7 +92,9 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [, , inputs] = workflowsManagement.management.runWorkflow.mock.calls[0];
-    expect(inputs.message).toBe('High error rate\n\nError rate spiked.\n\nProbable cause: Bad deploy.');
+    expect(inputs.message).toBe(
+      'High error rate\n\nError rate spiked.\n\nProbable cause: Bad deploy.'
+    );
   });
 
   it('uses discovery_slug as the concurrency_key', async () => {
