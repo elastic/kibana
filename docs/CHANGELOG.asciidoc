@@ -142,6 +142,8 @@ Data ingestion and Fleet::
 * Fixes a crash in the **Integrations** view when a package has no icon ({kibana-pull}273191[#273191]).
 Developer tools::
 * Fixes **Dev Tools Console** autocomplete in query filter context to suggest query DSL instead of the obsolete Elasticsearch 1.x filter DSL ({kibana-pull}272907[#272907]).
+Elastic Observability solution::
+* Fixes deleting a label from a Synthetics monitor not persisting on edit ({kibana-pull}274404[#274404]).
 Elastic Security solution::
 For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
 Kibana platform::
