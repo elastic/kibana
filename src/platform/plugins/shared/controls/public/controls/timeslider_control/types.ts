@@ -11,6 +11,7 @@ import type {
   AppliesTimeslice,
   PublishingSubject,
   PublishesUnsavedChanges,
+  PublishesRelatedPanels,
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasCustomPrepend, TimeSliderControlState } from '@kbn/controls-schemas';
@@ -20,6 +21,7 @@ export type TimeSliderControlApi = DefaultEmbeddableApi<TimeSliderControlState> 
   Pick<ReturnType<typeof initializeLabelManager>['api'], 'label$'> &
   AppliesTimeslice &
   PublishesUnsavedChanges &
+  PublishesRelatedPanels &
   HasCustomPrepend & {
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;

@@ -75,7 +75,7 @@ const parseStatsCommand = (
   stats: StatDefinition[],
   groupByFields: string[]
 ): ESQLSingleAstItem[] => {
-  const assignments = stats.map((s) => `${s.label} = ${buildAggFragment(s)}`);
+  const assignments = stats.map((s) => `${escapeField(s.label)} = ${buildAggFragment(s)}`);
   const groupBy =
     groupByFields.length > 0 ? ` BY ${groupByFields.map(escapeField).join(', ')}` : '';
   const src = `ROW x = 1 | STATS ${assignments.join(', ')}${groupBy}`;

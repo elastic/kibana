@@ -10,7 +10,7 @@ ENV OPENSSL_PATH=${HOME}/openssl
 # Only specific versions are FIPS certified.
 ENV OPENSSL_VERSION='3.0.8'
 
-RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc xvfb
+RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc xvfb gawk
 
 RUN locale-gen en_US.UTF-8
 

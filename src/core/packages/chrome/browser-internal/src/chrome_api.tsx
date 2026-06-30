@@ -10,7 +10,7 @@
 import React, { type ReactNode } from 'react';
 import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
-import type { AppHeaderConfig } from '@kbn/core-chrome-browser';
+import type { AppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -79,6 +79,11 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    setNavigationCustomization: (customization) =>
+      projectNavigation.setNavigationCustomization(customization),
+    getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
+    registerCustomizeNavigationHandler: (handler) =>
+      projectNavigation.registerCustomizeNavigationHandler(handler),
   };
 
   let appHeaderRegistrationId = 0;
@@ -186,6 +191,19 @@ export function createChromeApi({
       get isEnabled() {
         return isNextChrome(featureFlags);
       },
+      aiButton: {
+        get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
+        register: (button: GlobalHeaderAiButton) => {
+          state.aiButton.update((prev) => new Set([...prev, button]));
+          return () => {
+            state.aiButton.update((prev) => {
+              const next = new Set(prev);
+              next.delete(button);
+              return next;
+            });
+          };
+        },
+      },
       globalSearch: {
         get$: () => state.globalSearch.$,
         set: (config) => state.globalSearch.set(config),
@@ -209,6 +227,10 @@ export function createChromeApi({
             }
           };
         },
+      },
+      userMenu: {
+        get$: () => state.userMenu.$,
+        set: (content) => state.userMenu.set(content),
       },
       registerFeedbackHandler: (handler: () => void) => {
         state.feedbackHandler.set(handler);

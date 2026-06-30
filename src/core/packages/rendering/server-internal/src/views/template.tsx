@@ -40,8 +40,14 @@ export const Template: FunctionComponent<Props> = ({
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;
   const colorScheme = darkMode === 'system' ? 'light dark' : darkMode ? 'dark' : 'light';
+  // Both branches render at 40×40 — the size is owned by the
+  // `.kbnLoaderWrap > svg, .kbnLoaderWrap > img` rule in
+  // `legacy_styles.css` so default and custom-branded splashes can't
+  // drift apart. The `width`/`height` attrs here just give the browser
+  // a stable intrinsic size to avoid layout shift while the custom logo
+  // image loads.
   const logo = customBranding.logo ? (
-    <img src={customBranding.logo} width="64" height="64" alt="logo" />
+    <img src={customBranding.logo} width="40" height="40" alt="logo" />
   ) : (
     <Logo />
   );
@@ -99,7 +105,19 @@ export const Template: FunctionComponent<Props> = ({
           style={{ display: 'none' }}
           data-test-subj="kbnLoadingMessage"
         >
-          <div className="kbnLoaderWrap">
+          {/*
+           * `role="progressbar"` + `aria-label` mirror what
+           * `<EuiLoadingElastic />` exposes. The wrapper owns the
+           * loading announcement so the inline SVG in `<Logo />` can
+           * stay decorative (`aria-hidden`).
+           */}
+          <div
+            className="kbnLoaderWrap"
+            role="progressbar"
+            aria-label={i18n.translate('core.ui.loadingElasticAriaLabel', {
+              defaultMessage: 'Loading Elastic',
+            })}
+          >
             {logo}
             <div
               className="kbnWelcomeText"

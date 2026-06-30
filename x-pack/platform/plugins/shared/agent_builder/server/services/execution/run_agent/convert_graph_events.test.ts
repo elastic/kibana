@@ -6,7 +6,7 @@
  */
 
 import { of, toArray, lastValueFrom } from 'rxjs';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import { convertGraphEvents } from './convert_graph_events';
 import { steps } from './constants';
 
@@ -28,6 +28,7 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       params: data.params,
       tool_call_group_id: data.toolCallGroupId,
       tool_origin: data.toolOrigin,
+      tool_type: data.toolType,
     },
   })),
   createToolResultEvent: jest.fn(),
@@ -82,7 +83,9 @@ describe('convertGraphEvents', () => {
         graphName: 'test-graph',
         toolManager: {
           getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-          getToolOrigin: jest.fn().mockReturnValue(ToolOrigin.inline),
+          getToolMeta: jest
+            .fn()
+            .mockReturnValue({ origin: ToolOrigin.inline, type: ToolType.builtin }),
         } as any,
         pendingRound: undefined,
         logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -106,6 +109,7 @@ describe('convertGraphEvents', () => {
           tool_call_id: 'call-1',
           tool_id: 'inline.dynamic',
           tool_origin: ToolOrigin.inline,
+          tool_type: ToolType.builtin,
         }),
       }),
     ]);
@@ -139,7 +143,7 @@ describe('convertGraphEvents', () => {
           graphName: 'test-graph',
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-            getToolOrigin: jest.fn(),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -189,7 +193,7 @@ describe('convertGraphEvents', () => {
           graphName: 'test-graph',
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-            getToolOrigin: jest.fn(),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -256,7 +260,7 @@ describe('convertGraphEvents', () => {
             graphName: 'test-graph',
             toolManager: {
               getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-              getToolOrigin: jest.fn(),
+              getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
             } as any,
             pendingRound: undefined,
             logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -321,7 +325,7 @@ describe('convertGraphEvents', () => {
           graphName: 'test-graph',
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-            getToolOrigin: jest.fn(),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -373,7 +377,7 @@ describe('convertGraphEvents', () => {
           graphName: 'test-graph',
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
-            getToolOrigin: jest.fn(),
+            getToolMeta: jest.fn().mockReturnValue({ origin: undefined, type: undefined }),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,

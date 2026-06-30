@@ -154,6 +154,35 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString(logger, '{{ul}}', variables, 'json')).toBe(variables.ul);
     });
 
+    it('handles escape:html with commonly escaped strings', () => {
+      expect(renderMustacheString(logger, '{{lt}}', variables, 'html')).toBe('&lt;');
+      expect(renderMustacheString(logger, '{{gt}}', variables, 'html')).toBe('&gt;');
+      expect(renderMustacheString(logger, '{{amp}}', variables, 'html')).toBe('&amp;');
+      expect(renderMustacheString(logger, '{{nl}}', variables, 'html')).toBe(variables.nl);
+      expect(renderMustacheString(logger, '{{dq}}', variables, 'html')).toBe('&quot;');
+      // backtick is also escaped by Mustache's built-in HTML escaper
+      expect(renderMustacheString(logger, '{{bt}}', variables, 'html')).toBe('&#x60;');
+      expect(renderMustacheString(logger, '{{bs}}', variables, 'html')).toBe(variables.bs);
+      expect(renderMustacheString(logger, '{{st}}', variables, 'html')).toBe(variables.st);
+      expect(renderMustacheString(logger, '{{ul}}', variables, 'html')).toBe(variables.ul);
+      expect(renderMustacheString(logger, '{{sq}}', { sq: "'" }, 'html')).toBe('&#39;');
+    });
+
+    it('handles triple escapes for html mode', () => {
+      expect(renderMustacheString(logger, '{{{lt}}}', variables, 'html')).toBe(variables.lt);
+      expect(renderMustacheString(logger, '{{{gt}}}', variables, 'html')).toBe(variables.gt);
+      expect(renderMustacheString(logger, '{{{amp}}}', variables, 'html')).toBe(variables.amp);
+      expect(renderMustacheString(logger, '{{{dq}}}', variables, 'html')).toBe(variables.dq);
+    });
+
+    it('passes through null', () => {
+      expect(renderMustacheString(logger, null, variables, 'none')).toBeNull();
+    });
+
+    it('passes through undefined', () => {
+      expect(renderMustacheString(logger, undefined, variables, 'none')).toBeUndefined();
+    });
+
     it('handles errors', () => {
       expect(renderMustacheString(logger, '{{a}', variables, 'none')).toMatchInlineSnapshot(
         `"error rendering mustache template \\"{{a}\\": Unclosed tag at 4"`

@@ -71,6 +71,7 @@ export const EndpointUrl = ({
                   aria-label={i18n.translate('vectordbOnboarding.pathSelection.copyUrlAriaLabel', {
                     defaultMessage: 'Copy Elasticsearch URL',
                   })}
+                  data-test-subj="vectordbConnectToProjectCopyUrl"
                   data-telemetry-id="vectordbOnboarding-connectToProject-copyUrl"
                 />
               </EuiToolTip>

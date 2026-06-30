@@ -31,9 +31,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
-import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
+import type { LogsExtractionClient } from './domain/logs_extraction';
+import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
+import type { EntityMetadataClient } from './domain/entity_metadata';
 import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
@@ -58,8 +60,9 @@ export interface EntityStoreApiRequestHandlerContext {
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
+  entityMetadataClient: EntityMetadataClient;
   resolutionClient: ResolutionClient;
-  ccsLogsExtractionClient: CcsLogsExtractionClient;
+  remoteLogsExtractionClient: RemoteLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
@@ -80,6 +83,10 @@ export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createEntityMetadataClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => EntityMetadataClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
 }
 

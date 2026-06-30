@@ -164,6 +164,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/presentation-util'
+  - '@kbn/presentation-util-plugin'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/ebt-click'
   - '@kbn/apm-types-shared'

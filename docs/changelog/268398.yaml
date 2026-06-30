@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/268398
+issues:
+- https://github.com/elastic/kibana/issues/268125
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Dashboards and visualizations
+title: Fix stale closure in the presentation autoplay timer in Dashboards

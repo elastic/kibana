@@ -10,6 +10,5 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Rules list', () => {
     loadTestFile(require.resolve('./rules_list'));
-    loadTestFile(require.resolve('./bulk_actions'));
   });
 };

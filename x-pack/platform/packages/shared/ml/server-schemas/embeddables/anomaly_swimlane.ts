@@ -5,127 +5,59 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
-import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
-export const swimlaneTypeSchema = schema.oneOf([
-  schema.literal('overall'),
-  schema.literal('viewBy'),
-]);
-
-export type SwimlaneType = TypeOf<typeof swimlaneTypeSchema>;
-
-const commonUserInputProps = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-});
-
-const anomalySwimlaneOverallSchema = schema.object({
-  swimlaneType: schema.literal('overall'),
-  ...commonUserInputProps.getPropSchemas(),
-});
-
-const anomalySwimlaneViewBySchema = schema.object({
-  swimlaneType: schema.literal('viewBy'),
-  viewBy: schema.string(),
-  ...commonUserInputProps.getPropSchemas(),
-});
-
-const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
+const baseProps = {
+  ...serializedTitlesSchema.getPropSchemas(),
   ...serializedTimeRangeSchema.getPropSchemas(),
-  id: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
-  query: schema.maybe(querySchema),
-  refreshConfig: schema.maybe(refreshIntervalSchema),
+  job_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 1000 }), {
+    minSize: 1,
+    maxSize: 10000,
+    meta: {
+      description:
+        'IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.',
+    },
+  }),
+  per_page: schema.maybe(
+    schema.number({
+      min: 1,
+      meta: {
+        description:
+          'Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.',
+      },
+    })
+  ),
+};
+
+const anomalySwimLaneOverallSchema = schema.object({
+  ...baseProps,
+  swimlane_type: schema.literal('overall'),
 });
 
-export const anomalySwimlaneEmbeddableCustomInputViewBySchema = schema.object({
-  ...anomalySwimlaneViewBySchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
+const anomalySwimLaneViewBySchema = schema.object({
+  ...baseProps,
+  swimlane_type: schema.literal('viewBy'),
+  view_by: schema.string({
+    minLength: 1,
+    maxLength: 1000,
+    meta: { description: 'Field name used to split anomalies into a view-by swim lane.' },
+  }),
 });
 
-export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
->;
-
-export const anomalySwimlaneEmbeddableCustomInputOverallSchema = schema.object({
-  ...anomalySwimlaneOverallSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
-});
-
-export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
->;
-
-export const anomalySwimlaneEmbeddableCustomInputSchema = schema.oneOf([
-  anomalySwimlaneEmbeddableCustomInputViewBySchema,
-  anomalySwimlaneEmbeddableCustomInputOverallSchema,
-]);
-
-export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputSchema
->;
-
-export const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-  swimlaneType: swimlaneTypeSchema,
-  viewBy: schema.maybe(schema.string()),
-  panelTitle: schema.maybe(schema.string()),
-});
-
-export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
-  typeof anomalySwimlaneEmbeddableUserInputSchema
->;
-
-export const anomalySwimlanePropsSchema = schema.object({
-  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas(),
-});
-
-export type AnomalySwimlaneProps = TypeOf<typeof anomalySwimlanePropsSchema>;
-
-export const anomalySwimlaneInitialInputSchema = schema.object({
-  jobIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
-  swimlaneType: schema.maybe(swimlaneTypeSchema),
-  viewBy: schema.maybe(schema.string()),
-  title: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.number()),
-});
-
-export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
-
-export const anomalySwimLaneControlsStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-  swimlaneType: swimlaneTypeSchema,
-  viewBy: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.number()),
-});
-
-export type AnomalySwimLaneControlsState = TypeOf<typeof anomalySwimLaneControlsStateSchema>;
-
-export const anomalySwimlaneEmbeddableStateViewBySchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputViewBySchema.getPropSchemas(),
-});
-
-export type AnomalySwimlaneEmbeddableStateViewBy = TypeOf<
-  typeof anomalySwimlaneEmbeddableStateViewBySchema
->;
-
-const anomalySwimlaneEmbeddableStateOverallSchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputOverallSchema.getPropSchemas(),
-});
-
-export const anomalySwimLaneEmbeddableStateSchema = schema.oneOf([
-  anomalySwimlaneEmbeddableStateViewBySchema,
-  anomalySwimlaneEmbeddableStateOverallSchema,
-]);
+export const anomalySwimLaneEmbeddableStateSchema = schema.oneOf(
+  [anomalySwimLaneOverallSchema, anomalySwimLaneViewBySchema],
+  {
+    meta: {
+      id: 'ml_anomaly_swimlane',
+      description: 'Anomaly Swim Lane embeddable',
+    },
+  }
+);
 
 export type AnomalySwimLaneEmbeddableState = TypeOf<typeof anomalySwimLaneEmbeddableStateSchema>;
+
+export type SwimlaneType = AnomalySwimLaneEmbeddableState['swimlane_type'];

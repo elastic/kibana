@@ -7,14 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { CloudLinksPillStyle } from './cloud_links_styles';
@@ -31,7 +24,6 @@ interface CloudLinksProps {
 }
 
 export const CloudLinks = ({ cloud, CloudBaseOnly = false }: CloudLinksProps) => {
-  const euiThemeContext = useEuiTheme();
   const [billingUrl, setBillingUrl] = useState<string>('');
   const [isLoadingPrivilegedUrls, setIsLoadingPrivilegedUrls] = useState(true);
   useEffect(() => {
@@ -91,7 +83,7 @@ export const CloudLinks = ({ cloud, CloudBaseOnly = false }: CloudLinksProps) =>
   }
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" css={CloudLinksPillStyle(euiThemeContext)}>
+    <EuiFlexGroup gutterSize="m" alignItems="center" css={CloudLinksPillStyle}>
       <EuiFlexItem grow={false}>
         <EuiLink
           href={cloud.baseUrl}

@@ -7,8 +7,12 @@
 
 import { parse } from 'yaml';
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
+import { outputType, OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT } from '../constants/output';
+
 import {
   getAllowedOutputTypesForAgentPolicy,
+  getAllowedOutputTypesForPackagePolicy,
   outputYmlIncludesReservedPerformanceKey,
 } from './output_helpers';
 
@@ -23,10 +27,10 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     } as any);
 
     expect(res).toHaveLength(4);
-    expect(res).toContain('elasticsearch');
-    expect(res).toContain('logstash');
-    expect(res).toContain('kafka');
-    expect(res).toContain('remote_elasticsearch');
+    expect(res).toContain(outputType.Elasticsearch);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+    expect(res).toContain(outputType.RemoteElasticsearch);
   });
 
   it('should return only elasticsearch for an agent policy with APM', () => {
@@ -38,7 +42,7 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
       ],
     } as any);
 
-    expect(res).toEqual(['elasticsearch']);
+    expect(res).toEqual([outputType.Elasticsearch]);
   });
 
   it('should return only elasticsearch for an agent policy with Fleet Server', () => {
@@ -50,7 +54,7 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
       ],
     } as any);
 
-    expect(res).toEqual(['elasticsearch']);
+    expect(res).toEqual([outputType.Elasticsearch]);
   });
 
   it('should return only elasticsearch for an agent policy with Fleet Server not yet installed', () => {
@@ -58,33 +62,128 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
       has_fleet_server: true,
     } as any);
 
-    expect(res).toEqual(['elasticsearch']);
+    expect(res).toEqual([outputType.Elasticsearch]);
   });
 
   it('should return only elasticsearch for an agentless agent policy', () => {
     const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
 
-    expect(res).toEqual(['elasticsearch']);
+    expect(res).toEqual([outputType.Elasticsearch]);
   });
-});
 
-describe('getAllowedOutputTypesForPackagePolicy', () => {
-  it('should return all available output type for a package policy without agentless support', () => {
+  it('should return only OTel-supported output types when any package policy has an enabled OTel input', () => {
     const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'nginx' },
+          inputs: [{ type: 'log', enabled: true }],
+        },
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
+  });
+
+  it('should not restrict outputs when OTel input is disabled', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: false }],
         },
       ],
     } as any);
 
     expect(res).toHaveLength(4);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+  });
+
+  it('should still return only elasticsearch for fleet server even when an OTel input is also present', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'fleet_server' },
+          inputs: [],
+        },
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual([outputType.Elasticsearch]);
+  });
+});
+
+describe('getAllowedOutputTypesForPackagePolicy', () => {
+  it('should return all available output types for a non-agentless policy without OTel inputs', () => {
+    const res = getAllowedOutputTypesForPackagePolicy({
+      supports_agentless: false,
+      inputs: [{ type: 'log', streams: [], enabled: true }],
+    } as any);
+
+    expect(res).toHaveLength(4);
+    expect(res).toContain(outputType.Elasticsearch);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+    expect(res).toContain(outputType.RemoteElasticsearch);
   });
 
   it('should return only elasticsearch for a package policy with agentless support', () => {
-    const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
+    const res = getAllowedOutputTypesForPackagePolicy({
+      supports_agentless: true,
+      inputs: [],
+    } as any);
 
-    expect(res).toEqual(['elasticsearch']);
+    expect(res).toEqual([outputType.Elasticsearch]);
+  });
+
+  it('should return only OTel-supported output types when any input is an OTel input', () => {
+    const res = getAllowedOutputTypesForPackagePolicy({
+      supports_agentless: false,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true }],
+    } as any);
+
+    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
+  });
+
+  it('should return only OTel-supported output types when mixed inputs contain an OTel input', () => {
+    const res = getAllowedOutputTypesForPackagePolicy({
+      supports_agentless: false,
+      inputs: [
+        { type: 'log', streams: [], enabled: true },
+        { type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true },
+      ],
+    } as any);
+
+    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
+  });
+
+  it('should return AGENTLESS_ALLOWED_OUTPUT_TYPES (not OTel list) when agentless even with OTel input', () => {
+    const res = getAllowedOutputTypesForPackagePolicy({
+      supports_agentless: true,
+      inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true }],
+    } as any);
+
+    expect(res).toEqual([outputType.Elasticsearch]);
+  });
+
+  it('should return all available output types when inputs field is missing (safe default)', () => {
+    const res = getAllowedOutputTypesForPackagePolicy({
+      supports_agentless: false,
+    } as any);
+
+    expect(res).toHaveLength(4);
+    expect(res).toContain(outputType.Elasticsearch);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+    expect(res).toContain(outputType.RemoteElasticsearch);
   });
 });
 

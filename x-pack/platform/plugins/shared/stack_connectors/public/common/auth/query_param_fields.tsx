@@ -14,8 +14,9 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { UseArray, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -150,15 +151,20 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        disabled={readOnly}
-                        aria-label={i18n.DELETE_QUERY_PARAM_BUTTON}
-                        data-test-subj="httpRemoveQueryParamButton"
-                        css={{ marginTop: 28 }}
-                      />
+                      <EuiToolTip
+                        content={i18n.DELETE_QUERY_PARAM_BUTTON}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          color="danger"
+                          onClick={() => removeItem(item.id)}
+                          iconType="minusInCircle"
+                          disabled={readOnly}
+                          aria-label={i18n.DELETE_QUERY_PARAM_BUTTON}
+                          data-test-subj="httpRemoveQueryParamButton"
+                          css={{ marginTop: 28 }}
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiPanel>

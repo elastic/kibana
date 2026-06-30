@@ -236,10 +236,9 @@ const dashboardGridStyles = {
         },
 
       // Hide hover actions when dashboard has an overlay
-      '.dshDashboardGrid__item--blurred .embPanel__hoverActions, .dshDashboardGrid__item--focused .embPanel__hoverActions':
-        {
-          visibility: 'hidden !important' as 'hidden',
-        },
+      '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
+        visibility: 'hidden !important' as 'hidden',
+      },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
         '.dshDashboardGrid__item--expanded': {

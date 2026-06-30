@@ -80,7 +80,10 @@ describe('V2RulesAdapter', () => {
         time_field: '@timestamp',
         schedule: { every: '1m', lookback: '2m' },
         grouping: { fields: ['_id'] },
-        evaluation: { query: { base: 'FROM logs-* METADATA _id | WHERE level == "error"' } },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error"' },
+        },
       });
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
@@ -121,7 +124,10 @@ describe('V2RulesAdapter', () => {
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '2m' },
           grouping: { fields: ['_id'] },
-          evaluation: { query: { base: 'FROM logs-* METADATA _id | WHERE level == "error"' } },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error"' },
+          },
         },
       });
     });
@@ -184,8 +190,10 @@ describe('V2RulesAdapter', () => {
         },
       });
 
-      const data = lastCreateCall(mock).data as { evaluation: { query: { base: string } } };
-      expect(data.evaluation.query.base).toBe(
+      const data = lastCreateCall(mock).data as {
+        query: { format: 'standalone'; breach: { query: string } };
+      };
+      expect(data.query.breach.query).toBe(
         'FROM logs.child, logs.child.* METADATA _id | WHERE KQL("message: error")'
       );
     });
@@ -202,8 +210,10 @@ describe('V2RulesAdapter', () => {
         },
       });
 
-      const data = lastUpdateCall(mock).data as { evaluation: { query: { base: string } } };
-      expect(data.evaluation.query.base).toBe('FROM logs-* METADATA _id | WHERE level == "error"');
+      const data = lastUpdateCall(mock).data as {
+        query: { format: 'standalone'; breach: { query: string } };
+      };
+      expect(data.query.breach.query).toBe('FROM logs-* METADATA _id | WHERE level == "error"');
     });
 
     it('leaves queries without METADATA unchanged', async () => {
@@ -218,8 +228,10 @@ describe('V2RulesAdapter', () => {
         },
       });
 
-      const data = lastCreateCall(mock).data as { evaluation: { query: { base: string } } };
-      expect(data.evaluation.query.base).toBe('FROM logs-* | WHERE level == "error"');
+      const data = lastCreateCall(mock).data as {
+        query: { format: 'standalone'; breach: { query: string } };
+      };
+      expect(data.query.breach.query).toBe('FROM logs-* | WHERE level == "error"');
     });
   });
 

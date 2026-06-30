@@ -65,7 +65,7 @@ export const getQuality = async ({
   const actionableFindings: ActionableFinding[] = qualityResults
     .filter((result) => isQualityIncompatible(result.incompatibleFieldCount))
     .map((result) => ({
-      severity: 'warning' as const,
+      severity: 'WARNING' as const,
       message: `${result.indexName} has ${result.incompatibleFieldCount} incompatible ECS fields`,
       resource: result.indexName,
     }));

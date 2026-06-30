@@ -6,8 +6,8 @@
  */
 
 import { esql, type ComposerSortShorthand } from '@elastic/esql';
-import type { Feature, QueryLink } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import type { Feature, QueryLink } from '@kbn/significant-events-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { isStoredFeatureKnowledgeIndicator, isStoredQueryKnowledgeIndicator } from '../data_stream';
 import {
   combineWhere,
@@ -18,6 +18,7 @@ import {
 } from '../esql_helpers';
 import {
   EXCLUDED,
+  FEATURE_TYPE,
   ID,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
@@ -28,7 +29,7 @@ import {
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { StatusError } from '../../errors/status_error';
 import type { RevisionReader } from './revision_reader';
-import type { LatestSourceWhereCondition } from '../../../sig_events/latest_source_query';
+import type { LatestSourceWhereCondition } from '../../../significant_events/latest_source_query';
 import type { RuleUnbackedFilter } from './types';
 
 function ruleUnbackedPostGroupingWhere(
@@ -71,7 +72,7 @@ export class IndicatorReader {
         : undefined;
 
     const featureTypesFilter = options.type?.length
-      ? esql.exp`\`feature.type\` IN (${options.type.map((t) => esql.str(t))})`
+      ? inPredicate(FEATURE_TYPE, options.type)
       : undefined;
 
     const where = combineWhere(
@@ -133,7 +134,7 @@ export class IndicatorReader {
     options: { types?: string[] } = {}
   ): Promise<{ '@timestamp': string } | null> {
     const featureTypesFilter = options.types?.length
-      ? esql.exp`\`feature.type\` IN (${options.types.map((t) => esql.str(t))})`
+      ? inPredicate(FEATURE_TYPE, options.types)
       : undefined;
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
@@ -225,5 +226,15 @@ export class IndicatorReader {
 
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
+  }
+
+  async findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+    if (ids.length === 0) return [];
+    const where = combineWhere(inPredicate(TYPE, [KI_TYPE_FEATURE]), inPredicate(ID, ids));
+    const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
+    return docs.filter(isStoredFeatureKnowledgeIndicator).map((doc) => ({
+      id: doc.id,
+      stream_name: doc['stream.name'],
+    }));
   }
 }

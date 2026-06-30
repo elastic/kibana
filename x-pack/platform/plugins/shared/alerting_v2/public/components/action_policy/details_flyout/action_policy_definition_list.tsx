@@ -7,21 +7,20 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { paths } from '../../../constants';
 import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
-import { BadgeList } from './badge_list';
+import { BadgeList } from '../badge_list';
+import { PopoverItems } from '../../popover_items';
 import { DestinationRow } from './destination_row';
 
 const EMPTY_VALUE = '-';
@@ -31,23 +30,7 @@ export interface ActionPolicyDefinitionListProps {
 }
 
 export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionListProps) => {
-  const {
-    description,
-    type: policyType,
-    ruleId,
-    tags,
-    matcher,
-    groupingMode,
-    groupBy,
-    throttle,
-    destinations = [],
-  } = policy;
-  const { basePath } = useService(CoreStart('http'));
-
-  const ruleDetailsHref =
-    policyType === 'single_rule' && ruleId
-      ? basePath.prepend(paths.ruleDetails(ruleId))
-      : undefined;
+  const { description, tags, matcher, groupingMode, groupBy, throttle, destinations = [] } = policy;
 
   const items: EuiDescriptionListProps['listItems'] = [
     {
@@ -58,35 +41,40 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
     },
   ];
 
-  if (policyType) {
-    items.push({
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.scope', {
-        defaultMessage: 'Scope',
-      }),
-      description:
-        policyType === 'single_rule' && ruleId ? (
-          <EuiLink href={ruleDetailsHref} data-test-subj="actionPolicyDefinitionLinkedRuleLink">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicyDefinition.scope.linkedRule"
-              defaultMessage="Linked to rule {ruleId}"
-              values={{ ruleId: <EuiCode>{ruleId}</EuiCode> }}
-            />
-          </EuiLink>
-        ) : (
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicyDefinition.scope.global"
-            defaultMessage="Global. Matches alerts from any rule in this space"
-          />
-        ),
-    });
-  }
-
   items.push(
     {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.tags', {
         defaultMessage: 'Tags',
       }),
-      description: tags && tags.length > 0 ? <BadgeList items={tags} /> : EMPTY_VALUE,
+      description:
+        tags && tags.length > 0 ? (
+          <PopoverItems
+            items={tags}
+            numberOfItemsToDisplay={1}
+            wrapItems
+            popoverTitle={i18n.translate(
+              'xpack.alertingV2.actionPolicyDefinition.tags.popoverTitle',
+              { defaultMessage: 'Tags' }
+            )}
+            popoverButtonTitle={`+${Math.max(tags.length - 1, 0)}`}
+            dataTestPrefix="actionPolicyDefinitionTags"
+            renderItem={(tag) => (
+              <EuiBadge
+                key={tag}
+                color="hollow"
+                title={tag}
+                css={{
+                  maxWidth: '100%',
+                  '.euiBadge__text': { minWidth: 0 },
+                }}
+              >
+                {tag}
+              </EuiBadge>
+            )}
+          />
+        ) : (
+          EMPTY_VALUE
+        ),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher', {
@@ -161,5 +149,13 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
       ),
   });
 
-  return <EuiDescriptionList compressed type="column" listItems={items} />;
+  return (
+    <EuiDescriptionList
+      compressed
+      type="column"
+      columnWidths={[1, 3]}
+      descriptionProps={{ style: { minWidth: 0 } }}
+      listItems={items}
+    />
+  );
 };

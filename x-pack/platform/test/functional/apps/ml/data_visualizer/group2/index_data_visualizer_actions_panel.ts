@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
-        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch);
+        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch, true);
 
         await ml.testExecution.logTestStep(`loads data for full time range`);
         await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();

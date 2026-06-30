@@ -25,7 +25,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
-import type { ChildWorkflowExecutionItem, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
@@ -39,6 +43,8 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps, shown on the overview pseudo-step. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
   resumeMessage?: string;
@@ -56,6 +62,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     workflowExecutionId,
     stepExecution,
     workflowExecutionDuration,
+    workflowExecutionUsage,
     isLoadingStepData,
     workflowExecutionStatus,
     resumeMessage,
@@ -138,16 +145,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           });
         }
         if (hasInput) {
+          // For non-manual triggers (alert/document/etc.), rename to "Event" when manual
+          // inputs are also present — the output slot holds those inputs (see workflow_pseudo_step_context.ts)
           pseudoTabs.push({
             id: 'input',
-            name: 'Input',
+            name: triggerType !== 'manual' && hasOutput ? 'Event' : 'Input',
           });
         }
         if (hasOutput) {
-          pseudoTabs.push({
-            id: 'output',
-            name: 'Output',
-          });
+          // For non-manual triggers, output holds user-supplied manual inputs supplied alongside the event
+          pseudoTabs.push({ id: 'output', name: triggerType !== 'manual' ? 'Input' : 'Output' });
         }
         return pseudoTabs;
       }
@@ -161,7 +168,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Input',
         },
       ];
-    }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
+    }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType]);
 
     const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
@@ -187,6 +194,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          workflowExecutionUsage={workflowExecutionUsage}
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
@@ -274,7 +282,33 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ) : (
                 <>
                   {selectedTabId === 'output' && (
-                    <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                    <>
+                      {isTriggerPseudoStep && triggerType !== 'manual' && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflowsManagement.stepExecutionDetails.manualInputsAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: <strong>{'{{ inputs.<field> }}'}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                    </>
                   )}
                   {selectedTabId === 'input' && (
                     <>

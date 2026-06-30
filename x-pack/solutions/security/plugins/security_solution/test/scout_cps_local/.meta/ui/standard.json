@@ -1,5 +1,5 @@
 {
-  "sha1": "f55794ca908a49ac611e7eae155650582c2c2bda",
+  "sha1": "391a31963c5966b043edf6383045240e9166bd8f",
   "tests": [
     {
       "id": "96992190a6b747c-923a699644bffc2",
@@ -26,6 +26,34 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
         "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c810e715177a2c-970d67f49640173",
+      "title": "Graph Visualization CPS projectRouting search-all space forwards projectRouting=_alias:* to the Graph API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
+        "line": 199,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c810e715177a2c-b3150da24b2522c",
+      "title": "Graph Visualization CPS projectRouting origin-only space forwards projectRouting=_alias:_origin to the Graph API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
+        "line": 239,
         "column": 7
       }
     }

@@ -44,6 +44,7 @@ jest.mock('../../../alerts_table/actions', () => ({
 }));
 
 jest.mock('../../../../../attack_discovery/helpers', () => ({
+  ...jest.requireActual('../../../../../attack_discovery/helpers'),
   getTacticMetadata: jest.fn(() => []),
 }));
 
@@ -57,8 +58,10 @@ jest.mock(
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
+      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+        {markdown}
+      </div>
     )),
   })
 );
@@ -194,5 +197,20 @@ describe('SummaryTab', () => {
       }),
       {}
     );
+  });
+
+  it('passes originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
+    mockAttack.alertIds = ['alert-1', 'alert-2'];
+    mockAttack.replacements = { 'alert-1': 'original-1' };
+    renderSummaryTab();
+
+    const formatters = screen.getAllByTestId('mock-markdown-formatter');
+    expect(formatters.length).toBeGreaterThan(0);
+    formatters.forEach((formatter) => {
+      expect(formatter).toHaveAttribute(
+        'data-alert-ids',
+        JSON.stringify(['original-1', 'alert-2'])
+      );
+    });
   });
 });

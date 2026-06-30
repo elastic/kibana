@@ -6,6 +6,7 @@
   "include": [
     "common/**/*",
     "public/**/*",
+    "server/**/*",
     "test/scout/**/*"
   ],
   "exclude": [
@@ -13,6 +14,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-router",
@@ -22,6 +24,7 @@
     "@kbn/scout",
     "@kbn/kibana-react-plugin",
     "@kbn/react-query",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/i18n-react"
   ]
 }
