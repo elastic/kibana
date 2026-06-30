@@ -125,7 +125,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('derives readable input from bounds when selecting a preset with a display-only label', async () => {
-      const expectedInputText = 'May 1, 2026, 00:00 to May 2, 2026, 23:59';
+      const expectedInputText = 'May 1, 2026, 00:00:00.000 to May 2, 2026, 23:59:00.000';
 
       renderWithEuiTheme(
         <DateRangePicker

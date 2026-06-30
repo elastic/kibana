@@ -90,8 +90,6 @@ export interface PrettifyValueOptions {
   extraDelimiter?: string;
   /** Presets to match against — if the value's bounds match a preset, its label is used. */
   presets?: TimeRangeBoundsOption[];
-  /** Controls sub-minute precision shown when prettifying absolute timestamps. */
-  timePrecision?: TimePrecision;
 }
 
 /**
@@ -125,7 +123,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   const trimmed = value.trim();
   if (!trimmed) return value;
 
-  const { extraDelimiter, presets = [], timePrecision } = options ?? {};
+  const { extraDelimiter, presets = [] } = options ?? {};
   const patterns = getDelimiterPatterns(extraDelimiter);
 
   // Try splitting on delimiters
@@ -147,8 +145,8 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
 
       // Both bounds are "now" (with or without rounding) — format any absolute dates
       if (!prettyStart && !prettyEnd) {
-        const absStart = prettifyAbsoluteDate(start, timePrecision);
-        const absEnd = prettifyAbsoluteDate(end, timePrecision);
+        const absStart = prettifyAbsoluteDate(start);
+        const absEnd = prettifyAbsoluteDate(end);
         if (!absStart && !absEnd) return trimmed;
         const delim = DATE_RANGE_INPUT_DELIMITER;
         return `${absStart ?? start} ${delim} ${absEnd ?? end}`;
@@ -164,8 +162,8 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
       if (prettyStart && prettyEnd) return `${prettyStart} ${delim} ${prettyEnd}`;
 
       // One side is a relative offset, other is absolute/now-rounding → prettify what we can
-      return `${prettyStart ?? prettifyAbsoluteDate(start, timePrecision) ?? start} ${delim} ${
-        prettyEnd ?? prettifyAbsoluteDate(end, timePrecision) ?? end
+      return `${prettyStart ?? prettifyAbsoluteDate(start) ?? start} ${delim} ${
+        prettyEnd ?? prettifyAbsoluteDate(end) ?? end
       }`;
     }
   }
@@ -176,7 +174,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   if (prettySingle) return prettySingle;
 
   // Try formatting as an absolute ISO date
-  const prettyAbsolute = prettifyAbsoluteDate(trimmed, timePrecision);
+  const prettyAbsolute = prettifyAbsoluteDate(trimmed);
   if (prettyAbsolute) return prettyAbsolute;
 
   // Natural language or anything else — pass through unchanged

@@ -195,13 +195,12 @@ describe('prettifyValue', () => {
       expect(
         prettifyValue(`${start} to ${end}`, {
           presets: [{ start, end, label: 'May 1, 00:00 → May 2, 23:59' }],
-          timePrecision: 'none',
         })
       ).toBe(
-        `${moment.utc(start).local().format('MMM D, YYYY, HH:mm')} to ${moment
+        `${moment.utc(start).local().format(DEFAULT_DATE_FORMAT)} to ${moment
           .utc(end)
           .local()
-          .format('MMM D, YYYY, HH:mm')}`
+          .format(DEFAULT_DATE_FORMAT)}`
       );
     });
 

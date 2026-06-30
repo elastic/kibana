@@ -193,15 +193,12 @@ describe('getOptionInputText', () => {
     const end = '2026-05-02T23:59:00.000Z';
 
     expect(
-      getOptionInputText(
-        { start, end, label: 'May 1, 00:00 → May 2, 23:59' },
-        { timePrecision: 'none' }
-      )
+      getOptionInputText({ start, end, label: 'May 1, 00:00 → May 2, 23:59' })
     ).toBe(
-      `${moment.utc(start).local().format('MMM D, YYYY, HH:mm')} to ${moment
+      `${moment.utc(start).local().format('MMM D, YYYY, HH:mm:ss.SSS')} to ${moment
         .utc(end)
         .local()
-        .format('MMM D, YYYY, HH:mm')}`
+        .format('MMM D, YYYY, HH:mm:ss.SSS')}`
     );
   });
 
@@ -211,11 +208,8 @@ describe('getOptionInputText', () => {
     // Rounding is kept (`-15m/m`, not `-15m`) so re-applying the text reproduces the
     // stored bound exactly; only the absolute end becomes readable instead of raw ISO.
     expect(
-      getOptionInputText(
-        { start: 'now-15m/m', end, label: '15 minutes ago → 15:55:55' },
-        { timePrecision: 's' }
-      )
-    ).toBe(`-15m/m to ${moment.utc(end).local().format('MMM D, YYYY, HH:mm:ss')}`);
+      getOptionInputText({ start: 'now-15m/m', end, label: '15 minutes ago → 15:55:55' })
+    ).toBe(`-15m/m to ${moment.utc(end).local().format('MMM D, YYYY, HH:mm:ss.SSS')}`);
   });
 
   it('falls back to shorthand when label does not parse', () => {

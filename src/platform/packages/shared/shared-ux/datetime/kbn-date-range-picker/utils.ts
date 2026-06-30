@@ -277,16 +277,13 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
  *    bounds are reproduced verbatim (rounding included) so that re-applying the
  *    text yields exactly the stored range — no unintended rounding change.
  */
-export function getOptionInputText(
-  option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
-): string {
+export function getOptionInputText(option: TimeRangeBoundsOption): string {
   if (option.label && textToTimeRange(option.label).isNaturalLanguage) {
     return option.label;
   }
 
-  const startFragment = boundToInputFragment(option.start, options?.timePrecision);
-  const endFragment = boundToInputFragment(option.end, options?.timePrecision);
+  const startFragment = boundToInputFragment(option.start);
+  const endFragment = boundToInputFragment(option.end);
 
   if (startFragment.isNow && endFragment.isNow) return 'now';
   if (startFragment.isNow) return endFragment.text;
@@ -349,17 +346,14 @@ function boundToRelativeShorthand(bound: string): string | 'now' | null {
  *   instead of leaking the raw ISO string into the input.
  * - Rounding-only datemath (e.g. `now/d`) and anything unrecognised pass through as-is.
  */
-function boundToInputFragment(
-  bound: string,
-  precision?: TimePrecision
-): { text: string; isNow: boolean } {
+function boundToInputFragment(bound: string): { text: string; isNow: boolean } {
   const shorthand = boundToRelativeShorthand(bound);
   if (shorthand === 'now') return { text: '', isNow: true };
   if (shorthand !== null) return { text: shorthand, isNow: false };
 
   const parsed = moment(bound, moment.ISO_8601, true);
   if (parsed.isValid()) {
-    return { text: formatAbsoluteDate(parsed.toDate(), precision), isNow: false };
+    return { text: formatAbsoluteDate(parsed.toDate(), 'ms'), isNow: false };
   }
 
   return { text: bound, isNow: false };
