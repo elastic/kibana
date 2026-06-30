@@ -8,3 +8,4 @@
  */
 
 export * from './telemetry';
+export * from './generate_sample_from_json_schema';
