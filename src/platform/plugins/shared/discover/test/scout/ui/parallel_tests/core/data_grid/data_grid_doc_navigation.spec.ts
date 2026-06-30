@@ -59,15 +59,16 @@ spaceTest.describe(
         );
         await pageObjects.dataGrid.waitForLoad();
 
-        expect(
-          await pageObjects.filterBar.hasFilter({
+        await pageObjects.filterBar.waitForFilter(
+          {
             field: '@timestamp',
             value: 'exists',
             enabled: true,
             pinned: false,
             negated: false,
-          })
-        ).toBe(true);
+          },
+          'visible'
+        );
       }
     );
   }

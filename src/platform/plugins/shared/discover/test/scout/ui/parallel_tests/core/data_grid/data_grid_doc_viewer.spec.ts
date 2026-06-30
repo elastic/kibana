@@ -126,7 +126,12 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     await pageObjects.dataGrid.openDocViewerTab('doc_view_table');
     for (const field of fields) {
       await pageObjects.dataGrid.toggleColumnInDocViewer(field);
+      await expect(
+        pageObjects.dataGrid.getColumnHeader(field),
+        `column ${field} should appear in the grid after adding it from the flyout`
+      ).toBeAttached();
     }
+    await pageObjects.dataGrid.closeDocViewerFlyout();
     for (const field of fields) {
       await expect(
         pageObjects.dataGrid.getColumnHeader(field),
@@ -135,16 +140,21 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     }
 
     // Calling the same toggle again removes the column.
+    await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await pageObjects.dataGrid.openDocViewerTab('doc_view_table');
     for (const field of fields) {
       await pageObjects.dataGrid.toggleColumnInDocViewer(field);
+      await expect(
+        pageObjects.dataGrid.getColumnHeader(field),
+        `column ${field} should be removed from the grid`
+      ).toBeHidden();
     }
+    await pageObjects.dataGrid.closeDocViewerFlyout();
     for (const field of fields) {
       await expect(
         pageObjects.dataGrid.getColumnHeader(field),
         `column ${field} should be removed from the grid`
       ).toBeHidden();
     }
-
-    await pageObjects.dataGrid.closeDocViewerFlyout();
   });
 });

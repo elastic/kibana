@@ -116,17 +116,16 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
       await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
 
       for (const filter of CONTEXT_FILTERS) {
-        await expect
-          .poll(() =>
-            pageObjects.filterBar.hasFilter({
-              field: filter.filterField,
-              value: filter.value,
-              enabled: false,
-              pinned: false,
-              negated: false,
-            })
-          )
-          .toBe(true);
+        await pageObjects.filterBar.waitForFilter(
+          {
+            field: filter.filterField,
+            value: filter.value,
+            enabled: false,
+            pinned: false,
+            negated: false,
+          },
+          'visible'
+        );
       }
 
       await openAnchorDocumentDetails(page, pageObjects.dataGrid);

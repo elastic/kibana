@@ -28,7 +28,7 @@ const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
 
 const checkMainViewFilters = async (pageObjects: ContextTestFixtures['pageObjects']) => {
   for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-    expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
+    await pageObjects.filterBar.waitForFilter({ field, value, enabled: true }, 'visible');
   }
   const timeRange = await pageObjects.datePicker.getTimeConfig();
   expect(timeRange.start).toContain('2015-09-19');
@@ -75,6 +75,7 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
 
   spaceTest('should go back via breadcrumbs with preserved state', async ({ pageObjects }) => {
     await pageObjects.contextPage.goBackToDiscover();
+    expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
     await checkMainViewFilters(pageObjects);
   });
 
@@ -85,6 +86,7 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
       await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
       await pageObjects.contextPage.goBackToDiscover();
+      expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
       await checkMainViewFilters(pageObjects);
     }
   );
@@ -113,13 +115,14 @@ spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentA
 
         expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
         const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
-        expect(
-          await pageObjects.filterBar.hasFilter({
+        await pageObjects.filterBar.waitForFilter(
+          {
             field: 'extension',
             value: extensionValue,
             enabled: false,
-          })
-        ).toBe(true);
+          },
+          'visible'
+        );
       });
 
       await spaceTest.step(

@@ -111,7 +111,7 @@ export class DataGrid {
     const cellTestSubj = isValueAction
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
-    const actionSelector = `[data-test-subj="${actionTestSubj}-${fieldName}"]:visible`;
+    const actionTestSubjWithField = `${actionTestSubj}-${fieldName}`;
 
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     const cell = flyout.locator(`[data-test-subj="${cellTestSubj}"]`);
@@ -120,7 +120,7 @@ export class DataGrid {
     await cell.hover();
     await cell.click();
 
-    const action = this.page.locator(actionSelector);
+    const action = cell.locator(`[data-test-subj="${actionTestSubjWithField}"]`);
     await action.waitFor({ state: 'visible' });
     await action.click();
   }
@@ -443,6 +443,7 @@ export class DataGrid {
 
   async toggleColumnInDocViewer(fieldName: string) {
     await this.clickFieldActionInDocViewer(fieldName, 'toggleColumnButton');
+    await this.waitForLoad();
   }
 
   async waitForDocTableRendered() {

@@ -15,11 +15,7 @@ const assertNoFilterAndEmptyQuery = async (
   pageObjects: ExtParallelRunTestFixtures['pageObjects'],
   page: ExtParallelRunTestFixtures['page']
 ) => {
-  expect(
-    // checking if filter exists, enabled or disabled
-    await pageObjects.filterBar.hasFilter(filterBadge),
-    `Filter ${JSON.stringify(filterBadge)} should not exist`
-  ).toBe(false);
+  await pageObjects.filterBar.waitForFilter(filterBadge, 'hidden');
   await expect(
     page.testSubj.locator('queryInput'),
     'Query Bar input field should be empty'
@@ -93,12 +89,13 @@ spaceTest.describe(
           ...filterFieldAndValue,
           operator: 'is',
         });
-        expect(
-          await pageObjects.filterBar.hasFilter({
+        await pageObjects.filterBar.waitForFilter(
+          {
             ...filterFieldAndValue,
             enabled: true, // Filter is enabled by default
-          })
-        ).toBe(true);
+          },
+          'visible'
+        );
         await page.testSubj.fill('queryInput', SEARCH_QUERY);
         await page.testSubj.click('querySubmitButton');
         await pageObjects.discover.waitForHistogramRendered();
@@ -106,12 +103,13 @@ spaceTest.describe(
         await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
         await pageObjects.discover.waitForHistogramRendered();
 
-        expect(
-          await pageObjects.filterBar.hasFilter({
+        await pageObjects.filterBar.waitForFilter(
+          {
             ...filterFieldAndValue,
             enabled: true, // Filter is still enabled
-          })
-        ).toBe(true);
+          },
+          'visible'
+        );
         await expect(page.testSubj.locator('queryInput')).toHaveText(SEARCH_QUERY);
 
         // create new search

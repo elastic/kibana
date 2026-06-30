@@ -59,13 +59,14 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
       );
       await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-      expect(
-        await pageObjects.filterBar.hasFilter({
+      await pageObjects.filterBar.waitForFilter(
+        {
           field: TEST_ANCHOR_FILTER_FIELD,
           value: TEST_ANCHOR_FILTER_VALUE,
           enabled: true,
-        })
-      ).toBe(true);
+        },
+        'visible'
+      );
 
       await pageObjects.dataGrid.closeDocViewerFlyout();
 
@@ -86,13 +87,14 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
     await pageObjects.filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
     await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-    expect(
-      await pageObjects.filterBar.hasFilter({
+    await pageObjects.filterBar.waitForFilter(
+      {
         field: TEST_ANCHOR_FILTER_FIELD,
         value: TEST_ANCHOR_FILTER_VALUE,
         enabled: false,
-      })
-    ).toBe(true);
+      },
+      'visible'
+    );
 
     expect(await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(
       false
@@ -122,21 +124,23 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
      */
     const expectFiltersToExist = async (): Promise<void> => {
       expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-      expect(
-        await pageObjects.filterBar.hasFilter({
+      await pageObjects.filterBar.waitForFilter(
+        {
           field: FILTER_FIELD_GEO_SRC,
           value: FILTER_VALUE_GEO_SRC_IN,
           enabled: true,
           pinned: true,
-        })
-      ).toBe(true);
-      expect(
-        await pageObjects.filterBar.hasFilter({
+        },
+        'visible'
+      );
+      await pageObjects.filterBar.waitForFilter(
+        {
           field: 'extension',
           value: 'png',
           enabled: true,
-        })
-      ).toBe(true);
+        },
+        'visible'
+      );
       expect(
         await everyFieldMatches(
           pageObjects,
@@ -166,9 +170,10 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
       await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
       expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
-      expect(
-        await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
-      ).toBe(true);
+      await pageObjects.filterBar.waitForFilter(
+        { field: 'extension', value: 'png', enabled: true },
+        'visible'
+      );
       expect(await everyFieldMatches(pageObjects, (row) => row[1] === 'png')).toBe(true);
 
       await page.goBack();
@@ -179,9 +184,10 @@ spaceTest.describe('Discover context - filters (basic)', { tag: tags.deploymentA
       await page.goForward();
       await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
       expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
-      expect(
-        await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
-      ).toBe(true);
+      await pageObjects.filterBar.waitForFilter(
+        { field: 'extension', value: 'png', enabled: true },
+        'visible'
+      );
       expect(await everyFieldMatches(pageObjects, (row) => row[1] === 'png')).toBe(true);
     }
   );

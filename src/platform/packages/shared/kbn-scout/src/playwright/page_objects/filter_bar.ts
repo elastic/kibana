@@ -30,6 +30,8 @@ interface FilterStateOptions {
   negated?: boolean;
 }
 
+type FilterWaitState = 'visible' | 'hidden';
+
 export class FilterBar {
   constructor(private readonly page: ScoutPage) {}
 
@@ -81,7 +83,11 @@ export class FilterBar {
     return this.page.testSubj.locator('^filter-badge').count();
   }
 
-  async hasFilter(options: FilterStateOptions) {
+  async waitForFilter(options: FilterStateOptions, state: FilterWaitState): Promise<void> {
+    await this.getFilterLocator(options).waitFor({ state });
+  }
+
+  private getFilterLocator(options: FilterStateOptions) {
     const testSubjLocator = [
       '~filter',
       options.enabled !== undefined && `~filter-${options.enabled ? 'enabled' : 'disabled'}`,
@@ -93,7 +99,7 @@ export class FilterBar {
       .filter(Boolean)
       .join(' & ');
 
-    return this.page.testSubj.isVisible(testSubjLocator, { strict: true });
+    return this.page.testSubj.locator(testSubjLocator);
   }
 
   async toggleFilterEnabled(field: string) {

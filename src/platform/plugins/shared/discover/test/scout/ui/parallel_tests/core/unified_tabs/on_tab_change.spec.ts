@@ -92,7 +92,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
         expect(await discover.isShowingDocViewer()).toBe(true);
 
         await dataGrid.openDocViewerTab(DOC_VIEWER_JSON_TAB_ID);
-        expect(await discover.isDocViewerTabSelected(DOC_VIEWER_JSON_TAB_ID)).toBe(true);
+        await discover.waitForDocViewerTabSelected(DOC_VIEWER_JSON_TAB_ID);
       });
 
       await spaceTest.step('tab 1: open DocViewer and keep the default Table tab', async () => {
@@ -104,19 +104,19 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
         expect(await discover.isShowingDocViewer()).toBe(true);
 
         await dataGrid.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
-        expect(await discover.isDocViewerTabSelected(DOC_VIEWER_TABLE_TAB_ID)).toBe(true);
+        await discover.waitForDocViewerTabSelected(DOC_VIEWER_TABLE_TAB_ID);
       });
 
       await spaceTest.step('switching tabs restores each DocViewer selected tab', async () => {
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
         expect(await discover.isShowingDocViewer()).toBe(true);
-        expect(await discover.isDocViewerTabSelected(DOC_VIEWER_JSON_TAB_ID)).toBe(true);
+        await discover.waitForDocViewerTabSelected(DOC_VIEWER_JSON_TAB_ID);
 
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         expect(await discover.isShowingDocViewer()).toBe(true);
-        expect(await discover.isDocViewerTabSelected(DOC_VIEWER_TABLE_TAB_ID)).toBe(true);
+        await discover.waitForDocViewerTabSelected(DOC_VIEWER_TABLE_TAB_ID);
       });
     }
   );

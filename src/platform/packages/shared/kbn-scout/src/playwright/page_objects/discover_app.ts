@@ -822,6 +822,12 @@ export class DiscoverApp {
     }
   }
 
+  async waitForDocViewerTabSelected(tabId: string): Promise<void> {
+    await this.page
+      .locator(`[data-test-subj="docViewerTab-${tabId}"][aria-selected="true"]`)
+      .waitFor({ state: 'visible' });
+  }
+
   /**
    * Inside an open document-viewer flyout, type a field name into the search
    * input to filter the fields table. Mirrors the FTR

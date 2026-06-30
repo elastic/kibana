@@ -91,9 +91,7 @@ spaceTest.describe(
         await navigateToFirstDocContext(pageObjects);
 
         for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: false })).toBe(
-            true
-          );
+          await pageObjects.filterBar.waitForFilter({ field, value, enabled: false }, 'visible');
         }
       }
     );
