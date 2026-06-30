@@ -11,21 +11,19 @@ import type { CaseAttachmentData } from '../../../common/types/agent_builder/att
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
 const getOwnerInfo = (owner: string) => {
-  const info = (OWNER_INFO as Record<string, { appId: string }>)[owner];
+  const info = (OWNER_INFO as Record<string, { appId: string; casesBasePath: string }>)[owner];
   return info ?? OWNER_INFO[GENERAL_CASES_OWNER];
 };
 
 export const getAppIdForOwner = (owner: string): string => getOwnerInfo(owner).appId;
 
-const getCasePathForOwner = (owner: string, caseId: string): string => {
-  if (owner === GENERAL_CASES_OWNER) {
-    return `/insightsAndAlerting/cases/${caseId}`;
-  }
-  return `/cases/${caseId}`;
-};
+const getCasesBasePath = (owner: string): string => getOwnerInfo(owner).casesBasePath;
+
+const getCasePathForOwner = (owner: string, caseId: string): string =>
+  `${getCasesBasePath(owner)}/${caseId}`;
 
 export const getCasesListPathForOwner = (owner: string, query?: string): string => {
-  const base = owner === GENERAL_CASES_OWNER ? '/insightsAndAlerting/cases' : '/cases';
+  const base = getCasesBasePath(owner);
   return query ? `${base}?${query}` : base;
 };
 

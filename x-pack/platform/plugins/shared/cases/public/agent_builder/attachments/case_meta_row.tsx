@@ -62,7 +62,7 @@ export const CaseMetaRow: React.FC<Props> = ({ data, caseUrls }) => {
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {data?.totalAttachments && (
+      {!!data.totalAttachments && (
         <EuiFlexItem grow={false}>
           <EuiBadge
             color="hollow"

@@ -12,7 +12,9 @@ import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Case, RelatedCase } from '../../../common/types/domain';
+import { GENERAL_CASES_OWNER, OWNER_INFO } from '../../../common/constants';
 import { getCaseViewPath } from '../../common/utils';
+import { isValidOwner } from '../../../common/utils/owner';
 
 export interface CoreServices {
   coreStart: CoreStart;
@@ -99,21 +101,6 @@ export const deduplicateCases = (casesArrays: RelatedCase[][]): RelatedCase[] =>
 
 // CASE URL
 
-const APP_ROUTES = {
-  security: '/app/security',
-  observability: '/app/observability',
-  management: '/app/management/insightsAndAlerting',
-} as const;
-
-function getAppRoute(owner: string): string {
-  const ownerToRoute: Record<string, string> = {
-    securitySolution: APP_ROUTES.security,
-    observability: APP_ROUTES.observability,
-    cases: APP_ROUTES.management,
-  };
-  return ownerToRoute[owner] || APP_ROUTES.management;
-}
-
 function buildFullUrl(
   request: KibanaRequest,
   core: CoreStart,
@@ -164,8 +151,8 @@ export function getCaseUrl(
       });
     }
 
-    const appRoute = getAppRoute(owner);
-    const path = `${appRoute}/cases/${caseId}`;
+    const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
+    const path = `${ownerInfo.appBasePath}${ownerInfo.casesBasePath}/${caseId}`;
     return buildFullUrl(request, core, spaceId, path);
   } catch (error) {
     return null;
