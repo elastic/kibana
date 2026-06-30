@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { usePatchConversationMetadata } from '../../../hooks/use_patch_conversation_metadata';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ConversationMembers } from './conversation_members';
 import { TemplateFieldRow } from './template_field_row';
 import {
@@ -33,7 +34,7 @@ import {
 import { ConversationWorkflowHooks } from './conversation_workflow_hooks';
 import { ConversationDetailTimelineTab } from './tabs/conversation_detail_timeline_tab';
 
-const OBSERVABILITY_INVESTIGATION_TEMPLATE_ID = 'observability-investigation-v1';
+const OBSERVABILITY_INCIDENT_TEMPLATE_ID = 'observability-incident-v1';
 
 enum ConversationDetailSidebarTab {
   metadata = 'metadata',
@@ -85,11 +86,11 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
   const { euiTheme } = useEuiTheme();
   const tabsId = useGeneratedHtmlId({ prefix: 'conversationDetailSidebarTabs' });
   const { mutate, isLoading } = usePatchConversationMetadata();
+  const { openSidebarConversation } = useAgentBuilderServices();
   const fieldDefinitions = getTemplateFieldDefinitions(conversation);
   const templateLabel = getTemplateLabel(conversation);
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
-  const showTimelineTab =
-    resolveTemplateId(conversation) === OBSERVABILITY_INVESTIGATION_TEMPLATE_ID;
+  const showTimelineTab = resolveTemplateId(conversation) === OBSERVABILITY_INCIDENT_TEMPLATE_ID;
   const [selectedTab, setSelectedTab] = useState<ConversationDetailSidebarTab>(
     ConversationDetailSidebarTab.metadata
   );
@@ -107,6 +108,13 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
       mutate({ [key]: value });
     },
     [mutate]
+  );
+
+  const handleOpenConversation = useCallback(
+    (conversationId: string) => {
+      openSidebarConversation({ conversationId });
+    },
+    [openSidebarConversation]
   );
 
   const tabs = [
@@ -162,6 +170,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
               value={conversation.custom_fields?.[definition.key]}
               isSaving={isLoading}
               onChange={handleFieldChange}
+              onOpenConversation={handleOpenConversation}
             />
           ))}
 

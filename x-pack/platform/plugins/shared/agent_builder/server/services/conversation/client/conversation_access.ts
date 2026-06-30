@@ -39,8 +39,8 @@ steps:
       current_state: "{{ inputs.current_state }}"
       timeline:
         - at: "{{ inputs.now }}"
-          actor: observability current state refresh
-          source: incident
+          actor: incident state agent
+          source: state update
           summary: "{{ inputs.current_state }}"
           metadata:
             conversation_id: "{{ inputs.conversation_id }}"

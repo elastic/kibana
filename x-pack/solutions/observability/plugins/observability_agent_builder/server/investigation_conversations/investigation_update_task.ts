@@ -29,11 +29,7 @@ import {
   OBSERVABILITY_CONVERSATION_WORKFLOW_HOOK_TASK_TYPE,
   OBSERVABILITY_INCIDENT_TEMPLATE_ID,
 } from '../../common/constants';
-import {
-  appendTimelineEntries,
-  normalizeTimelineInput,
-  type ObservabilityInvestigationTimelineEntry,
-} from './conversation_metadata';
+import { appendTimelineEntries, normalizeTimelineInput } from './conversation_metadata';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
@@ -57,7 +53,6 @@ interface DueWorkflowHook {
 
 export interface ConversationWorkflowHookRunResult {
   customFields: Record<string, unknown>;
-  timelineEntries: ObservabilityInvestigationTimelineEntry[];
 }
 
 const DEFAULT_HOOK_SCAN_INTERVAL = '1m';
@@ -90,7 +85,6 @@ export const runConversationWorkflowHooksForTrigger = async ({
   if (!hooks.length) {
     return {
       customFields: conversation.custom_fields ?? {},
-      timelineEntries: [],
     };
   }
 
@@ -282,15 +276,6 @@ const runConversationWorkflowHooks = async ({
         },
         { signal }
       );
-      await appendTimelineEntriesToLinkedInvestigation({
-        esClient,
-        index,
-        customFields: hookResult.customFields,
-        entries: hookResult.timelineEntries,
-        now,
-        signal,
-        logger,
-      });
       updatedCount++;
     }
 
@@ -324,11 +309,10 @@ const runDueHooksForConversation = async ({
   logger: Logger;
 }): Promise<ConversationWorkflowHookRunResult> => {
   let customFields = conversation.custom_fields ?? {};
-  const timelineEntries: ObservabilityInvestigationTimelineEntry[] = [];
 
   for (const { hook, state } of hooks) {
     if (signal.aborted) {
-      return { customFields, timelineEntries };
+      return { customFields };
     }
 
     if (!hook.workflow_id && !hook.inline_workflow_yaml) {
@@ -415,10 +399,9 @@ const runDueHooksForConversation = async ({
       output: execution.output,
     });
     customFields = hookResult.customFields;
-    timelineEntries.push(...hookResult.timelineEntries);
   }
 
-  return { customFields, timelineEntries };
+  return { customFields };
 };
 
 const executeSavedHookWorkflow = async ({
@@ -670,25 +653,32 @@ const buildHookSuccessFields = ({
         value: normalizedOutput.timeline,
         now,
         actor,
-        source: 'incident',
+        source: 'state update',
       })
     : [];
+  const customFieldsWithOutput = {
+    ...customFields,
+    ...outputFields,
+    last_refreshed_at: now,
+    last_state_update_source: 'workflow_hook',
+  };
+  const customFieldsWithTimeline = outputTimeline.length
+    ? appendTimelineEntries({
+        customFields: customFieldsWithOutput,
+        entries: outputTimeline,
+        now,
+      })
+    : customFieldsWithOutput;
 
   return {
     customFields: updateHookState({
-      customFields: {
-        ...customFields,
-        ...outputFields,
-        last_refreshed_at: now,
-        last_state_update_source: 'workflow_hook',
-      },
+      customFields: customFieldsWithTimeline,
       hook,
       previousState,
       now,
       executionId,
       status,
     }),
-    timelineEntries: outputTimeline,
   };
 };
 
@@ -794,66 +784,6 @@ const getTemplateId = (
   conversation: Pick<ConversationSearchSource, 'template_id' | 'template_snapshot'>
 ): string | undefined => {
   return conversation.template_snapshot?.template_id ?? conversation.template_id;
-};
-
-const appendTimelineEntriesToLinkedInvestigation = async ({
-  esClient,
-  index,
-  customFields,
-  entries,
-  now,
-  signal,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-  customFields: Record<string, unknown>;
-  entries: ObservabilityInvestigationTimelineEntry[];
-  now: string;
-  signal: AbortSignal;
-  logger: Logger;
-}) => {
-  if (!entries.length) {
-    return;
-  }
-
-  const investigationConversationId = getString(customFields.investigation_conversation_id);
-  if (!investigationConversationId) {
-    return;
-  }
-
-  try {
-    const investigation = await esClient.get<ConversationSearchSource>(
-      {
-        index,
-        id: investigationConversationId,
-        _source: ['custom_fields'],
-      },
-      { signal }
-    );
-
-    await esClient.update(
-      {
-        index,
-        id: investigationConversationId,
-        retry_on_conflict: 3,
-        doc: {
-          custom_fields: appendTimelineEntries({
-            customFields: investigation._source?.custom_fields ?? {},
-            entries,
-            now,
-          }),
-          updated_at: now,
-          read: false,
-        },
-      },
-      { signal }
-    );
-  } catch (error) {
-    logger.debug(
-      `Unable to append incident timeline entries to investigation conversation ${investigationConversationId}: ${error}`
-    );
-  }
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {

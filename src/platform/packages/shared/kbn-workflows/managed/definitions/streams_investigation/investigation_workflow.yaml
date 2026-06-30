@@ -140,8 +140,9 @@ steps:
         outcome: "{{ steps.investigate.output.structured_output.mechanism | default: '' }}"
         currentState: "{% if steps.investigate.error == null %}{{ steps.investigate.output.structured_output.evidence_summary | default: 'Investigation completed' }}{% else %}Investigation failed{% endif %}"
         timeline:
-          - summary: "{% if steps.investigate.error == null %}Investigation workflow completed{% else %}Investigation workflow failed{% endif %}"
-            source: "streams_investigation"
+          - actor: "investigation agent"
+            source: "investigation"
+            summary: "{% if steps.investigate.error == null %}Investigation completed and updated the incident state{% else %}Investigation failed; incident state needs manual review{% endif %}"
             metadata:
               workflow_execution_id: "{{ execution.id }}"
               conversation_id: "{{ inputs.context.conversation_id }}"

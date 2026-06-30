@@ -165,7 +165,10 @@ describe('conversation_access', () => {
       ]);
       expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('type: data.set');
       expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('timeline:');
-      expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('source: incident');
+      expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain(
+        'actor: incident state agent'
+      );
+      expect(snapshot?.workflow_hooks?.[0].inline_workflow_yaml).toContain('source: state update');
     });
 
     it('returns undefined for unknown template_id', () => {

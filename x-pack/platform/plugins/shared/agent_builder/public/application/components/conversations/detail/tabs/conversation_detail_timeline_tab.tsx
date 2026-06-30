@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -173,9 +174,7 @@ export const ConversationDetailTimelineTab = ({ timeline }: { timeline: unknown 
               )}
             </EuiFlexGroup>
             <EuiSpacer size="xs" />
-            <EuiText size="s">
-              <p>{entry.summary}</p>
-            </EuiText>
+            <EuiMarkdownFormat textSize="s">{entry.summary}</EuiMarkdownFormat>
           </EuiPanel>
         </EuiTimelineItem>
       ))}

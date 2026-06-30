@@ -13,10 +13,19 @@ export type TemplateFieldRender = 'default' | 'badge' | 'severity_badge';
 export interface TemplateFieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'readonly_text' | 'markdown' | 'json' | 'select' | 'assignees';
+  type:
+    | 'text'
+    | 'readonly_text'
+    | 'markdown'
+    | 'json'
+    | 'select'
+    | 'assignees'
+    | 'conversation_link'
+    | 'conversation_links';
   options?: readonly string[];
   render?: TemplateFieldRender;
   show_in_header?: boolean;
+  linkLabel?: string;
 }
 
 export interface TemplateHeaderAction {
@@ -147,7 +156,8 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
       {
         key: 'incident_conversation_id',
         label: 'Incident conversation',
-        type: 'readonly_text',
+        type: 'conversation_link',
+        linkLabel: 'Open incident',
       },
       { key: 'workflow_execution_id', label: 'Workflow execution', type: 'readonly_text' },
     ],
@@ -173,9 +183,15 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
       {
         key: 'investigation_conversation_id',
         label: 'Investigation conversation',
-        type: 'readonly_text',
+        type: 'conversation_link',
+        linkLabel: 'Open investigation',
       },
-      { key: 'related_investigations', label: 'Related investigations', type: 'json' },
+      {
+        key: 'related_investigations',
+        label: 'Related investigations',
+        type: 'conversation_links',
+        linkLabel: 'Open investigation',
+      },
     ],
   },
 };

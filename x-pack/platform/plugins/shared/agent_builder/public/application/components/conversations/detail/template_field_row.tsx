@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiMarkdownFormat,
+  EuiLink,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -28,6 +29,12 @@ const labels = {
   notSet: i18n.translate('xpack.agentBuilder.conversationDetail.templateFieldRow.notSetLabel', {
     defaultMessage: 'Not set',
   }),
+  openConversation: i18n.translate(
+    'xpack.agentBuilder.conversationDetail.templateFieldRow.openConversationLabel',
+    {
+      defaultMessage: 'Open conversation',
+    }
+  ),
 };
 
 interface TemplateFieldRowProps {
@@ -35,6 +42,7 @@ interface TemplateFieldRowProps {
   value: unknown;
   isSaving: boolean;
   onChange: (key: string, value: unknown) => void;
+  onOpenConversation?: (conversationId: string) => void;
 }
 
 const stringifyValue = (value: unknown): string => {
@@ -53,11 +61,24 @@ const stringifyValue = (value: unknown): string => {
   }
 };
 
+const getConversationIds = (value: unknown): string[] => {
+  if (typeof value === 'string' && value.length > 0) {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0);
+  }
+
+  return [];
+};
+
 export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
   definition,
   value,
   isSaving,
   onChange,
+  onOpenConversation,
 }) => {
   const { euiTheme } = useEuiTheme();
   const stringValue = value === undefined || value === null ? '' : String(value);
@@ -129,6 +150,33 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
     [definition.key, onChange]
   );
 
+  const renderConversationLinks = () => {
+    const conversationIds = getConversationIds(value);
+    if (!conversationIds.length) {
+      return <EuiText size="s">{labels.notSet}</EuiText>;
+    }
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        {conversationIds.map((conversationId, index) => {
+          const baseLabel = definition.linkLabel ?? labels.openConversation;
+          const label = conversationIds.length > 1 ? `${baseLabel} ${index + 1}` : baseLabel;
+
+          return (
+            <EuiFlexItem key={conversationId} grow={false}>
+              <EuiLink
+                onClick={onOpenConversation ? () => onOpenConversation(conversationId) : undefined}
+                data-test-subj={`conversationMetadataLink-${definition.key}-${index}`}
+              >
+                {label}
+              </EuiLink>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    );
+  };
+
   const badgePreview =
     stringValue && (renderType === 'badge' || renderType === 'severity_badge') ? (
       <EuiBadge color={getFieldBadgeColor(definition, stringValue)}>{stringValue}</EuiBadge>
@@ -177,6 +225,14 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
         <div css={readonlyValueStyles}>
           <EuiText size="s">{stringifyValue(value)}</EuiText>
         </div>
+      </EuiFormRow>
+    );
+  }
+
+  if (definition.type === 'conversation_link' || definition.type === 'conversation_links') {
+    return (
+      <EuiFormRow label={definition.label} fullWidth>
+        <div css={readonlyValueStyles}>{renderConversationLinks()}</div>
       </EuiFormRow>
     );
   }

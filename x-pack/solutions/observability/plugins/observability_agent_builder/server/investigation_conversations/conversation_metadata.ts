@@ -50,8 +50,19 @@ interface BuildManualRefreshFieldsOptions {
   metadata?: Record<string, unknown>;
 }
 
+interface BuildIncidentRefreshFieldsOptions {
+  customFields: Record<string, unknown>;
+  now: string;
+  investigationConversationId: string;
+  currentState?: string;
+  outcome?: string;
+  timeline?: unknown;
+}
+
 const USER_ACTOR = 'investigation user';
 const UPDATER_ACTOR = 'observability investigation updater';
+const INCIDENT_ACTOR = 'incident lifecycle';
+const INVESTIGATION_WORKFLOW_ACTOR = 'investigation workflow';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -205,7 +216,6 @@ export const buildInvestigationCustomFields = ({
     ...(connectorId ? { connector_id: connectorId } : {}),
     ...(initialContext ? { initial_context: initialContext } : {}),
     ...(report ? { outcome: report } : {}),
-    ...(timelineEntries.length > 0 ? { timeline: timelineEntries } : {}),
     ...(workflowHooks ? { workflow_hooks: normalizeWorkflowHooks(workflowHooks) } : {}),
     ...(metadata ? { workflow_metadata: metadata } : {}),
   };
@@ -228,8 +238,10 @@ export const buildInvestigationSeedMessage = (customFields: Record<string, unkno
 
 export const buildIncidentCustomFields = ({
   investigation,
+  now,
 }: {
   investigation: Conversation;
+  now: string;
 }): Record<string, unknown> => {
   const investigationFields = investigation.custom_fields ?? {};
 
@@ -239,6 +251,17 @@ export const buildIncidentCustomFields = ({
     investigation_conversation_id: investigation.id,
     related_investigations: [investigation.id],
     ...(investigationFields.outcome ? { investigation_outcome: investigationFields.outcome } : {}),
+    timeline: [
+      {
+        at: now,
+        actor: INCIDENT_ACTOR,
+        source: 'incident',
+        summary: 'Incident opened from investigation',
+        metadata: {
+          investigation_conversation_id: investigation.id,
+        },
+      },
+    ],
   };
 };
 
@@ -252,24 +275,11 @@ export const buildInvestigationFieldsWithIncidentLink = ({
   now: string;
 }): Record<string, unknown> => {
   const customFields = investigation.custom_fields ?? {};
-  return appendTimelineEntries({
-    customFields: {
-      ...customFields,
-      incident_conversation_id: incidentConversationId,
-    },
-    entries: [
-      {
-        at: now,
-        actor: USER_ACTOR,
-        source: 'incident',
-        summary: 'Incident opened',
-        metadata: {
-          incident_conversation_id: incidentConversationId,
-        },
-      },
-    ],
-    now,
-  });
+  return {
+    ...customFields,
+    incident_conversation_id: incidentConversationId,
+    last_refreshed_at: now,
+  };
 };
 
 export const buildManualRefreshFields = ({
@@ -278,20 +288,13 @@ export const buildManualRefreshFields = ({
   currentState,
   outcome,
   status,
-  timeline,
   workflowHooks,
   metadata,
 }: BuildManualRefreshFieldsOptions): Record<string, unknown> => {
-  const timelineEntries = normalizeTimelineInput({
-    value: timeline,
-    now,
-    actor: USER_ACTOR,
-    source: 'incident',
-  });
   const nextCurrentState =
     currentState ?? outcome ?? getString(customFields.current_state) ?? 'State refreshed';
 
-  const nextFields = {
+  return {
     ...customFields,
     current_state: nextCurrentState,
     last_refreshed_at: now,
@@ -301,8 +304,49 @@ export const buildManualRefreshFields = ({
     ...(workflowHooks ? { workflow_hooks: normalizeWorkflowHooks(workflowHooks) } : {}),
     ...(metadata ? { refresh_metadata: metadata } : {}),
   };
+};
 
-  return timelineEntries.length > 0
+const appendUniqueString = (value: unknown, nextValue: string): string[] => {
+  const values = Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === 'string')
+    : [];
+  return values.includes(nextValue) ? values : [...values, nextValue];
+};
+
+export const buildIncidentFieldsFromInvestigationRefresh = ({
+  customFields,
+  now,
+  investigationConversationId,
+  currentState,
+  outcome,
+  timeline,
+}: BuildIncidentRefreshFieldsOptions): Record<string, unknown> => {
+  const timelineEntries = normalizeTimelineInput({
+    value: timeline,
+    now,
+    actor: INVESTIGATION_WORKFLOW_ACTOR,
+    source: 'investigation',
+  });
+  const nextCurrentState =
+    currentState ??
+    outcome ??
+    getString(customFields.current_state) ??
+    'Incident state refreshed from investigation';
+
+  const nextFields = {
+    ...customFields,
+    current_state: nextCurrentState,
+    last_refreshed_at: now,
+    last_state_update_source: 'investigation_refresh',
+    investigation_conversation_id: investigationConversationId,
+    related_investigations: appendUniqueString(
+      customFields.related_investigations,
+      investigationConversationId
+    ),
+    ...(outcome ? { investigation_outcome: outcome } : {}),
+  };
+
+  return timelineEntries.length
     ? appendTimelineEntries({
         customFields: nextFields,
         entries: timelineEntries,
