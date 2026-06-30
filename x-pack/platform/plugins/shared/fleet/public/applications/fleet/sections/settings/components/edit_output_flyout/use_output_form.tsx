@@ -471,7 +471,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    (value?: string) => {
+    (value) => {
       const { certificate, key } = sslValuesRef.current;
       return isSharedSslActive && certificate && !key ? validateSSLKeySecret(value) : undefined;
     },
