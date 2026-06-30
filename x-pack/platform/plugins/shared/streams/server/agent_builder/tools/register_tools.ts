@@ -91,7 +91,7 @@ export function registerAgentBuilderTools({
     createListIlmPoliciesTool({ getScopedClients, isServerless: server.isServerless }),
 
     // Write tools
-    createUpdateStreamTool({ getScopedClients, writeQueue, logger: logger.get('update_stream') }),
+    createUpdateStreamTool({ getScopedClients, writeQueue }),
     createCreatePartitionTool({ getScopedClients, writeQueue }),
     createDeleteStreamTool({ getScopedClients, writeQueue }),
 
