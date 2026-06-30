@@ -11,11 +11,11 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { TaskResult } from '@kbn/streams-schema';
 import type {
   IdentifyFeaturesResult,
   SignificantEventsQueriesGenerationResult,
-  TaskResult,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 
 /**
  * @deprecated Legacy onboarding result shape used by the task-based implementation.
@@ -25,7 +25,8 @@ interface LegacyOnboardingResult {
   featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
   queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
 }
-import { StreamsKIsOnboardingStep, TaskStatus } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';

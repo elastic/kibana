@@ -7,7 +7,7 @@
 
 import { createKiIdentificationStartTool } from './tool';
 import { createMockToolContext } from '../../utils/test_helpers';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('createKiIdentificationStartTool', () => {

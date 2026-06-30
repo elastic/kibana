@@ -6,13 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import {
   dependencyEdgeSchema,
   infraComponentSchema,
   causeKiSchema,
   evidenceSchema,
 } from '../common_schemas';
-import { MAX_STREAM_NAME_LENGTH } from '../../helpers/stream_name_validation';
 import {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,

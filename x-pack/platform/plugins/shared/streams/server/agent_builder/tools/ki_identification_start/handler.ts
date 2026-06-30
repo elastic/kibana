@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
 import type {
   StreamsKIsOnboardingClient,
