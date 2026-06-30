@@ -271,12 +271,17 @@ async function runIntegration(
       namespace,
       config.validateTargetIds
     );
-    // When target validation ran, restrict the metadata write to the same
-    // validated target set so the history stream stays consistent with the
-    // latest-index write (no dangling targets in either store).
-    const { validTargetIds } = write;
+    // Only write metadata for actors that actually landed in the latest index.
+    // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
+    // the metadata write for that actor so the two stores stay in sync.
+    const { validTargetIds, succeededEntityIds } = write;
+    const actorFilteredRecords = records.filter(
+      (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
+    );
+
+    // When target validation also ran, further restrict to the validated target set.
     const metadataRecords = validTargetIds
-      ? records.flatMap((r) => {
+      ? actorFilteredRecords.flatMap((r) => {
           const filteredRels: Record<string, string[]> = {};
           for (const [relType, targetEuids] of Object.entries(r.relationships)) {
             const valid = targetEuids.filter((id) => validTargetIds.has(id));
@@ -286,7 +291,7 @@ async function runIntegration(
             ? [{ ...r, relationships: filteredRels }]
             : [];
         })
-      : records;
+      : actorFilteredRecords;
     const metadata = await writeRelationshipMetadatas(
       entityMetadataClient,
       logger,
@@ -315,7 +320,14 @@ async function runIntegration(
     return {
       buckets: totalBuckets,
       recordsCount: records.length,
-      write: { updated: 0, notFound: 0, errors: 0, droppedTargets: 0, relationshipTypeApplied: {} },
+      write: {
+        updated: 0,
+        notFound: 0,
+        errors: 0,
+        droppedTargets: 0,
+        relationshipTypeApplied: {},
+        succeededEntityIds: new Set(),
+      },
       metadata: { docsAttempted: 0, docsApplied: 0 },
       outcome: 'error',
       iterations,

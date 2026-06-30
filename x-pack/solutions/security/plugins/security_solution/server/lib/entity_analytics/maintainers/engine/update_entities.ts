@@ -128,6 +128,14 @@ export interface WriteEntityIdsResult {
    * writes (e.g. metadata) to the same validated set.
    */
   validTargetIds?: Set<string>;
+  /**
+   * Set of actor entity IDs whose bulk-update item succeeded (no error response).
+   * Always populated — empty when no records were written. Used by the caller to
+   * gate the metadata write so only actors that landed in the latest index get a
+   * metadata record; prevents metadata from accumulating for actors that are 404
+   * (not yet in the entity store).
+   */
+  succeededEntityIds: Set<string>;
 }
 
 /**
@@ -162,6 +170,7 @@ const EMPTY_RESULT: WriteEntityIdsResult = {
   errors: 0,
   droppedTargets: 0,
   relationshipTypeApplied: {},
+  succeededEntityIds: new Set(),
 };
 
 export const writeEntityIds = async (
@@ -235,6 +244,7 @@ export const writeEntityIds = async (
       droppedTargets,
       relationshipTypeApplied: {},
       validTargetIds,
+      succeededEntityIds: new Set(),
     };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);
@@ -265,8 +275,10 @@ export const writeEntityIds = async (
   // target ID) to reflect writes landed, excluding entities whose bulk item failed.
   const failedHashes = new Set(responseErrors.map((e) => e._id));
   const relationshipTypeApplied: Record<string, number> = {};
+  const succeededEntityIds = new Set<string>();
   for (const [entityId, mergedRels] of merged) {
     if (!failedHashes.has(hashEntityId(entityId))) {
+      succeededEntityIds.add(entityId);
       for (const relType of Object.keys(mergedRels)) {
         relationshipTypeApplied[relType] = (relationshipTypeApplied[relType] ?? 0) + 1;
       }
@@ -280,5 +292,6 @@ export const writeEntityIds = async (
     droppedTargets,
     relationshipTypeApplied,
     validTargetIds,
+    succeededEntityIds,
   };
 };

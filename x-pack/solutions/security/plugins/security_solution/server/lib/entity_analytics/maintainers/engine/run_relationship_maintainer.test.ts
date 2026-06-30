@@ -15,6 +15,7 @@ import {
   runRelationshipMaintainer,
   type RelationshipMaintainerTelemetryCollector,
 } from './run_relationship_maintainer';
+import { hashEntityId } from './update_entities';
 import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS, LOOKBACK_WINDOW } from './constants';
 import type { RelationshipIntegrationConfig } from './types';
 
@@ -971,6 +972,48 @@ describe('runRelationshipMaintainer', () => {
         integrations: [baseConfig],
       });
       expect(bulkAppend).not.toHaveBeenCalled();
+    });
+
+    it('does not write metadata for actors whose entity update returned a non-success status (404/500)', async () => {
+      // alice gets a 404 (entity not yet in store), bob succeeds.
+      // Metadata should only contain docs for bob, never alice.
+      const { esClient, search, esql } = makeEsClient();
+      const aliceHash = hashEntityId('user:alice@corp');
+      const { entityMetadataClient, bulkAppend } = makeClients();
+      const crudClient = {
+        bulkUpdateEntity: jest
+          .fn()
+          .mockResolvedValue([{ _id: aliceHash, status: 404, type: 'not_found', reason: '' }]),
+      } as unknown as EntityUpdateClient;
+      search.mockResolvedValueOnce(
+        successResponse([
+          { key: { 'user.name': 'alice' }, doc_count: 2 },
+          { key: { 'user.name': 'bob' }, doc_count: 1 },
+        ])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [
+          ['user:alice@corp', ['host:H1'], null],
+          ['user:bob@corp', ['host:H2'], null],
+        ],
+      });
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+      });
+      const [docs] = bulkAppend.mock.calls[0] as [Array<Record<string, unknown>>];
+      const actorIds = docs.map((d) => d['entity.id']);
+      expect(actorIds).not.toContain('user:alice@corp');
+      expect(actorIds).toContain('user:bob@corp');
     });
 
     it('reuses one scanId across every integration in a single run', async () => {
