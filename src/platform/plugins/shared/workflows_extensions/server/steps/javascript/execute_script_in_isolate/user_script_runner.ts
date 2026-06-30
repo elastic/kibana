@@ -9,9 +9,12 @@
 
 import type ivm from 'isolated-vm';
 
+// User scripts run as synchronous code only. Async constructs are intentionally
+// unsupported: top-level `await` throws a SyntaxError, and returning a Promise
+// fails the structured-clone copy-out. Keeping execution synchronous means the
+// in-isolate CPU `timeout` fully bounds every script (no suspended-promise hangs).
 const USER_SCRIPT_RUNNER = `
-  const AsyncFunction = async function () {}.constructor;
-  return new AsyncFunction($0)();
+  return new Function($0)();
 `;
 
 export const runUserScript = (
@@ -21,7 +24,6 @@ export const runUserScript = (
 ): Promise<unknown> =>
   ivmContext.evalClosure(USER_SCRIPT_RUNNER, [script], {
     arguments: { copy: true },
-    promise: true,
-    result: { promise: true, copy: true },
+    result: { copy: true },
     timeout: executionTimeoutMs,
   });

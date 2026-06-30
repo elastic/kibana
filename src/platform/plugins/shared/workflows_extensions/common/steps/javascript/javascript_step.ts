@@ -55,6 +55,8 @@ export const scriptsJavaScriptStepCommonDefinition: CommonStepDefinition<
 
 Execute a JavaScript script in a sandboxed runtime and return its result to downstream steps.
 
+Only **synchronous** code is supported. \`async\`/\`await\`, returning a \`Promise\`, and timers (\`setTimeout\`/\`setInterval\`) are not available; using them fails the step.
+
 ## Basic Usage
 
 \`\`\`yaml

@@ -51,8 +51,10 @@ steps:
 
         return array;
 
-  - name: func-async-await
+  - name: sec-async-rejected
     type: ${ScriptsJavaScriptStepTypeId}
+    on-failure:
+      continue: true
     with:
       code: |
         const value = await Promise.resolve(42);
@@ -226,9 +228,11 @@ spaceTest.describe(
       expectStepCompleted(liquidMutation);
       expect(liquidMutation.output).toStrictEqual([1, 2, 3, 4, 5, 6]);
 
-      const asyncAwait = getJavaScriptStep(execution as WorkflowExecutionDto, 'func-async-await');
-      expectStepCompleted(asyncAwait);
-      expect(asyncAwait.output).toBe(42);
+      const asyncRejected = getJavaScriptStep(
+        execution as WorkflowExecutionDto,
+        'sec-async-rejected'
+      );
+      expectStepFailedWithMessage(asyncRejected, /await is only valid in async/i);
 
       const complexReturn = getJavaScriptStep(
         execution as WorkflowExecutionDto,

@@ -113,15 +113,26 @@ describe('executeScriptInIsolate', () => {
     expect(result).toBe('undefined');
   });
 
-  it('executes scripts with await', async () => {
-    const result = await executeScriptInIsolate({
-      script: 'const value = await Promise.resolve(42); return value;',
-      logger: createLogger(),
-      abortSignal: new AbortController().signal,
-      ...defaultIsolateParams,
-    });
+  it('rejects scripts that use await (synchronous code only)', async () => {
+    await expect(
+      executeScriptInIsolate({
+        script: 'const value = await Promise.resolve(42); return value;',
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        ...defaultIsolateParams,
+      })
+    ).rejects.toThrow(/await is only valid in async/i);
+  });
 
-    expect(result).toBe(42);
+  it('rejects scripts that return a Promise (synchronous code only)', async () => {
+    await expect(
+      executeScriptInIsolate({
+        script: 'return Promise.resolve(42);',
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        ...defaultIsolateParams,
+      })
+    ).rejects.toThrow();
   });
 
   it('returns primitive values from user scripts', async () => {
