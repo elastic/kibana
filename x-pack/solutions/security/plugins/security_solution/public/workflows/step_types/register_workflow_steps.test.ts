@@ -12,6 +12,7 @@ import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
+import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
@@ -42,7 +43,7 @@ describe('registerWorkflowSteps (public)', () => {
     } as unknown as ExperimentalFeatures);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
     // getStartServices is called once eagerly to create the shared memoized promise
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
@@ -75,6 +76,7 @@ describe('registerWorkflowSteps (public)', () => {
     expect(results).toContain(renderAlertNarrativeStepDefinition);
     expect(results).toContain(buildAlertEntityGraphStepDefinition);
     expect(results).toContain(setAlertStatusStepDefinition);
+    expect(results).toContain(setAlertTagsStepDefinition);
     expect(results).toContain(assignAlertStepDefinition);
     expect(results).toContain(setAttackStatusStepDefinition);
   });
@@ -95,6 +97,7 @@ describe('registerWorkflowSteps (public)', () => {
     // renderAlertNarrativeStepDefinition and buildAlertEntityGraphStepDefinition return undefined
     expect(results.filter((res) => res === undefined).length).toBe(2);
     expect(results).toContain(setAlertStatusStepDefinition);
+    expect(results).toContain(setAlertTagsStepDefinition);
     expect(results).toContain(assignAlertStepDefinition);
     expect(results).toContain(setAttackStatusStepDefinition);
   });

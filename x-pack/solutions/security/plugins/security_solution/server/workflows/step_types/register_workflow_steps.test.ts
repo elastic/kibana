@@ -12,6 +12,7 @@ import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
+import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import {
@@ -45,12 +46,15 @@ describe('registerWorkflowSteps (server)', () => {
       setAlertStatusStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAlertTagsStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       assignAlertStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       setAttackStatusStepDefinition
     );
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
     // getStartServices is called once eagerly to create the shared memoized promise
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });

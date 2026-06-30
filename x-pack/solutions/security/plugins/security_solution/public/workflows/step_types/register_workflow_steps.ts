@@ -53,6 +53,10 @@ export const registerWorkflowSteps = (
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./set_alert_tags_step/set_alert_tags_step').then((m) => m.setAlertTagsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./assign_alert_step/assign_alert_step').then((m) => m.assignAlertStepDefinition)
   );
 
