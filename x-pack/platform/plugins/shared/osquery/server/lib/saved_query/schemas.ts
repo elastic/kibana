@@ -134,6 +134,8 @@ const packQuerySchemaV3ForwardCompat = schema.object(
     ecs_mapping: schema.maybe(ecsMappingSchema),
     snapshot: schema.maybe(schema.boolean()),
     removed: schema.maybe(schema.boolean()),
+    name: schema.maybe(schema.string()),
+    start_date: schema.maybe(schema.string()),
     schedule_type: schema.maybe(
       schema.nullable(schema.oneOf([schema.literal('interval'), schema.literal('rrule')]))
     ),
