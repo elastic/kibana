@@ -41,7 +41,7 @@ export const WorkflowChangeHistoryProvider = ({
   workflowName,
   children,
 }: WorkflowChangeHistoryProviderProps): JSX.Element => {
-  const { workflowsManagement } = useKibana().services;
+  const { analytics: coreAnalytics } = useKibana().services;
   const isEnabled = useWorkflowChangeHistoryEnabled();
   const adapter = useWorkflowChangeHistoryAdapter(workflowId);
   const canRestore = useWorkflowChangeHistoryRestoreEligibility();
@@ -54,15 +54,12 @@ export const WorkflowChangeHistoryProvider = ({
     []
   );
   const analytics = useMemo((): Pick<AnalyticsServiceStart, 'reportEvent'> | undefined => {
-    const reportEvent = workflowsManagement?.telemetry?.reportEvent;
-    if (!reportEvent) {
+    if (!coreAnalytics) {
       return undefined;
     }
 
-    return {
-      reportEvent: reportEvent as Pick<AnalyticsServiceStart, 'reportEvent'>['reportEvent'],
-    };
-  }, [workflowsManagement?.telemetry]);
+    return { reportEvent: coreAnalytics.reportEvent };
+  }, [coreAnalytics]);
 
   if (!isEnabled) {
     return <>{children}</>;

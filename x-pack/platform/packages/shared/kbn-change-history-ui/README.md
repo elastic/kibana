@@ -71,26 +71,36 @@ For list-backed adapters, ensure `getChange` can resolve while the list is refet
 
 The package emits **browser EBT** events when `ChangeHistoryProvider` receives **`scope`** and **`analytics`** (`Pick<AnalyticsServiceStart, 'reportEvent'>`). Set `features={{ telemetry: false }}` to disable reporting (UI behavior is unchanged).
 
+All EBT **schemas and event definitions** live in this package. Consumers register them at plugin setup and pass Core's `reportEvent` into the provider — do not duplicate schemas or extend domain-specific telemetry client types for change-history events.
+
 ### Register event types
 
-Consuming plugins must register schemas once at setup:
+Call once from the consuming plugin's `setup()` (Core `analytics.registerEventType` is setup-only):
 
 ```tsx
-import { changeHistoryTelemetryEvents } from '@kbn/change-history-ui';
+import { registerChangeHistoryTelemetryEvents } from '@kbn/change-history-ui';
 
-analytics.registerEventType(changeHistoryTelemetryEvents[0]);
-// or register all:
-changeHistoryTelemetryEvents.forEach((event) => analytics.registerEventType(event));
+registerChangeHistoryTelemetryEvents(analytics);
 ```
 
-Export `changeHistoryTelemetryEvents`, `changeHistoryTelemetryEventSchemas`, `ChangeHistoryTelemetryEventTypes`, and `changeHistoryTelemetryEventNames` from this package.
+**Registration ownership:** `change_history_*` event types are global EBT identifiers. The helper is idempotent — safe if multiple plugins call it; the first registration wins and duplicates are skipped. Do not fork or customize schemas per plugin. Domains are distinguished via **`scope`** on each payload (`module` / `dataset` / `objectType`).
+
+For bundle size, lazy-load the helper (as Workflows does):
+
+```tsx
+void import('@kbn/change-history-ui/src/telemetry/register_change_history_telemetry_events').then(
+  ({ registerChangeHistoryTelemetryEvents }) => registerChangeHistoryTelemetryEvents(analytics)
+);
+```
 
 ### Wire the provider
+
+Pass Core analytics `reportEvent` — not a domain-narrowed telemetry client:
 
 ```tsx
 <ChangeHistoryProvider
   scope={{ module: 'stack', dataset: 'workflows', objectType: 'workflow' }}
-  analytics={{ reportEvent: telemetry.reportEvent }}
+  analytics={{ reportEvent: core.analytics.reportEvent }}
   /* … */
 >
 ```
@@ -101,7 +111,7 @@ Every payload includes `eventName`, `module`, `dataset`, and `objectType` (from 
 
 | Event type | `eventName` | When emitted | Notable properties |
 | --- | --- | --- | --- |
-| `change_history_opened` | Change history opened | First open of the modal per object | — |
+| `change_history_opened` | Change history opened | Each time the modal is opened (closed → open transition) | — |
 | `change_history_change_selected` | Change history change selected | User selects a timeline row or auto-selects latest | `selectionSource` (`user_click` \| `auto_latest`), `hasSequence`, optional `eventAction` |
 | `change_history_filter_applied` | Change history filter applied | Filter UI applies a change *(not wired yet)* | `filterType` (`timeRange` \| `actor`), optional `hasActiveTimeRange`, `activeActorCount` |
 | `change_history_diff_viewed` | Change history diff viewed | User views a diff *(not wired yet)* | `comparisonType` (`vs_current` \| `vs_previous`), optional `versionDistance`, `compareMode`, `hasSemanticSummary` |
@@ -128,4 +138,4 @@ node scripts/jest x-pack/platform/packages/shared/kbn-change-history-ui/src/comp
 - Query key helpers (`changeHistoryListQueryKey`, `changeHistoryDetailQueryKey`, `changeHistoryObjectQueryKeyPrefix`, `changeHistoryScopeQueryKeyPrefix`, …)
 - `ChangeHistoryModal`, `ChangeHistoryTrigger`, `ChangeHistoryPreviewPanel`
 - `createChangeHistoryHttpAdapter`
-- Telemetry (`changeHistoryTelemetryEvents`, `ChangeHistoryTelemetryEventTypes`, `createChangeHistoryTelemetryReporter`, …)
+- Telemetry (`changeHistoryTelemetryEvents`, `registerChangeHistoryTelemetryEvents`, `ChangeHistoryTelemetryEventTypes`, `createChangeHistoryTelemetryReporter`, …)

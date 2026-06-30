@@ -65,6 +65,7 @@ export {
   changeHistoryTelemetryEventSchemas,
   ChangeHistoryTelemetryEventTypes,
   createChangeHistoryTelemetryReporter,
+  registerChangeHistoryTelemetryEvents,
 } from './src/telemetry';
 export type {
   ChangeHistoryCompareMode,

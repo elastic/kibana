@@ -182,7 +182,7 @@ describe('WorkflowChangeHistoryListItem', () => {
     useKibana.mockReturnValue({
       services: {
         http,
-        workflowsManagement: { telemetry: { reportEvent } },
+        analytics: { reportEvent },
       },
     });
 

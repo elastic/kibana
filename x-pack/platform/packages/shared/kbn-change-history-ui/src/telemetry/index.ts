@@ -7,6 +7,7 @@
 
 export { changeHistoryTelemetryEvents } from './events';
 export type { ChangeHistoryTelemetryEvent } from './events';
+export { registerChangeHistoryTelemetryEvents } from './register_change_history_telemetry_events';
 export { createChangeHistoryTelemetryReporter } from './create_change_history_telemetry_reporter';
 export type { CreateChangeHistoryTelemetryReporterOptions } from './create_change_history_telemetry_reporter';
 export { changeHistoryTelemetryEventNames, changeHistoryTelemetryEventSchemas } from './schemas';

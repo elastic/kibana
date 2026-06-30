@@ -20,7 +20,7 @@ type ChangeHistoryTelemetryEventSchemas = {
 
 const eventSchemas: ChangeHistoryTelemetryEventSchemas = changeHistoryTelemetryEventSchemas;
 
-/** EBT event definitions for `analytics.registerEventType` in consuming plugins. */
+/** EBT event definitions registered via {@link registerChangeHistoryTelemetryEvents}. */
 export const changeHistoryTelemetryEvents: ChangeHistoryTelemetryEvent[] = Object.entries(
   eventSchemas
 ).map(([eventType, schema]) => ({

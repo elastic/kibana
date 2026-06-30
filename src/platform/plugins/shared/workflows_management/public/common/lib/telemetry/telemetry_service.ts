@@ -22,15 +22,13 @@ export class TelemetryService {
     this.analytics = analytics;
     workflowsTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
 
-    // Lazy-load change-history telemetry schemas to avoid pulling the full
+    // Lazy-load change-history telemetry registration to avoid pulling the full
     // @kbn/change-history-ui package into the plugin page-load bundle.
-    void import('@kbn/change-history-ui/src/telemetry/events').then(
-      ({ changeHistoryTelemetryEvents }) => {
-        changeHistoryTelemetryEvents.forEach((eventConfig) =>
-          analytics.registerEventType(eventConfig)
-        );
-      }
-    );
+    void import(
+      '@kbn/change-history-ui/src/telemetry/register_change_history_telemetry_events'
+    ).then(({ registerChangeHistoryTelemetryEvents }) => {
+      registerChangeHistoryTelemetryEvents(analytics);
+    });
   }
 
   public getClient(): TelemetryServiceClient {
