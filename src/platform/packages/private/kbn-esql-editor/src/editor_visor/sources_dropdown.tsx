@@ -54,9 +54,10 @@ interface SourcesDropdownProps {
   currentSources: string[];
   // Callback when the selected data sources change
   onChangeSources: (newSources: string[]) => void;
+  isDisabled?: boolean;
 }
 
-export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDropdownProps) {
+export function SourcesDropdown({ currentSources, onChangeSources, isDisabled }: SourcesDropdownProps) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [fetchedSources, setFetchedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const euiTheme = useEuiTheme();
@@ -194,6 +195,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
       gutterSize="s"
       responsive={false}
       data-test-subj="ESQLEditor-visor-sources-dropdown"
+      css={isDisabled ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
     >
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>

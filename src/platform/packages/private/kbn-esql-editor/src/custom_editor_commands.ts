@@ -317,11 +317,9 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
 export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
   onQuerySubmit: (source: QuerySource) => void,
-  toggleVisor: () => void,
   onPrettifyQuery: () => void,
   onGenerateFromComment?: () => void
 ) => {
-  // Add editor key bindings
   editor.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
@@ -332,12 +330,6 @@ export const addEditorKeyBindings = (
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.Shift | monaco.KeyCode.Enter,
     () => editor.trigger('keyboard', 'type', { text: '\n' })
-  );
-
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => toggleVisor()
   );
 
   editor.addCommand(

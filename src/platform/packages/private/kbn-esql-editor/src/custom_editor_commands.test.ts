@@ -200,34 +200,13 @@ describe('Custom Editor Commands', () => {
   });
 
   describe('addEditorKeyBindings', () => {
-    it('should call toggleVisor function when command is executed', () => {
-      const mockOnQuerySubmit = jest.fn();
-      const mockToggleVisor = jest.fn();
-      const mockOnPrettifyQuery = jest.fn();
-
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
-
-      expect(mockEditor.addCommand).toHaveBeenCalledTimes(4);
-
-      const cmdKCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
-        // eslint-disable-next-line no-bitwise
-        ([keyMod]) => keyMod === (monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK)
-      );
-      expect(cmdKCall).toBeDefined();
-
-      const cmdKHandler = cmdKCall[1];
-
-      cmdKHandler();
-
-      expect(mockToggleVisor).toHaveBeenCalledTimes(1);
-    });
-
     it('should call onQuerySubmit when CMD+Enter is pressed', () => {
       const mockOnQuerySubmit = jest.fn();
-      const mockToggleVisor = jest.fn();
       const mockOnPrettifyQuery = jest.fn();
 
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockOnPrettifyQuery);
+
+      expect(mockEditor.addCommand).toHaveBeenCalledTimes(3);
 
       const cmdEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise
@@ -244,10 +223,9 @@ describe('Custom Editor Commands', () => {
 
     it('should call onPrettifyQuery when CMD+I is pressed', () => {
       const mockOnQuerySubmit = jest.fn();
-      const mockToggleVisor = jest.fn();
       const mockOnPrettifyQuery = jest.fn();
 
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockOnPrettifyQuery);
 
       const cmdICall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise

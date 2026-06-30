@@ -17,13 +17,10 @@ interface UseEsqlEditorActionsParams {
   isHistoryOpen: boolean;
   isCurrentQueryStarred: boolean;
   onUpdateAndSubmitQuery: (newQuery: string, source: QuerySource) => void;
-  onVisorClosed?: () => void;
   starredQueriesService: EsqlStarredQueriesService | null;
   trimmedQuery: string;
-  isVisorOpenRef: React.MutableRefObject<boolean>;
   setIsHistoryOpen: (value: boolean) => void;
   setIsCurrentQueryStarred: (value: boolean) => void;
-  setIsVisorOpen: (value: boolean) => void;
   trackQueryHistoryOpened: (isOpen: boolean) => void;
 }
 
@@ -32,13 +29,10 @@ export function useEsqlEditorActions({
   isHistoryOpen,
   isCurrentQueryStarred,
   onUpdateAndSubmitQuery,
-  onVisorClosed,
   starredQueriesService,
   trimmedQuery,
-  isVisorOpenRef,
   setIsHistoryOpen,
   setIsCurrentQueryStarred,
-  setIsVisorOpen,
   trackQueryHistoryOpened,
 }: UseEsqlEditorActionsParams): {
   editorActions: EsqlEditorActions;
@@ -46,16 +40,7 @@ export function useEsqlEditorActions({
   onSubmitEsqlQuery: (queryString: string) => void;
   onToggleHistory: () => void;
   onToggleStarredQuery: () => Promise<void>;
-  onToggleVisor: () => void;
 } {
-  const onToggleVisor = useCallback(() => {
-    const isClosingVisor = isVisorOpenRef.current;
-    setIsVisorOpen(!isVisorOpenRef.current);
-    if (isClosingVisor) {
-      onVisorClosed?.();
-    }
-  }, [isVisorOpenRef, onVisorClosed, setIsVisorOpen]);
-
   const onClickQueryHistory = useCallback(
     (isOpen: boolean) => {
       trackQueryHistoryOpened(isOpen);
@@ -95,7 +80,6 @@ export function useEsqlEditorActions({
 
   const editorActions = useMemo(
     () => ({
-      toggleVisor: onToggleVisor,
       toggleHistory: onToggleHistory,
       toggleStarredQuery: onToggleStarredQuery,
       submitEsqlQuery: onSubmitEsqlQuery,
@@ -111,7 +95,6 @@ export function useEsqlEditorActions({
       onSubmitEsqlQuery,
       onToggleHistory,
       onToggleStarredQuery,
-      onToggleVisor,
       starredQueriesService,
       trimmedQuery,
     ]
@@ -123,6 +106,5 @@ export function useEsqlEditorActions({
     onSubmitEsqlQuery,
     onToggleHistory,
     onToggleStarredQuery,
-    onToggleVisor,
   };
 }

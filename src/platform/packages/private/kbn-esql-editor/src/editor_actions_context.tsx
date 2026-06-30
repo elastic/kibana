@@ -9,7 +9,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export interface EsqlEditorActions {
-  toggleVisor: () => void;
   toggleHistory: () => void;
   toggleStarredQuery: () => void;
   submitEsqlQuery: (query: string) => void;
@@ -23,7 +22,6 @@ const EsqlEditorActionsContext = createContext<EsqlEditorActions | null>(null);
 const EsqlEditorActionsRegisterContext = createContext<(actions: EsqlEditorActions | null) => void>(
   () => {}
 );
-const EsqlEditorActionsProviderContext = createContext(false);
 
 export function EsqlEditorActionsProvider({ children }: { children: React.ReactNode }) {
   const [actions, setActions] = useState<EsqlEditorActions | null>(null);
@@ -33,21 +31,15 @@ export function EsqlEditorActionsProvider({ children }: { children: React.ReactN
 
   return (
     <EsqlEditorActionsRegisterContext.Provider value={registerActions}>
-      <EsqlEditorActionsProviderContext.Provider value={true}>
-        <EsqlEditorActionsContext.Provider value={actions}>
-          {children}
-        </EsqlEditorActionsContext.Provider>
-      </EsqlEditorActionsProviderContext.Provider>
+      <EsqlEditorActionsContext.Provider value={actions}>
+        {children}
+      </EsqlEditorActionsContext.Provider>
     </EsqlEditorActionsRegisterContext.Provider>
   );
 }
 
 export function useEsqlEditorActions() {
   return useContext(EsqlEditorActionsContext);
-}
-
-export function useHasEsqlEditorActionsProvider() {
-  return useContext(EsqlEditorActionsProviderContext);
 }
 
 export function useEsqlEditorActionsRegistration(actions: EsqlEditorActions | null) {

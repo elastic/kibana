@@ -9,6 +9,7 @@
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
@@ -18,6 +19,7 @@ import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
@@ -128,16 +130,25 @@ export const DiscoverTopNav = ({
   });
 
   const onOpenQueryInNewTab = useCallback(
-    async (tabName: string, esqlQuery: string) => {
+    async (tabName: string, nlPrompt: string) => {
       await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
-          appState: { query: { esql: esqlQuery } },
+          appState: { query: { esql: getInitialESQLQuery(dataView) } },
+          uiState: { esqlEditor: { visorPrompt: nlPrompt } },
         })
       );
     },
-    [dispatch]
+    [dispatch, dataView]
   );
+
+  const [hasAiConnector, setHasAiConnector] = useState(false);
+  useEffect(() => {
+    services.http
+      .get<{ connectors: unknown[] }>('/internal/inference/connectors')
+      .then((res) => setHasAiConnector(res.connectors.length > 0))
+      .catch(() => setHasAiConnector(false));
+  }, [services.http]);
 
   useEffect(() => {
     return () => {
@@ -330,6 +341,26 @@ export const DiscoverTopNav = ({
     [dispatch, setSearchDraftUiState]
   );
 
+  const draftKqlText = useMemo(() => {
+    const draftQuery = searchDraftUiState?.query;
+    if (draftQuery && 'query' in draftQuery) return (draftQuery as { query: string }).query;
+    return '';
+  }, [searchDraftUiState]);
+
+  const kqlFooterOption = useMemo(() => {
+    if (isEsqlMode || !hasAiConnector || !draftKqlText.trim()) return undefined;
+    return {
+      label: i18n.translate('discover.dslToEsql.askAiLabel', { defaultMessage: 'or ask using AI' }),
+      iconType: 'productAgent' as const,
+      onClick: () => {
+        onOpenQueryInNewTab(
+          i18n.translate('discover.dslToEsql.newTabLabel', { defaultMessage: 'AI Query' }),
+          draftKqlText.trim()
+        );
+      },
+    };
+  }, [isEsqlMode, hasAiConnector, draftKqlText, onOpenQueryInNewTab]);
+
   const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
   const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
   const onEsqlEditorInitialStateChange = useCallback(
@@ -436,6 +467,7 @@ export const DiscoverTopNav = ({
         }
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
+        kqlFooterOption={kqlFooterOption}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

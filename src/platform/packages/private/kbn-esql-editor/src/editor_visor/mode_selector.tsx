@@ -22,17 +22,24 @@ const nlLabel = i18n.translate('esqlEditor.visor.modeNaturalLanguage', {
 });
 
 const modeOptions: Array<EuiComboBoxOptionOption<VisorMode>> = [
-  { label: kqlLabel, value: VisorMode.KQL },
   { label: nlLabel, value: VisorMode.NaturalLanguage },
+  { label: kqlLabel, value: VisorMode.KQL },
 ];
 
 interface ModeSelectorProps {
   onModeChange: (mode: VisorMode) => void;
+  initialMode?: VisorMode;
 }
 
-export function ModeSelector({ onModeChange }: ModeSelectorProps) {
+export function ModeSelector({ onModeChange, initialMode }: ModeSelectorProps) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<VisorMode>>>(
-    [modeOptions[0]]
+    () => {
+      const initial =
+        initialMode != null
+          ? modeOptions.find((option) => option.value === initialMode)
+          : undefined;
+      return [initial ?? modeOptions[0]];
+    }
   );
   const inputRefSet = useRef(false);
 
