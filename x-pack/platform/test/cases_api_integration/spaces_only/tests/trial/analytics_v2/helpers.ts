@@ -400,7 +400,8 @@ export interface ActiveResetState {
  */
 export interface ActivityDocSource {
   '@timestamp': string;
-  kibana: { space_ids: string[] };
+  // Top-level singular scoping field, matching the cases surface (DLS).
+  space_id: string;
   cases: { id: string };
   owner: string;
   actor: {

@@ -38,13 +38,14 @@ import type { UserActionPersistedAttributes } from '../../common/types/user_acti
  */
 export interface ActivityAnalyticsDoc {
   '@timestamp': string;
-  kibana: {
-    space_ids: string[];
-  };
+  // Top-level scoping fields for implicit-privileges DLS, matching the cases
+  // surface. `space_id` is singular — a user action lives in one space. See
+  // `mappings/activity.ts`.
+  space_id: string;
+  owner: string;
   cases: {
     id: string;
   };
-  owner: string;
   actor: ActivityActorDoc;
   action: {
     type: string;
@@ -95,13 +96,14 @@ export function buildActivityDoc(
 
   return {
     '@timestamp': a.created_at,
-    kibana: {
-      space_ids: so.namespaces ?? ['default'],
-    },
+    // Top-level scoping fields for implicit-privileges DLS. `namespaces` is a
+    // single-element array for space-isolated SOs; take the first element so
+    // `space_id` is the singular scalar the DLS convention expects.
+    space_id: so.namespaces?.[0] ?? 'default',
+    owner: a.owner,
     cases: {
       id: caseId,
     },
-    owner: a.owner,
     actor: toActor(a.created_by),
     action: {
       type: a.type,

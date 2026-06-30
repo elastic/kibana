@@ -567,28 +567,39 @@ export async function deleteAllPerSpaceCasesDataViews(
 ): Promise<number> {
   const PAGE_SIZE = 100;
 
-  // Pass 1: collect matching ids. Pagination is stable because the
-  // index isn't mutated while it's being walked.
+  // Pass 1: collect matching ids via a point-in-time finder. SO `find`
+  // is `from`/`size`-based, so a page/offset walk throws
+  // `result_window_too_large` once `page * perPage` crosses
+  // `index.max_result_window` (default 10k). At the 10K-space scale this
+  // subsystem targets the cluster can hold well over 10k data views, and
+  // the throw would land mid-`/reset` — after step 1/2 already dropped
+  // and recreated the indices — leaving the subsystem half-reset (data
+  // views undeleted, bootstrap cache never cleared). PIT + `searchAfter`
+  // (via `createPointInTimeFinder`, which also manages the PIT open/close)
+  // is unbounded by the result window — the same reason the
+  // reconciliation runners use PIT (see `reconciliation/runner.ts`).
+  // Pagination is stable: the PIT pins a snapshot, and pass 2 deletes
+  // only after the walk fully drains.
   const targets: Array<{ id: string; namespace: string | undefined }> = [];
-  let page = 1;
-  while (true) {
-    const result = await soClient.find({
-      type: DATA_VIEW_SO_TYPE,
-      namespaces: ['*'],
-      perPage: PAGE_SIZE,
-      page,
-    });
-
-    for (const so of result.saved_objects) {
-      // Only act on data views managed by this plugin; everything
-      // else is left untouched.
-      if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
-        targets.push({ id: so.id, namespace: so.namespaces?.[0] });
+  const finder = soClient.createPointInTimeFinder({
+    type: DATA_VIEW_SO_TYPE,
+    namespaces: ['*'],
+    perPage: PAGE_SIZE,
+  });
+  try {
+    for await (const result of finder.find()) {
+      for (const so of result.saved_objects) {
+        // Only act on data views managed by this plugin; everything
+        // else is left untouched.
+        if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
+          targets.push({ id: so.id, namespace: so.namespaces?.[0] });
+        }
       }
     }
-
-    if (result.saved_objects.length < PAGE_SIZE) break;
-    page++;
+  } finally {
+    // Release the PIT even if iteration throws. `close()` is safe to
+    // call after the generator has already auto-closed on normal drain.
+    await finder.close();
   }
 
   // Pass 2: delete the collected ids. Per-item errors log at WARN

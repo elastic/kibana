@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createDoc).to.be.an('object');
       expect(createDoc!.cases.id).to.eql(created.id);
       expect(createDoc!.action.verb).to.eql('create');
-      expect(createDoc!.kibana.space_ids).to.eql(['default']);
+      expect(createDoc!.space_id).to.eql('default');
       // payload_json contains the full create_case payload —
       // assert a known field (title) round-trips so analysts can
       // pivot via ES|QL `MV_FROM_JSON` on the column.

@@ -23,8 +23,10 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  * Field group conventions:
  *   - `@timestamp` — required by Discover / Lens; set to the user
  *     action's `created_at` (immutable, no later edits).
- *   - `kibana.space_ids` — every space this user-action belongs to.
- *     Future DLS key, mirrors the cases surface.
+ *   - `space_id` / `owner` — top-level (document-root) scoping fields for
+ *     implicit-privileges DLS, matching the cases surface (see
+ *     `mappings/case.ts`). `space_id` is singular — a user action belongs
+ *     to exactly one case in one space.
  *   - `cases.id` — denormalized from the SO `references[case]` so
  *     ES|QL `LOOKUP JOIN .cases ON cases.id` works without an
  *     intermediate aggregation.
@@ -60,11 +62,11 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
   properties: {
     '@timestamp': { type: 'date' },
 
-    kibana: {
-      properties: {
-        space_ids: { type: 'keyword' },
-      },
-    },
+    // Top-level scoping fields for implicit-privileges DLS, matching the
+    // cases surface. `space_id` is singular (a user action lives in exactly
+    // one space); `owner` carries the solution dimension.
+    space_id: { type: 'keyword' },
+    owner: { type: 'keyword' },
 
     cases: {
       properties: {
@@ -74,10 +76,6 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
         id: { type: 'keyword' },
       },
     },
-
-    // Mirrors the cases surface's `owner`. Useful for per-solution
-    // slicing (Security vs Observability vs Stack).
-    owner: { type: 'keyword' },
 
     actor: {
       properties: {

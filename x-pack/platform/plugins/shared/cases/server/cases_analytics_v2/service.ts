@@ -332,11 +332,13 @@ export class CasesAnalyticsV2Service {
    *
    * When on: bootstraps `.cases` and `.cases-activity`, swaps the
    * no-op writers for the real ones, captures lifecycle references,
-   * and schedules the singleton reconciliation task. Index bootstrap
-   * errors are logged inside `ensure*Index` and never thrown — the
-   * cases plugin must keep starting even if analytics fails to
-   * bootstrap. Per-space data views are bootstrapped lazily on the
-   * first cases request per space, via `ensureDataViewForSpace`.
+   * and schedules the singleton reconciliation task. `ensure*Index`
+   * throw on unexpected errors (e.g. a shard-limit cluster); the
+   * try/catch here logs and swallows them so the cases plugin keeps
+   * starting even when analytics fails to bootstrap — analytics is a
+   * downstream feature, and administrators can re-bootstrap via
+   * `/reset`. Per-space data views are bootstrapped lazily on the first
+   * cases request per space, via `ensureDataViewForSpace`.
    */
   public async start(deps: CasesAnalyticsV2StartDeps): Promise<void> {
     if (!this.enabled) {

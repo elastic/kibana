@@ -173,9 +173,11 @@ the runtime fields they want to keep. Out of scope for the managed feature.
 **DLS interaction.** A future Kibana-side provider (built on the
 `ImplicitPrivilegesProvider` SPI tracked in
 [elastic/elasticsearch#147176](https://github.com/elastic/elasticsearch/pull/147176))
-will scope which case documents a user can read inside `.cases` via DLS on
-`cases.owner` + `kibana.space_ids`. Until that lands, role-granted access to
-`.cases` is unrestricted (see "Authorization" above). The per-space data view
+will scope which case documents a user can read inside `.cases` (and
+`.cases-activity`) via DLS on the top-level `space_id` + `owner` fields —
+placed at the document root on both surfaces to match the implicit-privileges
+DLS convention. Until that lands, role-granted access is unrestricted (see
+"Authorization" above). The per-space data view
 is orthogonal — it scopes the _runtime field set_, not the document set. The
 two compose cleanly: a user in space A sees only space-A runtime fields
 **and** (once DLS is enforced) only space-A cases.
