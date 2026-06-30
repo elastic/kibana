@@ -26,16 +26,26 @@ export function validateToolCalls({
   toolChoice,
   tools,
 }: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
-  if (toolCalls.length && toolChoice === ToolChoiceType.none) {
+  // Models under token pressure occasionally emit malformed tool calls with
+  // an empty or whitespace-only name. Rather than 500-ing the entire request
+  // (which cascades and fails the conversation), filter these out early.
+  // The model will either re-emit on the next turn or proceed without —
+  // both are preferable to crashing the inference pipeline.
+  const sanitizedToolCalls = toolCalls.filter((toolCall) => {
+    const name = toolCall.function.name?.trim();
+    return name !== undefined && name.length > 0;
+  });
+
+  if (sanitizedToolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
-      `tool_choice was "none" but ${toolCalls
+      `tool_choice was "none" but ${sanitizedToolCalls
         .map((toolCall) => toolCall.function.name)
         .join(', ')} was/were called`,
-      { toolCalls }
+      { toolCalls: sanitizedToolCalls }
     );
   }
 
-  return toolCalls.map((toolCall) => {
+  return sanitizedToolCalls.map((toolCall) => {
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {

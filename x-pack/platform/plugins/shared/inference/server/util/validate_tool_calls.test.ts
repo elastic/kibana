@@ -34,6 +34,43 @@ describe('validateToolCalls', () => {
     );
   });
 
+  it('filters out malformed tool calls with empty names instead of throwing', () => {
+    // Models under token pressure occasionally emit tool calls with empty
+    // names. These should be silently dropped, not crash the pipeline.
+    const result = validateToolCalls({
+      toolCalls: [
+        {
+          function: {
+            name: '',
+            arguments: '{}',
+          },
+          toolCallId: '1',
+        },
+        {
+          function: {
+            name: 'my_function',
+            arguments: '{}',
+          },
+          toolCallId: '2',
+        },
+      ],
+      tools: {
+        my_function: {
+          description: 'description',
+        },
+      },
+    });
+    expect(result).toEqual([
+      {
+        function: {
+          name: 'my_function',
+          arguments: {},
+        },
+        toolCallId: '2',
+      },
+    ]);
+  });
+
   it('throws an error if an unknown tool was called', () => {
     expect(() =>
       validateToolCalls({
