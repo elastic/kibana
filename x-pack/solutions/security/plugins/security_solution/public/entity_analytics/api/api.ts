@@ -148,8 +148,9 @@ export const useEntityAnalyticsRoutes = () => {
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
-  const isMaintainerRiskScoreV2Enabled =
-    isEntityStoreV2UiSettingEnabled && isEntityAnalyticsEntityStoreV2Enabled;
+  // When entityAnalyticsEntityStoreV2 is enabled, the V1 risk_engine:risk_scoring task type is
+  // removed from Task Manager entirely. Always use entity maintainers regardless of the uiSetting.
+  const isMaintainerRiskScoreV2Enabled = isEntityAnalyticsEntityStoreV2Enabled;
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
