@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.18>>
+* <<release-notes-8.19.17>>
 * <<release-notes-8.19.16>>
 * <<release-notes-8.19.15>>
 * <<release-notes-8.19.14>>
@@ -122,6 +124,77 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.18]]
+== {kib} 8.19.18
+
+The 8.19.18 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.18]]
+=== Fixes
+Alerting and cases::
+* Fixes case pushes only stamping a subset of attachments, which caused the alert count comment to be duplicated in the external system on every push ({kibana-pull}274451[#274451]).
+Dashboards and Visualizations::
+* Fixes **Canvas** autoplay not advancing past the first page ({kibana-pull}272619[#272619]).
+Data ingestion and Fleet::
+* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
+* Fixes a crash in the **Integrations** view when a package has no icon ({kibana-pull}273191[#273191]).
+Developer tools::
+* Fixes **Dev Tools Console** autocomplete in query filter context to suggest query DSL instead of the obsolete Elasticsearch 1.x filter DSL ({kibana-pull}272907[#272907]).
+Elastic Observability solution::
+* Fixes deleting a label from a Synthetics monitor not persisting on edit ({kibana-pull}274404[#274404]).
+Elastic Security solution::
+For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Kibana platform::
+* Fixes the Files plugin blob download to return the requested file type ({kibana-pull}274783[#274783]).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys ({kibana-pull}256233[#256233]).
+
+[[release-notes-8.19.17]]
+== {kib} 8.19.17
+
+The 8.19.17 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.17]]
+=== Known issues
+
+// tag::known-issue-268398[]
+.Canvas Autoplay stops advancing after one page.
+[%collapsible]
+====
+*Details* +
+Multipage Canvas visualizations stop advancing after one page when in autoplay mode
+
+*Workaround* +
+Manually advance to the next page or upgrade to 8.19.18 or 9.3.7.
+
+*Resolved* + 
+This issue is resolved in 8.19.18 and 9.3.7.
+====
+// end::known-issue-268398[]
+
+[float]
+[[fixes-v8.19.17]]
+=== Fixes
+Alerting::
+* Fixes the **Alerts** page fetching alerts twice on initial load, which briefly showed all alerts before the filtered set ({kibana-pull}271441[#271441]).
+Dashboards and Visualizations::
+* Fixes the autoplay timer in **Canvas** jumping to the wrong page when pages are added or removed ({kibana-pull}268398[#268398]).
+Data ingestion and Fleet::
+* Fixes data stream selectors in input packages with multiple policy templates incorrectly sharing or duplicating variables between templates ({kibana-pull}273364[#273364]).
+* Improves response time of the agent policies list by computing counts in a single aggregation instead of multiple queries per policy ({kibana-pull}272429[#272429]).
+* Fixes missing security rule names in the **Integrations → Assets** tab ({kibana-pull}272089[#272089]).
+Developer tools::
+* Fixes autocomplete so `GET` is shown before `DELETE` when suggesting HTTP methods on an empty request line in **Console** ({kibana-pull}270787[#270787]).
+* Marks invalid HTTP methods (for example, `GETT` and `POSTS`) as errors in **Console** ({kibana-pull}270479[#270479]).
+Discover::
+* Fixes slow parsing when KQL queries contain long runs of whitespace ({kibana-pull}266512[#266512]).
+Elastic Observability solution::
+* Fixes overlapping messages in the **Logs → Anomalies** table by restoring single-line truncation with an ellipsis ({kibana-pull}273221[#273221]).
+* Fixes status tiles in the SLO Overview so that newly created SLOs are counted consistently with the per-row **No Data** badge ({kibana-pull}266315[#266315]).
+Elastic Security solution::
+For the Elastic Security 8.19.17 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [[release-notes-8.19.16]]
 == {kib} 8.19.16

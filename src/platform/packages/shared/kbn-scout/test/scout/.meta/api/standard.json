@@ -1,5 +1,5 @@
 {
-  "sha1": "559a525bb933b4a6df3b62bd8bf6361df1eba3da",
+  "sha1": "968fbfa1e31fa8efb51bac0d3d5b257eff1af972",
   "tests": [
     {
       "id": "f44f18cc703276d-178a4921f7b18d0",
@@ -759,6 +759,68 @@
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_server_hosts.spec.ts",
         "line": 51,
         "column": 12
+      }
+    },
+    {
+      "id": "90a862f4dd27054-4a8e13918686022",
+      "title": "Built-in ES roles setBuiltInRole should throw when the role does not exist in Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/built_in_roles.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "90a862f4dd27054-4acc5fc9ece9474",
+      "title": "Built-in ES roles setBuiltInRole should throw when called on a Serverless project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/built_in_roles.spec.ts",
+        "line": 23,
+        "column": 10
+      }
+    },
+    {
+      "id": "90a862f4dd27054-c966865be7e7513",
+      "title": "Built-in ES roles setBuiltInRole should provision the custom role slot and return the descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/built_in_roles.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "90a862f4dd27054-15098dd6a8dcec8",
+      "title": "Built-in ES roles getApiKeyForBuiltInRole should create an API key scoped to a built-in ES role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/built_in_roles.spec.ts",
+        "line": 53,
+        "column": 10
       }
     },
     {
