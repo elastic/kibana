@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,15 +17,18 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { NightshiftIllustration } from './nightshift_illustration';
 
 export interface GapsReport {
@@ -36,13 +40,13 @@ export interface GapsReport {
 interface CommonConnectorType {
   id: string;
   actionTypeIds: readonly string[];
+  iconActionTypeId: string;
   name: string;
-  description: string;
 }
 
 export interface NightshiftAppProps {
   onStartOnboarding?: () => void;
-  onStartGapClosing?: () => void;
+  onStartGapClosing?: (connectorName?: string) => void;
   agentBuilderAvailable?: boolean;
   gapsReport?: GapsReport | null;
   installedConnectorActionTypeIds?: string[];
@@ -52,71 +56,49 @@ const COMMON_OBSERVABILITY_CONNECTORS: CommonConnectorType[] = [
   {
     id: 'slack',
     actionTypeIds: ['.slack', '.slack_api', '.slack2'],
+    iconActionTypeId: '.slack2',
     name: i18n.translate('xpack.nightshift.commonConnectors.slackName', {
       defaultMessage: 'Slack',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.slackDescription', {
-      defaultMessage: 'Bring team conversations and incident handoffs into the workflow.',
     }),
   },
   {
     id: 'microsoftTeams',
     actionTypeIds: ['.teams', '.microsoft-teams'],
+    iconActionTypeId: '.microsoft-teams',
     name: i18n.translate('xpack.nightshift.commonConnectors.microsoftTeamsName', {
       defaultMessage: 'Microsoft Teams',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.microsoftTeamsDescription', {
-      defaultMessage: 'Connect collaboration channels where operational context is discussed.',
     }),
   },
   {
     id: 'pagerDuty',
     actionTypeIds: ['.pagerduty', '.pagerduty_mcp'],
+    iconActionTypeId: '.pagerduty_mcp',
     name: i18n.translate('xpack.nightshift.commonConnectors.pagerDutyName', {
       defaultMessage: 'PagerDuty',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.pagerDutyDescription', {
-      defaultMessage: 'Use on-call and escalation data to understand response ownership.',
     }),
   },
   {
     id: 'jira',
     actionTypeIds: ['.jira', '.jira-cloud'],
+    iconActionTypeId: '.jira-cloud',
     name: i18n.translate('xpack.nightshift.commonConnectors.jiraName', {
       defaultMessage: 'Jira',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.jiraDescription', {
-      defaultMessage: 'Link alerts and gaps to tickets, deployments, and ownership trails.',
     }),
   },
   {
     id: 'serviceNow',
     actionTypeIds: ['.servicenow', '.servicenow-sir', '.servicenow-itom', '.servicenow_search'],
+    iconActionTypeId: '.servicenow_search',
     name: i18n.translate('xpack.nightshift.commonConnectors.serviceNowName', {
       defaultMessage: 'ServiceNow',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.serviceNowDescription', {
-      defaultMessage: 'Bring change, incident, and service-management records into context.',
     }),
   },
   {
     id: 'github',
     actionTypeIds: ['.github'],
+    iconActionTypeId: '.github',
     name: i18n.translate('xpack.nightshift.commonConnectors.githubName', {
       defaultMessage: 'GitHub',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.githubDescription', {
-      defaultMessage: 'Use source history and ownership to connect events with code changes.',
-    }),
-  },
-  {
-    id: 'webhook',
-    actionTypeIds: ['.webhook', '.cases-webhook'],
-    name: i18n.translate('xpack.nightshift.commonConnectors.webhookName', {
-      defaultMessage: 'Webhook',
-    }),
-    description: i18n.translate('xpack.nightshift.commonConnectors.webhookDescription', {
-      defaultMessage: 'Connect custom systems that expose operational state or runbook actions.',
     }),
   },
 ];
@@ -126,16 +108,40 @@ const onboardingButtonLabel = i18n.translate('xpack.nightshift.startOnboardingBu
 });
 
 const viewGapsButtonLabel = i18n.translate('xpack.nightshift.viewGapsButtonLabel', {
-  defaultMessage: 'Review knowledge gaps',
+  defaultMessage: 'Review gaps',
 });
 
 const closeGapsButtonLabel = i18n.translate('xpack.nightshift.closeGapsButtonLabel', {
-  defaultMessage: 'Close those gaps via chat',
+  defaultMessage: 'Close gaps',
 });
 
 const closeButtonLabel = i18n.translate('xpack.nightshift.closeFlyoutButtonLabel', {
   defaultMessage: 'Close',
 });
+
+const gapsPanelTitle = i18n.translate('xpack.nightshift.gapsPanelTitle', {
+  defaultMessage: 'Gaps',
+});
+
+const missingGapsReportDescription = i18n.translate(
+  'xpack.nightshift.missingGapsReportDescription',
+  {
+    defaultMessage: 'No knowledge gaps report is available yet.',
+  }
+);
+
+const commonConnectorsLabel = i18n.translate('xpack.nightshift.commonConnectorsLabel', {
+  defaultMessage: 'Common connectors to add',
+});
+
+const getConnectorIconType = (connectorType: CommonConnectorType): IconType =>
+  ConnectorIconsMap.get(connectorType.iconActionTypeId) ?? 'plugs';
+
+const getConnectorButtonLabel = (connectorName: string) =>
+  i18n.translate('xpack.nightshift.commonConnectorButtonLabel', {
+    defaultMessage: 'Close gaps starting with {connectorName}',
+    values: { connectorName },
+  });
 
 export function NightshiftApp({
   onStartOnboarding,
@@ -161,39 +167,47 @@ export function NightshiftApp({
     [installedConnectorIds]
   );
 
-  const onboardingButton =
-    agentBuilderAvailable && onStartOnboarding ? (
-      <EuiButton
-        fill
-        iconType="sparkles"
-        onClick={onStartOnboarding}
-        data-test-subj="nightshiftStartOnboardingButton"
-      >
-        {onboardingButtonLabel}
-      </EuiButton>
-    ) : null;
+  const canStartOnboarding = Boolean(agentBuilderAvailable && onStartOnboarding);
+  const canCloseGaps = Boolean(agentBuilderAvailable && onStartGapClosing);
 
-  const viewGapsButton = gapsReport ? (
-    <EuiButtonEmpty
-      iconType="inspect"
-      onClick={() => setIsGapsFlyoutOpen(true)}
-      data-test-subj="nightshiftViewGapsButton"
+  const onboardingButton = (
+    <EuiButton
+      fill
+      iconType="sparkles"
+      disabled={!canStartOnboarding}
+      onClick={() => onStartOnboarding?.()}
+      data-test-subj="nightshiftStartOnboardingButton"
     >
-      {viewGapsButtonLabel}
-    </EuiButtonEmpty>
-  ) : null;
+      {onboardingButtonLabel}
+    </EuiButton>
+  );
 
-  const actions =
-    onboardingButton || viewGapsButton ? (
-      <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false} wrap>
-        {viewGapsButton && <EuiFlexItem grow={false}>{viewGapsButton}</EuiFlexItem>}
-        {onboardingButton && <EuiFlexItem grow={false}>{onboardingButton}</EuiFlexItem>}
-      </EuiFlexGroup>
-    ) : undefined;
+  const renderConnectorButton = (connectorType: CommonConnectorType, iconType: IconType) => {
+    const connectorButtonLabel = getConnectorButtonLabel(connectorType.name);
+
+    return (
+      <EuiToolTip content={connectorButtonLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={iconType}
+          aria-label={connectorButtonLabel}
+          color="text"
+          display="base"
+          disabled={!canCloseGaps}
+          onClick={() => onStartGapClosing?.(connectorType.name)}
+          data-test-subj={`nightshiftConnectorGapClosingButton-${connectorType.id}`}
+        />
+      </EuiToolTip>
+    );
+  };
 
   return (
     <>
-      <EuiFlexGroup justifyContent="center" style={{ padding: '24px 0' }}>
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>{onboardingButton}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup justifyContent="center" style={{ padding: '8px 0 24px' }}>
         <EuiFlexItem style={{ maxWidth: 840 }}>
           <EuiEmptyPrompt
             data-test-subj="nightshiftEmptyState"
@@ -220,55 +234,74 @@ export function NightshiftApp({
                 </p>
               </EuiText>
             }
-            actions={actions}
           />
 
-          {missingConnectorTypes.length > 0 && (
-            <>
-              <EuiSpacer size="xl" />
-              <EuiPanel paddingSize="l" hasBorder data-test-subj="nightshiftMissingConnectors">
+          <EuiSpacer size="l" />
+          <EuiPanel paddingSize="m" hasBorder data-test-subj="nightshiftGapsPanel">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" wrap>
+              <EuiFlexItem>
                 <EuiTitle size="xs">
-                  <h3>
-                    {i18n.translate('xpack.nightshift.commonConnectorsTitle', {
-                      defaultMessage: 'Common connectors to add',
-                    })}
-                  </h3>
+                  <h3>{gapsPanelTitle}</h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
                   <p>
-                    {i18n.translate('xpack.nightshift.commonConnectorsDescription', {
-                      defaultMessage:
-                        'These connector types often help Nightshift understand operational context across alerts, incidents, code, and team communication.',
-                    })}
+                    {gapsReport ? (
+                      <FormattedMessage
+                        id="xpack.nightshift.gapsPanelDescription"
+                        defaultMessage="We found these gaps when analyzing existing knowledge. Updated {updatedAt}."
+                        values={{
+                          updatedAt: <FormattedRelative value={gapsReport.updated_at} />,
+                        }}
+                      />
+                    ) : (
+                      missingGapsReportDescription
+                    )}
                   </p>
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType="inspect"
+                  disabled={!gapsReport}
+                  onClick={() => setIsGapsFlyoutOpen(true)}
+                  data-test-subj="nightshiftViewGapsButton"
+                >
+                  {viewGapsButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            {missingConnectorTypes.length > 0 && (
+              <>
                 <EuiSpacer size="m" />
-                <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  data-test-subj="nightshiftMissingConnectors"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      <span>{commonConnectorsLabel}</span>
+                    </EuiText>
+                  </EuiFlexItem>
                   {missingConnectorTypes.map((connectorType) => (
                     <EuiFlexItem
                       key={connectorType.id}
+                      grow={false}
                       data-test-subj="nightshiftMissingConnectorType"
                     >
-                      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type="link" size="m" />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s">
-                            <strong>{connectorType.name}</strong>
-                          </EuiText>
-                          <EuiText size="s" color="subdued">
-                            <p>{connectorType.description}</p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                      <Suspense fallback={renderConnectorButton(connectorType, 'plugs')}>
+                        {renderConnectorButton(connectorType, getConnectorIconType(connectorType))}
+                      </Suspense>
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
-              </EuiPanel>
-            </>
-          )}
+              </>
+            )}
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -286,10 +319,13 @@ export function NightshiftApp({
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
               <p>
-                {i18n.translate('xpack.nightshift.gapsFlyoutUpdatedLabel', {
-                  defaultMessage: 'Updated: {date}',
-                  values: { date: new Date(gapsReport.updated_at).toLocaleString() },
-                })}
+                <FormattedMessage
+                  id="xpack.nightshift.gapsFlyoutUpdatedLabel"
+                  defaultMessage="Updated {updatedAt}"
+                  values={{
+                    updatedAt: <FormattedRelative value={gapsReport.updated_at} />,
+                  }}
+                />
               </p>
             </EuiText>
           </EuiFlyoutHeader>
@@ -318,7 +354,7 @@ export function NightshiftApp({
                       setIsGapsFlyoutOpen(false);
                       onStartGapClosing();
                     }}
-                    data-test-subj="nightshiftCloseGapsButton"
+                    data-test-subj="nightshiftFlyoutCloseGapsButton"
                   >
                     {closeGapsButtonLabel}
                   </EuiButton>
