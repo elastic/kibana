@@ -84,6 +84,14 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'while-iteration':
       iconType = 'tokenNumber';
       break;
+    case 'parallel':
+    case 'enter-parallel':
+    case 'exit-parallel':
+      iconType = 'branch';
+      break;
+    case 'parallel-branch':
+      iconType = 'branch';
+      break;
     case 'loop.break':
     case 'loop.continue':
     case 'loop-break':

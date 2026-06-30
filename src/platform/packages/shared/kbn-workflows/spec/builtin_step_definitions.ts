@@ -13,6 +13,7 @@ import {
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  ParallelStepConfigSchema,
   SwitchStepConfigSchema,
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
@@ -153,6 +154,36 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       type: console
       with:
         message: "Unknown status"`,
+      ],
+    },
+  },
+  {
+    id: 'parallel',
+    label: 'Parallel',
+    description:
+      'Run branches concurrently and collect their results. Use dynamic fan-out (`foreach` + `steps`) to run the same body once per item, or static `branches` to run a fixed set of named, heterogeneous branches.',
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: ParallelStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: enrich
+  type: parallel
+  branches:
+    - name: virustotal
+      steps:
+        - name: scan_hash
+          type: http
+          with:
+            url: "https://example.com/vt/{{ inputs.file_hash }}"
+    - name: geoip
+      steps:
+        - name: geo_lookup
+          type: http
+          with:
+            url: "http://ip-api.com/json/{{ inputs.source_ip }}"`,
       ],
     },
   },

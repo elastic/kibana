@@ -218,6 +218,18 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'parallel',
+        label: i18n.translate('workflows.actionsMenu.parallel', {
+          defaultMessage: 'Parallel',
+        }),
+        description: i18n.translate('workflows.actionsMenu.parallelDescription', {
+          defaultMessage: 'Run branches concurrently and collect their results',
+        }),
+        iconType: 'branch',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+        stability: getBuiltInStepDefinition('parallel')?.stability,
+      },
+      {
         id: 'wait',
         label: i18n.translate('workflows.actionsMenu.wait', {
           defaultMessage: 'Wait',
