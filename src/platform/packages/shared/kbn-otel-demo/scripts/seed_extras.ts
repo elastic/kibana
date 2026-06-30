@@ -43,6 +43,7 @@ run(
         kibanaUrl,
         username: kibanaCredentials.username,
         password: kibanaCredentials.password,
+        version,
         log,
       });
     } else {

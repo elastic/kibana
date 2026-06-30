@@ -21,10 +21,11 @@ interface SeedMemoryOptions {
   kibanaUrl: string;
   username: string;
   password: string;
+  version: string;
   log: ToolingLog;
 }
 
-const OTEL_DEMO_MEMORY_PAGES: MemoryPage[] = [
+const getOtelDemoMemoryPages = (version: string): MemoryPage[] => [
   {
     name: 'otel-demo-overview',
     title: 'OpenTelemetry Demo - Overview',
@@ -84,7 +85,7 @@ The demo code contains error-injection feature flags controlled by \`flagd\` (e.
 
 ## Source Code & Code Search
 
-Repository: \`open-telemetry/opentelemetry-demo\` (tag \`v1.12.0\`). Each service lives under \`src/<service-name>/\` in the repository.
+Repository: \`open-telemetry/opentelemetry-demo\` (tag \`v${version}\`). Each service lives under \`src/<service-name>/\` in the repository.
 
 The source code is indexed in Semantic Code Search. Use the workflow tools below to investigate code — find log message origins, confirm exact error strings, understand service behaviour, and trace git history. All workflows accept \`repository: "open-telemetry/opentelemetry-demo"\`.
 
@@ -247,9 +248,10 @@ async function listAllPages(
   return body.entries ?? [];
 }
 
-export async function seedMemory({ kibanaUrl, username, password, log }: SeedMemoryOptions) {
+export async function seedMemory({ kibanaUrl, username, password, version, log }: SeedMemoryOptions) {
   const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-  const ownedNames = new Set(OTEL_DEMO_MEMORY_PAGES.map((p) => p.name));
+  const pages = getOtelDemoMemoryPages(version);
+  const ownedNames = new Set(pages.map((p) => p.name));
 
   log.info('Seeding significant event memory pages...');
 
@@ -261,7 +263,7 @@ export async function seedMemory({ kibanaUrl, username, password, log }: SeedMem
     }
   }
 
-  for (const page of OTEL_DEMO_MEMORY_PAGES) {
+  for (const page of pages) {
     const existingId = await getExistingId(kibanaUrl, page.name, authHeader);
     if (existingId) {
       log.info(`  Deleting existing memory page "${page.name}" before re-seeding`);
