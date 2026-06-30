@@ -59,12 +59,9 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
 
   const handleSelect = useCallback(
     (option: TimeRangeBoundsOption) => {
-      applyRange(
-        { start: option.start, end: option.end },
-        getOptionInputText(option, { timePrecision })
-      );
+      applyRange({ start: option.start, end: option.end }, getOptionInputText(option));
     },
-    [applyRange, timePrecision]
+    [applyRange]
   );
 
   return (
@@ -74,7 +71,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
           key={`${option.start}-${option.end}-${index}`}
           data-test-subj={toTestSubj(
             'dateRangePickerPresetItem',
-            getOptionDisplayLabel(option, { timePrecision })
+            option.label ?? getOptionDisplayLabel(option, { timePrecision })
           )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
