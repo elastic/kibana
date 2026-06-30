@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import { getDefaultTransactionType } from '../../../../common/transaction_types';
 import { ResponsiveFlyout } from '../responsive_flyout';
 import { ServiceFlyoutFooter } from './footer';
 import { ServiceFlyoutHeader } from './header';
@@ -60,15 +59,12 @@ export function ServiceFlyout({
   const title = service.label ?? service.id;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
 
-  const defaultTransactionType =
-    initialTransactionType ?? getDefaultTransactionType(service.agentName);
-
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
   const [flyoutRange, setFlyoutRange] = useState({
     rangeFrom: initialRangeFrom,
     rangeTo: initialRangeTo,
   });
-  const [transactionType, setTransactionType] = useState(defaultTransactionType);
+  const [transactionType, setTransactionType] = useState(initialTransactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(

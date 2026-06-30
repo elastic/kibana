@@ -94,12 +94,12 @@ export function ServiceFlyoutQueryControls({
   }, [core?.uiSettings]);
 
   const selectedTransactionType = useMemo(
-    () => getTransactionType({ transactionType, transactionTypes, agentName }) ?? '',
+    () => getTransactionType({ transactionType, transactionTypes, agentName }),
     [agentName, transactionType, transactionTypes]
   );
 
   useEffect(() => {
-    if (selectedTransactionType && selectedTransactionType !== transactionType) {
+    if (selectedTransactionType !== undefined && selectedTransactionType !== transactionType) {
       onTransactionTypeChange(selectedTransactionType);
     }
   }, [onTransactionTypeChange, selectedTransactionType, transactionType]);
@@ -157,7 +157,7 @@ export function ServiceFlyoutQueryControls({
                       ]
                     : transactionTypeOptions
                 }
-                value={isTransactionTypeDisabled ? '' : selectedTransactionType}
+                value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
                 onChange={(event) => onTransactionTypeChange(event.currentTarget.value)}
               />
             </EuiFlexItem>

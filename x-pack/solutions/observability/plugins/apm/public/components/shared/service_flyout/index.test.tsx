@@ -145,6 +145,23 @@ describe('ServiceFlyout onView', () => {
   });
 });
 
+describe('ServiceFlyout initial state', () => {
+  it('does not seed transactionType from a hardcoded default before the fetch resolves', () => {
+    render(
+      <ServiceFlyout
+        service={service}
+        environment="ENVIRONMENT_ALL"
+        kuery=""
+        initialRangeFrom="now-15m"
+        initialRangeTo="now"
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('serviceFlyoutOverviewReadout')).not.toHaveTextContent('request');
+  });
+});
+
 describe('ServiceFlyout local filter state', () => {
   it('keeps filter changes local to the flyout and does not close it', () => {
     const onClose = jest.fn();

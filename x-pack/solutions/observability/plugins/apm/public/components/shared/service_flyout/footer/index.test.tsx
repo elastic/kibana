@@ -56,6 +56,28 @@ describe('ServiceFlyoutFooter', () => {
     mockUseManageSlosUrl.mockReturnValue('/app/slos');
   }
 
+  it('passes empty string transactionType to the traces Discover link before the type resolves', () => {
+    setupAllHrefs();
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutFooter
+          serviceName="opbeans-java"
+          environment="production"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          transactionType=""
+        />
+      </IntlProvider>
+    );
+
+    expect(mockUseDiscoverHref).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexType: 'traces',
+        queryParams: expect.objectContaining({ transactionType: '' }),
+      })
+    );
+  });
+
   it('scopes the Discover links to the environment and sorts by timestamp DESC', () => {
     setupAllHrefs();
     renderFooter();

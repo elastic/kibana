@@ -99,6 +99,14 @@ describe('service flyout chart_configs', () => {
       expect(keyMetrics[0].titleAction).toBe('latency-action');
     });
 
+    it('omits the transaction type clause when transactionType is empty string', () => {
+      const { keyMetrics } = buildDefinitions({ transactionType: '' });
+
+      keyMetrics.forEach(({ config }) => {
+        expect(esqlOf(config)).not.toContain('transaction.type');
+      });
+    });
+
     it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {
       const { keyMetrics } = buildDefinitions({ environment: ENVIRONMENT_ALL.value });
 
