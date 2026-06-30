@@ -211,14 +211,12 @@ export const useComposeDiscoverFlyout = ({
           {
             onSuccess: (rule) => {
               const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length > 0) {
-                setupNotificationsMutation.mutate(
-                  { rule, actions },
-                  { onSuccess: closeFlyout, onError: closeFlyout }
-                );
-              } else {
+              if (actions.length === 0) {
                 closeFlyout();
+                return;
               }
+              // Only close the flyout once notification setup also succeeds
+              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
             },
           }
         )
