@@ -108,12 +108,6 @@ export function AlertDetails() {
   const { alertId } = useParams<AlertDetailsPathParams>();
   const { getUrlTabId, setUrlTabId } = useTabId();
   const urlTabId = getUrlTabId();
-  const {
-    isLoadingRelatedDashboards,
-    suggestedDashboards,
-    linkedDashboards,
-    refetchRelatedDashboards,
-  } = useRelatedDashboards(alertId);
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
@@ -137,6 +131,15 @@ export function AlertDetails() {
   const canReadAlertRule = Boolean(
     alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
   );
+
+  // Related dashboards are derived from the rule (a rule-read operation), so
+  // gate the fetch on the same per-rule-type authorization used elsewhere.
+  const {
+    isLoadingRelatedDashboards,
+    suggestedDashboards,
+    linkedDashboards,
+    refetchRelatedDashboards,
+  } = useRelatedDashboards(alertId, { enabled: canReadAlertRule });
 
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
