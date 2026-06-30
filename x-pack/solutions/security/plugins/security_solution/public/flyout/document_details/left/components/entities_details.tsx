@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -22,8 +22,24 @@ import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
+import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
 
 export const ENTITIES_TAB_ID = 'entity';
+
+export interface EntitySectionOverrides {
+  /** Called when the user clicks to preview the entity in a side panel instead of navigating away. */
+  onPreviewEntity?: () => void;
+  /** Called when the user clicks a tab that opens a CSP insight sub-panel. */
+  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
+  /** Custom renderer for entity link fields; receives the field name, raw value, and optional children. */
+  linkRenderer?: EntityTableLinkRenderer;
+}
+
+export interface EntitySectionOverrideBuilders {
+  buildUserOverrides?: (entity: { name: string; entityId?: string }) => EntitySectionOverrides;
+  buildHostOverrides?: (entity: { name: string; entityId?: string }) => EntitySectionOverrides;
+}
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -44,7 +60,10 @@ const resolveHostDisplayForEntities = (
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
-export const EntitiesDetails: React.FC = () => {
+export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
+  buildUserOverrides,
+  buildHostOverrides,
+}) => {
   const { getFieldsData, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const timestamp = getField(getFieldsData('@timestamp'));
 
@@ -103,6 +122,25 @@ export const EntitiesDetails: React.FC = () => {
   const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
   const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
 
+  const userStoreEntityId = userEntityFromStore?.entityRecord?.entity?.id;
+  const hostStoreEntityId = hostEntityFromStore?.entityRecord?.entity?.id;
+
+  const userOverrides = useMemo(
+    () =>
+      userDisplayName != null
+        ? buildUserOverrides?.({ name: userDisplayName, entityId: userStoreEntityId })
+        : undefined,
+    [buildUserOverrides, userDisplayName, userStoreEntityId]
+  );
+
+  const hostOverrides = useMemo(
+    () =>
+      hostDisplayName != null
+        ? buildHostOverrides?.({ name: hostDisplayName, entityId: hostStoreEntityId })
+        : undefined,
+    [buildHostOverrides, hostDisplayName, hostStoreEntityId]
+  );
+
   const showUserDetails = timestamp != null && userDisplayName != null;
   const showHostDetails =
     hostEntityIdentifiers != null && timestamp != null && hostDisplayName != null;
@@ -125,9 +163,10 @@ export const EntitiesDetails: React.FC = () => {
               <EuiSpacer size="s" />
               <UserDetails
                 userName={userDisplayName}
-                entityId={userEntityFromStore?.entityRecord?.entity?.id}
+                entityId={userStoreEntityId}
                 timestamp={timestamp}
                 scopeId={scopeId}
+                {...userOverrides}
               />
             </EuiFlexItem>
           )}
@@ -145,10 +184,11 @@ export const EntitiesDetails: React.FC = () => {
 
               <HostDetails
                 hostName={hostDisplayName}
-                entityId={hostEntityFromStore?.entityRecord?.entity?.id}
+                entityId={hostStoreEntityId}
                 timestamp={timestamp}
                 scopeId={scopeId}
                 hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}
+                {...hostOverrides}
               />
             </EuiFlexItem>
           )}

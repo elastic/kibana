@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -63,6 +64,8 @@ export interface UserSummaryProps {
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.user>;
   /** When using Entity Store v2: first seen from entity lifecycle. */
@@ -103,6 +106,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
@@ -307,12 +311,18 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
-                    <FlyoutLink
-                      field="host.ip"
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                    LinkRenderer ? (
+                      <LinkRenderer field="host.ip" value={ip}>
+                        {ip}
+                      </LinkRenderer>
+                    ) : (
+                      <FlyoutLink
+                        field="host.ip"
+                        value={ip}
+                        scopeId={scopeId}
+                        isFlyoutOpen={isFlyoutOpen}
+                      />
+                    )
                   ) : (
                     getEmptyTagValue()
                   )
@@ -333,6 +343,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         lastSeenFromEntityStore,
         firstColumn,
         isFlyoutOpen,
+        LinkRenderer,
       ]
     );
     return (
