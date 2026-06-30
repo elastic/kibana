@@ -229,7 +229,10 @@ apiTest.describe('Agent Builder — tracing snapshot', { tag: [...tags.stateful.
       // Sanitize the spans and sort them by name
       const spans = hits
         .map((hit) => sanitizeSpan(hit._source as Record<string, unknown>))
-        .sort((a, b) => String(a.name ?? '').localeCompare(String(b.name ?? '')));
+        .sort((a, b) => {
+          const byName = String(a.name ?? '').localeCompare(String(b.name ?? ''));
+          return byName !== 0 ? byName : JSON.stringify(a).localeCompare(JSON.stringify(b));
+        });
 
       expect(JSON.stringify(spans, null, 2)).toMatchSnapshot('agent-builder-traces.json');
     }
