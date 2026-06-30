@@ -6,6 +6,7 @@
  */
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import { getActiveAttachments } from '@kbn/agent-builder-common/attachments';
 import { useMemo } from 'react';
 import { mapAttachmentsForCart } from '../components/conversations/conversation_rounds/round_response/attachments/to_unknown_attachment_for_cart';
 import { useConversationContext } from '../context/conversation/conversation_context';
@@ -21,7 +22,8 @@ export const useActiveConversationAttachments = (): UnknownAttachment[] => {
   const { conversation } = useConversation();
 
   return useMemo(() => {
-    const merged = upsertAttachmentsIntoList(conversation?.attachments, pendingAttachments ?? []);
+    const activePersisted = getActiveAttachments(conversation?.attachments ?? []);
+    const merged = upsertAttachmentsIntoList(activePersisted, pendingAttachments ?? []);
     return mapAttachmentsForCart(merged);
   }, [conversation?.attachments, pendingAttachments]);
 };
