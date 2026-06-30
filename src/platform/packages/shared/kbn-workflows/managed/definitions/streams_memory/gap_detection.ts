@@ -15,7 +15,7 @@ export const STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID = 'system-streams-memory-g
 export const STREAMS_MEMORY_GAP_DETECTION_WORKFLOW = {
   id: STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 8,
+  version: 9,
   billable: false,
   yaml: GAP_DETECTION_YAML,
   management: {

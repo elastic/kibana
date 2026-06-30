@@ -61,59 +61,26 @@ steps:
     on-failure:
       continue: true
 
-  - name: get_investigation_executions
+  - name: get_rca_outputs
     type: elasticsearch.request
     with:
       method: POST
-      path: '/.workflows-executions/_search'
+      path: '/.workflows-step-executions/_search'
       body:
-        size: 200
-        sort:
-          - finishedAt:
-              order: desc
+        size: 20
         _source:
-          - id
-          - finishedAt
+          - output.structured_output.gaps_found
+          - output.gaps_found
+          - workflowRunId
         query:
           bool:
             must:
               - term:
-                  originManagedWorkflowId: 'system-streams-investigation'
+                  stepId: 'platform_streams_investigation_rca'
               - term:
                   status: 'completed'
-              - range:
-                  finishedAt:
-                    gte: 'now-7d'
     on-failure:
       continue: true
-
-  - name: collect_step_outputs
-    type: foreach
-    foreach: "${{ steps.get_investigation_executions.output.hits.hits }}"
-    on-failure:
-      continue: true
-    steps:
-      - name: get_rca_output
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/.workflows-step-executions/_search'
-          body:
-            size: 1
-            _source:
-              - output.structured_output.gaps_found
-              - output.gaps_found
-            query:
-              bool:
-                must:
-                  - term:
-                      workflowRunId: '{{ foreach.item._source.id }}'
-                  - term:
-                      stepId: 'platform_streams_investigation_rca'
-                  - term:
-                      status: 'completed'
-        on-failure:
-          continue: true
 
   - name: merge_investigation_gaps
     type: ai.agent
@@ -128,7 +95,7 @@ steps:
 
         The following are structured outputs from recent investigation workflow runs. Each hit may contain a gaps_found array from the investigation's structured output:
 
-        {{ steps.collect_step_outputs.output | json }}
+        {{ steps.get_rca_outputs.output | json }}
 
         Before incorporating any gap, apply this strict filter: only keep items that represent **missing data that could reasonably be provided** — a data source that was absent or inaccessible and would have helped the investigation. Discard anything that is an incident-specific observation (e.g. "the pod crashed", "no logs existed during the outage window", "the service was down") — those describe what happened, not a knowledge gap that can be fixed.
 
