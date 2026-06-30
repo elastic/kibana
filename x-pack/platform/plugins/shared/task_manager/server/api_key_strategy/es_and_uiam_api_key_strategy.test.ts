@@ -284,9 +284,9 @@ describe('EsAndUiamApiKeyStrategy', () => {
       // The cloned key is Task-Manager-owned (not the caller's), so it is invalidatable.
       expect(fields?.userScope.apiKeyCreatedByUser).toBe(false);
       // The granted UIAM key is the one used to build the fake request for execution.
-      expect(
-        strategy.getApiKeyForFakeRequest(mockTaskInstance(fields as Partial<ConcreteTaskInstance>))
-      ).toBe('essu_fresh-secret');
+      expect(strategy.getApiKeyForFakeRequest(mockTaskInstance({ ...fields }))).toBe(
+        'essu_fresh-secret'
+      );
     });
 
     test('grants both ES and UIAM keys when request has UIAM credential', async () => {

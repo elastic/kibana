@@ -146,18 +146,11 @@ export const createApiKey = async (
     return grantApiKeysForTaskTypes({
       taskInstances,
       user,
-      createKey: async ({ name }) => {
-        const cloneResult = await security.authc.apiKeys.cloneAsInternalUser(request, {
+      createKey: ({ name }) =>
+        security.authc.apiKeys.cloneAsInternalUser(request, {
           name,
           metadata: { managed: true },
-        });
-
-        if (!cloneResult) {
-          throw Error('Could not clone API key.');
-        }
-
-        return cloneResult;
-      },
+        }),
     });
   }
 
