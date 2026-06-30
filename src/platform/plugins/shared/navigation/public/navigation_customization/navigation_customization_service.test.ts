@@ -277,7 +277,7 @@ describe('NavigationCustomizationService', () => {
       );
     });
 
-    it('does not report the baseline when the flag write fails (read-only user)', async () => {
+    it('does not report the baseline when the flag write fails', async () => {
       const { core, chrome } = makeDeps();
       (core.userStorage.set as jest.Mock).mockRejectedValue(new Error('Forbidden'));
       const reportEvent = core.analytics.reportEvent as jest.Mock;
@@ -286,9 +286,9 @@ describe('NavigationCustomizationService', () => {
       service.enableUi({ core, chrome, solution: 'es' });
       await flushAsyncImport();
 
-      // The write was attempted, but its rejection means the user cannot persist a
-      // customization — so the baseline is neither reported nor (being unpersisted)
-      // re-fired on the next load.
+      // The write was attempted, but its rejection means this load cannot persist
+      // the dedupe flag. Skip the event rather than reporting a baseline that
+      // could be reported again on a later load.
       expect(core.userStorage.set).toHaveBeenCalledWith(
         NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY,
         true
@@ -475,7 +475,7 @@ describe('NavigationCustomizationService', () => {
 
       // Reset-to-default / unchanged: no moves and nothing hidden.
       onSave({ moves: [], hidden: [] }, ['a', 'b'], []);
-      // The event is reported only after the persist (here a `remove`) resolves.
+      // The event is reported only after the persistence operation (here a `remove`) resolves.
       await flushAsyncImport();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
@@ -520,10 +520,10 @@ describe('NavigationCustomizationService', () => {
       );
     });
 
-    it('does not report when the persist fails (read-only user)', async () => {
+    it('does not report when persistence fails', async () => {
       const deps = makeDeps();
-      // Both the set (real customization) and remove (reset) paths can reject for
-      // a user without write access; fail both so either branch is covered.
+      // Both the set (real customization) and remove (reset) paths can reject
+      // on a User Storage write failure; fail both so either branch is covered.
       (deps.core.userStorage.set as jest.Mock).mockRejectedValue(new Error('Forbidden'));
       (deps.core.userStorage.remove as jest.Mock).mockRejectedValue(new Error('Forbidden'));
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);

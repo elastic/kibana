@@ -140,11 +140,9 @@ export class NavigationCustomizationService {
               hidden: overflowSet.has(node.id),
             }));
             const navProps = buildNavItemsProperties(itemsPayload);
-            // Persist the "reported" flag first and emit the baseline only on a
-            // successful write.
-            //  - Read-only users (write rejects) emit no baseline at all since they
-            //    can never persist a customization.
-            //  - Writable users emit exactly once; the flag then suppresses it on subsequent loads.
+            // Persist the "reported" flag first and emit the baseline only after
+            // that write succeeds. If User Storage cannot persist the flag, skip
+            // the event because future page loads could not be reliably deduped.
             core.userStorage
               .set(NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY, true)
               .then(() => {
@@ -155,7 +153,7 @@ export class NavigationCustomizationService {
                 });
               })
               .catch(() => {
-                // Read-only user: nothing persisted, nothing reported.
+                // Nothing persisted, so nothing is reported.
               });
           });
       }
@@ -201,10 +199,9 @@ export class NavigationCustomizationService {
         onChange: (c) => chrome.project.setNavigationCustomization(c),
         onSave: (c, order, hiddenIds) => {
           // The live nav was already updated optimistically via onChange. The
-          // server write can still fail (e.g. a read-only user lacks write
-          // access to the user-storage saved object), so surface a toast rather
-          // than letting the failure pass silently and the change vanish on the
-          // next page load.
+          // User Storage write can still fail, so surface a toast rather than
+          // letting the failure pass silently and the change vanish on the next
+          // page load.
           //
           // When the user applied a reset (or manually returned every item to
           // its default position/visibility), the customization is the identity
@@ -246,11 +243,11 @@ export class NavigationCustomizationService {
           closeModal();
         },
         onReset: () => {
-          // Only update the live preview — the server write is deferred until
-          // the user clicks Apply, keeping Reset consistent with the
+          // Only update the live preview — the User Storage write is deferred
+          // until the user clicks Apply, keeping Reset consistent with the
           // preview-until-Apply model used by every other edit in this modal.
           // If the user cancels after a Reset, onClose restores savedCustomization
-          // and the server is never touched, so the stored value is preserved.
+          // and User Storage is never touched, so the stored value is preserved.
           chrome.project.setNavigationCustomization(undefined);
           return this.getNavigationItems(chrome).then((nav) => nav.items);
         },
