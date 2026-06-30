@@ -17,6 +17,7 @@ import {
   ISOLATE_TOOL_ID,
   UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
+  LIST_ENDPOINTS_TOOL_ID,
 } from '.';
 
 function assertStandardReturn(result: unknown) {
@@ -251,12 +252,17 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     });
   });
 
-  describe('Consistency across tools', () => {
-    it('all three tools return ToolResultType.other for "endpoint not found" (not error)', async () => {
+  describe('Consistency across host-lookup tools', () => {
+    const HOST_LOOKUP_TOOL_IDS = [ISOLATE_TOOL_ID, UNISOLATE_TOOL_ID, GET_ENDPOINT_STATUS_TOOL_ID];
+
+    it('all host-lookup tools return ToolResultType.other for "endpoint not found" (not error)', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
       const inlineTools = await skill.getInlineTools?.();
+      const hostLookupTools = (inlineTools ?? []).filter((t) =>
+        HOST_LOOKUP_TOOL_IDS.includes(t.id)
+      );
 
-      for (const tool of inlineTools ?? []) {
+      for (const tool of hostLookupTools) {
         const result = await (tool as unknown as { handler: Function }).handler(
           { hostName: 'nonexistent-host' },
           { logger: { error: jest.fn() } }
@@ -272,15 +278,25 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     it('handler errors use ToolResultType.error while not-found uses ToolResultType.other', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
       const inlineTools = await skill.getInlineTools?.();
+      const hostLookupTools = (inlineTools ?? []).filter((t) =>
+        HOST_LOOKUP_TOOL_IDS.includes(t.id)
+      );
 
-      for (const tool of inlineTools ?? []) {
-        // Endpoint not found should NOT be an error type
+      for (const tool of hostLookupTools) {
         const notFoundResult = await (tool as unknown as { handler: Function }).handler(
           { hostName: 'nonexistent-host' },
           { logger: { error: jest.fn() } }
         );
         expect(notFoundResult.results[0].type).toBe('other');
       }
+    });
+
+    it('list_endpoints tool is excluded from host-lookup consistency checks', async () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const inlineTools = await skill.getInlineTools?.();
+      const listTool = (inlineTools ?? []).find((t) => t.id === LIST_ENDPOINTS_TOOL_ID);
+      expect(listTool).toBeDefined();
+      expect(HOST_LOOKUP_TOOL_IDS).not.toContain(LIST_ENDPOINTS_TOOL_ID);
     });
   });
 });

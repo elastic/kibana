@@ -13,6 +13,7 @@ import {
   ISOLATE_TOOL_ID,
   UNISOLATE_TOOL_ID,
   GET_ENDPOINT_STATUS_TOOL_ID,
+  LIST_ENDPOINTS_TOOL_ID,
 } from '.';
 
 describe('createEndpointResponseActionsSkill', () => {
@@ -45,11 +46,12 @@ describe('createEndpointResponseActionsSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns exactly 3 inline tools (isolate_host, unisolate_host, get_endpoint_status)', async () => {
+    it('returns exactly 4 inline tools (list_endpoints, isolate_host, unisolate_host, get_endpoint_status)', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
       const inlineTools = await skill.getInlineTools?.();
-      expect(inlineTools).toHaveLength(3);
+      expect(inlineTools).toHaveLength(4);
       const toolIds = (inlineTools ?? []).map((t) => t.id);
+      expect(toolIds).toContain(LIST_ENDPOINTS_TOOL_ID);
       expect(toolIds).toContain(ISOLATE_TOOL_ID);
       expect(toolIds).toContain(UNISOLATE_TOOL_ID);
       expect(toolIds).toContain(GET_ENDPOINT_STATUS_TOOL_ID);
