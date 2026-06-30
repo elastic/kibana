@@ -97,9 +97,10 @@ describe('fetchEvents', () => {
     const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     // Two origin IDs → og_id0, og_id1; one alert → og_alrt_id0
     expect(args.params).toHaveLength(3);
-    const keys = args.params?.map((p: Record<string, string>) => Object.keys(p)[0]) ?? [];
-    expect(keys.filter((k: string) => k.startsWith('og_id'))).toEqual(['og_id0', 'og_id1']);
-    expect(keys.filter((k: string) => k.startsWith('og_alrt_id'))).toEqual(['og_alrt_id0']);
+    const params = args.params as Array<Record<string, string>>;
+    const keys = params?.map((p) => Object.keys(p)[0]) ?? [];
+    expect(keys.filter((k) => k.startsWith('og_id'))).toEqual(['og_id0', 'og_id1']);
+    expect(keys.filter((k) => k.startsWith('og_alrt_id'))).toEqual(['og_alrt_id0']);
   });
 
   describe('Target entity filtering', () => {
