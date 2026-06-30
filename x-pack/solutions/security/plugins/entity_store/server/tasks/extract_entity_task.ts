@@ -37,10 +37,12 @@ async function runTask({
   entityType,
   logger,
   core,
+  isServerless,
 }: RunContext & {
   entityType: EntityType;
   logger: Logger;
   core: types.EntityStoreCoreSetup;
+  isServerless: boolean;
 }): Promise<RunResult> {
   logger.info(`Running extract entity task`);
 
@@ -65,6 +67,7 @@ async function runTask({
       fakeRequest,
       logger,
       namespace,
+      isServerless,
     });
 
     const extractionStart = Date.now();
@@ -134,11 +137,13 @@ export function registerExtractEntityTasks({
   logger,
   entityTypes,
   core,
+  isServerless,
 }: {
   core: types.EntityStoreCoreSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   entityTypes: EntityType[];
+  isServerless: boolean;
 }): void {
   try {
     const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -166,6 +171,7 @@ export function registerExtractEntityTasks({
                     core,
                     entityType: type,
                     fakeRequest,
+                    isServerless,
                   }),
               }),
           }),

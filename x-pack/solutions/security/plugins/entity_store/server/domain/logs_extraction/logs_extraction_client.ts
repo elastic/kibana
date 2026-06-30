@@ -44,6 +44,7 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
+import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
@@ -58,7 +59,7 @@ import {
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+import type { RemoteLogsExtractionClient } from './remote';
 import { EntityStoreNotRunningError } from '../errors';
 import type { LogExtractionUpdateParams } from '../../routes/constants';
 
@@ -104,7 +105,7 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  ccsLogsExtractionClient: CcsLogsExtractionClient;
+  remoteLogsExtractionClient: RemoteLogsExtractionClient;
 }
 
 export class LogsExtractionClient {
@@ -114,8 +115,7 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  ccsLogsExtractionClient: CcsLogsExtractionClient;
-
+  remoteLogsExtractionClient: RemoteLogsExtractionClient;
   constructor({
     logger,
     namespace,
@@ -123,7 +123,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
-    ccsLogsExtractionClient,
+    remoteLogsExtractionClient,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -131,7 +131,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.ccsLogsExtractionClient = ccsLogsExtractionClient;
+    this.remoteLogsExtractionClient = remoteLogsExtractionClient;
   }
 
   private async getLogExtractionConfigAndState(
@@ -162,7 +162,7 @@ export class LogsExtractionClient {
         pages,
         indexPatterns,
         lastSearchTimestamp,
-        ccsError,
+        remoteError,
         logsCapDeferred,
         logsCapApplied,
         logsProcessed,
@@ -195,7 +195,7 @@ export class LogsExtractionClient {
         // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
         // do not overwrite it — only clear any stale error.
         await this.engineDescriptorClient.update(type, {
-          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
         });
       } else {
         await this.engineDescriptorClient.update(type, {
@@ -204,7 +204,7 @@ export class LogsExtractionClient {
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
           },
-          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
         });
       }
 
@@ -277,7 +277,7 @@ export class LogsExtractionClient {
     pages: number;
     indexPatterns: string[];
     lastSearchTimestamp: string;
-    ccsError?: Error;
+    remoteError?: Error;
     logsCapDeferred: boolean;
     logsCapApplied: boolean;
     logsProcessed: number;
@@ -286,8 +286,6 @@ export class LogsExtractionClient {
       config.additionalIndexPatterns,
       config.excludedIndexPatterns
     );
-    const isRemote = remoteIndexPatterns.length > 0;
-    const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
     const mainPromise = this.runMainPath({
       type,
@@ -295,38 +293,38 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
+      latestIndex: getLatestEntitiesIndexName(this.namespace),
       indexPatterns: localIndexPatterns,
-      latestIndex,
     });
 
-    if (isRemote) {
-      const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
-        type,
-        remoteIndexPatterns,
-        docsLimit: config.docsLimit,
-        maxLogsPerPage: config.maxLogsPerPage,
-        lookbackPeriod: config.lookbackPeriod,
-        delay: config.delay,
-        frequency: config.frequency,
-        entityDefinition,
-        abortController: opts?.abortController,
-        windowOverride: opts?.specificWindow,
-        maxTimeWindowSize: config.maxTimeWindowSize,
-        maxLogsPerWindow: config.maxLogsPerWindow,
-        maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
-      });
+    const remoteStrategyIndexPatterns = this.remoteLogsExtractionClient.strategy.buildPatterns({
+      localIndexPatterns,
+      remoteIndexPatterns,
+    });
+    const remotePromise = this.remoteLogsExtractionClient.extractToUpdates({
+      type,
+      entityDefinition,
+      remoteIndexPatterns: remoteStrategyIndexPatterns,
+      docsLimit: config.docsLimit,
+      maxLogsPerPage: config.maxLogsPerPage,
+      lookbackPeriod: config.lookbackPeriod,
+      delay: config.delay,
+      frequency: config.frequency,
+      maxTimeWindowSize: config.maxTimeWindowSize,
+      maxLogsPerWindow: config.maxLogsPerWindow,
+      maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
+      abortController: opts?.abortController,
+      windowOverride: opts?.specificWindow,
+    });
 
-      const [mainResult, ccsResult] = await Promise.all([mainPromise, ccsPromise]);
+    const [mainResult, remoteResult] = await Promise.all([mainPromise, remotePromise]);
 
-      return {
-        ...mainResult,
-        isRemote,
-        indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
-        ccsError: ccsResult.error,
-      };
-    }
-
-    return { ...(await mainPromise), isRemote };
+    return {
+      ...mainResult,
+      isRemote: remoteStrategyIndexPatterns.length > 0,
+      indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
+      remoteError: remoteResult.error,
+    };
   }
 
   /**
@@ -808,6 +806,7 @@ export class LogsExtractionClient {
         logsPageCursorStart,
         logsPageCursorEnd,
       });
+
       recoveryIdForBounded = undefined;
 
       this.logger.debug(
@@ -949,9 +948,10 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Returns local and remote (CCS) index patterns separately.
-   * Main extraction uses local only (LOOKUP JOIN does not support CCS).
-   * CCS extraction uses remote only.
+   * Returns local index patterns and remote patterns separately.
+   * Cluster-prefixed patterns (`cluster1:logs-*`) go to remote (CCS strategy).
+   * Unqualified patterns stay local; CPS strategy reuses local patterns for linked projects.
+   * Main extraction uses local patterns only (LOOKUP JOIN does not support remote).
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
@@ -972,6 +972,15 @@ export class LogsExtractionClient {
       }
     });
 
+    // Pre-flight: find data streams with closed backing indices and build adjustments.
+    // Open backing indices must be added as positives BEFORE any negations.
+    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+      this.esClient,
+      localIndexPatterns,
+      this.logger
+    );
+    localIndexPatterns.push(...openBackingIndices);
+
     // Append after includes: ES negation only subtracts from earlier entries in the same expression.
     // e.g. `logs-*,-logs-proxy-*` excludes proxy logs, but `-logs-proxy-*,logs-*` does not.
     excludedIndexPatterns.forEach((pattern) => {
@@ -981,6 +990,9 @@ export class LogsExtractionClient {
         localIndexPatterns.push(`-${pattern}`);
       }
     });
+
+    // Closed-index negations go last — after all positive includes and user exclusions.
+    localIndexPatterns.push(...closedNegations);
 
     return { localIndexPatterns, remoteIndexPatterns };
   }
@@ -997,8 +1009,9 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Builds the full list of index patterns (updates, additional, security data view)
-   * including CCS remote indices, without filtering by alerts or CCS.
+   * Builds the full list of index patterns (updates, additional, security data view),
+   * including cluster-prefixed patterns from the data view, without alerts or
+   * local/remote splitting applied.
    */
   private async getAllIndexPatternsIncludingRemote(
     additionalIndexPatterns: string[] = []
