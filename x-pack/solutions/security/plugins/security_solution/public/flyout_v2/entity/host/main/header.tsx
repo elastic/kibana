@@ -13,41 +13,48 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { getHostDetailsUrl } from '../../../common/components/link_to';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
-import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
-import type { IdentityFields } from '../../document_details/shared/utils';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EntitySourceBadge } from '../shared/components/entity_source_badge';
-import { RiskLevelBadge } from '../shared/components/risk_level_badge';
+import { getHostDetailsUrl } from '../../../../common/components/link_to';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import type { FirstLastSeenData } from '../../../../flyout/entity_details/shared/components/observed_entity/types';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 
-interface HostPanelHeaderProps {
+export interface HeaderProps {
+  /** Host name displayed as the flyout title. */
   hostName: string;
+  /** First/last seen timestamps for the host. */
   lastSeen: FirstLastSeenData;
+  /** Entity store entity ID, used for the entity source badge. */
   entityId?: string;
+  /** Key-value map of identity fields used to resolve the host. */
   identityFields?: IdentityFields;
+  /** Whether the host exists in the entity store. */
   isEntityInStore?: boolean;
+  /** Risk severity level for the host. */
   riskLevel?: RiskSeverity;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({
+/**
+ * Header component for the host details flyout.
+ */
+export const Header = ({
   hostName,
   lastSeen,
   entityId,
   identityFields,
   isEntityInStore,
   riskLevel,
-}: HostPanelHeaderProps) => {
+}: HeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
@@ -55,15 +62,7 @@ export const HostPanelHeader = ({
     [lastSeenDate]
   );
   return (
-    <FlyoutHeader
-      data-test-subj="host-panel-header"
-      hasBorder={false}
-      css={css`
-        & > .euiPanel {
-          padding-bottom: 0;
-        }
-      `}
-    >
+    <div data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         {!isEntityInStore && (
           <EuiFlexItem grow={false}>
@@ -148,6 +147,6 @@ export const HostPanelHeader = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </FlyoutHeader>
+    </div>
   );
 };
