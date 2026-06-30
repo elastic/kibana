@@ -1264,7 +1264,7 @@ paths:
       summary: Export scheduled query results
       tags:
         - Security Osquery API
-      x-state: Added in 9.5.0
+      x-state: Generally available; Added in 9.5.0
   /api/osquery/scheduled_results/{scheduleId}/{executionCount}/results:
     get:
       description: >
