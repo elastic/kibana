@@ -68,6 +68,9 @@ steps:
       path: '/.workflows-step-executions/_search'
       body:
         size: 20
+        sort:
+          - startedAt:
+              order: desc
         _source:
           - output.structured_output.gaps_found
           - output.gaps_found
@@ -79,6 +82,9 @@ steps:
                   stepId: 'platform_streams_investigation_rca'
               - term:
                   status: 'completed'
+              - range:
+                  startedAt:
+                    gte: 'now-7d'
     on-failure:
       continue: true
 
