@@ -184,8 +184,7 @@ describe('EditOutputFlyout', () => {
         expect(utils.queryByText(label)).toBeNull();
       });
 
-      // Show the new mTLS sub-section headings
-      expect(utils.queryByText('Server certificate authorities')).not.toBeNull();
+      // Show the Client certificate mTLS sub-section heading
       expect(utils.queryByText('Client certificate (mTLS)')).not.toBeNull();
     });
   });

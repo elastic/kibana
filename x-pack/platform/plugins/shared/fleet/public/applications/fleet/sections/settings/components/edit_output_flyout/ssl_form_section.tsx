@@ -118,19 +118,6 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             />
           )}
           <EuiSpacer size="m" />
-          {type !== 'download_source' && (
-            <>
-              <EuiTitle size="xxs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.sslServerCaSectionTitle"
-                    defaultMessage="Server certificate authorities"
-                  />
-                </h4>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-            </>
-          )}
           <MultiRowInput
             placeholder={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
