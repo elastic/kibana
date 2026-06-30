@@ -238,7 +238,7 @@ export interface DefaultAppStateExtension {
    */
   hideTable?: boolean;
   /**
-   * The state for field list sidebar visibility toggle (collapsed when `true`)
+   * The state for field list sidebar visibility toggle
    */
   hideSidebar?: boolean;
 }

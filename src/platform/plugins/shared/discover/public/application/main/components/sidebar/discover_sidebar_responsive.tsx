@@ -385,12 +385,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const dispatch = useInternalStateDispatch();
   const hideSidebar = useAppStateSelector((state) => state.hideSidebar ?? false);
 
-  // Drive the field list collapse state from app state (toggles, profile defaults,
-  // URL, reset). The collapse is owned by app state; the panels toggle button writes
-  // both app state and localStorage, while this effect reflects app state into the
-  // field list container's own collapse observable. We pass `updateLocalStorage:
-  // false` so programmatic drives (profile defaults, URL, reset) never clobber the
-  // user's saved cross-session preference.
   useEffect(() => {
     const visibility = unifiedFieldListSidebarContainerApi?.sidebarVisibility;
     if (visibility && visibility.isCollapsed$.getValue() !== hideSidebar) {
