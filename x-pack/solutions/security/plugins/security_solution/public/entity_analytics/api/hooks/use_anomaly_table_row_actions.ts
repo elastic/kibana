@@ -131,6 +131,10 @@ export const useAnomalyTableRowActions = ({
         const record = (result.hits.hits[0]?._source ?? null) as CachedRecord | null;
         cachedRecordRef.current = record;
         return record;
+      })
+      .catch(() => {
+        fetchRecordPromiseRef.current = null;
+        return null;
       });
     return fetchRecordPromiseRef.current;
   }, [ml, row.recordId, row.jobId]);
@@ -142,11 +146,17 @@ export const useAnomalyTableRowActions = ({
     if (cachedJobRef.current) return Promise.resolve(cachedJobRef.current);
     if (fetchJobPromiseRef.current) return fetchJobPromiseRef.current;
     if (!ml?.mlApi) return Promise.resolve(null);
-    fetchJobPromiseRef.current = ml.mlApi.jobs.jobs([row.jobId]).then((jobs) => {
-      const job = (jobs[0] ?? null) as CachedJob | null;
-      cachedJobRef.current = job;
-      return job;
-    });
+    fetchJobPromiseRef.current = ml.mlApi.jobs
+      .jobs([row.jobId])
+      .then((jobs) => {
+        const job = (jobs[0] ?? null) as CachedJob | null;
+        cachedJobRef.current = job;
+        return job;
+      })
+      .catch(() => {
+        fetchJobPromiseRef.current = null;
+        return null;
+      });
     return fetchJobPromiseRef.current;
   }, [ml, row.jobId]);
 

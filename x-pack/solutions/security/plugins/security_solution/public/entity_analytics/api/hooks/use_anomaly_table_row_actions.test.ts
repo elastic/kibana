@@ -311,4 +311,42 @@ describe('useAnomalyTableRowActions', () => {
       expect(mockJobsFn).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('retry after fetch failure', () => {
+    it('retries anomalySearch after a failed fetch', async () => {
+      mockAnomalySearch.mockRejectedValueOnce(new Error('network error'));
+      const { result } = renderActions();
+      const action = result.current.actions.find((a) => a.key === 'view-in-single-metric-viewer')!;
+
+      await act(async () => {
+        action.onClick();
+        await waitFor(() => expect(mockAnomalySearch).toHaveBeenCalledTimes(1));
+      });
+      expect(window.open).not.toHaveBeenCalled();
+
+      await act(async () => {
+        action.onClick();
+        await waitFor(() => expect(window.open).toHaveBeenCalled());
+      });
+      expect(mockAnomalySearch).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries jobs.jobs after a failed fetch', async () => {
+      mockJobsFn.mockRejectedValueOnce(new Error('network error'));
+      const { result } = renderActions();
+      const action = result.current.actions.find((a) => a.key === 'view-in-discover')!;
+
+      await act(async () => {
+        action.onClick();
+        await waitFor(() => expect(window.open).toHaveBeenCalledTimes(1));
+      });
+      expect(mockJobsFn).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        action.onClick();
+        await waitFor(() => expect(window.open).toHaveBeenCalledTimes(2));
+      });
+      expect(mockJobsFn).toHaveBeenCalledTimes(2);
+    });
+  });
 });
