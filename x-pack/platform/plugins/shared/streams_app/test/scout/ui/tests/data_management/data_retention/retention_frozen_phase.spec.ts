@@ -66,7 +66,7 @@ test.describe('Stream data retention - frozen phase', { tag: [...tags.stateful.c
     });
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
-    await expect(page.getByTestId('lifecyclePhase-frozen-button')).toBeVisible();
+    await expect(page.getByTestId('lifecyclePhase-Frozen-button')).toBeVisible();
   });
 
   test('should show 3 data phases subtitle when frozen_after and data_retention are both set', async ({
@@ -102,7 +102,7 @@ test.describe('Stream data retention - frozen phase', { tag: [...tags.stateful.c
     });
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
-    await page.getByTestId('lifecyclePhase-frozen-button').click();
-    await expect(page.getByTestId('lifecyclePhase-frozen-popoverTitle')).toBeVisible();
+    await page.getByTestId('lifecyclePhase-Frozen-button').click();
+    await expect(page.getByTestId('lifecyclePhase-Frozen-popoverTitle')).toBeVisible();
   });
 });
