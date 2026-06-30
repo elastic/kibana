@@ -126,6 +126,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/alerts-ui-shared'
+  - '@kbn/es-types'
 tags:
   - plugin
   - prod
