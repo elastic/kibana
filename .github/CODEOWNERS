@@ -3145,7 +3145,7 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/search-kibana
-/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
+/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-generative-ai
 
 # HTTP
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/http @elastic/workflows-eng
