@@ -15,6 +15,7 @@ import { createMockStore } from '../../../entities/workflows/store/__mocks__/sto
 import {
   selectEditorWorkflowDefinition,
   selectEditorWorkflowLookup,
+  selectIsExecutionsTab,
   selectWorkflowId,
   selectYamlString as selectYamlStringSelector,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -207,6 +208,9 @@ describe('WorkflowDetailEditor', () => {
     });
 
     mockUseSelector.mockImplementation((selector: any) => {
+      if (selector === selectIsExecutionsTab) {
+        return false; // default: workflow (editable) tab
+      }
       if (selector === selectYamlStringSelector) {
         return mockYaml;
       }
@@ -357,6 +361,33 @@ describe('WorkflowDetailEditor', () => {
         new Error('Failed to run step'),
         { title: 'Failed to run step' }
       );
+    });
+
+    it('does not run step or open modal when on the executions tab', async () => {
+      // Regression: "Run step" must be a no-op on the Executions tab because
+      // handleStepRun uses the editable (draft) YAML/context, which differs from
+      // the execution snapshot the graph is currently showing.
+      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+
+      const mockMutateAsync = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' });
+      mockUseWorkflowActions.mockReturnValue({
+        runIndividualStep: { mutateAsync: mockMutateAsync },
+      });
+
+      const prevImpl = mockUseSelector.getMockImplementation();
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsExecutionsTab) return true; // on the executions tab
+        return prevImpl?.(selector) ?? null;
+      });
+
+      const { getByTestId, store } = renderEditor();
+      await act(async () => {
+        getByTestId('test-step-run').click();
+      });
+
+      // Neither mutation nor modal should fire — the handler must bail out early
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(store?.getState().detail.testStepModalOpenStepId).toBeUndefined();
     });
 
     it('does not run step or open modal when executeWorkflow is not granted', async () => {

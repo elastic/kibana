@@ -25,6 +25,7 @@ import {
   selectEditorWorkflowLookup,
   selectEditorYaml,
   selectHighlightedStepId,
+  selectIsExecutionsTab,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -82,6 +83,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const definition = useSelector(selectEditorWorkflowDefinition);
   const stepExecutions = useSelector(selectStepExecutions);
+  const isExecutionsTab = useSelector(selectIsExecutionsTab);
   const isYamlValid = useSelector(selectIsYamlSyntaxValid) ?? true;
   const editorYaml = useSelector(selectEditorYaml) ?? '';
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -214,7 +216,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         direction={direction}
         renderStepIcon={renderStepIcon}
         onStepRun={handleStepRun}
-        canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
+        canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid && !isExecutionsTab}
         defaultViewport={defaultViewport}
         onViewportChange={onViewportChange}
         showZoomControls
@@ -245,7 +247,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             <WorkflowVisualEditorFlyout
               target={flyoutTarget}
               editorYaml={editorYaml}
-              canExecuteWorkflow={Boolean(canExecuteWorkflow)}
+              canExecuteWorkflow={Boolean(canExecuteWorkflow) && !isExecutionsTab}
               isYamlValid={isYamlValid}
               onClose={handleFlyoutClose}
               onOpenInYaml={handleOpenInYaml}

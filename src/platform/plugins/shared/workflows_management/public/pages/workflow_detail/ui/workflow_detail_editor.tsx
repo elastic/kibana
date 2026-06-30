@@ -120,6 +120,13 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         return;
       }
 
+      // Guard: the run-step handler uses the draft workflow YAML and context, which
+      // differ from the execution snapshot shown on the Executions tab. Bail out to
+      // prevent running the wrong version.
+      if (isExecutionsTab) {
+        return;
+      }
+
       if (!canExecuteWorkflow) {
         return;
       }
@@ -155,6 +162,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       dispatch(setTestStepModalOpenStepId(params.stepId));
     },
     [
+      isExecutionsTab,
       workflowId,
       getContextOverrideData,
       runIndividualStep,
