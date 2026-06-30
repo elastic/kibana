@@ -63,11 +63,11 @@ import {
 } from '../../flyout/entity_details/shared/constants';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../common/lib/telemetry';
-import { UserPanelContent } from '../../flyout/entity_details/user_right/content';
-import { UserPanelHeader } from '../../flyout/entity_details/user_right/header';
-import { useObservedUser } from '../../flyout/entity_details/user_right/hooks/use_observed_user';
+import { Content as UserPanelContent } from '../../flyout_v2/entity/user/main/content';
+import { Header as UserPanelHeader } from '../../flyout_v2/entity/user/main/header';
+import { useObservedUser } from '../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useManagedUser } from '../../flyout/entity_details/shared/hooks/use_managed_user';
-import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout/entity_details/user_right/constants';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/user/main/constants';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { ServicePanelContent } from '../../flyout/entity_details/service_right/content';
 import { ServicePanelHeader } from '../../flyout/entity_details/service_right/header';

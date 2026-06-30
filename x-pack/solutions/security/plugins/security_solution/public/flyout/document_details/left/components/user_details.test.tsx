@@ -14,7 +14,7 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { UserDetails } from './user_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
-import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
+import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
@@ -91,7 +91,7 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
 
 jest.mock('../../../../helper_hooks', () => ({ useHasSecurityCapability: () => true }));
 
-jest.mock('../../../entity_details/user_right/hooks/use_observed_user');
+jest.mock('../../../../flyout_v2/entity/user/main/hooks/use_observed_user');
 const mockUseObservedUser = useObservedUser as jest.Mock;
 
 jest.mock('../../../../common/containers/related_entities/related_hosts');
