@@ -290,9 +290,7 @@ export const Main: FunctionComponent<MainProps> = ({
       (ds) => (dataSetsCountByDataSource.get(ds.name) ?? 0) > 0
     );
     if (hasRelatedDataSets) {
-      setDeleteDataSourcesError(
-        mainTranslations.confirmDeleteDataSources.hasRelatedDataSetsError
-      );
+      setDeleteDataSourcesError(mainTranslations.confirmDeleteDataSources.hasRelatedDataSetsError);
       return;
     }
 
@@ -734,7 +732,10 @@ export const Main: FunctionComponent<MainProps> = ({
         description={
           <>
             {mainTranslations.pageDescription}{' '}
-            <EuiLink href="https://www.elastic.co/docs/reference/query-languages/esql/esql-federated-data" target="_blank">
+            <EuiLink
+              href="https://www.elastic.co/docs/reference/query-languages/esql/esql-federated-data"
+              target="_blank"
+            >
               {mainTranslations.docsLink}
             </EuiLink>
           </>
