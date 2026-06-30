@@ -213,8 +213,40 @@ describe('cancelWorkflow', () => {
 
     await cancelWorkflow(buildCancelParams({ workflowExecutionRepository, workflowTaskManager }));
 
+    expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ id: workflowExecutionId, status: ExecutionStatus.CANCELLED }),
+      { refresh: 'wait_for' }
+    );
     expect(
       workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
     ).toHaveBeenCalled();
+  });
+
+  it('does not refresh when cancelling queued execution without schedulingRequest', async () => {
+    const workflowExecutionRepository = buildRepository(
+      buildExecution({
+        status: ExecutionStatus.QUEUED,
+        concurrencyGroupKey: 'group-a',
+        workflowDefinition: {
+          name: 'wf',
+          enabled: true,
+          version: '1',
+          triggers: [],
+          steps: [],
+          settings: { concurrency: { key: 'group-a', strategy: 'queue', max: 1 } },
+        },
+      })
+    );
+    const workflowTaskManager = buildTaskManager();
+
+    await cancelWorkflow({
+      ...buildCancelParams({ workflowExecutionRepository, workflowTaskManager }),
+      schedulingRequest: undefined,
+    });
+
+    expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ id: workflowExecutionId, status: ExecutionStatus.CANCELLED }),
+      {}
+    );
   });
 });

@@ -61,27 +61,31 @@ export const cancelWorkflow = async ({
     workflowExecution.status === ExecutionStatus.PENDING ||
     workflowExecution.status === ExecutionStatus.QUEUED;
 
-  await workflowExecutionRepository.updateWorkflowExecution({
-    id: workflowExecution.id,
-    ...(freesConcurrencySlotImmediately ? { status: ExecutionStatus.CANCELLED } : {}),
-    cancelRequested: true,
-    cancellationReason: 'Cancelled by user',
-    cancelledAt: new Date().toISOString(),
-    cancelledBy: 'system',
-  });
+  const concurrencySettings = workflowExecution.workflowDefinition?.settings?.concurrency;
+  const shouldRefreshBeforeQueueDrain =
+    freesConcurrencySlotImmediately &&
+    concurrencySettings?.strategy === 'queue' &&
+    workflowExecution.concurrencyGroupKey &&
+    schedulingRequest;
+
+  await workflowExecutionRepository.updateWorkflowExecution(
+    {
+      id: workflowExecution.id,
+      ...(freesConcurrencySlotImmediately ? { status: ExecutionStatus.CANCELLED } : {}),
+      cancelRequested: true,
+      cancellationReason: 'Cancelled by user',
+      cancelledAt: new Date().toISOString(),
+      cancelledBy: 'system',
+    },
+    shouldRefreshBeforeQueueDrain ? { refresh: 'wait_for' } : {}
+  );
 
   await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
     spaceId: workflowExecution.spaceId,
     fakeRequest: schedulingRequest,
   });
 
-  const concAfterCancel = workflowExecution.workflowDefinition?.settings?.concurrency;
-  if (
-    freesConcurrencySlotImmediately &&
-    concAfterCancel?.strategy === 'queue' &&
-    workflowExecution.concurrencyGroupKey &&
-    schedulingRequest
-  ) {
+  if (shouldRefreshBeforeQueueDrain && concurrencySettings) {
     try {
       await drainConcurrencyQueueSlots({
         workflowExecutionRepository,
@@ -89,7 +93,7 @@ export const cancelWorkflow = async ({
         logger,
         spaceId: workflowExecution.spaceId,
         concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
-        concurrencySettings: concAfterCancel,
+        concurrencySettings,
         request: schedulingRequest,
       });
     } catch (drainErr) {
