@@ -133,7 +133,7 @@ actions:
         | `aiops_pattern_analysis` | Pattern analysis |
 
         > info
-        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `field_stats_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
+        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
         ### Embedding library items
 
