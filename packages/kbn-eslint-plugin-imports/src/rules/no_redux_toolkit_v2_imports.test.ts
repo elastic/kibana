@@ -40,6 +40,9 @@ ruleTester.run('@kbn/imports/no_redux_toolkit_v2_imports', NoReduxToolkitV2Impor
     { code: `import { something } from 'redux-devtools-extension';` },
     // require with v1 alias
     { code: `const rtk = require('redux-toolkit-v1');` },
+    // jest.mock with v1 alias
+    { code: `jest.mock('react-redux-v7', () => ({ useSelector: jest.fn() }));` },
+    { code: `jest.requireActual('redux-toolkit-v1');` },
     // infra files are skipped (tested via filename)
     {
       code: `import { configureStore } from '@reduxjs/toolkit';`,
@@ -96,6 +99,16 @@ ruleTester.run('@kbn/imports/no_redux_toolkit_v2_imports', NoReduxToolkitV2Impor
       code: `const redux = require('redux');`,
       errors: [{ message: msg('redux-v4', 'redux') }],
       output: `const redux = require('redux-v4');`,
+    },
+    {
+      code: `jest.mock('react-redux', () => ({ useSelector: jest.fn() }));`,
+      errors: [{ message: msg('react-redux-v7', 'react-redux') }],
+      output: `jest.mock('react-redux-v7', () => ({ useSelector: jest.fn() }));`,
+    },
+    {
+      code: `jest.requireActual('immer');`,
+      errors: [{ message: msg('immer-v9', 'immer') }],
+      output: `jest.requireActual('immer-v9');`,
     },
   ],
 });
