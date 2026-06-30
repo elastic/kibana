@@ -268,7 +268,9 @@ run(
     log.info(`\nSnapshot discoveries (${discoveries.length}):`);
     if (discoveries.length > 0) {
       for (const discovery of discoveries) {
-        log.info(formatDiscovery(discovery));
+        for (const line of formatDiscovery(discovery)) {
+          log.info(line);
+        }
       }
     } else {
       log.info('  (none — snapshot taken without --discovery)');
