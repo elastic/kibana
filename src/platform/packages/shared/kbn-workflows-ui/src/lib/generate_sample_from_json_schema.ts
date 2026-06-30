@@ -10,7 +10,8 @@
 import type { JSONSchema7 } from 'json-schema';
 import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
+
+export const INPUT_STRING_PLACEHOLDER = '<your_input>';
 
 const MAX_REF_RESOLUTION_DEPTH = 32;
 
