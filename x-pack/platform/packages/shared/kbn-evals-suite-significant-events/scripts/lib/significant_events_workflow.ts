@@ -11,7 +11,8 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Discovery, Feature, StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
+import type { Discovery, Feature} from '@kbn/significant-events-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
   STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
