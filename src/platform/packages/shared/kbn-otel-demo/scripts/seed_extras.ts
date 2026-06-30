@@ -57,9 +57,8 @@ run(
         2. Pre-seeds significant event memory pages with demo context.
 
       Run this after the demo is up (node scripts/otel_demo.js).
-      Uses the \`scs\` CLI from PATH if available, otherwise pulls and runs
-      the published Docker image (ghcr.io/elastic/semantic-code-search:main).
-      Pass --skip-code-search to skip code search entirely.
+      Requires the \`scs\` CLI from https://github.com/elastic/semantic-code-search
+      unless --skip-code-search is passed.
     `,
     flags: {
       string: ['config', 'version'],

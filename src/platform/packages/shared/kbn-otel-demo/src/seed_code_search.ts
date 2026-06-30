@@ -16,10 +16,11 @@ import type { ElasticsearchConfig } from './read_kibana_config';
 
 const OTEL_DEMO_REPO_URL = 'https://github.com/open-telemetry/opentelemetry-demo.git';
 const OTEL_DEMO_REPOSITORY = 'open-telemetry/opentelemetry-demo';
-const SCS_DOCKER_IMAGE = 'ghcr.io/elastic/semantic-code-search:main';
+const SCS_REPO_URL = 'https://github.com/elastic/semantic-code-search.git';
 
 // Cached outside the Kibana repo so it persists across branches and is never committed.
 const SCS_CACHE_DIR = path.join(os.homedir(), '.kbn-otel-scs');
+const SCS_BIN = path.join(SCS_CACHE_DIR, 'packages', 'cli', 'dist', 'src', 'bin.js');
 // Tracks which version is currently indexed so --version changes trigger a re-index.
 const INDEXED_VERSION_FILE = path.join(SCS_CACHE_DIR, '.indexed-version');
 
@@ -31,74 +32,49 @@ interface SeedCodeSearchOptions {
   log: ToolingLog;
 }
 
-type ScsMode = 'path' | 'docker';
-
 /**
- * Returns whether to use the PATH-installed `scs` binary or the Docker image.
- * Prefers PATH; falls back to pulling the published Docker image (no build step).
+ * Returns [exe, ...prefixArgs] for invoking the scs CLI.
+ * Prefers a PATH-installed `scs`; falls back to cloning + building the monorepo.
  */
-async function ensureScs(log: ToolingLog): Promise<ScsMode> {
+async function ensureScs(log: ToolingLog): Promise<[string, ...string[]]> {
   try {
     await execa.command('scs --version');
     log.info('Using scs from PATH.');
-    return 'path';
+    return ['scs'];
   } catch {
-    // not on PATH — fall through to Docker
+    // not on PATH — fall through to local build
   }
 
-  log.info(`Pulling SCS Docker image (${SCS_DOCKER_IMAGE}) ...`);
-  await execa('docker', ['pull', SCS_DOCKER_IMAGE], { stdio: 'inherit' });
-  return 'docker';
-}
+  if (!fs.existsSync(SCS_BIN)) {
+    if (!fs.existsSync(SCS_CACHE_DIR)) {
+      log.info(`Cloning elastic/semantic-code-search to ${SCS_CACHE_DIR} ...`);
+      await execa('git', ['clone', '--depth', '1', SCS_REPO_URL, SCS_CACHE_DIR], {
+        stdio: 'inherit',
+      });
+    } else {
+      log.info(`Pulling latest scs in ${SCS_CACHE_DIR} ...`);
+      await execa('git', ['pull'], { cwd: SCS_CACHE_DIR, stdio: 'inherit' });
+    }
 
-/**
- * Replaces localhost/127.0.0.1 with host.docker.internal so that URLs
- * passed to a Docker container can reach the host's services.
- */
-const toDockerHost = (s: string) =>
-  s.replace(/\b(localhost|127\.0\.0\.1)\b/g, 'host.docker.internal');
+    log.info('Installing scs dependencies (yarn install) ...');
+    // CXXFLAGS=--std=c++20 is required to compile tree-sitter native bindings against Node 24 headers.
+    await execa('yarn', ['install'], {
+      cwd: SCS_CACHE_DIR,
+      stdio: 'inherit',
+      env: { ...process.env, CXXFLAGS: '--std=c++20' },
+    });
 
-/**
- * Runs an scs subcommand using either the PATH-installed binary or the Docker image.
- * When mode is 'docker' and repoDir is provided, it is mounted read-only at /repo
- * inside the container and scs args referencing the repo must use /repo.
- */
-async function runScs(
-  mode: ScsMode,
-  scsArgs: string[],
-  env: NodeJS.ProcessEnv,
-  repoDir?: string
-): Promise<void> {
-  if (mode === 'path') {
-    await execa('scs', scsArgs, { stdio: 'inherit', env });
-    return;
+    log.info('Building scs CLI (nx run @elastic/scs:build) ...');
+    await execa('yarn', ['nx', 'run', '@elastic/scs:build'], {
+      cwd: SCS_CACHE_DIR,
+      stdio: 'inherit',
+      env: { ...process.env, NX_LOAD_DOT_ENV_FILES: 'false' },
+    });
+  } else {
+    log.info(`Using cached scs build at ${SCS_BIN}`);
   }
 
-  // Rewrite localhost references in env values and CLI args so the container
-  // can reach host-side services (Elasticsearch, Kibana).
-  const dockerEnv: NodeJS.ProcessEnv = {};
-  for (const [k, v] of Object.entries(env)) {
-    dockerEnv[k] = typeof v === 'string' ? toDockerHost(v) : v;
-  }
-  const dockerArgs = scsArgs.map(toDockerHost);
-
-  await execa(
-    'docker',
-    [
-      'run',
-      '--rm',
-      // Allow the container to reach host services via host.docker.internal on Linux.
-      ...(process.platform === 'linux' ? ['--add-host', 'host.docker.internal:host-gateway'] : []),
-      ...(repoDir ? ['-v', `${repoDir}:/repo:ro`] : []),
-      ...Object.entries(dockerEnv)
-        .filter((entry): entry is [string, string] => typeof entry[1] === 'string')
-        .flatMap(([k, v]) => ['-e', `${k}=${v}`]),
-      SCS_DOCKER_IMAGE,
-      'scs',
-      ...dockerArgs,
-    ],
-    { stdio: 'inherit' }
-  );
+  return ['node', SCS_BIN];
 }
 
 /**
@@ -155,13 +131,14 @@ export async function seedCodeSearch({
   version,
   log,
 }: SeedCodeSearchOptions) {
-  const [scsMode, repoDir] = await Promise.all([
+  const [scsBin, repoDir] = await Promise.all([
     ensureScs(log),
     ensureOtelDemoAtVersion(version, log),
   ]);
+  const [exe, ...prefixArgs] = scsBin;
 
   // scs reads ES credentials from environment variables
-  const env: NodeJS.ProcessEnv = {
+  const env = {
     ...process.env,
     ELASTICSEARCH_ENDPOINT: elasticsearch.hosts,
     ELASTICSEARCH_USERNAME: elasticsearch.username,
@@ -190,13 +167,10 @@ export async function seedCodeSearch({
       );
     }
 
-    // In Docker mode the repo is mounted at /repo; in path mode pass the local path directly.
-    const repoDirArg = scsMode === 'docker' ? '/repo' : repoDir;
-    await runScs(
-      scsMode,
-      ['index', repoDirArg, '--clean', '--repository', OTEL_DEMO_REPOSITORY],
-      env,
-      scsMode === 'docker' ? repoDir : undefined
+    await execa(
+      exe,
+      [...prefixArgs, 'index', repoDir, '--clean', '--repository', OTEL_DEMO_REPOSITORY],
+      { stdio: 'inherit', env }
     );
 
     setIndexedVersion(version);
@@ -205,9 +179,10 @@ export async function seedCodeSearch({
 
   log.info('Installing agentic interfaces into Kibana ...');
 
-  await runScs(
-    scsMode,
+  await execa(
+    exe,
     [
+      ...prefixArgs,
       'install-agentic-interfaces',
       '--kibana-url',
       kibanaUrl,
@@ -216,7 +191,7 @@ export async function seedCodeSearch({
       '--password',
       kibanaCredentials.password,
     ],
-    env
+    { stdio: 'inherit', env }
   );
 
   log.info('Agentic interfaces installed.');
