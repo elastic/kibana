@@ -361,7 +361,10 @@ describe('updateDataStreamsLifecycle inherit', () => {
 
 describe('updateDataStreamsFailureStore', () => {
   interface FailureStoreEsClient {
-    indices: Pick<ElasticsearchClient['indices'], 'putDataStreamOptions' | 'simulateIndexTemplate'>;
+    indices: Pick<
+      ElasticsearchClient['indices'],
+      'putDataStreamOptions' | 'getDataStream' | 'simulateTemplate' | 'simulateIndexTemplate'
+    >;
   }
 
   let mockEsClient: jest.Mocked<FailureStoreEsClient>;
@@ -371,13 +374,17 @@ describe('updateDataStreamsFailureStore', () => {
     mockEsClient = {
       indices: {
         putDataStreamOptions: jest.fn().mockResolvedValue({}),
-        simulateIndexTemplate: jest.fn().mockResolvedValue({
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [{ name: 'test-stream', template: 'test-stream-template' }],
+        }),
+        simulateTemplate: jest.fn().mockResolvedValue({
           template: {
             data_stream_options: {
               failure_store: { enabled: true, lifecycle: { enabled: true, data_retention: '7d' } },
             },
           },
         }),
+        simulateIndexTemplate: jest.fn().mockResolvedValue({}),
       },
     };
 
@@ -516,9 +523,10 @@ describe('updateDataStreamsFailureStore', () => {
       isServerless: false,
     });
 
-    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
-      name: 'test-stream',
+    expect(mockEsClient.indices.simulateTemplate).toHaveBeenCalledWith({
+      name: 'test-stream-template',
     });
+    expect(mockEsClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
       {
@@ -533,7 +541,7 @@ describe('updateDataStreamsFailureStore', () => {
   });
 
   it('disables failure store when failureStore is set to inherit and template has no failure store config', async () => {
-    mockEsClient.indices.simulateIndexTemplate = jest.fn().mockResolvedValue({
+    mockEsClient.indices.simulateTemplate = jest.fn().mockResolvedValue({
       template: {},
     });
 
@@ -549,8 +557,8 @@ describe('updateDataStreamsFailureStore', () => {
       isServerless: false,
     });
 
-    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
-      name: 'test-stream',
+    expect(mockEsClient.indices.simulateTemplate).toHaveBeenCalledWith({
+      name: 'test-stream-template',
     });
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
@@ -587,9 +595,10 @@ describe('updateDataStreamsFailureStore', () => {
     );
   });
 
-  it('logs and throws error when simulateIndexTemplate fails', async () => {
-    const error = new Error('Template simulation error');
-    mockEsClient.indices.simulateIndexTemplate = jest.fn().mockRejectedValue(error);
+  it('fails closed (does not change failure store) when the template cannot be simulated', async () => {
+    mockEsClient.indices.simulateTemplate = jest
+      .fn()
+      .mockRejectedValue(new Error('Template simulation error'));
 
     await expect(
       updateDataStreamsFailureStore({
@@ -599,11 +608,11 @@ describe('updateDataStreamsFailureStore', () => {
         stream: createMockClassicStream('test-stream'),
         isServerless: false,
       })
-    ).rejects.toThrow('Template simulation error');
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Error updating data stream failure store: Template simulation error'
+    ).rejects.toThrow(
+      'Cannot determine template failure store for test-stream — the data stream may be replicated and managed by a remote cluster'
     );
+
+    expect(mockEsClient.indices.putDataStreamOptions).not.toHaveBeenCalled();
   });
 });
 
@@ -695,18 +704,6 @@ describe('simulateClassicStreamTemplate', () => {
 
   it('returns undefined for an empty simulated template (e.g. replicated streams)', async () => {
     mockSimulateTemplate.mockResolvedValue({});
-
-    const template = await simulateClassicStreamTemplate({
-      esClient: mockEsClient as unknown as ElasticsearchClient,
-      name: 'logs-foo-default',
-      logger: mockLogger as unknown as Logger,
-    });
-
-    expect(template).toBeUndefined();
-  });
-
-  it('degrades to undefined when the template simulation fails', async () => {
-    mockSimulateTemplate.mockRejectedValue(new Error('boom'));
 
     const template = await simulateClassicStreamTemplate({
       esClient: mockEsClient as unknown as ElasticsearchClient,
