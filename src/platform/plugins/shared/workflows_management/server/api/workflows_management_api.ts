@@ -586,7 +586,7 @@ export class WorkflowsManagementApi {
         taskType: WORKFLOW_WEBHOOK_DISPATCH_TASK_TYPE,
         params: { workflowId, spaceId },
         state: {},
-        runAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          schedule: { interval: '365d' },
         scope: ['workflows', `workflow:${workflowId}`],
       },
       { request }
