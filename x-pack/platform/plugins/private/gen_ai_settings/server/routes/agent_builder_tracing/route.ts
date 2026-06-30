@@ -11,8 +11,8 @@ import {
 } from '@kbn/management-settings-ids';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
-const syncAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
-  endpoint: 'POST /internal/gen_ai_settings/agent_builder/sync_tracing_dashboard',
+const syncAgentBuilderTracingPlatformFeaturesRoute = createGenAiSettingsServerRoute({
+  endpoint: 'POST /internal/gen_ai_settings/agent_builder/sync_tracing_platform_features',
   security: {
     authz: {
       requiredPrivileges: ['manage_advanced_settings'],
@@ -21,7 +21,7 @@ const syncAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
   handler: async (resources): Promise<{ installed: boolean }> => {
     const { request, plugins } = resources;
 
-    if (!plugins.agentBuilder) {
+    if (!plugins.agentBuilderPlatform) {
       return { installed: false };
     }
 
@@ -38,13 +38,16 @@ const syncAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute({
     );
     const enabled = tracingEnabled && experimentalFeaturesEnabled;
 
-    const agentBuilderStart = await plugins.agentBuilder.start();
-    await agentBuilderStart.dashboard.syncOverviewForSpace(enabled, request.spaceId);
+    const agentBuilderPlatformStart = await plugins.agentBuilderPlatform.start();
+    await agentBuilderPlatformStart.tracingFeatures.sync({
+      enabled,
+      spaceId: request.spaceId,
+    });
 
-    return { installed: enabled };
+    return { installed: true };
   },
 });
 
-export const agentBuilderTracingDashboardRoutes = {
-  ...syncAgentBuilderTracingDashboardRoute,
+export const agentBuilderTracingRoutes = {
+  ...syncAgentBuilderTracingPlatformFeaturesRoute,
 };
