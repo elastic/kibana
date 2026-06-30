@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../../../../flyout/entity_details/shared/components/take_action';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
@@ -37,22 +37,20 @@ export const Footer = ({ identityFields, entity }: FooterProps) => {
   }, [euidApi?.euid, entity]);
 
   return (
-    <EuiPanel color="transparent">
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <AiAssistantButton
-            entityType={EntityType.user}
-            entityName={userName}
-            telemetryPathway="entity_flyout"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TakeAction
-            isDisabled={!userName || !isInSecurityApp}
-            kqlQuery={euidEntityFilter ?? `user.name: "${userName}"`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <AiAssistantButton
+          entityType={EntityType.user}
+          entityName={userName}
+          telemetryPathway="entity_flyout"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TakeAction
+          isDisabled={!userName || !isInSecurityApp}
+          kqlQuery={euidEntityFilter ?? `user.name: "${userName}"`}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
