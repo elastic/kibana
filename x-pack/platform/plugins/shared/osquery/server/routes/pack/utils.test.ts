@@ -15,6 +15,7 @@ import {
   resolvePackScheduleForUpdate,
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
+  resolvePreservedQueries,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -1360,5 +1361,68 @@ describe('Pack utils', () => {
         transitioned: false,
       });
     });
+  });
+});
+
+describe('resolvePreservedQueries', () => {
+  const existing = {
+    q1: { schedule_id: 'sid-q1', start_date: 'd1' },
+    q2: { schedule_id: 'sid-q2', start_date: 'd2' },
+  };
+
+  it('matches each query to its own stored row by map key', () => {
+    const result = resolvePreservedQueries(
+      { q1: { id: 'q1', query: 'a' }, q2: { id: 'q2', query: 'b' } },
+      existing
+    );
+    expect(result).toEqual({
+      q1: { schedule_id: 'sid-q1', start_date: 'd1' },
+      q2: { schedule_id: 'sid-q2', start_date: 'd2' },
+    });
+  });
+
+  it('re-pairs a renamed query (changed map key) via the incoming `id`', () => {
+    const result = resolvePreservedQueries({ q1_renamed: { id: 'q1', query: 'a' } }, existing);
+    expect(result.q1_renamed).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+  });
+
+  it('consumes each stored row at most once — a stale duplicate `id` does not collide', () => {
+    // q2 lies that its id is q1, but q2 also owns a stored row `q2`. Pass 1
+    // matches BOTH queries by their own map key (q1→q1, q2→q2), so the stale
+    // `id: q1` claim never fires and the two keep distinct schedule_ids.
+    const result = resolvePreservedQueries(
+      { q1: { id: 'q1', query: 'a' }, q2: { id: 'q1', query: 'b' } },
+      existing
+    );
+    expect(result.q1).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+    expect(result.q2).toEqual({ schedule_id: 'sid-q2', start_date: 'd2' });
+    expect(result.q1).not.toEqual(result.q2);
+  });
+
+  it('a stale `id` only matters when the claiming query has no stored row of its own', () => {
+    // `extra` has no stored row by its own key and claims q1. But q1 (present
+    // in the outgoing set) reserves its own row in pass 1, so `extra` finds q1
+    // already consumed and is left unmatched (caller mints fresh) — no collision.
+    const result = resolvePreservedQueries(
+      { q1: { id: 'q1', query: 'a' }, extra: { id: 'q1', query: 'b' } },
+      existing
+    );
+    expect(result.q1).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+    expect(result.extra).toBeUndefined();
+  });
+
+  it('is independent of key order — the real owner keeps its row even if the impostor comes first', () => {
+    const result = resolvePreservedQueries(
+      { other: { id: 'q1', query: 'b' }, q1: { id: 'q1', query: 'a' } },
+      existing
+    );
+    // Pass 1 reserves q1 for the query whose map key is q1; the impostor misses.
+    expect(result.q1).toEqual({ schedule_id: 'sid-q1', start_date: 'd1' });
+    expect(result.other).toBeUndefined();
+  });
+
+  it('leaves a brand-new query unmatched', () => {
+    const result = resolvePreservedQueries({ fresh: { query: 'x' } }, existing);
+    expect(result.fresh).toBeUndefined();
   });
 });

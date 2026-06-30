@@ -57,12 +57,13 @@ import {
   buildScheduleResponseSlice,
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
+  resolvePreservedQueries,
 } from './utils';
 
 import { convertShardsToArray, convertShardsToObject } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
-import type { PackQueryInput } from './utils';
+import type { PackQueryInput, PreservableQueryFields } from './utils';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
@@ -184,11 +185,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const existingQueriesById = keyBy(currentPackSO.attributes.queries ?? [], 'id') as Record<
           string,
-          {
-            schedule_id?: string;
-            start_date?: string;
-            rrule_schedule?: PackQueryInput['rrule_schedule'];
-          }
+          PreservableQueryFields
         >;
 
         const resolved = resolvePackScheduleForUpdate({
@@ -227,12 +224,16 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               >)
             : undefined);
 
+        // Map each outgoing query to the stored query it preserves
+        // `schedule_id` / `start_date` from, guaranteeing no two queries share a
+        // stored row (see `resolvePreservedQueries`).
+        const resolvedExistingByKey = baseQueries
+          ? resolvePreservedQueries(baseQueries, existingQueriesById)
+          : {};
+
         const queries = baseQueries
           ? (mapValues(baseQueries, (queryData, queryId) => {
-              const incomingId = queryData.id;
-              const existing =
-                (incomingId ? existingQueriesById[incomingId] : undefined) ??
-                existingQueriesById[queryId];
+              const existing = resolvedExistingByKey[queryId];
               const carried = resolved.transitioned
                 ? stripPriorModePerQueryFields(queryData, resolved.scheduleType)
                 : queryData;

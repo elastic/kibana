@@ -1484,5 +1484,113 @@ describe('updatePackRoute', () => {
       expect(badRequest).not.toHaveBeenCalled();
       expect(ok).toHaveBeenCalledTimes(1);
     });
+
+    it('does not let two queries collide on one schedule_id when a stale `id` is reused', async () => {
+      // Konrad review #3: a stale/duplicate client-supplied `id` (here `q2`
+      // lies that its id is `q1`) must not make both queries inherit the same
+      // stored `schedule_id`. Each stored row is consumable once: `q1` keeps
+      // its own id (matched by map key first), and the impostor `q2` mints a
+      // fresh schedule_id instead of stealing `q1`'s.
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          queries: [
+            {
+              id: 'q1',
+              name: 'q1',
+              query: 'SELECT 1',
+              interval: 60,
+              schedule_id: 'sid-q1',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+            {
+              id: 'q2',
+              name: 'q2',
+              query: 'SELECT 2',
+              interval: 60,
+              schedule_id: 'sid-q2',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          queries: {
+            q1: { id: 'q1', query: 'SELECT 1', interval: 60 },
+            q2: { id: 'q1', query: 'SELECT 2', interval: 60 }, // <-- stale/wrong id
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      const written = getWrittenQueries(mockClient);
+      const q1 = written.find((q) => q.id === 'q1')!;
+      const q2 = written.find((q) => q.id === 'q2')!;
+      // q1 keeps its own stored schedule_id.
+      expect(q1.schedule_id).toBe('sid-q1');
+      // q2's stale id claim is rejected: it does NOT inherit sid-q1.
+      expect(q2.schedule_id).not.toBe('sid-q1');
+      // No two queries share a schedule_id.
+      expect(q1.schedule_id).not.toBe(q2.schedule_id);
+    });
+
+    it('reserves a query`s own id before honoring another query`s rename claim on it', async () => {
+      // Order-independence: even if the impostor (`other`, claiming id `q1`)
+      // is processed, the real `q1` must not lose its schedule_id. Pass 1
+      // reserves `q1` for the query whose own map key is `q1`; the rename
+      // claimant only gets unreserved rows.
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          queries: [
+            {
+              id: 'q1',
+              name: 'q1',
+              query: 'SELECT 1',
+              interval: 60,
+              schedule_id: 'sid-q1',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          queries: {
+            other: { id: 'q1', query: 'SELECT 2', interval: 60 }, // claims q1's id
+            q1: { id: 'q1', query: 'SELECT 1', interval: 60 }, // the real q1
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      const written = getWrittenQueries(mockClient);
+      const realQ1 = written.find((q) => q.id === 'q1')!;
+      const other = written.find((q) => q.id === 'other')!;
+      // The real q1 keeps its schedule_id; the impostor does not steal it.
+      expect(realQ1.schedule_id).toBe('sid-q1');
+      expect(other.schedule_id).not.toBe('sid-q1');
+    });
   });
 });
