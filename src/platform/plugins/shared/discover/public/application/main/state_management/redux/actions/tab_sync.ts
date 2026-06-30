@@ -94,7 +94,9 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const initializeAndSyncUrlState = () => {
       const { persistedDiscoverSession } = getState();
-      const hasPersistedSession = Boolean(persistedDiscoverSession?.id);
+      const hasPersistedTab = Boolean(
+        persistedDiscoverSession?.tabs.some((tab) => tab.id === tabId)
+      );
 
       addLog('[tab_sync] initialize state and sync with URL', { persistedDiscoverSession });
 
@@ -102,16 +104,16 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         getCurrentUrlState(urlStateStorage, services);
 
       // Only reset profile defaults that are not already set in the URL.
-      // Persisted sessions own their saved state, so only non-persisted fields can be reset.
+      // Persisted tabs own their saved state, so only non-persisted fields can be reset.
       dispatch(
         internalStateActions.setProfileStateFieldsToReset({
           tabId,
           fieldsToReset: getFieldsToReset({
-            columns: columns === undefined && !hasPersistedSession,
-            rowHeight: rowHeight === undefined && !hasPersistedSession,
-            breakdownField: breakdownField === undefined && !hasPersistedSession,
-            hideChart: hideChart === undefined && !hasPersistedSession,
-            hideTable: hideTable === undefined && !hasPersistedSession,
+            columns: columns === undefined && !hasPersistedTab,
+            rowHeight: rowHeight === undefined && !hasPersistedTab,
+            breakdownField: breakdownField === undefined && !hasPersistedTab,
+            hideChart: hideChart === undefined && !hasPersistedTab,
+            hideTable: hideTable === undefined && !hasPersistedTab,
             hideSidebar: hideSidebar === undefined,
           }),
         })
