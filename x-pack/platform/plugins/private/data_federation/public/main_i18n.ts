@@ -14,7 +14,7 @@ export const mainTranslations = {
 
   pageDescription: i18n.translate('xpack.dataFederation.pageDescription', {
     defaultMessage:
-      'Register datasets from your external data sources to query with ES|QL, alongside your indexed data.',
+      'Connect to external data sources and add specific datasets to query with ES|QL, just like your indexed data. No ingestion required.',
   }),
 
   technicalPreview: i18n.translate('xpack.dataFederation.technicalPreview', {
