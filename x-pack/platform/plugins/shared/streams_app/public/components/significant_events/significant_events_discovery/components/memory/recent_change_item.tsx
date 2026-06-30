@@ -16,7 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { changeTypeColors, changeTypeIcons, formatRelativeTime } from './utils';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { changeTypeColors, changeTypeIcons } from './utils';
 import type { MemoryVersionRecord } from './types';
 
 export function RecentChangeItem({
@@ -58,7 +59,7 @@ export function RecentChangeItem({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {formatRelativeTime(change.created_at)}
+            <FormattedRelative value={change.created_at} />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

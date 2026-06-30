@@ -18,10 +18,11 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { MemoryDiffViewer } from './memory_diff_viewer';
 import type { MemoryEntry, MemoryVersionRecord } from './types';
 import { useMemoryHistory, useMemoryVersion } from './use_memory';
-import { changeTypeColors, formatRelativeTime } from './utils';
+import { changeTypeColors } from './utils';
 
 export function HistoryPanel({ entryId, entry }: { entryId: string; entry: MemoryEntry }) {
   const { data: historyData, isLoading } = useMemoryHistory(entryId);
@@ -81,7 +82,7 @@ export function HistoryPanel({ entryId, entry }: { entryId: string; entry: Memor
       width: '130px',
       render: (date: string) => (
         <EuiToolTip content={new Date(date).toLocaleString()}>
-          <span>{formatRelativeTime(date)}</span>
+          <FormattedRelative value={date} />
         </EuiToolTip>
       ),
     },

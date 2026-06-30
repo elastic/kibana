@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import {
   useConsolidateMemory,
@@ -37,7 +38,6 @@ import {
   useDetectGaps,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
-import { formatRelativeTime } from './utils';
 import { EntryFlyout } from './entry_flyout';
 import { ChangeFlyout } from './change_flyout';
 import { CreateEntryFlyout } from './create_entry_flyout';
@@ -251,7 +251,8 @@ export function MemoryTab() {
                           <EuiFlexGroup gutterSize="xs" alignItems="center" wrap>
                             <EuiFlexItem grow={false}>
                               <EuiText size="xs" color="subdued">
-                                {formatRelativeTime(result.updated_at)} · {result.updated_by}
+                                <FormattedRelative value={result.updated_at} /> ·{' '}
+                                {result.updated_by}
                               </EuiText>
                             </EuiFlexItem>
                             {result.tags.map((tag) => (

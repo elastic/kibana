@@ -96,6 +96,7 @@ export function MemoryDiffViewer({
                     text-decoration: ${part.removed ? 'line-through' : 'none'};
                   `}
                 >
+                  {part.added ? '+ ' : part.removed ? '- ' : ''}
                   {part.value}
                 </span>
               ))}

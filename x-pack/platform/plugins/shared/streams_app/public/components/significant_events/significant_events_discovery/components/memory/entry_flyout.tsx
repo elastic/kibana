@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { isEqual } from 'lodash';
 import {
   EuiBadge,
   EuiButton,
@@ -118,10 +119,20 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
   const isDirty =
     isEditing &&
     !!entry &&
-    (editTitle !== entry.title ||
-      editContent !== entry.content ||
-      editCategories.map((c) => c.label).join('\0') !== entry.categories.join('\0') ||
-      editTags.map((t) => t.label).join('\0') !== entry.tags.join('\0'));
+    !isEqual(
+      {
+        title: entry.title,
+        content: entry.content,
+        categories: entry.categories,
+        tags: entry.tags,
+      },
+      {
+        title: editTitle,
+        content: editContent,
+        categories: editCategories.map((c) => c.label),
+        tags: editTags.map((t) => t.label),
+      }
+    );
 
   const handleEdit = useCallback(() => {
     if (entry) {
