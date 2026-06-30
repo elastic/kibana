@@ -278,6 +278,7 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export type { RendererDefinition, RendererPayloadOf } from './renderers';
 export { EffortLevels, type EffortLevel } from './model_provider';
 export {
   type OAuthClient,

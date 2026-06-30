@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { RendererUIDefinition } from '@kbn/agent-builder-browser';
 import { RenderersService } from './renderers_service';
 
 const dashboardDefinition: RendererUIDefinition = {
   type: 'dashboard',
+  payloadSchema: z.object({ id: z.string() }),
   render: () => null,
 };
 

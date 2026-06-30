@@ -7,6 +7,8 @@
 
 import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
+import type { z, ZodObject } from '@kbn/zod/v4';
+import type { RendererDefinition } from '@kbn/agent-builder-common/renderers';
 
 /**
  * Context passed to a renderer's {@link RendererUIDefinition.render} function.
@@ -61,30 +63,31 @@ export interface RendererActionButtonsParams<TPayload = unknown> {
 /**
  * Browser-side UI definition for rendering objects of a specific renderer type.
  *
- * Correlated with its server-side renderer type definition (and the
- * `<render type="…" />` directive) by the `type` field.
+ * Extends the shared {@link RendererDefinition} (type + payload schema) with the
+ * browser-only rendering members. Because it carries the `payloadSchema`, the
+ * browser has everything it needs to validate a resolved payload before mounting,
+ * and the payload type passed to `render` is inferred directly from the schema.
  */
-export interface RendererUIDefinition<TPayload = unknown> {
-  /**
-   * Unique identifier for the renderer type to register.
-   */
-  type: string;
+export interface RendererUIDefinition<TSchema extends ZodObject<any> = ZodObject<any>>
+  extends RendererDefinition<string, TSchema> {
   /**
    * Renders the payload inline in the conversation.
    */
-  render: (payload: TPayload, ctx: RendererRenderContext) => ReactNode;
+  render: (payload: z.infer<TSchema>, ctx: RendererRenderContext) => ReactNode;
   /**
    * Optional header metadata (icon, subtitle) for the rendered object.
    */
-  getHeader?: (payload: TPayload) => RendererHeaderData;
+  getHeader?: (payload: z.infer<TSchema>) => RendererHeaderData;
   /**
    * Optional action buttons displayed alongside the rendered object.
    */
-  getActionButtons?: (params: RendererActionButtonsParams<TPayload>) => RendererActionButton[];
+  getActionButtons?: (
+    params: RendererActionButtonsParams<z.infer<TSchema>>
+  ) => RendererActionButton[];
   /**
    * Optional custom renderer for canvas mode (expanded flyout view).
    */
-  renderCanvas?: (payload: TPayload, ctx: RendererCanvasContext) => ReactNode;
+  renderCanvas?: (payload: z.infer<TSchema>, ctx: RendererCanvasContext) => ReactNode;
   /**
    * Optional preferred width for the canvas flyout. Accepts any valid CSS width
    * value (e.g. `'600px'`, `'40vw'`).
@@ -102,13 +105,13 @@ export interface RendererServiceStartContract {
    * @param definition - The UI definition; the renderer type is taken from `definition.type`.
    * @throws Error if a renderer for the type is already registered.
    */
-  register: <TPayload = unknown>(definition: RendererUIDefinition<TPayload>) => void;
+  register: <TSchema extends ZodObject<any> = ZodObject<any>>(
+    definition: RendererUIDefinition<TSchema>
+  ) => void;
   /**
    * Retrieves the UI definition for a renderer type, or `undefined` if none is registered.
    */
-  getRendererUiDefinition: <TPayload = unknown>(
-    type: string
-  ) => RendererUIDefinition<TPayload> | undefined;
+  getRendererUiDefinition: (type: string) => RendererUIDefinition | undefined;
   /**
    * Checks whether a UI definition is registered for the given renderer type.
    */
