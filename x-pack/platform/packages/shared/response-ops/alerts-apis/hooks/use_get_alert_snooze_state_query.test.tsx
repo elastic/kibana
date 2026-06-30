@@ -10,13 +10,13 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/get_muted_alerts_instances_by_rule';
-import { useGetMutedAlertsQuery } from './use_get_muted_alerts_query';
+import { useGetAlertSnoozeStateQuery } from './use_get_alert_snooze_state_query';
 
 jest.mock('../apis/get_muted_alerts_instances_by_rule');
 
 const ruleIds = ['a', 'b'];
 
-describe('useGetMutedAlertsQuery', () => {
+describe('useGetAlertSnoozeStateQuery', () => {
   const http = httpServiceMock.createStartContract();
   const notifications = notificationServiceMock.createStartContract();
   const addErrorMock = notifications.toasts.addError;
@@ -26,33 +26,32 @@ describe('useGetMutedAlertsQuery', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const muteAlertInstanceSpy = jest.spyOn(api, 'getMutedAlertsInstancesByRule');
+    const spy = jest.spyOn(api, 'getAlertSnoozeStateByRule');
 
-    renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }), {
+    renderHook(() => useGetAlertSnoozeStateQuery({ http, notifications, ruleIds }), {
       wrapper: Wrapper,
     });
 
-    await waitFor(() =>
-      expect(muteAlertInstanceSpy).toHaveBeenCalledWith(expect.objectContaining({ ruleIds }))
-    );
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(expect.objectContaining({ ruleIds })));
   });
 
   it('does not call the api if the enabled option is false', async () => {
-    const spy = jest.spyOn(api, 'getMutedAlertsInstancesByRule');
+    const spy = jest.spyOn(api, 'getAlertSnoozeStateByRule');
 
-    renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }, { enabled: false }), {
-      wrapper: Wrapper,
-    });
+    renderHook(
+      () => useGetAlertSnoozeStateQuery({ http, notifications, ruleIds }, { enabled: false }),
+      { wrapper: Wrapper }
+    );
 
     await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api returns an error', async () => {
     const spy = jest
-      .spyOn(api, 'getMutedAlertsInstancesByRule')
+      .spyOn(api, 'getAlertSnoozeStateByRule')
       .mockRejectedValue(new Error('An error'));
 
-    renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }), {
+    renderHook(() => useGetAlertSnoozeStateQuery({ http, notifications, ruleIds }), {
       wrapper: Wrapper,
     });
 
