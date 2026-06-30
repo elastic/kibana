@@ -67,6 +67,52 @@ Domains with **1-based** list APIs that embed detail in each row (e.g. workflows
 
 For list-backed adapters, ensure `getChange` can resolve while the list is refetching (e.g. do not clear an in-memory detail cache until new list data has arrived).
 
+## EBT telemetry
+
+The package emits **browser EBT** events when `ChangeHistoryProvider` receives **`scope`** and **`analytics`** (`Pick<AnalyticsServiceStart, 'reportEvent'>`). Set `features={{ telemetry: false }}` to disable reporting (UI behavior is unchanged).
+
+### Register event types
+
+Consuming plugins must register schemas once at setup:
+
+```tsx
+import { changeHistoryTelemetryEvents } from '@kbn/change-history-ui';
+
+analytics.registerEventType(changeHistoryTelemetryEvents[0]);
+// or register all:
+changeHistoryTelemetryEvents.forEach((event) => analytics.registerEventType(event));
+```
+
+Export `changeHistoryTelemetryEvents`, `changeHistoryTelemetryEventSchemas`, `ChangeHistoryTelemetryEventTypes`, and `changeHistoryTelemetryEventNames` from this package.
+
+### Wire the provider
+
+```tsx
+<ChangeHistoryProvider
+  scope={{ module: 'stack', dataset: 'workflows', objectType: 'workflow' }}
+  analytics={{ reportEvent: telemetry.reportEvent }}
+  /* … */
+>
+```
+
+Every payload includes `eventName`, `module`, `dataset`, and `objectType` (from `scope`).
+
+### Events
+
+| Event type | `eventName` | When emitted | Notable properties |
+| --- | --- | --- | --- |
+| `change_history_opened` | Change history opened | First open of the modal per object | — |
+| `change_history_change_selected` | Change history change selected | User selects a timeline row or auto-selects latest | `selectionSource` (`user_click` \| `auto_latest`), `hasSequence`, optional `eventAction` |
+| `change_history_filter_applied` | Change history filter applied | Filter UI applies a change *(not wired yet)* | `filterType` (`timeRange` \| `actor`), optional `hasActiveTimeRange`, `activeActorCount` |
+| `change_history_diff_viewed` | Change history diff viewed | User views a diff *(not wired yet)* | `comparisonType` (`vs_current` \| `vs_previous`), optional `versionDistance`, `compareMode`, `hasSemanticSummary` |
+| `change_history_restore_confirmed` | Change history restore confirmed | User confirms restore in the dialog | optional `restoredFromSequence`, `currentSequence`, `rollbackDistance` |
+| `change_history_restore_completed` | Change history restore completed | Restore API succeeds | same sequence fields + optional `newSequence`, `durationMs` (confirm → API success) |
+| `change_history_restore_failed` | Change history restore failed | Restore API fails | optional `errorCode` (e.g. `RESTORE_CONFLICT`) |
+
+`rollbackDistance` is `currentSequence - restoredFromSequence` when both are present. Sequence fields are omitted when list rows lack `object.sequence`.
+
+Use `useChangeHistoryConfig().telemetry` to emit custom events (e.g. filters or diff) from domain-specific UI built on this package.
+
 ## Running tests
 
 ```bash
@@ -82,3 +128,4 @@ node scripts/jest x-pack/platform/packages/shared/kbn-change-history-ui/src/comp
 - Query key helpers (`changeHistoryListQueryKey`, `changeHistoryDetailQueryKey`, `changeHistoryObjectQueryKeyPrefix`, `changeHistoryScopeQueryKeyPrefix`, …)
 - `ChangeHistoryModal`, `ChangeHistoryTrigger`, `ChangeHistoryPreviewPanel`
 - `createChangeHistoryHttpAdapter`
+- Telemetry (`changeHistoryTelemetryEvents`, `ChangeHistoryTelemetryEventTypes`, `createChangeHistoryTelemetryReporter`, …)
