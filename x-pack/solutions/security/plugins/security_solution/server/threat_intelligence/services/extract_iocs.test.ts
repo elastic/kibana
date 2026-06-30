@@ -288,10 +288,10 @@ describe('extract_iocs — DROP side (precision filters)', () => {
       expect(tieredValues(r, 'reference', 'domain')).toContain('bazaar.abuse.ch');
     });
 
-    test('github.com bare domain is emitted with tier=reference', () => {
+    test('github.com bare domain passes through to uncertain (content-host, path is the signal)', () => {
       const r = extractIocs({ text: 'source code at github.com' });
-      expect(anchorDomainValues(r)).not.toContain('github.com');
-      expect(tieredValues(r, 'reference', 'domain')).toContain('github.com');
+      const ioc = r.iocs.find((i) => i.type === 'domain' && i.value === 'github.com');
+      expect(ioc?.tier).toBe('uncertain');
     });
 
     test('attack.mitre.org is emitted with tier=reference', () => {
@@ -386,12 +386,13 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       expect(domainValues(r)).toContain('c2infrastructure.io');
     });
 
-    test('retains legitimate GitHub subdomains used for C2', () => {
-      // raw.githubusercontent.com — not covered by bare 'github.com' noise entry
+    test('retains raw.githubusercontent.com as uncertain (content-host, URL carries the signal)', () => {
       const r = extractIocs({
         text: 'payload fetched from raw.githubusercontent.com via certutil',
       });
       expect(domainValues(r)).toContain('raw.githubusercontent.com');
+      const ioc = r.iocs.find((i) => i.value === 'raw.githubusercontent.com');
+      expect(ioc?.tier).toBe('uncertain');
     });
   });
 
@@ -472,16 +473,18 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
   });
 
   describe('noise domain denylist additions (eval-2026-06-23) — reference tier', () => {
-    test('registry.npmjs.org → reference tier, not anchor-eligible', () => {
+    test('registry.npmjs.org → uncertain (content-host removed from denylist; path is the signal)', () => {
       const r = extractIocs({ text: 'package fetched from registry.npmjs.org/lodash' });
-      expect(anchorDomainValues(r)).not.toContain('registry.npmjs.org');
-      expect(tieredValues(r, 'reference', 'domain')).toContain('registry.npmjs.org');
+      const ioc = r.iocs.find((i) => i.value === 'registry.npmjs.org');
+      expect(ioc?.tier).toBe('uncertain');
     });
 
-    test('eset.com → reference tier, not anchor-eligible', () => {
+    test('eset.com → reference/vendor_research tier, not anchor-eligible', () => {
       const r = extractIocs({ text: 'ESET researchers at eset.com published this analysis' });
       expect(anchorDomainValues(r)).not.toContain('eset.com');
       expect(tieredValues(r, 'reference', 'domain')).toContain('eset.com');
+      const ioc = r.iocs.find((i) => i.value === 'eset.com');
+      expect(ioc?.tier_basis).toBe('vendor_research');
     });
   });
 
@@ -602,7 +605,9 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
 
   describe('tier fields — heuristic assignment (Stage B1)', () => {
     test('hash IOC gets tier=discriminating, basis=hash_high_entropy', () => {
-      const r = extractIocs({ text: 'sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' });
+      const r = extractIocs({
+        text: 'sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      });
       const hash = r.iocs.find((ioc) => ioc.type === 'hash');
       expect(hash?.tier).toBe('discriminating');
       expect(hash?.tier_heuristic).toBe('discriminating');
@@ -921,14 +926,18 @@ describe('extract_iocs — email host not added to defangedDomains (Fix 2)', () 
       expect(domIoc.tier_basis).not.toBe('defanged_source');
     }
     // Email IOC is still extracted correctly
-    expect(r.iocs.filter((i) => i.type === 'email').map((i) => i.value)).toContain('evil@gmail.com');
+    expect(r.iocs.filter((i) => i.type === 'email').map((i) => i.value)).toContain(
+      'evil@gmail.com'
+    );
   });
 
   test('defanged email with provider domain — provider domain not emitted as IOC at all', () => {
     // gmail.com appears ONLY as the email host, not standalone — must not be emitted.
     const r = extractIocs({ text: 'attacker only used evil@gmail[.]com for comms' });
     expect(r.iocs.filter((i) => i.type === 'domain' && i.value === 'gmail.com')).toHaveLength(0);
-    expect(r.iocs.filter((i) => i.type === 'email').map((i) => i.value)).toContain('evil@gmail.com');
+    expect(r.iocs.filter((i) => i.type === 'email').map((i) => i.value)).toContain(
+      'evil@gmail.com'
+    );
   });
 
   test('domain defanged in email AND standalone keeps discriminating tier', () => {
@@ -942,6 +951,103 @@ describe('extract_iocs — email host not added to defangedDomains (Fix 2)', () 
   });
 });
 
+// ── B1.6 Fix 1: defanged IP promotion ────────────────────────────────────────
+
+describe('extract_iocs — defanged IP promotion (B1.6 Fix 1)', () => {
+  test('defanged public IP → discriminating/defanged_source (203[.]0[.]113[.]5)', () => {
+    const r = extractIocs({ text: 'C2 server at 203[.]0[.]113[.]5:443' });
+    const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === '203.0.113.5');
+    expect(ioc?.tier).toBe('discriminating');
+    expect(ioc?.tier_basis).toBe('defanged_source');
+  });
+
+  test('defanged private IP stays reference/private_ip (10[.]0[.]0[.]1)', () => {
+    // private_ip wins over defanged_source — a defanged LAN address is not a C2 indicator
+    const r = extractIocs({ text: 'lateral movement via 10[.]0[.]0[.]1' });
+    const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === '10.0.0.1');
+    expect(ioc?.tier).toBe('reference');
+    expect(ioc?.tier_basis).toBe('private_ip');
+  });
+
+  test('non-defanged public IP stays uncertain (203.0.113.99)', () => {
+    const r = extractIocs({ text: 'C2 at 203.0.113.99' });
+    const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === '203.0.113.99');
+    expect(ioc?.tier).toBe('uncertain');
+    expect(ioc?.tier_basis).toBe('uncertain_default');
+  });
+
+  test('defanged C2 IP with hxxps URL → discriminating (142[.]11[.]206[.]73 corpus gold)', () => {
+    // Simulates the Axios supply-chain gold TP IP
+    const r = extractIocs({ text: 'C2 IP 142[.]11[.]206[.]73 port 8000' });
+    const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === '142.11.206.73');
+    expect(ioc?.tier).toBe('discriminating');
+    expect(ioc?.tier_basis).toBe('defanged_source');
+  });
+});
+
+// ── B1.6 Fix 2: vendor/research domains + content-host reclassification ──────
+
+describe('extract_iocs — vendor/research domains (B1.6 Fix 2)', () => {
+  test('microsoft.com → reference/vendor_research (exact match)', () => {
+    const r = extractIocs({ text: 'download from microsoft.com security portal' });
+    expect(tieredValues(r, 'reference', 'domain')).toContain('microsoft.com');
+    expect(anchorDomainValues(r)).not.toContain('microsoft.com');
+    const ioc = r.iocs.find((i) => i.value === 'microsoft.com');
+    expect(ioc?.tier_basis).toBe('vendor_research');
+  });
+
+  test('kaspersky.com → reference/vendor_research (exact match)', () => {
+    const r = extractIocs({ text: 'analysis at kaspersky.com research' });
+    expect(tieredValues(r, 'reference', 'domain')).toContain('kaspersky.com');
+    expect(anchorDomainValues(r)).not.toContain('kaspersky.com');
+    const ioc = r.iocs.find((i) => i.value === 'kaspersky.com');
+    expect(ioc?.tier_basis).toBe('vendor_research');
+  });
+
+  test('research.kaspersky.com → reference/vendor_research (suffix match)', () => {
+    const r = extractIocs({ text: 'blog post at research.kaspersky.com' });
+    expect(tieredValues(r, 'reference', 'domain')).toContain('research.kaspersky.com');
+    const ioc = r.iocs.find((i) => i.value === 'research.kaspersky.com');
+    expect(ioc?.tier_basis).toBe('vendor_research');
+  });
+
+  test('reset.com does NOT match eset.com suffix (dotted prefix prevents collision)', () => {
+    const r = extractIocs({ text: 'domain reset.com observed' });
+    const ioc = r.iocs.find((i) => i.value === 'reset.com');
+    expect(ioc?.tier_basis).not.toBe('vendor_research');
+    expect(ioc?.tier).toBe('uncertain');
+  });
+
+  test('unit42.paloaltonetworks.com → reference/vendor_research (suffix match)', () => {
+    const r = extractIocs({ text: 'report at unit42.paloaltonetworks.com' });
+    const ioc = r.iocs.find((i) => i.value === 'unit42.paloaltonetworks.com');
+    expect(ioc?.tier).toBe('reference');
+    expect(ioc?.tier_basis).toBe('vendor_research');
+  });
+
+  test('raw.githubusercontent.com → uncertain (content-host; URL IOCs still captured)', () => {
+    const r = extractIocs({
+      text: 'payload at https://raw.githubusercontent.com/attacker/repo/stage2.bin raw.githubusercontent.com',
+    });
+    const bareIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'raw.githubusercontent.com');
+    expect(bareIoc?.tier).toBe('uncertain');
+    // URL itself is still extracted
+    expect(urlValues(r)).toContain('https://raw.githubusercontent.com/attacker/repo/stage2.bin');
+  });
+
+  test('github.com → uncertain (content-host, not in denylist or vendor set)', () => {
+    const r = extractIocs({ text: 'source at github.com' });
+    const ioc = r.iocs.find((i) => i.value === 'github.com');
+    expect(ioc?.tier).toBe('uncertain');
+  });
+
+  test('baidu.com → uncertain (removed from denylist; benign incumbent for B2 to judge)', () => {
+    const r = extractIocs({ text: 'liveness check to baidu.com hardcoded' });
+    const ioc = r.iocs.find((i) => i.value === 'baidu.com');
+    expect(ioc?.tier).toBe('uncertain');
+  });
+});
+
 // ── URL host tier inheritance ──────────────────────────────────────────────────
 
 describe('extract_iocs — URL tier inherits from host', () => {
@@ -952,11 +1058,11 @@ describe('extract_iocs — URL tier inherits from host', () => {
     expect(url?.tier_basis).toMatch(/url_host_inherited:defanged_source/);
   });
 
-  test('URL with CDN host inherits contextual tier', () => {
+  test('URL with CDN host stays uncertain (lift-only; non-discriminating host does not propagate)', () => {
     const r = extractIocs({ text: 'C2 at https://attacker.s3.amazonaws.com/payload' });
     const url = r.iocs.find((i) => i.type === 'url');
-    expect(url?.tier).toBe('contextual');
-    expect(url?.tier_basis).toMatch(/url_host_inherited:known_cdn/);
+    expect(url?.tier).toBe('uncertain');
+    expect(url?.tier_basis).toBe('uncertain_default');
   });
 
   test('URL with ordinary unknown host is uncertain', () => {
@@ -968,5 +1074,23 @@ describe('extract_iocs — URL tier inherits from host', () => {
   test('C2 URL with port preserves port in value', () => {
     const r = extractIocs({ text: 'beacon to http://sfrclak.com:8000/6202033' });
     expect(urlValues(r)).toContain('http://sfrclak.com:8000/6202033');
+  });
+
+  test('URL on content-hosting host stays uncertain even with discriminating path', () => {
+    // Path carries the signal — host is not discriminating, so no lift to reference/contextual.
+    // B2 judges the full URL.
+    const r = extractIocs({
+      text: 'payload at https://raw.githubusercontent.com/attacker/repo/payload.ps1',
+    });
+    const url = r.iocs.find((i) => i.type === 'url');
+    expect(url?.tier).toBe('uncertain');
+    expect(url?.tier_basis).toBe('uncertain_default');
+  });
+
+  test('URL on discriminating (defanged) host lifts to discriminating', () => {
+    const r = extractIocs({ text: 'C2 https://evil[.]com/stage2' });
+    const url = r.iocs.find((i) => i.type === 'url');
+    expect(url?.tier).toBe('discriminating');
+    expect(url?.tier_basis).toMatch(/url_host_inherited:defanged_source/);
   });
 });

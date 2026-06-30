@@ -20,8 +20,15 @@
  * Scope: exact hostname only — subdomains are NOT automatically covered.
  * Add both `abuse.ch` and `bazaar.abuse.ch` if both are noise.
  *
- * NOT in scope here: vendor CDNs / cloud providers that can also appear as IOC infra
- * (e.g. cloudflare.com, amazonaws.com). Those are intentionally excluded.
+ * NOT in scope here:
+ *   - Vendor CDNs / cloud providers that can also appear as IOC infra
+ *     (e.g. cloudflare.com, amazonaws.com) — intentionally excluded.
+ *   - Pure security-vendor / research domains (kaspersky.com, eset.com, etc.) —
+ *     covered by VENDOR_RESEARCH_DOMAINS in extract_iocs.ts with suffix matching
+ *     so subdomains (research.kaspersky.com, blog.eset.com) are automatically included.
+ *   - Content-hosting / dual-use platforms where the path is the discriminating
+ *     signal (github.com, raw.githubusercontent.com, npmjs.com) — left as uncertain
+ *     so B2 can judge the full URL rather than the bare host.
  */
 
 interface NoiseDomainEntry {
@@ -132,14 +139,6 @@ export const IOC_NOISE_DOMAIN_LIST: readonly NoiseDomainEntry[] = [
     source: 'manual',
   },
   {
-    domain: 'github.com',
-    rationale:
-      'GitHub — appears as tool/code reference. NOTE: github.com subdomains (raw.githubusercontent.com, ' +
-      'gist.github.com) can be legitimate IOCs and are NOT covered by this entry.',
-    added: '2026-06-08',
-    source: 'manual',
-  },
-  {
     domain: 'twitter.com',
     rationale: 'Social media reference link — never adversary C2 in direct-domain form',
     added: '2026-06-08',
@@ -171,12 +170,6 @@ export const IOC_NOISE_DOMAIN_LIST: readonly NoiseDomainEntry[] = [
   },
   // ── Package registries ────────────────────────────────────────────────────
   {
-    domain: 'registry.npmjs.org',
-    rationale: 'npm package registry — cited as supply-chain reference, never adversary C2',
-    added: '2026-06-25',
-    source: 'eval-2026-06-23',
-  },
-  {
     domain: 'packages.npm.org',
     rationale: 'npm CDN/packages host — distribution infrastructure reference, never IOC',
     added: '2026-06-25',
@@ -185,13 +178,6 @@ export const IOC_NOISE_DOMAIN_LIST: readonly NoiseDomainEntry[] = [
   {
     domain: 'npmjs.org',
     rationale: 'npm organization domain — package registry citation, not adversary infra',
-    added: '2026-06-25',
-    source: 'eval-2026-06-23',
-  },
-  // ── AV vendor self-citations ──────────────────────────────────────────────
-  {
-    domain: 'eset.com',
-    rationale: 'ESET AV vendor — appears in reports as vendor attribution, never C2',
     added: '2026-06-25',
     source: 'eval-2026-06-23',
   },

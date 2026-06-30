@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import { IOC_TYPES, type IocType } from '../../../common/threat_intelligence/hub';
+import { type IocType } from '../../../common/threat_intelligence/hub';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
 
@@ -118,10 +118,7 @@ const IPV4_OCTET = '(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)';
 const IPV4 = `(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`;
 const DOMAIN_LABEL = '[a-z0-9](?:[a-z0-9\\-]*[a-z0-9])?';
 const DOMAIN_HOST = `(?:${DOMAIN_LABEL}\\.)+[a-z]{2,24}`;
-const SOCKET_PATTERN = new RegExp(
-  `\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`,
-  'gi'
-);
+const SOCKET_PATTERN = new RegExp(`\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`, 'gi');
 
 // ── Keep existing filter infrastructure ─────────────────────────────────────
 
@@ -329,6 +326,35 @@ const PUBLIC_SUFFIX_DROPLIST = new Set([
 const isPrivateIp = (ip: string) => PRIVATE_IP_PREFIXES.some((p) => ip.startsWith(p));
 
 /**
+ * Pure security-vendor and research domains — exact-match OR suffix-match
+ * (so research.kaspersky.com, blog.eset.com are caught without explicit enumeration).
+ *
+ * Match rule: domain === base  OR  domain.endsWith('.' + base)
+ * The dotted `.${base}` form prevents collisions (reset.com must NOT match eset.com).
+ *
+ * Only pure security vendors / research orgs belong here. Content-hosting platforms
+ * (github.com, npmjs.com) belong in the uncertain bucket — their path is the signal.
+ * microsoft.com stays here: it appears only as a product/download reference in CTI.
+ */
+const VENDOR_RESEARCH_DOMAINS = new Set([
+  'kaspersky.com',
+  'securelist.com',
+  'eset.com',
+  'welivesecurity.com',
+  'paloaltonetworks.com',
+  'mandiant.com',
+  'sentinelone.com',
+  'sophos.com',
+  'fortinet.com',
+  'dragos.com',
+  'recordedfuture.com',
+  'ahnlab.com',
+  'nviso.eu',
+  'harfanglab.io',
+  'microsoft.com',
+]);
+
+/**
  * Well-known CDN / cloud / hosting base domains that appear regularly as IOC
  * infrastructure but are too common to be discriminating anchors. Subdomains of
  * these that appear in threat reports are real (contextual), but they cannot
@@ -340,7 +366,7 @@ const isPrivateIp = (ip: string) => PRIVATE_IP_PREFIXES.some((p) => ip.startsWit
  * costs detection signal.
  *
  * NOT listed: github.com, virustotal.com, elastic.co — those are in
- * IOC_NOISE_DOMAINS (reference tier), not here.
+ * IOC_NOISE_DOMAINS (reference tier) or VENDOR_RESEARCH_DOMAINS, not here.
  */
 const LOW_DISCRIMINATION_DOMAINS = new Set([
   'amazonaws.com',
@@ -414,9 +440,7 @@ const extractTld = (domain: string): string => {
   return lastDot === -1 ? domain : domain.slice(lastDot + 1);
 };
 
-type DomainFilterResult =
-  | { emit: false }
-  | { emit: true; tier: IocTier; basis: string };
+type DomainFilterResult = { emit: false } | { emit: true; tier: IocTier; basis: string };
 
 /**
  * Domain filter pipeline.
@@ -458,6 +482,14 @@ const classifyDomain = (
   // Step d — noise domain denylist: KEEP but tag reference so it's visible + measurable.
   if (IOC_NOISE_DOMAINS.has(lower)) {
     return { emit: true, tier: 'reference', basis: 'denylist' };
+  }
+
+  // Step d2 — vendor/research domain suffix match: KEEP but tag reference.
+  // Exact match OR subdomain of a known vendor base (dotted prefix prevents collisions).
+  for (const base of VENDOR_RESEARCH_DOMAINS) {
+    if (lower === base || lower.endsWith(`.${base}`)) {
+      return { emit: true, tier: 'reference', basis: 'vendor_research' };
+    }
   }
 
   // Step e — corroboration gate for ambiguous/code-shaped TLDs: KEEP but tag denied.
@@ -538,9 +570,7 @@ const refang = (text: string): string =>
     // Bracket-wrapped colon (after scheme separator already handled)
     .replace(/\[:\]/g, ':')
     // Obfuscated scheme prefix: hxxps?:// (any casing of the XX) → http(s)://
-    .replace(/hxxps?:\/\//gi, (m) =>
-      m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'
-    )
+    .replace(/hxxps?:\/\//gi, (m) => (m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'))
     // Email defang: [@] or (at) → @
     .replace(/\[@\]|\(at\)/gi, '@');
 
@@ -613,6 +643,21 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     rawDomainsInRefangedNoEmails.filter((d) => !rawDomainsInOriginal.has(d))
   );
 
+  // ── Corroboration signal 1b: defanged-in-source IPs ──────────────────────
+  // Mirrors defangedDomains: an IP present in refangedTextNoEmails but absent
+  // from the original text was created by refang → vendor deliberately defanged
+  // it (e.g. 142[.]11[.]206[.]73) → strongest discriminating signal for IPs.
+  const rawIpsInOriginal = new Set(
+    (originalLower.match(new RegExp(IP_PATTERN.source, IP_PATTERN.flags)) ?? []).map((ip) =>
+      ip.toLowerCase()
+    )
+  );
+  const defangedIps: ReadonlySet<string> = new Set(
+    (refangedLowerNoEmails.match(new RegExp(IP_PATTERN.source, IP_PATTERN.flags)) ?? []).filter(
+      (ip) => !rawIpsInOriginal.has(ip)
+    )
+  );
+
   const pushIoc = (ioc: ExtractedIoc) => {
     const dedupKey = `${ioc.type}:${ioc.value.toLowerCase()}`;
     if (seen.has(dedupKey)) return;
@@ -659,15 +704,19 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       consumed.push([idx, idx + match[0].length]);
       rawUrls.push(raw);
 
-      // URL tier: inherit from host classification.
+      // URL tier: lift-only. A discriminating host lifts the URL to discriminating.
+      // Any non-discriminating host (reference, contextual, uncertain) leaves the URL
+      // uncertain — the path/query carries the signal and B2 should judge the full URL.
       let tier: IocTier = 'uncertain';
       let basis = 'uncertain_default';
       try {
         const host = new URL(raw).hostname.toLowerCase();
         if (host) {
           const hostResult = classifyDomainTier(host, defangedDomains);
-          tier = hostResult.tier;
-          basis = `url_host_inherited:${hostResult.basis}`;
+          if (hostResult.tier === 'discriminating') {
+            tier = 'discriminating';
+            basis = `url_host_inherited:${hostResult.basis}`;
+          }
         }
       } catch {
         // malformed URL — keep uncertain
@@ -743,9 +792,19 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         tier_basis: cidrBasis,
       });
 
-      // Derived bare IP — tiers as normal public IP (uncertain).
-      const ipTier: IocTier = isPrivateIp(networkIp) ? 'reference' : 'uncertain';
-      const ipBasis = isPrivateIp(networkIp) ? 'private_ip' : 'uncertain_default';
+      // Derived bare IP — private wins, then defanged-in-source, else uncertain.
+      let ipTier: IocTier;
+      let ipBasis: string;
+      if (isPrivateIp(networkIp)) {
+        ipTier = 'reference';
+        ipBasis = 'private_ip';
+      } else if (defangedIps.has(networkIp)) {
+        ipTier = 'discriminating';
+        ipBasis = 'defanged_source';
+      } else {
+        ipTier = 'uncertain';
+        ipBasis = 'uncertain_default';
+      }
       pushIoc({
         type: 'ip',
         value: networkIp,
@@ -800,11 +859,22 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       consumed.push([idx, idx + match[0].length]);
 
       // Classify host as ip or domain
-      const ipMatch = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/.test(host);
+      const ipMatch =
+        /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/.test(host);
 
       if (ipMatch) {
-        const tier: IocTier = isPrivateIp(host) ? 'reference' : 'uncertain';
-        const basis = isPrivateIp(host) ? 'private_ip' : 'uncertain_default';
+        let tier: IocTier;
+        let basis: string;
+        if (isPrivateIp(host)) {
+          tier = 'reference';
+          basis = 'private_ip';
+        } else if (defangedIps.has(host)) {
+          tier = 'discriminating';
+          basis = 'defanged_source';
+        } else {
+          tier = 'uncertain';
+          basis = 'uncertain_default';
+        }
         const dedupKey = `ip:${host}`;
         if (!seen.has(dedupKey)) {
           seen.add(dedupKey);
@@ -881,8 +951,18 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   {
     const matches = remainderText.match(new RegExp(IP_PATTERN.source, IP_PATTERN.flags)) ?? [];
     for (const raw of matches) {
-      const tier: IocTier = isPrivateIp(raw) ? 'reference' : 'uncertain';
-      const basis = isPrivateIp(raw) ? 'private_ip' : 'uncertain_default';
+      let tier: IocTier;
+      let basis: string;
+      if (isPrivateIp(raw)) {
+        tier = 'reference';
+        basis = 'private_ip';
+      } else if (defangedIps.has(raw)) {
+        tier = 'discriminating';
+        basis = 'defanged_source';
+      } else {
+        tier = 'uncertain';
+        basis = 'uncertain_default';
+      }
       pushIoc({
         type: 'ip',
         value: raw,
@@ -945,9 +1025,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // change whether two reports are considered to share infrastructure).
   // `value` is already normalized (lowercase for domain/url/hash); the .toLowerCase()
   // call is a safety net for ip and future types.
-  const anchorEligible = iocs.filter(
-    (ioc) => ioc.tier !== 'reference' && ioc.tier !== 'denied'
-  );
+  const anchorEligible = iocs.filter((ioc) => ioc.tier !== 'reference' && ioc.tier !== 'denied');
   const iocSetHash =
     anchorEligible.length === 0
       ? null
