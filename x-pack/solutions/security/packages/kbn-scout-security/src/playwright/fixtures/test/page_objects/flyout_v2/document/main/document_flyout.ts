@@ -317,13 +317,15 @@ export class DocumentFlyout {
    * tool/child flyout on click; today only IP fields (source.ip / destination.ip) are supported.
    */
   highlightedFieldChildLink(field: string): Locator {
-    return this.highlightedFieldsTable
-      .locator('tr')
-      .filter({ hasText: field })
-      // The shared OpenFlyoutLink component renders the linkable value as an EuiLink with this test
-      // subject (OPEN_FLYOUT_LINK_TEST_ID = `${PREFIX}OpenFlyoutLink`); the old
-      // `securitySolutionFlyoutChildLink` id no longer exists (renamed in PR #274017).
-      .locator('[data-test-subj="securitySolutionFlyoutOpenFlyoutLink"]');
+    return (
+      this.highlightedFieldsTable
+        .locator('tr')
+        .filter({ hasText: field })
+        // The shared OpenFlyoutLink component renders the linkable value as an EuiLink with this test
+        // subject (OPEN_FLYOUT_LINK_TEST_ID = `${PREFIX}OpenFlyoutLink`); the old
+        // `securitySolutionFlyoutChildLink` id no longer exists (renamed in PR #274017).
+        .locator('[data-test-subj="securitySolutionFlyoutOpenFlyoutLink"]')
+    );
   }
 
   /** Hover the status badge and wait for the cell-actions hover popover to appear. */
