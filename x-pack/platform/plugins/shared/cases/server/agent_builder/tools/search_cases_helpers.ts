@@ -128,7 +128,12 @@ function buildFullUrl(
     return `${publicBaseUrl}${pathWithSpace}`;
   }
 
-  const protocol = request.headers['x-forwarded-proto'] || 'http';
+  // x-forwarded-proto can be a comma-separated list or string[] in proxied environments;
+  // take the last value (nearest proxy = most specific) to avoid "http,https://host/path".
+  const rawProto = request.headers['x-forwarded-proto'];
+  const protocol = Array.isArray(rawProto)
+    ? (rawProto[rawProto.length - 1] ?? 'http')
+    : rawProto ?? 'http';
   const host = request.headers.host || 'localhost:5601';
   const baseUrl = `${protocol}://${host}`;
   const pathWithSpace = addSpaceIdToPath(serverBasePath, spaceId, path);
