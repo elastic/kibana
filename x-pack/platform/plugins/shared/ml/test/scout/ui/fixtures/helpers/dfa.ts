@@ -55,9 +55,7 @@ export const cleanupDfaTest = async ({
   }
   await esClient.indices.delete({ index: destinationIndex, ignore_unavailable: true });
   const destViews = await apiServices.dataViews.getAll();
-  const destView = destViews.data.find(
-    (dv: { title: string }) => dv.title === destinationIndex
-  );
+  const destView = destViews.data.find((dv: { title: string }) => dv.title === destinationIndex);
   if (destView) {
     await apiServices.dataViews.delete(destView.id);
   }

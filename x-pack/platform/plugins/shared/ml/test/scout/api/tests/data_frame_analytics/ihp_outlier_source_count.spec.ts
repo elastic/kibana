@@ -22,9 +22,7 @@ apiTest.describe(
   },
   () => {
     apiTest.beforeAll(async ({ esArchiver }) => {
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier'
-      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
     });
 
     apiTest('ft_ihp_outlier has exactly 1460 documents', async ({ esClient }) => {
