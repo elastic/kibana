@@ -87,8 +87,8 @@ export interface EventEdge extends GraphEdge {
  */
 export interface EventEsqlRow {
   action: string;
-  actorEntityId: string;
-  targetEntityId: string | null;
+  actorEntityId: string | string[];
+  targetEntityId: string | string[] | null;
   isOrigin: boolean;
   isOriginAlert: boolean;
   isAlert: boolean;

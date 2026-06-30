@@ -151,8 +151,8 @@ export const fetchGraph = async ({
   // Collect all entity IDs for a single consolidated enrichment query
   const allEntityIds = new Set<string>();
   for (const r of eventsResult.records) {
-    if (r.actorEntityId) allEntityIds.add(r.actorEntityId);
-    if (r.targetEntityId) allEntityIds.add(r.targetEntityId);
+    addValuesToSet(allEntityIds, r.actorEntityId, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetEntityId, { dropEmpty: true });
   }
   for (const r of relationshipsResult.records) {
     // actorIds is the multi-value set of same-type actors merged in the ES|QL STATS.
