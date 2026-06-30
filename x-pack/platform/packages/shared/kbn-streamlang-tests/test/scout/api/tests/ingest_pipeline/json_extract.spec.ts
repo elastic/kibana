@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { JsonExtractProcessor, StreamlangDSL } from '@kbn/streamlang';
+import type { JsonExtractProcessor, MathProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
@@ -79,13 +79,13 @@ apiTest.describe(
 
     apiTest(
       'should write extracted value into a pre-existing parent object so it is readable downstream',
-      async ({ esClient }) => {
+      async ({ testBed }) => {
         const indexName = 'streams-e2e-test-json-extract-nested-target';
-        const pipelineId = 'streams-e2e-test-json-extract-nested-target-pipeline';
 
         // json_extract into a nested target, then a downstream step that reads it back
-        // via the flexible accessor (mirrors the customer's json_extract -> math repro).
-        const streamlangDSL = {
+        // via the flexible accessor (mirrors the customer's json_extract -> math repro
+        // that previously threw a NullPointerException).
+        const streamlangDSL: StreamlangDSL = {
           steps: [
             {
               action: 'json_extract',
@@ -97,64 +97,42 @@ apiTest.describe(
                   type: 'long',
                 },
               ],
-            },
+            } as JsonExtractProcessor,
             {
               action: 'math',
-              expression: 'attributes.app.action.duration_nano / 1000000000',
-              to: 'attributes.app.action.duration',
-            },
+              expression: 'attributes.app.action.duration_nano + 0',
+              to: 'duration_readback',
+            } as MathProcessor,
           ],
-        } as unknown as StreamlangDSL;
+        };
 
         const { processors } = await transpile(streamlangDSL);
 
-        try {
-          await esClient.indices.create({
-            index: indexName,
-            mappings: { dynamic: 'true' },
-          });
+        // The child-stream pipeline uses the flexible field access pattern; the bug
+        // only surfaces when reads/writes go through it. `attributes` already exists
+        // as a real object on the incoming document.
+        const docs = [
+          {
+            '@timestamp': '2026-06-29T15:30:00Z',
+            attributes: { payload: '{"duration": 68319744}' },
+          },
+        ];
+        const { errors } = await testBed.ingest(indexName, docs, processors, {
+          pipeline: { field_access_pattern: 'flexible' },
+        });
 
-          // The child-stream pipeline uses the flexible field access pattern; the bug
-          // only surfaces when reads/writes go through it.
-          await esClient.ingest.putPipeline({
-            id: pipelineId,
-            field_access_pattern: 'flexible',
-            processors,
-          });
+        // No script_exception / NullPointerException from the downstream read.
+        expect(errors).toHaveLength(0);
 
-          // `attributes` already exists as a real object on the incoming document.
-          const response = await esClient.bulk({
-            refresh: true,
-            pipeline: pipelineId,
-            body: [
-              { index: { _index: indexName } },
-              {
-                '@timestamp': '2026-06-29T15:30:00Z',
-                attributes: { repro: 'yes', payload: '{"duration": 68319744}' },
-              },
-            ],
-          });
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs).toHaveLength(1);
+        const source = ingestedDocs[0] as Record<string, unknown>;
 
-          // No script_exception / NullPointerException from the downstream read.
-          expect(response.errors).toBe(false);
-
-          const searchResponse = await esClient.search({
-            index: indexName,
-            query: { match_all: {} },
-            size: 1,
-          });
-          const source = searchResponse.hits.hits[0]._source as {
-            attributes?: Record<string, unknown>;
-          } & Record<string, unknown>;
-
-          // The value lands inside the existing `attributes` object...
-          expect(source.attributes?.['app.action.duration_nano']).toBe(68319744);
-          // ...and not as a literal top-level dotted key.
-          expect(source['attributes.app.action.duration_nano']).toBeUndefined();
-        } finally {
-          await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
-          await esClient.ingest.deletePipeline({ id: pipelineId }, { ignore: [404] });
-        }
+        // The downstream `$()` read resolved the extracted value (instead of null),
+        // proving it was written somewhere reachable inside `attributes`.
+        expect(source.duration_readback).toBe(68319744);
+        // ...and it was not stranded as a literal top-level dotted key.
+        expect(source['attributes.app.action.duration_nano']).toBeUndefined();
       }
     );
   }
