@@ -206,12 +206,7 @@ export function TraceList({ response }: Props) {
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
       initialPageSize={25}
-<<<<<<< HEAD
-=======
-      actions={traceRowActions}
-      isActionsDisabled={isActionsDisabled}
       tableLayout="auto"
->>>>>>> e6f75e415c70 (feat: truncate long service names in Traces table (#275553))
     />
   );
 }
