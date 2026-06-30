@@ -91,22 +91,22 @@ export function getRelevantRuleIdsFromLogEvent(
   return allRuleIds.filter((ruleId) => matchingSearchIds.ruleIds.includes(ruleId));
 }
 
-export function denormalizeEvent(
+export function buildExecutionHistoryItem(
   event: IValidatedEvent,
   { policyNames, ruleNames, workflowNames }: NameMaps,
   matchingSearchIds?: ResolvedSearchIds
-): PolicyExecutionHistoryItem[] {
+): PolicyExecutionHistoryItem | null {
   if (!event || (matchingSearchIds && !matchingSearchIds.hasMatches)) {
-    return [];
+    return null;
   }
 
   const timestamp = event['@timestamp'];
   const action = event.event?.action;
-  if (!timestamp || !isPolicyOutcome(action)) return [];
+  if (!timestamp || !isPolicyOutcome(action)) return null;
 
   const savedObjects = event.kibana?.saved_objects ?? [];
   const policyId = savedObjects.find((so) => so.type === ACTION_POLICY_SAVED_OBJECT_TYPE)?.id;
-  if (!policyId) return [];
+  if (!policyId) return null;
 
   const dispatcher = event.kibana?.alerting_v2?.dispatcher ?? {};
 
@@ -115,18 +115,21 @@ export function denormalizeEvent(
     .map((so) => so.id);
   const allRuleIds = [...referencedRuleIds, ...(dispatcher.rule_ids ?? [])].filter(isString);
   const relevantRuleIds = getRelevantRuleIdsFromLogEvent(policyId, allRuleIds, matchingSearchIds);
+  if (relevantRuleIds.length === 0) return null;
+
+  const rules = relevantRuleIds.map((id) => ({ id, name: ruleNames.get(id) ?? null }));
 
   const workflows = (dispatcher.workflow_ids ?? [])
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
-  return relevantRuleIds.map((ruleId) => ({
+  return {
     '@timestamp': timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
-    rule: { id: ruleId, name: ruleNames.get(ruleId) ?? null },
     outcome: action,
     episode_count: Number(dispatcher.episode_count ?? 0),
     action_group_count: Number(dispatcher.action_group_count ?? 0),
+    rules,
     workflows,
-  }));
+  };
 }

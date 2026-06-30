@@ -31,8 +31,8 @@ import {
 } from '../services/logger_service/logger_service';
 import { ALERTING_V2_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
-import type { ResolvedSearchIds } from './denormalize_event';
-import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
+import type { ResolvedSearchIds } from './build_execution_history_item';
+import { collectIdsFromEvents, buildExecutionHistoryItem, type NameMaps } from './build_execution_history_item';
 
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
@@ -109,9 +109,11 @@ export class ActionPolicyExecutionHistoryClient {
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
-    const items = result.events.flatMap((event) =>
-      denormalizeEvent(event, nameMaps, searchIsActive ? matchingSearchIds : undefined)
-    );
+    const items = result.events
+      .map((event) =>
+        buildExecutionHistoryItem(event, nameMaps, searchIsActive ? matchingSearchIds : undefined)
+      )
+      .filter((item): item is PolicyExecutionHistoryItem => item !== null);
 
     return {
       items,
