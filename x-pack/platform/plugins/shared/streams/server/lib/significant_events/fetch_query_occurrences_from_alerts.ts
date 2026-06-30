@@ -7,7 +7,10 @@
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { SignificantEventsGetResponse, SignificantEventsResponse } from '@kbn/streams-schema';
+import type {
+  SignificantEventsGetResponse,
+  SignificantEventsResponse,
+} from '@kbn/significant-events-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { chunk, isEmpty } from 'lodash';

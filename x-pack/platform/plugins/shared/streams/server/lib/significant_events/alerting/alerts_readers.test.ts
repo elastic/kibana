@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryLink } from '@kbn/streams-schema';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import {
   RULES_BUCKET_SIZE,
   buildChangePointHistogramBounds,

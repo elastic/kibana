@@ -7,7 +7,7 @@
 
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryLink } from '@kbn/streams-schema';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 

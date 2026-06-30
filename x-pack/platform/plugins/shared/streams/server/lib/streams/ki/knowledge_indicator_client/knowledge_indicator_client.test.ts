@@ -11,9 +11,9 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
+import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import type { SignificantEventsAlertingContext } from '../../../significant_events/alerting/significant_events_alerting_context';
 import { ALERTS_READER_V1 } from '../../../significant_events/alerting/alerts_reader';
-import { computeFeatureUuid } from '@kbn/streams-schema';
 import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 

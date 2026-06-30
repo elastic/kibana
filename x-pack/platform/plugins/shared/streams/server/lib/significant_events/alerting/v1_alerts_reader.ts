@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryLink } from '@kbn/streams-schema';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { toEsqlRequest } from '../../streams/helpers/esql';
 import {

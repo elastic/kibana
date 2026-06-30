@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryLink } from '@kbn/streams-schema';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import { toEsqlRequest } from '../../streams/helpers/esql';
 import {
   RULES_BUCKET_SIZE,

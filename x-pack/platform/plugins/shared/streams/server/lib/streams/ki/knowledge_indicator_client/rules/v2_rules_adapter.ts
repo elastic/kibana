@@ -10,7 +10,8 @@
 import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { stripMetadata, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { MATCH_LOOKBACK_MINUTES } from '../../../../significant_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,

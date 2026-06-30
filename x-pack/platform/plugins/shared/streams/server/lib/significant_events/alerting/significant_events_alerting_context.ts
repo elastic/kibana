@@ -10,7 +10,7 @@ import type { IUiSettingsClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 } from '@kbn/management-settings-ids';
-import { QUERY_TYPE_STATS, type QueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
 import { DualCleanupRulesAdapter } from '../../streams/ki/knowledge_indicator_client/rules/dual_cleanup_rules_adapter';
 import type { IRulesManagementClient } from '../../streams/ki/knowledge_indicator_client/rules/rules_management_client';
 import { RulesAdapterV1 } from '../../streams/ki/knowledge_indicator_client/rules/v1_rules_adapter';
