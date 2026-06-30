@@ -25,5 +25,4 @@ describe('prompts', () => {
       expect((prompt.match(regex) || []).length).toBe(expectedCount);
     }
   );
-
 });
