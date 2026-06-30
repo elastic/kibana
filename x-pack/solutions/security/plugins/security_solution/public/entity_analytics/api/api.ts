@@ -18,6 +18,10 @@ import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
+  AnomalyOverviewRequestBody,
+  AnomalyOverviewResponse,
+  AnomalySummaryRequestBody,
+  AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
   CreateEntitySourceResponse,
@@ -92,6 +96,8 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
+  ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
+  ENTITY_ANOMALY_SUMMARY_INTERNAL_URL,
 } from '../../../common/constants';
 import {
   WATCHLISTS_URL,
@@ -924,6 +930,54 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    const fetchAnomalySummary = ({
+      entityType,
+      entityId,
+      body,
+      signal,
+    }: {
+      entityType: string;
+      entityId: string;
+      body?: AnomalySummaryRequestBody;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<AnomalySummaryResponse>(
+        ENTITY_ANOMALY_SUMMARY_INTERNAL_URL.replace(
+          '{entity_type}',
+          encodeURIComponent(entityType)
+        ).replace('{entity_id}', encodeURIComponent(entityId)),
+        {
+          version: API_VERSIONS.internal.v1,
+          method: 'POST',
+          body: JSON.stringify(body ?? {}),
+          signal,
+        }
+      );
+
+    const fetchAnomalyOverview = ({
+      entityType,
+      entityId,
+      body,
+      signal,
+    }: {
+      entityType: string;
+      entityId: string;
+      body?: AnomalyOverviewRequestBody;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<AnomalyOverviewResponse>(
+        ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL.replace(
+          '{entity_type}',
+          encodeURIComponent(entityType)
+        ).replace('{entity_id}', encodeURIComponent(entityId)),
+        {
+          version: API_VERSIONS.internal.v1,
+          method: 'POST',
+          body: JSON.stringify(body ?? {}),
+          signal,
+        }
+      );
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -977,6 +1031,8 @@ export const useEntityAnalyticsRoutes = () => {
       enableLeadGeneration,
       disableLeadGeneration,
       fetchLeadGenerationPrivileges,
+      fetchAnomalyOverview,
+      fetchAnomalySummary,
     };
   }, [
     http,
