@@ -127,31 +127,8 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
             then: USER_ENTITY_NAMESPACE.Local,
           },
           {
-            condition: {
-              and: [
-                { field: 'event.kind', includes: 'asset' },
-                { field: 'cloud.provider', eq: 'aws' },
-              ],
-            },
-            then: 'aws',
-          },
-          {
-            condition: {
-              and: [
-                { field: 'event.kind', includes: 'asset' },
-                { field: 'cloud.provider', eq: 'gcp' },
-              ],
-            },
-            then: 'gcp',
-          },
-          {
-            condition: {
-              and: [
-                { field: 'event.kind', includes: 'asset' },
-                { field: 'cloud.provider', eq: 'azure' },
-              ],
-            },
-            then: 'entra_id',
+            condition: { field: 'event.kind', includes: 'asset' },
+            then: { field: 'cloud.provider', mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' } },
           },
           { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
