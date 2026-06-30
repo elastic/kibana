@@ -104,7 +104,7 @@ const mockValidationResultFor = (attributes: Record<string, unknown>) => ({
 
 const createMockRouteContext = () => {
   const findDecryptedMonitors = jest.fn().mockResolvedValue([]);
-  const find = jest.fn().mockResolvedValue({ total: 0 });
+  const find = jest.fn().mockResolvedValue({ saved_objects: [] });
   const createInternalRepository = jest.fn().mockReturnValue({});
   return {
     routeContext: {
@@ -341,7 +341,17 @@ describe('UpdateMonitorAPI', () => {
 
     it('records a validation error when a name patch conflicts with an existing monitor', async () => {
       const { routeContext, mocks } = createMockRouteContext();
-      mocks.find.mockResolvedValue({ total: 1 });
+      mocks.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-monitor',
+            attributes: {
+              [ConfigKey.CONFIG_ID]: 'existing-monitor',
+              [ConfigKey.NAME]: 'Already Taken',
+            },
+          },
+        ],
+      });
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
 
       const api = new UpdateMonitorAPI(routeContext);
@@ -352,6 +362,38 @@ describe('UpdateMonitorAPI', () => {
       expect(mocks.find).toHaveBeenCalledTimes(1);
       expect(result.survivors).toHaveLength(0);
       expect(result.perIdErrors['mon-1']).toMatchObject({
+        code: 'validation_failed',
+        message: expect.stringContaining('already exists'),
+      });
+    });
+
+    it('checks existing monitor name conflicts in one SO query for many name patches', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      const updates = Array.from({ length: 50 }, (_, i) => ({
+        id: `mon-${i}`,
+        attributes: { [ConfigKey.NAME]: `Bulk Name ${i}` },
+      }));
+      mocks.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-monitor',
+            attributes: {
+              [ConfigKey.CONFIG_ID]: 'existing-monitor',
+              [ConfigKey.NAME]: 'Bulk Name 17',
+            },
+          },
+        ],
+      });
+      mocks.findDecryptedMonitors.mockResolvedValue(
+        updates.map(({ id }) => mockDecryptedMonitor({ id }))
+      );
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({ updates });
+
+      expect(mocks.find).toHaveBeenCalledTimes(1);
+      expect(result.survivors).toHaveLength(49);
+      expect(result.perIdErrors['mon-17']).toMatchObject({
         code: 'validation_failed',
         message: expect.stringContaining('already exists'),
       });
@@ -372,6 +414,7 @@ describe('UpdateMonitorAPI', () => {
         ],
       });
 
+      expect(mocks.find).not.toHaveBeenCalled();
       expect(result.survivors).toHaveLength(0);
       expect(result.perIdErrors['mon-1']).toMatchObject({
         code: 'validation_failed',

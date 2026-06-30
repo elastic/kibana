@@ -93,7 +93,7 @@ interface ExecuteParams {
 export class UpdateMonitorAPI {
   routeContext: RouteContext;
   result: UpdateMonitorPreprocessResult = { survivors: [], perIdErrors: {} };
-  private patchNameCounts = new Map<string, number>();
+  private namePatchErrors = new Map<string, string>();
 
   /*
    * Request-scoped permission caches. A new instance is created per request,
@@ -115,7 +115,7 @@ export class UpdateMonitorAPI {
     const patchById = new Map<string, Partial<EncryptedSyntheticsMonitor>>(
       updates.map((update) => [update.id, update.attributes])
     );
-    this.patchNameCounts = this.buildPatchNameCounts(updates);
+    this.namePatchErrors = await this.validateNamePatches(updates);
 
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
@@ -184,7 +184,7 @@ export class UpdateMonitorAPI {
 
     const { prevAttrs, merged } = this.mergePatch(decryptedMonitor, patch);
 
-    const nameError = await this.validateNamePatch(monitorId, patch);
+    const nameError = this.namePatchErrors.get(monitorId);
     if (nameError) {
       this.result.perIdErrors[monitorId] = {
         code: 'validation_failed',
@@ -287,31 +287,56 @@ export class UpdateMonitorAPI {
     return { prevAttrs, merged };
   }
 
-  private async validateNamePatch(
-    monitorId: string,
-    patch: Partial<EncryptedSyntheticsMonitor>
-  ): Promise<string | undefined> {
-    const nextName = patch[ConfigKey.NAME];
-    if (typeof nextName !== 'string') {
-      return;
-    }
-    if ((this.patchNameCounts.get(nextName) ?? 0) > 1) {
-      return duplicateNamePatchMessage(nextName);
-    }
-
-    const editMonitorAPI = new AddEditMonitorAPI(this.routeContext);
-    return editMonitorAPI.validateUniqueMonitorName(nextName, monitorId);
-  }
-
-  private buildPatchNameCounts(updates: MonitorBulkUpdate[]): Map<string, number> {
-    const counts = new Map<string, number>();
-    for (const { attributes } of updates) {
+  private async validateNamePatches(updates: MonitorBulkUpdate[]): Promise<Map<string, string>> {
+    const errors = new Map<string, string>();
+    const idsByName = new Map<string, string[]>();
+    for (const { id, attributes } of updates) {
       const nextName = attributes[ConfigKey.NAME];
       if (typeof nextName === 'string') {
-        counts.set(nextName, (counts.get(nextName) ?? 0) + 1);
+        const ids = idsByName.get(nextName);
+        if (ids) {
+          ids.push(id);
+        } else {
+          idsByName.set(nextName, [id]);
+        }
       }
     }
-    return counts;
+
+    const namesToCheck: string[] = [];
+    for (const [name, ids] of idsByName) {
+      if (ids.length > 1) {
+        ids.forEach((id) => errors.set(id, duplicateNamePatchMessage(name)));
+      } else {
+        namesToCheck.push(name);
+      }
+    }
+
+    if (namesToCheck.length === 0) {
+      return errors;
+    }
+
+    const { monitorConfigRepository } = this.routeContext;
+    const filter = getSavedObjectKqlFilter({ field: 'name.keyword', values: namesToCheck });
+    const { saved_objects: existingMonitors = [] } = await monitorConfigRepository.find({
+      perPage: 500,
+      filter,
+    });
+
+    for (const monitor of existingMonitors) {
+      const attributes = monitor.attributes as Partial<MonitorFields>;
+      const existingName = attributes[ConfigKey.NAME];
+      const existingId = attributes[ConfigKey.CONFIG_ID] ?? monitor.id;
+      if (typeof existingName !== 'string' || typeof existingId !== 'string') {
+        continue;
+      }
+
+      const requestedIds = idsByName.get(existingName);
+      if (requestedIds?.length === 1 && requestedIds[0] !== existingId) {
+        errors.set(requestedIds[0], monitorNameExistsMessage(existingName));
+      }
+    }
+
+    return errors;
   }
 
   /**
@@ -512,6 +537,12 @@ const duplicateNamePatchMessage = (name: string) =>
   i18n.translate('xpack.synthetics.server.bulkUpdate.duplicateNamePatch', {
     defaultMessage:
       'Duplicate monitor name "{name}" in updates; each monitor name may appear at most once.',
+    values: { name },
+  });
+
+const monitorNameExistsMessage = (name: string) =>
+  i18n.translate('xpack.synthetics.server.bulkUpdate.uniqueName', {
+    defaultMessage: 'Monitor name must be unique, "{name}" already exists.',
     values: { name },
   });
 
