@@ -1,5 +1,5 @@
 version: '1'
-name: '.significant-events-triage'
+name: 'Significant Events Triage'
 description: 'Analyses unreviewed discoveries with a judge agent and creates significant events.'
 enabled: true
 tags:
