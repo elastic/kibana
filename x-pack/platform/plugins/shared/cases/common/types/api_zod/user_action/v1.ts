@@ -48,6 +48,9 @@ export const UserActionFindRequestSchema = paginationSchema({
 }).extend({
   types: z.array(z.enum(UserActionFindRequestTypesValues)).optional(),
   sortOrder: z.enum(['desc', 'asc']).optional(),
+});
+
+export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.extend({
   author: z.string().max(MAX_USER_ACTION_AUTHOR_LENGTH).optional(),
   search: z.string().max(MAX_USER_ACTION_SEARCH_LENGTH).optional(),
 });
@@ -61,4 +64,5 @@ export const UserActionFindResponseSchema = z.object({
 
 export type CaseUserActionStats = z.infer<typeof CaseUserActionStatsSchema>;
 export type UserActionFindRequest = z.infer<typeof UserActionFindRequestSchema>;
+export type UserActionInternalFindRequest = z.infer<typeof UserActionInternalFindRequestSchema>;
 export type UserActionFindResponse = z.infer<typeof UserActionFindResponseSchema>;

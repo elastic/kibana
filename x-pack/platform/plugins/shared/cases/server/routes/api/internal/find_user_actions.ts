@@ -9,8 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 import { isCommentUserAction } from '../../../../common/utils/user_actions';
 import type { attachmentApiV2, userActionApiV1 } from '../../../../common/types/api';
+import { UserActionInternalFindRequestRt } from '../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
@@ -33,7 +35,7 @@ export const findUserActionsRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const options = request.query as userActionApiV1.UserActionInternalFindRequest;
+      const options = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)(request.query);
 
       const userActionsResponse: userActionApiV1.UserActionFindResponse =
         await casesClient.userActions.find({
