@@ -1918,7 +1918,7 @@
     "@parcel/watcher": "2.5.1",
     "@playwright/test": "1.61.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
-    "@redocly/cli": "2.30.4",
+    "@redocly/cli": "2.35.1",
     "@rsdoctor/rspack-plugin": "1.5.7",
     "@rspack/core": "1.7.11",
     "@rspack/plugin-react-refresh": "1.6.1",
