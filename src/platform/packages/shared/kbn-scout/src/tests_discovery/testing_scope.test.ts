@@ -239,8 +239,6 @@ describe('deriveScoutConfigsForFile', () => {
     ).toEqual(['x-pack/solutions/observability/plugins/foo/test/scout/ui/playwright.config.ts']);
   });
 
-  // --- area sub-directory tests ---
-
   it('maps an area parallel spec to the area parallel config', () => {
     touch('pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts');
     expect(

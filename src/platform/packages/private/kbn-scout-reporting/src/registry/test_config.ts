@@ -21,7 +21,6 @@ export interface ScoutTestConfig {
   path: string;
   category: string;
   type: string;
-  /** Namespace sub-directory (e.g. `detection_engine` for `test/scout/detection_engine/ui/`). `undefined` for configs directly under `test/scout/{ui,api}/`. */
   namespace: string | undefined;
   module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
@@ -186,9 +185,8 @@ export const testConfigs = {
 
     this.log.info(`Loaded ${this._configs.length} Scout test configs in ${duration.toFixed(2)}s`);
 
-    // Structural validation: a scout root must be either entirely root-level or
-    // entirely namespace-based, never both. Group by (module.root + serverConfigSet) because
-    // custom config sets (scout_*) are independent roots from the scout runtime's perspective.
+    // A scout root must be either root-level or namespace-based, never both.
+    // scout_* roots are independent from scout/, so group by (module.root + serverConfigSet).
     const byRoot = new Map<string, ScoutTestConfig[]>();
     for (const config of this._configs) {
       const key = `${config.module.root}/test/${

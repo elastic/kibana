@@ -85,11 +85,6 @@ export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
  * Unified regex matching both platform/solution and example plugin Playwright config paths.
  * Uses named capture groups so callers can branch on `examplesRoot` to decide how to
  * resolve module metadata (kibana.jsonc vs directory-derived).
- *
- * Named groups:
- *   - `namespace`      : optional one-level sub-directory under the scout root
- *                        (e.g. `detection_engine` in `test/scout/detection_engine/ui/`).
- *                        Absent for configs that live directly under `test/scout/{api,ui}/`.
  */
 export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
   `^(?:` +
@@ -153,18 +148,11 @@ export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
 ];
 
 /**
- * Captures `<prefix>/test/(scout|scout_<custom>)[/<namespace>]/(api|ui)/<rest?>` and the
- * `.meta/` variant `<prefix>/test/(scout|scout_<custom>)[/<namespace>]/.meta/(api|ui)/<rest?>`.
- *
- * The optional `<namespace>` group uses a negative lookahead (`(?!\\.meta)`) to prevent
- * the `.meta` directory name from being captured as a namespace. Regex backtracking
- * also prevents `api` / `ui` from being captured as a namespace: if the optional namespace
- * group consumed a category name, the following required category group would fail,
- * causing the engine to backtrack and leave namespace empty.
+ * Captures `<prefix>/test/scout{_*}[/<namespace>]/(api|ui)/<rest?>` and its `.meta/` variant.
+ * A negative lookahead prevents `.meta` from being captured as a namespace; backtracking
+ * prevents `api`/`ui` from being captured as a namespace.
  *
  * Capture groups: 1=prefix, 2=scoutDir, 3=namespace (optional), 4=category (api|ui), 5=rest (optional).
- * The category alternation is derived from `SCOUT_TEST_CATEGORIES` for parity
- * with the rest of this file.
  */
 export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
   `^(.+?)\\/test\\/(scout(?:_[^/]+)?)(?:\\/(?!\\.meta)([^/]+))?\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(

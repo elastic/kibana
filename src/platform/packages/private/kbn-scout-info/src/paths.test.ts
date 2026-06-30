@@ -192,7 +192,6 @@ describe('Scout path regexes', () => {
   });
 
   describe('SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX', () => {
-    // Groups: 1=examplesRoot, 2=plugin, 3=serverConfigSet, 4=namespace (optional), 5=category, 6=configType
     it('matches examples/ plugin config with custom config set', () => {
       const match = 'examples/hello_world/test/scout_examples/api/playwright.config.ts'.match(
         SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
@@ -201,7 +200,7 @@ describe('Scout path regexes', () => {
       expect(match![1]).toBe('examples');
       expect(match![2]).toBe('hello_world');
       expect(match![3]).toBe('examples');
-      expect(match![4]).toBeUndefined(); // no namespace
+      expect(match![4]).toBeUndefined();
       expect(match![5]).toBe('api');
       expect(match![6]).toBe('');
     });
@@ -214,7 +213,7 @@ describe('Scout path regexes', () => {
       expect(match![1]).toBe('x-pack/examples');
       expect(match![2]).toBe('hello_world');
       expect(match![3]).toBe('examples');
-      expect(match![4]).toBeUndefined(); // no namespace
+      expect(match![4]).toBeUndefined();
       expect(match![5]).toBe('ui');
     });
 
@@ -241,7 +240,7 @@ describe('Scout path regexes', () => {
         SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
       );
       expect(match).not.toBeNull();
-      expect(match![3]).toBeUndefined(); // no serverConfigSet
+      expect(match![3]).toBeUndefined();
       expect(match![4]).toBe('my_area');
       expect(match![5]).toBe('ui');
     });

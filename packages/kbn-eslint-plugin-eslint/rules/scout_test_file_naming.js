@@ -12,23 +12,15 @@
 const path = require('path');
 
 /**
- * Matches Scout test file paths following the supported patterns:
- *   {scout,scout_*}/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts               (no namespace)
- *   {scout,scout_*}/<namespace>/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts   (single namespace level)
- *
- * The optional namespace segment `(?:\/[^/]+)?` uses regex backtracking to avoid
- * consuming `ui`/`api` as a namespace: if the namespace group claims `ui`, the
- * following required `\/(?:ui|api)\/` fails, the engine backtracks, and
- * namespace is left empty.
+ * Matches `scout{_*}/[<namespace>/]{ui,api}/{parallel_,}tests/` paths.
+ * Backtracking prevents `ui`/`api` from being consumed as the namespace segment.
  */
 const SCOUT_TEST_PATH_PATTERN =
   /\/test\/scout(?:_[^/]+)?(?:\/[^/]+)?\/(?:ui|api)\/(?:parallel_)?tests\//;
 
 /**
- * Detects unsupported two-level namespace paths, e.g.
- * test/scout/<namespace1>/<namespace2>/{ui,api}/
- * Only a single namespace level is allowed between the scout root and the
- * {ui,api} category directory.
+ * Detects unsupported two-level namespace nesting: `scout{_*}/<a>/<b>/{ui,api}/`.
+ * Only one namespace level is allowed between the scout root and `{ui,api}/`.
  */
 const SCOUT_TOO_DEEP_NAMESPACE_PATTERN = /\/test\/scout(?:_[^/]+)?\/[^/]+\/[^/]+\/(?:ui|api)\//;
 
