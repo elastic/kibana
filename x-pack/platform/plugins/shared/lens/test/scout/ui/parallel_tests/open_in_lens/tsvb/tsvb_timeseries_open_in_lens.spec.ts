@@ -18,11 +18,14 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
+import { testData, getImportedDashboardId } from '../../../fixtures';
 
 spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
+  let dashboardId: string;
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_TIMESERIES);
+    const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_TIMESERIES);
+    dashboardId = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.TIMESERIES);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
     await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
     await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
@@ -30,11 +33,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    const { dashboard } = pageObjects;
-    await dashboard.goto();
-    await dashboard.clickDashboardTitleLink(testData.TSVB_DASHBOARDS.TIMESERIES);
-    await dashboard.switchToEditMode();
-    await dashboard.waitForRenderComplete();
+    await pageObjects.dashboard.openDashboardWithIdInEditMode(dashboardId);
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

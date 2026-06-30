@@ -18,11 +18,14 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
+import { testData, getImportedDashboardId } from '../../../fixtures';
 
 spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
+  let dashboardId: string;
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_GAUGE);
+    const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_GAUGE);
+    dashboardId = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.GAUGE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
     await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
     await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
@@ -30,11 +33,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    const { dashboard } = pageObjects;
-    await dashboard.goto();
-    await dashboard.clickDashboardTitleLink(testData.TSVB_DASHBOARDS.GAUGE);
-    await dashboard.switchToEditMode();
-    await dashboard.waitForRenderComplete();
+    await pageObjects.dashboard.openDashboardWithIdInEditMode(dashboardId);
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

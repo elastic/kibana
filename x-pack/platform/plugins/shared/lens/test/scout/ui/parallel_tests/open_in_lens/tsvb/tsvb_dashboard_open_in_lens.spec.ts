@@ -18,14 +18,19 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
+import { testData, getImportedDashboardId } from '../../../fixtures';
 
 // FLAKY: https://github.com/elastic/kibana/issues/179307
 // These tests were historically skipped in stateful FTR (describe.skip).
 // Using test.fixme() until stability is confirmed in Scout.
 spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
+  let dashboard1Id: string;
+  let dashboard2Id: string;
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_DASHBOARD);
+    const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_DASHBOARD);
+    dashboard1Id = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.DASHBOARD_1);
+    dashboard2Id = getImportedDashboardId(imported, testData.TSVB_DASHBOARDS.DASHBOARD_2);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
     await scoutSpace.uiSettings.setDefaultTime(testData.LOGSTASH_IN_RANGE_DATES);
     await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
@@ -43,10 +48,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await browserAuth.loginAsAdmin();
       const { dashboard, lens } = pageObjects;
 
-      await dashboard.goto();
-      await dashboard.clickDashboardTitleLink(testData.TSVB_DASHBOARDS.DASHBOARD_1);
-      await dashboard.switchToEditMode();
-      await dashboard.waitForRenderComplete();
+      await dashboard.openDashboardWithIdInEditMode(dashboard1Id);
 
       const originalPanelCount = await dashboard.getPanelCount();
 
@@ -88,9 +90,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await browserAuth.loginAsAdmin();
       const { dashboard, lens } = pageObjects;
 
-      await dashboard.goto();
-      await dashboard.clickDashboardTitleLink(testData.TSVB_DASHBOARDS.DASHBOARD_2);
-      await dashboard.switchToEditMode();
+      await dashboard.openDashboardWithIdInEditMode(dashboard2Id);
 
       // Save to library first
       await dashboard.saveToLibrary(visTitle);
