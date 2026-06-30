@@ -194,7 +194,7 @@ paths:
       operationId: OsqueryExportScheduledQueryResults
       x-codegen-enabled: true
       x-labels: [ serverless, ess ]
-      x-state: Added in 9.5.0
+      x-state: Generally available; Added in 9.5.0
       parameters:
         - name: scheduleId
           in: path
