@@ -49,7 +49,7 @@ export const CaseListItem: React.FC<{
 
   const handleLinkClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button === 1 || e.metaKey || e.ctrlKey) {
+      if (e.button !== 0 || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
         return;
       }
       e.preventDefault();
