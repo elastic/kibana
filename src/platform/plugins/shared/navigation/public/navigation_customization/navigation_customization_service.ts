@@ -113,11 +113,7 @@ export class NavigationCustomizationService {
       this.activeSolution = solution;
     }
 
-    // Fire the baseline detection event once, the first time the solution is known,
-    // deferred until the nav tree has emitted at least one item. getNavigationItems()
-    // reads a synchronous snapshot that is empty when enableUi fires (the solution
-    // plugin calls initNavigation independently and the two events race), so we
-    // subscribe to getNavigation$ and act on the first emission that has items.
+    // Fire the baseline detection event once, the first time the solution is known.
     if (solution && !this.detectionReported) {
       this.detectionReported = true;
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
@@ -145,18 +141,10 @@ export class NavigationCustomizationService {
             }));
             const navProps = buildNavItemsProperties(itemsPayload);
             // Persist the "reported" flag first and emit the baseline only on a
-            // successful write. The flag and the customization itself go through
-            // the same user-storage route and permission, so a successful write
-            // proves the user could also persist a real customization. This
-            // gates the baseline on write capability without a separate
-            // capabilities check:
-            //  - Read-only users (write rejects) emit no baseline at all. They
-            //    can never persist a customization, so excluding them avoids
-            //    both re-firing the event on every page load (the flag never
-            //    sticks) and padding the baseline denominator with users who
-            //    structurally cannot convert to `did_customize: true`.
-            //  - Writable users emit exactly once; the flag then suppresses it
-            //    on subsequent loads.
+            // successful write.
+            //  - Read-only users (write rejects) emit no baseline at all since they
+            //    can never persist a customization.
+            //  - Writable users emit exactly once; the flag then suppresses it on subsequent loads.
             core.userStorage
               .set(NAV_BASELINE_TELEMETRY_REPORTED_STORAGE_KEY, true)
               .then(() => {
@@ -229,13 +217,10 @@ export class NavigationCustomizationService {
 
           persist
             .then(() => {
-              // Report only persisted customizations, gated on the write
-              // succeeding. A read-only user whose write fails sees the toast
-              // below instead, so this avoids over-counting `did_customize` for
-              // a save that never landed. Mirrors the baseline-detection event,
-              // which is likewise emitted only after its write resolves.
+              // Report persisted customizations, gated on the write succeeding.
               if (!this.activeSolution) return;
               const hiddenSet = new Set(hiddenIds);
+
               // A save with no moves and nothing hidden is equivalent to the
               // default layout — e.g. the user clicked "Reset to default" and
               // applied — so it does not count as a customization.
@@ -247,9 +232,6 @@ export class NavigationCustomizationService {
               });
             })
             .catch((error: Error) => {
-              // `toastMessage` provides a friendlier, actionable body than the raw
-              // HTTP error (which is just "Internal Server Error"); the underlying
-              // error stays available via the toast's "See the full error" action.
               core.notifications.toasts.addError(error, {
                 title: i18n.translate('navigation.customization.saveErrorTitle', {
                   defaultMessage: 'Unable to save navigation customization',
@@ -261,8 +243,6 @@ export class NavigationCustomizationService {
               });
             });
 
-          // Close synchronously — the live nav was already updated optimistically
-          // via onChange, so there's no reason to block the modal on the write.
           closeModal();
         },
         onReset: () => {
