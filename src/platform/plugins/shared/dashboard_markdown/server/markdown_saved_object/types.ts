@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MarkdownAttributes } from './types';
-export { markdownAttributesSchema } from './v1';
+import type { MarkdownByValueState } from '../embeddable/schemas';
+
+export type StoredMarkdownState = MarkdownByValueState & {
+  title: string; // all saved objects have a title
+};

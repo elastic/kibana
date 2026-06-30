@@ -13,7 +13,6 @@ import {
   asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
   PAGINATION_MAX_SIZE,
-  ID_MAX_LENGTH,
 } from '@kbn/as-code-shared-schemas';
 
 export const searchRequestQuerySchema = schema.object({
@@ -33,7 +32,6 @@ export const searchResponseBodySchema = schema.object({
     schema.object({
       id: schema.string({
         meta: { description: 'The markdown library item ID.' },
-        maxLength: ID_MAX_LENGTH,
       }),
       data: schema.object({
         description: schema.maybe(
