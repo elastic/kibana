@@ -51,7 +51,7 @@ export const getLatestEntityIndexPattern = (namespace: string) =>
     namespace,
   })}-*` as const;
 
-// Returns the index pattern matching all versioned metadata entity indices.
+// Returns the index pattern matching the entity metadata datastream.
 export const getMetadataEntityIndexPattern = (namespace: string) =>
   `${getEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
@@ -69,14 +69,6 @@ export const getLatestEntitiesIndexName = (namespace: string) =>
     namespace,
   })}-${padVersion(MAPPING_VERSION)}`;
 
-// Returns the alias name for the entity metadata dataset.
+// Returns the write alias for the entity metadata datastream.
 export const getEntityMetadataAlias = (namespace: string) =>
   `${ENTITY_BASE_PREFIX}-${ENTITY_METADATA}-${namespace}` as const;
-
-// Returns the concrete index name for the entity metadata index (with version suffix).
-export const getEntityMetadataIndexName = (namespace: string) =>
-  `${getEntityIndexPattern({
-    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-    dataset: ENTITY_METADATA,
-    namespace,
-  })}-${padVersion(MAPPING_VERSION)}`;

@@ -29,10 +29,6 @@ export interface BulkCreateEntityMetadataDocsResult {
  * Per-doc drops are surfaced via `onDrop` and logged here; the call resolves
  * to `{ successful, failed }` counts.
  *
- * `refresh` defaults to `false`: this is an append-only history stream
- * written by background maintainers and read asynchronously, so blocking
- * each bulk on a shard refresh only adds latency to maintainer runs. Callers
- * that need read-your-write (e.g. tests) can opt into `'wait_for'`.
  */
 export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
   esClient: ElasticsearchClient,
@@ -40,13 +36,12 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
     index: string;
     docs: TDoc[];
     logger: Logger;
-    refresh?: 'wait_for' | boolean;
   }
 ): Promise<BulkCreateEntityMetadataDocsResult> => {
   const { successful, failed } = await esClient.helpers.bulk({
     datasource: params.docs,
     index: params.index,
-    refresh: params.refresh ?? false,
+    refresh: false,
     onDocument: () => ({ create: {} }),
     onDrop: (dropped) => {
       params.logger.error(

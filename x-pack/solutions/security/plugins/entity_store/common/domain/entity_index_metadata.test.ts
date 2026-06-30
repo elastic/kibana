@@ -5,25 +5,9 @@
  * 2.0.
  */
 
-import {
-  ENTITY_LATEST,
-  ENTITY_UPDATES,
-  ENTITY_HISTORY,
-  ENTITY_METADATA,
-  getEntityIndexPattern,
-} from './entity_index';
+import { ENTITY_METADATA, getEntityIndexPattern } from './entity_index';
 
 describe('entity_index dataset constants', () => {
-  it('exposes an ENTITY_METADATA constant equal to "metadata"', () => {
-    expect(ENTITY_METADATA).toBe('metadata');
-  });
-
-  it('keeps existing dataset constants unchanged', () => {
-    expect(ENTITY_LATEST).toBe('latest');
-    expect(ENTITY_UPDATES).toBe('updates');
-    expect(ENTITY_HISTORY).toBe('history');
-  });
-
   it('allows getEntityIndexPattern to accept the new "metadata" dataset', () => {
     // If the `Dataset` union is not extended, this call fails TypeScript
     // strict compilation. We assert here that it succeeds at both type

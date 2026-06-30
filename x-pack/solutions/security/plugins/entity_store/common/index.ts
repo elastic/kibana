@@ -125,7 +125,6 @@ export {
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
   getEntityMetadataAlias,
-  getEntityMetadataIndexName,
   getMetadataEntityIndexPattern,
 } from './domain/entity_index';
 
