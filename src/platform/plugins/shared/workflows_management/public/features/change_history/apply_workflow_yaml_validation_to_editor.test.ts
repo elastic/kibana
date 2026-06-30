@@ -119,4 +119,25 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     model.dispose();
   });
+
+  it('returns empty validation results when validation is aborted', async () => {
+    const yaml = 'name: aborted-validation\nsteps:\n  - name: step\n    type: console\n';
+    const model = monaco.editor.createModel(yaml, 'yaml');
+    const editor = createMockEditor(model);
+    const decorationsRef = { current: null as monaco.editor.IEditorDecorationsCollection | null };
+    const controller = new AbortController();
+    controller.abort();
+
+    const result = await applyWorkflowYamlValidationToEditor(
+      editor,
+      yaml,
+      true,
+      decorationsRef,
+      controller.signal
+    );
+
+    expect(result).toEqual({ validationResults: [] });
+
+    model.dispose();
+  });
 });

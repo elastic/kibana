@@ -35,12 +35,11 @@ export const ChangeHistoryItemComment = memo(function ChangeHistoryItemComment({
 
   const handleToggle = useCallback(
     (event: React.MouseEvent | React.KeyboardEvent) => {
-      event.stopPropagation();
-
       if (!isExpandable) {
         return;
       }
 
+      event.stopPropagation();
       setExpanded((value) => !value);
     },
     [isExpandable]

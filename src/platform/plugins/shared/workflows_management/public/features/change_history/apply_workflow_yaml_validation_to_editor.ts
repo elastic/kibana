@@ -92,7 +92,15 @@ export const applyWorkflowYamlValidationToEditor = async (
     return { validationResults: [] };
   }
 
-  const computed = await getCachedWorkflowYamlComputationAsync(yamlString, signal);
+  let computed: ComputedData;
+  try {
+    computed = await getCachedWorkflowYamlComputationAsync(yamlString, signal);
+  } catch (error) {
+    if (signal?.aborted || (error instanceof DOMException && error.name === 'AbortError')) {
+      return { validationResults: [] };
+    }
+    throw error;
+  }
 
   if (signal?.aborted) {
     return { validationResults: [] };

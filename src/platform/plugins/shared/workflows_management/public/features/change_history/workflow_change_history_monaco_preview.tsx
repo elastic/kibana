@@ -140,7 +140,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  const hasCompare = Boolean(compareYaml && compareYaml !== yaml);
+  const hasCompare = compareYaml !== undefined && compareYaml !== yaml;
 
   useWorkflowsMonacoTheme();
 

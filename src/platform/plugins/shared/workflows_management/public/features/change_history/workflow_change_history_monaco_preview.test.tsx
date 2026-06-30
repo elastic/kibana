@@ -171,6 +171,23 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     expect(screen.queryByTestId('workflowChangeHistoryDiffNavigator')).not.toBeInTheDocument();
   });
 
+  it('renders a diff editor when compare yaml is empty and current yaml is not', () => {
+    jest.useFakeTimers();
+    renderPreview({
+      yaml: 'name: v2\n',
+      compareYaml: '',
+    });
+
+    expect(mockCreateDiffEditor).toHaveBeenCalled();
+    expect(mockCreateEditor).not.toHaveBeenCalled();
+    expect(monaco.editor.createModel).toHaveBeenCalledWith('', 'yaml');
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+
+    expect(screen.getByTestId('workflowChangeHistoryCompareUnified')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowChangeHistoryCompareSplit')).toBeInTheDocument();
+  });
+
   it('renders a diff editor when compare yaml differs', () => {
     jest.useFakeTimers();
     renderPreview({

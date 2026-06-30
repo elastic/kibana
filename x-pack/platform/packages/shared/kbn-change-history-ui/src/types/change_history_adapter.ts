@@ -19,7 +19,7 @@ export interface ChangeHistoryAdapter {
    * Returns paginated changes for the object.
    *
    * `items` MUST be in descending timestamp order (newest first). Required for
-   * compare-with-previous preview (`getPreviousChangeId`) and timeline display.
+   * compare-with-previous preview (`findPreviousChangeId`) and timeline display.
    */
   listChanges: (params: ListChangeHistoryParams) => Promise<ListChangeHistoryResult>;
   getChange: (params: GetChangeParams) => Promise<ChangeHistoryDetail>;

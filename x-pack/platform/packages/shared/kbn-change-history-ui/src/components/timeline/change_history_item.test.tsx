@@ -7,20 +7,20 @@
 
 import '@testing-library/jest-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { ChangeHistoryProvider } from '../../provider/change_history_provider';
-import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
-import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../../test_utils/change_history_test_fixtures';
+import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { ChangeHistoryItem } from './change_history_item';
 
-const adapter: ChangeHistoryAdapter = {
-  listChanges: jest.fn(),
-  getChange: jest.fn(),
-};
+jest.mock('../../provider/use_change_history_config', () => ({
+  useChangeHistoryConfig: jest.fn(),
+}));
 
-const baseItem = {
+const mockUseChangeHistoryConfig = useChangeHistoryConfig as jest.Mock;
+
+const baseItem: ChangeHistoryListItem = {
   id: 'evt-1',
   timestamp: '2026-06-16T12:00:00.000Z',
   actor: { name: 'Pavel M', profileId: 'user-1' },
@@ -31,35 +31,32 @@ const baseItem = {
 };
 
 const renderItem = (
-  overrides?: Partial<typeof baseItem>,
-  providerProps?: Partial<React.ComponentProps<typeof ChangeHistoryProvider>>
+  overrides?: Partial<ChangeHistoryListItem>,
+  options?: { selected?: boolean; onClick?: jest.Mock }
 ) =>
   render(
     <I18nProvider>
-      <ChangeHistoryProvider
-        objectId={TEST_OBJECT_ID}
-        adapter={adapter}
-        labels={{ previewTitle: TEST_OBJECT_TITLE }}
-        renderPreview={() => null}
-        renderBadge={({ item }) => (
-          <EuiBadge color="hollow">
-            {item.isCurrent
-              ? `Current version • v${item.metadata?.version}`
-              : `v${item.metadata?.version}`}
-          </EuiBadge>
-        )}
-        {...providerProps}
-      >
-        <ChangeHistoryItem
-          item={{ ...baseItem, ...overrides }}
-          selected={false}
-          onClick={jest.fn()}
-        />
-      </ChangeHistoryProvider>
+      <ChangeHistoryItem
+        item={{ ...baseItem, ...overrides }}
+        selected={options?.selected ?? false}
+        onClick={options?.onClick ?? jest.fn()}
+      />
     </I18nProvider>
   );
 
 describe('ChangeHistoryItem', () => {
+  beforeEach(() => {
+    mockUseChangeHistoryConfig.mockReturnValue({
+      renderBadge: ({ item }: { item: ChangeHistoryListItem }) => (
+        <EuiBadge color="hollow">
+          {item.isCurrent
+            ? `Current version • v${item.metadata?.version}`
+            : `v${item.metadata?.version}`}
+        </EuiBadge>
+      ),
+    });
+  });
+
   it('renders relative timestamp, actor metadata, and version badge', () => {
     renderItem();
 
@@ -69,22 +66,17 @@ describe('ChangeHistoryItem', () => {
   });
 
   it('marks the item as selected for styling', () => {
-    render(
-      <I18nProvider>
-        <ChangeHistoryProvider
-          objectId={TEST_OBJECT_ID}
-          adapter={adapter}
-          labels={{ previewTitle: TEST_OBJECT_TITLE }}
-          renderPreview={() => null}
-          renderBadge={({ item }) => (
-            <EuiBadge color="hollow">v{String(item.metadata?.version ?? '')}</EuiBadge>
-          )}
-        >
-          <ChangeHistoryItem item={baseItem} selected={true} onClick={jest.fn()} />
-        </ChangeHistoryProvider>
-      </I18nProvider>
-    );
+    renderItem(undefined, { selected: true });
 
     expect(screen.getByTestId('changeHistoryItem-evt-1')).toHaveAttribute('data-selected', 'true');
+  });
+
+  it('selects the item when a non-expandable comment is clicked', () => {
+    const onClick = jest.fn();
+    renderItem({ comment: 'Restored from backup' }, { onClick });
+
+    fireEvent.click(screen.getByTestId('changeHistoryItemComment'));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });
