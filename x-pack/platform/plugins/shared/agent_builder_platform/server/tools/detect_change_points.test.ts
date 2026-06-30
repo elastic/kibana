@@ -32,9 +32,10 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-const createMockAttachments = (): AttachmentStateManager =>
+const createMockAttachments = (addImpl?: jest.Mock): AttachmentStateManager =>
   ({
     getActive: () => [],
+    add: addImpl ?? jest.fn(),
   } as unknown as AttachmentStateManager);
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
@@ -53,13 +54,14 @@ const mockExecuteEsql = executeEsql as jest.MockedFunction<typeof executeEsql>;
 
 /** Helper that narrows the union return type to the results-bearing branch. */
 const callTool = async (
-  params: Parameters<ReturnType<typeof detectChangePointsTool>['handler']>[0]
+  params: Parameters<ReturnType<typeof detectChangePointsTool>['handler']>[0],
+  attachments?: AttachmentStateManager
 ): Promise<ToolHandlerStandardReturn> => {
   const tool = detectChangePointsTool();
   const result = await tool.handler(params, {
     esClient: mockEsClient,
     logger: mockLogger,
-    attachments: createMockAttachments(),
+    attachments: attachments ?? createMockAttachments(),
   } as any);
   return result as ToolHandlerStandardReturn;
 };
@@ -151,7 +153,7 @@ describe('detectChangePointsTool', () => {
     expect(layers).toHaveLength(2);
 
     const dataLayer = layers[0];
-    expect(dataLayer.type).toBe('line');
+    expect(dataLayer.type).toBe('area');
     expect(dataLayer.x.column).toBe('bucket');
     expect(dataLayer.y[0].column).toBe('avg_bytes');
 
@@ -192,7 +194,9 @@ describe('detectChangePointsTool', () => {
     mockExecuteEsql.mockResolvedValue({ columns, values });
 
     const result = await callTool({ query: BY_ENTITY_QUERY, max_charts: 3 });
-    expect(result.results.length).toBeLessThanOrEqual(3);
+    // 3 visualization results + 1 truncation notice
+    const vizResults = result.results.filter((r) => r.type === ToolResultType.visualization);
+    expect(vizResults.length).toBeLessThanOrEqual(3);
   });
 
   it('scopes annotations to each entity — no cross-entity bleed', async () => {
@@ -264,5 +268,78 @@ describe('detectChangePointsTool', () => {
 
     const annotations = (result.results[0].data as any).visualization.layers[1].events;
     expect(annotations[0].label).toContain('step_change');
+  });
+
+  it('returns ToolResultType.error when ES|QL execution fails', async () => {
+    mockExecuteEsql.mockRejectedValue(new Error('ES|QL execution failed'));
+
+    const result = await callTool({ query: SIMPLE_CHANGE_POINT_QUERY, max_charts: 6 });
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect((result.results[0].data as any).message).toContain('ES|QL execution failed');
+  });
+
+  it('save_charts: false is the default and no attachment is created', async () => {
+    const columns = [col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    const values = [['2024-01-15T00:00:00Z', 1000, 'step_change', 0.001]];
+    mockExecuteEsql.mockResolvedValue({ columns, values });
+
+    const mockAdd = jest.fn();
+    const result = await callTool(
+      { query: SIMPLE_CHANGE_POINT_QUERY, max_charts: 6 },
+      createMockAttachments(mockAdd)
+    );
+
+    expect(mockAdd).not.toHaveBeenCalled();
+    expect((result.results[0].data as any).attachment_id).toBeUndefined();
+  });
+
+  it('save_charts: true persists an attachment and returns attachment_id', async () => {
+    const columns = [col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    const values = [['2024-01-15T00:00:00Z', 1000, 'step_change', 0.001]];
+    mockExecuteEsql.mockResolvedValue({ columns, values });
+
+    const mockAdd = jest.fn().mockResolvedValue({ id: 'att-123' });
+    const result = await callTool(
+      { query: SIMPLE_CHANGE_POINT_QUERY, max_charts: 6, save_charts: true },
+      createMockAttachments(mockAdd)
+    );
+
+    expect(mockAdd).toHaveBeenCalledTimes(1);
+    const addCall = mockAdd.mock.calls[0][0];
+    expect(addCall.type).toBe('visualization');
+    expect(addCall.data.query).toMatch(/change point analysis/i);
+    expect((result.results[0].data as any).attachment_id).toBe('att-123');
+  });
+
+  it('appends a truncation notice when entity count exceeds max_charts', async () => {
+    const columns = [col('host'), col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    const values = Array.from({ length: 5 }, (_, i) => [
+      `host-${i}`,
+      `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`,
+      1000 + i,
+      'step_change',
+      0.001,
+    ]);
+    mockExecuteEsql.mockResolvedValue({ columns, values });
+
+    const result = await callTool({ query: BY_ENTITY_QUERY, max_charts: 3 });
+    // 3 visualization results + 1 truncation notice
+    expect(result.results).toHaveLength(4);
+    const notice = result.results[result.results.length - 1];
+    expect(notice.type).toBe(ToolResultType.other);
+    expect((notice.data as any).message).toMatch(/capped at 3/i);
+    expect((notice.data as any).message).toMatch(/2 additional/i);
+  });
+
+  it('coerces epoch-number timestamps to ISO strings in annotation events', async () => {
+    const epochMs = new Date('2024-01-15T00:00:00Z').getTime();
+    const columns = [col('bucket'), col('avg_bytes'), col('type'), col('pvalue')];
+    const values = [[epochMs, 1000, 'step_change', 0.001]];
+    mockExecuteEsql.mockResolvedValue({ columns, values });
+
+    const result = await callTool({ query: SIMPLE_CHANGE_POINT_QUERY, max_charts: 6 });
+    const event = (result.results[0].data as any).visualization.layers[1].events[0];
+    expect(event.timestamp).toBe('2024-01-15T00:00:00.000Z');
   });
 });

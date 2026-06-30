@@ -19,7 +19,6 @@ const TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.productDocumentation,
   platformCoreTools.createVisualization,
-  platformCoreTools.detectChangePoints,
 ];
 
 const discoverDataAnalysisSkill = defineSkillType({
@@ -159,15 +158,7 @@ Use natural phrasing. Example: "I can also run a few other analyses on this data
 Do NOT execute any of these — only mention them as next-step options.
 
 ### Additional Capabilities
-- If the discover_run_query tool is available and the user asks to run or open a query in Discover, use it. This opens the query in Discover.
-
-#### Change Point Detection (only when asked)
-When the user asks about change points, anomalies, trend shifts, or sudden changes in a metric:
-1. Confirm the query is in ES|QL mode (same mode check as above).
-2. Build or use an ES|QL query ending with \`CHANGE_POINT <value> ON <time> [BY <entity>]\`. Use generateEsql to produce the query if needed.
-3. Call the \`${platformCoreTools.detectChangePoints}\` tool with that query and an appropriate time range.
-4. Summarize which entities showed change points and what type of change occurred.
-Do NOT call this tool unless the user explicitly requests change point analysis.`,
+- If the discover_run_query tool is available and the user asks to run or open a query in Discover, use it. This opens the query in Discover.`,
   getRegistryTools: () => TOOL_IDS,
 });
 

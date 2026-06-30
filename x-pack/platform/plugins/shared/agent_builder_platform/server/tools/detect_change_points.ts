@@ -26,6 +26,8 @@ import {
 } from '@kbn/esql-utils';
 import { resolveTimeRange } from './screen_context_utils';
 
+const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
+
 const detectChangePointsSchema = z.object({
   query: z.string().describe('ES|QL query containing a CHANGE_POINT command'),
   time_range: z
@@ -49,6 +51,14 @@ const detectChangePointsSchema = z.object({
     .describe(
       '(Optional) Maximum number of per-entity charts to render. Must be between 1 and 10. Defaults to 6.'
     ),
+  save_charts: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      '(Optional) When true, each entity chart is persisted as a visualization attachment so it can be added to a dashboard. ' +
+        'Set to true ONLY when the user explicitly asks to save the charts or add them to a dashboard. Defaults to false.'
+    ),
 });
 
 export const detectChangePointsTool = (): BuiltinToolDefinition<
@@ -57,25 +67,32 @@ export const detectChangePointsTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.detectChangePoints,
     type: ToolType.builtin,
-    description: `Detect change points in a time-series metric and render an annotated line chart for each entity group.
+    description: `Detect change points in a time-series metric and render an annotated area chart for each entity group.
 
 ## Usage
 
-Call this tool when the user asks about change points, anomalies, trend shifts, or sudden changes in a metric.
+Call this tool only when the user explicitly requests change point analysis or asks to detect sudden shifts or abrupt trend breaks in a metric.
 
 The tool requires an ES|QL query that includes a \`CHANGE_POINT\` command, e.g.:
   \`FROM logs-* | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket BY host\`
 
 The tool will:
 1. Execute the CHANGE_POINT query to find significant change points.
-2. For each entity group (up to max_charts), build an annotated Lens line chart showing the metric trend with change-point markers.
-3. Return one visualization result per entity group.
+2. For each entity group (up to max_charts), build an annotated Lens area chart showing the metric trend with change-point markers.
+3. Return one visualization result per entity group. If save_charts is true, each chart is also persisted as a visualization attachment (attachment_id included in the result) that can be added to a dashboard.
+
+Set save_charts = true ONLY when the user explicitly asks to save charts or add them to a dashboard.
 
 Do NOT call this tool unless the user explicitly requests change point analysis.`,
     schema: detectChangePointsSchema,
     tags: [],
     handler: async (
-      { query, time_range: explicitTimeRange, max_charts: maxCharts = 6 },
+      {
+        query,
+        time_range: explicitTimeRange,
+        max_charts: maxCharts = 6,
+        save_charts: saveCharts = false,
+      },
       { esClient, logger, attachments }
     ) => {
       // Validate: query must contain a top-level CHANGE_POINT command
@@ -139,13 +156,14 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
           return obj;
         });
       } catch (error) {
-        logger.error(`detect_change_points: CHANGE_POINT query failed: ${error.message}`);
+        const message = error instanceof Error ? error.message : String(error);
+        logger.error(`detect_change_points: CHANGE_POINT query failed: ${message}`);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to execute CHANGE_POINT query: ${error.message}`,
+                message: `Failed to execute CHANGE_POINT query: ${message}`,
               },
             },
           ],
@@ -194,92 +212,156 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
       }
 
       // Group rows by entity (each unique combination of BY-column values)
-      const entityGroups = groupByEntity(changePointRows, entityColumns, maxCharts);
+      const { groups: entityGroups, totalGroupCount } = groupByEntity(
+        changePointRows,
+        entityColumns,
+        maxCharts
+      );
 
       // Phase 3: Build one Lens visualization per entity group
-      const results = entityGroups.map(({ representativeRow, groupRows, entityLabel }) => {
-        const entityLineQuery = entityColumns.length
-          ? appendEntityFiltersToChangePointLineEsql(
-              lineBaseQuery,
-              representativeRow,
-              entityColumns
-            )
-          : lineBaseQuery;
-
-        // Resolve named time-range params so Lens receives an executable query string
-        const resolvedLineQuery = timeRangeParams.length
-          ? interpolateEsqlQuery(
-              entityLineQuery,
-              timeRangeParams.reduce<Record<string, EsqlToolParamValue | null>>(
-                (acc, p) => ({ ...acc, ...p }),
-                {}
+      const results = await Promise.all(
+        entityGroups.map(async ({ representativeRow, groupRows, entityLabel }) => {
+          const entityLineQuery = entityColumns.length
+            ? appendEntityFiltersToChangePointLineEsql(
+                lineBaseQuery,
+                representativeRow,
+                entityColumns
               )
-            )
-          : entityLineQuery;
+            : lineBaseQuery;
 
-        const lensConfig = {
-          type: 'xy',
-          title: entityLabel,
-          layers: [
-            {
-              data_source: { type: 'esql' as const, query: resolvedLineQuery },
-              type: 'area' as const,
-              ignore_global_filters: false,
-              sampling: 1,
-              x: { column: timeColumn },
-              y: [{ column: valueColumn }],
-            },
-            {
-              type: 'annotations' as const,
-              ignore_global_filters: false,
-              events: groupRows.map((row) => ({
-                type: 'point' as const,
-                timestamp: String(row[timeColumn]),
-                label: `${row[typeColumn]} (p=${row[pvalueColumn]})`,
-                text: { visible: true },
-              })),
-            },
-          ],
-        };
+          // Resolve named time-range params so Lens receives an executable query string
+          const resolvedLineQuery = timeRangeParams.length
+            ? interpolateEsqlQuery(
+                entityLineQuery,
+                timeRangeParams.reduce<Record<string, EsqlToolParamValue | null>>(
+                  (acc, p) => ({ ...acc, ...p }),
+                  {}
+                )
+              )
+            : entityLineQuery;
 
-        return {
-          tool_result_id: getToolResultId(),
-          type: ToolResultType.visualization,
-          data: {
-            visualization: lensConfig,
-            chart_type: SupportedChartType.XY,
-            esql: resolvedLineQuery,
-            ...(timeRange && { time_range: timeRange }),
+          const lensConfig = {
+            type: 'xy',
+            title: entityLabel,
+            layers: [
+              {
+                data_source: { type: 'esql' as const, query: resolvedLineQuery },
+                type: 'area' as const,
+                ignore_global_filters: false,
+                sampling: 1,
+                x: { column: timeColumn },
+                y: [{ column: valueColumn }],
+              },
+              {
+                type: 'annotations' as const,
+                ignore_global_filters: false,
+                events: groupRows.map((row) => {
+                  const rawTs = row[timeColumn];
+                  const timestamp =
+                    typeof rawTs === 'number' ? new Date(rawTs).toISOString() : String(rawTs);
+                  return {
+                    type: 'point' as const,
+                    timestamp,
+                    label: `${row[typeColumn]} (p=${row[pvalueColumn]})`,
+                    text: { visible: true },
+                  };
+                }),
+              },
+            ],
+          };
+
+          // Persist as a visualization attachment only when the user explicitly requested it.
+          // Each saved attachment becomes part of conversation state, so we avoid creating them
+          // during ordinary analysis.
+          let attachmentId: string | undefined;
+          if (saveCharts) {
+            try {
+              const att = await attachments.add({
+                type: VISUALIZATION_ATTACHMENT_TYPE,
+                data: {
+                  query: `Change point analysis for ${entityLabel}`,
+                  visualization: lensConfig as Record<string, unknown>,
+                  chart_type: SupportedChartType.XY,
+                  esql: resolvedLineQuery,
+                  ...(timeRange && { time_range: timeRange }),
+                },
+                description: `Change point: ${entityLabel}`,
+              });
+              attachmentId = att.id;
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              logger.warn(
+                `detect_change_points: could not persist attachment for "${entityLabel}": ${message}`
+              );
+            }
+          }
+
+          return {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.visualization,
+            data: {
+              visualization: lensConfig,
+              chart_type: SupportedChartType.XY,
+              esql: resolvedLineQuery,
+              ...(timeRange && { time_range: timeRange }),
+              ...(attachmentId && { attachment_id: attachmentId }),
+            },
+          };
+        })
+      );
+
+      if (totalGroupCount <= maxCharts) {
+        return { results };
+      }
+
+      const omitted = totalGroupCount - maxCharts;
+      return {
+        results: [
+          ...results,
+          {
+            type: ToolResultType.other,
+            data: {
+              message:
+                `Results are capped at ${maxCharts} entity groups. ` +
+                `${omitted} additional ${
+                  omitted === 1 ? 'entity was' : 'entities were'
+                } omitted. ` +
+                `Increase max_charts or narrow the query to see more.`,
+            },
           },
-        };
-      });
-
-      return { results };
+        ],
+      };
     },
   };
 };
 
 /**
  * Groups CHANGE_POINT result rows by unique entity (BY-column combination) and returns
- * at most `maxGroups` groups.
+ * at most `maxGroups` groups alongside the total count of distinct groups found.
  */
 function groupByEntity(
   rows: Array<Record<string, unknown>>,
   entityColumns: readonly string[],
   maxGroups: number
-): Array<{
-  representativeRow: Record<string, unknown>;
-  groupRows: Array<Record<string, unknown>>;
-  entityLabel: string;
-}> {
+): {
+  groups: Array<{
+    representativeRow: Record<string, unknown>;
+    groupRows: Array<Record<string, unknown>>;
+    entityLabel: string;
+  }>;
+  totalGroupCount: number;
+} {
   if (entityColumns.length === 0) {
-    return [
-      {
-        representativeRow: rows[0],
-        groupRows: rows,
-        entityLabel: 'Change Points',
-      },
-    ];
+    return {
+      groups: [
+        {
+          representativeRow: rows[0],
+          groupRows: rows,
+          entityLabel: 'Change Points',
+        },
+      ],
+      totalGroupCount: 1,
+    };
   }
 
   const groupMap = new Map<
@@ -297,7 +379,8 @@ function groupByEntity(
     }
   }
 
-  return Array.from(groupMap.entries())
+  const totalGroupCount = groupMap.size;
+  const groups = Array.from(groupMap.entries())
     .slice(0, maxGroups)
     .map(([, { representativeRow, groupRows }]) => {
       const entityLabel = entityColumns
@@ -305,4 +388,6 @@ function groupByEntity(
         .join(', ');
       return { representativeRow, groupRows, entityLabel };
     });
+
+  return { groups, totalGroupCount };
 }

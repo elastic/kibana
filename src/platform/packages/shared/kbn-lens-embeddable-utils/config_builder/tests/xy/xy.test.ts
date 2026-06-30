@@ -882,6 +882,12 @@ describe('XY', () => {
         const annotationDataViewId = (annotationLayer as any).indexPatternId;
         expect(annotationDataViewId).toBeTruthy();
         const adHocDataViews = lensState.state.adHocDataViews ?? {};
+        const esqlDataViewEntry = Object.entries(adHocDataViews).find(
+          ([, dataView]) => (dataView as any).type === 'esql'
+        );
+        expect(esqlDataViewEntry).toBeDefined();
+        const [esqlDataViewId] = esqlDataViewEntry!;
+        expect(annotationDataViewId).not.toBe(esqlDataViewId);
         const annotationDataView = adHocDataViews[annotationDataViewId];
         expect(annotationDataView).toBeDefined();
         // Must NOT be an ES|QL data view type

@@ -37,6 +37,12 @@ type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & {
   state: Omit<XYLensState, 'visualization'> & { visualization: XYPersistedState };
 };
 
+const ANNOTATION_DATA_VIEW_ID_SUFFIX = '--annotation';
+
+function getAnnotationDataViewId(dataView: APIAdHocDataView): string {
+  return `${generateAdHocDataViewId(dataView)}${ANNOTATION_DATA_VIEW_ID_SUFFIX}`;
+}
+
 export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilters {
   // convert layers and produce references from them
   const { layers, usedDataviews } = buildDatasourceStates(
@@ -84,12 +90,15 @@ export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilte
         timeFieldName: firstEsqlDataView.timeFieldName ?? LENS_DEFAULT_TIME_FIELD,
         // dataSourceType intentionally omitted — makes this a regular index-pattern data view
       };
-      const annotationDataViewSpec = getAdHocDataViewSpec(regularDataView);
-      const annotationDataViewId = generateAdHocDataViewId(regularDataView);
+      // Keep the companion data view distinct from the ES|QL data view when both resolve to
+      // the same index + time field id.
+      const annotationDataViewId = getAnnotationDataViewId(regularDataView);
+      const annotationDataViewSpec = {
+        ...getAdHocDataViewSpec(regularDataView),
+        id: annotationDataViewId,
+      };
 
-      if (!adHocDataViews[annotationDataViewId]) {
-        adHocDataViews[annotationDataViewId] = annotationDataViewSpec;
-      }
+      adHocDataViews[annotationDataViewId] = annotationDataViewSpec;
 
       for (const i of annotationLayerIndices) {
         dataViewLayerToIdMap[getIdForLayer(config.layers[i], i)] = annotationDataViewId;
