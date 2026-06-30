@@ -6,7 +6,7 @@
  */
 
 import type { ConverseStep, EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { Detection, Discovery, SignificantEvent } from '@kbn/streams-schema';
+import type { Detection, Discovery, SignificantEvent } from '@kbn/significant-events-schema';
 
 /** Fields every discovery agent output carries: the converse trail and trace id. */
 export interface AgentOutputBase {

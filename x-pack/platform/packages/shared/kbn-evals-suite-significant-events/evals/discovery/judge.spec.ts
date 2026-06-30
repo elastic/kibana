@@ -8,7 +8,7 @@
 import { SIGEVENTS_JUDGE_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   listAvailableSnapshots,

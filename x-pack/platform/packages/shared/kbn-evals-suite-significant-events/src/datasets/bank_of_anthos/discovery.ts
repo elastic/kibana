@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Detection, Discovery } from '@kbn/streams-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import type { DatasetConfig } from '../types';
 
 const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partial<Detection>> =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { JudgeEvaluator } from '../../types';
 
 const VALID_STATUSES = new Set<SignificantEvent['status']>([

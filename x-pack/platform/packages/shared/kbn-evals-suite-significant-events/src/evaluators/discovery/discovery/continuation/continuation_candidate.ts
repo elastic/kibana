@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 
 export interface ToContinuationCandidateParams {
   /** A discovery the agent produced in a prior cycle. */

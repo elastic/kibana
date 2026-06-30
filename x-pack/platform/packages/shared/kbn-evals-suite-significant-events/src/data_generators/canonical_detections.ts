@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Detection } from '@kbn/streams-schema';
+import type { Detection } from '@kbn/significant-events-schema';
 
 const CANONICAL_TIMESTAMP = '2024-01-01T00:00:00.000Z';
 

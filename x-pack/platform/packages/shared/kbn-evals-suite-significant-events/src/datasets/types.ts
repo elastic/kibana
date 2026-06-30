@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/streams-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 

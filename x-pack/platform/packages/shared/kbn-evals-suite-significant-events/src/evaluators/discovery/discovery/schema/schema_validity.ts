@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const VALID_KINDS = new Set<Discovery['kind']>(['discovery', 'clearance', 'handled']);
