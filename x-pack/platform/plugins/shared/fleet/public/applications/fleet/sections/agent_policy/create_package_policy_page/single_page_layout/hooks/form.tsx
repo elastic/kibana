@@ -8,17 +8,14 @@
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual, omit, pick } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
-import {
-  formatInputs,
-  formatVars,
-} from '../../../../../../../../common/services/simplified_package_policy_helper';
+import { toNewAgentlessPolicy } from '../../../../../../../../common/services';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
 
@@ -159,53 +156,7 @@ async function savePackagePolicy(
 
   // If agentless use agentless policies API
   if (policy.supports_agentless) {
-    function formatPackage(pkg: NewPackagePolicy['package']) {
-      return omit(pkg, 'title');
-    }
-
-    // Detect target cloud provider from var_groups or inputs
-    const targetCsp = detectTargetCsp(pkgPolicy as NewPackagePolicy, varGroups);
-
-    // TODO: Replace this omit-based approach with a pick-based toNewAgentlessPolicy()
-    // mapper that produces a NewAgentlessPolicy directly.
-    const agentlessRequestBody = {
-      package: formatPackage(pkgPolicy.package),
-      ...omit(
-        pkgPolicy,
-        'policy_ids',
-        'policy_id',
-        'package',
-        'enabled',
-        'inputs',
-        'vars',
-        'id',
-        'condition',
-        'supports_agentless',
-        'supports_cloud_connector',
-        'cloud_connector_id',
-        'cloud_connector_name'
-      ),
-      id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
-      inputs: formatInputs(pkgPolicy.inputs),
-      vars: formatVars(pkgPolicy.vars),
-      // Build cloud_connector object if cloud connectors are supported
-      ...(pkgPolicy.supports_cloud_connector && {
-        cloud_connector: {
-          enabled: true,
-          // Include target_csp if detected (required for var_groups packages)
-          ...(targetCsp && { target_csp: targetCsp }),
-          ...(pkgPolicy.cloud_connector_id && {
-            cloud_connector_id: pkgPolicy.cloud_connector_id,
-          }),
-          // Only pass the name if creating a new connector (no cloud_connector_id)
-          ...(!pkgPolicy.cloud_connector_id &&
-            pkgPolicy.cloud_connector_name && {
-              name: pkgPolicy.cloud_connector_name,
-            }),
-        },
-      }),
-    };
-
+    const agentlessRequestBody = toNewAgentlessPolicy(pkgPolicy as NewPackagePolicy, varGroups);
     const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
     return { type: 'agentless', policy: item };
   }
@@ -329,6 +280,7 @@ export function useOnSubmit({
   const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -535,14 +487,13 @@ export function useOnSubmit({
     // For single-input agentless integrations the simplified UX shows no enable/disable
     // toggle, so if the input is disabled by default the user has no way to enable it or
     // see any configuration fields.  Auto-enable it when switching to agentless.
+    const inputs = packagePolicy.inputs ?? [];
     const agentlessAllowedInputCount = isAgentlessSelected
-      ? packagePolicy.inputs.filter((i) =>
-          isInputAllowedForDeploymentMode(i, 'agentless', packageInfo)
-        ).length
+      ? inputs.filter((i) => isInputAllowedForDeploymentMode(i, 'agentless', packageInfo)).length
       : 0;
     const isSingleAgentlessInput = agentlessAllowedInputCount === 1;
 
-    return packagePolicy.inputs.map((input) => {
+    return inputs.map((input) => {
       const allowedForDeploymentMode = isInputAllowedForDeploymentMode(
         input,
         isAgentlessSelected ? 'agentless' : 'default',
@@ -575,8 +526,9 @@ export function useOnSubmit({
   // when a var_group selection actually hides or reveals an input, preventing
   // infinite update loops from new array references.
   const inputsEnablingDiffer = useMemo(() => {
-    if (packagePolicy.inputs.length !== newInputs.length) return true;
-    return packagePolicy.inputs.some((input, i) => input.enabled !== newInputs[i]?.enabled);
+    const inputs = packagePolicy.inputs ?? [];
+    if (inputs.length !== newInputs.length) return true;
+    return inputs.some((input, i) => input.enabled !== newInputs[i]?.enabled);
   }, [packagePolicy.inputs, newInputs]);
 
   useEffect(() => {
@@ -626,6 +578,7 @@ export function useOnSubmit({
       force?: boolean;
       skipConfirmModal?: boolean;
     } = {}) => {
+      setSubmitAttempted(true);
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -914,6 +867,7 @@ export function useOnSubmit({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
   };
