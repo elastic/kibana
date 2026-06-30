@@ -24,6 +24,8 @@ export interface DocumentationItem {
   isTechPreview?: boolean;
   isStubbed?: boolean;
   icon?: string;
+  failureReason?: string;
+  inferenceId?: string;
 }
 
 export const ELASTIC_DOCS_ID = 'elastic_documents';

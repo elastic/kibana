@@ -11,7 +11,15 @@
 export * as cli from './src/cli';
 
 // Test framework
-export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
+export {
+  test,
+  spaceTest,
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  tags,
+} from './src/playwright';
 
 // Fixtures & configuration
 export {
@@ -34,6 +42,12 @@ export * from './src/playwright/eui_components';
 
 // Kibana-wide components
 export * from './src/playwright/ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  CopySavedObjectsToSpaceFlyout,
+  SavedObjectsManagementPage,
+} from './src/playwright/page_objects';
 
 // Scout core types
 export type {
@@ -64,12 +78,14 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';
 
 // Authentication types
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type { ApiClientFixture } from './src/playwright/fixtures/scope/worker/api_client';
 export type {
   RoleSessionCredentials,
   CookieHeader,

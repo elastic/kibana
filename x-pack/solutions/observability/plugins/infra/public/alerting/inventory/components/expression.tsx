@@ -13,10 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiHealth,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -631,14 +632,21 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraExpressionRowButton"
-            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-            onClick={toggle}
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggle}
+              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+                defaultMessage: 'Expand row.',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow>
@@ -683,19 +691,29 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                     defaultMessage="Warning"
                   />
                 </EuiHealth>
-                <EuiButtonIcon
-                  data-test-subj="infraExpressionRowButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
                       defaultMessage: 'Remove warningThreshold',
                     }
                   )}
-                  iconSize="s"
-                  color="text"
-                  iconType="minusCircle"
-                  onClick={toggleWarningThreshold}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="infraExpressionRowButton"
+                    aria-label={i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                      {
+                        defaultMessage: 'Remove warningThreshold',
+                      }
+                    )}
+                    iconSize="s"
+                    color="text"
+                    iconType="minusCircle"
+                    onClick={toggleWarningThreshold}
+                  />
+                </EuiToolTip>
               </EuiFlexGroup>
             </>
           )}
@@ -727,15 +745,22 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="infraExpressionRowButton"
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
-              color="danger"
-              iconType="trash"
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="infraExpressionRowButton"
+                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+                  defaultMessage: 'Remove condition',
+                })}
+                color="danger"
+                iconType="trash"
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

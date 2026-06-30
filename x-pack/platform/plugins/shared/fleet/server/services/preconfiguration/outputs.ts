@@ -10,7 +10,7 @@ import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import pMap from 'p-map';
 
 const pbkdf2Async = utils.promisify(crypto.pbkdf2);
@@ -105,7 +105,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
     const { id, config, ...outputData } = output;
 
-    const configYaml = config ? dump(config) : undefined;
+    const configYaml = config ? stringify(config) : undefined;
 
     const data: NewOutput = {
       ...outputData,
@@ -151,11 +151,10 @@ export async function createOrUpdatePreconfiguredOutputs(
           secretHashes,
         });
         // Bump revision of all policies using that output
-        if (outputData.is_default || outputData.is_default_monitoring) {
-          await agentPolicyService.bumpAllAgentPolicies(esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
-        }
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {
+          isDefault: outputData.is_default,
+          isDefaultMonitoring: outputData.is_default_monitoring,
+        });
       }
     }
   };

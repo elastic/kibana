@@ -350,7 +350,6 @@ export const waffleLegacyBasicState = {
           layerType: 'data',
           numberDisplay: 'percent',
           legendDisplay: 'default',
-          nestedLegend: true,
           collapseFns: {},
           categoryDisplay: 'default',
         },
@@ -1074,7 +1073,6 @@ export const waffleLegacyAdvancedStateWithCollapsedGroups = {
           layerType: 'data',
           numberDisplay: 'percent',
           legendDisplay: 'default',
-          nestedLegend: true,
           collapseFns: {
             partition_value_accessor_group_by_0: 'sum',
           },

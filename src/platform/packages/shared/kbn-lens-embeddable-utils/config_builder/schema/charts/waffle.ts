@@ -18,6 +18,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
+  legendPositionSchema,
 } from '../shared';
 import { validateMultipleMetricsCriteria, valueDisplaySchema } from './partition_shared';
 import {
@@ -46,6 +47,7 @@ const waffleConfigSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {
@@ -107,7 +109,8 @@ export const waffleConfigSchemaNoESQL = schema.object(
     styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionConfigPrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema,
+        'waffleMetric'
       ),
       {
         minSize: 1,
@@ -117,7 +120,10 @@ export const waffleConfigSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'waffleGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,

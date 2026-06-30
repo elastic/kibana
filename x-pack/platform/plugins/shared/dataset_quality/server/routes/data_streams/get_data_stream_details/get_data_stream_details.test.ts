@@ -57,6 +57,7 @@ describe('getDataStreamDetails', () => {
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
     search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
@@ -64,6 +65,7 @@ describe('getDataStreamDetails', () => {
     mockESClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
       search: jest.fn(),
+      fieldCaps: jest.fn(),
     };
     esClient.asCurrentUser = mockESClient;
 
@@ -121,7 +123,7 @@ describe('getDataStreamDetails', () => {
       },
     } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
 
-    mockESClient.fieldCaps.mockResolvedValue({
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
       fields: {
         'host.name': {
           keyword: { type: 'keyword', aggregatable: true },
@@ -312,6 +314,99 @@ describe('getDataStreamDetails', () => {
         });
 
         expect(result).toEqual({});
+      });
+
+      it('returns empty object when ES surfaces index_not_found_exception as 500 (e.g. partial-restored backing index)', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const error = new Error(
+          'index_not_found_exception: no such index [partial-.ds-logs-test-default-2026.03.21-000001]'
+        );
+        (
+          error as Error & { statusCode?: number; body?: { error?: { type?: string } } }
+        ).statusCode = 500;
+        (error as Error & { body?: { error?: { type?: string } } }).body = {
+          error: { type: 'index_not_found_exception' },
+        };
+        mockDatasetQualityESClient.search.mockRejectedValue(error);
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(result).toEqual({});
+      });
+
+      it('calls the wrapped fieldCaps (not the raw esClient.fieldCaps) so ignore_unavailable is applied', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
+          index: 'logs-test-default',
+          fields: ['*'],
+          include_unmapped: false,
+        });
+        expect(mockESClient.fieldCaps).not.toHaveBeenCalled();
+        expect(result).toEqual(detailsObject);
+      });
+
+      it('returns docs/services/hosts but sizeBytes=0 when indices.stats throws index_not_found_exception', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const error = new Error(
+          'index_not_found_exception: no such index [partial-.ds-logs-test-default-2026.03.21-000001]'
+        );
+        (
+          error as Error & { statusCode?: number; body?: { error?: { type?: string } } }
+        ).statusCode = 500;
+        (error as Error & { body?: { error?: { type?: string } } }).body = {
+          error: { type: 'index_not_found_exception' },
+        };
+        mockESClient.indices.stats.mockRejectedValue(error);
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(result.docsCount).toBe(1000);
+        expect(result.sizeBytes).toBe(0);
+        expect(result.services).toEqual({ 'service.name': ['service1', 'service2'] });
       });
 
       it('throws error for other types of errors', async () => {

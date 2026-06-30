@@ -72,6 +72,7 @@
             "type": "keyword"
           },
           "params": {
+            "ignore_above": 4096,
             "type": "flattened"
           }
         },
@@ -1463,6 +1464,10 @@
         "type": "keyword"
       }
     }
+  },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
   },
   "entity-definition": {
     "dynamic": false,

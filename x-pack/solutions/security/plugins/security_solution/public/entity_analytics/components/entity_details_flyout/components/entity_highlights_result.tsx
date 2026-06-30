@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import {
@@ -119,29 +120,45 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="refresh"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel',
                     { defaultMessage: 'Regenerate summary' }
                   )}
-                  onClick={onRefresh}
-                  size="xs"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel',
+                      { defaultMessage: 'Regenerate summary' }
+                    )}
+                    onClick={onRefresh}
+                    size="xs"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               {textToCopy && (
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={textToCopy}>
                     {(copy) => (
-                      <EuiButtonIcon
-                        iconType="copy"
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.securitySolution.flyout.entityDetails.highlights.copyAriaLabel',
                           { defaultMessage: 'Copy summary' }
                         )}
-                        onClick={copy}
-                        size="xs"
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="copy"
+                          aria-label={i18n.translate(
+                            'xpack.securitySolution.flyout.entityDetails.highlights.copyAriaLabel',
+                            { defaultMessage: 'Copy summary' }
+                          )}
+                          onClick={copy}
+                          size="xs"
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiCopy>
                 </EuiFlexItem>

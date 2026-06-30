@@ -6,13 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type extendSessionIcon from './icons/extend_session.svg';
+
+import type { EuiContextMenuItemIcon } from '@elastic/eui';
 
 export type OnActionComplete = () => void;
 export type OnActionDismiss = () => void;
 
 export interface IClickActionDescriptor {
   label: React.ReactNode;
-  iconType: 'trash' | 'cancel' | typeof extendSessionIcon;
+  icon: EuiContextMenuItemIcon;
   onClick: () => Promise<void> | void;
 }

@@ -122,16 +122,10 @@ describe('AutoInstallContentPackagesTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      (dataStreamService.getAllFleetDataStreams as jest.Mock).mockResolvedValue([
-        {
-          name: 'logs-system.cpu-default',
-        } as any,
-        {
-          name: 'logs-system.memory-default',
-        } as any,
-        {
-          name: 'logs-system.test-default',
-        } as any,
+      (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        'logs-system.cpu-default',
+        'logs-system.memory-default',
+        'logs-system.test-default',
       ]);
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
@@ -247,7 +241,7 @@ describe('AutoInstallContentPackagesTask', () => {
       await runTask();
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-      expect(dataStreamService.getAllFleetDataStreams).not.toHaveBeenCalled();
+      expect(dataStreamService.getAllFleetDataStreamNames).not.toHaveBeenCalled();
     });
 
     it('should not downgrade package when a newer prerelease version is installed', async () => {
@@ -299,6 +293,30 @@ describe('AutoInstallContentPackagesTask', () => {
       expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
         expect.objectContaining({ pkgName: 'kubernetes_otel' })
       );
+    });
+
+    describe('getDatasetsWithData', () => {
+      it('should deduplicate datasets when multiple data streams share the same dataset but have different namespaces', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'logs-system.cpu-production',
+        ]);
+
+        const result: string[] = await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect(result).toEqual(['system.cpu']);
+      });
+
+      it('should deduplicate datasets when multiple data streams share the same dataset but have different types', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'metrics-system.cpu-default',
+        ]);
+
+        const result: string[] = await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect(result).toEqual(['system.cpu']);
+      });
     });
   });
 });

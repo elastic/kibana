@@ -317,17 +317,24 @@ export function QueryList({
                   })}
                 >
                   {(copy) => (
-                    <EuiButtonIcon
-                      iconType="copy"
-                      iconSize="m"
-                      onClick={copy}
-                      css={css`
-                        cursor: pointer;
-                      `}
-                      aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                    <EuiToolTip
+                      content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                         defaultMessage: 'Copy query to clipboard',
                       })}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="copy"
+                        iconSize="m"
+                        onClick={copy}
+                        css={css`
+                          cursor: pointer;
+                        `}
+                        aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                          defaultMessage: 'Copy query to clipboard',
+                        })}
+                      />
+                    </EuiToolTip>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -419,12 +426,8 @@ export function QueryColumn({
   return (
     <>
       {isExpandable && (
-        <EuiButtonIcon
-          onClick={() => {
-            setIsRowExpanded(!isRowExpanded);
-          }}
-          data-test-subj="ESQLEditor-queryList-queryString-expanded"
-          aria-label={
+        <EuiToolTip
+          content={
             isRowExpanded
               ? i18n.translate('esqlEditor.query.collapseLabel', {
                   defaultMessage: 'Collapse',
@@ -433,13 +436,30 @@ export function QueryColumn({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-          size="xs"
-          color="text"
-          css={css`
-            flex-shrink: 0;
-          `}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              setIsRowExpanded(!isRowExpanded);
+            }}
+            data-test-subj="ESQLEditor-queryList-queryString-expanded"
+            aria-label={
+              isRowExpanded
+                ? i18n.translate('esqlEditor.query.collapseLabel', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('esqlEditor.query.expandLabel', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+            size="xs"
+            color="text"
+            css={css`
+              flex-shrink: 0;
+            `}
+          />
+        </EuiToolTip>
       )}
       <span
         css={css`

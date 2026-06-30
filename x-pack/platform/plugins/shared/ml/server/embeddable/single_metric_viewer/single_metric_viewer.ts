@@ -15,32 +15,32 @@ import {
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
 
 const baseUserInputProps = schema.object({
-  forecastId: schema.maybe(schema.string()),
-  functionDescription: schema.maybe(schema.string()),
-  jobIds: schema.arrayOf(schema.string()),
+  forecastId: schema.maybe(schema.string({ maxLength: 10000 })),
+  functionDescription: schema.maybe(schema.string({ maxLength: 10000 })),
+  jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
   selectedDetectorIndex: schema.number(),
   selectedEntities: schema.maybe(
-    schema.recordOf(schema.string(), schema.maybe(mlEntityFieldValueSchema))
+    schema.recordOf(schema.string({ maxLength: 10000 }), schema.maybe(mlEntityFieldValueSchema))
   ),
 });
 
 export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
   ...baseUserInputProps.getPropSchemas(),
-  panelTitle: schema.maybe(schema.string()),
+  panelTitle: schema.maybe(schema.string({ maxLength: 10000 })),
 });
 
 export const singleMetricViewerEmbeddableCustomInputSchema = schema.object({
   ...baseUserInputProps.getPropSchemas(),
   ...serializedTimeRangeSchema.getPropSchemas(),
-  id: schema.maybe(schema.string()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+  id: schema.maybe(schema.string({ maxLength: 10000 })),
+  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
   query: schema.maybe(querySchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
 });
 
 export const singleMetricViewerEmbeddableInputSchema = schema.object({
   ...singleMetricViewerEmbeddableCustomInputSchema.getPropSchemas(),
-  title: schema.maybe(schema.string()),
+  title: schema.maybe(schema.string({ maxLength: 10000 })),
 });
 
 export const singleMetricViewerEmbeddableStateSchema = schema.object({

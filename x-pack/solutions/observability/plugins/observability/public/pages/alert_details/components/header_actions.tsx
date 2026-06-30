@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_RULE_UUID, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
@@ -120,16 +121,26 @@ export function HeaderActions({
             isOpen={isPopoverOpen}
             closePopover={handleClosePopover}
             button={
-              <EuiButtonIcon
-                display="base"
-                size="m"
-                iconType="boxesVertical"
-                data-test-subj="alert-details-header-actions-menu-button"
-                onClick={handleTogglePopover}
-                aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
                   defaultMessage: 'Actions',
                 })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  display="base"
+                  size="m"
+                  iconType="boxesVertical"
+                  data-test-subj="alert-details-header-actions-menu-button"
+                  onClick={handleTogglePopover}
+                  aria-label={i18n.translate(
+                    'xpack.observability.alertDetails.actionsButtonLabel',
+                    {
+                      defaultMessage: 'Actions',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             }
           >
             <div style={{ width: '220px' }}>

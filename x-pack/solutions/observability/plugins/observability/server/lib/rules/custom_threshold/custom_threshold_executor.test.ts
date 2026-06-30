@@ -1730,6 +1730,8 @@ describe('The custom threshold alert type', () => {
               language: 'kuery',
             },
           },
+          timeSize: 1,
+          timeUnit: 'm',
         });
       });
 
@@ -1791,6 +1793,8 @@ describe('The custom threshold alert type', () => {
               language: 'kuery',
             },
           },
+          timeSize: 1,
+          timeUnit: 'm',
         });
       });
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {

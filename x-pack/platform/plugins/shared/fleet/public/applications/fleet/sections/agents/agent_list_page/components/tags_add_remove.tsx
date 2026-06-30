@@ -185,7 +185,7 @@ export const TagsAddRemove: React.FC<Props> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="plus" />
+          <EuiIcon type="plus" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <FormattedMessage
@@ -203,6 +203,9 @@ export const TagsAddRemove: React.FC<Props> = ({
   return (
     <>
       <EuiWrappingPopover
+        aria-label={i18n.translate('xpack.fleet.tagsAddRemove.popoverAriaLabel', {
+          defaultMessage: 'Add / remove tags',
+        })}
         isOpen={isPopoverOpen}
         button={button!}
         closePopover={closePopover}

@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui/src/components/common';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const StepDetailsLinkIcon = ({
   stepIndex,
@@ -31,8 +32,10 @@ export const StepDetailsLinkIcon = ({
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation({ refetchMonitorEnabled: false });
+  const spaceId = useUrlSpaceId();
 
-  const stepDetailsLink = `${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`;
+  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
+  const stepDetailsLink = `${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}${spaceIdQuery}`;
 
   if (asButton) {
     return (
@@ -50,15 +53,16 @@ export const StepDetailsLinkIcon = ({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="syntheticsStepDetailsLinkIconButton"
-      {...commonProps}
-      title={VIEW_DETAILS(stepIndex)}
-      size="s"
-      href={stepDetailsLink}
-      target={target}
-      iconType="chartWaterfall"
-    />
+    <EuiToolTip content={VIEW_DETAILS(stepIndex)} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="syntheticsStepDetailsLinkIconButton"
+        {...commonProps}
+        size="s"
+        href={stepDetailsLink}
+        target={target}
+        iconType="chartWaterfall"
+      />
+    </EuiToolTip>
   );
 };
 

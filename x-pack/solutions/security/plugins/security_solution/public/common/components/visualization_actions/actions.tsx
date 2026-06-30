@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -139,13 +139,15 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={MORE_ACTIONS}
-        className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
-        data-test-subj={dataTestSubj}
-        iconType="boxesVertical"
-        onClick={onButtonClick}
-      />
+      <EuiToolTip content={MORE_ACTIONS} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={MORE_ACTIONS}
+          className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
+          data-test-subj={dataTestSubj}
+          iconType="boxesVertical"
+          onClick={onButtonClick}
+        />
+      </EuiToolTip>
     ),
     [dataTestSubj, onButtonClick]
   );
@@ -154,6 +156,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     <Wrapper className={className}>
       {panels.value && panels.value.length > 0 && (
         <EuiPopover
+          aria-label={MORE_ACTIONS}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}

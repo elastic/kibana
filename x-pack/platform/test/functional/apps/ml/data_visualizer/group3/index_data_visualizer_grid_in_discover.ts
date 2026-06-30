@@ -74,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('field statistics in Discover', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
       );

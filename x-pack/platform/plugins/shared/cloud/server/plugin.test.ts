@@ -53,6 +53,43 @@ describe('Cloud Plugin', () => {
         expect(setup.isCloudEnabled).toBe(true);
       });
 
+      describe('isEce', () => {
+        it('defaults to true for cloud-enabled non-serverless deployments when isSaasContainer is missing', () => {
+          const { setup } = setupPlugin();
+          expect(setup.isEce).toBe(true);
+        });
+
+        it('is false when isSaasContainer is true', () => {
+          const { setup } = setupPlugin({
+            isSaasContainer: true,
+          });
+          expect(setup.isEce).toBe(false);
+        });
+
+        it('is true when isSaasContainer is false', () => {
+          const { setup } = setupPlugin({
+            isSaasContainer: false,
+          });
+          expect(setup.isEce).toBe(true);
+        });
+
+        it('is undefined for self-managed deployments when isSaasContainer is missing', () => {
+          const { setup } = setupPlugin({
+            id: undefined,
+          });
+          expect(setup.isEce).toBeUndefined();
+        });
+
+        it('is undefined for serverless deployments when isSaasContainer is missing', () => {
+          const { setup } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+            },
+          });
+          expect(setup.isEce).toBeUndefined();
+        });
+      });
+
       it('exposes cloudId', () => {
         const { setup } = setupPlugin();
         expect(setup.cloudId).toBe('cloudId');

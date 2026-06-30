@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
@@ -36,6 +36,7 @@ import {
 } from './execution_functions';
 import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
+import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
@@ -445,8 +446,14 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
-                logger.error(`Workflow ${workflowId} not found`);
-                return;
+                // Keep this as error for a while to ensure that such message appears only once per workflow
+                logger.error(
+                  `Workflow ${workflowId} not found in space ${spaceId}; removing orphaned scheduled task`
+                );
+                return {
+                  state: taskInstance.state,
+                  shouldDeleteTask: true,
+                };
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
@@ -594,11 +601,13 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
+    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -613,6 +622,23 @@ export class WorkflowsExecutionEnginePlugin
       config: this.config,
     };
 
+    // Re-check that a workflow is still enabled right before persisting an
+    // execution document.  The route-level check may have read a stale value
+    // if a concurrent hard-delete disabled the workflow in the meantime.
+    // Skipped for test runs — unsaved workflows don't exist in the index.
+    const ensureWorkflowEnabled = async (
+      workflow: WorkflowExecutionEngineModel,
+      spaceId: string
+    ) => {
+      if (workflow.isTestRun) {
+        return;
+      }
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      if (!stillEnabled) {
+        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+      }
+    };
+
     // Helper function to create and persist a workflow execution
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
@@ -625,6 +651,9 @@ export class WorkflowsExecutionEnginePlugin
       repository: WorkflowExecutionRepository;
     }> => {
       await this.initialize(coreStart);
+
+      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+
       const workflowCreatedAt = new Date();
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const executedBy = await getAuthenticatedUser(
@@ -712,6 +741,17 @@ export class WorkflowsExecutionEnginePlugin
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');
+      }
+
+      // Test-only hook: simulate slow execution creation so Scout API tests
+      // can deterministically reproduce the TOCTOU race in hardDeleteWorkflows.
+      // Only honoured for internal API requests (KbnClient sets x-elastic-internal-origin).
+      if (request?.isInternalApiRequest) {
+        const raw = request.headers['x-kbn-test-run-delay-ms'];
+        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : raw ?? '0'), 10);
+        if (delayMs > 0) {
+          await new Promise((r) => setTimeout(r, delayMs));
+        }
       }
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
@@ -833,6 +873,8 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
+      await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
+
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
         ...(executionContext ?? {}),
@@ -907,16 +949,9 @@ export class WorkflowsExecutionEnginePlugin
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
       }
 
-      if (
-        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-          workflowExecution.status
-        )
-      ) {
-        // Already in a terminal state or being canceled
+      if (isTerminalStatus(workflowExecution.status)) {
         return;
       }
-
-      const cancelledAt = new Date().toISOString();
 
       if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
         await cancelWaitingWorkflow({
@@ -929,12 +964,49 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
+      const cancelUpdateFields = {
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt,
+        cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
+      };
+
+      if (workflowExecution.status === ExecutionStatus.PENDING) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowExecution.id,
+          status: ExecutionStatus.CANCELLED,
+          ...cancelUpdateFields,
+        });
+        await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
+        return;
+      }
+
+      let hasActiveTask = true;
+      try {
+        hasActiveTask = await workflowTaskManager.hasActiveTaskForExecution(workflowExecution.id);
+      } catch (err) {
+        // TM/ES issues: preserve legacy behavior (cancelRequested + nudge idle tasks) instead of
+        // failing the API or optimistically terminalizing without a reliable task check.
+        this.logger.warn(
+          `Could not determine active Task Manager tasks for execution ${workflowExecution.id}; ` +
+            `falling back to cancelRequested-only cancel. ${
+              err instanceof Error ? err.message : String(err)
+            }`
+        );
+      }
+
+      if (!hasActiveTask) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowExecution.id,
+          status: ExecutionStatus.CANCELLED,
+          ...cancelUpdateFields,
+        });
+        return;
+      }
+
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowExecution.id,
+        ...cancelUpdateFields,
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
@@ -1015,6 +1087,9 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
+
+      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
+      await workflowTaskManager.forceRunIdleTasks(executionId);
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(

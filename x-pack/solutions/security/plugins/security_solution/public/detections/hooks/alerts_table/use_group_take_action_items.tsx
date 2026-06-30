@@ -139,7 +139,7 @@ export const useGroupTakeActionsItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
       refetchQuery();
     },
     [addError, refetchQuery]

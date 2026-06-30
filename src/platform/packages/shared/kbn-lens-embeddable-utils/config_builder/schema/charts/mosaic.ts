@@ -18,6 +18,7 @@ import {
   layerSettingsSchema,
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
+  legendPositionSchema,
 } from '../shared';
 import { legendNestedSchema, valueDisplaySchema } from './partition_shared';
 import {
@@ -37,6 +38,7 @@ const mosaicConfigSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {
@@ -118,11 +120,15 @@ export const mosaicConfigSchemaNoESQL = schema.object(
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      partitionConfigPrimaryMetricOptionsSchema
+      partitionConfigPrimaryMetricOptionsSchema,
+      'mosaicMetric'
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'mosaicGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,
@@ -137,7 +143,10 @@ export const mosaicConfigSchemaNoESQL = schema.object(
      */
     group_breakdown_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema({ collapse_by: schema.maybe(collapseBySchema) }),
+        mergeAllBucketsWithChartDimensionSchema(
+          { collapse_by: schema.maybe(collapseBySchema) },
+          'mosaicGroupBreakdownBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,

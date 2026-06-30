@@ -5,9 +5,15 @@
  * 2.0.
  */
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { IndexName, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndexName,
+  QueryDslQueryContainer,
+  UpdateByQueryResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { waitForTaskToComplete } from './wait_for_task';
+import type { WaitForTaskOptions } from './wait_for_task';
 
 const BATCH_SIZE = 5 * 1024 * 1024; // 5MB
 const RETRY_ON_CONFLICT = 3;
@@ -18,33 +24,45 @@ export interface UpdateByQueryWithScriptOptions {
   script: string;
   params: Record<string, unknown>;
   signal?: AbortSignal;
+  waitForTask?: Omit<WaitForTaskOptions, 'esClient' | 'taskId' | 'signal'>;
 }
 
 export const updateByQueryWithScript = async (
   esClient: ElasticsearchClient,
   options: UpdateByQueryWithScriptOptions
 ): Promise<{ updated: number; total: number }> => {
-  const { index, query, script, params, signal } = options;
-  const response = await esClient.updateByQuery(
-    {
-      index,
-      query,
-      refresh: true,
-      // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
-      // Conflicted documents are not updated.
-      conflicts: 'proceed',
-      wait_for_completion: true,
-      script: {
-        source: script,
-        lang: 'painless',
-        params,
-      },
+  const { index, query, script, params, signal, waitForTask } = options;
+  const body = {
+    index,
+    query,
+    refresh: true,
+    // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
+    // Conflicted documents are not updated.
+    conflicts: 'proceed' as const,
+    wait_for_completion: waitForTask === undefined,
+    script: {
+      source: script,
+      lang: 'painless' as const,
+      params,
     },
-    { signal }
-  );
-  const updated = response.updated ?? 0;
-  const total = response.total ?? 0;
-  return { updated, total };
+  };
+
+  if (waitForTask !== undefined) {
+    const { task } = await esClient.updateByQuery(body, { signal });
+    if (task == null) {
+      throw new Error('updateByQuery did not return a task id');
+    }
+    const response = await waitForTaskToComplete<UpdateByQueryResponse>({
+      ...waitForTask,
+      esClient,
+      taskId: task,
+      signal,
+    });
+    return { updated: response.updated ?? 0, total: response.total ?? 0 };
+  }
+
+  const response = await esClient.updateByQuery(body, { signal });
+  return { updated: response.updated ?? 0, total: response.total ?? 0 };
 };
 
 export type IngestEntitiesTransformDocument = (
@@ -105,9 +123,19 @@ export async function ingestEntities({
   }
 
   const ignoreSet = new Set(fieldsToIgnore ?? []);
+
+  const columnNameSet = new Set(columns.map((col) => col.name));
+  const isMultiFieldSubField = (name: string): boolean => {
+    const lastDot = name.lastIndexOf('.');
+    return lastDot !== -1 && columnNameSet.has(name.substring(0, lastDot));
+  };
+
   const columnMeta = columns.map((col) => ({
     name: col.name,
-    skip: (useUpsertById && col.name === esIdField) || ignoreSet.has(col.name),
+    skip:
+      (useUpsertById && col.name === esIdField) ||
+      ignoreSet.has(col.name) ||
+      isMultiFieldSubField(col.name),
     isIdField: useUpsertById && col.name === esIdField,
   }));
 

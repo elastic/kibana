@@ -11,7 +11,8 @@ import { loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/218208
+describe.skip(
   'Alert Flyout Automated Action Results',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
@@ -103,7 +104,7 @@ describe(
         cy.getBySel('add-to-timeline').click();
         cy.contains(timelineRegex);
         cy.getBySel('securitySolutionFlyoutNavigationCollapseDetailButton').click();
-        cy.getBySel('timeline-bottom-bar').contains('Untitled timeline').click();
+        cy.getBySel('timeline-bottom-bar').contains('Untitled Timeline').click();
         cy.contains(filterRegex);
       }
     );

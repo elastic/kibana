@@ -2,7 +2,7 @@
 # Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
-  cluster: []
+  cluster: ['monitor_inference']
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'
@@ -39,7 +39,7 @@ viewer:
         - '*'
   run_as: []
 editor:
-  cluster: []
+  cluster: ['monitor_inference']
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'

@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -262,7 +262,9 @@ export async function getAgentsByKuery(
     });
     if (agentlessPolicies.items.length > 0) {
       filters.push(
-        `NOT policy_id: (${agentlessPolicies.items.map((policy) => `"${policy.id}"`).join(' or ')})`
+        `NOT policy_id: (${agentlessPolicies.items
+          .map((policy) => `"${escapeQuotes(policy.id)}"`)
+          .join(' or ')})`
       );
     }
   }
@@ -761,6 +763,7 @@ export async function updateAgent(
       index: AGENTS_INDEX,
       doc: agentSOAttributesToFleetServerAgentDoc(data),
       refresh: 'wait_for',
+      retry_on_conflict: 5,
     })
   );
 }

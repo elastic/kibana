@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
@@ -60,19 +61,26 @@ export class ImportCompleteView extends Component<Props, {}> {
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={jsonAsString}>
               {(copy) => (
-                <EuiButtonIcon
-                  size="s"
-                  onClick={copy}
-                  iconType="copy"
-                  color="text"
-                  data-test-subj={copyButtonDataTestSubj}
-                  aria-label={i18n.translate(
-                    'xpack.fileUpload.importComplete.copyButtonAriaLabel',
-                    {
-                      defaultMessage: 'Copy to clipboard',
-                    }
-                  )}
-                />
+                <EuiToolTip
+                  content={i18n.translate('xpack.fileUpload.importComplete.copyButtonAriaLabel', {
+                    defaultMessage: 'Copy to clipboard',
+                  })}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={copy}
+                    iconType="copy"
+                    color="text"
+                    data-test-subj={copyButtonDataTestSubj}
+                    aria-label={i18n.translate(
+                      'xpack.fileUpload.importComplete.copyButtonAriaLabel',
+                      {
+                        defaultMessage: 'Copy to clipboard',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           </EuiFlexItem>

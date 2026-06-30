@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiAccordion,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -40,6 +41,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   const canEnableRules = useUserPrivileges().rulesPrivileges.enableDisable.edit;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const isEnableButtonDisabled = useMemo(
     () => !canEnableRules || technique.disabledRules.length === 0,
@@ -135,8 +137,10 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       anchorPosition="rightCenter"
       data-test-subj="coverageOverviewPopover"
       ownFocus={false}
+      aria-labelledby={popoverTitleId}
     >
       <EuiPopoverTitle
+        id={popoverTitleId}
         className={css`
           min-width: 30em;
         `}

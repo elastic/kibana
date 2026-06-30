@@ -88,6 +88,7 @@ export const GapFillStatusSelector = ({
       closePopover={close}
       panelPaddingSize="none"
       repositionOnScroll
+      aria-label={GAP_FILL_STATUS_FILTER_LABEL}
     >
       <EuiSelectable
         aria-label={GAP_FILL_STATUS_FILTER_LABEL}

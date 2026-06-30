@@ -586,6 +586,41 @@ describe('#create', () => {
     );
   });
 
+  test(`trims whitespace from name when creating a space`, async () => {
+    const maxSpaces = 5;
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      total: maxSpaces - 1,
+    } as any);
+
+    const mockConfig = createMockConfig({
+      enabled: true,
+      maxSpaces,
+      allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await client.create({ ...spaceToCreate, name: '  foo-name  ' });
+
+    expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith(
+      'space',
+      expect.objectContaining({ name: 'foo-name' }),
+      expect.anything()
+    );
+  });
+
   test(`throws bad request when we are at the maximum number of spaces`, async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
@@ -911,6 +946,59 @@ describe('#update', () => {
       solution: 'es',
     });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  test(`preserves existing leading/trailing whitespace in name when updating a space with the same name`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as object), name: '  foo-name  ' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+    const id = savedObject.id;
+    await client.update(id, { ...spaceToUpdate, name: '  foo-name  ' });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.objectContaining({ name: '  foo-name  ' })
+    );
+  });
+
+  test(`trims leading/trailing whitespace from name when updating a space with a new name`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+    const id = savedObject.id;
+    await client.update(id, { ...spaceToUpdate, name: '  new-name  ' });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.objectContaining({ name: 'new-name' })
+    );
   });
 
   test('throws bad request when solution property is provided in serverless build', async () => {

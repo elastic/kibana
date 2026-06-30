@@ -7,18 +7,19 @@
 
 import React, { useCallback } from 'react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  EuiPanel,
-  useEuiTheme,
   EuiLink,
+  EuiPanel,
   EuiSkeletonText,
-  EuiCodeBlock,
-  EuiCallOut,
-  EuiButtonEmpty,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -113,14 +114,24 @@ export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntr
             <QueryStreamBadge />
             {onEdit && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  aria-label={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
                     defaultMessage: 'Edit query stream',
                   })}
-                  data-test-subj={`streamsAppQueryStreamEditButton-${streamName}`}
-                  onClick={() => onEdit(streamName)}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    aria-label={i18n.translate(
+                      'xpack.streams.queryStreamEntry.editButtonAriaLabel',
+                      {
+                        defaultMessage: 'Edit query stream',
+                      }
+                    )}
+                    data-test-subj={`streamsAppQueryStreamEditButton-${streamName}`}
+                    onClick={() => onEdit(streamName)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -287,6 +298,7 @@ export function EditingQueryStreamEntry({
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.streams.editingQueryStreamEntry.fetchError', {
             defaultMessage: 'Unable to load query stream details',
           })}

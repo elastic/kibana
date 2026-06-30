@@ -8,6 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 export const indicesSchema = schema.object({
-  index: schema.maybe(schema.string()),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  index: schema.maybe(schema.string({ maxLength: 10000 })),
+  fields: schema.maybe(schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 })),
 });

@@ -87,6 +87,9 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.slo.sloManagementBulkActions.popoverAriaLabel', {
+        defaultMessage: 'Bulk actions for selected SLOs',
+      })}
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
@@ -102,7 +105,7 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
             defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
             values: { count: items.length },
           })}{' '}
-          <EuiIcon type="chevronSingleDown" size="s" />
+          <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

@@ -53,9 +53,10 @@ describe(
 
       // KQL search with a matching filter keeps results visible
       cy.intercept('GET', '/api/osquery/live_queries/*/results/*').as('filteredResults');
-      cy.getBySel('osqueryResultsSearchBar').type('agent.name: *');
-      cy.getBySel('querySubmitButton').click();
-      cy.wait('@filteredResults');
+      cy.getBySel('osqueryResultsSearchBar').click().type('agent.name: *');
+      cy.get('body').type('{esc}'); // dismiss KQL autocomplete suggestions
+      cy.getBySel('querySubmitButton').should('not.be.disabled').click({ force: true });
+      cy.wait('@filteredResults', { timeout: 30000 });
       cy.getBySel(RESULTS_TABLE).should('exist');
       cy.getBySel(RESULTS_TABLE).find('[role="row"]').should('have.length.greaterThan', 1);
 

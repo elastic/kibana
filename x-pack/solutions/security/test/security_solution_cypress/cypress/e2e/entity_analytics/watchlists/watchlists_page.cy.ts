@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { PRIVMON_PRIVILEGE_CHECK_API } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
-import { WATCHLISTS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_PRIVILEGES_URL,
+  WATCHLISTS_URL,
+} from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
 import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -22,16 +24,7 @@ import {
 describe(
   'Entity Analytics Watchlists Management Page ',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsWatchlistEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     const WATCHLISTS_LIST_URL = `${WATCHLISTS_URL}/list`;
@@ -82,7 +75,7 @@ describe(
 
     beforeEach(() => {
       login();
-      cy.intercept('GET', PRIVMON_PRIVILEGE_CHECK_API, {
+      cy.intercept('GET', WATCHLISTS_PRIVILEGES_URL, {
         statusCode: 200,
         body: {
           has_all_required: true,

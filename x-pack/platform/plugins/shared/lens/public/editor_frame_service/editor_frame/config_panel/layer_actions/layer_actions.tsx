@@ -105,19 +105,29 @@ const InContextMenuActions = (props: LayerActionsProps) => {
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+          defaultMessage: `Layer actions`,
+        })}
         id={splitButtonPopoverId}
         button={
-          <EuiButtonIcon
-            display="empty"
-            color="text"
-            size="xs"
-            iconType="boxesVertical"
-            aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
               defaultMessage: `Layer actions`,
             })}
-            onClick={onButtonClick}
-            data-test-subj={dataTestSubject}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              display="empty"
+              color="text"
+              size="xs"
+              iconType="boxesVertical"
+              aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+                defaultMessage: `Layer actions`,
+              })}
+              onClick={onButtonClick}
+              data-test-subj={dataTestSubject}
+            />
+          </EuiToolTip>
         }
         ownFocus={true}
         isOpen={isPopoverOpen}
@@ -201,7 +211,6 @@ export const LayerActions = (props: LayerActionsProps) => {
               color={outsideListAction.color ?? 'text'}
               data-test-subj={outsideListAction['data-test-subj']}
               aria-label={outsideListAction.displayName}
-              title={outsideListAction.displayName}
               disabled={outsideListAction.disabled}
               onClick={() => outsideListAction.execute?.(props.mountingPoint)}
             />

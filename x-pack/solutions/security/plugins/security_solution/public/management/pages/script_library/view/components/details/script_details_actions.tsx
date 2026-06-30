@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
@@ -78,6 +79,10 @@ export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsPro
         panelPaddingSize="none"
         anchorPosition="downLeft"
         data-test-subj={getTestId('actionsPopover')}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.script.detailsActions.popover.ariaLabel',
+          { defaultMessage: 'Script actions' }
+        )}
       >
         <EuiContextMenuPanel size="s" items={takeActionItems} />
       </EuiPopover>

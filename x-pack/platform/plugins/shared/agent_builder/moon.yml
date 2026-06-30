@@ -123,6 +123,7 @@ dependsOn:
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod

@@ -24,13 +24,13 @@
 [
   {
     "name": "apm",
-    "version": "9.1.0-preview-1747764883",
+    "version": "9.3.5-preview-1779430085",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "2.7.6"
+    "version": "2.9.4"
   },
   {
     "name": "endpoint",
@@ -52,11 +52,11 @@
   },
   {
     "name": "synthetics",
-    "version": "1.6.1"
+    "version": "1.7.0"
   },
   {
     "name": "security_detection_engine",
-    "version": "9.3.8"
+    "version": "9.4.6"
   },
   {
     "name": "security_ai_prompts",

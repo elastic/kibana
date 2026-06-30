@@ -124,7 +124,7 @@ For each test group, determine where it should run:
 - **Serverless only**: serverless-specific behavior
 - **Specific serverless projects**: e.g. security-only, observability-only
 
-Cross-reference with existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr_*_configs.yml` to preserve CI coverage. Flag tests that currently only run in one environment but could run in both.
+Cross-reference with existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr-manifests/ftr_*_configs.yml` to preserve CI coverage. Flag tests that currently only run in one environment but could run in both.
 
 **Cloud portability**: flag FTR tests that make non-portable assumptions (hardcoded `localhost` URLs, local file paths, node topology assumptions, or cluster settings unavailable on Elastic Cloud).
 

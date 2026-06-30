@@ -14,6 +14,7 @@ import {
   buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
+  type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
   TIMESTAMP_FIELD,
@@ -22,6 +23,7 @@ import {
   extractPaginationParams,
   buildPaginationSection,
   hasFieldEvaluations,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
 
 const CCS_FIELDS_TO_KEEP = [
@@ -44,6 +46,8 @@ export interface CcsLogsExtractionQueryParams {
   docsLimit: number;
   recoveryId?: string;
   pagination?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 }
 
 /**
@@ -58,17 +62,26 @@ export function buildCcsLogsExtractionEsqlQuery({
   docsLimit,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: CcsLogsExtractionQueryParams): string {
   const { fields, type } = entityDefinition;
 
   const parts = [];
 
   // Because we don't have updates on remote clusters, we need to nullify the unmapped fields
-  parts.push(`SET unmapped_fields="nullify";`);
+  parts.push(NULLIFY_UNMAPPED_FIELDS_SETTING);
 
   // FROM and WHERE
   parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
   );
 
   // Special evaluations for entity id

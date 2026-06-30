@@ -7,7 +7,14 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -79,7 +86,16 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       {
         render: (downloadSource: DownloadSource) =>
           downloadSource.is_default ? (
-            <EuiIcon type="check" data-test-subj="editDownloadSourceTable.defaultIcon" />
+            <EuiIcon
+              type="check"
+              data-test-subj="editDownloadSourceTable.defaultIcon"
+              aria-label={i18n.translate(
+                'xpack.fleet.settings.downloadSourcesTable.defaultIconLabel',
+                {
+                  defaultMessage: 'Default download source',
+                }
+              )}
+            />
           ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.downloadSourcesTable.defaultColumnTitle', {
@@ -107,27 +123,29 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    aria-label={deleteDownloadSourceLabel}
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteDownloadSource(downloadSource)}
-                    title={deleteDownloadSourceLabel}
-                    data-test-subj="editDownloadSourceTable.delete.btn"
-                  />
+                  <EuiToolTip content={deleteDownloadSourceLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={deleteDownloadSourceLabel}
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteDownloadSource(downloadSource)}
+                      data-test-subj="editDownloadSourceTable.delete.btn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={editDownloadSourceLabel}
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_download_sources', {
-                    downloadSourceId: downloadSource.id,
-                  })}
-                  title={editDownloadSourceLabel}
-                  data-test-subj="editDownloadSourceTable.edit.btn"
-                />
+                <EuiToolTip content={editDownloadSourceLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={editDownloadSourceLabel}
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_download_sources', {
+                      downloadSourceId: downloadSource.id,
+                    })}
+                    data-test-subj="editDownloadSourceTable.edit.btn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

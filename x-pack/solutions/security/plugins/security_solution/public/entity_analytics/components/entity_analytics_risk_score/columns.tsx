@@ -8,7 +8,7 @@
 import type { SyntheticEvent } from 'react';
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { get } from 'lodash/fp';
 
@@ -130,9 +130,9 @@ export const getRiskScoreColumns = <E extends EntityType>(
       render: (riskScore: number) => {
         if (riskScore != null) {
           return (
-            <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-              {formatRiskScore(riskScore)}
-            </span>
+            <EuiToolTip content={`${riskScore}`}>
+              <span data-test-subj="risk-score-truncate">{formatRiskScore(riskScore)}</span>
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();

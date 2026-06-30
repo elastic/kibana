@@ -76,7 +76,7 @@ const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
   // Filter ensures only entities that exist in the entity store are shown.
   // For watchlists, the watchlist filter implicitly achieves this.
   const entityFilter = watchlistId
-    ? `| WHERE entity.attributes.watchlists == "${watchlistId}"`
+    ? `| WHERE MV_CONTAINS(entity.attributes.watchlists, "${watchlistId}")`
     : `| WHERE entity.name IS NOT NULL`;
 
   return `
@@ -140,9 +140,10 @@ export const useRecentAnomaliesDataEsqlSource = ({
   viewBy,
   watchlistId,
   spaceId,
-}: EsqlSourceParams & { rowLabels?: string[] }) => {
+  timeRange,
+}: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
-  const interval = useIntervalForHeatmap();
+  const interval = useIntervalForHeatmap(timeRange);
 
   if (!euidApi || !spaceId || !rowLabels) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');

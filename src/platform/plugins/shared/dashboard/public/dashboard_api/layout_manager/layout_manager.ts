@@ -128,13 +128,18 @@ export function initializeLayoutManager(
   /** Observable that publishes `true` when all children APIs are available */
   const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
     map(([children, layout, viewMode]) => {
-      // filter out panels that are in collapsed sections, since the APIs will never be available
+      const renderedPanelCount = Object.keys(layout.panels).filter((uuid) => {
+        const sectionId = layout.panels[uuid].grid.sectionId;
+        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapseed, it does not render
+      }).length;
       const expectedChildCount =
-        Object.values(layout.panels).filter((panel) => {
-          return panel.grid.sectionId ? !isSectionCollapsed(panel.grid.sectionId) : true;
-        }).length + (viewMode === 'print' ? 0 : Object.values(layout.pinnedPanels).length); // pinned panels are not rendered in print mode
+        renderedPanelCount + (viewMode === 'print' ? 0 : Object.keys(layout.pinnedPanels).length);
 
-      const currentChildCount = Object.keys(children).length;
+      const currentChildCount = Object.keys(children).filter((uuid) => {
+        const sectionId = layout.panels[uuid]?.grid.sectionId; // uuid might reference a pinned panel
+        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapsed, it should never trigger loading, even if the API exists
+      }).length;
+
       return expectedChildCount !== currentChildCount;
     }),
     distinctUntilChanged()
@@ -216,13 +221,14 @@ export function initializeLayoutManager(
   };
 
   // --------------------------------------------------------------------------------------
-  // Place the incoming embeddables if there is at least one
+  // Place incoming embeddables (used at init and for late arrivals on the same dashboard)
   // --------------------------------------------------------------------------------------
-  if (incomingEmbeddables?.length) {
-    const first = incomingEmbeddables[0];
+  const addIncomingEmbeddables = (embeddables?: EmbeddablePackageState[]) => {
+    if (!embeddables?.length) return;
+    const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
 
-    for (const incomingEmbeddable of incomingEmbeddables) {
+    for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
@@ -255,7 +261,10 @@ export function initializeLayoutManager(
     }
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
-  }
+  };
+
+  // On initialization, place incoming embeddables if there is at least one
+  addIncomingEmbeddables(incomingEmbeddables);
 
   // --------------------------------------------------------------------------------------
   // API definition
@@ -585,6 +594,7 @@ export function initializeLayoutManager(
       children$,
       getChildApi,
       addNewPanel,
+      addIncomingEmbeddables,
       removePanel,
       replacePanel,
       duplicatePanel,

@@ -152,7 +152,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           title,
           filename,
           objectType: scheduledReport.attributes.meta.objectType,
-          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+          date: runAt.toISOString(),
         } satisfies ScheduledReportTemplateVariables;
         const subject = renderMustacheString(
           this.logger,

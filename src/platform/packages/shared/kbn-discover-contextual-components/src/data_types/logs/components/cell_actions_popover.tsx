@@ -11,16 +11,18 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import {
   EuiBadge,
-  type EuiBadgeProps,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
   EuiText,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiCopy,
+  EuiToolTip,
+  type EuiBadgeProps,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -72,6 +74,7 @@ export function CellActionsPopover({
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
   const { euiTheme } = useEuiTheme();
+  const popoverTitleId = useGeneratedHtmlId();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
@@ -89,6 +92,7 @@ export function CellActionsPopover({
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={renderPopoverTrigger({ popoverTriggerProps })}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -108,7 +112,7 @@ export function CellActionsPopover({
               font-family: ${euiTheme.font.familyCode};
             `}
           >
-            <strong>{name}</strong>{' '}
+            <strong id={popoverTitleId}>{name}</strong>{' '}
             {typeof renderValue === 'function' ? (
               <>{renderValue(escapeAndPreserveHighlightTags(value))}</>
             ) : rawValue != null && typeof rawValue !== 'object' ? (
@@ -124,14 +128,16 @@ export function CellActionsPopover({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={closeCellActionPopoverText}
-            data-test-subj="dataTableExpandCellActionPopoverClose"
-            iconSize="s"
-            iconType="cross"
-            size="xs"
-            onClick={closePopover}
-          />
+          <EuiToolTip content={closeCellActionPopoverText} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={closeCellActionPopoverText}
+              data-test-subj="dataTableExpandCellActionPopoverClose"
+              iconSize="s"
+              iconType="cross"
+              size="xs"
+              onClick={closePopover}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       {onFilter ? (

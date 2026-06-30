@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -168,22 +169,34 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.contentConnectors.connectors.moreOptionsPopover.ariaLabel',
+                      { defaultMessage: 'More connector options' }
+                    )}
                     isOpen={showMoreOptionsPopover}
                     closePopover={() => setShowMoreOptionsPopover(false)}
                     button={
-                      <EuiButtonIcon
-                        data-test-subj="entSearchContent-connectors-newConnector-moreOptionsButton"
-                        data-telemetry-id="entSearchContent-connectors-newConnector-moreOptionsButton"
-                        color="primary"
-                        display="fill"
-                        size="m"
-                        iconType="boxesVertical"
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.enterpriseSearch.connectors.more.ariaLabel',
                           { defaultMessage: 'More options' }
                         )}
-                        onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          data-test-subj="entSearchContent-connectors-newConnector-moreOptionsButton"
+                          data-telemetry-id="entSearchContent-connectors-newConnector-moreOptionsButton"
+                          color="primary"
+                          display="fill"
+                          size="m"
+                          iconType="boxesVertical"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.connectors.more.ariaLabel',
+                            { defaultMessage: 'More options' }
+                          )}
+                          onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
+                        />
+                      </EuiToolTip>
                     }
                   >
                     <EuiContextMenuPanel

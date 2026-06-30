@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -234,18 +235,34 @@ export function Assignments({
             </EuiButton>
             {data.type === 'categories' && (
               <EuiPopover
+                aria-label={i18n.translate(
+                  'coloring.colorMapping.container.additionalActionsPopoverAriaLabel',
+                  {
+                    defaultMessage: 'Additional assignments actions',
+                  }
+                )}
                 button={
-                  <EuiButtonIcon
-                    iconType="boxesVertical"
-                    color="text"
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
                       {
                         defaultMessage: 'Open additional assignments actions',
                       }
                     )}
-                    onClick={() => setShowOtherActions(true)}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="boxesVertical"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
+                        {
+                          defaultMessage: 'Open additional assignments actions',
+                        }
+                      )}
+                      onClick={() => setShowOtherActions(true)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={showOtherActions}
                 closePopover={() => setShowOtherActions(false)}
@@ -290,7 +307,7 @@ export function Assignments({
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-clearAllAssignments"
                       size="s"
-                      icon={<EuiIcon type="eraser" size="m" color="danger" />}
+                      icon={<EuiIcon type="eraser" size="m" color="danger" aria-hidden={true} />}
                       onClick={() => {
                         setShowOtherActions(false);
                         dispatch(removeAllAssignments());

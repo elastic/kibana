@@ -10,8 +10,8 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
-import { DEFAULT_MODEL_SAVE_SUCCESS, DEFAULT_MODEL_SAVE_ERROR } from '../../common/translations';
 import { useKibana } from './use_kibana';
 
 export interface DefaultModelSettingsState {
@@ -93,10 +93,16 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       const newSaved = getSavedState();
       setSavedState(newSaved);
       setState(newSaved);
-      notifications.toasts.addSuccess({ title: DEFAULT_MODEL_SAVE_SUCCESS });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess', {
+          defaultMessage: 'Default model settings saved',
+        }),
+      });
     } catch (e) {
       notifications.toasts.addDanger({
-        title: DEFAULT_MODEL_SAVE_ERROR,
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveError', {
+          defaultMessage: 'Failed to save default model settings',
+        }),
         text: (e as Error)?.message ?? 'Unknown error',
       });
     }

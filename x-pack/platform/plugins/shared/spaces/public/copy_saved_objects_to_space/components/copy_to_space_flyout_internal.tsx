@@ -260,7 +260,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="copy" />
+            <EuiIcon size="m" type="copy" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
@@ -277,7 +277,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
       <EuiFlyoutBody>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={savedObjectTarget.icon} />
+            <EuiIcon type={savedObjectTarget.icon} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>

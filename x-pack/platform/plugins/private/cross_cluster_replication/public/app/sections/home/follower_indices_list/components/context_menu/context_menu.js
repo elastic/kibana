@@ -14,6 +14,7 @@ import {
   EuiContextMenuItem,
   EuiPopover,
   EuiPopoverTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { routing } from '../../../../../services/routing';
@@ -36,6 +37,8 @@ export class ContextMenu extends PureComponent {
   state = {
     isPopoverOpen: false,
   };
+
+  popoverTitleId = htmlIdGenerator()();
 
   onButtonClick = () => {
     this.setState((prevState) => ({
@@ -91,6 +94,7 @@ export class ContextMenu extends PureComponent {
 
     return (
       <EuiPopover
+        aria-labelledby={this.popoverTitleId}
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
@@ -98,7 +102,7 @@ export class ContextMenu extends PureComponent {
         anchorPosition={anchorPosition}
         repositionOnScroll
       >
-        <EuiPopoverTitle paddingSize="s">
+        <EuiPopoverTitle paddingSize="s" id={this.popoverTitleId}>
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndex.contextMenu.title"
             defaultMessage="Follower {followerIndicesLength, plural, one {index} other {indices}} options"

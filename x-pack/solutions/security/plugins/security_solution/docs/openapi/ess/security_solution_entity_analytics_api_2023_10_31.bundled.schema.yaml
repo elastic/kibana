@@ -13,7 +13,13 @@ servers:
 paths:
   /api/asset_criticality:
     delete:
-      description: Delete the asset criticality record for a specific entity.
+      deprecated: true
+      description: >
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset
+        criticality for a specific entity.
+
+
+        Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -46,9 +52,8 @@ paths:
                 type: object
                 properties:
                   deleted:
-                    description: >-
-                      True if the record was deleted or false if the record did
-                      not exist.
+                    description: True if the record was deleted or false if the record did not
+                      exist.
                     type: boolean
                   record:
                     $ref: '#/components/schemas/AssetCriticalityRecord'
@@ -62,7 +67,9 @@ paths:
       tags:
         - Security Entity Analytics API
     get:
-      description: Get the asset criticality record for a specific entity.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** Get the asset criticality record for a
+        specific entity.'
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -94,7 +101,12 @@ paths:
       tags:
         - Security Entity Analytics API
     post:
+      deprecated: true
       description: >
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset
+        criticality to an entity.
+
+
         Create or update an asset criticality record for a specific entity.
 
 
@@ -111,9 +123,7 @@ paths:
                 - type: object
                   properties:
                     refresh:
-                      description: >-
-                        If 'wait_for' the request will wait for the index
-                        refresh.
+                      description: If 'wait_for' the request will wait for the index refresh.
                       enum:
                         - wait_for
                       type: string
@@ -136,7 +146,12 @@ paths:
         - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
+      deprecated: true
       description: >
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset
+        criticality.
+
+
         Bulk upsert up to 1000 asset criticality records.
 
 
@@ -166,8 +181,7 @@ paths:
                       - type: object
                         properties:
                           criticality_level:
-                            $ref: >-
-                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                            $ref: '#/components/schemas/AssetCriticalityLevelsForBulkUpload'
                         required:
                           - criticality_level
                   maxItems: 1000
@@ -207,7 +221,9 @@ paths:
         - Security Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: List asset criticality records, paging, sorting and filtering as needed.
+      deprecated: true
+      description: '**Deprecated in 9.4.0.** List asset criticality records, paging,
+        sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -418,9 +434,7 @@ paths:
                         description: Current number of privileged users being monitored
                         type: integer
                       max_allowed:
-                        description: >-
-                          Maximum number of privileged users allowed to be
-                          monitored
+                        description: Maximum number of privileged users allowed to be monitored
                         type: integer
                     required:
                       - current_count
@@ -433,9 +447,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: >-
-        Check if the current user has all required permissions for Privilege
-        Monitoring
+      description: Check if the current user has all required permissions for
+        Privilege Monitoring
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -540,9 +553,8 @@ paths:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
-                    description: >-
-                      A message providing additional information about the
-                      deletion status
+                    description: A message providing additional information about the deletion
+                      status
                     type: string
                 required:
                   - success
@@ -611,8 +623,7 @@ paths:
                 required:
                   - message
           description: Successful response
-      summary: >-
-        Installs the privileged access detection package for the Entity
+      summary: Installs the privileged access detection package for the Entity
         Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
@@ -661,8 +672,7 @@ paths:
                   - ml_module_setup_status
                   - jobs
           description: Privileged access detection status retrieved
-      summary: >-
-        Gets the status of the privileged access detection package for the
+      summary: Gets the status of the privileged access detection package for the
         Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
@@ -698,6 +708,7 @@ paths:
               properties:
                 description:
                   description: Description of the watchlist
+                  maxLength: 1000
                   type: string
                 entitySources:
                   description: Optional entity sources to create and link to the watchlist
@@ -710,27 +721,28 @@ paths:
                       filter:
                         $ref: '#/components/schemas/Filter'
                       identifierField:
-                        description: >-
-                          Field used to query the entity store for index-type
-                          sources
+                        description: Field used to query the entity store for index-type sources
+                        maxLength: 256
                         type: string
                       indexPattern:
+                        maxLength: 1000
                         type: string
                       integrationName:
-                        description: >-
-                          Required when type is entity_analytics_integration.
-                          One of entityanalytics_okta, entityanalytics_ad.
+                        description: Required when type is entity_analytics_integration. One of
+                          entityanalytics_okta, entityanalytics_ad.
+                        maxLength: 256
                         type: string
                       matchers:
                         items:
                           $ref: '#/components/schemas/Matcher'
+                        maxItems: 100
                         type: array
                       name:
+                        maxLength: 256
                         type: string
                       queryRule:
-                        description: >-
-                          KQL query used to filter data from the provided index
-                          patterns
+                        description: KQL query used to filter data from the provided index patterns
+                        maxLength: 4096
                         type: string
                       range:
                         $ref: '#/components/schemas/DateRange'
@@ -739,12 +751,14 @@ paths:
                     required:
                       - type
                       - name
+                  maxItems: 100
                   type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
                 name:
                   description: Unique name for the watchlist
+                  maxLength: 256
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
@@ -824,6 +838,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -841,12 +856,14 @@ paths:
               properties:
                 description:
                   description: Description of the watchlist
+                  maxLength: 1000
                   type: string
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
                 name:
                   description: Unique name of the watchlist
+                  maxLength: 256
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
@@ -1151,9 +1168,7 @@ paths:
                       $ref: '#/components/schemas/WatchlistEntityUnassignResponseItem'
                     type: array
                   not_found:
-                    description: >-
-                      Number of entities not found in the manual watchlist
-                      assignment
+                    description: Number of entities not found in the manual watchlist assignment
                     example: 1
                     type: integer
                   successful:
@@ -1211,9 +1226,8 @@ paths:
       x-state: Technical Preview
   /api/risk_score/engine/dangerously_delete_data:
     delete:
-      description: >-
-        Cleaning up the the Risk Engine by removing the indices, mapping and
-        transforms
+      description: Cleaning up the the Risk Engine by removing the indices, mapping
+        and transforms
       operationId: CleanUpRiskEngine
       responses:
         '200':
@@ -1279,6 +1293,15 @@ paths:
                       - entity_types
                       - filter
                   type: array
+                page_size:
+                  description: >
+                    Number of entities to score per page. Higher values reduce
+                    total scoring time by reducing the number of alert-index
+                    scans, but cannot exceed the ES|QL result limit (10,000 by
+                    default).
+                  maximum: 10000
+                  minimum: 100
+                  type: integer
                 range:
                   type: object
                   properties:
@@ -1307,18 +1330,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse
+                $ref: '#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
       summary: Configure the Risk Engine Saved Object
       tags:
         - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
-      description: >-
-        Schedule the risk scoring engine to run as soon as possible. You can use
-        this to recalculate entity risk scores after updating their asset
-        criticality.
+      description: Schedule the risk scoring engine to run as soon as possible. You
+        can use this to recalculate entity risk scores after updating their
+        asset criticality.
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
@@ -1379,8 +1400,7 @@ components:
         - extreme_impact
       type: string
     AssetCriticalityLevelsForBulkUpload:
-      description: >-
-        The criticality level of the asset for bulk upload. The value
+      description: The criticality level of the asset for bulk upload. The value
         `unassigned` is used to indicate that the criticality level is not
         assigned and is only used for bulk upload.
       enum:
@@ -1552,11 +1572,12 @@ components:
       properties:
         end:
           description: End of the lookback period (date math or ISO string, e.g. "now")
+          maxLength: 256
           type: string
         start:
-          description: >-
-            Start of the lookback period (date math or ISO string, e.g.
+          description: Start of the lookback period (date math or ISO string, e.g.
             "now-10d")
+          maxLength: 256
           type: string
       required:
         - start
@@ -1606,8 +1627,10 @@ components:
       properties:
         kuery:
           oneOf:
-            - type: string
-            - type: object
+            - maxLength: 4096
+              type: string
+            - additionalProperties: false
+              type: object
     IdField:
       enum:
         - host.name
@@ -1632,13 +1655,16 @@ components:
               type: string
         syncMarkerIndex:
           description: Index to read latest sync markers from
+          maxLength: 1000
           type: string
     Matcher:
       type: object
       properties:
         fields:
           items:
+            maxLength: 256
             type: string
+          maxItems: 100
           type: array
         values:
           description: >
@@ -1648,10 +1674,13 @@ components:
             supported for simplicity and predictability.
           oneOf:
             - items:
+                maxLength: 256
                 type: string
+              maxItems: 1000
               type: array
             - items:
                 type: boolean
+              maxItems: 1000
               type: array
       required:
         - fields
@@ -1701,17 +1730,22 @@ components:
                 $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
+          maxLength: 256
           type: string
         labels:
           type: object
           properties:
             source_ids:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             source_integrations:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             sources:
               items:
@@ -1719,6 +1753,7 @@ components:
                   - csv
                   - index_sync
                   - api
+              maxItems: 100
               type: array
         user:
           type: object
@@ -1727,6 +1762,7 @@ components:
               description: Indicates if the user is privileged.
               type: boolean
             name:
+              maxLength: 512
               type: string
     MonitoringEngineDescriptor:
       type: object
@@ -1735,8 +1771,7 @@ components:
           type: object
           properties:
             message:
-              description: >-
-                Error message typically only present if the engine is in error
+              description: Error message typically only present if the engine is in error
                 state
               type: string
         status:
@@ -1748,6 +1783,12 @@ components:
         - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
         - type: object
           properties:
+            apiKeyId:
+              description: ID of the API key used for scoped reads from the source index. Only
+                present for index-type sources.
+              maxLength: 64
+              nullable: true
+              type: string
             id:
               type: string
           required:
@@ -1766,10 +1807,12 @@ components:
       type: object
       properties:
         field:
+          maxLength: 256
           type: string
         source:
           type: string
         value:
+          maxLength: 256
           type: string
       required:
         - field
@@ -1850,21 +1893,27 @@ components:
           $ref: '#/components/schemas/Filter'
         identifierField:
           description: Field used to query the entity store for index-type sources
+          maxLength: 256
           type: string
         indexPattern:
+          maxLength: 1000
           type: string
         integrationName:
+          maxLength: 256
           type: string
         integrations:
           $ref: '#/components/schemas/Integrations'
         matchers:
           items:
             $ref: '#/components/schemas/Matcher'
+          maxItems: 100
           type: array
         name:
+          maxLength: 256
           type: string
         queryRule:
           description: KQL query used to filter data from the provided index patterns
+          maxLength: 4096
           type: string
         range:
           $ref: '#/components/schemas/DateRange'
@@ -1884,11 +1933,10 @@ components:
                 properties:
                   field:
                     description: The field name for the label
+                    maxLength: 256
                     type: string
                   source:
-                    description: >-
-                      The source where this label was created (api, csv, or
-                      index_sync)
+                    description: The source where this label was created (api, csv, or index_sync)
                     enum:
                       - api
                       - csv
@@ -1896,13 +1944,16 @@ components:
                     type: string
                   value:
                     description: The value of the label
+                    maxLength: 256
                     type: string
+              maxItems: 100
               type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
+              maxLength: 512
               type: string
     WatchlistCsvUploadResponseItem:
       example:

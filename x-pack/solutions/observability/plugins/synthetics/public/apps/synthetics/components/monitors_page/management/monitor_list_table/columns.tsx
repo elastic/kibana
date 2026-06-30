@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -162,6 +162,7 @@ export function useMonitorListColumns({
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
             overviewStatus={overviewStatus}
+            spaces={monitor.spaces}
           />
         ) : null,
     },
@@ -405,12 +406,14 @@ export function useMonitorListColumns({
       }),
       render: () => (
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
-          <EuiButtonIcon
-            data-test-subj="syntheticsUseMonitorListColumnsButton"
-            iconType="boxesVertical"
-            isDisabled={true}
-            aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
-          />
+          <EuiToolTip content={CANNOT_PERFORM_ACTION_SYNTHETICS} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="syntheticsUseMonitorListColumnsButton"
+              iconType="boxesVertical"
+              isDisabled={true}
+              aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
+            />
+          </EuiToolTip>
         </NoPermissionsTooltip>
       ),
     };

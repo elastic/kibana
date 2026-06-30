@@ -33,6 +33,7 @@ import {
   normalizeKeywordList,
   searchDocById,
 } from '../fixtures/helpers';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -285,7 +286,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2']) },
     });
 
     // Update sub_type in between documents with null values
@@ -359,7 +360,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5']) },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -397,21 +398,27 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         confidence: ENTITY_CONFIDENCE.High,
       },
       user: {
-        hash: [
+        hash: expect.arrayContaining([
           'hash-1',
-          'hash-10',
-          'hash-11',
+          'hash-2',
           'hash-3',
           'hash-4',
           'hash-5',
           'hash-6',
           'hash-7',
           'hash-8',
-          'hash-2',
-        ],
+          'hash-9',
+          'hash-10',
+          'hash-11',
+        ]),
         domain: 'example.com',
       },
     });
+    // With cap=100 all 11 distinct hashes must be collected (exercises the raised cap).
+    const userHash = (
+      updatedLatestDomain.hits.hits[0]._source as Record<string, Record<string, unknown>>
+    ).user.hash;
+    expect(normalizeKeywordList(userHash)).toHaveLength(11);
   });
 
   apiTest(
@@ -626,7 +633,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
-    'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
+    'Should set entity.namespace to local and entity.name to user.name and host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
       // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
@@ -976,7 +983,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should omit documents at logs extraction when they do not match documentsFilter or postAggFilter',
     async ({ apiClient, esClient }) => {
-      const from = '2026-03-18T11:00:00Z';
+      // from is 1 second past the timestamp used by the "entity.name" test to avoid
+      // cross-test data leaking in with the now always-inclusive >= boundary.
+      const from = '2026-03-18T11:00:01Z';
       const to = '2026-03-18T12:00:00Z';
 
       // 1. event.outcome = 'failure' → documentsFilter omits (pre-agg)
@@ -1069,6 +1078,69 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
+    'Should extract all entities when all documents share the same timestamp as fromDateISO (timestamp collision at slice boundary)',
+    async ({ apiClient, esClient }) => {
+      // Regression test for the log-slice boundary bug.
+      //
+      // Root cause: buildLogPageProbeSourceClause used `@timestamp > fromDateISO` (exclusive)
+      // when logsPageCursorStart was set. When all remaining docs share @timestamp = fromDateISO,
+      // the exclusive base filter drops them before the compound _id cursor can apply — the second
+      // outer iteration finds 0 documents and the entities are permanently lost.
+      //
+      // Fix: always use `@timestamp >= fromDateISO`. The compound cursor
+      // `(@timestamp > T OR (@timestamp = T AND _id > lastId))` owns the exclusive lower bound.
+      const SHARED_TIMESTAMP = '2026-05-01T10:00:00.000Z';
+      const from = SHARED_TIMESTAMP; // intentionally equal to all doc timestamps
+      const to = '2026-05-01T11:00:00.000Z';
+      const MAX_LOGS_PER_PAGE = 3;
+      const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
+
+      // Shrink the log-slice window to force multiple outer loop iterations within one run.
+      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+      });
+      expect(updateResponse.statusCode).toBe(200);
+
+      try {
+        // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
+        // Outer iteration 1 processes the first MAX_LOGS_PER_PAGE docs and sets
+        // logsPageCursorStart = (SHARED_TIMESTAMP, lastId). Outer iteration 2 must
+        // find the remaining docs via the compound cursor — the fix makes this work.
+        for (let i = 1; i <= TOTAL_DOCS; i++) {
+          await ingestDoc(esClient, {
+            '@timestamp': SHARED_TIMESTAMP,
+            host: { name: `ts-collision-host-${i}` },
+          });
+        }
+
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          from,
+          to
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true, count: TOTAL_DOCS });
+
+        for (let i = 1; i <= TOTAL_DOCS; i++) {
+          const hit = await searchDocById(esClient, `host:ts-collision-host-${i}`);
+          expect(hit.hits.hits).toHaveLength(1);
+        }
+      } finally {
+        // Restore default so subsequent tests are not affected.
+        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
+        });
+      }
+    }
+  );
+
+  apiTest(
     'Should merge entity.relationships.* identifier from host.entity on source documents',
     async ({ apiClient, esClient }) => {
       const fromIso = '2026-04-10T09:00:00Z';
@@ -1144,6 +1216,88 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const supervisesUser = supervisesRawIdentifiers!.user as Record<string, unknown> | undefined;
       expect(normalizeKeywordList(supervisesUser?.email)).toStrictEqual(['supervisee@example.com']);
       expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
+    }
+  );
+
+  apiTest(
+    'Should succeed when a data stream matched by the data view has a closed backing index',
+    async ({ apiClient, esClient }) => {
+      const DATA_STREAM = 'logs-closed-smoke';
+      const FROM = '2026-06-24T09:59:00Z';
+      const TO = '2026-06-24T11:00:00Z';
+      const TS = '2026-06-24T10:00:00Z';
+
+      try {
+        // Create a composable index template so the data stream can be created.
+        await esClient.indices.putIndexTemplate({
+          name: 'logs-closed-smoke-template',
+          index_patterns: [`${DATA_STREAM}*`],
+          data_stream: {},
+          priority: 500,
+        });
+
+        // First ingest creates the data stream and its first (soon-to-be-closed) backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'closed-backing-host' } },
+        });
+
+        // Discover the first backing index name before rolling over.
+        const beforeRollover = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        const firstBacking = ([] as string[]).concat(
+          beforeRollover.data_streams[0]?.backing_indices ?? []
+        )[0];
+
+        // Roll over to create a second (open) backing index.
+        await esClient.indices.rollover({ alias: DATA_STREAM });
+
+        // The entity we will assert on lands in the new open backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'open-smoke-host' } },
+        });
+
+        // Simulate the production scenario: close the older backing index.
+        await esClient.indices.close({ index: firstBacking });
+
+        // Extraction must not throw cluster_block_exception and must succeed.
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          FROM,
+          TO
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true });
+
+        // The entity from the open backing index must be extracted.
+        const hit = await searchDocById(esClient, 'host:open-smoke-host');
+        expect(hit.hits.hits).toHaveLength(1);
+      } finally {
+        // Re-open closed backing indices before deleting the data stream (ES rejects
+        // deleteDataStream when backing indices are closed).
+        const resolved = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        if (resolved.data_streams.length > 0) {
+          const allBacking = resolved.data_streams.flatMap((ds) =>
+            ([] as string[]).concat(ds.backing_indices)
+          );
+          await esClient.indices.open({ index: allBacking, ignore_unavailable: true });
+        }
+        await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
+        await esClient.indices.deleteIndexTemplate(
+          { name: 'logs-closed-smoke-template' },
+          { ignore: [404] }
+        );
+      }
     }
   );
 });

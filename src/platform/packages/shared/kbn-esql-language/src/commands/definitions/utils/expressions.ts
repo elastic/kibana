@@ -128,7 +128,7 @@ export function getExpressionType(
        * at least we know that the final argument to case will never be a conditional
        * expression, always a result expression.
        *
-       * One problem with this is that if a false case is not provided, the return type
+       * One problem with this is that if a elseValue is not provided, the return type
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
@@ -190,6 +190,10 @@ export function resolveArgumentTypes(
     argTypes: args.map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy)),
     literalMask: args.map((arg) => {
       const unwrapped = Array.isArray(arg) ? arg[0] : arg;
+
+      if (!Array.isArray(unwrapped) && unwrapped.type === 'list') {
+        return unwrapped.values.length > 0 && unwrapped.values.every(isLiteral);
+      }
 
       return isLiteral(unwrapped);
     }),

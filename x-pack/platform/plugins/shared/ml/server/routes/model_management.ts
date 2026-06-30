@@ -84,7 +84,7 @@ export function modelManagementRoutes({
           request: {
             query: schema.object({
               type: schema.maybe(itemTypeLiterals),
-              node: schema.maybe(schema.string()),
+              node: schema.maybe(schema.string({ maxLength: 10000 })),
               showClosedJobs: schema.maybe(schema.boolean()),
             }),
           },

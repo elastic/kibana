@@ -19,6 +19,13 @@ const eventSchema = z.object({
   status: z.string(),
 });
 
+const createTriggerDefinition = (): ServerTriggerDefinition => ({
+  id: 'cases.updated',
+  title: 'Case updated',
+  description: 'Emitted when a case is updated',
+  eventSchema,
+});
+
 const createDeps = (overrides: Partial<EmitEventDeps> = {}): EmitEventDeps => ({
   triggerRegistry: new TriggerRegistry(),
   triggerEventHandler: null,
@@ -47,10 +54,7 @@ describe('emitEvent', () => {
 
   it('throws when payload does not match the trigger eventSchema', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     const handler = jest.fn();
     const deps = createDeps({
       triggerRegistry: registry,
@@ -74,10 +78,7 @@ describe('emitEvent', () => {
 
   it('calls handler when payload matches eventSchema', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     const handler = jest.fn().mockResolvedValue(undefined);
     const deps = createDeps({
       triggerRegistry: registry,
@@ -108,10 +109,7 @@ describe('emitEvent', () => {
 
   it('passes eventChainContext undefined when request has no chain context (e.g. direct emit_loop)', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     const handler = jest.fn().mockResolvedValue(undefined);
     const deps = createDeps({
       triggerRegistry: registry,
@@ -135,10 +133,7 @@ describe('emitEvent', () => {
 
   it('passes eventChainContext from request when not provided in params', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     const handler = jest.fn().mockResolvedValue(undefined);
     const deps = createDeps({
       triggerRegistry: registry,
@@ -166,10 +161,7 @@ describe('emitEvent', () => {
 
   it('skips schema validation when eventSchema has no safeParse method', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     // Overwrite the definition's eventSchema with an object that lacks safeParse
     const definition = registry.get('cases.updated')!;
     (definition as any).eventSchema = { shape: {} };
@@ -194,10 +186,7 @@ describe('emitEvent', () => {
 
   it('includes stringified error when schema validation error is not an Error instance', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     // Replace eventSchema with a fake that returns a non-Error failure
     const definition = registry.get('cases.updated')!;
     (definition as any).eventSchema = {
@@ -226,10 +215,7 @@ describe('emitEvent', () => {
 
   it('throws when no handler is registered', async () => {
     const registry = new TriggerRegistry();
-    registry.register({
-      id: 'cases.updated',
-      eventSchema,
-    } as ServerTriggerDefinition);
+    registry.register(createTriggerDefinition());
     const deps = createDeps({
       triggerRegistry: registry,
       triggerEventHandler: null,

@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -450,19 +451,29 @@ export const AnomalyTimeline: FC = () => {
               css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
             >
               <EuiPopover
+                aria-label={i18n.translate('xpack.ml.explorer.swimlane.actionsPopoverAriaLabel', {
+                  defaultMessage: 'Anomaly swim lane actions menu',
+                })}
                 button={
-                  <EuiButtonIcon
-                    size="s"
-                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.explorer.swimlaneActions', {
                       defaultMessage: 'Actions',
                     })}
-                    color="text"
-                    display="base"
-                    isSelected={isMenuOpen}
-                    iconType="boxesVertical"
-                    onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                    data-test-subj="mlAnomalyTimelinePanelMenu"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      size="s"
+                      aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                        defaultMessage: 'Actions',
+                      })}
+                      color="text"
+                      display="base"
+                      isSelected={isMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                      data-test-subj="mlAnomalyTimelinePanelMenu"
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isMenuOpen}
                 closePopover={setIsMenuOpen.bind(null, false)}

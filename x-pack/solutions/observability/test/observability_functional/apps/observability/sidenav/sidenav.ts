@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await solutionNavigation.sidenav.clickLink({ navId: 'agent_builder' }); // click on Agents link
           return (await browser.getCurrentUrl()).includes('/app/agent_builder');
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Agents' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Agent Builder' });
 
         // Open other tools more popover
         await solutionNavigation.sidenav.expandMore();

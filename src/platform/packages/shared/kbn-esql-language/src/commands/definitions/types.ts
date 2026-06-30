@@ -452,10 +452,6 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkTooFewBranches: {
-    message: string;
-    type: {};
-  };
   forkNotAllowedWithSubqueries: {
     message: string;
     type: {};

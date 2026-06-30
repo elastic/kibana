@@ -82,6 +82,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
         }}
         panelPaddingSize="none"
         repositionOnScroll
+        aria-label={i18n.AUTHOR_FILTER_ARIAL_LABEL}
       >
         <EuiSelectable
           aria-label={i18n.AUTHOR_FILTER_ARIAL_LABEL}

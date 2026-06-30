@@ -50,12 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover sidebar', function describeIndexTests() {
-    before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
     beforeEach(async () => {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'

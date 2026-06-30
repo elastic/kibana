@@ -7,16 +7,17 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  EuiPopover,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiText,
-  useEuiTheme,
-  useEuiFontSize,
-  useGeneratedHtmlId,
+  EuiToolTip,
   keys,
+  useEuiFontSize,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -45,8 +46,16 @@ export const RefinementPopover = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const editorId = useGeneratedHtmlId({ prefix: 'refinementEditor' });
 
-  const openPopover = useCallback(() => {
-    setIsPopoverOpen(true);
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((prev) => {
+      if (prev) {
+        setUserPrompt('');
+        if (editorRef.current) {
+          editorRef.current.textContent = '';
+        }
+      }
+      return !prev;
+    });
   }, []);
 
   const closePopover = useCallback(() => {
@@ -141,7 +150,7 @@ export const RefinementPopover = ({
   const triggerButton = (
     <GenerateSuggestionButton
       size="s"
-      onClick={openPopover}
+      onClick={togglePopover}
       isLoading={isLoading}
       isDisabled={isDisabled}
       aiFeatures={aiFeatures}
@@ -215,14 +224,16 @@ export const RefinementPopover = ({
                     onClose={() => setIsConnectorPopoverOpen(false)}
                     aria-label={connectorPickerAriaLabel}
                     button={
-                      <EuiButtonIcon
-                        data-test-subj="streamsAppRefinementPickConnectorButton"
-                        onClick={() => setIsConnectorPopoverOpen((prev) => !prev)}
-                        color="text"
-                        size="s"
-                        iconType="controlsHorizontal"
-                        aria-label={connectorPickerAriaLabel}
-                      />
+                      <EuiToolTip content={connectorPickerAriaLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          data-test-subj="streamsAppRefinementPickConnectorButton"
+                          onClick={() => setIsConnectorPopoverOpen((prev) => !prev)}
+                          color="text"
+                          size="s"
+                          iconType="controlsHorizontal"
+                          aria-label={connectorPickerAriaLabel}
+                        />
+                      </EuiToolTip>
                     }
                   />
                 </EuiFlexItem>

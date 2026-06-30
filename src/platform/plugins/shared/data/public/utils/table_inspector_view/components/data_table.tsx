@@ -195,6 +195,9 @@ class DataTableFormatClass extends Component<
 
     return (
       <EuiInMemoryTable
+        tableCaption={i18n.translate('data.inspector.table.tableCaption', {
+          defaultMessage: 'Inspector data',
+        })}
         tableLayout="auto"
         className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"

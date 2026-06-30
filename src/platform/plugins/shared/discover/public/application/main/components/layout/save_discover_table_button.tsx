@@ -17,6 +17,7 @@ import {
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
   selectTabSavedSearch,
+  useCurrentTabSelector,
   useInternalStateGetState,
   useRuntimeStateManager,
 } from '../../state_management/redux';
@@ -35,6 +36,7 @@ const BUTTON_LABEL = i18n.translate('discover.saveDiscoverTable.buttonLabel', {
 
 export function SaveDiscoverTableButton() {
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const getState = useInternalStateGetState();
   const services = useDiscoverServices();
   const runtimeStateManager = useRuntimeStateManager();
@@ -58,17 +60,20 @@ export function SaveDiscoverTableButton() {
       const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
       services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-        state: { ...attributes, title: newTitle, description: newDescription, references },
+        state: {
+          byValueState: { ...attributes, title: newTitle, description: newDescription, references },
+          controlGroupState,
+        },
         app: 'dashboards',
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [getState, services, runtimeStateManager]
+    [getState, runtimeStateManager, services, controlGroupState]
   );
 
   return (
     <>
-      <EuiToolTip content={BUTTON_LABEL} delay="long" disableScreenReaderOutput position="top">
+      <EuiToolTip content={BUTTON_LABEL} disableScreenReaderOutput position="top">
         <EuiButtonIcon
           data-test-subj="saveDiscoverTableToDashboardButton"
           aria-label={BUTTON_LABEL}

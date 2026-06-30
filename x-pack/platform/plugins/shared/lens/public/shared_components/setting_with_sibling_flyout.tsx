@@ -9,16 +9,17 @@ import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
 import React, { useState, useEffect } from 'react';
 import {
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
+  EuiTitle,
+  EuiToolTip,
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
@@ -89,16 +90,23 @@ export function SettingWithSiblingFlyout({
                 >
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="text"
-                        data-test-subj="lns-indexPattern-SettingWithSiblingFlyoutBack"
-                        className="lnsSettingWithSiblingFlyout__backIcon"
-                        onClick={closeFlyout}
-                        iconType="sortLeft"
-                        aria-label={i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
+                      <EuiToolTip
+                        content={i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
                           defaultMessage: 'Back',
                         })}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          color="text"
+                          data-test-subj="lns-indexPattern-SettingWithSiblingFlyoutBack"
+                          className="lnsSettingWithSiblingFlyout__backIcon"
+                          onClick={closeFlyout}
+                          iconType="sortLeft"
+                          aria-label={i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
+                            defaultMessage: 'Back',
+                          })}
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xs">

@@ -14,11 +14,19 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { ResourceTypes } from '@kbn/product-doc-common';
 import { DocumentationSection } from './documentation_section';
+import { enableProductDocumentationToolOnDefaultAgent } from './enable_product_documentation_tool_on_agent';
 
 jest.mock('@kbn/react-kibana-mount', () => ({
   // In unit tests we don’t need a real MountPoint; returning the node allows us to assert on its contents.
   toMountPoint: (node: unknown) => node,
 }));
+
+jest.mock('./enable_product_documentation_tool_on_agent', () => ({
+  enableProductDocumentationToolOnDefaultAgent: jest.fn().mockResolvedValue(undefined),
+}));
+
+const enableProductDocumentationToolOnDefaultAgentMock =
+  enableProductDocumentationToolOnDefaultAgent as jest.Mock;
 
 describe('DocumentationSection', () => {
   const coreStart = coreMock.createStart();
@@ -76,6 +84,23 @@ describe('DocumentationSection', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    enableProductDocumentationToolOnDefaultAgentMock.mockResolvedValue(undefined);
+    mockProductDocBase.installation.install = jest.fn().mockResolvedValue({ installed: true });
+    mockProductDocBase.installation.uninstall = jest.fn().mockResolvedValue({ success: true });
+    mockProductDocBase.installation.getStatus = jest.fn().mockImplementation(({ resourceType }) => {
+      if (resourceType === ResourceTypes.securityLabs) {
+        return Promise.resolve({
+          inferenceId: '.elser-2-elasticsearch',
+          resourceType: ResourceTypes.securityLabs,
+          status: 'uninstalled',
+        });
+      }
+      return Promise.resolve({
+        inferenceId: '.elser-2-elasticsearch',
+        overall: 'uninstalled',
+        perProducts: {},
+      });
+    });
   });
 
   describe('rendering', () => {
@@ -256,6 +281,10 @@ describe('DocumentationSection', () => {
         const calls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls.length;
         expect(calls).toBeGreaterThan(initialCalls);
       });
+
+      await waitFor(() => {
+        expect(enableProductDocumentationToolOnDefaultAgentMock).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('should show a helpful toast (air-gapped hint + docs link) when install fails', async () => {
@@ -319,6 +348,7 @@ describe('DocumentationSection', () => {
         expect(screen.getByTestId('documentation-install-security_labs')).toBeInTheDocument();
       });
 
+      enableProductDocumentationToolOnDefaultAgentMock.mockClear();
       fireEvent.click(screen.getByTestId('documentation-install-security_labs'));
 
       await waitFor(() => {
@@ -326,6 +356,10 @@ describe('DocumentationSection', () => {
           inferenceId: '.elser-2-elasticsearch',
           resourceType: ResourceTypes.securityLabs,
         });
+      });
+
+      await waitFor(() => {
+        expect(enableProductDocumentationToolOnDefaultAgentMock).toHaveBeenCalled();
       });
     });
 

@@ -11,7 +11,7 @@ import Fsp from 'fs/promises';
 
 import globby from 'globby';
 import { asyncMapWithLimit } from '@kbn/std';
-import Yaml from 'js-yaml';
+import { parse } from 'yaml';
 
 const FM_SEP_RE = /^---$/m;
 
@@ -38,7 +38,7 @@ export async function getAllDocFileIds(outputDir: string) {
 
     let fm;
     try {
-      fm = Yaml.load(fmYaml.slice(0, fmEnd.index));
+      fm = parse(fmYaml.slice(0, fmEnd.index));
       if (typeof fm !== 'object' || fm === null) {
         throw new Error('expected yaml to produce an object');
       }

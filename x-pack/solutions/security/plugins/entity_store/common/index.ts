@@ -118,4 +118,5 @@ export {
   getEntityIndexPattern,
   getEntitiesAlias,
   getLatestEntitiesIndexName,
+  getLatestEntityIndexPattern,
 } from './domain/entity_index';

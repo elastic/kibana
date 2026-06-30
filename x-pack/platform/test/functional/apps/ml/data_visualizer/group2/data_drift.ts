@@ -90,7 +90,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier');
 
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
 
@@ -98,8 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await Promise.all([
         ml.testResources.deleteDataViewByTitle('ft_fare*'),
         ml.testResources.deleteDataViewByTitle('ft_fare*,ft_fareq*'),

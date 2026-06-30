@@ -1,13 +1,13 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 20500
   advancedSettings: 6196
-  agentBuilder: 45717
+  agentBuilder: 48000
   agentBuilderPlatform: 8886
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
   alertingVTwo: 47881
-  apm: 25363
+  apm: 25434
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardAgent: 5135
+  dashboardAgent: 8000
   dashboardMarkdown: 6151
   data: 496646
   dataQuality: 11469
@@ -76,8 +76,8 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 209495
-  genAiSettings: 5663
+  fleet: 213000
+  genAiSettings: 6400
   globalSearch: 6890
   globalSearchBar: 26122
   globalSearchProviders: 4646
@@ -97,9 +97,9 @@ pageLoadAssetSize:
   interactiveSetup: 36524
   intercepts: 21066
   kibanaOverview: 6339
-  kibanaReact: 21499
+  kibanaReact: 21495
   kibanaUsageCollection: 1736
-  kibanaUtils: 54161
+  kibanaUtils: 54084
   kql: 15428
   kubernetesSecurity: 6807
   lens: 94679
@@ -154,7 +154,7 @@ pageLoadAssetSize:
   searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 10345
+  searchInferenceEndpoints: 13404
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -170,7 +170,7 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
-  share: 58677
+  share: 64618
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -209,6 +209,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52210
   watcher: 10485
-  workflowsExtensions: 38894
+  workflowsExtensions: 44875
   workflowsManagement: 35010
   workplaceAIApp: 14056

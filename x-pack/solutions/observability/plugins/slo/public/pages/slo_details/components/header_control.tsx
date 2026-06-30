@@ -201,6 +201,7 @@ export function HeaderControl({ slo }: Props) {
     <EuiIcon
       type="external"
       size="s"
+      aria-hidden={true}
       css={{
         marginLeft: '10px',
       }}
@@ -210,6 +211,9 @@ export function HeaderControl({ slo }: Props) {
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.slo.sloDetailsHeaderControl.popoverAriaLabel', {
+          defaultMessage: 'SLO details actions',
+        })}
         data-test-subj="sloDetailsHeaderControlPopover"
         button={
           <EuiButton

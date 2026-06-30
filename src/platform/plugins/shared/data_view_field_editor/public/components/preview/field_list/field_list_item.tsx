@@ -167,24 +167,31 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
         <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
-            <EuiButtonIcon
-              onClick={(e: { detail: number }) => {
-                const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
-                toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
-              }}
-              id={pinButtonId}
-              onFocus={() => setIsPinFocused(true)}
-              onBlur={() => setIsPinFocused(false)}
-              color="text"
-              iconType={showPinIcon ? 'pinFill' : 'empty'}
-              data-test-subj="pinFieldButton"
-              aria-label={i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
-                {
-                  defaultMessage: 'Pin field',
-                }
-              )}
-            />
+            <EuiToolTip
+              content={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
+                defaultMessage: 'Pin field',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={(e: { detail: number }) => {
+                  const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+                  toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
+                }}
+                id={pinButtonId}
+                onFocus={() => setIsPinFocused(true)}
+                onBlur={() => setIsPinFocused(false)}
+                color="text"
+                iconType={showPinIcon ? 'pinFill' : 'empty'}
+                data-test-subj="pinFieldButton"
+                aria-label={i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
+                  {
+                    defaultMessage: 'Pin field',
+                  }
+                )}
+              />
+            </EuiToolTip>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

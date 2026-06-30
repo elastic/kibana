@@ -421,15 +421,15 @@ describe('action_type_form', () => {
     expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeTruthy();
 
     // Verify that the tooltip renders
-    // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
+    act(() => {
+      wrapper.find('.euiToolTipAnchor').first().simulate('mouseOver');
+    });
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').last().text()).toBe('Action contains errors.');
-    // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+    await waitFor(() => {
+      expect(document.querySelector('.euiToolTipPopover')).toHaveTextContent(
+        'Action contains errors.'
+      );
+    });
   });
 
   it('resets action variables when the actionItem.frequency.summary changes', async () => {

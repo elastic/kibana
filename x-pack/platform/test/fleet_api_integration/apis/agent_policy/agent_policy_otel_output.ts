@@ -149,9 +149,6 @@ export default function (providerContext: FtrProviderContext) {
       return fullPolicy.exporters?.[`elasticsearch/${outputId}`];
     }
 
-    // -----------------------------------------------------------------------
-    // Test 1: ssl params from config_yaml appear in beatsauth extension
-    // -----------------------------------------------------------------------
     it('includes ssl parameters from config_yaml in the beatsauth extension', async () => {
       const outputId = await createOutput({
         config_yaml:
@@ -176,9 +173,6 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    // -----------------------------------------------------------------------
-    // Test 2: timeout / idle_connection_timeout from config_yaml appear in beatsauth
-    // -----------------------------------------------------------------------
     it('includes timeout and idle_connection_timeout from config_yaml in the beatsauth extension', async () => {
       const outputId = await createOutput({
         config_yaml: 'timeout: 30s\nidle_connection_timeout: 5s',
@@ -200,9 +194,6 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    // -----------------------------------------------------------------------
-    // Test 3: structured ssl fields take precedence over config_yaml
-    // -----------------------------------------------------------------------
     it('structured ssl fields take precedence over config_yaml values in beatsauth', async () => {
       const outputId = await createOutput({
         // config_yaml sets verification_mode to none — structured field should override to full
@@ -232,9 +223,6 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    // -----------------------------------------------------------------------
-    // Test 4: otel_disable_beatsauth=true — no beatsauth extension, no auth in exporter
-    // -----------------------------------------------------------------------
     it('omits beatsauth extension and exporter auth when otel_disable_beatsauth is true', async () => {
       const outputId = await createOutput({
         otel_disable_beatsauth: true,
@@ -261,9 +249,6 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    // -----------------------------------------------------------------------
-    // Test 5: otel_disable_beatsauth=true — otel_exporter_config_yaml still merged
-    // -----------------------------------------------------------------------
     it('still merges otel_exporter_config_yaml into the exporter when otel_disable_beatsauth is true', async () => {
       const outputId = await createOutput({
         otel_disable_beatsauth: true,
@@ -287,9 +272,6 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    // -----------------------------------------------------------------------
-    // Test 6: otel_disable_beatsauth=false (explicit) — beatsauth is still generated
-    // -----------------------------------------------------------------------
     it('generates beatsauth normally when otel_disable_beatsauth is false', async () => {
       const outputId = await createOutput({
         otel_disable_beatsauth: false,
@@ -311,6 +293,48 @@ export default function (providerContext: FtrProviderContext) {
       } finally {
         await deleteAgentPolicy(agentPolicyId);
         await deleteOutput(outputId);
+      }
+    });
+
+    it('rejects updating a policy data output to Logstash when the policy has an OTel integration', async () => {
+      const { body: logstashBody } = await supertest
+        .post('/api/fleet/outputs')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `logstash-output-${uuidv4()}`,
+          type: 'logstash',
+          hosts: ['logstash.example.com:5044'],
+          is_default: false,
+          is_default_monitoring: false,
+        })
+        .expect(200);
+      const logstashOutputId = logstashBody.item.id;
+
+      const {
+        body: {
+          item: { id: agentPolicyId },
+        },
+      } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ name: `otel-logstash-test-${uuidv4()}`, namespace: 'default' })
+        .expect(200);
+
+      try {
+        await addOtelPackagePolicy(agentPolicyId);
+
+        await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-logstash-test-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: logstashOutputId,
+          })
+          .expect(400);
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+        await deleteOutput(logstashOutputId);
       }
     });
   });

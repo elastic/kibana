@@ -367,8 +367,9 @@ function DiscoverDocumentsComponent({
     () => ({
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
       updateESQLQuery: onUpdateESQLQuery,
+      refreshData: () => dataStateContainer.refetch$.next(undefined),
     }),
-    [dispatch, onUpdateESQLQuery]
+    [dispatch, onUpdateESQLQuery, dataStateContainer]
   );
 
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);

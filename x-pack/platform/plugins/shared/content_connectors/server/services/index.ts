@@ -49,6 +49,17 @@ const connectorsInputName = 'connectors-py';
 const pkgName = 'elastic_connectors';
 const pkgTitle = 'Elastic Connectors';
 
+// A few native connector `service_type` values don't match their `policy_template`
+// name in the `elastic_connectors` package manifest (see issue #266539).
+const SERVICE_TYPE_TO_POLICY_TEMPLATE: Record<string, string> = {
+  microsoft_teams: 'teams',
+  mssql: 'microsoft_sql',
+  s3: 'amazon_s3',
+};
+
+const getPolicyTemplateName = (serviceType: string): string =>
+  SERVICE_TYPE_TO_POLICY_TEMPLATE[serviceType] ?? serviceType;
+
 export class AgentlessConnectorsInfraService {
   private logger: Logger;
   private soClient: SavedObjectsClientContract;
@@ -185,6 +196,8 @@ export class AgentlessConnectorsInfraService {
     const pkgVersion = await this.getPackageVersion();
     this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
+    const policyTemplate = getPolicyTemplateName(connector.service_type);
+
     const packagePolicyToCreate = {
       package: {
         title: pkgTitle,
@@ -195,9 +208,9 @@ export class AgentlessConnectorsInfraService {
       description: '',
       namespace: '',
       enabled: true,
-      policy_template: connector.service_type,
+      policy_template: policyTemplate,
       inputs: {
-        [`${connector.service_type}-${connectorsInputName}`]: {
+        [`${policyTemplate}-${connectorsInputName}`]: {
           enabled: true,
           vars: {
             connector_id: connector.id,

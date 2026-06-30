@@ -175,7 +175,8 @@ export const getLiveQueryResultsRoute = (
                   search,
                   query.action_id,
                   query.agents?.length ?? 0,
-                  namespacesOrUndefined
+                  namespacesOrUndefined,
+                  spaceId
                 )
               )
             )
@@ -188,6 +189,7 @@ export const getLiveQueryResultsRoute = (
                 kuery: request.query.kuery,
                 esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
+                spaceId,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
