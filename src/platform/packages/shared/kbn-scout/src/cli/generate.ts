@@ -654,5 +654,13 @@ export const generateCmd: Command<void> = {
     log.write('\n');
 
     await enableModuleInScoutCiConfig(relativePath, log);
+
+    if (area) {
+      log.write('\n');
+      log.info(
+        `Next step: update .github/CODEOWNERS if the new area has a dedicated feature team owner:\n` +
+          `  ${relativePath}/test/${scoutRoot}/${area}/ @elastic/<team>\n`
+      );
+    }
   },
 };
