@@ -1406,15 +1406,14 @@ export class DataViewsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          this.clearInstanceCache(indexPattern.id);
+          this.dataViewCache.delete(indexPattern.id!);
+          this.dataViewLazyCache.delete(indexPattern.id!);
 
           // Try the save again
           await this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
         }
         throw err;
       });
-
-    this.clearInstanceCache(indexPattern.id);
   }
 
   /**
