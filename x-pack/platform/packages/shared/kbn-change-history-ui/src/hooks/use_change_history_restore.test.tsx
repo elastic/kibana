@@ -9,7 +9,6 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
-import { useChangeHistoryList } from './use_change_history_list';
 import { useChangeHistoryRestore } from './use_change_history_restore';
 import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
 import {
@@ -38,8 +37,7 @@ const createHarness = (
   adapter: ChangeHistoryAdapter,
   features: { restore?: boolean } = { restore: true },
   permissions: { canRestore?: boolean } = { canRestore: true },
-  reportEvent?: jest.Mock,
-  listPageSize?: number
+  reportEvent?: jest.Mock
 ) => {
   const { wrapper: QueryClientWrapper, queryClient } = createQueryClientWrapper();
 
@@ -53,7 +51,6 @@ const createHarness = (
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => null}
         scope={TEST_CHANGE_HISTORY_SCOPE}
-        listPageSize={listPageSize}
         analytics={reportEvent ? { reportEvent } : undefined}
       >
         {children}
@@ -235,192 +232,6 @@ describe('useChangeHistoryRestore', () => {
     const durationMs = completedCall?.[1]?.durationMs as number;
     expect(durationMs).toBeGreaterThanOrEqual(25);
     expect(durationMs).toBeLessThan(150);
-  });
-
-  it('reports newSequence only after active list refetch completes', async () => {
-    const reportEvent = jest.fn();
-    let listFetchCount = 0;
-
-    const listChanges = jest.fn().mockImplementation(async () => {
-      listFetchCount += 1;
-
-      if (listFetchCount === 1) {
-        return {
-          items: [
-            {
-              id: 'evt-7',
-              timestamp: '2026-06-16T12:00:00.000Z',
-              actor: { name: 'Alice' },
-              action: 'update',
-              isCurrent: true,
-              metadata: { version: 7 },
-            },
-          ],
-          total: 7,
-        };
-      }
-
-      await new Promise<void>((resolve) => {
-        setTimeout(resolve, 50);
-      });
-
-      return {
-        items: [
-          {
-            id: 'evt-8',
-            timestamp: '2026-06-16T13:00:00.000Z',
-            actor: { name: 'Alice' },
-            action: 'restore',
-            isCurrent: true,
-            metadata: { version: 8 },
-          },
-        ],
-        total: 8,
-      };
-    });
-
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const adapter: ChangeHistoryAdapter = {
-      listChanges,
-      getChange: jest.fn(),
-      restoreChange,
-    };
-    const { wrapper } = createHarness(
-      adapter,
-      { restore: true },
-      { canRestore: true },
-      reportEvent
-    );
-
-    const { result } = renderHook(
-      () => ({
-        list: useChangeHistoryList({
-          adapter,
-          objectId: TEST_OBJECT_ID,
-          enabled: true,
-        }),
-        restore: useChangeHistoryRestore(),
-      }),
-      { wrapper }
-    );
-
-    await waitFor(() => {
-      expect(result.current.list.isLoading).toBe(false);
-    });
-    expect(listFetchCount).toBe(1);
-
-    await act(async () => {
-      await result.current.restore.restoreChange({
-        objectId: TEST_OBJECT_ID,
-        changeId: 'evt-3',
-        restoreTelemetry: {
-          restoredFromSequence: 3,
-          currentSequence: 7,
-          rollbackDistance: 4,
-        },
-      });
-    });
-
-    expect(listFetchCount).toBeGreaterThanOrEqual(2);
-    expect(reportEvent).toHaveBeenCalledWith(
-      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
-      expect.objectContaining({
-        restoredFromSequence: 3,
-        currentSequence: 7,
-        rollbackDistance: 4,
-        newSequence: 8,
-      })
-    );
-  });
-
-  it('reports newSequence when provider listPageSize matches the active list query', async () => {
-    const reportEvent = jest.fn();
-    const customPageSize = 10;
-    let listFetchCount = 0;
-
-    const listChanges = jest.fn().mockImplementation(async ({ page }) => {
-      listFetchCount += 1;
-      expect(page.size).toBe(customPageSize);
-
-      if (listFetchCount === 1) {
-        return {
-          items: [
-            {
-              id: 'evt-7',
-              timestamp: '2026-06-16T12:00:00.000Z',
-              actor: { name: 'Alice' },
-              action: 'update',
-              isCurrent: true,
-              metadata: { version: 7 },
-            },
-          ],
-          total: 7,
-        };
-      }
-
-      return {
-        items: [
-          {
-            id: 'evt-8',
-            timestamp: '2026-06-16T13:00:00.000Z',
-            actor: { name: 'Alice' },
-            action: 'restore',
-            isCurrent: true,
-            metadata: { version: 8 },
-          },
-        ],
-        total: 8,
-      };
-    });
-
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const adapter: ChangeHistoryAdapter = {
-      listChanges,
-      getChange: jest.fn(),
-      restoreChange,
-    };
-    const { wrapper } = createHarness(
-      adapter,
-      { restore: true },
-      { canRestore: true },
-      reportEvent,
-      customPageSize
-    );
-
-    const { result } = renderHook(
-      () => ({
-        list: useChangeHistoryList({
-          adapter,
-          objectId: TEST_OBJECT_ID,
-          enabled: true,
-        }),
-        restore: useChangeHistoryRestore(),
-      }),
-      { wrapper }
-    );
-
-    await waitFor(() => {
-      expect(result.current.list.isLoading).toBe(false);
-    });
-
-    await act(async () => {
-      await result.current.restore.restoreChange({
-        objectId: TEST_OBJECT_ID,
-        changeId: 'evt-3',
-        restoreTelemetry: {
-          restoredFromSequence: 3,
-          currentSequence: 7,
-          rollbackDistance: 4,
-        },
-      });
-    });
-
-    expect(reportEvent).toHaveBeenCalledWith(
-      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
-      expect.objectContaining({
-        newSequence: 8,
-      })
-    );
   });
 
   it('reports restore_failed telemetry when restore fails', async () => {

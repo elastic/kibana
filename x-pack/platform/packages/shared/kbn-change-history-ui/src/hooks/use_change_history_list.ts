@@ -17,10 +17,7 @@ export interface UseChangeHistoryListArgs {
   adapter: ChangeHistoryAdapter;
   objectId: string;
   enabled?: boolean;
-  /**
-   * Overrides provider `listPageSize` for this query only. Must match the provider value for
-   * `restore_completed.newSequence` telemetry (restore reads cache at provider `listPageSize`).
-   */
+  /** Overrides provider `listPageSize` for this query only. */
   pageSize?: number;
 }
 

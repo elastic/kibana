@@ -80,7 +80,6 @@ export interface ReportChangeHistoryRestoreCompletedActionParams
   restoredFromSequence?: number;
   currentSequence?: number;
   rollbackDistance?: number;
-  newSequence?: number;
   durationMs?: number;
 }
 

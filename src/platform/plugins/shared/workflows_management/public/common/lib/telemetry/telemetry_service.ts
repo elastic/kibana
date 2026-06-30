@@ -24,11 +24,13 @@ export class TelemetryService {
 
     // Lazy-load change-history telemetry registration to avoid pulling the full
     // @kbn/change-history-ui package into the plugin page-load bundle.
-    void import(
-      '@kbn/change-history-ui/src/telemetry/register_change_history_telemetry_events'
-    ).then(({ registerChangeHistoryTelemetryEvents }) => {
-      registerChangeHistoryTelemetryEvents(analytics);
-    });
+    void import('@kbn/change-history-ui/src/telemetry/register_change_history_telemetry_events')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
   }
 
   public getClient(): TelemetryServiceClient {

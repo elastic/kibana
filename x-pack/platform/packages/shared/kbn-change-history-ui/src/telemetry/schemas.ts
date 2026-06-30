@@ -180,13 +180,6 @@ const restoreCompletedSchema: RootSchema<ReportChangeHistoryRestoreCompletedActi
   ...eventNameSchema,
   ...scopeSchema,
   ...restoreSequenceFieldsSchema,
-  newSequence: {
-    type: 'integer',
-    _meta: {
-      description: 'Sequence after the restore write',
-      optional: true,
-    },
-  },
   durationMs: {
     type: 'integer',
     _meta: {
