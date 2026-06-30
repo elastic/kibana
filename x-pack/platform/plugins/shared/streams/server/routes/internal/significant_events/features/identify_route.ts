@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
@@ -121,7 +121,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
           metadata: {
             connectorTelemetry: {
               pluginId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-              aggregateBy: STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+              aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
             },
           },
         }),

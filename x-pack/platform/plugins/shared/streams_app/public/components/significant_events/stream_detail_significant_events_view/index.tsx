@@ -24,7 +24,7 @@ import { type Streams } from '@kbn/streams-schema';
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
-  type StreamsKIsOnboardingStatusResult,
+  type KIsOnboardingStatusResult,
 } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -98,7 +98,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const onKnowledgeIndicatorsOnboardingComplete = useCallback(
     (
       completedState: Extract<
-        StreamsKIsOnboardingStatusResult,
+        KIsOnboardingStatusResult,
         { status: SignificantEventsWorkflowStatus.Completed }
       >
     ) => {

@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Discovery, Feature, StreamsKIsOnboardingStep } from '@kbn/significant-events-schema';
+import { Discovery, Feature, KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
   STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -134,7 +134,7 @@ export async function triggerKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX,
-  steps: StreamsKIsOnboardingStep[] = [StreamsKIsOnboardingStep.FeaturesIdentification]
+  steps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
   log.info(`Triggering KI onboarding (${steps.join(', ')}) on stream ${streamName}...`);
 
