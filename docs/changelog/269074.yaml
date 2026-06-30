@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269074
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Search and data
+title: Fix missing .otel suffix on named OTel inputs

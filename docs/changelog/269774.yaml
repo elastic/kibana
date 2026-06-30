@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/269774
+issues:
+- https://github.com/elastic/kibana/issues/268819
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Dashboards and visualizations
+title: Fix waffle chart legend values not persisting correctly through the API

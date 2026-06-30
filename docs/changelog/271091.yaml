@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/271091
+issues:
+- https://github.com/elastic/security-team/issues/17554
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: Fix workflow step output getting lost when resuming execution

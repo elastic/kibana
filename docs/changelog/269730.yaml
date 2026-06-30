@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/269730
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: Add recurring rule scheduling with rrule support

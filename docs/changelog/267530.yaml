@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/267530
+issues:
+- https://github.com/elastic/search-team/issues/14263
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- AI and machine Learning
+title: Add per-agent access control lists (ACLs) in Agent Builder

@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269988
+issues:
+- https://github.com/elastic/kibana/issues/269984
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: 'Fix `default_pipeline` not updating on write index for second OTel metrics stream'
