@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
@@ -54,12 +59,15 @@ interface GetEntityAnomaliesParams {
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
+  minScore?: number;
+  maxScore?: number;
   jobIds?: string[];
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
   offset?: number;
   pageSize?: number;
+  request: KibanaRequest;
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   soClient: SavedObjectsClientContract;
 }
@@ -75,17 +83,26 @@ export const getEntityAnomalies = async ({
   esClient,
   fromMs,
   toMs,
+  minScore,
+  maxScore,
   jobIds,
   threatTactics,
   logger,
   ml,
   offset = 0,
   pageSize = 100,
+  request,
   sort,
   soClient,
 }: GetEntityAnomaliesParams): Promise<GetEntityAnomaliesResult> => {
-  const allSecurityJobIds = await getSecurityMlJobIds({ ml, soClient });
-  const allConfigs = await getJobConfig({ jobIds: allSecurityJobIds, logger, ml, soClient });
+  const allSecurityJobIds = await getSecurityMlJobIds({ ml, request, soClient });
+  const allConfigs = await getJobConfig({
+    jobIds: allSecurityJobIds,
+    logger,
+    ml,
+    request,
+    soClient,
+  });
 
   let resolvedJobIds = jobIds;
   if (threatTactics && threatTactics.length > 0) {
@@ -106,12 +123,15 @@ export const getEntityAnomalies = async ({
     entityId,
     fromMs,
     toMs,
+    minScore,
+    maxScore,
     jobIds: resolvedJobIds,
     sort,
     from: offset,
     size: pageSize,
     logger,
     ml,
+    request,
     soClient,
   });
 

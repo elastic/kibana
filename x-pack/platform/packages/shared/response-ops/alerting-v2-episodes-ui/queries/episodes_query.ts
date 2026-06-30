@@ -15,6 +15,13 @@ import {
   PAGE_SIZE_ESQL_VARIABLE,
   HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
+import {
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from '../components/severity/severity_utils';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -35,6 +42,8 @@ export interface AlertEpisode {
   last_tags?: string[];
   /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
   episode_data?: string | null;
+  /** Latest top-level `severity` from a breached rule event, when present. */
+  severity?: string | null;
 }
 
 /**
@@ -61,6 +70,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_deactivate_action',
   'last_tags',
   'episode_data',
+  'severity',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -81,6 +91,8 @@ export interface EpisodesFilterState {
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
+  /** Severity values (OR). Includes EPISODE_SEVERITY_FILTER_NONE for episodes without severity. */
+  severity?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
 }
@@ -98,8 +110,27 @@ const ALLOWLISTED_SORT_FIELDS = new Set([
   'duration',
 ]);
 
+const SEVERITY_SORT_FIELD = '_severity_sort';
+const EPISODE_WITHOUT_SEVERITY_SORT_VALUE = -1;
+
 const sanitizeSortField = (field: string) => {
   return ALLOWLISTED_SORT_FIELDS.has(field) ? field : '@timestamp';
+};
+
+const buildSeveritySortEval = (): string => {
+  const cases = EPISODE_SEVERITIES.map(
+    (severity) => `severity == "${severity}", ${EPISODE_SEVERITY_CHART_VALUE[severity]}`
+  ).join(', ');
+
+  return `EVAL ${SEVERITY_SORT_FIELD} = CASE(${cases}, ${EPISODE_WITHOUT_SEVERITY_SORT_VALUE})`;
+};
+
+const resolveSortField = (sortField: string): string => {
+  if (sortField === 'severity') {
+    return SEVERITY_SORT_FIELD;
+  }
+
+  return sanitizeSortField(sortField);
 };
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
@@ -110,7 +141,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -150,6 +181,27 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
+  const severityValues = severities
+    .filter((severity) => severity !== EPISODE_SEVERITY_FILTER_NONE)
+    .filter(isSupportedEpisodeSeverity)
+    .map(normalizeEpisodeSeverity);
+  const includeNoSeverity = severities.includes(EPISODE_SEVERITY_FILTER_NONE);
+
+  const parts: string[] = [];
+  if (severityValues.length) {
+    const inList = severityValues.map((severity) => escapeStringValue(severity)).join(', ');
+    parts.push(`severity IN (${inList})`);
+  }
+  if (includeNoSeverity) {
+    parts.push('severity IS NULL');
+  }
+  if (!parts.length) {
+    return;
+  }
+  query.pipe(`WHERE ${parts.join(' OR ')}`);
+};
+
 const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
   if (filterState.status) {
     query.where`effective_status == ${filterState.status}`;
@@ -162,6 +214,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
+  }
+  if (filterState.severity?.length) {
+    addSeverityFilter(query, filterState.severity);
   }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
@@ -210,7 +265,6 @@ export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
 ): ComposerQuery => {
-  const sortField = sanitizeSortField(sortState.sortField);
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
@@ -219,6 +273,12 @@ export const buildEpisodesQuery = (
   if (filterState) {
     applyFilterState(query, filterState);
   }
+
+  if (sortState.sortField === 'severity') {
+    query.pipe(buildSeveritySortEval());
+  }
+
+  const sortField = resolveSortField(sortState.sortField);
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
