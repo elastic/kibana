@@ -13,6 +13,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -24,6 +25,10 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
+import { buildMitreReferenceUrl } from '../../../../../common/detection_engine/mitre/build_mitre_reference_url';
+import { useKibana } from '../../../../common/lib/kibana';
 import type {
   CoverageOverviewDashboard,
   CoverageOverviewRuleWithInvalidMitre,
@@ -35,6 +40,35 @@ interface RuleListProps {
   rules: CoverageOverviewRuleWithInvalidMitre[];
 }
 
+const InvalidMitreBadge = memo(({ id }: { id: string }) => {
+  const href = buildMitreReferenceUrl(id);
+
+  if (!href) {
+    return (
+      <EuiBadge color="warning" data-test-subj={`coverageOverviewInvalidMitreBadge-${id}`}>
+        {id}
+      </EuiBadge>
+    );
+  }
+
+  return (
+    <EuiToolTip content={i18n.INVALID_MITRE_ID_BADGE_TOOLTIP(id)}>
+      <EuiBadge
+        color="warning"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        iconType="popout"
+        iconSide="right"
+        data-test-subj={`coverageOverviewInvalidMitreBadge-${id}`}
+      >
+        {id}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+});
+InvalidMitreBadge.displayName = 'InvalidMitreBadge';
+
 const RuleList = memo(({ rules }: RuleListProps) => (
   <EuiFlexGroup direction="column" gutterSize="s">
     {rules.map((rule) => (
@@ -44,15 +78,13 @@ const RuleList = memo(({ rules }: RuleListProps) => (
             <RuleLink name={rule.name} id={rule.id} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.INVALID_MITRE_IDS_TOOLTIP(rule.invalidMitreIds)}>
-              <EuiFlexGroup gutterSize="xs" wrap>
-                {rule.invalidMitreIds.map((id) => (
-                  <EuiFlexItem key={id} grow={false}>
-                    <EuiBadge color="warning">{id}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiToolTip>
+            <EuiFlexGroup gutterSize="xs" wrap>
+              {rule.invalidMitreIds.map((id) => (
+                <EuiFlexItem key={id} grow={false}>
+                  <InvalidMitreBadge id={id} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -70,6 +102,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = ({
 }: CoverageOverviewInvalidMitreRulesCalloutProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
+  const { docLinks } = useKibana().services;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -89,11 +122,30 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = ({
       <EuiCallOut
         announceOnMount={false}
         data-test-subj="coverageOverviewInvalidMitreRulesCallout"
-        title={i18n.INVALID_MITRE_RULES_CALLOUT_TITLE}
+        title={i18n.INVALID_MITRE_RULES_CALLOUT_TITLE(MITRE_ATTACK_VERSION)}
         color="warning"
         iconType="warning"
       >
-        <p>{i18n.INVALID_MITRE_RULES_CALLOUT_DESCRIPTION(invalidCount)}</p>
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.description"
+            defaultMessage="You have {count, plural, one {# rule that references} other {# rules that reference}} MITRE ATT&CK® IDs not present in the currently supported version ({version}). They may not appear correctly in the coverage matrix. {learnMoreLink}"
+            values={{
+              count: invalidCount,
+              version: MITRE_ATTACK_VERSION,
+              learnMoreLink: (
+                <EuiLink
+                  href={docLinks.links.siem.mitreCoverage}
+                  target="_blank"
+                  data-test-subj="coverageOverviewInvalidMitreRulesLearnMoreLink"
+                >
+                  {i18n.INVALID_MITRE_RULES_CALLOUT_DESCRIPTION_LEARN_MORE}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>{i18n.INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE}</p>
         <EuiButton
           data-test-subj="coverageOverviewInvalidMitreRulesViewButton"
           color="warning"

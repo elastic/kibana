@@ -99,12 +99,12 @@ export const UNSUPPORTED_MITRE_OPTION_LABEL = (id: string, name: string | undefi
 export const UNSUPPORTED_MITRE_ID_ERROR = (id: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.unsupportedIdErrorMessage', {
     defaultMessage:
-      '"{id}" is not in the currently supported MITRE ATT&CK® version. Choose a supported value.',
+      '"{id}" is not in the currently supported MITRE ATT&CK\u00AE version. Choose a supported value.',
     values: { id },
   });
 
 export const RENAMED_FROM_HINT = (previousName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.renamedFromHint', {
-    defaultMessage: 'Renamed from "{previousName}" in the current MITRE ATT&CK® version.',
+    defaultMessage: 'Renamed from "{previousName}" in the current MITRE ATT&CK\u00AE version.',
     values: { previousName },
   });

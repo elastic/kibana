@@ -185,22 +185,30 @@ export const COVERAGE_OVERVIEW_FETCH_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const INVALID_MITRE_RULES_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
+export const INVALID_MITRE_RULES_CALLOUT_TITLE = (version: string) =>
+  i18n.translate(
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
+    {
+      values: { version },
+      defaultMessage:
+        'Some rules have outdated MITRE ATT&CK\u00AE mappings (currently supported: {version})',
+    }
+  );
+
+export const INVALID_MITRE_RULES_CALLOUT_DESCRIPTION_LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.descriptionLearnMore',
   {
-    defaultMessage: 'Some rules have outdated MITRE ATT&CK\u00AE mappings',
+    defaultMessage: 'Learn more',
   }
 );
 
-export const INVALID_MITRE_RULES_CALLOUT_DESCRIPTION = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.description',
-    {
-      values: { count },
-      defaultMessage:
-        'You have {count, plural, one {# rule that references} other {# rules that reference}} MITRE ATT&CK\u00AE IDs not present in the currently supported version. They may not appear correctly in the coverage matrix.',
-    }
-  );
+export const INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.prebuiltNotice',
+  {
+    defaultMessage:
+      'Elastic prebuilt rule mappings were updated for this MITRE ATT&CK\u00AE version. Make sure to install the latest prebuilt rule updates so their coverage stays accurate.',
+  }
+);
 
 export const INVALID_MITRE_RULES_VIEW_RULES_BUTTON = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.viewRulesButton',
@@ -245,11 +253,11 @@ export const INVALID_MITRE_RULES_MODAL_DISABLED_SECTION = i18n.translate(
   }
 );
 
-export const INVALID_MITRE_IDS_TOOLTIP = (ids: string[]) =>
+export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string) =>
   i18n.translate(
-    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdsTooltip',
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdBadgeTooltip',
     {
-      values: { ids: ids.join(', ') },
-      defaultMessage: 'Invalid MITRE IDs: {ids}',
+      values: { id },
+      defaultMessage: 'Open MITRE ATT&CK\u00AE reference for {id}',
     }
   );
