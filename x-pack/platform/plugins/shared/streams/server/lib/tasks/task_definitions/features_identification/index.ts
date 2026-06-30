@@ -21,7 +21,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
-import { STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForFeature } from '../../../../routes/utils/resolve_connector_for_feature';
@@ -103,7 +103,7 @@ async function runFeaturesIdentification(
       ? Promise.resolve(connectorIdOverride)
       : resolveConnectorForFeature({
           searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-          featureId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
           featureName: 'knowledge indicator extraction',
           request: fakeRequest,
         }),

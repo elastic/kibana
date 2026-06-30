@@ -13,9 +13,9 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
-  type StreamsKIsOnboardingFeaturesResult,
-  type StreamsKIsOnboardingQueriesResult,
-  type StreamsKIsOnboardingStatusResult,
+  type KIsOnboardingFeaturesResult,
+  type KIsOnboardingQueriesResult,
+  type KIsOnboardingStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/significant-events-schema';
@@ -105,8 +105,8 @@ interface OnboardingWorkflowOutputContext {
  */
 export interface StreamsKIsOnboardingOutput {
   streamName: string;
-  features: StreamsKIsOnboardingFeaturesResult;
-  queries: StreamsKIsOnboardingQueriesResult;
+  features: KIsOnboardingFeaturesResult;
+  queries: KIsOnboardingQueriesResult;
 }
 
 /** Flattens nested onboarding inputs into the workflow engine's scalar payload. */
@@ -248,11 +248,7 @@ export class StreamsKIsOnboardingClient {
    * For completed executions a second fetch retrieves the full execution
    * context so output counts can be included in the result.
    */
-  async getStatus({
-    streamName,
-  }: {
-    streamName: string;
-  }): Promise<StreamsKIsOnboardingStatusResult> {
+  async getStatus({ streamName }: { streamName: string }): Promise<KIsOnboardingStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },

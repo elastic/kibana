@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
-  STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
@@ -101,7 +101,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         ? Promise.resolve(connectorIdOverride)
         : resolveConnectorForFeature({
             searchInferenceEndpoints: server.searchInferenceEndpoints,
-            featureId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+            featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
             featureName: 'knowledge indicator extraction',
             request,
           }),
@@ -120,8 +120,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
           connectorId,
           metadata: {
             connectorTelemetry: {
-              pluginId: STREAMS_SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-              aggregateBy: STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+              pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+              aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
             },
           },
         }),

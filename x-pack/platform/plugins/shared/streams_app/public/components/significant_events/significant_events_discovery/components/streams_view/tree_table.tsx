@@ -25,7 +25,7 @@ import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/interna
 import { Streams } from '@kbn/streams-schema';
 import {
   SignificantEventsWorkflowStatus,
-  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
@@ -444,7 +444,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
+                if (KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -13,10 +13,14 @@ interface Props {
 }
 
 export const BadgeList = ({ items }: Props) => (
-  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+  <EuiFlexGroup gutterSize="xs" wrap responsive={false} css={{ maxWidth: '100%' }}>
     {items.map((item) => (
-      <EuiFlexItem grow={false} key={item}>
-        <EuiBadge color="hollow">{item}</EuiBadge>
+      <EuiFlexItem grow={false} key={item} css={{ maxWidth: '100%' }}>
+        <EuiToolTip content={item} position="top">
+          <EuiBadge color="hollow" title="">
+            {item}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>
