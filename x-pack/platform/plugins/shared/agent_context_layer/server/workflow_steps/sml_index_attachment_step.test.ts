@@ -543,7 +543,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     });
   });
 
-  describe('experimental feature-flag check', () => {
+  describe('Context Engine feature-flag check', () => {
     it('calls isFeatureEnabled with the workflow fake request and proceeds when enabled', async () => {
       const startContract = buildStartContract();
       const isFeatureEnabled = jest.fn().mockResolvedValue(true);
@@ -593,7 +593,11 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
       expect(result.output).toBeUndefined();
       expect(result.error).toBeInstanceOf(Error);
-      expect((result.error as Error).message).toContain('experimental features are disabled');
+      // Surfaces the experimental nature, since this error reaches workflow
+      // authors/operators.
+      expect((result.error as Error).message).toContain(
+        'Context Engine (experimental feature) is disabled'
+      );
       expect((result.error as Error).message).toContain('upsert');
       expect(startContract.indexAttachment).not.toHaveBeenCalled();
       // Privilege check must be skipped — the feature-flag gate is an
@@ -622,7 +626,9 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
       expect(result.output).toBeUndefined();
       expect(result.error).toBeInstanceOf(Error);
-      expect((result.error as Error).message).toContain('experimental features are disabled');
+      expect((result.error as Error).message).toContain(
+        'Context Engine (experimental feature) is disabled'
+      );
       expect((result.error as Error).message).toContain('delete');
       expect(startContract.deleteAttachment).not.toHaveBeenCalled();
       expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
