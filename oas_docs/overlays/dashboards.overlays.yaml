@@ -131,6 +131,7 @@ actions:
         | `aiops_change_point_chart` | Change point detection chart |
         | `aiops_log_rate_analysis` | Log rate analysis |
         | `aiops_pattern_analysis` | Pattern analysis |
+        | `field_stats_table` | Field statistics table |
 
         > info
         > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
