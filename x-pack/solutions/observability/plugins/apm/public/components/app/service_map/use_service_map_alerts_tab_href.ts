@@ -10,7 +10,8 @@
  *
  * The module exposes three related hooks that all resolve the
  * service-scoped alerts-tab destination from the current map route
- * (see `SERVICE_MAP_ALERTS_NAVIGATE_ROUTES`) while preserving the
+ * (`/service-map`, `/services/{serviceName}/service-map`, or
+ * `/mobile-services/{serviceName}/service-map`) while preserving the
  * shared time range / environment params and **stripping `kuery`** (alerts
  * aggregate across all visible services, so a node-scoped click would
  * otherwise carry the map's service-name filter into a destination where
@@ -29,7 +30,7 @@
  *
  * All three rely on `useAnyOfApmParams` and will throw if called outside a
  * matching APM map route — mount inside `ServiceMapAlertsNavigateGraphWrapper`
- * (`ServiceMapGraph`, `ContextualServiceMapGraph`, or `ApmEmbeddableContext` on alert embeds).
+ * (`ServiceMapGraph`, `ContextualServiceMapGraph`, or alert embeds).
  */
 
 import type { KeyboardEvent, MouseEvent } from 'react';

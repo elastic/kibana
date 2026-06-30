@@ -14,12 +14,8 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
-import {
-  EXPLORE_IN_SERVICE_MAP_LABEL,
-  SERVICE_MAP_EMBED_PANEL_HEIGHT,
-  SERVICE_MAP_EMBED_PANEL_PREVIEW_TITLE,
-} from '../../../../embeddable/service_map/service_map_embed_panel_messages';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -33,6 +29,17 @@ import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context'
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { getServiceMapTimeRange } from './get_service_map_time_range';
 import { buildKueryFromAlert, buildFiltersFromAlert } from './build_alert_filters';
+
+const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.alertDetails.serviceMapPanel.title', {
+  defaultMessage: 'Service map preview',
+});
+
+const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
+  'xpack.apm.alertDetails.serviceMapPanel.exploreInServiceMap',
+  { defaultMessage: 'Explore in Service map' }
+);
+
+const EMBEDDABLE_HEIGHT = 400;
 
 export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionProps) {
   const embeddableDeps = useApmEmbeddableDeps();
@@ -96,7 +103,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h3>{SERVICE_MAP_EMBED_PANEL_PREVIEW_TITLE}</h3>
+                <h3>{SERVICE_MAP_PANEL_TITLE}</h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -132,7 +139,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
           <EuiPanel
             hasBorder
             paddingSize="none"
-            css={{ overflow: 'hidden', height: SERVICE_MAP_EMBED_PANEL_HEIGHT }}
+            css={{ overflow: 'hidden', height: EMBEDDABLE_HEIGHT }}
             data-test-subj="apmAlertDetailsServiceMapEmbeddableContainer"
           >
             <ApmEmbeddableContext
