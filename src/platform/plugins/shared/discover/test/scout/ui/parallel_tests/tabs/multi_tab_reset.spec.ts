@@ -11,14 +11,14 @@
  * Multi-tab Discover session reset and uninitialized-tab restore flows.
  */
 
-import { spaceTest, type ScoutPage, type ScoutTestFixtures } from '@kbn/scout';
+import { spaceTest, type ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 import {
   createDataViewFromSearchBar,
-  getSelectedDataViewName,
   saveDiscoverSession,
   selectDataViewMode,
+  waitForTabStateToPersist,
 } from '../../fixtures/tabs/helpers';
 
 spaceTest.describe(
@@ -36,9 +36,8 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.discover.setQueryMode('classic');
-      await pageObjects.discover.goto();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.waitUntilTabIsLoaded();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -49,15 +48,15 @@ spaceTest.describe(
     spaceTest(
       'should clear all tabs when starting a new session',
       async ({ pageObjects, page }) => {
-        const { discover } = pageObjects;
+        const { discover, unifiedTabs } = pageObjects;
         const sessionName = 'Clear tabs Discover session';
 
         await spaceTest.step('create and save a multi-tab session', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
-          expect(await discover.getTabLabels()).toStrictEqual([
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
             'Untitled',
             'Untitled 2',
             'Untitled 3',
@@ -68,11 +67,11 @@ spaceTest.describe(
 
         await spaceTest.step('load the saved session', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await expect(page.testSubj.locator('breadcrumb last')).toHaveText(sessionName);
-          expect(await discover.getTabLabels()).toStrictEqual([
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
             'Untitled',
             'Untitled 2',
             'Untitled 3',
@@ -81,21 +80,21 @@ spaceTest.describe(
 
         await spaceTest.step('clear loaded session', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await expect(page.testSubj.locator('breadcrumb last')).toBeHidden();
-          expect(await discover.getTabLabels()).toStrictEqual(['Untitled']);
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
         });
 
         await spaceTest.step('add a second unsaved tab', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
-          expect(await discover.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
         });
 
         await spaceTest.step('clear unsaved tabs', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilSearchingHasFinished();
-          expect(await discover.getTabLabels()).toStrictEqual(['Untitled']);
+          await discover.waitUntilTabIsLoaded();
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
         });
       }
     );
@@ -103,7 +102,7 @@ spaceTest.describe(
     spaceTest(
       'should restore correct data view or ES|QL query for uninitialized tabs',
       async ({ pageObjects, page }) => {
-        const { discover } = pageObjects;
+        const { discover, unifiedTabs } = pageObjects;
         const sessionName = 'Uninitialized tabs session';
         const persistedDataView1 = 'logstash-*';
         const persistedDataView2 = 'kibana_sample_data_flights';
@@ -112,63 +111,64 @@ spaceTest.describe(
         const esqlQuery1 = 'FROM logstash-* | LIMIT 100';
         const esqlQuery2 = 'FROM kibana_sample_data_flights | LIMIT 50';
 
-        expect(await getSelectedDataViewName(page)).toBe(persistedDataView1);
+        expect(await discover.getSelectedDataViewName()).toBe(persistedDataView1);
 
         await spaceTest.step('create tab 1: ad-hoc data view 1', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
           await createDataViewFromSearchBar(page, {
             name: 'logst',
             adHoc: true,
             hasTimeField: true,
           });
-          await discover.waitUntilSearchingHasFinished();
-          expect(await getSelectedDataViewName(page)).toBe(adHocDataView1);
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getSelectedDataViewName()).toBe(adHocDataView1);
         });
 
         await spaceTest.step('create tab 2: ES|QL 1', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
           await discover.writeAndSubmitEsqlQuery(esqlQuery1);
           expect(await discover.getEsqlQueryValue()).toBe(esqlQuery1);
         });
 
         await spaceTest.step('create tab 3: persisted data view 2', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
           await selectDataViewMode(page, { discardModal: true });
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await discover.selectDataView(persistedDataView2);
-          await discover.waitUntilSearchingHasFinished();
-          expect(await getSelectedDataViewName(page)).toBe(persistedDataView2);
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getSelectedDataViewName()).toBe(persistedDataView2);
         });
 
         await spaceTest.step('create tab 4: ad-hoc data view 2', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
           await createDataViewFromSearchBar(page, {
             name: 'log',
             adHoc: true,
             hasTimeField: true,
           });
-          await discover.waitUntilSearchingHasFinished();
-          expect(await getSelectedDataViewName(page)).toBe(adHocDataView2);
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getSelectedDataViewName()).toBe(adHocDataView2);
         });
 
         await spaceTest.step('create tab 5: ES|QL 2', async () => {
-          await discover.createNewTab();
-          await discover.waitUntilSearchingHasFinished();
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
           await discover.writeAndSubmitEsqlQuery(esqlQuery2);
           expect(await discover.getEsqlQueryValue()).toBe(esqlQuery2);
         });
 
         await spaceTest.step('refresh and validate all tabs', async () => {
+          await waitForTabStateToPersist(page);
           await page.reload();
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await expect
             .poll(async () => discover.getEsqlQueryValue(), { timeout: 30_000 })
             .toBe(esqlQuery2);
-          await expectTabState(pageObjects, page, [
+          await expectTabState(pageObjects, [
             { index: 4, dataView: adHocDataView2 },
             { index: 3, dataView: persistedDataView2 },
             { index: 2, esqlQuery: esqlQuery1 },
@@ -183,8 +183,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('validate all tabs after save', async () => {
-          expect(await getSelectedDataViewName(page)).toBe(persistedDataView1);
-          await expectTabState(pageObjects, page, [
+          expect(await discover.getSelectedDataViewName()).toBe(persistedDataView1);
+          await expectTabState(pageObjects, [
             { index: 1, dataView: adHocDataView1 },
             { index: 2, esqlQuery: esqlQuery1 },
             { index: 3, dataView: persistedDataView2 },
@@ -195,16 +195,16 @@ spaceTest.describe(
 
         await spaceTest.step('clear session and reload from saved', async () => {
           await discover.clickNewSearch();
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await expect(page.testSubj.locator('breadcrumb last')).toBeHidden();
           await discover.loadSavedSearch(sessionName);
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           await expect(page.testSubj.locator('breadcrumb last')).toHaveText(sessionName);
         });
 
         await spaceTest.step('validate all tabs after reload', async () => {
-          expect(await getSelectedDataViewName(page)).toBe(persistedDataView1);
-          await expectTabState(pageObjects, page, [
+          expect(await discover.getSelectedDataViewName()).toBe(persistedDataView1);
+          await expectTabState(pageObjects, [
             { index: 1, dataView: adHocDataView1 },
             { index: 2, esqlQuery: esqlQuery1 },
             { index: 3, dataView: persistedDataView2 },
@@ -221,15 +221,14 @@ type DiscoverPageObjects = ScoutTestFixtures['pageObjects'];
 
 const expectTabState = async (
   pageObjects: DiscoverPageObjects,
-  page: ScoutPage,
   expectedStates: Array<{ index: number; dataView?: string; esqlQuery?: string }>
 ) => {
-  const { discover } = pageObjects;
+  const { discover, unifiedTabs } = pageObjects;
   for (const expectedState of expectedStates) {
-    await discover.selectTabByIndex(expectedState.index);
-    await discover.waitUntilSearchingHasFinished();
+    await unifiedTabs.selectTab(expectedState.index);
+    await discover.waitUntilTabIsLoaded();
     if (expectedState.dataView) {
-      expect(await getSelectedDataViewName(page)).toBe(expectedState.dataView);
+      expect(await discover.getSelectedDataViewName()).toBe(expectedState.dataView);
     }
     if (expectedState.esqlQuery) {
       expect(await discover.getEsqlQueryValue()).toBe(expectedState.esqlQuery);

@@ -31,9 +31,8 @@ spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-cl
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.discover.setQueryMode('classic');
-    await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -44,13 +43,13 @@ spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-cl
   spaceTest(
     'should load a legacy Discover session into a single untitled tab',
     async ({ pageObjects, page }) => {
-      const { discover } = pageObjects;
+      const { discover, unifiedTabs } = pageObjects;
 
       await discover.loadSavedSearch(LEGACY_SESSION_NAME);
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await expect(page.testSubj.locator('breadcrumb last')).toHaveText(LEGACY_SESSION_NAME);
-      expect(await discover.getTabLabels()).toStrictEqual(['Untitled']);
+      expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
       expect(await getHitCount(page)).toBe('14,004');
     }
   );
@@ -58,39 +57,39 @@ spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-cl
   spaceTest(
     'should allow adding tabs to a legacy session and saving as new',
     async ({ pageObjects, page }) => {
-      const { discover } = pageObjects;
+      const { discover, unifiedTabs } = pageObjects;
 
       await spaceTest.step('load legacy session', async () => {
         await discover.loadSavedSearch(LEGACY_SESSION_NAME);
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await expect(page.testSubj.locator('breadcrumb last')).toHaveText(LEGACY_SESSION_NAME);
-        expect(await discover.getTabLabels()).toStrictEqual(['Untitled']);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
       });
 
       await spaceTest.step('create a second tab', async () => {
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
-        expect(await discover.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
       });
 
       await spaceTest.step('save as new session', async () => {
         await saveDiscoverSession(page, UPDATED_SESSION_NAME, { saveAsNew: true });
         await expect(page.testSubj.locator('breadcrumb last')).toHaveText(UPDATED_SESSION_NAME);
-        expect(await discover.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
       });
 
       await spaceTest.step('load legacy session again', async () => {
         await discover.loadSavedSearch(LEGACY_SESSION_NAME);
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await expect(page.testSubj.locator('breadcrumb last')).toHaveText(LEGACY_SESSION_NAME);
-        expect(await discover.getTabLabels()).toStrictEqual(['Untitled']);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
       });
 
       await spaceTest.step('load updated session again', async () => {
         await discover.loadSavedSearch(UPDATED_SESSION_NAME);
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await expect(page.testSubj.locator('breadcrumb last')).toHaveText(UPDATED_SESSION_NAME);
-        expect(await discover.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
       });
     }
   );

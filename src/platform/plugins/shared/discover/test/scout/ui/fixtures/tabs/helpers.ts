@@ -201,27 +201,6 @@ export const addFieldColumn = async (page: ScoutPage, field: string) => {
 };
 
 /**
- * Returns the query string from the KQL query input.
- */
-export const getQueryString = async (page: ScoutPage): Promise<string> => {
-  return (await page.testSubj.locator('queryInput').inputValue()) ?? '';
-};
-
-/**
- * Submits the current query by clicking the query submit button.
- */
-export const submitQuery = async (page: ScoutPage) => {
-  await page.testSubj.click('querySubmitButton');
-};
-
-/**
- * Returns the currently selected data view name from the switcher.
- */
-export const getSelectedDataViewName = async (page: ScoutPage): Promise<string> => {
-  return page.testSubj.innerText('*dataView-switch-link');
-};
-
-/**
  * Returns the hit count text from the Discover query hits element.
  */
 export const getHitCount = async (page: ScoutPage): Promise<string> => {
@@ -246,4 +225,36 @@ export const getSelectedSidebarFields = async (page: ScoutPage): Promise<string[
     }
   }
   return fields;
+};
+
+// Discover persists per-tab state to this localStorage key.
+const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
+
+/**
+ * Waits until the locally persisted tab state has settled.
+ *
+ * Discover writes tab state (labels, app state, vis) to localStorage on a
+ * trailing throttle (`MIDDLEWARE_THROTTLE_MS` = 300ms in `internal_state.ts`),
+ * so the most recent edit to the active tab is flushed ~300ms after the action.
+ * A reload within that window drops the pending write and the tab reverts. Call
+ * this before a `page.reload()` that asserts persistence: it polls the stored
+ * snapshot and resolves once two reads a throttle-window apart are identical,
+ * meaning the trailing write has flushed.
+ */
+export const waitForTabStateToPersist = async (page: ScoutPage) => {
+  let previous: string | null = null;
+  await expect
+    .poll(
+      async () => {
+        const current = await page.evaluate(
+          (key) => window.localStorage.getItem(key),
+          TABS_LOCAL_STORAGE_KEY
+        );
+        const settled = current !== null && current === previous;
+        previous = current;
+        return settled;
+      },
+      { timeout: 10_000, intervals: [350] }
+    )
+    .toBe(true);
 };

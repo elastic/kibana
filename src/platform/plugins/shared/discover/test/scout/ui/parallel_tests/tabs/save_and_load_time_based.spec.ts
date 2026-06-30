@@ -20,6 +20,7 @@ import { testData } from '../../fixtures/common';
 import {
   createDataViewFromSearchBar,
   openSaveDiscoverSessionModal,
+  waitForTabStateToPersist,
 } from '../../fixtures/tabs/helpers';
 
 const AD_HOC_WITH_TIME_RANGE = 'log';
@@ -38,9 +39,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.discover.setQueryMode('classic');
-    await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -51,7 +51,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
   spaceTest(
     'should show time range switch when saving if any tab is time based',
     async ({ pageObjects, page }) => {
-      const { discover } = pageObjects;
+      const { discover, unifiedTabs } = pageObjects;
 
       const expectTimeSwitchVisible = async () => {
         await openSaveDiscoverSessionModal(page);
@@ -61,105 +61,108 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 
       await spaceTest.step('case A: persisted DV is time-based, others are not', async () => {
         // Tab 2: ad hoc data view without time field
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
         await createDataViewFromSearchBar(page, {
           name: AD_HOC_WITHOUT_TIME_RANGE,
           adHoc: true,
           hasTimeField: false,
         });
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Tab 3: ES|QL non-time-based
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
         await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
         await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Visit the time-based tab and check
-        await discover.selectTabByIndex(0);
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
 
         // Switch away, refresh so time-based tab is unvisited, then check
-        await discover.selectTabByIndex(1);
+        await unifiedTabs.selectTab(1);
+        await waitForTabStateToPersist(page);
         await page.reload();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
       });
 
       await spaceTest.step('case B: ad hoc DV is time-based, others are not', async () => {
         await discover.clickNewSearch();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Tab 2: ad hoc data view with time field
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
         await createDataViewFromSearchBar(page, {
           name: AD_HOC_WITH_TIME_RANGE,
           adHoc: true,
           hasTimeField: true,
         });
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Tab 3: ES|QL non-time-based
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
         await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
         await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Visit the time-based tab and check
-        await discover.selectTabByIndex(1);
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
 
         // Switch away, refresh, then check
-        await discover.selectTabByIndex(0);
+        await unifiedTabs.selectTab(0);
+        await waitForTabStateToPersist(page);
         await page.reload();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
       });
 
       await spaceTest.step('case C: ES|QL tab is time-based, DV tabs are not', async () => {
         await discover.clickNewSearch();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
         await createDataViewFromSearchBar(page, {
           name: AD_HOC_WITHOUT_TIME_RANGE,
           adHoc: true,
           hasTimeField: false,
         });
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Tab 3: ES|QL time-based
-        await discover.createNewTab();
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
         await discover.codeEditor.setCodeEditorValue(
           'FROM logstash-* | SORT @timestamp DESC | LIMIT 10'
         );
         await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         // Visit ES|QL time-based tab and check
-        await discover.selectTabByIndex(2);
-        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
 
         // Switch away, refresh, then check
-        await discover.selectTabByIndex(1);
+        await unifiedTabs.selectTab(1);
+        await waitForTabStateToPersist(page);
         await page.reload();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await expectTimeSwitchVisible();
       });
     }
@@ -168,7 +171,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
   spaceTest(
     'should not show time range switch when no tab is time based',
     async ({ pageObjects, page }) => {
-      const { discover } = pageObjects;
+      const { discover, unifiedTabs } = pageObjects;
 
       const expectTimeSwitchMissing = async () => {
         await openSaveDiscoverSessionModal(page);
@@ -178,31 +181,32 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 
       // Tab 1: persisted data view without time field
       await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       // Tab 2: ad hoc data view without time field
-      await discover.createNewTab();
-      await discover.waitUntilSearchingHasFinished();
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
       await createDataViewFromSearchBar(page, {
         name: AD_HOC_WITHOUT_TIME_RANGE,
         adHoc: true,
         hasTimeField: false,
       });
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       // Tab 3: ES|QL non-time-based
-      await discover.createNewTab();
-      await discover.waitUntilSearchingHasFinished();
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
       await discover.selectTextBaseLang();
       await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
       await page.testSubj.click('querySubmitButton');
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await expectTimeSwitchMissing();
 
       // Refresh, then check again
+      await waitForTabStateToPersist(page);
       await page.reload();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
       await expectTimeSwitchMissing();
     }
   );
