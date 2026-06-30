@@ -9,7 +9,11 @@ import { uniq } from 'lodash';
 import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import pMap from 'p-map';
-import type { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import semverGt from 'semver/functions/gt';
 
 import { escapeKuery } from '@kbn/es-query';
