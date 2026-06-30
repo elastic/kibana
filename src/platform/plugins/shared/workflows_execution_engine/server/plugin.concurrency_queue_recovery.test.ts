@@ -28,15 +28,12 @@ jest.mock('elastic-apm-node', () => ({
 }));
 
 const mockMaybeDrainConcurrencyQueueAfterTerminal = jest.fn().mockResolvedValue(undefined);
-const mockReconcileConcurrencyQueueBacklog = jest.fn().mockResolvedValue(undefined);
 jest.mock('./concurrency/concurrency_queue_drainer', () => {
   const actual = jest.requireActual('./concurrency/concurrency_queue_drainer');
   return {
     ...actual,
     maybeDrainConcurrencyQueueAfterTerminal: (...args: unknown[]) =>
       mockMaybeDrainConcurrencyQueueAfterTerminal(...args),
-    reconcileConcurrencyQueueBacklog: (...args: unknown[]) =>
-      mockReconcileConcurrencyQueueBacklog(...args),
   };
 });
 
@@ -59,11 +56,7 @@ jest.mock('./execution_functions', () => {
 });
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
-import {
-  WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_ID,
-  WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE,
-  WORKFLOW_RUN_TASK_TYPE,
-} from './workflow_task_manager/types';
+import { WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
 
 describe('concurrency queue recovery wiring', () => {
   let taskDefinitions: Record<string, TaskRegisterDefinition>;
@@ -99,36 +92,12 @@ describe('concurrency queue recovery wiring', () => {
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
     });
 
-    return { plugin, coreSetup, coreStart, taskManagerSetup };
+    return { plugin };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockResolveInterruptedWorkflowRunTask.mockResolvedValue('task_complete');
-  });
-
-  it('registers the periodic reconcile task and schedules it on start', async () => {
-    const { plugin } = setupPlugin();
-    const coreStart = coreMock.createStart();
-    const taskManagerStart = taskManagerMock.createStart();
-    taskManagerStart.ensureScheduled.mockResolvedValue({} as never);
-
-    plugin.start(coreStart as never, {
-      taskManager: taskManagerStart,
-      actions: {} as never,
-      workflowsExtensions: {} as never,
-      licensing: licensingMock.createStart(),
-      cloud: {} as never,
-    });
-
-    expect(taskDefinitions[WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE]).toBeDefined();
-    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_ID,
-        taskType: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE,
-        schedule: { interval: '5m' },
-      })
-    );
   });
 
   it('workflow:run calls maybeDrain when interrupt recovery returns task_complete', async () => {
@@ -165,36 +134,6 @@ describe('concurrency queue recovery wiring', () => {
         workflowRunId,
         spaceId,
         fakeRequest,
-      })
-    );
-  });
-
-  it('reconcile task runner invokes reconcileConcurrencyQueueBacklog', async () => {
-    setupPlugin();
-
-    const runner = taskDefinitions[WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE]!.createTaskRunner({
-      taskInstance: {
-        id: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_ID,
-        taskType: WORKFLOW_DRAIN_CONCURRENCY_QUEUES_TASK_TYPE,
-        params: {},
-        state: {},
-        attempts: 1,
-        runAt: new Date('2024-01-01T10:00:00Z'),
-        scheduledAt: new Date('2024-01-01T09:55:00Z'),
-        startedAt: new Date('2024-01-01T10:00:00Z'),
-        retryAt: null,
-        status: TaskStatus.Running,
-        ownerId: 'kibana-instance-id',
-      } as ConcreteTaskInstance,
-      fakeRequest: {} as KibanaRequest,
-      abortController: new AbortController(),
-    });
-
-    await runner.run();
-
-    expect(mockReconcileConcurrencyQueueBacklog).toHaveBeenCalledWith(
-      expect.objectContaining({
-        request: {},
       })
     );
   });

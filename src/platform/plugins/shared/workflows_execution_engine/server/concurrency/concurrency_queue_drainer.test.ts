@@ -13,7 +13,6 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   drainConcurrencyQueueSlots,
   maybeDrainConcurrencyQueueAfterTerminal,
-  reconcileConcurrencyQueueBacklog,
 } from './concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -172,64 +171,6 @@ describe('drainConcurrencyQueueSlots', () => {
       expect.objectContaining({ id: 'workflow:exec-queued-1:manual' }),
       expect.any(Object)
     );
-  });
-});
-
-describe('reconcileConcurrencyQueueBacklog', () => {
-  const scheduleMock = jest.fn().mockResolvedValue(undefined);
-  const baseParams = {
-    taskManager: { schedule: scheduleMock } as unknown as TaskManagerStartContract,
-    logger: { debug: jest.fn(), warn: jest.fn() } as unknown as Logger,
-    request: {} as unknown as KibanaRequest,
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns early when no queue strategy groups have backlog', async () => {
-    const workflowExecutionRepository = {
-      findQueueStrategyGroupsWithBacklog: jest.fn().mockResolvedValue([]),
-    } as unknown as WorkflowExecutionRepository;
-
-    await reconcileConcurrencyQueueBacklog({
-      ...baseParams,
-      workflowExecutionRepository,
-    });
-
-    expect(scheduleMock).not.toHaveBeenCalled();
-  });
-
-  it('drains each discovered queue strategy group', async () => {
-    const workflowExecutionRepository = {
-      findQueueStrategyGroupsWithBacklog: jest.fn().mockResolvedValue([
-        {
-          spaceId: 'default',
-          concurrencyGroupKey: 'g1',
-          concurrencySettings: { key: 'g1', strategy: 'queue', max: 1 },
-        },
-      ]),
-      countExecutionsByConcurrencyGroupAndStatuses: jest
-        .fn()
-        .mockResolvedValueOnce(0)
-        .mockResolvedValue(1),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-q1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
-        id: 'exec-q1',
-        spaceId: 'default',
-        triggeredBy: 'manual',
-        status: ExecutionStatus.PENDING,
-      }),
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-    } as unknown as WorkflowExecutionRepository;
-
-    await reconcileConcurrencyQueueBacklog({
-      ...baseParams,
-      workflowExecutionRepository,
-    });
-
-    expect(scheduleMock).toHaveBeenCalledTimes(1);
   });
 });
 
