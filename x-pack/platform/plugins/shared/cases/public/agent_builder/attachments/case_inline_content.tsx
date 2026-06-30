@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -39,6 +40,7 @@ import {
   OBSERVABLES,
   SHOW_LESS,
   SHOW_MORE,
+  TAGS,
   UPDATED,
 } from './translations';
 
@@ -90,7 +92,8 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
     Boolean(data.created_at) ||
     Boolean(data.updated_at) ||
     hasObservablesCount ||
-    Boolean(data.connector_name);
+    Boolean(data.connector_name) ||
+    (data.tags != null && data.tags.length > 0);
 
   return (
     <EuiSplitPanel.Outer hasBorder data-test-subj="case-attachment-inline">
@@ -122,13 +125,13 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
       <EuiSplitPanel.Inner>
         <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
           {idLabel && (
-            <EuiFlexItem grow>
+            <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {idLabel}
               </EuiText>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={true}>
             <EuiTitle size="xs">
               <h3>{data.title}</h3>
             </EuiTitle>
@@ -189,6 +192,22 @@ const CaseInlineExpandedContent: React.FC<
       {data.description && (
         <EuiFlexItem>
           <DetailRow label={DESCRIPTION} value={data.description} />
+        </EuiFlexItem>
+      )}
+      {data.tags != null && data.tags.length > 0 && (
+        <EuiFlexItem>
+          <DetailRow
+            label={TAGS}
+            value={
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {data.tags.map((tag) => (
+                  <EuiFlexItem grow={false} key={tag}>
+                    <EuiBadge color="hollow">{tag}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            }
+          />
         </EuiFlexItem>
       )}
       {data.category && (

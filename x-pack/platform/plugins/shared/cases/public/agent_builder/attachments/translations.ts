@@ -33,6 +33,10 @@ export const CATEGORY = i18n.translate('xpack.cases.agentBuilder.case.category',
   defaultMessage: 'Category',
 });
 
+export const TAGS = i18n.translate('xpack.cases.agentBuilder.case.tags', {
+  defaultMessage: 'Tags',
+});
+
 export const CREATED = i18n.translate('xpack.cases.agentBuilder.case.created', {
   defaultMessage: 'Created',
 });
