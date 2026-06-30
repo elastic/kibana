@@ -6,6 +6,7 @@
  */
 
 import { AT_TIMESTAMP } from '@kbn/apm-types';
+import { isEqual } from 'lodash';
 
 const SOURCE_COLUMN = '_source';
 
@@ -37,4 +38,27 @@ export function getTraceLogsColumns({
   const configuredColumns = columns.filter((column) => column !== SOURCE_COLUMN);
 
   return configuredColumns.length > 0 ? configuredColumns : undefined;
+}
+
+export function shouldPersistTraceLogsColumnsToUrl({
+  emittedColumns,
+  defaultColumns,
+}: {
+  emittedColumns?: string[];
+  defaultColumns?: string[];
+}): boolean {
+  if (!emittedColumns || isDiscoverDefaultLogColumns(emittedColumns)) {
+    return false;
+  }
+
+  const settingColumns = getTraceLogsColumns({
+    urlColumns: undefined,
+    defaultColumns,
+  });
+
+  if (!settingColumns) {
+    return true;
+  }
+
+  return !isEqual(emittedColumns, settingColumns);
 }

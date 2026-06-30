@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTraceLogsColumns, isDiscoverDefaultLogColumns } from './get_trace_logs_columns';
+import { getTraceLogsColumns, isDiscoverDefaultLogColumns, shouldPersistTraceLogsColumnsToUrl } from './get_trace_logs_columns';
 
 describe('isDiscoverDefaultLogColumns', () => {
   it('returns true for empty or Summary-only columns', () => {
@@ -48,5 +48,43 @@ describe('getTraceLogsColumns', () => {
 
   it('returns undefined when neither URL nor setting provide columns', () => {
     expect(getTraceLogsColumns({ defaultColumns: [] })).toBeUndefined();
+  });
+});
+
+describe('shouldPersistTraceLogsColumnsToUrl', () => {
+  it('does not persist Discover defaults', () => {
+    expect(
+      shouldPersistTraceLogsColumnsToUrl({
+        emittedColumns: ['@timestamp', '_source'],
+        defaultColumns: ['message'],
+      })
+    ).toBe(false);
+  });
+
+  it('does not persist columns that match the setting only', () => {
+    expect(
+      shouldPersistTraceLogsColumnsToUrl({
+        emittedColumns: ['message'],
+        defaultColumns: ['message'],
+      })
+    ).toBe(false);
+  });
+
+  it('persists columns that differ from the setting', () => {
+    expect(
+      shouldPersistTraceLogsColumnsToUrl({
+        emittedColumns: ['message', 'log.level'],
+        defaultColumns: ['message'],
+      })
+    ).toBe(true);
+  });
+
+  it('persists custom columns when no setting is configured', () => {
+    expect(
+      shouldPersistTraceLogsColumnsToUrl({
+        emittedColumns: ['message'],
+        defaultColumns: [],
+      })
+    ).toBe(true);
   });
 });

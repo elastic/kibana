@@ -22,6 +22,7 @@ import { type UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fet
 import {
   getTraceLogsColumns,
   isDiscoverDefaultLogColumns,
+  shouldPersistTraceLogsColumnsToUrl,
 } from '../distribution/get_trace_logs_columns';
 
 const EMPTY_TRACE_LOGS_DEFAULT_COLUMNS: string[] = [];
@@ -269,6 +270,27 @@ function LogsTabContent({
     [defaultColumns]
   );
 
+  const handleLogsTableConfigChange = useCallback(
+    (config: SavedSearchTableConfig) => {
+      if (!onLogsTableConfigChange) {
+        return;
+      }
+
+      const columnsForUrl = shouldPersistTraceLogsColumnsToUrl({
+        emittedColumns: config.columns,
+        defaultColumns,
+      })
+        ? config.columns
+        : undefined;
+
+      onLogsTableConfigChange({
+        ...config,
+        columns: columnsForUrl,
+      });
+    },
+    [defaultColumns, onLogsTableConfigChange]
+  );
+
   const startTimestamp = Math.floor(timestamp / 1000);
   const endTimestamp = Math.ceil(startTimestamp + duration / 1000);
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
@@ -309,7 +331,7 @@ function LogsTabContent({
         enableDocumentViewer: true,
         enableFilters: false,
       }}
-      onTableConfigChange={onLogsTableConfigChange}
+      onTableConfigChange={handleLogsTableConfigChange}
       resolveColumnsOnChange={resolveColumnsOnChange}
     />
   ) : null;
