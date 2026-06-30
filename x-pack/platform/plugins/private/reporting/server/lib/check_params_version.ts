@@ -14,6 +14,6 @@ export function checkParamsVersion(jobParams: BaseParams, logger: Logger, defaul
     return jobParams.version;
   }
 
-  logger.warn(`No version provided in report job params. Defaulting to ${defaultVersion}`);
+  logger.debug(`No version provided in report job params. Defaulting to ${defaultVersion}`);
   return defaultVersion;
 }
