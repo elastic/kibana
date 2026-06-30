@@ -15,7 +15,7 @@ import type {
   PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../types';
-import { DATASET_VAR_NAME } from '../constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 
 import { PackagePolicyValidationError } from '../errors';
 
@@ -159,6 +159,17 @@ function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
   }, {} as SimplifiedPackagePolicyStreams);
 }
 
+export function syncDataStreamTypeFromVar(packagePolicy: NewPackagePolicy): void {
+  for (const input of packagePolicy.inputs) {
+    for (const stream of input.streams) {
+      const typeVal = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+      if (typeof typeVal === 'string' && typeVal && typeVal !== stream.data_stream.type) {
+        stream.data_stream.type = typeVal;
+      }
+    }
+  }
+}
+
 function assignVariables(
   userProvidedVars: SimplifiedVars,
   varsRecord?: PackagePolicyConfigRecord,
@@ -293,6 +304,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       }
     });
   });
+
+  syncDataStreamTypeFromVar(packagePolicy);
 
   return packagePolicy;
 }

@@ -2088,6 +2088,107 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     });
   });
 
+  describe('Data stream type', () => {
+    const validateDataStreamType = (type: string, packageType: string = 'input') => {
+      return validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: type,
+        },
+        {
+          name: 'data_stream.type',
+          type: 'text',
+        },
+        'data_stream.type',
+        parse,
+        packageType
+      );
+    };
+
+    it('should return null for valid types', () => {
+      expect(validateDataStreamType('logs')).toBeNull();
+      expect(validateDataStreamType('metrics')).toBeNull();
+      expect(validateDataStreamType('traces')).toBeNull();
+      expect(validateDataStreamType('synthetics')).toBeNull();
+      expect(validateDataStreamType('profiles')).toBeNull();
+    });
+
+    it('should return an error for the legacy profiling type', () => {
+      const res = validateDataStreamType('profiling');
+      expect(res).toEqual([
+        'Data stream type must be one of: logs, metrics, traces, synthetics, profiles',
+      ]);
+    });
+
+    it('should return an error for an unknown type', () => {
+      const res = validateDataStreamType('bogus');
+      expect(res).toEqual([
+        'Data stream type must be one of: logs, metrics, traces, synthetics, profiles',
+      ]);
+    });
+
+    it('should return null when value is undefined', () => {
+      const res = validatePackagePolicyConfig(
+        { type: 'text', value: undefined },
+        { name: 'data_stream.type', type: 'text' },
+        'data_stream.type',
+        parse,
+        'input'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should return null for non-input package type', () => {
+      expect(validateDataStreamType('bogus', 'integration')).toBeNull();
+    });
+  });
+
+  describe('additional_datastreams_permissions', () => {
+    const basePolicy: NewPackagePolicy = {
+      name: 'test-policy',
+      namespace: 'default',
+      enabled: true,
+      policy_ids: [],
+      inputs: [],
+      vars: {},
+    };
+    const minimalPackage = {
+      name: 'test-pkg',
+      title: 'Test',
+      version: '0.0.0',
+      description: '',
+      type: 'integration',
+      categories: [],
+      requirement: { kibana: { versions: '' }, elasticsearch: { versions: '' } },
+      format_version: '',
+      download: '',
+      path: '',
+      assets: { kibana: {} },
+      status: installationStatuses.NotInstalled,
+      data_streams: [],
+      policy_templates: [],
+    };
+
+    it('accepts profiles-* as an additional datastreams permission', () => {
+      const result = validatePackagePolicy(
+        { ...basePolicy, additional_datastreams_permissions: ['profiles-generic.otel-default'] },
+        minimalPackage as unknown as PackageInfo,
+        parse
+      );
+      expect(result.additional_datastreams_permissions).toBeNull();
+    });
+
+    it('rejects profiling-* as an additional datastreams permission', () => {
+      const result = validatePackagePolicy(
+        { ...basePolicy, additional_datastreams_permissions: ['profiling-events-default'] },
+        minimalPackage as unknown as PackageInfo,
+        parse
+      );
+      expect(result.additional_datastreams_permissions).not.toBeNull();
+      expect(result.additional_datastreams_permissions![0]).toContain('profiling-events-default');
+    });
+  });
+
   describe('URL validation', () => {
     it('should not return an error message for a valid URL', () => {
       const res = validatePackagePolicyConfig(
