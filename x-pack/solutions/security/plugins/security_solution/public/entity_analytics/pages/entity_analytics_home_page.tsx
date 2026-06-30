@@ -122,11 +122,7 @@ export const EntityAnalyticsHomePage = () => {
             }
           />
         ) : (
-          <EntityAnalyticsHomePageContent
-            hasMissingAnomalyPrivileges={
-              anomalyPrivilegesQuery.data?.has_read_permissions === false
-            }
-          />
+          <EntityAnalyticsHomePageContent />
         )}
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
@@ -134,11 +130,7 @@ export const EntityAnalyticsHomePage = () => {
   );
 };
 
-const EntityAnalyticsHomePageContent = ({
-  hasMissingAnomalyPrivileges,
-}: {
-  hasMissingAnomalyPrivileges: boolean;
-}) => {
+const EntityAnalyticsHomePageContent = () => {
   const { telemetry, agentBuilder, http } = useKibana().services;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
@@ -326,13 +318,11 @@ const EntityAnalyticsHomePageContent = ({
                 />
               </EuiPanel>
             </EuiFlexItem>
-            {!hasMissingAnomalyPrivileges && (
-              <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
-                <EuiPanel hasBorder>
-                  <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
+              <EuiPanel hasBorder>
+                <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
+              </EuiPanel>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
 
