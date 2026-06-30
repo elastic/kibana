@@ -17,9 +17,9 @@
 
 import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
-import type { Scenario } from '../..';
-import { getSynthtraceEnvironment } from '../..';
-import { withClient } from '../..';
+import type { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
