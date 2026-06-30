@@ -552,7 +552,7 @@ const getGapsOverviewRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/_gaps_overview',
   options: {
     access: 'internal',
-    summary: 'Get the structured gaps overview for the Nightshift page',
+    summary: 'Get the gaps overview for the Nightshift page',
   },
   security: {
     authz: {
@@ -566,7 +566,8 @@ const getGapsOverviewRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<
-    { available: false } | { available: true; data: Record<string, unknown>; updated_at: string }
+    | { available: false }
+    | { available: true; data: { title: string; content: string; updated_at: string } }
   > => {
     try {
       const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
@@ -578,12 +579,18 @@ const getGapsOverviewRoute = createServerRoute({
       if (!entry) {
         return { available: false };
       }
-      const match = entry.content.match(/^```gaps-data\n([\s\S]*?)\n```/);
-      if (!match) {
+      const content = entry.content.trim();
+      if (!content) {
         return { available: false };
       }
-      const data = JSON.parse(match[1]) as Record<string, unknown>;
-      return { available: true, data, updated_at: entry.updated_at };
+      return {
+        available: true,
+        data: {
+          title: entry.title,
+          content,
+          updated_at: entry.updated_at,
+        },
+      };
     } catch {
       return { available: false };
     }
