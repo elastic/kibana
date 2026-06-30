@@ -990,7 +990,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('paginates search results correctly', async () => {
           const theCase = await createCase(supertest, getPostCaseRequest());
 
-          await createComment({
+          const updatedCase = await createComment({
             supertest,
             caseId: theCase.id,
             params: postCommentUserReq,
@@ -1002,7 +1002,7 @@ export default ({ getService }: FtrProviderContext): void => {
               cases: [
                 {
                   id: theCase.id,
-                  version: theCase.version,
+                  version: updatedCase.version,
                   title: 'This is a cool title',
                 },
               ],
