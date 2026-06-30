@@ -22,12 +22,13 @@ import {
   ALERT_START,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_UUID,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_CONSUMER,
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import {
   RELATED_ACTIONS_COL,
   RELATED_ALERT_REASON,
@@ -39,7 +40,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
-import { useKibana } from '../../../utils/kibana_react';
+import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import type { GetObservabilityAlertsTableProp } from '../types';
@@ -85,10 +86,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     parentAlert,
   } = props;
 
-  const {
-    notifications: { toasts },
-  } = useKibana().services;
-  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
+  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
 
   const cellRenderers: AlertCellRenderers = {
     [ALERT_STATUS]: (value) => {
@@ -133,11 +131,19 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [ALERT_RULE_NAME]: (value) => {
       const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
       const ruleId = getAlertFieldValue(alert, ALERT_RULE_UUID);
+      const ruleTypeId = getAlertFieldValue(alert, ALERT_RULE_TYPE_ID);
+      const ruleConsumer = getAlertFieldValue(alert, ALERT_RULE_CONSUMER);
       const ruleLink = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : '';
+      // Rule read is authorized per rule type (and consumer), so gate the link on
+      // the specific rule behind this alert rather than a coarse "any rules" flag.
+      const canReadRule = authorizedToReadRuleType(
+        ruleTypeId,
+        ruleConsumer === '--' ? undefined : ruleConsumer
+      );
       return (
         <CellTooltip
           value={
-            authorizedToReadAnyRules && ruleLink ? (
+            canReadRule && ruleLink ? (
               <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
                 {value}
               </EuiLink>

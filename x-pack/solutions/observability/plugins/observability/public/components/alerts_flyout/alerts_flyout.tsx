@@ -22,11 +22,16 @@ import {
 } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
-import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import {
   getAlertFlyoutAriaLabel,
   ALERT_FLYOUT_DEFAULT_TITLE,
@@ -36,6 +41,7 @@ import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { paths } from '../../../common/locators/paths';
 import { AlertOverview } from '../alert_overview/alert_overview';
 import { useKibana } from '../../utils/kibana_react';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 
 type TabId = 'overview' | 'table';
@@ -58,13 +64,19 @@ export function AlertsFlyout({
   headerAppend,
 }: AlertsFlyoutProps) {
   const {
-    http,
     http: {
       basePath: { prepend },
     },
-    notifications: { toasts },
   } = useKibana().services;
-  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({ http, toasts });
+  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+
+  // Rule read is authorized per rule type (and consumer), so gate the "View rule"
+  // link on the specific rule behind this alert rather than a coarse "any rules" flag.
+  const alertRuleTypeId = alert?.[ALERT_RULE_TYPE_ID]?.[0] as string | undefined;
+  const alertConsumer = alert?.[ALERT_RULE_CONSUMER]?.[0] as string | undefined;
+  const canReadAlertRule = Boolean(
+    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  );
 
   const parsedAlert = alert ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
 
@@ -166,7 +178,7 @@ export function AlertsFlyout({
             <EuiText size="s" color="subdued">
               {getAlertSubtitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)}
             </EuiText>
-            {authorizedToReadAnyRules && alert?.[ALERT_RULE_UUID] && (
+            {canReadAlertRule && alert?.[ALERT_RULE_UUID] && (
               <EuiText size="s">
                 <EuiLink
                   data-test-subj="o11yAlertFlyoutRuleLink"

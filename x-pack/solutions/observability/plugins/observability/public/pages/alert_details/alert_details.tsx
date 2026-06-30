@@ -36,7 +36,6 @@ import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
@@ -51,6 +50,7 @@ import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
@@ -118,10 +118,7 @@ export function AlertDetails() {
     ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
     : undefined;
 
-  const { authorizedToReadRuleType } = useGetRuleTypesPermissions({
-    http,
-    toasts: services.notifications.toasts,
-  });
+  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
 
   // Rule read authorization is enforced per rule type (and consumer), so we
   // determine access for the specific rule behind this alert rather than relying

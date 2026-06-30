@@ -143,7 +143,10 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: jest.fn(() => ({ authorizedToReadAnyRules: true })),
+  useGetRuleTypesPermissions: jest.fn(() => ({
+    authorizedToReadAnyRules: true,
+    authorizedToReadRuleType: () => true,
+  })),
 }));
 
 const ruleDescriptions = [

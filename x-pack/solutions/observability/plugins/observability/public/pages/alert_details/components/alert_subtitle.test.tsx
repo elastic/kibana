@@ -15,7 +15,10 @@ import { AlertSubtitle } from './alert_subtitle';
 
 jest.mock('../../../utils/kibana_react');
 
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({ authorizedToReadAnyRules: true }));
+const mockAuthorizedToReadRuleType = jest.fn(() => true);
+const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+  authorizedToReadRuleType: mockAuthorizedToReadRuleType,
+}));
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
   useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
@@ -43,7 +46,10 @@ describe('Alert subtitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
-    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: true });
+    mockAuthorizedToReadRuleType.mockReturnValue(true);
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: mockAuthorizedToReadRuleType,
+    });
   });
 
   it('should show the rule type breached text', async () => {
@@ -59,8 +65,14 @@ describe('Alert subtitle', () => {
     expect(result.getByTestId('o11yAlertRuleLink')).toBeInTheDocument();
   });
 
-  it('should NOT show a "View rule" link when not authorized to read rules', async () => {
-    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: false });
+  it('should check read authorization for the alert specific rule type and consumer', async () => {
+    renderComponent({ alert });
+
+    expect(mockAuthorizedToReadRuleType).toHaveBeenCalledWith('logs.alert.document.count', 'logs');
+  });
+
+  it('should NOT show a "View rule" link when not authorized to read the rule type', async () => {
+    mockAuthorizedToReadRuleType.mockReturnValue(false);
 
     const result = renderComponent({ alert });
 
