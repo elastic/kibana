@@ -62,10 +62,11 @@ export const cancelWorkflow = async ({
     workflowExecution.status === ExecutionStatus.QUEUED;
 
   const concurrencySettings = workflowExecution.workflowDefinition?.settings?.concurrency;
+  const concurrencyGroupKey = workflowExecution.concurrencyGroupKey;
   const shouldRefreshBeforeQueueDrain =
     freesConcurrencySlotImmediately &&
     concurrencySettings?.strategy === 'queue' &&
-    workflowExecution.concurrencyGroupKey &&
+    concurrencyGroupKey &&
     schedulingRequest;
 
   await workflowExecutionRepository.updateWorkflowExecution(
@@ -85,14 +86,14 @@ export const cancelWorkflow = async ({
     fakeRequest: schedulingRequest,
   });
 
-  if (shouldRefreshBeforeQueueDrain && concurrencySettings) {
+  if (shouldRefreshBeforeQueueDrain && concurrencySettings && concurrencyGroupKey) {
     try {
       await drainConcurrencyQueueSlots({
         workflowExecutionRepository,
         taskManager,
         logger,
         spaceId: workflowExecution.spaceId,
-        concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+        concurrencyGroupKey,
         concurrencySettings,
         request: schedulingRequest,
       });
