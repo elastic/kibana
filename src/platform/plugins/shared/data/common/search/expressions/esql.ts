@@ -313,7 +313,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
         const inputQuery = ignoreGlobalFilters ? [] : input.query || [];
         params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
-
       }
 
       let startTime = Date.now();
