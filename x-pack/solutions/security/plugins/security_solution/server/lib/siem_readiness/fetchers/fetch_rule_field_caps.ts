@@ -102,8 +102,7 @@ export const fetchRuleFieldCaps = async ({
     }
 
     for (const ruleId of ruleIds) {
-      const requiredFieldNames =
-        ruleRequiredFields.get(ruleId)?.map((f) => f.name) ?? [];
+      const requiredFieldNames = ruleRequiredFields.get(ruleId)?.map((f) => f.name) ?? [];
       const missingFields = requiredFieldNames.filter((f) => !presentFields.has(f));
 
       if (missingFields.length > 0) {

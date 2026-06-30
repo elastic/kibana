@@ -76,10 +76,7 @@ describe('fetchRuleFieldCaps', () => {
   describe('deduplication — rules sharing the same (indexPattern, fieldSet)', () => {
     it('makes ONE fieldCaps call for two rules with identical indices and required fields', async () => {
       const indexToRules: IndexToRulesMap = new Map([
-        [
-          'logs-endpoint-000001',
-          [makeRule('rule-1', 'Rule 1'), makeRule('rule-2', 'Rule 2')],
-        ],
+        ['logs-endpoint-000001', [makeRule('rule-1', 'Rule 1'), makeRule('rule-2', 'Rule 2')]],
       ]);
       const ruleRequiredFields = new Map<string, RequiredField[]>([
         ['rule-1', [makeRequiredField('process.command_line'), makeRequiredField('user.name')]],
@@ -100,10 +97,7 @@ describe('fetchRuleFieldCaps', () => {
 
     it('makes TWO fieldCaps calls for rules with different field sets', async () => {
       const indexToRules: IndexToRulesMap = new Map([
-        [
-          'logs-endpoint-000001',
-          [makeRule('rule-1', 'Rule 1'), makeRule('rule-2', 'Rule 2')],
-        ],
+        ['logs-endpoint-000001', [makeRule('rule-1', 'Rule 1'), makeRule('rule-2', 'Rule 2')]],
       ]);
       const ruleRequiredFields = new Map<string, RequiredField[]>([
         ['rule-1', [makeRequiredField('process.command_line')]],
