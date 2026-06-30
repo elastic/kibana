@@ -270,6 +270,7 @@ describe('NavigationCustomizationService', () => {
         NAV_CUSTOMIZATION_EVENT_TYPE,
         expect.objectContaining({
           space_type: 'es',
+          action: 'default_observed',
           did_customize: false,
           visible_item_ids: ['a', 'b'],
           hidden_item_ids: [],
@@ -323,7 +324,7 @@ describe('NavigationCustomizationService', () => {
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
-        expect.objectContaining({ did_customize: false })
+        expect.objectContaining({ action: 'default_observed', did_customize: false })
       );
     });
 
@@ -394,7 +395,7 @@ describe('NavigationCustomizationService', () => {
       jest.clearAllMocks();
     });
 
-    it('onReset does not write to the server', async () => {
+    it('onReset does not write to User Storage', async () => {
       const { core, callbacks } = await openModalGetCallbacks();
       await callbacks.onReset();
       expect(core.userStorage.remove).not.toHaveBeenCalled();
@@ -423,7 +424,7 @@ describe('NavigationCustomizationService', () => {
       expect(core.userStorage.set).not.toHaveBeenCalled();
     });
 
-    it('Cancel after Reset leaves the server untouched and restores the live nav', async () => {
+    it('Cancel after Reset leaves User Storage untouched and restores the live nav', async () => {
       const saved: NavigationCustomization = { moves: [{ id: 'b', afterId: 'a' }], hidden: [] };
       const { core, chrome, callbacks } = await openModalGetCallbacks(saved);
       await callbacks.onReset();
@@ -483,6 +484,7 @@ describe('NavigationCustomizationService', () => {
         NAV_CUSTOMIZATION_EVENT_TYPE,
         expect.objectContaining({
           space_type: 'es',
+          action: 'default_saved',
           did_customize: false,
           visible_item_ids: ['a', 'b'],
           hidden_item_ids: [],
@@ -499,7 +501,11 @@ describe('NavigationCustomizationService', () => {
 
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
-        expect.objectContaining({ did_customize: true, visible_item_ids: ['b', 'a'] })
+        expect.objectContaining({
+          action: 'customization_saved',
+          did_customize: true,
+          visible_item_ids: ['b', 'a'],
+        })
       );
     });
 
@@ -513,6 +519,7 @@ describe('NavigationCustomizationService', () => {
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
         expect.objectContaining({
+          action: 'customization_saved',
           did_customize: true,
           visible_item_ids: ['a'],
           hidden_item_ids: ['b'],

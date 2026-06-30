@@ -148,6 +148,7 @@ export class NavigationCustomizationService {
               .then(() => {
                 reportNavigationCustomization(core.analytics, {
                   space_type: solution,
+                  action: 'default_observed',
                   did_customize: false,
                   ...navProps,
                 });
@@ -224,6 +225,7 @@ export class NavigationCustomizationService {
               const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
               reportNavigationCustomization(core.analytics, {
                 space_type: this.activeSolution,
+                action: didCustomize ? 'customization_saved' : 'default_saved',
                 did_customize: didCustomize,
                 ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),
               });

@@ -12,8 +12,11 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 
 export const NAV_CUSTOMIZATION_EVENT_TYPE = 'navigation_customization';
 
+export type NavCustomizationAction = 'default_observed' | 'customization_saved' | 'default_saved';
+
 export interface NavCustomizationEventProps {
   space_type: SolutionId;
+  action: NavCustomizationAction;
   did_customize: boolean;
   /** Visible nav item IDs in display order (array index = position). */
   visible_item_ids: string[];
@@ -42,14 +45,21 @@ export function registerNavigationCustomizationEvents(analytics: AnalyticsServic
         type: 'keyword',
         _meta: {
           description:
-            'The solution type of the space in which the navigation was customized (one of the Kibana solution/project ids, e.g. es, oblt, security, workplaceai, vectordb).',
+            'The solution type of the active space (one of the Kibana solution/project ids, e.g. es, oblt, security, workplaceai, vectordb).',
+        },
+      },
+      action: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'What caused the event: default_observed for the deduped baseline, customization_saved for a persisted non-default save, or default_saved for a persisted reset/default save.',
         },
       },
       did_customize: {
         type: 'boolean',
         _meta: {
           description:
-            'True when the user applied a non-default arrangement. False when the layout is the default — either the baseline detected at setup, or a save that produced the default (e.g. "Reset to default").',
+            'True for a persisted non-default customization. False for default-observed and default-saved events.',
         },
       },
       visible_item_ids: {
