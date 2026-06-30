@@ -179,7 +179,9 @@ describe('findMutedAlertInstancesRoute', () => {
         page: 1,
         per_page: 10,
         total: 1,
-        data: [{ id: 'rule-1', muted_alert_instance_ids: ['instance-1'], snoozed_alert_instances: [] }],
+        data: [
+          { id: 'rule-1', muted_alert_instance_ids: ['instance-1'], snoozed_alert_instances: [] },
+        ],
       },
     });
   });
