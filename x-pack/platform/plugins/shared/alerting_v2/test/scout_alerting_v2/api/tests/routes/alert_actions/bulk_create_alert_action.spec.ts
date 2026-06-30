@@ -8,12 +8,12 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
   BULK_ALERT_ACTION_URL,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -22,7 +22,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
@@ -294,7 +294,9 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_READ_ROLE
+      );
 
       const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },

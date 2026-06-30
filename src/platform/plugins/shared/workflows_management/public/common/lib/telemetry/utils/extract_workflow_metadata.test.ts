@@ -82,6 +82,7 @@ describe('extractWorkflowMetadata', () => {
     inputCount: 0,
     constCount: 0,
     triggerCount: 0,
+    hasCustomEventTrigger: false,
     hasTriggerConditions: false,
     hasTriggerWorkflowEventsIgnore: false,
     hasTriggerWorkflowEventsAllow: false,
@@ -108,6 +109,7 @@ describe('extractWorkflowMetadata', () => {
         inputCount: 0,
         constCount: 0,
         triggerCount: 0,
+        hasCustomEventTrigger: false,
         hasTriggerConditions: false,
         hasTriggerWorkflowEventsIgnore: false,
         hasTriggerWorkflowEventsAllow: false,
@@ -470,6 +472,20 @@ describe('extractWorkflowMetadata', () => {
       });
       expect(result.triggerTypes).toEqual(['scheduled']);
       expect(result.triggerCount).toBe(2);
+    });
+
+    it('sets hasCustomEventTrigger when an extension trigger type is present', () => {
+      const result = metadata({
+        triggers: [{ type: 'scheduled' }, { type: 'cases.created' }],
+      });
+      expect(result.hasCustomEventTrigger).toBe(true);
+    });
+
+    it('sets hasCustomEventTrigger false for built-in triggers only', () => {
+      const result = metadata({
+        triggers: [{ type: 'alert' }, { type: 'manual' }],
+      });
+      expect(result.hasCustomEventTrigger).toBe(false);
     });
   });
 

@@ -201,6 +201,33 @@ describe('useDimensionsWipe', () => {
       expect(onSelectedDimensionsChange).not.toHaveBeenCalled();
       expect(onBreakdownFieldChange).not.toHaveBeenCalled();
     });
+
+    it('does not act when allDimensions is empty (e.g. fresh mount on a duplicated Discover tab)', () => {
+      // Regression: on a duplicated tab `selectedDimensions` is restored
+      // from `uiState.metricsGrid` BEFORE the new tab's METRICS_INFO fetch
+      // starts, so `isLoading` is briefly false with `allDimensions=[]`.
+      // Without this gate the hook would prune the restored selection
+      // against the empty universe and push `breakdownField=undefined`
+      // back to Discover.
+      const onSelectedDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+      renderHook(() =>
+        useDimensionsWipe(
+          baseParams({
+            selectedDimensions: [dim('host.name')],
+            allDimensions: [],
+            isLoading: false,
+            hasError: false,
+            breakdownField: 'host.name',
+            onSelectedDimensionsChange,
+            onBreakdownFieldChange,
+          })
+        )
+      );
+
+      expect(onSelectedDimensionsChange).not.toHaveBeenCalled();
+      expect(onBreakdownFieldChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('reactivity', () => {

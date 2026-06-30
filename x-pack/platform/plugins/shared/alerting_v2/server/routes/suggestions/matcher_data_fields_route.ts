@@ -30,7 +30,7 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {

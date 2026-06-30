@@ -54,7 +54,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             className="lnsPanelFeatureList_button"
             color={'text'}
             onClick={onButtonClick}
-            title={iconTitle}
+            aria-label={iconTitle}
             size="s"
             css={css`
               color: transparent;

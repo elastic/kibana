@@ -42,6 +42,7 @@ import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
+import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
@@ -240,7 +241,6 @@ export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SE
 export function getSharedServerlessParams(nameSuffix = ''): string[] {
   const n1 = `es01${nameSuffix}`;
   const n2 = `es02${nameSuffix}`;
-  const n3 = `es03${nameSuffix}`;
 
   return [
     'run',
@@ -258,7 +258,7 @@ export function getSharedServerlessParams(nameSuffix = ''): string[] {
     'path.repo=/objectstore',
 
     '--env',
-    `cluster.initial_master_nodes=${n1},${n2},${n3}`,
+    `cluster.initial_master_nodes=${n1},${n2}`,
 
     '--env',
     'stateless.enabled=true',
@@ -354,7 +354,6 @@ export function getServerlessNodes(
 ): Array<Omit<ServerlessEsNodeArgs, 'image'>> {
   const n1 = `es01${nameSuffix}`;
   const n2 = `es02${nameSuffix}`;
-  const n3 = `es03${nameSuffix}`;
 
   return [
     {
@@ -364,10 +363,10 @@ export function getServerlessNodes(
         `127.0.0.1:${9300 + portOffset}:${9300 + portOffset}`,
 
         '--env',
-        `discovery.seed_hosts=${n2},${n3}`,
+        `discovery.seed_hosts=${n2}`,
 
         '--env',
-        'node.roles=["master","remote_cluster_client","ingest","index"]',
+        'node.roles=["master","remote_cluster_client","ingest","index","ml","transform"]',
       ],
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
@@ -385,7 +384,7 @@ export function getServerlessNodes(
         `127.0.0.1:${9302 + portOffset}:${9302 + portOffset}`,
 
         '--env',
-        `discovery.seed_hosts=${n1},${n3}`,
+        `discovery.seed_hosts=${n1}`,
 
         '--env',
         'node.roles=["master","remote_cluster_client","search"]',
@@ -393,22 +392,6 @@ export function getServerlessNodes(
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
         ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-      ],
-    },
-    {
-      name: n3,
-      params: [
-        '-p',
-        `127.0.0.1:${9203 + portOffset}:${9203 + portOffset}`,
-
-        '-p',
-        `127.0.0.1:${9303 + portOffset}:${9303 + portOffset}`,
-
-        '--env',
-        `discovery.seed_hosts=${n1},${n2}`,
-
-        '--env',
-        'node.roles=["master","remote_cluster_client","ml","transform"]',
       ],
     },
   ];
@@ -512,8 +495,25 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
  */
+export async function isDockerImageAvailableLocally(image: string) {
+  try {
+    const { stdout } = await execa('docker', ['images', '-q', image]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
+
+  if (shouldPreferCachedSnapshot() && (await isDockerImageAvailableLocally(image))) {
+    log.info(
+      'prefer-cached enabled, skipping pull of locally available image %s',
+      chalk.bold(image)
+    );
+    return;
+  }
 
   await pRetry(
     async () => {
@@ -1486,9 +1486,32 @@ async function runDockerContainerInSnapshotMode(
         throw createCliError(`Invalid sha format in manifest: ${sha}`);
       }
 
-      tag = `${version}-SNAPSHOT-${sha}`;
-      repo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
-      log.info(`Using commit-pinned docker tag from manifest: ${repo}:${tag}`);
+      const commitTag = `${version}-SNAPSHOT-${sha}`;
+      const commitRepo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
+      const versionTag = `${version}-SNAPSHOT`;
+
+      if (shouldPreferCachedSnapshot()) {
+        if (await isDockerImageAvailableLocally(`${commitRepo}:${commitTag}`)) {
+          tag = commitTag;
+          repo = commitRepo;
+        } else if (await isDockerImageAvailableLocally(`${commitRepo}:${versionTag}`)) {
+          tag = versionTag;
+          repo = commitRepo;
+          log.info(`Using locally cached docker image ${repo}:${tag}`);
+        } else if (await isDockerImageAvailableLocally(`${DOCKER_REPO}:${versionTag}`)) {
+          tag = versionTag;
+          repo = DOCKER_REPO;
+          log.info(`Using locally cached docker image ${repo}:${tag}`);
+        } else {
+          tag = commitTag;
+          repo = commitRepo;
+        }
+      } else {
+        tag = commitTag;
+        repo = commitRepo;
+      }
+
+      log.info(`Using docker image from manifest: ${repo}:${tag}`);
     } else {
       log.warning(
         `Failed to fetch ES_SNAPSHOT_MANIFEST (${resp.status}), falling back to default image`

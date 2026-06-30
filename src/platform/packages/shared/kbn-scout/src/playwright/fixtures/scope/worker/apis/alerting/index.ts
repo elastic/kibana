@@ -248,7 +248,7 @@ export const getAlertingApiHelper = (
           async () => {
             await kbnClient.request({
               method: 'DELETE',
-              path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}`,
+              path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}`,
               retries: 0,
               ignoreErrors: [204, 404],
             });
@@ -720,7 +720,7 @@ export const getAlertingApiHelper = (
               rulesData.data.map(async (rule: any) => {
                 await kbnClient.request({
                   method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/alerting/rule/${rule.id}`,
+                  path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${rule.id}`,
                   retries: 3,
                   ignoreErrors: [404],
                 });
@@ -743,14 +743,20 @@ export const getAlertingApiHelper = (
 
             const connectorsData = connectors.data as any;
             await Promise.all(
-              connectorsData.map(async (connector: any) => {
-                await kbnClient.request({
-                  method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
-                  retries: 3,
-                  ignoreErrors: [404],
-                });
-              })
+              connectorsData
+                // Preconfigured and system connectors cannot be deleted via the API
+                // (the DELETE endpoint returns 400), so only remove user-created ones.
+                .filter(
+                  (connector: any) => !connector.is_preconfigured && !connector.is_system_action
+                )
+                .map(async (connector: any) => {
+                  await kbnClient.request({
+                    method: 'DELETE',
+                    path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
+                    retries: 3,
+                    ignoreErrors: [404],
+                  });
+                })
             );
           }
         );
@@ -774,7 +780,7 @@ export const getAlertingApiHelper = (
               rulesData.data.map(async (rule: any) => {
                 await kbnClient.request({
                   method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/alerting/rule/${rule.id}`,
+                  path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${rule.id}`,
                   retries: 3,
                   ignoreErrors: [404],
                 });

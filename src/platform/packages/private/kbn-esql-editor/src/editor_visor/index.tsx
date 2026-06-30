@@ -13,8 +13,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  useEuiTheme,
+  EuiToolTip,
   type EuiComboBoxOptionOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -39,6 +40,8 @@ export interface QuickSearchVisorProps {
   query: string;
   // Handling smaller space for the visor
   isSpaceReduced?: boolean;
+  // Whether the editor is rendered inline (controls placeholder length)
+  isInline?: boolean;
   // Whether the visor is visible
   isVisible: boolean;
   // Callback when the query is updated and submitted
@@ -52,8 +55,16 @@ export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlacehol
   defaultMessage: 'Filter your data using KQL',
 });
 
+const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
+  defaultMessage: 'Filter using KQL',
+});
+
 const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
   defaultMessage: 'Describe the query you want in plain language',
+});
+
+const nlPlaceholderShort = i18n.translate('esqlEditor.visor.nlPlaceholderShort', {
+  defaultMessage: 'Describe in plain language',
 });
 
 const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
@@ -67,6 +78,7 @@ const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip',
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
+  isInline,
   isVisible,
   onUpdateAndSubmitQuery,
   onToggleVisor,
@@ -76,6 +88,7 @@ export function QuickSearchVisor({
   const { kql, core, data } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
+  const useShortPlaceholder = useMemo(() => isInline || isSpaceReduced, [isInline, isSpaceReduced]);
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
@@ -327,7 +340,7 @@ export function QuickSearchVisor({
                       language: 'kuery',
                     }}
                     disableAutoFocus={false}
-                    placeholder={searchPlaceholder}
+                    placeholder={useShortPlaceholder ? searchPlaceholderShort : searchPlaceholder}
                     onChange={(newQuery) => {
                       onKqlValueChange(newQuery.query as string);
                     }}
@@ -348,7 +361,7 @@ export function QuickSearchVisor({
               ) : (
                 <NLInput
                   value={nlValue}
-                  placeholder={nlPlaceholder}
+                  placeholder={useShortPlaceholder ? nlPlaceholderShort : nlPlaceholder}
                   disabled={!isVisible || isNlLoading}
                   onChange={setNlValue}
                   onSubmit={onNlSubmit}
@@ -360,16 +373,18 @@ export function QuickSearchVisor({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          size="s"
-          iconSize="m"
-          onClick={onToggleVisor}
-          iconType="cross"
-          aria-label={closeButtonAriaLabel}
-          css={styles.closeButton}
-        />
+        <EuiToolTip content={closeButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            display="base"
+            size="s"
+            iconSize="m"
+            onClick={onToggleVisor}
+            iconType="cross"
+            aria-label={closeButtonAriaLabel}
+            css={styles.closeButton}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

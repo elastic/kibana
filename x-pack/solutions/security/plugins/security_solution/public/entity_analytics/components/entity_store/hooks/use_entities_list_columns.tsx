@@ -6,7 +6,7 @@
  */
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiButtonIcon, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -86,17 +86,28 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         }
 
         return (
-          <EuiButtonIcon
-            iconType="maximize"
-            onClick={onClick}
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
               {
                 defaultMessage: 'Preview entity with name {name}',
                 values: { name: value },
               }
             )}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="maximize"
+              onClick={onClick}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
+                {
+                  defaultMessage: 'Preview entity with name {name}',
+                  values: { name: value },
+                }
+              )}
+            />
+          </EuiToolTip>
         );
       },
       width: '5%',

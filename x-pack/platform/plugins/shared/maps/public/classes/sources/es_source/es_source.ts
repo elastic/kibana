@@ -407,7 +407,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       return null;
     }
 
-    return indexPattern.getFormatterForField(fieldFromIndexPattern).getConverterFor('text');
+    const fieldFormat = indexPattern.getFormatterForField(fieldFromIndexPattern);
+    return (value) => fieldFormat.convertToText(value);
   }
 
   async loadStylePropsMeta({

@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-security-server-internal'
   - '@kbn/core-security-server-mocks'
+  - '@kbn/core-spaces-common'
   - '@kbn/cps-server-utils'
   - '@kbn/safer-lodash-set'
 tags:

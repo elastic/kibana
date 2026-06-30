@@ -18,12 +18,12 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { buildActionPolicyDestinations } from '../../../../common/builders';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -32,7 +32,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -85,7 +87,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       name: 'minimal-policy',
       description: 'minimal-policy description',
       destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
-      type: 'global',
       enabled: true,
       snoozedUntil: null,
       matcher: null,
@@ -148,37 +149,24 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
   });
 
-  apiTest('type: defaults to "global" when omitted', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ name: 'default-type-policy' }),
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.type).toBe('global');
-  });
-
   apiTest(
-    'type: creates with type:"single_rule" linked to an existing rule',
+    'matcher: scopes a policy to a single rule via a rule.id matcher',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-single-policy' } })
+        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy' } })
       );
 
+      const matcher = `rule.id: "${rule.id}"`;
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          name: 'single-rule-policy',
-          type: 'single_rule',
-          ruleId: rule.id,
+          name: 'rule-scoped-policy',
+          matcher,
         }),
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body).toMatchObject({
-        type: 'single_rule',
-        ruleId: rule.id,
-      });
+      expect(response.body).toMatchObject({ matcher });
     }
   );
 
@@ -418,36 +406,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('validation: rejects unknown type enum value', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        // @ts-expect-error
-        type: 'group_of_rules',
-      }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects type:"single_rule" without ruleId', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ type: 'single_rule' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects type:"global" with ruleId', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ type: 'global', ruleId: 'some-rule-id' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
   apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
@@ -460,7 +418,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
 
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },

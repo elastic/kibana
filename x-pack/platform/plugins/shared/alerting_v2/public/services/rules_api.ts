@@ -37,8 +37,10 @@ export type { BulkOperationParams, BulkOperationResponse };
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listTags() {
-    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`);
+  public async listTags(params: { filter?: string } = {}) {
+    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`, {
+      query: { filter: params.filter },
+    });
   }
 
   public async listRules(params: ListRulesParams) {

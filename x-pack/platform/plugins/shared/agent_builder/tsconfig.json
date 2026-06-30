@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/**/*.json",
     "test/scout_agent_builder/**/*",
     "test/scout_agent_builder_smoke/**/*",
     "test/scout_agent_builder_shared/**/*"
@@ -81,7 +82,7 @@
     "@kbn/doc-links",
     "@kbn/ui-actions-plugin",
     "@kbn/workflows",
-    "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
@@ -137,6 +138,7 @@
     "@kbn/test",
     "@kbn/test-es-server",
     "@kbn/react-kibana-mount",
-    "@kbn/telemetry"
+    "@kbn/user-profile-components",
+    "@kbn/telemetry",
   ]
 }

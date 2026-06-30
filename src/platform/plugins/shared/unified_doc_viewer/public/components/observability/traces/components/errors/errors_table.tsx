@@ -17,7 +17,7 @@
  */
 
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { forwardRef, useMemo } from 'react';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
@@ -102,30 +102,37 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
             description={sectionDescription}
             actions={actions}
           >
-            <EuiSpacer size="s" />
             {error ? (
-              <EuiText color="subdued">
-                {i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.error',
+              <EuiCallOut
+                announceOnMount
+                data-test-subj="unifiedDocViewerErrorsFetchErrorCallout"
+                color="warning"
+                iconType="warning"
+                size="s"
+                title={i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.error',
                   {
-                    defaultMessage: 'An error happened when trying to fetch data. Please try again',
+                    defaultMessage: "Couldn't load errors for this trace. Please try again later.",
                   }
                 )}
-              </EuiText>
+              />
             ) : (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiInMemoryTable
-                    tableCaption={sectionDescription}
-                    responsiveBreakpoint={false}
-                    items={response.traceErrors}
-                    columns={columns}
-                    pagination={{ showPerPageOptions: false, pageSize: 5 }}
-                    sorting={sorting}
-                    compressed
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiInMemoryTable
+                      tableCaption={sectionDescription}
+                      responsiveBreakpoint={false}
+                      items={response.traceErrors}
+                      columns={columns}
+                      pagination={{ showPerPageOptions: false, pageSize: 5 }}
+                      sorting={sorting}
+                      compressed
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
             )}
           </ContentFrameworkSection>
         )}

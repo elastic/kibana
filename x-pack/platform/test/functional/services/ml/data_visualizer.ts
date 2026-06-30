@@ -64,7 +64,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
 
     async navigateToDataViewSelection() {
       await testSubjects.click('mlDataVisualizerSelectIndexButton');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async navigateToFileUpload() {

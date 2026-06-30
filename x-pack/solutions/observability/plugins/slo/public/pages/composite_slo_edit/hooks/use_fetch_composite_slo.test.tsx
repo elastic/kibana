@@ -24,7 +24,7 @@ const compositeSloResponse = {
   description: 'desc',
   members: [
     {
-      id: 'slo-1',
+      sloId: 'slo-1',
       name: 'Availability SLO',
       instanceId: 'FEMALE',
       weight: 2,
@@ -32,7 +32,7 @@ const compositeSloResponse = {
       sliValue: 0.99,
     },
     {
-      id: 'slo-2',
+      sloId: 'slo-2',
       name: 'Latency SLO',
       weight: 1,
       normalisedWeight: 0.33,
@@ -206,7 +206,7 @@ describe('useFetchCompositeSlo', () => {
       ...compositeSloResponse,
       members: [
         {
-          id: 'slo-1',
+          sloId: 'slo-1',
           name: 'Availability SLO',
           instanceId: 'FEMALE',
           weight: 1,
@@ -214,7 +214,7 @@ describe('useFetchCompositeSlo', () => {
           sliValue: 0.99,
         },
         {
-          id: 'slo-1',
+          sloId: 'slo-1',
           name: 'Availability SLO',
           instanceId: 'MALE',
           weight: 1,

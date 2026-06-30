@@ -12,8 +12,8 @@ import { render, screen } from '@testing-library/react';
 import { SimilarErrors } from '.';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { fieldConstants } from '@kbn/discover-utils';
-import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import { OPEN_IN_DISCOVER_LABEL } from '../../../observability/traces/common/constants';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 
 const mockGenerateDiscoverLink = jest.fn((query) => (query ? 'http://discover/link' : undefined));
 

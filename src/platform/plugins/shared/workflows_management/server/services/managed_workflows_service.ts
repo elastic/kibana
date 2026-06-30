@@ -9,7 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -20,22 +20,23 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
+  ManagedWorkflowStatus,
+  ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
+import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
+import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
-const VERSION_CONFLICT_STATUS = 409;
-
-const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
-};
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -45,6 +46,10 @@ interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   logger: Logger;
+  audit?: Pick<
+    WorkflowManagementAuditLog,
+    'logWorkflowCreated' | 'logWorkflowUpdated' | 'logWorkflowDeleted'
+  >;
 }
 
 export class ManagedWorkflowsService {
@@ -95,7 +100,10 @@ export class ManagedWorkflowsService {
       includeDeleted: true,
     });
 
-    const orphanIdsBySpace = new Map<string, string[]>();
+    const orphanWorkflowsBySpace = new Map<
+      string,
+      Array<{ id: string; source: WorkflowProperties }>
+    >();
     for (const { id, source } of existingManagedDocs) {
       const owner = source.managedBy ?? undefined;
       const definitionId = source.originManagedWorkflowId ?? undefined;
@@ -108,26 +116,41 @@ export class ManagedWorkflowsService {
 
       if (isHardOrphan) {
         const workflowSpaceId = source.spaceId;
-        const ids = orphanIdsBySpace.get(workflowSpaceId) ?? [];
-        ids.push(id);
-        orphanIdsBySpace.set(workflowSpaceId, ids);
+        const workflows = orphanWorkflowsBySpace.get(workflowSpaceId) ?? [];
+        workflows.push({ id, source });
+        orphanWorkflowsBySpace.set(workflowSpaceId, workflows);
       }
     }
 
-    for (const [spaceId, orphanIds] of orphanIdsBySpace) {
-      if (orphanIds.length > 0) {
+    for (const [spaceId, orphanWorkflows] of orphanWorkflowsBySpace) {
+      if (orphanWorkflows.length > 0) {
         this.logger.info(
-          `Managed workflows: removing ${orphanIds.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
+          `Managed workflows: removing ${orphanWorkflows.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
             `(unregistered owner or removed definition)`
         );
-        await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
+        await this.deps.crudService.deleteWorkflows(
+          orphanWorkflows.map(({ id }) => id),
+          spaceId,
+          { force: true }
+        );
+        for (const { id: workflowId, source } of orphanWorkflows) {
+          this.deps.audit?.logWorkflowDeleted(undefined, {
+            id: workflowId,
+            force: true,
+            managed: true,
+            originalWorkflowId: source.originManagedWorkflowId,
+            ownerPlugin: source.managedBy,
+            spaceId,
+            reason: 'orphan_cleanup',
+          });
+        }
       }
     }
   }
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     for (let attempt = 0; attempt <= MAX_MANAGED_INSTALL_RETRIES; attempt++) {
@@ -135,7 +158,7 @@ export class ManagedWorkflowsService {
         await this.installManagedWorkflowOnce(id, options, registeredPluginId);
         return;
       } catch (error) {
-        if (!isVersionConflictError(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
+        if (!isRetryableWorkflowWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
           throw error;
         }
 
@@ -148,7 +171,7 @@ export class ManagedWorkflowsService {
 
   private async installManagedWorkflowOnce(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -186,8 +209,26 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
-        create: true,
+      const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
+      const documentWithVersion = maybeApplyWorkflowVersion(document, undefined, versioningEnabled);
+      const savedDocument = await this.deps.crudService.createWorkflowDocument(
+        workflowDocumentId,
+        spaceId,
+        documentWithVersion
+      );
+      await this.deps.crudService.logWorkflowChangesAfterWrite({
+        workflows: [{ id: workflowDocumentId, document: savedDocument }],
+        action: WorkflowChangeHistoryAction.workflowInstall,
+        spaceId,
+        timestamp: now,
+      });
+      this.deps.audit?.logWorkflowCreated(undefined, {
+        id: workflowDocumentId,
+        managed: true,
+        originalWorkflowId: definition.id,
+        ownerPlugin: definition.pluginId,
+        spaceId,
+        reason: 'install',
       });
       return;
     }
@@ -200,7 +241,10 @@ export class ManagedWorkflowsService {
 
     // For unchanged definitions, preserve the current document as-is.
     // Enforced enablement is reapplied only when a managed update is installed.
-    if (existing.definitionHash === definitionHash) {
+    if (
+      existing.definitionHash === definitionHash &&
+      existing.managedVersion === definition.version
+    ) {
       if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
         return;
       }
@@ -222,9 +266,30 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
-      ifSeqNo: existingDocument.seqNo,
-      ifPrimaryTerm: existingDocument.primaryTerm,
+    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
+    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
+    const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
+      workflowDocumentId,
+      spaceId,
+      {
+        document: documentWithVersion,
+        ifSeqNo: existingDocument.seqNo,
+        ifPrimaryTerm: existingDocument.primaryTerm,
+      }
+    );
+    await this.deps.crudService.logWorkflowChangesAfterWrite({
+      workflows: [{ id: workflowDocumentId, document: savedDocument }],
+      action: WorkflowChangeHistoryAction.workflowUpdate,
+      spaceId,
+      timestamp: now,
+    });
+    this.deps.audit?.logWorkflowUpdated(undefined, {
+      id: workflowDocumentId,
+      managed: true,
+      originalWorkflowId: definition.id,
+      ownerPlugin: definition.pluginId,
+      spaceId,
+      reason: 'reinstall',
     });
   }
 
@@ -253,6 +318,87 @@ export class ManagedWorkflowsService {
     }
 
     await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
+    this.deps.audit?.logWorkflowDeleted(undefined, {
+      id: workflowDocumentId,
+      force: true,
+      managed: true,
+      originalWorkflowId: existing.originManagedWorkflowId,
+      ownerPlugin: existing.managedBy,
+      spaceId,
+      reason: 'uninstall',
+    });
+  }
+
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    const definition = getManagedWorkflowDefinition(id);
+    if (!definition) {
+      throw new Error(`Unknown managed workflow id: ${id}`);
+    }
+    this.assertPluginRegistration(definition, registeredPluginId);
+
+    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
+    const spaceId = this.getRequiredSpaceId(options);
+    const registryHash = this.computeManagedDefinitionHash(definition);
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId,
+      {
+        includeDeleted: true,
+        includeGlobal: true,
+      }
+    );
+
+    if (!existing || existing.deleted_at) {
+      return this.createManagedWorkflowStatusReport({
+        status: 'missing',
+        workflowDocumentId,
+        definitionId: id,
+        spaceId,
+        definition,
+        registryHash,
+      });
+    }
+
+    if (existing.managed !== true) {
+      return this.createManagedWorkflowStatusReport({
+        status: 'not_managed',
+        workflowDocumentId,
+        definitionId: id,
+        spaceId,
+        definition,
+        registryHash,
+        existing,
+      });
+    }
+
+    const storedHash = existing.definitionHash ?? null;
+    const storedVersion = existing.managedVersion ?? null;
+    let status: ManagedWorkflowStatus = 'intact';
+    if (!existing.valid || !existing.definition) {
+      status = 'invalid';
+    } else if (!existing.enabled) {
+      status = 'disabled';
+    } else if (
+      storedHash !== registryHash ||
+      storedVersion !== definition.version ||
+      existing.originManagedWorkflowId !== definition.id
+    ) {
+      status = 'drifted';
+    }
+
+    return this.createManagedWorkflowStatusReport({
+      status,
+      workflowDocumentId,
+      definitionId: id,
+      spaceId,
+      definition,
+      registryHash,
+      existing,
+    });
   }
 
   public async executeManagedWorkflow(
@@ -295,14 +441,21 @@ export class ManagedWorkflowsService {
     }
 
     const response = await this.deps.workflowsExecutionEngine.executeWorkflow(
-      {
-        id: workflowDocumentId,
-        name: existing.name,
-        enabled: existing.enabled,
-        definition: existing.definition,
-        yaml: existing.yaml,
-        ...pickManagedWorkflowFields(existing),
-      },
+      toWorkflowExecutionEngineModel(
+        {
+          id: workflowDocumentId,
+          name: existing.name,
+          enabled: existing.enabled,
+          definition: existing.definition,
+          yaml: existing.yaml,
+          version: existing.version,
+          managed: existing.managed,
+          managedBy: existing.managedBy,
+          originManagedWorkflowId: existing.originManagedWorkflowId,
+          managedVersion: existing.managedVersion,
+        },
+        { spaceId }
+      ),
       context,
       request
     );
@@ -341,7 +494,10 @@ export class ManagedWorkflowsService {
       pluginId,
     });
 
-    const orphanIdsBySpace = new Map<string, string[]>();
+    const orphanWorkflowsBySpace = new Map<
+      string,
+      Array<{ id: string; source: WorkflowProperties }>
+    >();
     const dynamicUpdates: Array<{
       definitionId: ManagedWorkflowId;
       workflowId: string;
@@ -359,9 +515,9 @@ export class ManagedWorkflowsService {
         const docKey = `${docId}:${workflowSpaceId}`;
 
         if (!installedDocKeys.has(docKey)) {
-          const ids = orphanIdsBySpace.get(workflowSpaceId) ?? [];
-          ids.push(docId);
-          orphanIdsBySpace.set(workflowSpaceId, ids);
+          const workflows = orphanWorkflowsBySpace.get(workflowSpaceId) ?? [];
+          workflows.push({ id: docId, source });
+          orphanWorkflowsBySpace.set(workflowSpaceId, workflows);
         }
       }
 
@@ -374,13 +530,28 @@ export class ManagedWorkflowsService {
       }
     }
 
-    for (const [spaceId, orphanIds] of orphanIdsBySpace) {
-      if (orphanIds.length > 0) {
+    for (const [spaceId, orphanWorkflows] of orphanWorkflowsBySpace) {
+      if (orphanWorkflows.length > 0) {
         this.logger.info(
-          `Managed workflows: removing ${orphanIds.length} orphaned static workflow(s) ` +
+          `Managed workflows: removing ${orphanWorkflows.length} orphaned static workflow(s) ` +
             `for plugin '${pluginId}' in space '${spaceId}'`
         );
-        await this.deps.crudService.deleteWorkflows(orphanIds, spaceId, { force: true });
+        await this.deps.crudService.deleteWorkflows(
+          orphanWorkflows.map(({ id }) => id),
+          spaceId,
+          { force: true }
+        );
+        for (const { id: workflowId, source } of orphanWorkflows) {
+          this.deps.audit?.logWorkflowDeleted(undefined, {
+            id: workflowId,
+            force: true,
+            managed: true,
+            originalWorkflowId: source.originManagedWorkflowId,
+            ownerPlugin: source.managedBy,
+            spaceId,
+            reason: 'ready_reconciliation',
+          });
+        }
       }
     }
 
@@ -435,6 +606,41 @@ export class ManagedWorkflowsService {
     };
   }
 
+  private createManagedWorkflowStatusReport(params: {
+    status: ManagedWorkflowStatus;
+    workflowDocumentId: string;
+    definitionId: ManagedWorkflowId;
+    spaceId: string;
+    definition: ManagedWorkflowDefinition;
+    registryHash: string;
+    existing?: WorkflowProperties;
+  }): ManagedWorkflowStatusReport {
+    const {
+      status,
+      workflowDocumentId,
+      definitionId,
+      spaceId,
+      definition,
+      registryHash,
+      existing,
+    } = params;
+
+    return {
+      status,
+      workflowId: workflowDocumentId,
+      definitionId,
+      spaceId: existing?.spaceId ?? spaceId,
+      installed: Boolean(existing),
+      enabled: existing?.enabled ?? null,
+      valid: existing?.valid ?? null,
+      managedBy: existing?.managedBy ?? null,
+      storedVersion: existing?.managedVersion ?? null,
+      registryVersion: definition.version,
+      storedHash: existing?.definitionHash ?? null,
+      registryHash,
+    };
+  }
+
   private async prepareManagedWorkflowDocument(params: {
     definition: ManagedWorkflowDefinition;
     workflowDocumentId: string;
@@ -461,6 +667,7 @@ export class ManagedWorkflowsService {
       id: workflowDocumentId,
       yaml,
       actor: MANAGED_WORKFLOW_SYSTEM_USER,
+      lightweightValidation: true,
       now,
       spaceId,
     });
@@ -469,6 +676,7 @@ export class ManagedWorkflowsService {
       ...workflowData,
       managed: true,
       managedBy: definition.pluginId,
+      billable: definition.billable,
       definitionHash,
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,

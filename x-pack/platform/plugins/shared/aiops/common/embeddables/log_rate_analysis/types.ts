@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
-
-export interface LogRateAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
-  dataViewId?: string;
-}
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 
 export type StoredLogRateAnalysisEmbeddableState = Omit<
   LogRateAnalysisEmbeddableState,
-  'dataViewId'
+  'data_view_id'
 >;

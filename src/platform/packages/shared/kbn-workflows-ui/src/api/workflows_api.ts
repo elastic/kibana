@@ -42,8 +42,12 @@ import type {
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
   MgetWorkflowsParams,
+  RestoreWorkflowVersionParams,
+  RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
   RunWorkflowOptions,
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
   TestWorkflowParams,
   UpdateWorkflowParams,
   ValidateWorkflowParams,
@@ -158,9 +162,9 @@ export class WorkflowApi {
     });
   }
 
-  async getAggs({ fields }: GetAggsParams): Promise<WorkflowAggsDto> {
+  async getAggs({ fields, managed }: GetAggsParams): Promise<WorkflowAggsDto> {
     return this.http.get(`${BASE}/aggs`, {
-      query: { fields },
+      query: { fields, ...(managed ? { managed } : {}) },
       version: API_VERSION,
     });
   }
@@ -291,5 +295,30 @@ export class WorkflowApi {
     return this.http.get(`${INTERNAL_BASE}/config`, {
       version: INTERNAL_API_VERSION,
     });
+  }
+
+  async searchTriggerEvents(
+    params: SearchTriggerEventLogParams
+  ): Promise<SearchTriggerEventLogResult> {
+    return this.http.post(`${INTERNAL_BASE}/trigger_events/_search`, {
+      body: JSON.stringify(params),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async restoreWorkflowVersion(
+    workflowId: string,
+    eventId: string,
+    { signal }: RestoreWorkflowVersionParams = {}
+  ): Promise<RestoreWorkflowVersionResponseDto> {
+    return this.http.post(
+      `${INTERNAL_BASE}/workflow/${encodeURIComponent(workflowId)}/history/${encodeURIComponent(
+        eventId
+      )}/restore`,
+      {
+        version: INTERNAL_API_VERSION,
+        signal,
+      }
+    );
   }
 }

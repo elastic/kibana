@@ -48,7 +48,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated action policy.',
       },
       400: {
         body: () => errorResponseSchema,

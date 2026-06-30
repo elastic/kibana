@@ -203,9 +203,6 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
     );
 
     expect(mappingMeta).toEqual({
-      indexTypesMap: {
-        '.kibana': ['test_mv', 'test_switch'],
-      },
       mappingVersions: {
         test_mv: '10.2.0',
         test_switch: '10.1.0',

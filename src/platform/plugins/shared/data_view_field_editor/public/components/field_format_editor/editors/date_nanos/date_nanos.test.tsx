@@ -20,7 +20,7 @@ const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS' };
   }),
-  reactConvert: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
+  convertToReact: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
 });
 
 const formatParams = {

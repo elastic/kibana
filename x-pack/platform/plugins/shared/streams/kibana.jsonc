@@ -30,6 +30,7 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "agentContextLayer",
       "alertingVTwo",
       "cloud",
       "esql",
@@ -37,6 +38,7 @@
       "globalSearch",
       "searchInferenceEndpoints",
       "spaces",
+      "workflowsExtensions",
       "workflowsManagement"
     ],
     "requiredBundles": [],

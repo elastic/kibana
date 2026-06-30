@@ -496,8 +496,8 @@ describe('HeatmapComponent', function () {
         {...wrapperProps}
         formatFactory={(format) =>
           format?.id === 'string'
-            ? ({ convert: (v: unknown) => String(v) } as unknown as FieldFormat)
-            : ({ convert: (v: unknown) => v } as unknown as FieldFormat)
+            ? ({ convertToText: (v: unknown) => String(v) } as unknown as FieldFormat)
+            : ({ convertToText: (v: unknown) => v } as unknown as FieldFormat)
         }
         data={{
           ...data,

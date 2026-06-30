@@ -9,6 +9,7 @@
 
 import { CommandRegistry } from './registry';
 import { limitCommand } from './limit';
+import { dedupCommand } from './dedup';
 import { dropCommand } from './drop';
 import { keepCommand } from './keep';
 import { forkCommand } from './fork';
@@ -46,6 +47,7 @@ const esqlCommandRegistry = new CommandRegistry();
 
 const baseCommands = [
   limitCommand,
+  dedupCommand,
   dropCommand,
   forkCommand,
   renameCommand,

@@ -65,7 +65,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
   );
 
   return (
-    <ul css={styles.list}>
+    <ul css={[styles.list, styles.scroller]}>
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
@@ -77,14 +77,16 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
           extraActions={
             showExtraActions && onPresetDelete ? (
-              <EuiButtonIcon
-                aria-label={mainPanelTexts.deletePresetAriaLabel}
-                iconType="trash"
-                color="danger"
-                size="xs"
-                data-test-subj="dateRangePickerDeletePresetButton"
-                onClick={() => onPresetDelete(option)}
-              />
+              <EuiToolTip content={mainPanelTexts.deletePresetAriaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={mainPanelTexts.deletePresetAriaLabel}
+                  iconType="trash"
+                  color="danger"
+                  size="xs"
+                  data-test-subj="dateRangePickerDeletePresetButton"
+                  onClick={() => onPresetDelete(option)}
+                />
+              </EuiToolTip>
             ) : undefined
           }
         >
@@ -200,12 +202,12 @@ export function MainPanel() {
 
   return (
     <PanelContainer data-test-subj="dateRangePickerMainPanel">
-      <PanelBody>
-        <PanelBodySection spacingSide="none">
+      <PanelBody fill>
+        <PanelBodySection spacingSide="none" css={styles.presetsArea}>
           {timeRange.value === '' && <DocumentationButton />}
           <PresetsRecentTabs />
         </PanelBodySection>
-        <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
+        <PanelBodySection spacingSide="none" css={styles.bottomSection}>
           <hr css={dividerStyles.root} />
           <SubPanelMenu />
         </PanelBodySection>
@@ -228,15 +230,17 @@ export function MainPanel() {
           ) : undefined
         }
       >
-        <EuiButtonIcon
-          aria-label={mainPanelTexts.settingsAriaLabel}
-          iconType="gear"
-          display="base"
-          color="text"
-          size="s"
-          data-test-subj="dateRangePickerSettingsButton"
-          onClick={() => navigateTo(SettingsPanel.PANEL_ID)}
-        />
+        <EuiToolTip content={mainPanelTexts.settingsAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={mainPanelTexts.settingsAriaLabel}
+            iconType="gear"
+            display="base"
+            color="text"
+            size="s"
+            data-test-subj="dateRangePickerSettingsButton"
+            onClick={() => navigateTo(SettingsPanel.PANEL_ID)}
+          />
+        </EuiToolTip>
         {timeZoneDisplay && (
           <EuiText color="subdued" size="xs" component="span">
             {timeZoneDisplay}

@@ -66,7 +66,7 @@ export class InboxPublicPlugin
       category: DEFAULT_APP_CATEGORIES.security,
       euiIconType: 'email',
       status: AppStatus.accessible,
-      visibleIn: ['sideNav', 'globalSearch'],
+      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 100,
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();

@@ -85,6 +85,26 @@ describe('PROMQL columnsAfter', () => {
     expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
   });
 
+  it('does not return step column when time param is used', async () => {
+    const result = await columnsAfter(
+      synth.cmd`PROMQL index=metrics time="2026-01-13T11:30:00.000Z" col0=(sum by (job) (http_requests_total{env="prod"}))`,
+      [],
+      'PROMQL index=metrics time="2026-01-13T11:30:00.000Z" col0=(sum by (job) (http_requests_total{env="prod"})) | KEEP job',
+      {
+        fromFrom: () => Promise.resolve([]),
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve([]),
+        fromPromql: () =>
+          Promise.resolve([
+            { name: 'job', type: 'keyword', userDefined: false },
+            { name: 'http_requests_total', type: 'double', userDefined: false },
+          ]),
+      }
+    );
+
+    expect(result.map(({ name }) => name)).toEqual(['col0', 'job']);
+  });
+
   it('does not treat pipe inside label string as command delimiter', async () => {
     const sourceFields: ESQLFieldWithMetadata[] = [
       { name: 'bytes', type: 'double', userDefined: false },

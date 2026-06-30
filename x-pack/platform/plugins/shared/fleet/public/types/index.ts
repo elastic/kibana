@@ -88,6 +88,8 @@ export type {
   BulkDeleteEnrollmentAPIKeysResponse,
   PostStandaloneAgentAPIKeyRequest,
   PostStandaloneAgentAPIKeyResponse,
+  PostManagedOtlpAPIKeyRequest,
+  PostManagedOtlpAPIKeyResponse,
   PostLogstashApiKeyResponse,
   GetOutputsResponse,
   GetCurrentUpgradesResponse,

@@ -344,7 +344,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
             >
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xl" type={provider.icon ?? 'empty'} />
+                  <EuiIcon size="xl" type={provider.icon ?? 'empty'} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="xs">

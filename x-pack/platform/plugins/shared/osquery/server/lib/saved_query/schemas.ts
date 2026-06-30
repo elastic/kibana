@@ -75,7 +75,7 @@ const packSchemaV1 = schema.object({
   queries: schema.maybe(
     schema.oneOf([
       schema.recordOf(schema.string(), packQuerySchema),
-      schema.arrayOf(packQuerySchema),
+      schema.arrayOf(packQuerySchema, { maxSize: 1000 }),
     ])
   ),
   // Pack-asset version (prebuilt-pack version number). Name is taken — a future

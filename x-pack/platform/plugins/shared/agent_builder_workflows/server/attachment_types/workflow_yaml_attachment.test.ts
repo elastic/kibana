@@ -6,6 +6,7 @@
  */
 
 import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -55,9 +56,13 @@ const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
 
 describe('workflow_yaml_attachment', () => {
   describe('getTools', () => {
-    it('includes all workflow tools', () => {
+    it('includes all workflow tools, generate_workflow, and execute_workflow', () => {
       const type = registerAndCapture();
-      expect(type.getTools()).toEqual(Object.values(workflowTools));
+      expect(type.getTools()).toEqual([
+        ...Object.values(workflowTools),
+        platformCoreTools.generateWorkflow,
+        platformCoreTools.executeWorkflow,
+      ]);
     });
   });
 
@@ -177,20 +182,17 @@ describe('workflow_yaml_attachment', () => {
       expect(result.type).toBe('text');
       expect(result.value).toContain('```yaml\nversion: "1"\n```');
       expect(result.value).not.toContain('Validation: valid');
-      expect(result.value).toContain(
-        `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.setYaml})`
-      );
+      expect(result.value).toContain(platformCoreTools.generateWorkflow);
     });
   });
 
   describe('getAgentDescription', () => {
-    it('references the attachment type and edit tools', () => {
+    it('references the attachment type and generate_workflow tool', () => {
       const type = registerAndCapture();
       const description = type.getAgentDescription();
 
       expect(description).toContain(WORKFLOW_YAML_ATTACHMENT_TYPE);
-      expect(description).toContain(workflowTools.setYaml);
-      expect(description).toContain(workflowTools.modifyStep);
+      expect(description).toContain(platformCoreTools.generateWorkflow);
       expect(description).toContain(workflowTools.getStepDefinitions);
     });
   });

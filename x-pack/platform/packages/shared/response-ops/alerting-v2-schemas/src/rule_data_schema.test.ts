@@ -15,13 +15,21 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
+  getBreachEsqlQuery,
+  getRecoverEsqlQuery,
+  getNoDataEsqlQuery,
+  getRootEsqlQuery,
+  bulkGetRulesResponseSchema,
+  bulkGetRulesParamsSchema,
+  updateRuleBodySchema,
 } from './rule_data_schema';
+import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 const validCreateData = {
   kind: 'alert',
   metadata: { name: 'test rule' },
   schedule: { every: '5m' },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 describe('createRuleDataSchema', () => {
@@ -34,7 +42,7 @@ describe('createRuleDataSchema', () => {
         metadata: { name: 'test rule' },
         time_field: '@timestamp',
         schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
       });
     });
 
@@ -45,8 +53,6 @@ describe('createRuleDataSchema', () => {
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         grouping: { fields: ['host.name'] },
-        recovery_policy: { type: 'no_breach' },
-        no_data: { behavior: 'recover', timeframe: '15m' },
         state_transition: {
           pending_operator: 'AND',
           pending_count: 3,
@@ -272,19 +278,259 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('evaluation.query.base', () => {
-    it('rejects an empty query', () => {
+  describe('query', () => {
+    it('rejects an empty breach query', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        evaluation: { query: { base: '' } },
+        query: { format: 'standalone', breach: { query: '' } },
       });
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid ES|QL query', () => {
+    it('rejects an invalid ES|QL breach query', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        evaluation: { query: { base: 'FROM |' } },
+        query: { format: 'standalone', breach: { query: 'FROM |' } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a standalone query with a recovery query', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts recovery_strategy "no_breach" without a recovery block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'no_breach',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a standalone query with a no_data block', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        no_data_strategy: 'emit',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        },
+      });
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 1' },
+        no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+      });
+    });
+
+    it('accepts no_data_strategy "last_known_status"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data_strategy: 'last_known_status',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a composed query with breach segment', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a composed query with a whitespace-only breach segment', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: ' ' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a composed query with an invalid breach segment (compose fails ES|QL validation)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE (' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a composed query with a whitespace-only recovery segment', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+          recovery: { segment: ' ' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a composed query with an invalid recovery segment (compose fails ES|QL validation)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+          recovery: { segment: 'WHERE (' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts recovery_strategy "no_breach" with a composed query', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'no_breach',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a composed query with recovery segment', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+          recovery: { segment: 'WHERE cpu <= 0.5' },
+        },
+      });
+      expect(result.query).toMatchObject({
+        recovery: { segment: 'WHERE cpu <= 0.5' },
+      });
+    });
+
+    it('rejects a signal rule with composed format', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE error == true' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a signal rule with recovery_strategy "query"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        recovery_strategy: 'query',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a signal rule with recovery_strategy "no_breach"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        recovery_strategy: 'no_breach',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovery_strategy "query" when query.recovery is absent', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovery_strategy "no_breach" when query.recovery is also provided', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'no_breach',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovery_strategy "none" when query.recovery is also provided', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a signal rule with no_data_strategy "emit"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        no_data_strategy: 'emit',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        },
       });
       expect(result.success).toBe(false);
     });
@@ -503,53 +749,6 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('recovery_policy', () => {
-    it('accepts recovery_policy with type "no_breach"', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'no_breach' },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts recovery_policy with type "query" when query.base is provided', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1' },
-        },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects recovery_policy with type "query" when query is missing', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'query' },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['recovery_policy', 'query', 'base']);
-    });
-
-    it('rejects recovery_policy with type "query" when query.base is missing', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'query', query: {} },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['recovery_policy', 'query', 'base']);
-    });
-
-    it('rejects recovery_policy with type "query" when query.base is empty', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'query', query: { base: '' } },
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
   describe('artifacts value length', () => {
     it('accepts a runbook artifact at the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({
@@ -629,7 +828,7 @@ describe('createRuleDataSchema', () => {
   });
 
   describe('required fields', () => {
-    it.each(['kind', 'metadata', 'schedule', 'evaluation'] as const)(
+    it.each(['kind', 'metadata', 'schedule', 'query'] as const)(
       'rejects when required field "%s" is missing',
       (field) => {
         const { [field]: _, ...data } = validCreateData;
@@ -755,7 +954,7 @@ describe('updateRuleDataSchema', () => {
 
     it('rejects an invalid ES|QL query', () => {
       const result = updateRuleDataSchema.safeParse({
-        evaluation: { query: { base: 'FROM |' } },
+        query: { format: 'standalone', breach: { query: 'FROM |' } },
       });
       expect(result.success).toBe(false);
     });
@@ -918,6 +1117,214 @@ describe('updateRuleDataSchema', () => {
   });
 });
 
+describe('getBreachEsqlQuery', () => {
+  it('returns the breach query verbatim for standalone format', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM logs-* | LIMIT 1');
+  });
+
+  it('composes base and breach segment for composed format', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
+
+  it('handles a trailing comment in base without corrupting the composed query', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM logs-* // my query',
+      breach: { segment: 'WHERE status == "error"' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM logs-* | WHERE status == "error"');
+  });
+
+  it('handles a segment with multiple pipeline commands', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9 | STATS count = COUNT(*)' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe(
+      'FROM metrics-* | WHERE cpu > 0.9 | STATS count = COUNT(*)'
+    );
+  });
+});
+
+describe('getRecoverEsqlQuery', () => {
+  it('returns the recovery query verbatim for standalone format with strategy "query"', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+      recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+    };
+    expect(getRecoverEsqlQuery(query, 'query')).toBe('FROM logs-* | WHERE status == "ok"');
+  });
+
+  it('returns undefined when standalone has no recovery block', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    };
+    expect(getRecoverEsqlQuery(query, 'query')).toBeUndefined();
+  });
+
+  it('returns undefined when recovery_strategy is "no_breach"', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    };
+    expect(getRecoverEsqlQuery(query, 'no_breach')).toBeUndefined();
+  });
+
+  it('returns undefined when recovery_strategy is "none"', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+      recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+    };
+    expect(getRecoverEsqlQuery(query, 'none')).toBeUndefined();
+  });
+
+  it('returns undefined when recovery_strategy is undefined', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+      recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+    };
+    expect(getRecoverEsqlQuery(query, undefined)).toBeUndefined();
+  });
+
+  it('composes base and recovery segment for composed format with strategy "query"', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+      recovery: { segment: 'WHERE cpu <= 0.9' },
+    };
+    expect(getRecoverEsqlQuery(query, 'query')).toBe('FROM metrics-* | WHERE cpu <= 0.9');
+  });
+
+  it('returns undefined when composed has no recovery block', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getRecoverEsqlQuery(query, 'query')).toBeUndefined();
+  });
+
+  it('returns undefined when composed recovery_strategy is "no_breach"', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getRecoverEsqlQuery(query, 'no_breach')).toBeUndefined();
+  });
+});
+
+describe('getNoDataEsqlQuery', () => {
+  it('returns the no_data query verbatim for standalone format when no_data_strategy is set', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+      no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+    };
+    expect(getNoDataEsqlQuery(query, 'emit')).toBe('FROM heartbeat-* | LIMIT 1');
+  });
+
+  it('returns undefined for composed format (no no_data block)', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getNoDataEsqlQuery(query, 'emit')).toBeUndefined();
+  });
+
+  it('returns undefined when no_data_strategy is "none"', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+      no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+    };
+    expect(getNoDataEsqlQuery(query, 'none')).toBeUndefined();
+  });
+
+  it('returns undefined when no_data_strategy is undefined', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+      no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+    };
+    expect(getNoDataEsqlQuery(query, undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when no_data block is absent even with active strategy', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    };
+    expect(getNoDataEsqlQuery(query, 'emit')).toBeUndefined();
+  });
+});
+
+describe('getRootEsqlQuery', () => {
+  it('returns base for composed format', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment: 'WHERE cpu > 0.9' },
+    };
+    expect(getRootEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
+  it('returns breach.query for standalone format', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    };
+    expect(getRootEsqlQuery(query)).toBe('FROM logs-* | LIMIT 1');
+  });
+});
+
+describe('updateRuleBodySchema', () => {
+  it('accepts a payload without version', () => {
+    const result = updateRuleBodySchema.parse({});
+    expect(result).toEqual({});
+  });
+
+  it('accepts a payload with version', () => {
+    const result = updateRuleBodySchema.parse({ version: 'WzEsMV0=' });
+    expect(result.version).toBe('WzEsMV0=');
+  });
+
+  it('accepts version alongside data fields', () => {
+    const result = updateRuleBodySchema.parse({
+      version: 'WzEsMV0=',
+      metadata: { name: 'updated name' },
+    });
+    expect(result).toEqual({
+      version: 'WzEsMV0=',
+      metadata: { name: 'updated name' },
+    });
+  });
+
+  it('rejects an empty string version', () => {
+    expect(() => updateRuleBodySchema.parse({ version: '' })).toThrow();
+  });
+
+  it('rejects a version longer than 256 characters', () => {
+    expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
+  });
+});
+
 /**
  * These tests are the safety net for {@link IMMUTABLE_RULE_FIELDS}. They keep
  * `upsertRule` (PUT — rejects mutation) and `buildUpdateRuleAttributes`
@@ -945,15 +1352,99 @@ describe('rule field immutability classification', () => {
     expect(mutable).toMatchInlineSnapshot(`
       Array [
         "artifacts",
-        "evaluation",
         "grouping",
         "metadata",
-        "no_data",
-        "recovery_policy",
+        "no_data_strategy",
+        "query",
+        "recovery_strategy",
         "schedule",
         "state_transition",
         "time_field",
       ]
     `);
+  });
+});
+
+describe('bulkGetRulesParamsSchema', () => {
+  it('accepts a single id', () => {
+    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
+    expect(result).toEqual({ ids: ['rule-1'] });
+  });
+
+  it('accepts up to MAX_BULK_ITEMS ids', () => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
+  });
+
+  it('preserves caller-provided id order (no sorting)', () => {
+    const ids = ['rule-z', 'rule-a', 'rule-m'];
+    const result = bulkGetRulesParamsSchema.parse({ ids });
+    expect(result.ids).toEqual(ids);
+  });
+
+  it('trims whitespace around ids', () => {
+    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
+    expect(result.ids).toEqual(['rule-1']);
+  });
+
+  it('rejects a missing ids field', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS ids', () => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
+  });
+
+  it('rejects an id longer than ID_MAX_LENGTH', () => {
+    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
+  });
+
+  it('rejects an empty-string id', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
+  });
+
+  it('rejects a whitespace-only id (after trim it is empty)', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
+  });
+});
+
+describe('bulkGetRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r' },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    createdBy: 'user-a',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedBy: 'user-a',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts an empty rules array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ rules: [] });
+    expect(result).toEqual({ rules: [] });
+  });
+
+  it('accepts a populated rules array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ rules: [sampleRule] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
   });
 });

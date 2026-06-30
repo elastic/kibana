@@ -28,11 +28,18 @@ export interface SyntheticsUrlParams {
   tags?: string[];
   locations?: string[];
   monitorTypes?: string[] | string;
+  statusCodes?: string[];
   configIds?: string[];
   status?: string[];
+  // Certificates page quick filters, persisted so a filtered view is shareable.
+  browserResourceTypes?: string[];
+  party?: string[];
+  issuers?: string[];
+  expiringWithin?: string;
   locationId?: string;
   projects?: string[] | string;
   schedules?: string[] | string;
+  remoteNames?: string[] | string;
   groupBy?: MonitorOverviewState['groupBy']['field'];
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
   packagePolicyId?: string;
@@ -89,11 +96,13 @@ export const getSupportedUrlParams = (params: {
     query,
     tags,
     monitorTypes,
+    statusCodes,
     configIds,
     locations,
     locationId,
     projects,
     schedules,
+    remoteNames,
     groupBy,
     groupOrderBy,
     packagePolicyId,
@@ -101,6 +110,10 @@ export const getSupportedUrlParams = (params: {
     useLogicalAndFor,
     view,
     remoteName,
+    browserResourceTypes,
+    party,
+    issuers,
+    expiringWithin,
   } = filteredParams;
 
   return {
@@ -127,16 +140,22 @@ export const getSupportedUrlParams = (params: {
     query: query || '',
     tags: parseFilters(tags),
     monitorTypes: parseFilters(monitorTypes),
+    statusCodes: parseFilters(statusCodes),
     configIds: parseFilters(configIds),
     locations: parseFilters(locations),
     projects: parseFilters(projects),
     schedules: parseFilters(schedules),
+    remoteNames: parseFilters(remoteNames),
     locationId: locationId || undefined,
     cloneId: filteredParams.cloneId,
     spaceId: spaceId || undefined,
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
     remoteName: remoteName || undefined,
+    browserResourceTypes: parseFilters(browserResourceTypes),
+    party: parseFilters(party),
+    issuers: parseFilters(issuers),
+    expiringWithin: expiringWithin || undefined,
   };
 };
 

@@ -16,8 +16,39 @@ export class HomePage {
     return this.page.testSubj.locator('homeApp');
   }
 
-  public async goto() {
-    await this.page.gotoApp('home');
+  public get manageSection() {
+    return this.page.testSubj.locator('homeDataManage');
+  }
+
+  public get stackManagementButton() {
+    return this.page.testSubj.locator('homeManage');
+  }
+
+  public async goto(spaceId?: string) {
+    await this.page.addInitScript(() => {
+      window.localStorage.setItem('home:welcome:show', 'false');
+    });
+    if (spaceId) {
+      await this.page.gotoApp('home', { params: { space: spaceId } });
+    } else {
+      await this.page.gotoApp('home');
+    }
     await this.homeApp.waitFor({ state: 'visible' });
+  }
+
+  // The home page renders one solution card per registered solution, with
+  // `data-test-subj="homeSolutionPanel homeSolutionPanel_${solution.id}"`.
+  // Match on the second token via an attribute-contains-word selector so
+  // unrelated future test-subj strings starting with `homeSolutionPanel`
+  // (e.g. a panel header) cannot leak into the result.
+  public async getVisibleSolutions(): Promise<string[]> {
+    const locator = this.page.locator('[data-test-subj~="homeSolutionPanel"]');
+    const attributes = await locator.evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('data-test-subj') ?? '')
+    );
+    return attributes
+      .flatMap((value) => value.split(' '))
+      .filter((token) => token.startsWith('homeSolutionPanel_'))
+      .map((token) => token.slice('homeSolutionPanel_'.length));
   }
 }

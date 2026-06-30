@@ -5,22 +5,35 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Onboarding is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { TaskResult } from '@kbn/streams-schema';
 import type {
   IdentifyFeaturesResult,
-  OnboardingResult,
   SignificantEventsQueriesGenerationResult,
-  TaskResult,
-} from '@kbn/streams-schema';
-import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
+
+/**
+ * @deprecated Legacy onboarding result shape used by the task-based implementation.
+ * The new workflow-based implementation uses the flat KIsOnboardingResult from @kbn/streams-schema.
+ */
+interface LegacyOnboardingResult {
+  featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
+  queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
+}
+import { TaskStatus } from '@kbn/streams-schema';
+import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { StreamsTaskType, TaskContext } from '.';
-import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
-import { shouldIdentifyFeatures } from '../../sig_events/features/should_identify_features';
-import { persistQueries } from '../../sig_events/persist_queries';
+import { parseError } from '../../streams/errors/parse_error';
+import { shouldIdentifyFeatures } from '../../significant_events/features/should_identify_features';
+import { persistQueries } from '../../significant_events/persist_queries';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
@@ -29,19 +42,17 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { MemoryGenerationTaskParams } from './memory_generation';
-import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
-import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
+import type { SignificantEventsQueriesGenerationTaskParams } from '../../significant_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-} from '../../sig_events/tasks/significant_events_queries_generation';
+} from '../../significant_events/tasks/significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
   streamName: string;
   from: number;
   to: number;
-  steps: OnboardingStep[];
+  steps: KIsOnboardingStep[];
   connectors?: {
     features?: string;
     queries?: string;
@@ -72,18 +83,13 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const {
-                taskClient,
-                getQueryClient,
-                getFeatureClient,
-                streamsClient,
-                uiSettingsClient,
-              } = await taskContext.getScopedClients({
-                request: fakeRequest,
-                rulesClientOptions: { cloneApiKeysOnCreate: true },
-              });
+              const { taskClient, getKnowledgeIndicatorClient, streamsClient } =
+                await taskContext.getScopedClients({
+                  request: fakeRequest,
+                  rulesClientOptions: { cloneApiKeysOnCreate: true },
+                });
 
-              const featureClient = await getFeatureClient();
+              const kiClient = await getKnowledgeIndicatorClient();
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -93,14 +99,14 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification: {
+                    case KIsOnboardingStep.FeaturesIdentification: {
                       const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
                       const isFeaturesOnlyStep =
-                        steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
+                        steps.length === 1 && steps[0] === KIsOnboardingStep.FeaturesIdentification;
 
                       if (!isFeaturesOnlyStep) {
                         const { shouldIdentify } = await shouldIdentifyFeatures({
-                          featureClient,
+                          kiClient,
                           streamName,
                           thresholdHours: FEATURES_IDENTIFICATION_THRESHOLD_HOURS,
                         });
@@ -132,7 +138,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       break;
                     }
 
-                    case OnboardingStep.QueriesGeneration:
+                    case KIsOnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
                         {
                           start: from,
@@ -154,7 +160,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       }
 
                       await persistQueries(streamName, queriesTaskResult.queries, {
-                        queryClient: await getQueryClient(),
+                        kiClient,
                         streamsClient,
                       });
                       break;
@@ -164,7 +170,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   }
                 }
 
-                await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
+                await taskClient.complete<OnboardingTaskParams, LegacyOnboardingResult>(
                   _task,
                   {
                     streamName,
@@ -175,53 +181,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   },
                   { featuresTaskResult, queriesTaskResult }
                 );
-
-                // Schedule memory generation from discovered features and queries
-                const memoryParams: MemoryGenerationTaskParams = {};
-
-                if (
-                  featuresTaskResult?.status === TaskStatus.Completed &&
-                  featuresTaskResult.features.length > 0
-                ) {
-                  memoryParams.features = featuresTaskResult.features;
-                }
-
-                if (
-                  queriesTaskResult?.status === TaskStatus.Completed &&
-                  queriesTaskResult.queries.length > 0
-                ) {
-                  memoryParams.queries = queriesTaskResult.queries.map((query) => ({
-                    streamName,
-                    query,
-                  }));
-                }
-
-                const hasMemoryInputs =
-                  (memoryParams.features?.length ?? 0) > 0 ||
-                  (memoryParams.queries?.length ?? 0) > 0;
-
-                const onboardingUseMemory = await uiSettingsClient.get<boolean>(
-                  OBSERVABILITY_STREAMS_ENABLE_MEMORY
-                );
-                if (hasMemoryInputs && onboardingUseMemory && runContext.fakeRequest) {
-                  try {
-                    await taskClient.schedule<MemoryGenerationTaskParams>({
-                      task: {
-                        type: MEMORY_GENERATION_TASK_TYPE,
-                        id: MEMORY_GENERATION_TASK_TYPE,
-                        space: '*',
-                      },
-                      params: memoryParams,
-                      request: runContext.fakeRequest,
-                    });
-                  } catch (scheduleError) {
-                    taskContext.logger
-                      .get('onboarding')
-                      .warn(
-                        `Failed to schedule memory generation: ${getErrorMessage(scheduleError)}`
-                      );
-                  }
-                }
               } catch (error) {
                 // Errors here originate from waitForSubtask (plain Error), not from inference calls.
                 // isInferenceProviderError is always false, so no connector enrichment is needed.

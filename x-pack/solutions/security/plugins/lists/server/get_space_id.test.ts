@@ -8,6 +8,7 @@
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { getSpaceId } from './get_space_id';
 
@@ -29,7 +30,7 @@ describe('get_space_id', () => {
   });
 
   test('it returns "another-space" as the space id given a space id of "another-space"', () => {
-    const spaces = spacesServiceMock.createStartContract('another-space');
+    const spaces = spacesServiceMock.createStartContract(asSpaceId('another-space'));
     const space = getSpaceId({ request, spaces });
     expect(space).toEqual('another-space');
   });

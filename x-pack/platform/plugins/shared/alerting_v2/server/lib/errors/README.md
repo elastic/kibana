@@ -61,6 +61,8 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `IMMUTABLE_FIELDS_CHANGED`    | 400    | PUT (upsert) request changes a field flagged as immutable            | `{ fields }`                               |
 | `INVALID_FILTER_FIELD`        | 400    | The `filter` references a field that is not in the allow-list        | `{ field, allowed_fields }`                |
 | `UNSUPPORTED_FILTER_FUNCTION` | 400    | The `filter` uses a KQL function we do not translate yet             | `{ function }`                             |
+| `SCHEDULE_INTERVAL_TOO_SHORT` | 400    | `schedule.every` is below `xpack.alerting_v2.rules.minimumScheduleInterval` | `{ interval, minimumScheduleInterval }`    |
+| `MAX_SCHEDULES_PER_MINUTE_EXCEEDED` | 400 | Scheduling the rule would exceed `xpack.alerting_v2.rules.maxScheduledPerMinute` | `{ interval, maxScheduledPerMinute }` |
 
 ### Action policies (`server/lib/action_policy_client/`)
 
@@ -70,7 +72,6 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `ACTION_POLICY_ALREADY_EXISTS`    | 409    | `createActionPolicy` collides with an existing id                   | `{ action_policy_id }` |
 | `ACTION_POLICY_VERSION_CONFLICT`  | 409    | An update / delete races another writer                             | `{ action_policy_id }` |
 | `INVALID_ACTION_POLICY_DATA`      | 400    | The submitted body fails the domain-level schema check              | `{ context, errors }`  |
-| `RULE_NOT_FOUND_FOR_POLICY`       | 400    | A `single_rule` action policy references a non-existent rule        | `{ rule_id }`          |
 | `INVALID_DATE_STRING`             | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing  | `{ value }`            |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
@@ -85,6 +86,12 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | ------------------- | ------ | ------------------------------------------------------------- | ---------------- |
 | `INSIGHT_NOT_FOUND` | 404    | `getInsight` / `updateInsightStatus` cannot find an insight by id | `{ insight_id }` |
 
+### Engine state (`server/routes/base_alerting_route.ts`)
+
+| Code                   | Status | When                                                                                                                                                                          | `details` |
+| ---------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `ALERTING_DISABLED` | 503    | `BaseAlertingRoute.handle` short-circuits when `alerting:v2:enabled` is off so every route refuses requests until the operator turns the engine back on.                       | _(none)_  |
+
 ### Generic fallback codes
 
 | Code                    | Status | When                                                                        |
@@ -94,13 +101,14 @@ backwards compatible. Renaming or removing a code is a breaking change.
 ## Common error responses (every route)
 
 `BaseAlertingRoute` declares a `commonResponses` block that `static get
-validate()` merges into each subclass's `schemas.response`. Every route therefore documents these three OAS responses without restating them:
+validate()` merges into each subclass's `schemas.response`. Every route therefore documents these four OAS responses without restating them:
 
-| HTTP status | When                                                                            |
-| ----------- | ------------------------------------------------------------------------------- |
-| `401`       | The request was not authenticated.                                              |
-| `403`       | The caller lacks the route's `requiredPrivileges`.                              |
-| `500`       | Any uncaught throw boomifies to 500.                             |
+| HTTP status | When                                                                                                  |
+| ----------- | ----------------------------------------------------------------------------------------------------- |
+| `401`       | The request was not authenticated.                                                                    |
+| `403`       | The caller lacks the route's `requiredPrivileges`.                                                    |
+| `500`       | Any uncaught throw boomifies to 500.                                                                  |
+| `503`       | Alerting is administratively disabled via the `alerting:v2:enabled` advanced setting (kill switch).|
 
 Important distinction:
 

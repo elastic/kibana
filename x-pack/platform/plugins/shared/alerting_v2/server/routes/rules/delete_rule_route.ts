@@ -36,7 +36,7 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'The rule was deleted successfully.',
       },
       404: {
         body: () => errorResponseSchema,

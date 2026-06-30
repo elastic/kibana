@@ -10,6 +10,7 @@
 export { ExecutionError } from './errors/execution_error';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
+export { readWorkflowVersioningEnabled } from './lib/read_workflow_versioning_enabled';
 export { buildWorkflowFilters } from './lib/workflow_filters';
 export type {
   BuildWorkflowFiltersParams,
@@ -25,3 +26,9 @@ export {
 } from './repositories/step_execution_repository';
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
+
+export type {
+  GetManagedWorkflowStatusOptions,
+  ManagedWorkflowStatus,
+  ManagedWorkflowStatusReport,
+} from './types';

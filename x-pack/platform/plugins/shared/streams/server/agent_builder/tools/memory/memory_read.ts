@@ -80,7 +80,7 @@ export const createMemoryReadTool = ({
   schema: memoryReadSchema,
   tags: ['memory'],
   handler: async ({ name, id, heading, offset, limit }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
 
     if (!name && !id) {
       return {

@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/core-base-browser-internal",
     "@kbn/core-http-browser",
+    "@kbn/core-spaces-common",
     "@kbn/core-http-common",
     "@kbn/core-execution-context-browser-internal",
     "@kbn/core-execution-context-browser",

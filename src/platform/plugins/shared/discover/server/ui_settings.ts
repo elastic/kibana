@@ -29,11 +29,15 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
+import {
+  MAX_DISCOVER_SESSION_COLUMNS,
+  MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,
+} from '@kbn/saved-search-plugin/common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
-  enableValidations: boolean
+  enableValidations: boolean // More strict validation used for serverless
 ) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup,
   enableValidations: boolean
@@ -49,8 +53,8 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: enableValidations
-      ? schema.arrayOf(schema.string(), { maxSize: 50 })
-      : schema.arrayOf(schema.string()),
+      ? schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS })
+      : schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
@@ -178,7 +182,7 @@ export const getUiSettings: (
         'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: schema.arrayOf(schema.string(), { maxSize: 20 }),
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {

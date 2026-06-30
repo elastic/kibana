@@ -18,7 +18,7 @@ The core task is: **generate a correct ES|QL query from a natural-language quest
 
 Each example drives one round-trip through `/api/agent_builder/converse` with `agent_id: 'elastic-ai-agent'` (Kibana's default agent), so the suite measures the full agent loop — `list_indices` / `get_index_mapping` / `generate_esql` / `execute_esql` — not a raw `inferenceClient.chatComplete` call. This is the supported successor to the LangSmith-era `DefaultAssistantGraph.invoke()` path and keeps the regression story anchored to the same production surface end users hit from the assistant UI.
 
-Generated queries are scored by two tiers of evaluators — the first measures *quality*, the second measures *observability metrics* derived from OTel traces. The set is pinned in `evaluate_dataset.test.ts` so a silent drop or rename surfaces in CI.
+Generated queries are scored by two tiers of evaluators — the first measures _quality_, the second measures _observability metrics_ derived from OTel traces. The set is pinned in `evaluate_dataset.test.ts` so a silent drop or rename surfaces in CI.
 
 ### How ES|QL is extracted from the agent response
 
@@ -34,12 +34,12 @@ Spec `beforeAll` materialises **six index mappings** (`postgres-logs-*`, `packet
 
 ### Quality (LLM- and code-judged)
 
-| Evaluator | Kind | Score | Source | Description |
-|---|---|---|---|---|
-| **ES\|QL Functional Equivalence** | `LLM` | 0 / 0.5 / 1 | suite-local (`src/evaluators/esql_functional_equivalence.ts`) | Calibrated three-point judge — same evaluator name as the framework default, but the rubric (allow-list of common transformations, deny-list of substantive differences, conservative tie-breaker on `equivalent_with_caveats`) is suite-local. Stamps `metadata.judgeVersion=v2` so dashboards can partition out the framework's v1 history if needed. See [Calibrated FuncEq + bind-param substitution](#calibrated-funceq--bind-param-substitution) below. |
-| **ES\|QL Validity** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_validity.ts`) | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network. |
-| **ES\|QL Execution Validity** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_execution.ts`) | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. Substitutes `?_tstart` / `?_tend` at the ES boundary so the agent's bind-parameter form executes cleanly. |
-| **ES\|QL Result Equivalence** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_result_equivalence.ts`) | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. Same bind-parameter substitution as the execution evaluator. |
+| Evaluator                         | Kind   | Score       | Source                                                        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------- | ------ | ----------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ES\|QL Functional Equivalence** | `LLM`  | 0 / 0.5 / 1 | suite-local (`src/evaluators/esql_functional_equivalence.ts`) | Calibrated three-point judge — same evaluator name as the framework default, but the rubric (allow-list of common transformations, deny-list of substantive differences, conservative tie-breaker on `equivalent_with_caveats`) is suite-local. Stamps `metadata.judgeVersion=v2` so dashboards can partition out the framework's v1 history if needed. See [Calibrated FuncEq + bind-param substitution](#calibrated-funceq--bind-param-substitution) below. |
+| **ES\|QL Validity**               | `CODE` | 0–1         | suite-local (`src/evaluators/esql_validity.ts`)               | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network.                                                                                                                                                                                                                                                                                                           |
+| **ES\|QL Execution Validity**     | `CODE` | 0–1         | suite-local (`src/evaluators/esql_execution.ts`)              | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. Substitutes `?_tstart` / `?_tend` at the ES boundary so the agent's bind-parameter form executes cleanly.                                                                                                                                                                                              |
+| **ES\|QL Result Equivalence**     | `CODE` | 0–1         | suite-local (`src/evaluators/esql_result_equivalence.ts`)     | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. Same bind-parameter substitution as the execution evaluator.                                                                                                                                                                                                                                               |
 
 #### Calibrated FuncEq + bind-param substitution
 
@@ -52,12 +52,12 @@ Two suite-local divergences from the framework defaults, both motivated by failu
 
 Each task captures the active span's `traceId` via `getCurrentTraceId()` and the framework's trace-based evaluators query the OTel traces captured by the EDOT collector. These set a baseline we can track over time without paying for additional LLM judging — drift in latency or token usage typically shows up here before quality regressions become visible.
 
-| Evaluator | Kind | Score | Source | Description |
-|---|---|---|---|---|
-| **Tool calls** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.toolCalls`) | Number of `gen_ai.*` tool-call spans captured for this task's trace. |
-| **Latency** | `CODE` | ms | `@kbn/evals` (`evaluators.traceBasedEvaluators.latency`) | End-to-end task latency, measured from the root span. |
-| **Input tokens** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.inputTokens`) | Prompt tokens summed across LLM spans. |
-| **Output tokens** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.outputTokens`) | Completion tokens summed across LLM spans. |
+| Evaluator         | Kind   | Score | Source                                                        | Description                                                                    |
+| ----------------- | ------ | ----- | ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Tool calls**    | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.toolCalls`)    | Number of `gen_ai.*` tool-call spans captured for this task's trace.           |
+| **Latency**       | `CODE` | ms    | `@kbn/evals` (`evaluators.traceBasedEvaluators.latency`)      | End-to-end task latency, measured from the root span.                          |
+| **Input tokens**  | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.inputTokens`)  | Prompt tokens summed across LLM spans.                                         |
+| **Output tokens** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.outputTokens`) | Completion tokens summed across LLM spans.                                     |
 | **Cached tokens** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.cachedTokens`) | Cached-prompt tokens summed across LLM spans (when the provider reports them). |
 
 In CI the trace-based evaluators query the `tracingEs` cluster declared in `kbn-evals` config (the same cluster Kibana exports traces to via `tracingExporters`). Locally, by default Kibana exports traces through the EDOT collector to ES on `host.docker.internal:9200`, while Scout serves the suite on port `9220`; the trace-based evaluators query Scout's local cluster and find no traces. Override with `TRACING_ES_URL=http://elastic:changeme@localhost:9200` (or whichever port your EDOT collector targets) to point the trace client at the cluster that actually holds the spans. Without the override the trace columns render as `-` in the score table — the four ES|QL evaluators are unaffected.
@@ -77,8 +77,8 @@ Two end-to-end EIS fanouts in Buildkite, same suite, same 31-example dataset, sa
 
 #### v1 → v2 lift on the same six EIS models
 
-| Task model (EIS) | Validity v1→v2 | ExecValidity v1→v2 | FuncEq v1→v2 | ResultEq v1→v2 |
-|---|---|---|---|---|
+| Task model (EIS)              | Validity v1→v2          | ExecValidity v1→v2      | FuncEq v1→v2            | ResultEq v1→v2          |
+| ----------------------------- | ----------------------- | ----------------------- | ----------------------- | ----------------------- |
 | `openai-gpt-5.4`              | 0.97 → 0.97 (**+0.00**) | 0.69 → 0.97 (**+0.28**) | 0.10 → 0.19 (**+0.09**) | 0.29 → 0.61 (**+0.32**) |
 | `anthropic-claude-4.6-opus`   | 0.97 → 1.00 (**+0.03**) | 0.66 → 0.95 (**+0.29**) | 0.03 → 0.15 (**+0.12**) | 0.26 → 0.58 (**+0.32**) |
 | `anthropic-claude-4.6-sonnet` | 0.97 → 0.97 (**+0.00**) | 0.81 → 0.90 (**+0.09**) | 0.07 → 0.18 (**+0.11**) | 0.42 → 0.52 (**+0.10**) |
@@ -98,15 +98,15 @@ ExecValidity, FuncEq and ResultEq all moved in the expected direction at the mea
 
 The same v2 build extends to six LiteLLM OSS connectors (`models:weekly-eis-models` + six `models:llm-gateway/<id>` labels, the alerts-rag lineup minus the two upstream-broken Mistral entries):
 
-| Task model (OSS) | Validity | ExecValidity | FuncEq | ResultEq |
-|---|---|---|---|---|
-| `DeepSeek-V4-Flash` | 0.87 | 0.81 | 0.11 | 0.45 |
-| `Kimi-K2-Thinking`  | 0.90 | 0.69 | 0.15 | 0.29 |
-| `Kimi-K2.5`         | 0.84 | 0.65 | 0.19 | 0.29 |
-| `Kimi-K2.6`         | 0.94 | 0.48 | 0.06 | 0.29 |
-| `Ministral-3B`      | 0.90 | 0.00 | 0.02 | 0.00 |
-| `Codestral-2501`    | 0.71 | 0.02 | 0.03 | 0.00 |
-| **OSS-6 mean**      | 0.86 | 0.44 | 0.09 | 0.22 |
+| Task model (OSS)    | Validity | ExecValidity | FuncEq | ResultEq |
+| ------------------- | -------- | ------------ | ------ | -------- |
+| `DeepSeek-V4-Flash` | 0.87     | 0.81         | 0.11   | 0.45     |
+| `Kimi-K2-Thinking`  | 0.90     | 0.69         | 0.15   | 0.29     |
+| `Kimi-K2.5`         | 0.84     | 0.65         | 0.19   | 0.29     |
+| `Kimi-K2.6`         | 0.94     | 0.48         | 0.06   | 0.29     |
+| `Ministral-3B`      | 0.90     | 0.00         | 0.02   | 0.00     |
+| `Codestral-2501`    | 0.71     | 0.02         | 0.03   | 0.00     |
+| **OSS-6 mean**      | 0.86     | 0.44         | 0.09   | 0.22     |
 
 `DeepSeek-V4-Flash` clears the EIS-6 ExecValidity mean (0.81 vs 0.74), confirming OSS connectors are evaluable end-to-end on this suite. `Ministral-3B` and `Codestral-2501` collapse on ExecValidity (~0%) — they hallucinate schema (`FROM logs.* ALL_USERS` etc.) and the queries don't execute against the fixture indices. Same root cause the SQL guard catches for `gpt-oss-120b`: too small / too specialized for ES|QL generation. The suite catches it; no eval-framework gap.
 
@@ -128,7 +128,7 @@ Each entry is an `Example`:
 
 ```typescript
 interface Example<TInput, TOutput> {
-  input: TInput;   // { question: string } — natural-language question
+  input: TInput; // { question: string } — natural-language question
   output: TOutput; // { query: string }    — ground-truth ES|QL
 }
 ```
@@ -200,23 +200,23 @@ nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
 
 ## Environment variables
 
-| Variable | Description | Default |
-|---|---|---|
-| `EVALUATION_CONNECTOR_ID` | Connector ID for the task model (required) | — |
-| `EVALUATIONS_ES_URL` | Elasticsearch URL for storing results | `http://elastic:changeme@localhost:9220` |
-| `EVALUATIONS_ES_API_KEY` | API key for the results cluster | (none) |
-| `EVALUATION_REPETITIONS` | Number of times to run each example | `1` |
-| `ESQL_GENERATION_DATASET_LIMIT` | Max examples to load | (all 31) |
-| `ESQL_GENERATION_DATASET_OFFSET` | Skip first N examples | `0` |
+| Variable                         | Description                                | Default                                  |
+| -------------------------------- | ------------------------------------------ | ---------------------------------------- |
+| `EVALUATION_CONNECTOR_ID`        | Connector ID for the task model (required) | —                                        |
+| `EVALUATIONS_ES_URL`             | Elasticsearch URL for storing results      | `http://elastic:changeme@localhost:9220` |
+| `EVALUATIONS_ES_API_KEY`         | API key for the results cluster            | (none)                                   |
+| `EVALUATION_REPETITIONS`         | Number of times to run each example        | `1`                                      |
+| `ESQL_GENERATION_DATASET_LIMIT`  | Max examples to load                       | (all 31)                                 |
+| `ESQL_GENERATION_DATASET_OFFSET` | Skip first N examples                      | `0`                                      |
 
 ---
 
 ## Viewing results
 
-Results are written to `.kibana-evaluations` in Elasticsearch. Use Kibana Dev Tools:
+Results are written to `.evaluations` in Elasticsearch. Use Kibana Dev Tools:
 
 ```
-GET .kibana-evaluations/_search
+GET .evaluations/_search
 {
   "query": { "term": { "run_id": "<run-id>" } },
   "sort": [{ "@timestamp": "desc" }],

@@ -124,6 +124,7 @@ function convertTreeToEuiTreeViewItems(
           selected={selected}
           status={status}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
+          usage={stepExecution?.usage}
           onClick={selectStepExecution}
         />
       ),
@@ -219,7 +220,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="listBullet" size="l" />}
+        icon={<EuiIcon type="listBullet" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -286,16 +287,15 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set('__overview', executionOverview);
     }
 
-    const triggerPseudoStep =
+    const triggerTreeItem =
       stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
       stepExecutionsTree.find((item) => item.stepType === '__inputs');
-
-    if (triggerPseudoStep && execution.context) {
+    if (triggerTreeItem && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
-        triggerPseudoStep.stepExecutionId = triggerExecution.id;
-        triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
+        triggerTreeItem.stepExecutionId = triggerExecution.id;
+        triggerTreeItem.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
@@ -359,7 +359,7 @@ export const WorkflowStepExecutionTree = ({
   return (
     <EuiEmptyPrompt
       {...emptyPromptCommonProps}
-      icon={<EuiIcon type="error" size="l" />}
+      icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
       title={
         <h2>
           <FormattedMessage

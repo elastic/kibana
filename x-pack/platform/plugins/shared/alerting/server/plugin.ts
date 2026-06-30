@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -366,6 +366,7 @@ export class AlertingPlugin {
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
+          totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
         });
       }
     }
@@ -618,6 +619,7 @@ export class AlertingPlugin {
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
+        getTotalFieldsLimit: () => this.config.alertsService.totalFieldsLimit,
         getContextInitializationPromise: (
           context: string,
           namespace: string
@@ -767,8 +769,8 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
+      auditService: core.security.audit,
       backfillClient: this.backfillClient!,
-      basePathService: core.http.basePath,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       data: plugins.data,

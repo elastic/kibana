@@ -45,10 +45,9 @@ export function MetricsExperienceStateProvider({
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
-      setCurrentPage(0);
       setSelectedDimensions(nextDimensions);
     },
-    [setCurrentPage, setSelectedDimensions]
+    [setSelectedDimensions]
   );
 
   const onPageChange = useCallback(

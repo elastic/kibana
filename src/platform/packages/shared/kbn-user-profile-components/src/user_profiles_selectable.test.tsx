@@ -9,9 +9,9 @@
 
 import React from 'react';
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 
-import type { UserProfile } from './user_profile';
 import { UserProfilesSelectable } from './user_profiles_selectable';
 
 const userProfiles: UserProfile[] = [

@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../..';
 import { getDeepAnalysisPlaybook } from './get_deep_analysis_playbook';
 
 describe('getDeepAnalysisPlaybook (traces)', () => {
   const invokeWith = (columns?: Array<{ name: string; type?: string }>) => {
-    const accessor = getDeepAnalysisPlaybook!(() => undefined, { context: {} as never });
+    const accessor = getDeepAnalysisPlaybook!(() => undefined, {
+      context: {} as never,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+    });
     return accessor({ dataView: undefined, query: undefined, columns });
   };
 

@@ -12,13 +12,14 @@ import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  keys,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  type UseEuiTheme,
+  EuiToolTip,
   euiBreakpoint,
   euiScrollBarStyles,
+  keys,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import type { EventEmitter } from 'events';
 
@@ -286,18 +287,25 @@ function DefaultEditorSideBarComponent({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiButtonIcon
-        aria-expanded={!isCollapsed}
-        aria-label={i18n.translate('visDefaultEditor.sidebar.collapseButtonAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('visDefaultEditor.sidebar.collapseButtonAriaLabel', {
           defaultMessage: 'Toggle sidebar',
         })}
-        className="visEditor__collapsibleSidebarButton"
-        data-test-subj="collapseSideBarButton"
-        color="text"
-        iconType={isCollapsed ? 'menuLeft' : 'menuRight'}
-        onClick={onClickCollapse}
-        css={defaultEditorSideBarStyles.collapsibleSideBarButton}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          aria-expanded={!isCollapsed}
+          aria-label={i18n.translate('visDefaultEditor.sidebar.collapseButtonAriaLabel', {
+            defaultMessage: 'Toggle sidebar',
+          })}
+          className="visEditor__collapsibleSidebarButton"
+          data-test-subj="collapseSideBarButton"
+          color="text"
+          iconType={isCollapsed ? 'menuLeft' : 'menuRight'}
+          onClick={onClickCollapse}
+          css={defaultEditorSideBarStyles.collapsibleSideBarButton}
+        />
+      </EuiToolTip>
     </>
   );
 }

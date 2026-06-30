@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -81,30 +82,35 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         gutterSize="s"
       >
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="transitionLeftIn"
-            aria-label={labels.toggleSidebar}
-            color="text"
-            size="s"
-            onClick={onToggleCondensed}
-          />
+          <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="transitionLeftIn"
+              aria-label={labels.toggleSidebar}
+              aria-expanded={false}
+              color="text"
+              size="s"
+              onClick={onToggleCondensed}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         {sidebarView === 'conversation' && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="plus"
-              display="base"
-              color="text"
-              size="s"
-              aria-label={labels.newConversation}
-              onClick={() => {
-                navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
-              }}
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
-              })}
-            />
+            <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plus"
+                display="base"
+                color="text"
+                size="s"
+                aria-label={labels.newConversation}
+                onClick={() => {
+                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+                }}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -141,13 +147,16 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         )}
         {
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="transitionLeftOut"
-              aria-label={labels.toggleSidebar}
-              color="text"
-              size="s"
-              onClick={onToggleCondensed}
-            />
+            <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="transitionLeftOut"
+                aria-label={labels.toggleSidebar}
+                aria-expanded={true}
+                color="text"
+                size="s"
+                onClick={onToggleCondensed}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         }
       </EuiFlexGroup>

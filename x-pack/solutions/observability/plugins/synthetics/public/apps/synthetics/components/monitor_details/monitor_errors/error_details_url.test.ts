@@ -51,4 +51,43 @@ describe('getErrorDetailsUrl', () => {
       })
     ).toBe('/app/synthetics/monitor/cfg-1/errors/state-1?spaceId=team-a');
   });
+
+  it('appends remoteName when provided so the Error Details page can route queries at the correct cluster', () => {
+    expect(
+      getErrorDetailsUrl({
+        basePath: '',
+        configId: 'cfg-1',
+        stateId: 'state-1',
+        locationId: 'loc-1',
+        remoteName: 'cluster-one',
+      })
+    ).toBe('/app/synthetics/monitor/cfg-1/errors/state-1?locationId=loc-1&remoteName=cluster-one');
+  });
+
+  it('omits remoteName when it is an empty string', () => {
+    expect(
+      getErrorDetailsUrl({
+        basePath: '',
+        configId: 'cfg-1',
+        stateId: 'state-1',
+        locationId: 'loc-1',
+        remoteName: '',
+      })
+    ).toBe('/app/synthetics/monitor/cfg-1/errors/state-1?locationId=loc-1');
+  });
+
+  it('appends spaceId and remoteName together when both are provided', () => {
+    expect(
+      getErrorDetailsUrl({
+        basePath: '/s/foo',
+        configId: 'cfg-1',
+        stateId: 'state-1',
+        locationId: 'loc-1',
+        spaceId: 'team-a',
+        remoteName: 'cluster-one',
+      })
+    ).toBe(
+      '/s/foo/app/synthetics/monitor/cfg-1/errors/state-1?locationId=loc-1&spaceId=team-a&remoteName=cluster-one'
+    );
+  });
 });

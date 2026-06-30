@@ -74,7 +74,8 @@ export const getFilterClickData = (
         return isCurrentLayer;
       }
       const value =
-        splitChartFormatter?.convert(row[splitChartDimension.id]) || row[splitChartDimension.id];
+        splitChartFormatter?.convertToText(row[splitChartDimension.id]) ||
+        row[splitChartDimension.id];
       return isCurrentLayer && value === layer.smAccessorValue;
     })
   );
@@ -176,7 +177,7 @@ export const getFilterPopoverTitle = (
   if (visParams.dimensions.buckets) {
     const accessor = getAccessor(visParams.dimensions.buckets, columnIndex);
     formattedTitle = accessor
-      ? formatter(getFormatByAccessor(accessor, visData.columns)).convert(seriesKey)
+      ? formatter(getFormatByAccessor(accessor, visData.columns)).convertToText(seriesKey)
       : '';
   }
   return formattedTitle || seriesKey;

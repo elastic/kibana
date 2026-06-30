@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -32,12 +33,10 @@ export interface ChartsSectionProps {
    * The list of assignees to add to the others filters
    */
   assignees: AssigneesIdsSelection[];
-  // TODO change this do dataView: DataView when we remove the newDataViewPickerEnabled feature flag
-  //  as we can extract the runtimeMappings directly here using experimentalDataView.getRuntimeMappings()
   /**
-   * The runtime mappings to correctly query the charts data
+   * The dataView used to fetch the alerts data
    */
-  runtimeMappings: RunTimeMappings;
+  dataView: DataView;
   /**
    * The page filters retrieved from the FiltersSection component to filter the charts
    */
@@ -47,87 +46,89 @@ export interface ChartsSectionProps {
 /**
  * UI section of the alerts page that renders a series of charts.
  */
-export const KPIsSection = memo(
-  ({ assignees, runtimeMappings, pageFilters }: ChartsSectionProps) => {
-    const dispatch = useDispatch();
+export const KPIsSection = memo(({ assignees, dataView, pageFilters }: ChartsSectionProps) => {
+  const dispatch = useDispatch();
+  const runtimeMappings = useMemo(
+    () => (dataView.getRuntimeMappings() as RunTimeMappings) ?? {},
+    [dataView]
+  );
 
-    const { data } = useKibana().services;
-    const { filterManager } = data.query;
-    const addFilter = useCallback(
-      ({ field, value, negate }: AddFilterProps) => {
-        filterManager.addFilters([
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              negate: negate ?? false,
-            },
-            ...(value != null
-              ? { query: { match_phrase: { [field]: value } } }
-              : { exists: { field } }),
+  const { data } = useKibana().services;
+  const { filterManager } = data.query;
+  const addFilter = useCallback(
+    ({ field, value, negate }: AddFilterProps) => {
+      filterManager.addFilters([
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: negate ?? false,
           },
-        ]);
-      },
-      [filterManager]
-    );
+          ...(value != null
+            ? { query: { match_phrase: { [field]: value } } }
+            : { exists: { field } }),
+        },
+      ]);
+    },
+    [filterManager]
+  );
 
-    const getGlobalFiltersQuerySelector = useMemo(
-      () => inputsSelectors.globalFiltersQuerySelector(),
-      []
-    );
-    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-      TableId.alertsOnAlertsPage
-    );
-    const topLevelFilters = useMemo(() => {
-      return [
-        ...filters,
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-        ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-        ...buildAlertAssigneesFilter(assignees),
-      ];
-    }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
-    const alertsDefaultFilters = useMemo(
-      () => [...topLevelFilters, ...(pageFilters ?? [])],
-      [topLevelFilters, pageFilters]
-    );
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+    TableId.alertsOnAlertsPage
+  );
+  const topLevelFilters = useMemo(() => {
+    return [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...buildAlertAssigneesFilter(assignees),
+    ];
+  }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+  const alertsDefaultFilters = useMemo(
+    () => [...topLevelFilters, ...(pageFilters ?? [])],
+    [topLevelFilters, pageFilters]
+  );
 
-    const pageFiltersIsLoading = useMemo(() => !Array.isArray(pageFilters), [pageFilters]);
+  const pageFiltersIsLoading = useMemo(() => !Array.isArray(pageFilters), [pageFilters]);
 
-    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-    const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
 
-    const [{ signalIndexName }] = useUserData();
+  const [{ signalIndexName }] = useUserData();
 
-    const updateDateRangeCallback = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        dispatch(
-          setAbsoluteRangeDatePicker({
-            id: InputsModelId.global,
-            from: new Date(min).toISOString(),
-            to: new Date(max).toISOString(),
-          })
-        );
-      },
-      [dispatch]
-    );
+  const updateDateRangeCallback = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        })
+      );
+    },
+    [dispatch]
+  );
 
-    return (
-      <ChartPanels
-        addFilter={addFilter}
-        alertsDefaultFilters={alertsDefaultFilters}
-        isLoadingIndexPattern={pageFiltersIsLoading}
-        query={query}
-        runtimeMappings={runtimeMappings}
-        signalIndexName={signalIndexName}
-        updateDateRangeCallback={updateDateRangeCallback}
-      />
-    );
-  }
-);
+  return (
+    <ChartPanels
+      addFilter={addFilter}
+      alertsDefaultFilters={alertsDefaultFilters}
+      isLoadingIndexPattern={pageFiltersIsLoading}
+      query={query}
+      runtimeMappings={runtimeMappings}
+      signalIndexName={signalIndexName}
+      updateDateRangeCallback={updateDateRangeCallback}
+    />
+  );
+});
 
 KPIsSection.displayName = 'KPIsSection';

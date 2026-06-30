@@ -17,6 +17,15 @@ import {
 import type { FlyoutDeps } from '../types';
 import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
+import type { IndexUpdateService } from '../services/index_update_service';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 describe('createFlyout', () => {
   const coreStart = {
@@ -32,37 +41,42 @@ describe('createFlyout', () => {
   const indexEditorTelemetryService = new IndexEditorTelemetryService(
     {
       reportEvent: jest.fn(),
-    } as any,
+    } as unknown as AnalyticsServiceStart,
     true,
     true,
     'test-source'
   );
+
+  const totalHits$ = new BehaviorSubject<number>(0);
+  const dataTableColumns$ = new Subject<DatatableColumn[]>();
 
   const indexUpdateService = {
     setIndexName: jest.fn(),
     setIndexCreated: jest.fn(),
     exit: jest.fn(),
     completed$: of(),
-    totalHits$: new BehaviorSubject<number>(0),
-    dataTableColumns$: new Subject<any[]>(),
-  };
+    totalHits$,
+    dataTableColumns$,
+  } as unknown as IndexUpdateService;
 
   const deps: FlyoutDeps = {
-    coreStart: coreStart as any,
+    coreStart: coreStart as unknown as CoreStart,
     data: coreStart.data,
-    indexUpdateService: indexUpdateService as any,
+    indexUpdateService,
     indexEditorTelemetryService,
-    uiActions: {} as any,
-    fieldFormats: {} as any,
-    share: {} as any,
-    fileUpload: {} as any,
-    storage: {} as any,
+    uiActions: {} as UiActionsStart,
+    fieldFormats: {} as FieldFormatsStart,
+    share: {} as SharePluginStart,
+    fileUpload: {} as FileUploadPluginStart,
+    storage: {} as Storage,
     existingIndexName: undefined,
+    kql: {} as KqlPluginStart,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    indexUpdateService.totalHits$.next(0);
+    totalHits$.next(0);
+    dataTableColumns$.next([]);
   });
 
   it('should call trackFlyoutOpened with correct data when index exists', async () => {
@@ -75,8 +89,11 @@ describe('createFlyout', () => {
       triggerSource: 'test-source',
     });
 
-    indexUpdateService.totalHits$.next(10);
-    indexUpdateService.dataTableColumns$.next([{ name: 'field1' }, { name: 'field2' }]);
+    totalHits$.next(10);
+    dataTableColumns$.next([
+      { id: 'field1', name: 'field1', meta: { type: 'string' } },
+      { id: 'field2', name: 'field2', meta: { type: 'string' } },
+    ]);
 
     expect(trackFlyoutOpenedSpy).toHaveBeenCalledWith({
       docCount: 10,

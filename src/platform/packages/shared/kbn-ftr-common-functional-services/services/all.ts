@@ -22,6 +22,8 @@ import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 import { SamlAuthProvider } from './saml_auth';
 import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 import { SecurityServiceProvider } from './security';
+import { CookieAuthService } from './cookie_auth';
+import { BrowserAuthService } from './browser_auth';
 
 export const services = {
   es: EsProvider,
@@ -40,4 +42,6 @@ export const services = {
   esSupertest: ElasticsearchSupertestProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   security: SecurityServiceProvider,
+  cookieAuth: CookieAuthService,
+  browserAuth: BrowserAuthService,
 };

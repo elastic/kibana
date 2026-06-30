@@ -210,6 +210,55 @@ describe('LifecyclePhase', () => {
       );
     });
 
+    it('should display default repository required callout for frozen phase', () => {
+      const onCreateDefaultRepository = jest.fn();
+      const onRefreshDefaultRepository = jest.fn();
+
+      render(
+        <LifecyclePhase
+          label="frozen"
+          color="#00FFFF"
+          showDefaultRepositoryCallout
+          onCreateDefaultRepository={onCreateDefaultRepository}
+          onRefreshDefaultRepository={onRefreshDefaultRepository}
+          isRefreshingDefaultRepository={false}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.getByTestId('lifecyclePhase-frozen-warningIcon')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(
+        screen.getByTestId('lifecyclePhase-frozen-defaultRepositoryRequiredCallout')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('lifecyclePhase-frozen-snapshotRepository')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-frozen-createDefaultRepositoryButton'));
+      expect(onCreateDefaultRepository).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-frozen-refreshDefaultRepositoryButton'));
+      expect(onRefreshDefaultRepository).toHaveBeenCalledTimes(1);
+    });
+
+    it('should display warning icon for frozen phase enterprise callout', () => {
+      render(
+        <LifecyclePhase
+          label="frozen"
+          color="#00FFFF"
+          searchableSnapshot="aws-s3-repo"
+          showEnterpriseCallout
+          onUpgradeEnterprise={jest.fn()}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.getByTestId('lifecyclePhase-frozen-warningIcon')).toBeInTheDocument();
+    });
+
     it('should not display searchable snapshot for non-cold/frozen phases', () => {
       render(
         <LifecyclePhase

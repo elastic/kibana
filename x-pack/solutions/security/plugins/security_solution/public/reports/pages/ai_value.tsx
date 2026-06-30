@@ -5,19 +5,26 @@
  * 2.0.
  */
 import React, { useState, useRef, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContext,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
-import { EXPORT_REPORT } from '../components/ai_value/translations';
+import {
+  EXPORT_REPORT,
+  SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+} from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
-import { AIValueMetrics } from '../components/ai_value';
+import { AIValueReport } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
@@ -49,18 +56,18 @@ import {
 const BaseComponent = () => {
   const exportContext = useAIValueExportContext();
   const isExportMode = exportContext?.isExportMode === true;
-  const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const timerange = useDeepEqualSelector(inputsSelectors.valueReportTimeRangeSelector);
   const { from, to } = timerange;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
 
-  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
+  const isSourcererLoading = status !== 'ready';
 
   const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
-  const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
+  const [hasReportData, setHasReportData] = useState(false);
+  const [isDatePickerDisabled, setIsDatePickerDisabled] = useState(true);
+  const [isSampleMode, setIsSampleMode] = useState(false);
   const exportPDFRef = useRef<(() => void) | null>(null);
 
   const { serverless } = useKibana().services;
@@ -83,35 +90,51 @@ const BaseComponent = () => {
       isServerless ? (
         <EuiButtonEmpty
           className="exportPdfButton"
+          data-test-subj="aiValueExportButton"
           iconType="export"
           onClick={() => exportPDFRef.current?.()}
           size="s"
           aria-label={EXPORT_REPORT}
+          isDisabled={!hasReportData}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
       ) : (
         <EuiButtonEmpty
           className="exportPdfButton"
+          data-test-subj="aiValueExportButton"
           iconType="export"
           buttonRef={setExportButtonElement}
           size="s"
           aria-label={EXPORT_REPORT}
           onClick={toggleContextMenu}
-          isLoading={!isExportEnabled}
+          isDisabled={!hasReportData || !isExportEnabled}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
       ),
-    [isServerless, isExportEnabled, toggleContextMenu]
+    [isServerless, isExportEnabled, hasReportData, toggleContextMenu]
   );
 
   if (!hasSocManagementCapability) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
+  }
+
+  if (status === 'error') {
+    return (
+      <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="error"
+          title={<h2>{i18n.AI_VALUE_LOAD_ERROR_TITLE}</h2>}
+          body={<p>{i18n.AI_VALUE_LOAD_ERROR_BODY}</p>}
+        />
+      </SecuritySolutionPageWrapper>
+    );
   }
 
   return (
@@ -130,38 +153,61 @@ const BaseComponent = () => {
         <HeaderPage
           title={i18n.AI_VALUE_DASHBOARD}
           rightSideItems={[
-            <SuperDatePicker
-              id={InputsModelId.valueReport}
-              showUpdateButton="iconOnly"
-              width="auto"
-              compressed
-            />,
-            ...(hasAttackDiscoveries ? [exportButton] : []),
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {isSampleMode ? (
+                  <EuiContext
+                    i18n={{
+                      mapping: {
+                        'euiSuperUpdateButton.cannotUpdateTooltip':
+                          SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+                      },
+                    }}
+                  >
+                    <SuperDatePicker
+                      id={InputsModelId.valueReport}
+                      showUpdateButton="iconOnly"
+                      width="auto"
+                      compressed
+                      disabled={isSourcererLoading || isDatePickerDisabled}
+                    />
+                  </EuiContext>
+                ) : (
+                  <SuperDatePicker
+                    id={InputsModelId.valueReport}
+                    showUpdateButton="iconOnly"
+                    width="auto"
+                    compressed
+                    disabled={isSourcererLoading || isDatePickerDisabled}
+                  />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{exportButton}</EuiFlexItem>
+            </EuiFlexGroup>,
           ]}
         />
       )}
-      {isSourcererLoading ? (
-        <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-      ) : (
-        <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-          <EuiFlexItem>
-            <ValueReportExporter>
-              {(exportPDF) => {
-                // Store the export function in the ref
-                exportPDFRef.current = exportPDF;
+      <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+        <EuiFlexItem>
+          <ValueReportExporter>
+            {(exportPDF) => {
+              // Store the export function in the ref
+              exportPDFRef.current = exportPDF;
 
-                return (
-                  <AIValueMetrics
-                    from={from}
-                    to={to}
-                    setHasAttackDiscoveries={setHasAttackDiscoveries}
-                  />
-                );
-              }}
-            </ValueReportExporter>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+              return (
+                <AIValueReport
+                  from={from}
+                  to={to}
+                  setHasReportData={setHasReportData}
+                  setIsDatePickerDisabled={setIsDatePickerDisabled}
+                  setIsSampleMode={setIsSampleMode}
+                  isSourcererLoading={isSourcererLoading}
+                />
+              );
+            }}
+          </ValueReportExporter>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </SecuritySolutionPageWrapper>
   );
 };

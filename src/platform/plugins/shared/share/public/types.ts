@@ -166,6 +166,7 @@ export interface ExportShare<S extends SharingData = SharingData>
        */
       supportsAbsoluteTime?: boolean;
       renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
+      flyoutAriaLabel?: string;
     } & (
       | {
           generateAssetComponent?: never;
@@ -187,25 +188,27 @@ export interface ExportShare<S extends SharingData = SharingData>
   groupId: 'export';
 }
 
+export interface ExportShareParameters extends Record<string, unknown> {
+  label: React.FC<{ openFlyout: () => void }>;
+  toolTipContent?: ReactNode;
+  flyoutContent: React.FC<{
+    closeFlyout: () => void;
+    flyoutRef: React.RefObject<HTMLDivElement>;
+  }>;
+  flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+  flyoutAriaLabel?: string;
+  shouldRender: ({
+    availableExportItems,
+  }: {
+    availableExportItems: ExportShareConfig[];
+  }) => boolean;
+}
+
 /**
  * @description Share integration implementation definition that build off exports within kibana,
  * reach out to the shared ux team before settling on using this interface
  */
-export interface ExportShareDerivatives
-  extends ShareIntegration<{
-    label: React.FC<{ openFlyout: () => void }>;
-    toolTipContent?: ReactNode;
-    flyoutContent: React.FC<{
-      closeFlyout: () => void;
-      flyoutRef: React.RefObject<HTMLDivElement>;
-    }>;
-    flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
-    shouldRender: ({
-      availableExportItems,
-    }: {
-      availableExportItems: ExportShareConfig[];
-    }) => boolean;
-  }> {
+export interface ExportShareDerivatives extends ShareIntegration<ExportShareParameters> {
   groupId: 'exportDerivatives';
 }
 

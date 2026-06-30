@@ -6,6 +6,8 @@
  */
 
 import moment from 'moment';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { escapeQuotes } from '@kbn/es-query';
 
 export const CLIENT_DEFAULTS = {
   ABSOLUTE_DATE_RANGE_START: 0,
@@ -80,6 +82,38 @@ export const getTimespanFilter = ({ from, to }: { from: string; to: string }) =>
   },
 });
 
+/**
+ * All documents of a single Synthetics check run (summary, steps, screenshots,
+ * network events) are written at essentially the same instant. Queries that
+ * target a specific `monitor.check_group` therefore only need to look at a
+ * narrow window around the run's `@timestamp`.
+ *
+ * Bounding such queries lets Elasticsearch prune shards during the `can_match`
+ * phase — including slow, throttled frozen-tier searchable snapshots — instead
+ * of fanning out across every backing index. The buffer is intentionally far
+ * larger than any realistic journey duration so it can never drop a run's
+ * documents.
+ */
+export const CHECK_GROUP_TIME_RANGE_BUFFER_MS = 60 * 60 * 1000; // 1 hour
+
+export const getCheckGroupTimeRangeFilter = (timestamp: string): QueryDslQueryContainer => {
+  const runTime = new Date(timestamp).getTime();
+  if (Number.isNaN(runTime)) {
+    // These routes are client-callable and validate `timestamp` only by length,
+    // so an unparseable value would make the `toISOString()` calls below throw a
+    // RangeError (HTTP 500). Fall back to no bound instead of crashing.
+    return { match_all: {} };
+  }
+  return {
+    range: {
+      '@timestamp': {
+        gte: new Date(runTime - CHECK_GROUP_TIME_RANGE_BUFFER_MS).toISOString(),
+        lte: new Date(runTime + CHECK_GROUP_TIME_RANGE_BUFFER_MS).toISOString(),
+      },
+    },
+  };
+};
+
 export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 
 export const getLocationFilter = ({
@@ -115,7 +149,13 @@ export const getTimeSpanFilter = () => ({
 
 export const getQueryFilters = (query: string) => ({
   query_string: {
-    query: `${query}`,
+    query: `"${escapeQuotes(query)}"`,
+    // Free-text fields the search box should match against. Status codes
+    // are filtered precisely via a separate `terms` query on
+    // `http.response.status_code` (driven by the status-code chips in the
+    // Error Insights panel) so we deliberately do NOT include it here:
+    // searching for "200" in this multi-field query string would also
+    // match e.g. URL ports or substrings of other ids.
     fields: [
       'monitor.name.text',
       'tags',
@@ -124,6 +164,8 @@ export const getQueryFilters = (query: string) => ({
       'urls',
       'hosts',
       'monitor.project.id',
+      'error.message',
+      'url.domain',
     ],
   },
 });

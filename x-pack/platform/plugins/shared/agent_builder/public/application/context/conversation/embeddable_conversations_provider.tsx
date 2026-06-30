@@ -10,13 +10,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { agentBuilderDefaultAgentId, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -111,15 +112,17 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const setConversationId = useCallback(
     (id?: string) => {
-      if (currentProps.newConversation && id) {
-        // reset new conversation flag when there is a valid id
-        setCurrentProps({ ...currentProps, newConversation: undefined });
-      }
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
       }
+      // Functional updater prevents stale closure capture of currentProps.
+      setCurrentProps((prevProps) => ({
+        ...prevProps,
+        // reset new conversation flag when a valid id is assigned
+        ...(prevProps.newConversation && id ? { newConversation: undefined } : {}),
+      }));
     },
-    [currentProps, persistedConversationId, updatePersistedConversationId]
+    [persistedConversationId, updatePersistedConversationId]
   );
 
   const validateAndSetConversationId = useCallback(
@@ -191,7 +194,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
   }, []);
 
-  const upsertAttachments = useCallback((attachments: AttachmentInput[]) => {
+  const upsertAttachments = useCallback((attachments: ConversationAttachment[]) => {
     if (attachments.length === 0) {
       return;
     }
@@ -202,10 +205,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
-    }));
+    setCurrentProps((prevProps) => {
+      if (!prevProps.attachments) return prevProps;
+      return {
+        ...prevProps,
+        attachments: removeAttachmentFromList(prevProps.attachments, attachmentIndex),
+      };
+    });
   }, []);
 
   const setAgentId = useCallback((id: string) => {

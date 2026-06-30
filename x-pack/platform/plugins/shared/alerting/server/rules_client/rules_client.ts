@@ -9,7 +9,13 @@ import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
 import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
-import type { SanitizedRule, RuleTypeParams } from '../types';
+import { snoozeAlertInstance } from '../application/rule/methods/snooze_alert_instance/snooze_instance';
+import type {
+  SnoozeAlertInstanceParams,
+  SnoozeAlertInstanceQuery,
+  SnoozeAlertInstanceBody,
+} from '../application/rule/methods/snooze_alert_instance/types';
+import type { RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
 import type { CloneRuleParams } from '../application/rule/methods/clone';
@@ -52,7 +58,7 @@ import type { AggregateParams } from '../application/rule/methods/aggregate/type
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import type { DeleteRuleParams } from '../application/rule/methods/delete';
 import { deleteRule } from '../application/rule/methods/delete';
-import type { BulkDeleteRulesRequestBody } from '../application/rule/methods/bulk_delete';
+import type { BulkDeleteRulesParams } from '../application/rule/methods/bulk_delete/types';
 import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
 import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bulk_disable';
 import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
@@ -62,6 +68,8 @@ import type { BulkEditRuleParamsOptions } from '../application/rule/methods/bulk
 import { bulkEditRuleParamsWithReadAuth } from '../application/rule/methods/bulk_edit_params/bulk_edit_rule_params';
 import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
+import type { BulkCreateRulesParams } from '../application/rule/methods/bulk_create';
+import { bulkCreateRules } from '../application/rule/methods/bulk_create';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
@@ -69,6 +77,8 @@ import { muteInstance } from '../application/rule/methods/mute_alert/mute_instan
 import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
+import { unsnoozeAlertInstance } from '../application/rule/methods/unsnooze_alert/unsnooze_instance';
+import type { UnsnoozeAlertParams } from '../application/rule/methods/unsnooze_alert/types';
 import { bulkMuteUnmuteInstances } from '../application/rule/methods/bulk_mute_unmute_alerts/bulk_mute_unmute_instances';
 import type { BulkMuteUnmuteAlertsParams } from '../application/rule/types';
 import type { RunSoonParams } from '../application/rule/methods/run_soon';
@@ -118,17 +128,7 @@ import type {
 import type { FindGapAutoFillSchedulerLogsParams } from '../application/gaps/auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
 import { findGapAutoFillSchedulerLogs } from '../application/gaps/auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
-export type ConstructorOptions = Omit<
-  RulesClientContext,
-  'fieldsToExcludeFromPublicApi' | 'minimumScheduleIntervalInMs'
->;
-
-export const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
-  'monitoring',
-  'mapped_params',
-  'snoozeSchedule',
-  'activeSnoozes',
-];
+export type ConstructorOptions = Omit<RulesClientContext, 'minimumScheduleIntervalInMs'>;
 
 export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
   'activeSnoozes',
@@ -151,6 +151,7 @@ export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParam
   'revision',
   'running',
   'snoozeSchedule',
+  'snoozedInstances',
   'systemActions',
   'updatedBy',
   'updatedAt',
@@ -163,7 +164,6 @@ export class RulesClient {
     this.context = {
       ...context,
       minimumScheduleIntervalInMs: parseDuration(context.minimumScheduleInterval.value),
-      fieldsToExcludeFromPublicApi,
     };
   }
 
@@ -204,7 +204,10 @@ export class RulesClient {
 
   public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
     bulkGetRules<Params>(this.context, params);
-  public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
+  public bulkCreateRules = <Params extends RuleTypeParams = never>(
+    params: BulkCreateRulesParams<Params>
+  ) => bulkCreateRules<Params>(this.context, params);
+  public bulkDeleteRules = (options: BulkDeleteRulesParams) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
@@ -227,11 +230,18 @@ export class RulesClient {
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: { params: MuteAlertParams; query: MuteAlertQuery }) =>
     muteInstance(this.context, options);
+  public snoozeAlertInstance = (options: {
+    params: SnoozeAlertInstanceParams;
+    query: SnoozeAlertInstanceQuery;
+    body: SnoozeAlertInstanceBody;
+  }) => snoozeAlertInstance(this.context, options);
   public bulkMuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
     bulkMuteUnmuteInstances(this.context, { params: options, mute: true });
   public bulkUnmuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
     bulkMuteUnmuteInstances(this.context, { params: options, mute: false });
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
+  public unsnoozeAlertInstance = (options: UnsnoozeAlertParams) =>
+    unsnoozeAlertInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 

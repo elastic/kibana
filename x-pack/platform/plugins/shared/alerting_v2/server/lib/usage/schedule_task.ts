@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStartDependencies } from '../../types';
 import { emptyState } from './task_state';
-import { TASK_ID, SCHEDULE, TELEMETRY_TASK_TYPE } from './task_definition';
+import { TASK_ID, SCHEDULE, TELEMETRY_TASK_TYPE } from './constants';
 
 export async function scheduleTelemetryTask({
   logger,

@@ -252,6 +252,42 @@ describe('StepIoService', () => {
 
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
     });
+
+    it('clears the evicted flag so rehydration does not overwrite fresh output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: 0,
+      });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'run_health_check',
+        { stale: true },
+        1,
+        'workflow.execute'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.hasEvictedOutputs()).toBe(true);
+
+      service.setStepOutput('step-1', { health: 'ok' });
+
+      expect(service.hasEvictedOutputs()).toBe(false);
+      expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'step-1',
+          output: { stale: true },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.rehydrateOutputs(['step-1']);
+
+      expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
   });
 
   describe('size threshold (driven through setStepOutput)', () => {
@@ -459,6 +495,147 @@ describe('StepIoService', () => {
 
       expect(service.getStepOutput('step-1')).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
+    describe('loop source pinning (pinForeachSource / unpinForeachScope)', () => {
+      it('keeps a pinned loop source resident across an eviction cycle', async () => {
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        // A >threshold source output the loop iterates over.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'source-exec',
+          'bigSource',
+          { items: 'x'.repeat(200) },
+          250,
+          'connector'
+        );
+
+        // Pin it as a foreach source (the expression references `bigSource`).
+        service.pinForeachSource('myForeach', '{{ steps.bigSource.output.items }}');
+
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        // Without the pin this would be evicted (it is above threshold); the
+        // pin must keep it resident for the lifetime of the loop.
+        expect(service.getStepOutput('source-exec')).toEqual({ items: 'x'.repeat(200) });
+        expect(service.hasEvictedOutputs()).toBe(false);
+      });
+
+      it('allows the source to be evicted again after the loop scope is unpinned', async () => {
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'source-exec',
+          'bigSource',
+          { items: 'x'.repeat(200) },
+          250,
+          'connector'
+        );
+
+        service.pinForeachSource('myForeach', '{{ steps.bigSource.output.items }}');
+
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('source-exec')).toBeDefined();
+
+        // Loop exits -> release the pin. The output is no longer protected:
+        // re-touching it re-queues it for the deferred eviction cycle (mirrors a
+        // subsequent step write in the same flush), and it is now evicted.
+        service.unpinForeachScope('myForeach');
+        service.setStepOutput('source-exec', { items: 'x'.repeat(200) }, 250);
+
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        expect(service.getStepOutput('source-exec')).toBeUndefined();
+        expect(service.hasEvictedOutputs()).toBe(true);
+      });
+
+      it('keeps the source pinned until every loop scope that pinned it has unpinned', async () => {
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'source-exec',
+          'bigSource',
+          { items: 'x'.repeat(200) },
+          250,
+          'connector'
+        );
+
+        // Two distinct loop scopes pin the same source (nested/sibling loops).
+        service.pinForeachSource('loopA', '{{ steps.bigSource.output.items }}');
+        service.pinForeachSource('loopB', '{{ steps.bigSource.output.items }}');
+
+        // Inner loop exits — source must stay resident for the outer loop. Even
+        // re-touching it (re-queuing for eviction) must not evict while loopA
+        // still holds the pin.
+        service.unpinForeachScope('loopB');
+        service.setStepOutput('source-exec', { items: 'x'.repeat(200) }, 250);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('source-exec')).toBeDefined();
+        expect(service.hasEvictedOutputs()).toBe(false);
+
+        // Outer loop exits — now nothing pins it and it can be evicted.
+        service.unpinForeachScope('loopA');
+        service.setStepOutput('source-exec', { items: 'x'.repeat(200) }, 250);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('source-exec')).toBeUndefined();
+      });
+
+      it('re-pinning the same loop-source step releases its previous execution (no per-iteration leak)', async () => {
+        // Models a `while` condition referencing a step produced *inside* the
+        // loop body: each iteration yields a new execution id for the same
+        // stepId. Re-pinning must keep only the latest resident, not one copy
+        // per iteration (otherwise the eviction memory protection is defeated).
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+
+        // Iteration 1 produces execution `inner-exec-1` of step `innerProducer`.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'inner-exec-1',
+          'innerProducer',
+          { value: 'a'.repeat(200) },
+          250,
+          'connector'
+        );
+        service.pinLoopSource('whileLoop', 'steps.innerProducer.output.value : "x"');
+        expect(service.getStepOutput('inner-exec-1')).toBeDefined();
+
+        // Iteration 2 produces a new execution `inner-exec-2` of the same step.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'inner-exec-2',
+          'innerProducer',
+          { value: 'b'.repeat(200) },
+          250,
+          'connector'
+        );
+        // exit-while re-pins before evaluating the next iteration.
+        service.pinLoopSource('whileLoop', 'steps.innerProducer.output.value : "x"');
+
+        // The previous iteration's output is no longer pinned and becomes
+        // evictable; the current iteration's output stays resident.
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        expect(service.getStepOutput('inner-exec-1')).toBeUndefined();
+        expect(service.getStepOutput('inner-exec-2')).toEqual({ value: 'b'.repeat(200) });
+
+        // On loop exit nothing is pinned, so the latest becomes evictable too.
+        service.unpinLoopScope('whileLoop');
+        service.setStepOutput('inner-exec-2', { value: 'b'.repeat(200) }, 250);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('inner-exec-2')).toBeUndefined();
+      });
     });
 
     it('does not evict failed steps (output: null is semantic)', async () => {
@@ -1296,6 +1473,74 @@ describe('StepIoService', () => {
         node: stepCNode,
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
+
+    it('preserves fresh output when a deferred step completes on resume before flush', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness();
+      state.updateWorkflowExecution({ stepExecutionIds: ['exec-child'] });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([
+        {
+          id: 'exec-child',
+          stepId: 'run_health_check',
+          stepType: 'workflow.execute',
+          status: ExecutionStatus.WAITING_FOR_CHILD,
+        } as EsWorkflowStepExecution,
+      ]);
+      await service.load();
+
+      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('exec-child')).toBeUndefined();
+
+      state.upsertStep({
+        id: 'exec-child',
+        stepId: 'run_health_check',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.COMPLETED,
+      });
+      const childOutput = { health: 'ok' };
+      service.setStepOutput('exec-child', childOutput);
+
+      const workflow = {
+        name: 'Parent',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'run_health_check',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child' },
+          } as ConnectorStep,
+          {
+            name: 'log_result',
+            type: 'console',
+            with: { message: '{{steps.run_health_check.output | json}}' },
+          } as ConnectorStep,
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const logResultNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'log_result')!;
+
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-child',
+          output: null,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: logResultNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      expect(service.getStepOutput('exec-child')).toEqual(childOutput);
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 

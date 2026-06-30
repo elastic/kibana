@@ -1,0 +1,173 @@
+{
+  "sha1": "e62501d0bfed5ec7e2269cc6b3f211a9fa39dde2",
+  "tests": [
+    {
+      "id": "be66c17a1888746-11e36bad76c85ff",
+      "title": "Data Views feature controls security global indexPatterns all privileges - shows management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-792bfe7b655ddce",
+      "title": "Data Views feature controls security global indexPatterns all privileges - listing shows create button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-23cdc0daea2dd58",
+      "title": "Data Views feature controls security global indexPatterns all privileges - doesn't show read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-9f83e6f37c86562",
+      "title": "Data Views feature controls security global indexPatterns read-only privileges - shows Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-529911f05c62826",
+      "title": "Data Views feature controls security global indexPatterns read-only privileges - listing shows disabled create button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-29280bd8bb9d2ac",
+      "title": "Data Views feature controls security global indexPatterns read-only privileges - shows read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-2b8afbc3a72e1c8",
+      "title": "Data Views feature controls security no indexPatterns privileges - does not show Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "be66c17a1888746-6666095d46e84ea",
+      "title": "Data Views feature controls security no indexPatterns privileges - does not allow navigation to data views management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_security.spec.ts",
+        "line": 124,
+        "column": 7
+      }
+    },
+    {
+      "id": "c3ab6acd7c28628-001393ef2284f87",
+      "title": "Data Views feature controls spaces space with no features disabled - shows Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_spaces.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "c3ab6acd7c28628-6c7aad6f28ee1b3",
+      "title": "Data Views feature controls spaces space with no features disabled - data views listing shows create button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_spaces.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "c3ab6acd7c28628-6529ba46da0f526",
+      "title": "Data Views feature controls spaces space with Data Views disabled - redirects to management home",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_feature_controls_spaces.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "91d190d6bf56eeb-c8986ff2aa37ff6",
+      "title": "Data Views spaces management data view can be assigned to a custom space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_spaces_management.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    }
+  ]
+}

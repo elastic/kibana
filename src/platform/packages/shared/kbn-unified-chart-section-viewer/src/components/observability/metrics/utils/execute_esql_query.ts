@@ -22,7 +22,7 @@ import {
 import {
   EsqlResponseError,
   extractEsqlEmbeddedError,
-} from '../../../chart/utils/esql_response_error';
+} from '../../../../common/errors/esql_response_error';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 import { getMetricsExecutionContext } from './execution_context';
 

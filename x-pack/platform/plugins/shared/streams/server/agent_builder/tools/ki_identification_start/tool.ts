@@ -9,22 +9,22 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { OnboardingStep } from '@kbn/streams-schema';
+import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
-import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
-export const STREAMS_KI_IDENTIFICATION_START_TOOL_ID =
-  'platform.streams.sig_events.ki_identification_start';
+export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
+  'platform.sig_events.ki_identification_start';
 
 const onboardingStartSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
   steps: z
-    .array(z.enum(OnboardingStep))
+    .array(z.enum(KIsOnboardingStep))
     .optional()
-    .default([OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration])
+    .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
     .describe('Optional ordered KI identification steps for the background task.'),
   connectors: z
     .object({
@@ -35,13 +35,13 @@ const onboardingStartSchema = z.object({
 });
 
 export const createKiIdentificationStartTool = ({
-  getScopedClients,
   telemetry,
+  streamsKIsOnboardingClient,
 }: {
-  getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
-  id: STREAMS_KI_IDENTIFICATION_START_TOOL_ID,
+  id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
     Start stream Knowledge Indicator (KI) identification as a background task.
@@ -61,17 +61,16 @@ export const createKiIdentificationStartTool = ({
   schema: onboardingStartSchema,
   handler: async ({ stream_name: streamName, steps, connectors }, { request }) => {
     try {
-      const { taskClient } = await getScopedClients({ request });
       const resolvedSteps = steps ?? [
-        OnboardingStep.FeaturesIdentification,
-        OnboardingStep.QueriesGeneration,
+        KIsOnboardingStep.FeaturesIdentification,
+        KIsOnboardingStep.QueriesGeneration,
       ];
 
       const data = await startKiIdentificationToolHandler({
         streamName,
         steps: resolvedSteps,
         connectors,
-        taskClient,
+        streamsKIsOnboardingClient,
         request,
       });
 

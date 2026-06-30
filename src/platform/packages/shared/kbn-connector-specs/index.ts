@@ -34,6 +34,7 @@ export {
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from './src/connector_utils';
 export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
+export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';

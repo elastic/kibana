@@ -135,7 +135,6 @@ export const bulkEnableRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -368,6 +367,12 @@ const bulkEnableRulesWithOCC = async (
 
   await logRuleChanges({
     ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToEnable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleEnable,

@@ -13,3 +13,10 @@ export {
   type GraphEdge,
   type GraphAttachmentData,
 } from './graph';
+export { SKILL_ATTACHMENT_TYPE, type SkillAttachment, type SkillAttachmentData } from './skill';
+export {
+  CONNECTOR_SETUP_ATTACHMENT_TYPE,
+  connectorSetupAttachmentDataSchema,
+  type ConnectorSetupAttachment,
+  type ConnectorSetupAttachmentData,
+} from './connector_setup';

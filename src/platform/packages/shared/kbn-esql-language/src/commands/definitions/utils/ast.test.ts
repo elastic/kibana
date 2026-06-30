@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isParens, isSubQuery, Parser, PromQLParser, Walker } from '@elastic/esql';
+import type { ESQLAstItem, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
-import { correctPromqlQuerySyntax, correctQuerySyntax, getBracketsToClose } from './ast';
+import {
+  correctPromqlQuerySyntax,
+  correctQuerySyntax,
+  getBracketsToClose,
+  isMarkerNode,
+  removeAutocompleteMarkers,
+  unwrapExpressionParens,
+} from './ast';
 
 describe('getBracketsToClose', () => {
   it('returns the number of brackets to close', () => {
@@ -51,6 +60,18 @@ describe('correctQuerySyntax', () => {
     expect(result.endsWith(EDITOR_MARKER)).toBe(true);
   });
 
+  it('appends marker if all brackets are closed and ends with operator', () => {
+    const query = 'FROM index | STATS AVG(field1) != ';
+    const result = correctQuerySyntax(query);
+    expect(result.endsWith(EDITOR_MARKER)).toBe(true);
+  });
+
+  it('does not append marker for inline cast type names ending with operator-like suffixes', () => {
+    const query = 'FROM index | EVAL vec = [0.1, 0.2]::dense_vector ';
+    const result = correctQuerySyntax(query);
+    expect(result).toEqual(query);
+  });
+
   it('closes unclosed brackets', () => {
     const query = 'FROM foo | EVAL foo(bar[baz';
     const result = correctQuerySyntax(query);
@@ -65,22 +86,10 @@ describe('correctQuerySyntax', () => {
     expect(result).toEqual(query);
   });
 
-  it('appends marker if all brackets are closed and ends with operator', () => {
-    const query = 'FROM index | STATS AVG(field1) != ';
-    const result = correctQuerySyntax(query);
-    expect(result.endsWith(EDITOR_MARKER)).toBe(true);
-  });
-
   it('handles incomplete function signature', () => {
     const query = 'FROM foo | EVAL foo(bar, ';
     const result = correctQuerySyntax(query);
     expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
-  });
-
-  it('does not append marker for inline cast type names ending with operator-like suffixes', () => {
-    const query = 'FROM index | EVAL vec = [0.1, 0.2]::dense_vector ';
-    const result = correctQuerySyntax(query);
-    expect(result).toEqual(query);
   });
 });
 
@@ -114,5 +123,112 @@ describe('correctPromqlQuerySyntax', () => {
     const result = correctPromqlQuerySyntax(query);
     const markerMatches = result.match(new RegExp(EDITOR_MARKER, 'g')) ?? [];
     expect(markerMatches).toHaveLength(1);
+  });
+
+  it('normalizes marker nodes from parsed PromQL autocomplete ASTs', () => {
+    const query = correctPromqlQuerySyntax('rate(http_requests_total, ');
+    const { root } = PromQLParser.parse(query);
+    const normalizedRoot = removeAutocompleteMarkers(root);
+
+    expect(JSON.stringify(normalizedRoot)).not.toContain(EDITOR_MARKER);
+  });
+});
+
+describe('removeAutocompleteMarkers', () => {
+  const parseAutocomplete = (innerText: string): ESQLAstQueryExpression => {
+    const corrected = correctQuerySyntax(innerText);
+    return Parser.parse(corrected, { withFormatting: true }).root;
+  };
+
+  const countMarkers = (node: ESQLAstQueryExpression): number => {
+    let count = 0;
+    Walker.walk(node, {
+      visitAny: (current) => {
+        if (isMarkerNode(current as ESQLAstItem)) {
+          count++;
+        }
+      },
+    });
+    return count;
+  };
+
+  it('drops marker-only nodes nested in args arrays', () => {
+    const root = parseAutocomplete('FROM index | EVAL result = ROUND(doubleField, ');
+
+    expect(countMarkers(root)).toBeGreaterThan(0);
+    expect(countMarkers(removeAutocompleteMarkers(root))).toBe(0);
+  });
+
+  it('strips the marker from the inline cast type, not only from text', () => {
+    const root = parseAutocomplete('FROM index | EVAL casted = keywordField::');
+
+    // Before cleaning, the marker leaks into inlineCast.castType (a plain string property).
+    expect(JSON.stringify(root)).toContain(EDITOR_MARKER);
+    expect(JSON.stringify(removeAutocompleteMarkers(root))).not.toContain(EDITOR_MARKER);
+  });
+});
+
+describe('unwrapExpressionParens', () => {
+  const parse = (query: string): ESQLAstQueryExpression => Parser.parse(query).root;
+
+  const countExpressionParens = (root: ESQLAstQueryExpression): number => {
+    let count = 0;
+
+    Walker.walk(root, {
+      visitAny: (node) => {
+        if (isParens(node) && !isSubQuery(node)) {
+          count++;
+        }
+      },
+    });
+
+    return count;
+  };
+
+  const countSubQueryParens = (root: ESQLAstQueryExpression): number => {
+    let count = 0;
+
+    Walker.walk(root, {
+      visitAny: (node) => {
+        if (isSubQuery(node)) {
+          count++;
+        }
+      },
+    });
+
+    return count;
+  };
+
+  it('mutates and returns the same root', () => {
+    const root = parse('FROM index | EVAL (field)');
+
+    expect(unwrapExpressionParens(root)).toBe(root);
+  });
+
+  it.each([
+    ['single field parens', 'FROM index | EVAL (field)'],
+    ['nested field parens', 'FROM index | EVAL ((field))'],
+    ['operator operand parens', 'FROM index | WHERE (a + b) > 0'],
+    ['function argument parens', 'FROM index | EVAL result = ROUND((field))'],
+    ['nested function argument parens', 'FROM index | WHERE LENGTH(TRIM((field))) > 0'],
+    ['BY expression parens', 'FROM index | STATS COUNT(*) BY (field)'],
+    ['IN list value parens', 'FROM index | WHERE foo IN (1, (2 + 3))'],
+  ])('unwraps %s', (_, query) => {
+    const root = unwrapExpressionParens(parse(query));
+
+    expect(countExpressionParens(root)).toBe(0);
+  });
+
+  it('preserves subquery parens', () => {
+    const root = unwrapExpressionParens(parse('FROM index | WHERE field IN (FROM other)'));
+
+    expect(countSubQueryParens(root)).toBe(1);
+  });
+
+  it('preserves PromQL query parens', () => {
+    const root = unwrapExpressionParens(parse('PROMQL (?my_query)'));
+    const [arg] = root.commands[0].args;
+
+    expect(arg).toMatchObject({ type: 'parens' });
   });
 });

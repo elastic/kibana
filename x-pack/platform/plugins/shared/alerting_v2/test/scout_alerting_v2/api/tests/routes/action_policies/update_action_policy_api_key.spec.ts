@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getUpdateActionPolicyApiKeyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -23,7 +23,9 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -125,7 +127,9 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'reader-cannot-rotate' })
       );

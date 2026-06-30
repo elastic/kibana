@@ -14,17 +14,17 @@ import {
   UserActionTypes,
 } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_ATTACHMENT_REF_NAME } from '../../common/constants';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -34,9 +34,7 @@ describe('UserActionBuilder', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry,
-    });
+    builderFactory = new BuilderFactory();
   });
 
   beforeAll(() => {
@@ -200,6 +198,30 @@ describe('UserActionBuilder', () => {
       `);
     });
 
+    it('builds a comment user action with the attachment saved object type', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
+      const userAction = builder.build({
+        action: UserActionActions.update,
+        payload: {
+          attachment: {
+            comment: 'a comment!',
+            type: AttachmentType.user,
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+        },
+        savedObjectId: 'test-id',
+        savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT,
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters.references).toContainEqual({
+        id: 'test-id',
+        name: CASE_ATTACHMENT_REF_NAME,
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+      expect(userAction!.eventDetails.savedObjectType).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+    });
+
     it('builds an external reference attachment (savedObject) user action correctly', () => {
       const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
@@ -353,11 +375,6 @@ describe('UserActionBuilder', () => {
               "id": "test-id",
               "name": "associated-cases-comments",
               "type": "cases-comments",
-            },
-            Object {
-              "id": "testRef",
-              "name": "myTestReference",
-              "type": "test-so",
             },
           ],
         }

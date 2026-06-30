@@ -11,4 +11,6 @@ export enum AnalyticsEvents {
   claudeCliPromptCopied = 'claude_cli_prompt_copied',
   codeExampleCopied = 'code_example_copied',
   languageSelected = 'language_selected',
+  startChat = 'start_chat_gs',
+  suggestedPrompt = 'gs_suggested_prompt',
 }

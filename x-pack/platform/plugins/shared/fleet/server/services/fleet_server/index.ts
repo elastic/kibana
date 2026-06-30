@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { escapeQuotes } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';

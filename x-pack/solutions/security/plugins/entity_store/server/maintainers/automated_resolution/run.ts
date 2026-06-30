@@ -21,7 +21,7 @@ import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
-import type { AutomatedResolutionState, MatchBucket, EntityHit } from './types';
+import type { PerRuleState, MatchBucket, EntityHit } from './types';
 
 const MATCH_FIELD = 'user.email';
 const ENTITY_TYPE = 'user';
@@ -33,7 +33,7 @@ const ENTITY_NAMESPACE_FIELD = 'entity.namespace';
 const TOP_HITS_SIZE = 100;
 
 export interface RunDeps {
-  state: AutomatedResolutionState;
+  state: PerRuleState;
   namespace: string;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -41,7 +41,7 @@ export interface RunDeps {
   abortController: AbortController;
 }
 
-export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedResolutionState> {
+export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, abortController } = deps;
   const index = getLatestEntitiesIndexName(namespace);
 
@@ -97,7 +97,7 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
 async function collectNewEmailValues(
   esClient: ElasticsearchClient,
   index: string,
-  state: AutomatedResolutionState
+  state: PerRuleState
 ): Promise<{ values: string[]; maxTimestamp: string }> {
   const allValues: string[] = [];
   let afterKey: AggregationsCompositeAggregateKey | undefined;
@@ -302,7 +302,7 @@ async function resolveMatchBuckets(
           .map((e) => e.entityId);
         if (aliasIds.length === 0) continue;
 
-        const result = await resolutionClient.linkEntities(targetId, aliasIds, { refresh: false });
+        const result = await resolutionClient.linkEntities(targetId, aliasIds);
         resolutionsCreated += result.linked.length;
       } else if (unresolvedEntities.length >= 2) {
         // New group: pick target via namespace priority, link the rest
@@ -311,9 +311,7 @@ async function resolveMatchBuckets(
           .filter((e) => e.entityId !== targetEntity.entityId)
           .map((e) => e.entityId);
 
-        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds, {
-          refresh: false,
-        });
+        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds);
         resolutionsCreated += result.linked.length;
       }
       // else: only 1 unresolved, no existing targets → no match, skip

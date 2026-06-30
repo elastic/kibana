@@ -51,7 +51,6 @@ export async function invalidateUiamAPIKeys(
   requestHeaders.authorization = `ApiKey ${params.uiamApiKey}`;
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path: '/',
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

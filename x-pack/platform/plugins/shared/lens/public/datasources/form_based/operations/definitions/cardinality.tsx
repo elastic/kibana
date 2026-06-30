@@ -21,7 +21,8 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -125,11 +126,9 @@ export const cardinalityOperation: OperationDefinition<
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
-        emptyAsNull:
-          previousColumn &&
-          isColumnOfType<CardinalityIndexPatternColumn>('unique_count', previousColumn)
-            ? previousColumn.params?.emptyAsNull
-            : !columnParams?.usedInMath,
+        emptyAsNull: hasOperationType(previousColumn, 'unique_count')
+          ? getBooleanParam(previousColumn, 'emptyAsNull')
+          : !columnParams?.usedInMath,
       },
     };
   },

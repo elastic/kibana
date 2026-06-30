@@ -76,8 +76,8 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       const query = buildTargetsPerActorQuery(config, 'default');
       expect(query).toMatch(/^SET unmapped_fields="nullify";\nFROM /);
       expect(query).toContain('| WHERE ');
-      expect(query).toContain('| EVAL actorUserId = ');
-      expect(query).toContain('| EVAL targetEntityId = ');
+      expect(query).toContain('actorUserId = ');
+      expect(query).toContain('targetEntityId = ');
       expect(query).toContain('| WHERE COALESCE(actorUserId, "") != ""');
       expect(query).toContain('| WHERE COALESCE(targetEntityId, "") != ""');
       expect(query).toMatch(/\| LIMIT \d+/);

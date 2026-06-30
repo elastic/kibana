@@ -84,7 +84,7 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/ui-actions-plugin'
   - '@kbn/workflows'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
@@ -140,6 +140,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/test-es-server'
   - '@kbn/react-kibana-mount'
+  - '@kbn/user-profile-components'
   - '@kbn/telemetry'
 tags:
   - plugin
@@ -152,6 +153,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - server/**/*.json
     - test/scout_agent_builder/**/*
     - test/scout_agent_builder_smoke/**/*
     - test/scout_agent_builder_shared/**/*

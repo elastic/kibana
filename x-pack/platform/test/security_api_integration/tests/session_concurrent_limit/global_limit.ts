@@ -6,9 +6,9 @@
  */
 
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import {
   getSAMLRequestId,
   getSAMLResponse,
@@ -46,8 +46,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_provider).to.eql(provider);
 
-    return Array.isArray(apiResponse.headers['set-cookie'])
-      ? parseCookie(apiResponse.headers['set-cookie'][0])!
+    return apiResponse.headers['set-cookie']
+      ? findSessionCookie(apiResponse.headers['set-cookie'])
       : undefined;
   }
 
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', findSessionCookie(handshakeResponse.headers['set-cookie']).cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    return findSessionCookie(authenticationResponse.headers['set-cookie']);
   }
 
   async function loginWithBasic(credentials: { username: string; password: string }) {
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    return findSessionCookie(authenticationResponse.headers['set-cookie']);
   }
 
   async function loginWithAnonymous() {
@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    return findSessionCookie(authenticationResponse.headers['set-cookie']);
   }
 
   async function toggleSessionCleanupTask(enabled: boolean) {

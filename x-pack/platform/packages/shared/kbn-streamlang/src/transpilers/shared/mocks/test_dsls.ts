@@ -23,6 +23,7 @@ import type {
   JoinProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
+  UriPartsProcessor,
   RegisteredDomainProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
@@ -144,6 +145,24 @@ export const comprehensiveTestDSL: StreamlangDSL = {
       from: 'body.log',
       pattern: '%{attributes.client} %{attributes.method} %{attributes.path}',
     } as DissectProcessor,
+    // URI parts — default target prefix (`url`), default flags
+    {
+      action: 'uri_parts',
+      from: 'attributes.request_url',
+    } as UriPartsProcessor,
+    // URI parts — custom target + ignore_missing + where + remove_if_successful
+    {
+      action: 'uri_parts',
+      from: 'attributes.href',
+      to: 'attributes.parsed',
+      keep_original: false,
+      remove_if_successful: true,
+      ignore_missing: true,
+      where: {
+        field: 'attributes.href',
+        neq: '',
+      },
+    } as UriPartsProcessor,
     // Append parsing
     {
       action: 'append',

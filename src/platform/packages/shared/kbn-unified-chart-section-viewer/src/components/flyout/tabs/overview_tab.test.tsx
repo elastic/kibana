@@ -48,7 +48,7 @@ const mockSourceKind = (kind: MetricSourceKind) => {
 describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
     metricName: 'test.metric',
-    dataStream: 'test-data-stream',
+    indexName: 'test-data-stream',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     units: ['ms'],
     dimensionFields: [],
@@ -221,7 +221,7 @@ describe('Metric Flyout Overview Tab', () => {
     it('data_stream + streams feature on -> renders the link inside the Data stream metadata row', () => {
       mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const renderFn = linkRenderer();
-      const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
+      const metricItem = createMockMetric({ indexName: 'logs-foo-default' });
 
       const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
 
@@ -234,7 +234,7 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('data_stream + streams feature off -> renders Data stream metadata row, no link', () => {
       mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
-      const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
+      const metricItem = createMockMetric({ indexName: 'logs-foo-default' });
 
       const { getByTestId, queryByTestId } = renderTab(metricItem, undefined);
 
@@ -246,7 +246,7 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('data_stream + no external services -> renders Data stream metadata row (regression fix)', () => {
       mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
-      const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
+      const metricItem = createMockMetric({ indexName: 'logs-foo-default' });
 
       const { getByTestId, queryByTestId } = renderTab(metricItem, undefined, false);
 
@@ -259,7 +259,7 @@ describe('Metric Flyout Overview Tab', () => {
     it('index + streams feature on -> renders Index metadata row, no link', () => {
       mockSourceKind(METRIC_SOURCE_KIND.INDEX);
       const renderFn = linkRenderer();
-      const metricItem = createMockMetric({ dataStream: 'metrics-plain-index' });
+      const metricItem = createMockMetric({ indexName: 'metrics-plain-index' });
 
       const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
 
@@ -272,7 +272,7 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('index + streams feature off -> renders Index metadata row, no link', () => {
       mockSourceKind(METRIC_SOURCE_KIND.INDEX);
-      const metricItem = createMockMetric({ dataStream: 'metrics-plain-index' });
+      const metricItem = createMockMetric({ indexName: 'metrics-plain-index' });
 
       const { getByTestId, queryByTestId } = renderTab(metricItem, undefined);
 
@@ -286,7 +286,7 @@ describe('Metric Flyout Overview Tab', () => {
       mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const renderFn = linkRenderer();
       const metricItem = createMockMetric({
-        dataStream: 'remote_cluster:metrics-activemq.broker-default',
+        indexName: 'remote_cluster:metrics-activemq.broker-default',
       });
 
       const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);

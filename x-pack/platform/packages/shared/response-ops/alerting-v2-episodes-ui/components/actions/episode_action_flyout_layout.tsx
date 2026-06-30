@@ -101,7 +101,7 @@ export interface EpisodeActionFlyoutFooterProps {
   primaryLabel: string;
   cancelTestSubj: string;
   primaryTestSubj: string;
-  isPrimaryLoading: boolean;
+  isPrimaryLoading?: boolean;
   isPrimaryDisabled: boolean;
   isCancelDisabled?: boolean;
 }
@@ -113,7 +113,7 @@ export function EpisodeActionFlyoutFooter({
   primaryLabel,
   cancelTestSubj,
   primaryTestSubj,
-  isPrimaryLoading,
+  isPrimaryLoading = false,
   isPrimaryDisabled,
   isCancelDisabled = false,
 }: EpisodeActionFlyoutFooterProps) {

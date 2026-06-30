@@ -66,7 +66,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create PR
-  gh pr create \
+  pr_url=$(gh pr create \
     --title "$PR_TITLE" \
     --body "$PR_BODY" \
     --base "$BUILDKITE_BRANCH" \
@@ -74,7 +74,12 @@ main () {
     --label 'backport:skip' \
     --label 'release_note:skip' \
     --label 'Feature:Console' \
-    --label 'Team:Kibana Management'
+    --label 'Team:Kibana Management')
+
+  report_main_step "Enabling auto-merge (squash)"
+  if ! gh pr merge "$pr_url" --auto --squash; then
+    echo "Warning: Failed to enable auto-merge (squash) for $pr_url"
+  fi
 }
 
 main

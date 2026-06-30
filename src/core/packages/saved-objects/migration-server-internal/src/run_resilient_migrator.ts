@@ -19,9 +19,7 @@ import type {
   IndexMapping,
   SavedObjectsMigrationConfigType,
   MigrationResult,
-  IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { WaitGroup } from './kibana_migrator_utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';
@@ -29,7 +27,6 @@ import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { State } from './state';
-import type { AliasAction } from './actions';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -48,15 +45,9 @@ export interface RunResilientMigratorParams {
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
-  mustRelocateDocuments: boolean;
   indexTypes: string[];
-  indexTypesMap: IndexTypesMap;
   targetIndexMappings: IndexMapping;
   hashToVersionMap: Record<string, string>;
-  preMigrationScript?: string;
-  readyToReindex: WaitGroup<void>;
-  doneReindexing: WaitGroup<void>;
-  updateRelocationAliases: WaitGroup<AliasAction[]>;
   logger: Logger;
   transformRawDocs: TransformRawDocs;
   coreMigrationVersionPerType: SavedObjectsMigrationVersion;
@@ -77,16 +68,10 @@ export async function runResilientMigrator({
   client,
   kibanaVersion,
   waitForMigrationCompletion,
-  mustRelocateDocuments,
   indexTypes,
-  indexTypesMap,
   targetIndexMappings,
   hashToVersionMap,
   logger,
-  preMigrationScript,
-  readyToReindex,
-  doneReindexing,
-  updateRelocationAliases,
   transformRawDocs,
   coreMigrationVersionPerType,
   migrationVersionPerType,
@@ -99,12 +84,9 @@ export async function runResilientMigrator({
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
-    mustRelocateDocuments,
     indexTypes,
-    indexTypesMap,
     hashToVersionMap,
     targetIndexMappings,
-    preMigrationScript,
     coreMigrationVersionPerType,
     migrationVersionPerType,
     indexPrefix,
@@ -118,18 +100,9 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(
-      client,
-      transformRawDocs,
-      readyToReindex,
-      doneReindexing,
-      updateRelocationAliases,
-      typeRegistry.getLegacyTypes()
-    ),
+    next: next(client, transformRawDocs, typeRegistry.getLegacyTypes()),
     model,
     abort: async (state?: State) => {
-      // At this point, we could reject this migrator's defers and unblock other migrators
-      // but we are going to throw and shutdown Kibana anyway, so there's no real point in it
       await cleanup(client, state);
     },
   });

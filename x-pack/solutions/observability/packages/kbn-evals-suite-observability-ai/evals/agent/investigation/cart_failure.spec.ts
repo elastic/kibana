@@ -42,7 +42,7 @@ evaluate.describe(
         dataset: {
           name: 'cart-failure investigation',
           description:
-            'Evaluates whether the agent correctly investigates a cart service fault where the EmptyCart operation fails due to a connectivity error with an unreachable Valkey host. The fault is introduced via the cartFailure feature flag, which causes the cart service to use a hardcoded bad address (badhost:1234) for EmptyCart calls only. Crucially, checkout PlaceOrder succeeds (the emptyUserCart error is silently discarded in checkout), so the user-visible symptom is carts not clearing after orders, not failed checkouts.',
+            'Evaluates whether the agent correctly investigates the otel-demo cartFailure scenario, where the cart service fails to clear carts after checkout due to a bad Valkey host.',
           examples: [
             {
               input: {

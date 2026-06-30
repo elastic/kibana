@@ -37,11 +37,6 @@ export interface IBasePath {
   get(request: KibanaRequest): string;
 
   /**
-   * sets `basePath` value, specific for an incoming request.
-   */
-  set(request: KibanaRequest, requestSpecificBasePath: string): void;
-
-  /**
    * Prepends `path` with the basePath.
    */
   prepend(path: string): string;

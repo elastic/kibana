@@ -68,8 +68,12 @@ describe('getVariableSuggestions', () => {
     isInStepsContext: false,
     isInTriggersContext: false,
     isInWorkflowInputsContext: false,
+    isInEsqlQueryField: false,
+    esqlRegion: null,
+    esqlOffsetInQuery: null,
     workflowDefinition: null,
     currentWorkflowId: null,
+    isCurrentWorkflowManaged: false,
     ...overrides,
   });
 

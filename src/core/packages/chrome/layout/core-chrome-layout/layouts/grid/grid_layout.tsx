@@ -15,6 +15,7 @@ import {
   ChromeComponentsProvider,
   ClassicHeader,
   ChromeNextGlobalHeader,
+  ChromeAppHeaderRenderer,
   ProjectHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
@@ -22,6 +23,8 @@ import {
   AppMenuBar,
   Sidebar,
   useHasAppMenu,
+  useHasChromeAppHeaderContent,
+  useHasInlineAppHeader,
 } from '@kbn/core-chrome-browser-components';
 import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
@@ -105,6 +108,8 @@ export class GridLayout implements LayoutService {
       const hasHeaderBanner = useHasHeaderBanner();
       const chromeStyle = useChromeStyle();
       const hasAppMenu = useHasAppMenu();
+      const hasInlineAppHeader = useHasInlineAppHeader();
+      const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
       const footer = useGlobalFooter();
       const sidebarWidth = useSidebarWidth();
       const navigationWidth = useSideNavWidth();
@@ -129,7 +134,11 @@ export class GridLayout implements LayoutService {
           header = <ClassicHeader />;
         } else {
           header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
-          if (!nextChrome && hasAppMenu) {
+          if (nextChrome) {
+            if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
+              applicationTopBar = <ChromeAppHeaderRenderer />;
+            }
+          } else if (hasAppMenu) {
             applicationTopBar = <AppMenuBar />;
           }
 

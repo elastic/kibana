@@ -30,7 +30,6 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useNavigateToHostDetails } from '../../../../flyout/entity_details/host_right/hooks/use_navigate_to_host_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import type { HostEntity } from '../../../../../common/api/entity_analytics';
@@ -48,7 +47,6 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
@@ -143,16 +141,9 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   enableEntityLinks = false,
 }) => {
   const { from, to } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useSelectedPatterns();
 
   const timerange = useMemo(
     () => ({

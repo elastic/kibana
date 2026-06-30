@@ -1,4 +1,7 @@
+.artifacts
+docs/**/.artifacts
 .aws-config.json
+.bk.yaml
 .signing-config.json
 .ackrc
 /.es
@@ -21,7 +24,9 @@ target
 .idea
 .claude/*.local.json
 .claude/worktrees/
-.cursor
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
 !x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
@@ -30,6 +35,11 @@ target
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+.codex/
+config_sets/bug_fixer/
 
 # Ignore example plugin builds
 /examples/*/build

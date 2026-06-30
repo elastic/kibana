@@ -24,6 +24,17 @@ const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+// Files in shared drives (Team Drives) have no individual owner. The Drive API excludes
+// them from list/search results and rejects access by ID unless the caller explicitly
+// opts into shared drive support. `supportsAllDrives` is required on every shared-drive
+// operation; `includeItemsFromAllDrives` additionally surfaces shared-drive files in
+// list/search results. The files.export endpoint accepts neither and is not gated behind
+// them, so exporting shared-drive Google Docs/Sheets works without extra params.
+// See https://developers.google.com/workspace/drive/api/guides/enable-shareddrives
+const SHARED_DRIVE_LIST_PARAMS = {
+  includeItemsFromAllDrives: true,
+  supportsAllDrives: true,
+} as const;
 interface GoogleDriveFileMetadata {
   id: string;
   name: string;
@@ -60,6 +71,29 @@ function throwGoogleDriveError(error: unknown): void {
   }
 }
 
+// Text export MIME types for Google Workspace documents
+const TEXT_EXPORT_DOCS = 'text/markdown';
+const TEXT_EXPORT_SHEETS = 'text/csv';
+const TEXT_EXPORT_DEFAULT = 'text/plain';
+function resolveExportMimeType(
+  sourceMimeType: string,
+  responseType: 'arraybuffer' | 'text'
+): string {
+  if (responseType === 'text') {
+    switch (sourceMimeType) {
+      case 'application/vnd.google-apps.spreadsheet':
+        return TEXT_EXPORT_SHEETS;
+      case 'application/vnd.google-apps.document':
+        return TEXT_EXPORT_DOCS;
+      default:
+        return TEXT_EXPORT_DEFAULT;
+    }
+  }
+  return sourceMimeType === 'application/vnd.google-apps.spreadsheet'
+    ? SHEETS_EXPORT_MIME_TYPE
+    : DEFAULT_EXPORT_MIME_TYPE;
+}
+
 export const GoogleDriveConnector: ConnectorSpec = {
   metadata: {
     id: '.google_drive',
@@ -74,7 +108,19 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        isRecommended: true,
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -91,17 +137,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
         },
       },
-      {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope:
-            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
-        },
-      },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',
@@ -170,11 +206,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
           orderBy?: string;
         };
 
-        const params: Record<string, string | number> = {
+        const params: Record<string, string | number | boolean> = {
           q: typedInput.query,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          ...SHARED_DRIVE_LIST_PARAMS,
         };
 
         if (typedInput.pageToken) {
@@ -248,11 +285,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
         const folderId = typedInput.folderId || DEFAULT_FOLDER_ID;
         const trashedFilter = typedInput.includeTrashed ? '' : ' and trashed=false';
-        const params: Record<string, string | number> = {
+        const params: Record<string, string | number | boolean> = {
           q: `'${escapeQueryValue(folderId)}' in parents${trashedFilter}`,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          ...SHARED_DRIVE_LIST_PARAMS,
         };
 
         if (typedInput.pageToken) {
@@ -282,20 +320,36 @@ export const GoogleDriveConnector: ConnectorSpec = {
     downloadFile: {
       isTool: true,
       description:
-        'Download a file from Google Drive and return its content as base64-encoded data. Works with PDFs, Office documents, Google Docs (exported as PDF), Google Sheets (exported as XLSX), and other binary or text-based formats. Use file IDs from searchFiles or listFiles results. WARNING: Returns potentially large base64 payloads. Only call this when you have a plan to process the binary data (e.g. via an Elasticsearch ingest pipeline attachment processor). For text-based files, prefer reading metadata first to confirm the file type.',
+        'Download a file from Google Drive and return its content. ' +
+        'With the default responseType "arraybuffer", content is returned base64-encoded — suitable for PDFs, images, Office documents, and any binary format. ' +
+        'With responseType "text", content is returned as a plain string — suitable for CSV, Markdown, plain text, HTML, and other text formats; ' +
+        'Google Docs export as Markdown and Sheets export as CSV automatically. ' +
+        'WARNING: Binary (arraybuffer) responses can be very large. Only use them when you have a plan to process the data (e.g. via an Elasticsearch ingest pipeline attachment processor). ' +
+        'Use file IDs from searchFiles or listFiles results.',
       input: lazySchema(() =>
         z.object({
           fileId: z
             .string()
             .min(1)
             .describe(
-              'The ID of the file to download. Use IDs from searchFiles or listFiles results. Works with PDFs, Office docs, Google Docs, and other text-based formats.'
+              'The ID of the file to download. Use IDs from searchFiles or listFiles results.'
+            ),
+          responseType: z
+            .enum(['arraybuffer', 'text'])
+            .default('arraybuffer')
+            .describe(
+              'Controls the response format. ' +
+                '"arraybuffer" (default): content is returned as base64-encoded binary, suitable for any file type including PDFs, images, and Office documents. ' +
+                '"text": content is returned as a plain UTF-8 string without base64 encoding, suitable for CSV, Markdown, plain text, and HTML files. ' +
+                'When "text" is used with Google Workspace documents, the export format changes automatically: ' +
+                'Google Docs → text/markdown, Google Sheets → text/csv, Google Slides and others → text/plain.'
             ),
         })
       ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           fileId: string;
+          responseType: 'arraybuffer' | 'text';
         };
         let fileMetadataForError: GoogleDriveFileMetadata | undefined;
 
@@ -306,6 +360,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             {
               params: {
                 fields: 'id, name, mimeType, size',
+                supportsAllDrives: true,
               },
             }
           );
@@ -314,49 +369,57 @@ export const GoogleDriveConnector: ConnectorSpec = {
           fileMetadataForError = fileMetadata;
           const isGoogleDoc = fileMetadata.mimeType?.startsWith(GOOGLE_WORKSPACE_MIME_PREFIX);
 
+          let useTextResponse = typedInput.responseType === 'text';
           let contentResponse;
           let resolvedMimeType: string = fileMetadata.mimeType;
 
           if (isGoogleDoc) {
-            // Export Google Workspace documents
-            // Use XLSX for Sheets (preserves tabular structure), PDF for everything else
-            const defaultExport =
-              fileMetadata.mimeType === 'application/vnd.google-apps.spreadsheet'
-                ? SHEETS_EXPORT_MIME_TYPE
-                : DEFAULT_EXPORT_MIME_TYPE;
-            resolvedMimeType = defaultExport;
+            resolvedMimeType = resolveExportMimeType(
+              fileMetadata.mimeType,
+              typedInput.responseType
+            );
             contentResponse = await ctx.client.get(
               `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}/export`,
               {
                 params: {
                   mimeType: resolvedMimeType,
                 },
-                responseType: 'arraybuffer',
+                responseType: useTextResponse ? 'text' : 'arraybuffer',
               }
             );
           } else {
-            // Download native files
+            // For native files, only use text response if the mime type is text/*;
+            // fall back to base64 for binary types even when text was requested.
+            useTextResponse &&= !!fileMetadata.mimeType?.startsWith('text/');
             contentResponse = await ctx.client.get(
               `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}`,
               {
                 params: {
                   alt: 'media',
+                  supportsAllDrives: true,
                 },
-                responseType: 'arraybuffer',
+                responseType: useTextResponse ? 'text' : 'arraybuffer',
               }
             );
           }
 
-          const buffer = Buffer.from(contentResponse.data);
-          const base64Content = buffer.toString('base64');
+          let content: string;
+          let encoding: string;
+          if (useTextResponse) {
+            content = contentResponse.data as string;
+            encoding = 'utf-8';
+          } else {
+            content = Buffer.from(contentResponse.data).toString('base64');
+            encoding = 'base64';
+          }
 
           return {
             id: fileMetadata.id,
             name: fileMetadata.name,
             mimeType: resolvedMimeType,
             size: fileMetadata.size,
-            content: base64Content,
-            encoding: 'base64',
+            content,
+            encoding,
           };
         } catch (error: unknown) {
           const rawFileSizeBytes = getFinitePositiveNumber(fileMetadataForError?.size);
@@ -417,7 +480,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             typedInput.fileIds.map(async (fileId) => {
               try {
                 const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
-                  params: { fields: metadataFields },
+                  params: { fields: metadataFields, supportsAllDrives: true },
                 });
                 return response.data;
               } catch (error: unknown) {
@@ -450,10 +513,22 @@ export const GoogleDriveConnector: ConnectorSpec = {
     'Use listFiles when the user wants to browse the contents of a known folder (by folder ID),',
     'or to enumerate what is in a directory. listFiles does not support full-text search.',
     '',
+    '## Choosing the right responseType for downloadFile',
+    'Use responseType "text" (returns a plain UTF-8 string) when:',
+    '  - The file is a native text file (.txt, .csv, .md, .html, etc.)',
+    '  - You want to read a Google Doc as Markdown (exported automatically)',
+    '  - You want to read a Google Sheet as CSV (exported automatically)',
+    '  - You need to process the content directly as text without decoding base64',
+    'Use responseType "arraybuffer" (default, returns base64) when:',
+    '  - The file is binary (PDF, image, Office document, etc.)',
+    '  - You plan to pass the content to an Elasticsearch ingest pipeline attachment processor',
+    '  - You need the raw binary representation of any file type',
+    '',
     '## Be selective with downloads',
-    'downloadFile returns base64-encoded content that can be very large.',
+    'downloadFile with responseType "arraybuffer" returns base64-encoded content that can be very large.',
     'When downloading multiple files, be selective — large payloads can exceed context limits.',
     'Prefer narrowing search results before downloading rather than downloading everything.',
+    'For reading document content, prefer responseType "text" to avoid oversized base64 payloads.',
   ].join('\n'),
 
   test: {

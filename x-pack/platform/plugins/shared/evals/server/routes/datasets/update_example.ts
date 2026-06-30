@@ -86,10 +86,8 @@ export const registerUpdateExampleRoute = ({
 
           const { datasetId, exampleId } = request.params;
           const { input, output, metadata } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
 
           const exists = await datasetClient.datasetExists(datasetId);
           if (!exists) {

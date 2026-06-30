@@ -50,14 +50,6 @@ const defaultProps = {
   refetch,
 };
 
-const mockObservable = [
-  {
-    typeKey: 'observable-type-hostname',
-    value: 'test-host',
-    description: 'Auto extracted observable',
-  },
-];
-
 const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const useKibanaMock = useKibana as jest.Mock;
@@ -66,6 +58,7 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
   const panels = [{ id: 0, items }];
   render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
@@ -89,7 +82,6 @@ describe('useAddToCaseActions', () => {
           helpers: {
             getRuleIdFromEvent: () => null,
             canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
-            getObservablesFromEcs: jest.fn().mockReturnValue(mockObservable),
           },
         },
       },
@@ -138,7 +130,6 @@ describe('useAddToCaseActions', () => {
           },
         },
       ],
-      observables: mockObservable,
     });
   });
 

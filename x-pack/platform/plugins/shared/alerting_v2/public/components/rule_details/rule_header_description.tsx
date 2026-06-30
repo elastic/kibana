@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { useRule } from './rule_context';
-
-const KIND_LABELS: Record<string, string> = {
-  signal: i18n.translate('xpack.alertingV2.ruleDetails.kindSignal', {
-    defaultMessage: 'Detect only',
-  }),
-  alert: i18n.translate('xpack.alertingV2.ruleDetails.kindAlert', {
-    defaultMessage: 'Alerting',
-  }),
-};
-
-const KIND_ICONS: Record<string, string> = {
-  signal: 'securitySignalResolved',
-  alert: 'bell',
-};
 
 /**
  * Renders the description and tags row below the page title.
@@ -78,22 +65,17 @@ export const RuleTitleWithBadges: React.FC<RuleTitleWithBadgesProps> = ({ varian
   const isSummary = variant === 'summary';
 
   const kindBadge = (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      wrap={false}
-      responsive={false}
-      data-test-subj="kindBadge"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={KIND_ICONS[rule.kind] ?? 'dot'} size="m" color="text" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="text">
-          {KIND_LABELS[rule.kind] ?? rule.kind}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiToolTip content={RULE_KIND_TOOLTIPS[rule.kind]}>
+      <EuiBadge
+        color="hollow"
+        iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="kindBadge"
+      >
+        {RULE_KIND_LABELS[rule.kind] ?? rule.kind}
+      </EuiBadge>
+    </EuiToolTip>
   );
 
   const statusBadge = rule.enabled ? (

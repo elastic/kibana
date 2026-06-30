@@ -34,7 +34,7 @@ export const createMemoryRecentChangesTool = ({
   schema: memoryRecentChangesSchema,
   tags: ['memory'],
   handler: async ({ size }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
 
     try {
       const changes = await memoryService.getRecentChanges({ size: size ?? 20 });

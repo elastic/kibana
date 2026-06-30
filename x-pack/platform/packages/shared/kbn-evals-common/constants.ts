@@ -7,12 +7,14 @@
 
 export const EVALS_INTERNAL_URL = '/internal/evals' as const;
 
-export const EVALS_RUNS_URL = `${EVALS_INTERNAL_URL}/runs` as const;
-export const EVALS_RUN_URL = `${EVALS_INTERNAL_URL}/runs/{runId}` as const;
-export const EVALS_RUN_SCORES_URL = `${EVALS_INTERNAL_URL}/runs/{runId}/scores` as const;
-export const EVALS_RUNS_COMPARE_URL = `${EVALS_INTERNAL_URL}/runs/compare` as const;
-export const EVALS_RUN_DATASET_EXAMPLES_URL =
-  `${EVALS_INTERNAL_URL}/runs/{runId}/datasets/{datasetId}/examples` as const;
+export const EVALS_EXPERIMENTS_URL = `${EVALS_INTERNAL_URL}/experiments` as const;
+export const EVALS_EXPERIMENT_URL = `${EVALS_INTERNAL_URL}/experiments/{experimentId}` as const;
+export const EVALS_EXPERIMENT_SCORES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
+export const EVALS_SCORES_URL = `${EVALS_INTERNAL_URL}/scores` as const;
+export const EVALS_EXPERIMENTS_COMPARE_URL = `${EVALS_INTERNAL_URL}/experiments/compare` as const;
+export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
@@ -25,7 +27,14 @@ export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as con
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 
-export const EVALUATIONS_INDEX_PATTERN = 'kibana-evaluations*' as const;
+const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
+
+export const EvaluationIndices = {
+  SCORES: `${EVALUATION_INDEX_PREFIX}-scores`,
+  DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
+  DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
+} as const;
+
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
 
 export const API_VERSIONS = {

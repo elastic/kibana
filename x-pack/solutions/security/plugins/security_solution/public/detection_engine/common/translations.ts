@@ -705,6 +705,13 @@ export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   }
 );
 
+export const RULE_CHANGES_HISTORY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleChangesHistoryDescription',
+  {
+    defaultMessage: 'History',
+  }
+);
+
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
@@ -1191,6 +1198,13 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
     defaultMessage: 'Automatically refresh table',
+  }
+);
+
+export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
+  {
+    defaultMessage: 'Auto refresh settings',
   }
 );
 

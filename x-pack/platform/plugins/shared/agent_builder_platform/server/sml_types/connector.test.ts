@@ -92,7 +92,10 @@ describe('connectorSmlType', () => {
             type: 'connector',
             title: 'My MCP Connector',
             content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-            permissions: ['action:execute'],
+            permissions: {
+              kibana: { privileges: [{ name: 'action:execute' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       });
@@ -189,7 +192,10 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        permissions: ['action:execute'],
+        permissions: {
+          kibana: { privileges: [{ name: 'action:execute' }] },
+          elasticsearch: { indices: [] },
+        },
       });
     });
   });

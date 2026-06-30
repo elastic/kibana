@@ -14,6 +14,7 @@ This file defines exactly how to gather all context needed to generate a test pl
 - [Linked GitHub issues](#linked-github-issues)
 - [Parent issue](#parent-issue)
 - [Sub-issues](#sub-issues)
+- [Acceptance criterion extraction and origin tagging](#acceptance-criterion-extraction-and-origin-tagging)
 - [Pull requests and test coverage](#pull-requests-and-test-coverage)
 - [Context window management](#context-window-management)
 
@@ -104,11 +105,29 @@ gh issue view <number> --repo <owner>/<repo> --json number,title,body,comments
 
 Fall back to GitHub MCP if unavailable. For each sub-issue: read the full title, body, all comments, all images, and all URLs. Apply the same context-gathering process recursively. Treat sub-issue content as first-class context — as important as the main issue.
 
-For each sub-issue, extract every acceptance criterion — both explicit bullet points and implied requirements — and add them to a **flat acceptance criteria list** keyed by sub-issue number. This list is a critical artifact: it will be used in Step 2 to build the consolidated checklist and in Step 3's self-review to verify complete coverage.
-
 For each sub-issue, check its comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **sub-issue test plan for #<number>**. Collect all of them — they will be used in Step 2 to avoid duplication.
 
 Do not proceed to the pull requests section until all sub-issues have been fully read.
+
+---
+
+## Acceptance criterion extraction and origin tagging
+
+Run this step **after** all issue-corpus members have been fetched (target issue, parent issue if any, every sub-issue, every linked GitHub issue) and **before** reading the linked PRs in the next section.
+
+Walk **every issue in the corpus** and extract every acceptance criterion — both explicit bullet points and implied requirements — into a single **flat acceptance criteria list** keyed by issue number. The list must include the target issue, the parent, every sub-issue, and every linked issue — not only sub-issues. Coverage Ratio and Step 2's consolidated checklist both depend on every issue's ACs being present and tagged.
+
+**Origin tag** — assign exactly one to each AC entry:
+
+| Tag | When |
+|---|---|
+| `issue` | The AC appears in **any** issue body or comment in the corpus (target, parent, sub-issue, or linked issue). |
+| `pr` | The AC appears **only** in a PR description, PR diff, or PR review comment and not in any issue. |
+| `both` | The AC appears in both at least one issue and at least one PR. |
+
+PR sources do not exist yet at this point (the next section reads them); revisit the list while reading PRs to upgrade `issue` → `both` and to add new `pr` entries.
+
+This list is a critical artifact: it feeds Step 2 (consolidated AC checklist), Step 3's self-review (complete coverage verification), and the Issue Clarity Assessment Coverage Ratio (`issue` vs `pr` classification per scenario).
 
 ---
 
@@ -140,7 +159,7 @@ Fall back to GitHub MCP if unavailable. Apply these limits to the diff:
 
 **Build the test coverage catalog.** For each test file found, extract: the test type (unit `*.test.ts`, integration, API integration, or e2e Cypress `*.cy.ts` / Scout), the file path, and the describe blocks and test names. Store this catalog — it will be used in Step 3 to populate automation coverage lines.
 
-**Build a PR artifacts inventory.** While reading each PR's file list and diff, identify every new or substantially modified: API route, service method, UI component/page, saved object type, schema definition, and feature flag. Each distinct artifact is a candidate for at least one test scenario. Store this inventory — it will be used in Step 3's self-review to verify no implemented artifact is left without a corresponding scenario.
+**Build a PR artifacts inventory.** While reading each PR's file list and diff, identify every new or substantially modified: API route, service method, UI component/page, saved object type, schema definition, and feature flag. **For each artifact, record whether it was mentioned in any issue body/comment (`mentioned_in_issue: true`) or whether it appears only in the PR/code (`mentioned_in_issue: false`).** This flag is the per-artifact source signal that flows into the Issue Coverage Ratio: scenarios written against an artifact whose `mentioned_in_issue` is `false` will count as PR-derived. Each distinct artifact is a candidate for at least one test scenario. Store this inventory — it will be used in Step 3's self-review to verify no implemented artifact is left without a corresponding scenario, and in the Issue Clarity Assessment to compute the Coverage Ratio.
 
 **If a PR has no test files**, search the filesystem for existing tests:
 - Look for `*.test.ts` / `*.spec.ts` files adjacent to the modified source files
@@ -150,6 +169,29 @@ Fall back to GitHub MCP if unavailable. Apply these limits to the diff:
 - Search for folders named `integration`, `api_integration` anywhere under `x-pack/` that relate to the feature name or modified file names
 
 If no tests are found after all of the above, record `No existing tests found` in the catalog for this PR and continue — do not block. If a PR was already read in a previous session and a draft file exists, do not re-read it unless the user explicitly asks.
+
+### Orphan PRs
+
+A PR is **orphan** when its title or scope clearly relates to the target issue (or any sub-issue) but no formal cross-reference exists in either direction — no `Closes #N`, no mention in any issue body or timeline. Identify orphan PRs **after** the regular cross-reference walk and **before** adding them to the corpus.
+
+| Signal | Action |
+|---|---|
+| PR title contains the feature name or area, AND it was opened/updated in the relevant window | Open the PR. Check its body and the issue timeline for a reference (`Closes #N`, `Tracked by`, `Refs #N`, mentioned in a review comment) |
+| Reference found after deeper inspection (timeline comment, PR review, sub-issue body) | **Not orphan.** Add to the primary corpus as usual |
+| No reference found in either direction after the walk above | **Orphan.** Do not add to the primary corpus. Record under Known Limitations with `⚠️` and **stop and ask the user** whether to include it before proceeding to Step 2 |
+
+**Why this matters.** Orphan PRs are the single most common cause of silent scope creep in generated test plans. Absorbing them quietly would produce scenarios traceable to no issue AC, breaking the Core rule. Explicit handling preserves traceability and makes the relationship visible to the reader.
+
+When asking the user, surface:
+
+| Field | Example |
+|---|---|
+| PR number + URL | `#269123` |
+| One-line title | *"Add validation to X importer"* |
+| Best-guess relation to the target | *"Likely implements AC4 of #16898, but no explicit reference"* |
+| Default if no response | Exclude from corpus; keep in Known Limitations with `⚠️` |
+
+---
 
 Do not proceed to Step 2 until all linked PRs and their sub-issue PRs have been read, within the limits above.
 
