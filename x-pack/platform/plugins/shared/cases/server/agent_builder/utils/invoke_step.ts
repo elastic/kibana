@@ -6,7 +6,10 @@
  */
 
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
-import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type {
+  ServerHandlerStepDefinition,
+  StepHandlerContext,
+} from '@kbn/workflows-extensions/server';
 
 /**
  * Invokes a Cases workflow step handler from an agent builder tool context.
@@ -15,7 +18,7 @@ import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-ex
  * `contextManager.getFakeRequest()`, `context.input`, `context.config`, and `context.logger`.
  */
 export async function invokeStepHandler(
-  stepDef: ServerStepDefinition,
+  stepDef: ServerHandlerStepDefinition,
   input: Record<string, unknown>,
   toolContext: ToolHandlerContext,
   extraConfig: Record<string, unknown> = {}

@@ -104,17 +104,21 @@ interface InlineContentProps extends AttachmentRenderProps<CasesAttachment> {
 }
 const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }) => {
   const { data } = attachment;
-  if (data.cases.length === 0) return null;
   const visible = data.cases.slice(0, MAX_VISIBLE_ROWS);
-  const owner = visible[0].owner;
+  const owner = visible.length > 0 ? visible[0].owner : null;
 
   const casesUrl = useMemo(
     () =>
+      owner &&
       application.getUrlForApp(getAppIdForOwner(owner), {
         path: getCasesListPathForOwner(owner),
       }),
     [application, owner]
   );
+
+  if (!owner) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer hasBorder data-test-subj="cases-attachment-inline">
