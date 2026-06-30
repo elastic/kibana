@@ -27,7 +27,13 @@ export interface UseFetchRuleResponse {
   ) => Promise<QueryObserverResult<Rule | undefined, unknown>>;
 }
 
-export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleResponse {
+export function useFetchRule({
+  ruleId,
+  enabled = true,
+}: {
+  ruleId?: string;
+  enabled?: boolean;
+}): UseFetchRuleResponse {
   const {
     http,
     notifications: { toasts },
@@ -53,7 +59,7 @@ export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleRespo
         }
       },
       keepPreviousData: true,
-      enabled: Boolean(ruleId),
+      enabled: Boolean(ruleId) && enabled,
       refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
         // Don't retry when the user is not authorized to read the rule; a 403

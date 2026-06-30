@@ -42,7 +42,10 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../utils/kibana_react');
 jest.mock('@kbn/response-ops-rule-form/src/common');
 
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({ authorizedToReadAnyRules: true }));
+const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+  authorizedToReadAnyRules: true,
+  authorizedToReadRuleType: (): boolean => true,
+}));
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
   useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
@@ -238,7 +241,10 @@ describe('Alert details', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: true });
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadAnyRules: true,
+      authorizedToReadRuleType: () => true,
+    });
     useParamsMock.mockReturnValue(params);
     useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
     useHistoryMock.mockReturnValue({ replace: jest.fn() });
@@ -275,8 +281,11 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
   });
 
-  it('should hide the Investigation guide and Related dashboards tabs when unauthorized to read rules', async () => {
-    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadAnyRules: false });
+  it('should hide the Investigation guide and Related dashboards tabs when unauthorized to read the alert rule type', async () => {
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadAnyRules: false,
+      authorizedToReadRuleType: () => false,
+    });
     useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
 
     const alertDetails = renderComponent();
@@ -289,6 +298,21 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
+  });
+
+  it('should fall back to the generic overview when unauthorized to read the alert rule type', async () => {
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadAnyRules: true,
+      authorizedToReadRuleType: () => false,
+    });
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+    const alertDetails = renderComponent();
+
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+    // The generic overview renders instead of the customized rule-dependent section
+    expect(alertDetails.queryByTestId('overviewTabPanel')).toBeTruthy();
   });
 
   it('should show Metadata tab', async () => {

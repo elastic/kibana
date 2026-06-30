@@ -25,6 +25,7 @@ import {
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -123,13 +124,23 @@ export function AlertDetails() {
     ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
     : undefined;
 
-  const { rule, refetch } = useFetchRule({
-    ruleId: ruleId || '',
-  });
-
-  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+  const { authorizedToReadRuleType } = useGetRuleTypesPermissions({
     http,
     toasts: services.notifications.toasts,
+  });
+
+  // Rule read authorization is enforced per rule type (and consumer), so we
+  // determine access for the specific rule behind this alert rather than relying
+  // on a coarse "can read any rules" flag.
+  const alertRuleTypeId = alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID];
+  const alertConsumer = alertDetail?.formatted.fields[ALERT_RULE_CONSUMER];
+  const canReadAlertRule = Boolean(
+    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  );
+
+  const { rule, refetch } = useFetchRule({
+    ruleId: ruleId || '',
+    enabled: canReadAlertRule,
   });
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
@@ -297,6 +308,7 @@ export function AlertDetails() {
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
+    canReadAlertRule &&
     /*
     when feature flag is enabled, show alert details page with customized overview tab,
     otherwise show default overview tab
@@ -466,7 +478,7 @@ export function AlertDetails() {
   // The investigation guide and related dashboards tabs depend on rule data,
   // which requires rule read. Hide them when the user cannot read any rules.
   const ruleReadDependentTabIds: TabId[] = ['investigation_guide', 'related_dashboards'];
-  const visibleTabs = authorizedToReadAnyRules
+  const visibleTabs = canReadAlertRule
     ? tabs
     : tabs.filter((tab) => !ruleReadDependentTabIds.includes(tab.id));
 
