@@ -303,7 +303,7 @@ export const Host: FC<HostProps> = memo(function Host({
               entityType={EntityType.host}
               entityName={hostName}
               entityId={entityStoreEntityId}
-              onOpen={onShowHost}
+              onOpenEntity={onShowHost}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
@@ -322,7 +322,7 @@ export const Host: FC<HostProps> = memo(function Host({
                   entityType={EntityType.host}
                   value={hostName}
                   entityId={panelDisplayEntityId}
-                  onOpen={onShowHost}
+                  onOpenEntity={onShowHost}
                 />
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
@@ -331,7 +331,7 @@ export const Host: FC<HostProps> = memo(function Host({
                   entityType={EntityType.host}
                   value={hostName}
                   entityId={panelDisplayEntityId}
-                  onOpen={onShowHost}
+                  onOpenEntity={onShowHost}
                 />
               );
           }

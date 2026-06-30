@@ -38,63 +38,65 @@ export interface RiskInputsProps {
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
   /** Opens the originating entity flyout as a child. */
-  onOpen?: () => void;
+  onOpenEntity?: () => void;
 }
 
-export const RiskInputs = memo(({ entityType, entityName, entityId, onOpen }: RiskInputsProps) => {
-  const { services } = useKibana();
-  const store = useStore();
-  const history = useHistory();
-  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+export const RiskInputs = memo(
+  ({ entityType, entityName, entityId, onOpenEntity }: RiskInputsProps) => {
+    const { services } = useKibana();
+    const store = useStore();
+    const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const onShowAlert = useCallback(
-    (id: string, indexName: string) => {
-      services.overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyoutWrapper
-              documentId={id}
-              indexName={indexName}
-              renderCellActions={cellActionRenderer}
-              onAlertUpdated={noop}
-            />
-          ),
-        }),
-        {
-          ...defaultFlyoutProperties,
-          historyKey,
-          session: 'inherit',
-        }
-      );
-    },
-    [services, store, history, defaultFlyoutProperties, historyKey]
-  );
+    const onShowAlert = useCallback(
+      (id: string, indexName: string) => {
+        services.overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <DocumentFlyoutWrapper
+                documentId={id}
+                indexName={indexName}
+                renderCellActions={cellActionRenderer}
+                onAlertUpdated={noop}
+              />
+            ),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+          }
+        );
+      },
+      [services, store, history, defaultFlyoutProperties, historyKey]
+    );
 
-  return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <ToolsFlyoutHeader
-          title={TITLE}
-          onTitleClick={onOpen}
-          label={entityName}
-          iconType={ICON_TYPE[entityType]}
-        />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj={RISK_INPUTS_TOOL_TEST_ID}>
-        <RiskInputsTab
-          entityType={entityType}
-          entityName={entityName}
-          entityId={entityId}
-          onShowAlert={onShowAlert}
-        />
-      </EuiFlyoutBody>
-    </>
-  );
-});
+    return (
+      <>
+        <EuiFlyoutHeader hasBorder>
+          <ToolsFlyoutHeader
+            title={TITLE}
+            onTitleClick={onOpenEntity}
+            label={entityName}
+            iconType={ICON_TYPE[entityType]}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody data-test-subj={RISK_INPUTS_TOOL_TEST_ID}>
+          <RiskInputsTab
+            entityType={entityType}
+            entityName={entityName}
+            entityId={entityId}
+            onShowAlert={onShowAlert}
+          />
+        </EuiFlyoutBody>
+      </>
+    );
+  }
+);
 
 RiskInputs.displayName = 'RiskInputs';

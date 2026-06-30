@@ -305,7 +305,7 @@ export const User: FC<UserProps> = memo(function User({
               entityType={EntityType.user}
               entityName={userName}
               entityId={entityStoreEntityId}
-              onOpen={onOpenUser}
+              onOpenEntity={onOpenUser}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
@@ -316,7 +316,7 @@ export const User: FC<UserProps> = memo(function User({
                   entityType={EntityType.user}
                   value={userName}
                   entityId={panelDisplayEntityId}
-                  onOpen={onOpenUser}
+                  onOpenEntity={onOpenUser}
                 />
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
@@ -325,7 +325,7 @@ export const User: FC<UserProps> = memo(function User({
                   entityType={EntityType.user}
                   value={userName}
                   entityId={panelDisplayEntityId}
-                  onOpen={onOpenUser}
+                  onOpenEntity={onOpenUser}
                 />
               );
           }
