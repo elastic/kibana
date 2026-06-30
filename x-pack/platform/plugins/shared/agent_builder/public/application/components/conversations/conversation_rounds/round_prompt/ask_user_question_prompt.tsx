@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isMac } from '@kbn/shared-ux-utility';
 import {
   labels,
   containerStyles,
@@ -38,7 +37,6 @@ import type { AnswerDraft, AskUserQuestionPromptProps } from './ask_user_questio
 
 export type { AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
 
-const CONFIRM_KEY_HINT = isMac ? '⌘↵' : 'Ctrl↵';
 const HANDLED_DIGIT_KEY = /^[1-9]$/;
 
 /** True when the focused element can accept keyboard input — we don't steal those keys. */
@@ -55,10 +53,14 @@ const KeyHint = ({ children }: { children: React.ReactNode }) => {
     <span
       aria-hidden="true"
       css={css`
+        display: inline-flex;
+        align-items: center;
+        height: 1em;
+        vertical-align: middle;
         margin-left: ${euiTheme.size.xs};
         color: inherit;
         opacity: 0.7;
-        font-size: 11px;
+        font-size: ${euiTheme.font.scale.m * euiTheme.base}px;
         font-family: ${euiTheme.font.familyCode};
       `}
     >
@@ -284,13 +286,8 @@ export const AskUserQuestionPrompt = ({
       // can't receive input, so they don't block shortcuts.
       if (!isCustomInputFocused && isLiveTextEntry(active)) return;
 
-      // Cmd/Ctrl+Enter and Escape fire even while typing in the custom input.
-      if (event.key === 'Enter' && (isMac ? event.metaKey : event.ctrlKey)) {
-        event.preventDefault();
-        h.handleConfirm();
-        return;
-      }
-
+      // Escape fires even while typing in the custom input.
+      // Might be revisited when when decide to enable the STOP button in the chat input during HITL
       if (event.key === 'Escape') {
         event.preventDefault();
         h.handleSkipAll();
@@ -430,7 +427,13 @@ export const AskUserQuestionPrompt = ({
                 {/* Badge positioned over the card so it doesn't pollute the
                       label's text content (would break getByLabelText). */}
                 <div aria-hidden="true" css={optionBadgeAnchorStyles}>
-                  <EuiNotificationBadge size="s" color="subdued">
+                  <EuiNotificationBadge
+                    size="s"
+                    color="subdued"
+                    css={css`
+                      padding-inline: ${euiTheme.size.xs};
+                    `}
+                  >
                     {optionIndex + 1}
                   </EuiNotificationBadge>
                 </div>
@@ -489,6 +492,7 @@ export const AskUserQuestionPrompt = ({
                   aria-hidden="true"
                   css={css`
                     margin-right: ${euiTheme.size.base};
+                    padding-inline: ${euiTheme.size.xs};
                   `}
                 >
                   {currentQuestion.options.length + 1}
@@ -520,8 +524,8 @@ export const AskUserQuestionPrompt = ({
           <EuiButtonIcon
             onClick={handleBack}
             disabled={currentIndex === 0 || isInteractionDisabled}
-            iconType="arrowLeft"
-            size="s"
+            iconType="sortLeft"
+            size="m"
             color="text"
             display="empty"
             aria-label={labels.backButton}
@@ -529,9 +533,15 @@ export const AskUserQuestionPrompt = ({
         </EuiFlexItem>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSkip} disabled={isInteractionDisabled} size="s" color="text">
+            <EuiButton
+              onClick={handleSkip}
+              disabled={isInteractionDisabled}
+              size="s"
+              color="text"
+              iconType="sortRight"
+              iconSide="right"
+            >
               {labels.skipQuestionButton}
-              <KeyHint>→</KeyHint>
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -544,7 +554,7 @@ export const AskUserQuestionPrompt = ({
               color="primary"
             >
               {isFinalQuestion ? labels.confirmButton : labels.continueButton}
-              <KeyHint>{CONFIRM_KEY_HINT}</KeyHint>
+              <KeyHint>↵</KeyHint>
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

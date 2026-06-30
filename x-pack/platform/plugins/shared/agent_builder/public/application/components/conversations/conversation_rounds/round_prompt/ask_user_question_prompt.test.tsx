@@ -10,7 +10,6 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { isMac } from '@kbn/shared-ux-utility';
 import type {
   AskUserQuestionPromptResponse,
   AskUserQuestionItem,
@@ -427,12 +426,11 @@ describe('AskUserQuestionPrompt', () => {
       });
     });
 
-    it('renders the navigation key hints on the action buttons', () => {
+    it('renders the ↵ key hint on the Continue/Submit button', () => {
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
       );
-      expect(screen.getByText('→')).toBeInTheDocument();
-      expect(screen.getByText(isMac ? '⌘↵' : 'Ctrl↵')).toBeInTheDocument();
+      expect(screen.getByText('↵')).toBeInTheDocument();
     });
 
     it('Back button is disabled on question 1 and enabled after advancing', async () => {
@@ -602,48 +600,6 @@ describe('AskUserQuestionPrompt', () => {
       await userEvent.keyboard('{ArrowLeft}');
       // Still on Q2 — the arrow key didn't trigger Back
       expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
-    });
-
-    it('Cmd/Ctrl+Enter submits a multi-select prompt', async () => {
-      const onSubmit = jest.fn();
-      renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
-      );
-      await userEvent.keyboard('1'); // toggle Cat
-      await userEvent.keyboard('2'); // toggle Dog
-      const modifier = isMac ? '{Meta>}{Enter}{/Meta}' : '{Control>}{Enter}{/Control}';
-      await userEvent.keyboard(modifier);
-      expect(onSubmit).toHaveBeenCalledWith({
-        answers: [{ choice: [0, 1] }],
-      } satisfies AskUserQuestionPromptResponse);
-    });
-
-    it('does not carry focus to the next question after Cmd/Ctrl+Enter from the custom input', async () => {
-      renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
-      );
-      // Q1 has 2 regular options → digit 3 selects the custom row and focuses its input.
-      await userEvent.keyboard('3');
-      expect(screen.getByRole('textbox')).toHaveFocus();
-      await userEvent.keyboard('hello');
-      const modifier = isMac ? '{Meta>}{Enter}{/Meta}' : '{Control>}{Enter}{/Control}';
-      await userEvent.keyboard(modifier);
-      // On Q2 the custom input must NOT be auto-focused.
-      expect(screen.getByRole('heading', { name: 'Q2: pick many' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox')).not.toHaveFocus();
-    });
-
-    it('Cmd/Ctrl+Enter fires even while the custom text input is focused', async () => {
-      const onSubmit = jest.fn();
-      renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
-      );
-      await userEvent.type(screen.getByRole('textbox'), 'Fish');
-      const modifier = isMac ? '{Meta>}{Enter}{/Meta}' : '{Control>}{Enter}{/Control}';
-      await userEvent.keyboard(modifier);
-      expect(onSubmit).toHaveBeenCalledWith({
-        answers: [{ custom: 'Fish' }],
-      } satisfies AskUserQuestionPromptResponse);
     });
 
     it('Enter confirms a multi-select prompt when an option is tracked', async () => {
