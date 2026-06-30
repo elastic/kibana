@@ -7,9 +7,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
-import { HostPanelHeader } from './header';
-import { RiskSeverity } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../../common/mock';
+import { Header } from './header';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 
 const defaultLastSeen = {
   date: '2023-02-23T20:03:17.489Z',
@@ -22,13 +22,13 @@ const mockProps = {
   lastSeen: defaultLastSeen,
 };
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('HostPanelHeader', () => {
+describe('Header', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -39,7 +39,7 @@ describe('HostPanelHeader', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
+        <Header {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
       </TestProviders>
     );
 
@@ -49,7 +49,7 @@ describe('HostPanelHeader', () => {
   it('renders observed badge when lastSeen is defined', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -59,7 +59,7 @@ describe('HostPanelHeader', () => {
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
+        <Header {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
       </TestProviders>
     );
 
@@ -69,7 +69,7 @@ describe('HostPanelHeader', () => {
   it('renders skeleton when loading', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
+        <Header {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
       </TestProviders>
     );
 
@@ -81,7 +81,7 @@ describe('HostPanelHeader', () => {
   it('does not render lastSeen element when isEntityInStore is true', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} isEntityInStore />
+        <Header {...mockProps} isEntityInStore />
       </TestProviders>
     );
 
@@ -91,7 +91,7 @@ describe('HostPanelHeader', () => {
   it('renders entity store badge when isEntityInStore is true', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} isEntityInStore />
+        <Header {...mockProps} isEntityInStore />
       </TestProviders>
     );
 
@@ -101,7 +101,7 @@ describe('HostPanelHeader', () => {
   it('renders observed badge text when isEntityInStore is false', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -111,7 +111,7 @@ describe('HostPanelHeader', () => {
   it('renders risk level badge when isEntityInStore and riskLevel are provided', () => {
     const { getByText } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
+        <Header {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
       </TestProviders>
     );
 
@@ -121,7 +121,7 @@ describe('HostPanelHeader', () => {
   it('does not render risk level badge when isEntityInStore is false', () => {
     const { queryByText } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} riskLevel={RiskSeverity.High} />
+        <Header {...mockProps} riskLevel={RiskSeverity.High} />
       </TestProviders>
     );
 
@@ -131,7 +131,7 @@ describe('HostPanelHeader', () => {
   it('renders the host name as a link to the details page when isEntityInStore is false', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} isEntityInStore={false} />
+        <Header {...mockProps} isEntityInStore={false} />
       </TestProviders>
     );
 
@@ -141,7 +141,7 @@ describe('HostPanelHeader', () => {
   it('renders the host name without a link when isEntityInStore is true', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} isEntityInStore />
+        <Header {...mockProps} isEntityInStore />
       </TestProviders>
     );
 

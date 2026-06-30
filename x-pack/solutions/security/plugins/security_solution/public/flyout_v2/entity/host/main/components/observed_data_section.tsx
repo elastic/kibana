@@ -13,28 +13,45 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { ONE_WEEK_IN_HOURS } from '../../shared/constants';
-import { ObservedEntity } from '../../shared/components/observed_entity';
+import { hostToCriteria } from '../../../../../common/components/ml/criteria/host_to_criteria';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useInstalledSecurityJobNameById } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
+import type { ObservedEntityData } from '../../../../../flyout/entity_details/shared/components/observed_entity/types';
+import { ONE_WEEK_IN_HOURS } from '../../../../../flyout/entity_details/shared/constants';
+import { ObservedEntity } from '../../../../../flyout/entity_details/shared/components/observed_entity';
 import { useObservedHostFields } from '../hooks/use_observed_host_fields';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import type { HostItem } from '../../../../../common/search_strategy';
-import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
-import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
-import type { IdentityFields } from '../../../document_details/shared/utils';
-import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
+import type { OpenFlyoutLinkProps } from '../../../../shared/components/open_flyout_link';
+import { OpenFlyoutLink } from '../../../../shared/components/open_flyout_link';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
+import type { HostItem } from '../../../../../../common/search_strategy';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../../common/components/ml/anomaly/anomaly_table_euid';
+import { useAnomaliesTableData } from '../../../../../common/components/ml/anomaly/use_anomalies_table_data';
+import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
+import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
 };
+
+interface ObservedDataSectionProps {
+  /** Identity fields (e.g. host name) used to scope ML anomalies and queries */
+  identityFields: IdentityFields;
+  /** Entity Store record for the host, if available */
+  entityRecord?: EntityStoreRecord | null;
+  /** Observed host data, including loading state and field values */
+  observedHost: ObservedHostData;
+  /** Unique identifier for the flyout context, used to namespace cell actions */
+  contextID: string;
+  /** Identifier of the timeline/page scope the flyout is rendered in */
+  scopeId: string;
+  /** Identifier used to inspect the underlying request for this section */
+  queryId: string;
+}
 
 export const ObservedDataSection = memo(
   ({
@@ -44,14 +61,7 @@ export const ObservedDataSection = memo(
     contextID,
     scopeId,
     queryId,
-  }: {
-    identityFields: IdentityFields;
-    entityRecord?: EntityStoreRecord | null;
-    observedHost: ObservedHostData;
-    contextID: string;
-    scopeId: string;
-    queryId: string;
-  }) => {
+  }: ObservedDataSectionProps) => {
     const { euiTheme } = useEuiTheme();
     const xsFontSize = useEuiFontSize('xxs').fontSize;
 
@@ -136,7 +146,6 @@ export const ObservedDataSection = memo(
               observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
-              queryId={queryId}
             />
           )}
         </EuiAccordion>
@@ -153,15 +162,7 @@ const ObservedDataSectionContent = memo(
     observedHost,
     contextID,
     scopeId,
-    queryId,
-  }: {
-    identityFields: IdentityFields;
-    entityRecord?: EntityStoreRecord | null;
-    observedHost: ObservedHostData;
-    contextID: string;
-    scopeId: string;
-    queryId: string;
-  }) => {
+  }: Omit<ObservedDataSectionProps, 'queryId'>) => {
     const { to, from, isInitializing } = useGlobalTime();
 
     const { jobNameById } = useInstalledSecurityJobNameById();
@@ -200,12 +201,18 @@ const ObservedDataSectionContent = memo(
     );
     const observedFields = useObservedHostFields(observedHostWithAnomalies);
 
+    const renderFlyoutLink = useCallback(
+      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} asParent={false} />,
+      []
+    );
+
     return (
       <ObservedEntity
         observedData={observedHostWithAnomalies}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}
+        entityLink={renderFlyoutLink}
       />
     );
   }

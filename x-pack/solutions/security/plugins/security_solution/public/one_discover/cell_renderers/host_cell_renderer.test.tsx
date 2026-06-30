@@ -11,7 +11,9 @@ import userEvent from '@testing-library/user-event';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { IpCellRenderer } from './ip_cell_renderer';
+import { HostCellRenderer } from './host_cell_renderer';
+import { Host } from '../../flyout_v2/entity/host/main';
+import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
@@ -25,7 +27,7 @@ jest.mock('../../common/lib/kibana', () => ({
 }));
 
 jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => false,
+  useIsInSecurityApp: () => true,
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -47,17 +49,12 @@ jest.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => ({
   }),
 }));
 
-jest.mock('../../flyout_v2/shared/utils/build_flyout_content', () => ({
-  buildFlyoutContent: jest.fn((field: string, value: string) => {
-    if (field === 'source.ip' && value) {
-      return <div data-test-subj="mock-network-flyout" />;
-    }
-    return null;
-  }),
+jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
 }));
 
-jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('../../flyout_v2/entity/host/main', () => ({
+  Host: jest.fn(() => null),
 }));
 
 jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
@@ -70,14 +67,14 @@ const mockServices = {
 const mockStore = {} as SecurityAppStore;
 
 const baseProps: DataGridCellValueElementProps = {
-  columnId: 'source.ip',
+  columnId: 'host.name',
   isDetails: false,
   isExpanded: false,
   row: {
     id: '1',
     raw: {},
     flattened: {
-      'source.ip': '192.168.1.1',
+      'host.name': 'host-1',
     },
   },
   dataView: dataViewMock,
@@ -90,85 +87,95 @@ const baseProps: DataGridCellValueElementProps = {
   columnsMeta: undefined,
 };
 
-describe('IpCellRenderer', () => {
+describe('HostCellRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render a single IP as a clickable link', () => {
+  it('should render a single host name as a clickable link', () => {
     const { getByTestId } = render(
-      <IpCellRenderer {...baseProps} services={mockServices} store={mockStore} />
+      <HostCellRenderer {...baseProps} services={mockServices} store={mockStore} />
     );
 
-    const link = getByTestId('one-discover-ip-link');
+    const link = getByTestId('one-discover-host-link');
     expect(link).toBeInTheDocument();
-    expect(link).toHaveTextContent('192.168.1.1');
+    expect(link).toHaveTextContent('host-1');
   });
 
-  it('should open system flyout on click', async () => {
+  it('should open the host system flyout with the source document on click', async () => {
     const { getByTestId } = render(
-      <IpCellRenderer {...baseProps} services={mockServices} store={mockStore} />
+      <HostCellRenderer {...baseProps} services={mockServices} store={mockStore} />
     );
 
-    await userEvent.click(getByTestId('one-discover-ip-link'));
+    await userEvent.click(getByTestId('one-discover-host-link'));
+
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+
+    const providerArgs = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    const hostElement = React.Children.toArray(providerArgs.children.props.children).find(
+      (child): child is React.ReactElement => React.isValidElement(child) && child.type === Host
+    );
+
+    expect(hostElement).toBeDefined();
+    expect(hostElement?.props.hostName).toBe('host-1');
+    expect(hostElement?.props.hit).toBe(baseProps.row);
   });
 
-  it('should render multiple IPs as separate links', () => {
+  it('should render multiple host names as separate links', () => {
     const props = {
       ...baseProps,
       row: {
         ...baseProps.row,
         flattened: {
-          'source.ip': ['10.0.0.1', '10.0.0.2', '10.0.0.3'],
+          'host.name': ['host-1', 'host-2', 'host-3'],
         },
       },
     };
 
     const { getAllByTestId } = render(
-      <IpCellRenderer {...props} services={mockServices} store={mockStore} />
+      <HostCellRenderer {...props} services={mockServices} store={mockStore} />
     );
 
-    const links = getAllByTestId('one-discover-ip-link');
+    const links = getAllByTestId('one-discover-host-link');
     expect(links).toHaveLength(3);
-    expect(links[0]).toHaveTextContent('10.0.0.1');
-    expect(links[1]).toHaveTextContent('10.0.0.2');
-    expect(links[2]).toHaveTextContent('10.0.0.3');
+    expect(links[0]).toHaveTextContent('host-1');
+    expect(links[1]).toHaveTextContent('host-2');
+    expect(links[2]).toHaveTextContent('host-3');
   });
 
-  it('should render empty tag when value is null', () => {
+  it('should render an empty tag when the value is null', () => {
     const props = {
       ...baseProps,
       row: {
         ...baseProps.row,
         flattened: {
-          'source.ip': null,
+          'host.name': null,
         },
       },
     };
 
     const { container } = render(
-      <IpCellRenderer {...props} services={mockServices} store={mockStore} />
+      <HostCellRenderer {...props} services={mockServices} store={mockStore} />
     );
 
-    expect(container.querySelector('[data-test-subj="one-discover-ip-link"]')).toBeNull();
+    expect(container.querySelector('[data-test-subj="one-discover-host-link"]')).toBeNull();
   });
 
-  it('should render empty tag when value is an empty array', () => {
+  it('should render an empty tag when the value is an empty array', () => {
     const props = {
       ...baseProps,
       row: {
         ...baseProps.row,
         flattened: {
-          'source.ip': [],
+          'host.name': [],
         },
       },
     };
 
     const { container } = render(
-      <IpCellRenderer {...props} services={mockServices} store={mockStore} />
+      <HostCellRenderer {...props} services={mockServices} store={mockStore} />
     );
 
-    expect(container.querySelector('[data-test-subj="one-discover-ip-link"]')).toBeNull();
+    expect(container.querySelector('[data-test-subj="one-discover-host-link"]')).toBeNull();
   });
 });
