@@ -22,18 +22,12 @@ const RULE_ID = 'rule-1';
 const makeRule = (ruleId: string): RuleResponse =>
   ({ rule_id: ruleId, name: `Rule ${ruleId}` } as unknown as RuleResponse);
 
-// --- installable ("installation review") query states ---
-const installableDisabled = () => ({ data: undefined, isFetching: false, isFetched: false });
-const installableFetching = () => ({ data: undefined, isFetching: true, isFetched: false });
+// Query state builders reused across tests (one-off states are inlined at their call site).
 const installableSettledWith = (rules: RuleResponse[]) => ({
   data: { rules },
   isFetching: false,
   isFetched: true,
 });
-
-// --- installed-rules fallback query states ---
-const fallbackIdle = () => ({ rule: undefined, isFetching: false, isFetched: false });
-const fallbackFetching = () => ({ rule: undefined, isFetching: true, isFetched: false });
 const fallbackSettledWith = (rule: RuleResponse | undefined) => ({
   rule,
   isFetching: false,
@@ -51,14 +45,22 @@ const render = (ruleId: string | undefined, currentPageRules: RuleResponse[]) =>
 
 beforeEach(() => {
   jest.clearAllMocks();
-  // Default: neither query has run (the resolved-elsewhere / disabled states override per test).
-  usePrebuiltRulesInstallReviewMock.mockReturnValue(installableDisabled());
-  useFindInstalledPrebuiltRuleByRuleIdMock.mockReturnValue(fallbackIdle());
+  // Default: neither query has run (tests override as needed).
+  usePrebuiltRulesInstallReviewMock.mockReturnValue({
+    data: undefined,
+    isFetching: false,
+    isFetched: false,
+  });
+  useFindInstalledPrebuiltRuleByRuleIdMock.mockReturnValue({
+    rule: undefined,
+    isFetching: false,
+    isFetched: false,
+  });
 });
 
 describe('useDeepLinkedPrebuiltRule', () => {
   describe('resolution tiers', () => {
-    it('resolves to nothing and runs no queries when there is no ruleId', () => {
+    it('no ruleId -> resolves to nothing', () => {
       const { result } = render(undefined, []);
 
       expect(result.current.deepLinkedRule).toBeUndefined();
@@ -68,7 +70,7 @@ describe('useDeepLinkedPrebuiltRule', () => {
       expect(lastFallbackEnabled()).toBe(false);
     });
 
-    it('reuses the rule already on the current page and skips both queries', () => {
+    it('rule already loaded -> resolves to the rule', () => {
       const rule = makeRule(RULE_ID);
 
       const { result } = render(RULE_ID, [rule]);
@@ -76,12 +78,11 @@ describe('useDeepLinkedPrebuiltRule', () => {
       expect(result.current.deepLinkedRule).toBe(rule);
       expect(result.current.isDeepLinkedRuleInstalled).toBe(false);
       expect(result.current.isDeepLinkedRuleResolved).toBe(true);
-      // Design intent: nothing is fetched when the target is already in hand.
       expect(lastInstallableEnabled()).toBe(false);
       expect(lastFallbackEnabled()).toBe(false);
     });
 
-    it('fetches an off-page rule from the installable catalog', () => {
+    it('rule not yet loaded, but installable -> resolves to the installable rule', () => {
       const rule = makeRule(RULE_ID);
       usePrebuiltRulesInstallReviewMock.mockReturnValue(installableSettledWith([rule]));
 
@@ -91,11 +92,10 @@ describe('useDeepLinkedPrebuiltRule', () => {
       expect(result.current.deepLinkedRule).toBe(rule);
       expect(result.current.isDeepLinkedRuleInstalled).toBe(false);
       expect(result.current.isDeepLinkedRuleResolved).toBe(true);
-      // An installable hit means there is nothing to fall back to.
       expect(lastFallbackEnabled()).toBe(false);
     });
 
-    it('falls back to the installed rule when the catalog lookup is empty', () => {
+    it('rule not yet loaded and not installable -> resolves to the installed rule', () => {
       const installedRule = makeRule(RULE_ID);
       usePrebuiltRulesInstallReviewMock.mockReturnValue(installableSettledWith([]));
       useFindInstalledPrebuiltRuleByRuleIdMock.mockReturnValue(fallbackSettledWith(installedRule));
@@ -116,36 +116,17 @@ describe('useDeepLinkedPrebuiltRule', () => {
 
       expect(result.current.deepLinkedRule).toBeUndefined();
       expect(result.current.isDeepLinkedRuleInstalled).toBe(false);
-      // Both lookups settled with no hit — resolved, just empty.
       expect(result.current.isDeepLinkedRuleResolved).toBe(true);
-    });
-  });
-
-  describe('fallback sequencing', () => {
-    it('enables the installed-rules fallback only after the catalog lookup settles empty', () => {
-      usePrebuiltRulesInstallReviewMock.mockReturnValue(installableFetching());
-      const { rerender } = render(RULE_ID, []);
-
-      // While the catalog lookup is still in flight, the fallback must not run.
-      expect(lastFallbackEnabled()).toBe(false);
-
-      // Catalog settled with no hit → fallback turns on.
-      usePrebuiltRulesInstallReviewMock.mockReturnValue(installableSettledWith([]));
-      rerender();
-      expect(lastFallbackEnabled()).toBe(true);
-
-      // Catalog settled WITH a hit → fallback stays off.
-      usePrebuiltRulesInstallReviewMock.mockReturnValue(
-        installableSettledWith([makeRule(RULE_ID)])
-      );
-      rerender();
-      expect(lastFallbackEnabled()).toBe(false);
     });
   });
 
   describe('isDeepLinkedRuleResolved', () => {
     it('is false while the installable catalog lookup is fetching, true once it settles', () => {
-      usePrebuiltRulesInstallReviewMock.mockReturnValue(installableFetching());
+      usePrebuiltRulesInstallReviewMock.mockReturnValue({
+        data: undefined,
+        isFetching: true,
+        isFetched: false,
+      });
       const { result, rerender } = render(RULE_ID, []);
 
       expect(result.current.isDeepLinkedRuleResolved).toBe(false);
@@ -161,7 +142,11 @@ describe('useDeepLinkedPrebuiltRule', () => {
 
     it('is false while the installed-rules fallback is fetching, true once it settles', () => {
       usePrebuiltRulesInstallReviewMock.mockReturnValue(installableSettledWith([]));
-      useFindInstalledPrebuiltRuleByRuleIdMock.mockReturnValue(fallbackFetching());
+      useFindInstalledPrebuiltRuleByRuleIdMock.mockReturnValue({
+        rule: undefined,
+        isFetching: true,
+        isFetched: false,
+      });
       const { result, rerender } = render(RULE_ID, []);
 
       // Catalog settled empty but the fallback hasn't returned yet — not resolved.

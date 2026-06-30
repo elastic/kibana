@@ -8,17 +8,6 @@
 import type { RuleResponse, RuleSignatureId } from '../../../../common/api/detection_engine';
 import { useFindRulesQuery } from '../api/hooks/use_find_rules_query';
 
-/**
- * Fetches an already-installed prebuilt rule by its prebuilt `rule_id`
- * (signature ID, not the alerting saved-object UUID). Returns at most one rule
- * — `rule_id` is unique per installed alerting rule.
- *
- * Used by the Add Rules deep-link flow: when the install-review endpoint
- * returns nothing for a requested `rule_id`, the rule has either been
- * installed (common) or doesn't exist (rare). This hook covers the installed
- * case so the preview flyout can still render the rule with disabled install
- * buttons.
- */
 export const useFindInstalledPrebuiltRuleByRuleId = (
   ruleId: RuleSignatureId | undefined,
   options?: { enabled?: boolean }

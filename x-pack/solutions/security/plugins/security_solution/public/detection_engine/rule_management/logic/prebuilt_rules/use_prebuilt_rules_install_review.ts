@@ -25,11 +25,6 @@ interface UsePrebuiltRulesInstallReviewParams {
   page: number;
   perPage: number;
   filterOptions?: AddPrebuiltRulesTableFilterOptions;
-  /**
-   * Scope the query to specific rules by their `rule_id` signature. Used for
-   * deep-link scenarios (e.g. /rules/add_rules/<rule_id>) so a target rule is
-   * returned regardless of where it falls in the paginated catalog.
-   */
   ruleIds?: string[];
   sortingOptions?: PrebuiltRuleAssetsSortItem;
   aggregations?: PrebuiltRuleAssetsAggregations;
@@ -94,8 +89,6 @@ const buildRuleIdsClause = (ruleIds: string[]): string => {
 
 /**
  * Converts filter options from a simplified UI format to a format expected by the API.
- * `ruleIds`, when provided, scopes the result to those rules (used for deep-links) and is
- * ANDed with any tag filter.
  */
 export const buildInstallReviewKqlFilter = (
   filterOptions: AddPrebuiltRulesTableFilterOptions | undefined,

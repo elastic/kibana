@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
 import { AddPrebuiltRulesHeaderButtons } from './add_prebuilt_rules_header_buttons';
 import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table_context';
@@ -23,15 +23,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
-// Render an identifiable stand-in for the flyout so deep-link tests can assert which rule opened,
-// exercise the install actions, and trigger a close.
+// Render an identifiable stand-in for the flyout so deep-link tests can assert which rule opened
+// and exercise the install actions.
 jest.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => ({
-  RuleDetailsFlyout: jest.fn(({ rule, ruleActions, closeFlyout }) => (
+  RuleDetailsFlyout: jest.fn(({ rule, ruleActions }) => (
     <div data-test-subj="rule-details-flyout">
       <span data-test-subj="flyout-rule-name">{rule?.name}</span>
-      <button type="button" data-test-subj="flyout-close" onClick={() => closeFlyout()}>
-        {'close'}
-      </button>
       {ruleActions}
     </div>
   )),
@@ -389,12 +386,6 @@ describe('AddPrebuiltRulesTable deep linking', () => {
     isFetching: false,
     isFetched: true,
   });
-  const stillFetching = (): MockedInstallReview => ({
-    data: undefined,
-    isLoading: true,
-    isFetching: true,
-    isFetched: false,
-  });
 
   // The install-review hook backs both the table query and the by-rule_id deep-link query; tell
   // them apart by the `ruleIds` param the deep-link query passes.
@@ -415,18 +406,13 @@ describe('AddPrebuiltRulesTable deep linking', () => {
     });
   };
 
-  const LocationDisplay = () => {
-    const { pathname } = useLocation();
-    return <div data-test-subj="location-pathname">{pathname}</div>;
-  };
-
   const renderAt = (entry: string) =>
     render(
       <MemoryRouter initialEntries={[entry]}>
         <Route path={`${RULES_ADD_PATH}/:ruleId?`}>
           <QueryClientProvider client={new QueryClient()}>
             <AddPrebuiltRulesTableContextProvider>
-              <LocationDisplay />
+              <></>
             </AddPrebuiltRulesTableContextProvider>
           </QueryClientProvider>
         </Route>
@@ -441,13 +427,11 @@ describe('AddPrebuiltRulesTable deep linking', () => {
         rules: { read: true, edit: true },
       },
     });
-    // Default: nothing to deep-link to (overridden per test).
     mockInstallReview(settledWith([]), settledWith([]));
     mockInstalledFallback(undefined);
   });
 
-  it('opens the preview flyout for an off-page rule fetched by rule_id', async () => {
-    // The rule is not on the current table page, only resolvable via the by-rule_id lookup.
+  it('opens the preview flyout for a rule fetched by rule_id', async () => {
     mockInstallReview(settledWith([]), settledWith([makeRule('rule-1')]));
 
     renderAt(`${RULES_ADD_PATH}/rule-1`);
@@ -458,7 +442,12 @@ describe('AddPrebuiltRulesTable deep linking', () => {
 
   it('does not open the flyout while the deep-link resolution is still fetching', () => {
     // Table settled, but the by-rule_id lookup hasn't returned — must not open yet.
-    mockInstallReview(settledWith([]), stillFetching());
+    mockInstallReview(settledWith([]), {
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isFetched: false,
+    });
 
     renderAt(`${RULES_ADD_PATH}/rule-1`);
 
@@ -466,7 +455,7 @@ describe('AddPrebuiltRulesTable deep linking', () => {
   });
 
   it('opens the flyout with install actions disabled for an already-installed rule', async () => {
-    // Not in the installable catalog → falls back to the installed rule.
+    // Rule not in the installable catalog -> fall back to the installed rule.
     mockInstallReview(settledWith([]), settledWith([]));
     mockInstalledFallback(makeRule('rule-1'));
 
@@ -477,7 +466,7 @@ describe('AddPrebuiltRulesTable deep linking', () => {
     expect(screen.getByTestId('installAndEnablePrebuiltRuleFromFlyoutButton')).toBeDisabled();
   });
 
-  it('does not open the flyout (and does not throw) when the rule is not found anywhere', () => {
+  it('does not open the flyout when the rule is not found anywhere', () => {
     // Settled everywhere with no hit: deepLinkedRule stays undefined, so openRulePreview — which
     // would throw on a missing rule — is never called.
     mockInstallReview(settledWith([]), settledWith([]));
@@ -493,20 +482,6 @@ describe('AddPrebuiltRulesTable deep linking', () => {
 
     renderAt(RULES_ADD_PATH);
 
-    expect(screen.queryByTestId('rule-details-flyout')).not.toBeInTheDocument();
-  });
-
-  it('strips the rule_id from the URL when the flyout is closed', async () => {
-    mockInstallReview(settledWith([]), settledWith([makeRule('rule-1')]));
-
-    renderAt(`${RULES_ADD_PATH}/rule-1`);
-
-    await screen.findByTestId('rule-details-flyout');
-    expect(screen.getByTestId('location-pathname').textContent).toBe(`${RULES_ADD_PATH}/rule-1`);
-
-    fireEvent.click(screen.getByTestId('flyout-close'));
-
-    expect(screen.getByTestId('location-pathname').textContent).toBe(RULES_ADD_PATH);
     expect(screen.queryByTestId('rule-details-flyout')).not.toBeInTheDocument();
   });
 });

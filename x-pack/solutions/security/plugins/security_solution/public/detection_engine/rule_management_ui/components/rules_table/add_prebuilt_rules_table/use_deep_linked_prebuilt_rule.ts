@@ -29,15 +29,8 @@ export interface UseDeepLinkedPrebuiltRuleResult {
 }
 
 /**
- * Resolves a single prebuilt rule by `rule_id` for the Add Elastic Rules deep link
- * (`/rules/add_rules/:ruleId`), so the preview flyout has data regardless of which catalog page
- * is showing.
- *
- * Resolution is tiered:
- * 1. If the rule is already on the current table page, do nothing (the caller already has it).
- * 2. Otherwise fetch it by `rule_id` from the installable catalog.
- * 3. If it isn't installable (most commonly because it was already installed), fall back to the
- *    installed alerting rule so the flyout can still open — with install actions disabled.
+ * Resolves a single prebuilt rule by `rule_id`.
+ * If prebuilt rule is not found in the installable catalog, falls back to the installed rule if possible.
  */
 export const useDeepLinkedPrebuiltRule = ({
   ruleId,
