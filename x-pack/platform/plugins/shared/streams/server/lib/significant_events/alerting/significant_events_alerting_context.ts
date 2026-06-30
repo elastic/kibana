@@ -13,10 +13,10 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 } from '@kb
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/streams-schema';
 import { DualCleanupRulesAdapter } from '../../streams/ki/knowledge_indicator_client/rules/dual_cleanup_rules_adapter';
 import type { IRulesManagementClient } from '../../streams/ki/knowledge_indicator_client/rules/rules_management_client';
-import { V1RulesAdapter } from '../../streams/ki/knowledge_indicator_client/rules/v1_rules_adapter';
+import { RulesAdapterV1 } from '../../streams/ki/knowledge_indicator_client/rules/v1_rules_adapter';
 import {
-  V2RulesAdapter,
-  V2RulesNotInstalledAdapter,
+  RulesAdapterV2,
+  RulesNotInstalledAdapterV2,
 } from '../../streams/ki/knowledge_indicator_client/rules/v2_rules_adapter';
 import type { ISignificantEventsAlertsReader } from './alerts_reader';
 import { createAlertsReader } from './alerts_reader';
@@ -74,10 +74,10 @@ function createDualCleanupRulesClient({
   alertingV2RulesClient?: RulesClientApi;
   logger: Logger;
 }): IRulesManagementClient {
-  const v1Adapter = new V1RulesAdapter(alertingRulesClient);
+  const v1Adapter = new RulesAdapterV1(alertingRulesClient);
   const v2Client = alertingV2RulesClient
-    ? new V2RulesAdapter(alertingV2RulesClient)
-    : new V2RulesNotInstalledAdapter(logger);
+    ? new RulesAdapterV2(alertingV2RulesClient)
+    : new RulesNotInstalledAdapterV2(logger);
 
   return alertingV2Active
     ? new DualCleanupRulesAdapter(v2Client, v1Adapter, logger)

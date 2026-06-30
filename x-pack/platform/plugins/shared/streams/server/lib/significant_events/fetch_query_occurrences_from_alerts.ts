@@ -18,7 +18,7 @@ import type { RuleUnbackedFilter } from '../streams/ki';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 import { getColumnIndex } from '../streams/helpers/esql';
-import { type ISignificantEventsAlertsReader, V1_ALERTS_READER } from './alerting/alerts_reader';
+import { type ISignificantEventsAlertsReader, ALERTS_READER_V1 } from './alerting/alerts_reader';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 export interface SparseBucket {
@@ -129,7 +129,7 @@ export async function computeOccurrences(
     from,
     to,
     bucketSize,
-    alertsReader = V1_ALERTS_READER,
+    alertsReader = ALERTS_READER_V1,
   }: {
     ruleIds: string[];
     from: Date;
@@ -253,7 +253,7 @@ export async function getQueryOccurrences(
   dependencies: SignificantEventsDependencies
 ): Promise<QueryOccurrences> {
   const { kiClient, scopedClusterClient } = dependencies;
-  const { from, to, bucketSize, alertsReader = V1_ALERTS_READER } = params;
+  const { from, to, bucketSize, alertsReader = ALERTS_READER_V1 } = params;
 
   const queryLinks = await fetchQueryLinks(params, kiClient);
   if (isEmpty(queryLinks)) {

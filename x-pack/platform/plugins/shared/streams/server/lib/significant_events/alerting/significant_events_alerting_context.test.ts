@@ -9,7 +9,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
-import { V1_ALERTS_READER, V2_ALERTS_READER } from './alerts_reader';
+import { ALERTS_READER_V1, ALERTS_READER_V2 } from './alerts_reader';
 import {
   createSignificantEventsAlertingContextResolver,
   canQueryBeRuleBacked,
@@ -58,7 +58,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     )();
 
     expect(context.alertingV2Active).toBe(false);
-    expect(context.alertsReader).toBe(V1_ALERTS_READER);
+    expect(context.alertsReader).toBe(ALERTS_READER_V1);
   });
 
   it('returns v2 alerts reader when the UI flag is on and the v2 client is available', async () => {
@@ -67,7 +67,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     )();
 
     expect(context.alertingV2Active).toBe(true);
-    expect(context.alertsReader).toBe(V2_ALERTS_READER);
+    expect(context.alertsReader).toBe(ALERTS_READER_V2);
   });
 
   it('caches context resolution within a request via the resolver factory', async () => {
@@ -86,7 +86,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     expect(getAlertingV2RulesClient).toHaveBeenCalledTimes(1);
     expect(first).toBe(second);
     expect(first.alertingV2Active).toBe(false);
-    expect(first.alertsReader).toBe(V1_ALERTS_READER);
+    expect(first.alertsReader).toBe(ALERTS_READER_V1);
   });
 
   it('falls back to v1 when the UI flag is on but the v2 client is missing', async () => {
@@ -95,7 +95,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     )();
 
     expect(context.alertingV2Active).toBe(false);
-    expect(context.alertsReader).toBe(V1_ALERTS_READER);
+    expect(context.alertsReader).toBe(ALERTS_READER_V1);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('alerting v2 plugin is not available')
     );

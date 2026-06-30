@@ -8,8 +8,8 @@
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/streams-schema';
-import { V1SignificantEventsAlertsReader } from './v1_alerts_reader';
-import { V2SignificantEventsAlertsReader } from './v2_alerts_reader';
+import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
+import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
 
 export interface ChangePointScanParams {
   lookback: string;
@@ -112,11 +112,11 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
   return map;
 }
 
-export const V1_ALERTS_READER: ISignificantEventsAlertsReader =
-  new V1SignificantEventsAlertsReader();
-export const V2_ALERTS_READER: ISignificantEventsAlertsReader =
-  new V2SignificantEventsAlertsReader();
+export const ALERTS_READER_V1: ISignificantEventsAlertsReader =
+  new SignificantEventsAlertsReaderV1();
+export const ALERTS_READER_V2: ISignificantEventsAlertsReader =
+  new SignificantEventsAlertsReaderV2();
 
 export function createAlertsReader(alertingV2Active: boolean): ISignificantEventsAlertsReader {
-  return alertingV2Active ? V2_ALERTS_READER : V1_ALERTS_READER;
+  return alertingV2Active ? ALERTS_READER_V2 : ALERTS_READER_V1;
 }

@@ -17,7 +17,7 @@ import {
   getQueryOccurrences,
   fetchQueryOccurrencesFromAlerts,
 } from './fetch_query_occurrences_from_alerts';
-import { V2_ALERTS_READER } from './alerting/alerts_reader';
+import { ALERTS_READER_V2 } from './alerting/alerts_reader';
 
 const makeQueryLink = (overrides: Partial<QueryLink> & { id?: string } = {}): QueryLink => {
   const id = overrides.id ?? 'q1';
@@ -90,7 +90,7 @@ const defaultV2Params = {
   from: FROM,
   to: TO,
   bucketSize: BUCKET,
-  alertsReader: V2_ALERTS_READER,
+  alertsReader: ALERTS_READER_V2,
 };
 
 describe('fetchQueryOccurrencesFromAlerts', () => {

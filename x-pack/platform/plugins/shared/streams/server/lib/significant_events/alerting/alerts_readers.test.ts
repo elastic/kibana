@@ -12,7 +12,7 @@ import {
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
-import { V1_ALERTS_READER, V2_ALERTS_READER } from './alerts_reader';
+import { ALERTS_READER_V1, ALERTS_READER_V2 } from './alerts_reader';
 
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
@@ -46,8 +46,8 @@ function createEsClient() {
   };
 }
 
-describe('V1SignificantEventsAlertsReader', () => {
-  const reader = V1_ALERTS_READER;
+describe('SignificantEventsAlertsReaderV1', () => {
+  const reader = ALERTS_READER_V1;
 
   it('counts alerts with a document count query', async () => {
     const { client, count } = createEsClient();
@@ -261,8 +261,8 @@ describe('V1SignificantEventsAlertsReader', () => {
   });
 });
 
-describe('V2SignificantEventsAlertsReader', () => {
-  const reader = V2_ALERTS_READER;
+describe('SignificantEventsAlertsReaderV2', () => {
+  const reader = ALERTS_READER_V2;
 
   it('counts alerts with a distinct group_hash cardinality aggregation', async () => {
     const { client, search } = createEsClient();

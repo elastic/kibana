@@ -12,7 +12,7 @@ import {
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
 import type { SignificantEventsAlertingContext } from '../../../significant_events/alerting/significant_events_alerting_context';
-import { V1_ALERTS_READER } from '../../../significant_events/alerting/alerts_reader';
+import { ALERTS_READER_V1 } from '../../../significant_events/alerting/alerts_reader';
 import { computeFeatureUuid } from '@kbn/streams-schema';
 import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
@@ -84,7 +84,7 @@ function createAlertingContext(
 ): SignificantEventsAlertingContext {
   return {
     alertingV2Active: false,
-    alertsReader: V1_ALERTS_READER,
+    alertsReader: ALERTS_READER_V1,
     rulesClient: rulesManagementClient,
   };
 }

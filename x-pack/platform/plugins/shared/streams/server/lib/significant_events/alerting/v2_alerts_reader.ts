@@ -35,7 +35,7 @@ interface RawRuleBucket {
   last_floor_window?: { doc_count?: number; signal_count?: { value?: number } };
 }
 
-export class V2SignificantEventsAlertsReader implements ISignificantEventsAlertsReader {
+export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlertsReader {
   readonly index = '.rule-events';
   readonly ruleIdColumn = 'rule_id' as const;
 
