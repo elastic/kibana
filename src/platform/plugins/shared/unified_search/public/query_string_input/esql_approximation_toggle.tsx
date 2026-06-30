@@ -118,7 +118,7 @@ export const EsqlApproximationToggle = ({
               aria-label={ariaLabel}
               size="s"
               color={useApproximation ? 'success' : 'text'}
-              display={useApproximation ? 'base' : 'empty'}
+              display="base"
               disabled={disabled}
               data-test-subj="esqlApproximationToggleButton"
               onClick={() => setIsPopoverOpen((open) => !open)}
