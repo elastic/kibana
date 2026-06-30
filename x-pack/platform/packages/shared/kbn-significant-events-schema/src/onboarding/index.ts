@@ -14,7 +14,7 @@ import {
 } from '../workflows';
 
 /** Summary of the features identification step of a completed onboarding run. */
-export interface StreamsKIsOnboardingFeaturesResult {
+export interface KIsOnboardingFeaturesResult {
   skipped: boolean;
   discovered: BaseFeature[];
   connectorUsed: string;
@@ -22,28 +22,27 @@ export interface StreamsKIsOnboardingFeaturesResult {
 }
 
 /** Summary of the queries generation step of a completed onboarding run. */
-export interface StreamsKIsOnboardingQueriesResult {
+export interface KIsOnboardingQueriesResult {
   skipped: boolean;
   persisted: GeneratedSignificantEventQuery[];
   connectorUsed: string;
   tokensUsed: ChatCompletionTokenCount;
 }
 
-export interface StreamsKIsOnboardingResult {
-  features: StreamsKIsOnboardingFeaturesResult;
-  queries: StreamsKIsOnboardingQueriesResult;
+export interface KIsOnboardingResult {
+  features: KIsOnboardingFeaturesResult;
+  queries: KIsOnboardingQueriesResult;
 }
 
-export type StreamsKIsOnboardingStatusResult =
-  SignificantEventsWorkflowStatusResult<StreamsKIsOnboardingResult>;
+export type KIsOnboardingStatusResult = SignificantEventsWorkflowStatusResult<KIsOnboardingResult>;
 
-export enum StreamsKIsOnboardingStep {
+export enum KIsOnboardingStep {
   FeaturesIdentification = 'features_identification',
   QueriesGeneration = 'queries_generation',
 }
 
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
-export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<SignificantEventsWorkflowStatus> =
+export const KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<SignificantEventsWorkflowStatus> =
   new Set([
     SignificantEventsWorkflowStatus.InProgress,
     SignificantEventsWorkflowStatus.BeingCanceled,
