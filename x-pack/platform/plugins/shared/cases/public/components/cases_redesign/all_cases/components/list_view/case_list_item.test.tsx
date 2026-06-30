@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { renderWithTestingProviders } from '../../../../../common/mock';
 import { CaseListItem } from './case_list_item';
-import { basicCase } from '../../../../../containers/mock';
+import { basicCase, basicPush } from '../../../../../containers/mock';
 import { suggestionUserProfiles } from '../../../../../containers/user_profiles/api.mock';
 import { CaseSeverity } from '../../../../../../common/types/domain';
 import { CaseStatuses } from '@kbn/cases-components';
@@ -196,6 +196,38 @@ describe('CaseListItem', () => {
     const actionButton = screen.getByTestId('mock-action-column');
 
     expect(link.contains(actionButton)).toBe(false);
+  });
+
+  it('renders optional fields outside the stretched link', () => {
+    renderWithTestingProviders(
+      <CaseListItem
+        {...defaultProps}
+        selectedFields={[{ field: 'tags', name: i18n.TAGS, isChecked: true }]}
+      />
+    );
+
+    const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const optionalFields = screen.getByTestId('cases-list-item-optional-fields');
+
+    expect(link.contains(optionalFields)).toBe(false);
+  });
+
+  it('renders external incident link outside the stretched link when pushed', () => {
+    renderWithTestingProviders(
+      <CaseListItem
+        {...defaultProps}
+        theCase={{ ...mockCase, externalService: basicPush }}
+        selectedFields={[
+          { field: 'externalIncident', name: i18n.EXTERNAL_INCIDENT, isChecked: true },
+        ]}
+      />
+    );
+
+    const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const externalLink = screen.getByTestId('cases-list-item-field-external-link');
+
+    expect(link.contains(externalLink)).toBe(false);
+    expect(externalLink).toHaveAttribute('href', basicPush.externalUrl);
   });
 
   it('navigates to case view when the link content is clicked', async () => {

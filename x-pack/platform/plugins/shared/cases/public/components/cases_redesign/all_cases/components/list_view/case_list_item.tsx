@@ -232,8 +232,8 @@ export const CaseListItem: React.FC<{
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
-            <ListItemOptionalFields theCase={theCase} selectedFields={selectedFields} />
           </EuiLink>
+          <ListItemOptionalFields theCase={theCase} selectedFields={selectedFields} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false} css={styles.actions}>

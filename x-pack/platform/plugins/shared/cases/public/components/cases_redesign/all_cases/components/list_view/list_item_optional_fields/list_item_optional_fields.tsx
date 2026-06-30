@@ -22,6 +22,7 @@ export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
   const styles = useMemo(
     () => ({
       container: css`
+        position: relative;
         margin-top: ${euiTheme.size.s};
       `,
     }),
