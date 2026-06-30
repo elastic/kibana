@@ -110,7 +110,9 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Selected renderer can be disabled with one click', () => {
     enableAllRowRenderersWithSwitch();
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
+    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('be.checked');
 
     // Intercepts should be before click handlers that activate them rather than afterwards or you have race conditions
