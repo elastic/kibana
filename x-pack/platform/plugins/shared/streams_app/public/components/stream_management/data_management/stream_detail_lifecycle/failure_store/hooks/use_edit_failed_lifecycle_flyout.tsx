@@ -273,18 +273,16 @@ export const useEditFailedLifecycleFlyout = ({
       {
         successMessage,
         errorMessage,
-        onSettled,
+        onSuccess,
       }: {
         successMessage: string;
         errorMessage?: string;
-        onSettled?: () => void;
+        onSuccess?: () => void;
       }
     ) => {
       try {
         setIsSaving(true);
         await updateFailureStore(definition.stream.name, next);
-        refreshDefinition();
-        notifications.toasts.addSuccess({ title: successMessage });
       } catch (error) {
         notifications.toasts.addError(getFormattedError(error), {
           title:
@@ -293,10 +291,19 @@ export const useEditFailedLifecycleFlyout = ({
               defaultMessage: "We couldn't update the failure store settings.",
             }),
         });
+        // Keep the flyout open (no onSuccess) so the user can fix the issue and
+        // retry without losing their in-progress edits.
+        return;
       } finally {
         setIsSaving(false);
-        onSettled?.();
         data.refresh();
+      }
+      notifications.toasts.addSuccess({ title: successMessage });
+      onSuccess?.();
+      try {
+        refreshDefinition();
+      } catch {
+        // The save already succeeded; a stale view will recover on the next refresh.
       }
     },
     [data, definition.stream.name, notifications.toasts, refreshDefinition, updateFailureStore]
@@ -337,7 +344,7 @@ export const useEditFailedLifecycleFlyout = ({
 
     return saveFailureStore(nextFailureStore, {
       successMessage: saveSuccessMessage,
-      onSettled: closeMainFlyout,
+      onSuccess: closeMainFlyout,
     });
   };
 
@@ -424,7 +431,7 @@ export const useEditFailedLifecycleFlyout = ({
 
     return saveFailureStore(nextFailureStore, {
       successMessage: saveSuccessMessage,
-      onSettled: closeDeletePhaseFlyout,
+      onSuccess: closeDeletePhaseFlyout,
     });
   };
 

@@ -56,10 +56,13 @@ const createDefinition = (): Streams.ingest.all.GetResponse =>
     },
   } as unknown as Streams.ingest.all.GetResponse);
 
-const createKibana = (isServerless: boolean) =>
+const createKibana = (
+  isServerless: boolean,
+  toasts: { addSuccess: jest.Mock; addError: jest.Mock }
+) =>
   ({
     core: {
-      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      notifications: { toasts },
       http: {},
     },
     dependencies: {
@@ -75,19 +78,23 @@ const Harness = ({
   isServerless,
   updateFailureStore,
   failureStoreConfig,
+  refreshDefinition = jest.fn(),
+  toasts = { addSuccess: jest.fn(), addError: jest.fn() },
 }: {
   isServerless: boolean;
   updateFailureStore: jest.Mock;
   failureStoreConfig: FailureStoreConfig;
+  refreshDefinition?: jest.Mock;
+  toasts?: { addSuccess: jest.Mock; addError: jest.Mock };
 }) => {
   const { mainFlyout, deletePhaseFlyout, openMainFlyout, openDeletePhaseFlyout } =
     useEditFailedLifecycleFlyout({
       definition: createDefinition(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: { refresh: jest.fn() } as any,
-      refreshDefinition: jest.fn(),
+      refreshDefinition,
       failureStoreConfig,
-      kibana: createKibana(isServerless),
+      kibana: createKibana(isServerless, toasts),
       manageFailureStorePrivilege: true,
       updateFailureStore,
     });
@@ -313,5 +320,68 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
     fireEvent.click(screen.getByTestId('openMainFlyout'));
 
     expect(screen.getByTestId('dataLifecycleFlyoutApplyButton')).toBeDisabled();
+  });
+
+  it('keeps the main flyout open and shows an error when the save fails', async () => {
+    const updateFailureStore = jest.fn().mockRejectedValue(new Error('boom'));
+    const toasts = { addSuccess: jest.fn(), addError: jest.fn() };
+
+    render(
+      <LifecyclePreviewProvider>
+        <Harness
+          isServerless={false}
+          updateFailureStore={updateFailureStore}
+          failureStoreConfig={createFailureStoreConfig()}
+          toasts={toasts}
+        />
+      </LifecyclePreviewProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+    fireEvent.click(screen.getByTestId('editFailedDataLifecycle-enableFailureStoreCheckbox'));
+    fireEvent.click(screen.getByTestId('dataLifecycleFlyoutApplyButton'));
+
+    await waitFor(() => {
+      expect(updateFailureStore).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(toasts.addError).toHaveBeenCalled();
+    });
+    // The flyout must stay open so the user can fix the issue and retry without
+    // losing their in-progress edits.
+    expect(screen.getByTestId('dataLifecycleFlyoutApplyButton')).toBeInTheDocument();
+    expect(toasts.addSuccess).not.toHaveBeenCalled();
+  });
+
+  it('reports success (not an error) when refreshing the definition fails after a successful save', async () => {
+    const updateFailureStore = jest.fn().mockResolvedValue(undefined);
+    const refreshDefinition = jest.fn(() => {
+      throw new Error('refresh failed');
+    });
+    const toasts = { addSuccess: jest.fn(), addError: jest.fn() };
+
+    render(
+      <LifecyclePreviewProvider>
+        <Harness
+          isServerless={false}
+          updateFailureStore={updateFailureStore}
+          failureStoreConfig={createFailureStoreConfig()}
+          refreshDefinition={refreshDefinition}
+          toasts={toasts}
+        />
+      </LifecyclePreviewProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+    fireEvent.click(screen.getByTestId('editFailedDataLifecycle-enableFailureStoreCheckbox'));
+    fireEvent.click(screen.getByTestId('dataLifecycleFlyoutApplyButton'));
+
+    await waitFor(() => {
+      expect(toasts.addSuccess).toHaveBeenCalled();
+    });
+    // A refresh failure after a successful ES update must not be surfaced as a
+    // failed save.
+    expect(toasts.addError).not.toHaveBeenCalled();
   });
 });
