@@ -8,15 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useIsMutating } from '@kbn/react-query';
 import type { Dispatch, SetStateAction } from 'react';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { RULES_ADD_PATH } from '../../../../../../common/constants';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
@@ -330,9 +322,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             {isPreviewRuleAlreadyInstalled ? (
-              <EuiToolTip content={i18n.RULE_ALREADY_INSTALLED_TOOLTIP}>
-                {installButton}
-              </EuiToolTip>
+              <EuiToolTip content={i18n.RULE_ALREADY_INSTALLED_TOOLTIP}>{installButton}</EuiToolTip>
             ) : (
               installButton
             )}
@@ -378,38 +368,20 @@ export const AddPrebuiltRulesTableContextProvider = ({
   });
 
   // Auto-open the preview flyout when a rule_id is present in the URL path
-  // (e.g. /rules/add_rules/<rule_id>). Wait for both queries to settle on
-  // fresh data — otherwise a stale install-review cache could surface a rule
-  // that was installed in this session, and we'd open the install flyout for
-  // an already-installed rule with active install buttons.
-  const autoOpenedRuleIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!ruleIdFromUrl) {
-      autoOpenedRuleIdRef.current = null;
+    if (!ruleIdFromUrl || !isFetched || isFetching || !isDeepLinkedRuleResolved) {
+      // Do not open the flyout until all the required data is fetched.
       return;
     }
-    if (autoOpenedRuleIdRef.current === ruleIdFromUrl) {
-      return;
+    if (deepLinkedRule) {
+      openRulePreview(ruleIdFromUrl);
     }
-    // Wait for the table query and the by-rule_id deep-link resolution (incl. its fallback) to
-    // settle on fresh data before deciding — a stale cache could otherwise surface a rule that
-    // was installed in this session and open the install flyout with active install buttons.
-    if (!isFetched || isFetching || !isDeepLinkedRuleResolved) {
-      return;
-    }
-    const found = flyoutRules.find((r) => r.rule_id === ruleIdFromUrl);
-    if (!found) {
-      return;
-    }
-
-    autoOpenedRuleIdRef.current = ruleIdFromUrl;
-    openRulePreview(ruleIdFromUrl);
   }, [
     ruleIdFromUrl,
     isFetched,
     isFetching,
     isDeepLinkedRuleResolved,
-    flyoutRules,
+    deepLinkedRule,
     openRulePreview,
   ]);
 
