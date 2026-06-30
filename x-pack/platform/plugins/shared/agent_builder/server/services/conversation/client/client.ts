@@ -12,6 +12,8 @@ import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
+  isAgentNotFoundError,
+  isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
@@ -137,7 +139,10 @@ class ConversationClientImpl implements ConversationClient {
       await this.getDocumentWithAccess({ conversationId, access: 'converse' });
       return true;
     } catch (error) {
-      return false;
+      if (isConversationNotFoundError(error)) {
+        return false;
+      }
+      throw error;
     }
   }
 
@@ -248,6 +253,9 @@ class ConversationClientImpl implements ConversationClient {
           try {
             await this.agentRegistry.get(conversation.agent_id, { access: 'use' });
           } catch (error) {
+            if (!isAgentNotFoundError(error)) {
+              throw error;
+            }
             allowed = false;
           }
         }

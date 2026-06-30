@@ -6,7 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import { createAgentNotFoundError } from '@kbn/agent-builder-common';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control/types';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
@@ -107,9 +108,13 @@ describe('ConversationClient', () => {
           _source: expect.arrayContaining(['access_control']),
         })
       );
-      expect(result[0].access_control).toEqual({
-        access_mode: ConversationAccessControlMode.Public,
-      });
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          access_control: {
+            access_mode: ConversationAccessControlMode.Public,
+          },
+        })
+      );
     });
 
     it('filters listed conversations to public-or-owned conversations for accessible agents', async () => {
@@ -229,7 +234,7 @@ describe('ConversationClient', () => {
     });
 
     it('returns not found when conversation access passes but agent use access fails', async () => {
-      agentRegistry.get.mockRejectedValue(new Error('agent not found'));
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -250,7 +255,7 @@ describe('ConversationClient', () => {
 
   describe('exists', () => {
     it('returns false when conversation access passes but agent use access fails', async () => {
-      agentRegistry.get.mockRejectedValue(new Error('agent not found'));
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -264,6 +269,31 @@ describe('ConversationClient', () => {
       });
 
       await expect(client.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('propagates Elasticsearch read failures', async () => {
+      const error = new Error('search timeout');
+      mockEsClient.search.mockRejectedValue(error);
+
+      await expect(client.exists('conversation-1')).rejects.toBe(error);
+    });
+
+    it('propagates agent registry failures that are not access denials', async () => {
+      const error = new Error('agent registry unavailable');
+      agentRegistry.get.mockRejectedValue(error);
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await expect(client.exists('conversation-1')).rejects.toBe(error);
     });
   });
 
@@ -317,7 +347,7 @@ describe('ConversationClient', () => {
     });
 
     it('returns not found for converse updates when agent use access fails', async () => {
-      agentRegistry.get.mockRejectedValue(new Error('agent not found'));
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
