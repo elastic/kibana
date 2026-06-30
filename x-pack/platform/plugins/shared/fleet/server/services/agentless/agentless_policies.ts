@@ -53,6 +53,8 @@ import {
 import { agentlessAgentService } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
 
+import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
+
 /**
  * Options accepted by {@link AgentlessPoliciesService.listAgentlessPolicies}.
  *
@@ -402,7 +404,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     // server-side (and `supports_agentless` is excluded from the allowed kuery fields) so
     // callers can neither widen the scope to regular package policies nor override it.
     const agentlessFilter = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`;
-    const combinedKuery = kuery ? `(${agentlessFilter}) AND (${kuery})` : agentlessFilter;
+    const normalizedKuery = kuery
+      ? prefixKueryFieldsWithSavedObjectType(kuery, PACKAGE_POLICY_SAVED_OBJECT_TYPE)
+      : undefined;
+    const combinedKuery = normalizedKuery
+      ? `(${agentlessFilter}) AND (${normalizedKuery})`
+      : agentlessFilter;
 
     this.logger.debug(`Listing agentless policies with kuery [${combinedKuery}]`);
 
