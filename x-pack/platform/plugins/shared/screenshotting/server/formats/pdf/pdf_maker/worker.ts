@@ -170,14 +170,14 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
         buffers.push(data);
       });
       pdfDoc.on('end', () => {
-        const buffer = Buffer.allocUnsafeSlow(
+        const output = Buffer.allocUnsafeSlow(
           buffers.reduce((length, chunk) => length + chunk.length, 0)
         );
         let offset = 0;
         for (const chunk of buffers) {
-          offset += chunk.copy(buffer, offset);
+          offset += chunk.copy(output, offset);
         }
-        resolve(buffer);
+        resolve(output);
       });
       pdfDoc.end();
     });
