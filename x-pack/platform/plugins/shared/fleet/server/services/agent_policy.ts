@@ -2086,8 +2086,12 @@ class AgentPolicyService {
         scroll_size: SO_SEARCH_LIMIT,
         refresh: true,
         query: {
-          term: {
-            policy_id: agentPolicyId,
+          bool: {
+            should: [
+              { term: { policy_id: agentPolicyId } },
+              { prefix: { policy_id: `${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+            ],
+            minimum_should_match: 1,
           },
         },
       });
