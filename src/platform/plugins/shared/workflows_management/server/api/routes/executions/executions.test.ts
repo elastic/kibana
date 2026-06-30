@@ -663,7 +663,8 @@ describe('Execution Routes', () => {
         'ex-1',
         'default',
         { resume: true },
-        request
+        request,
+        { channel: 'kibana_execution_view' }
       );
       expect(result).toMatchObject({
         type: 'ok',
