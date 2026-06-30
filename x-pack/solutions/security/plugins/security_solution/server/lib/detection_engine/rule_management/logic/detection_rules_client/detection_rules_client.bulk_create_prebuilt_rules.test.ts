@@ -26,6 +26,10 @@ jest.mock('uuid', () => ({
 }));
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
+jest.mock('../../../prebuilt_rules/constants', () => ({
+  ...jest.requireActual('../../../prebuilt_rules/constants'),
+  PREBUILT_RULES_BULK_CREATE_BATCH_SIZE: 2,
+}));
 
 describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -264,7 +268,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     );
   });
 
-  it('processes rules in chunks when batchSize is specified', async () => {
+  it('processes rules in chunks based on PREBUILT_RULES_BULK_CREATE_BATCH_SIZE', async () => {
     const rules = [
       { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
       { ...getCreateRulesSchemaMock(), version: 2, rule_id: 'rule-2' },
@@ -277,7 +281,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: 0,
     });
 
-    await detectionRulesClient.bulkCreatePrebuiltRules({ rules, batchSize: 2 });
+    await detectionRulesClient.bulkCreatePrebuiltRules({ rules });
 
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(2);
     expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(2);

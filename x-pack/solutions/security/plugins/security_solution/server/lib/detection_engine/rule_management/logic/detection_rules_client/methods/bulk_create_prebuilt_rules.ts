@@ -36,7 +36,7 @@ export const bulkCreatePrebuiltRules = async ({
   mlAuthz,
   args,
 }: BulkCreatePrebuiltRulesOptions): Promise<BulkCreatePrebuiltRulesResult> => {
-  const { rules, batchSize = PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } = args;
+  const { rules } = args;
   const results: BulkCreatePrebuiltRulesResult['results'] = [];
   const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
 
@@ -70,8 +70,8 @@ export const bulkCreatePrebuiltRules = async ({
     }
   }
 
-  for (let i = 0; i < validRules.length; i += batchSize) {
-    const chunk = validRules.slice(i, i + batchSize);
+  for (let i = 0; i < validRules.length; i += PREBUILT_RULES_BULK_CREATE_BATCH_SIZE) {
+    const chunk = validRules.slice(i, i + PREBUILT_RULES_BULK_CREATE_BATCH_SIZE);
     const itemById = new Map<string, PrebuiltRuleAsset>();
     const bulkInputs: Array<{
       data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
