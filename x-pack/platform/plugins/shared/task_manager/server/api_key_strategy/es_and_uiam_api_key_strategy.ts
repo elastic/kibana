@@ -256,6 +256,19 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       }
       return apiKey;
     }
+
+    // A cloned UIAM request persists only a UIAM key (no ES `apiKey`) even when the
+    // strategy's `typeToUse` is ES (`grant_uiam_api_keys=true` while `api_key_type`
+    // defaults to `es`). Fall back to the UIAM key so the task can still authenticate
+    // at run time instead of yielding an undefined credential.
+    if (!taskInstance.apiKey && taskInstance.uiamApiKey) {
+      this.logger.debug(
+        'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+        { tags: UIAM_LOGS_USAGE_TAGS }
+      );
+      return taskInstance.uiamApiKey;
+    }
+
     return taskInstance.apiKey;
   }
 

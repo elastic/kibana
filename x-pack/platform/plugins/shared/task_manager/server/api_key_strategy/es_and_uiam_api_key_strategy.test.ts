@@ -146,6 +146,28 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(logger.debug).not.toHaveBeenCalled();
     });
 
+    test('falls back to uiamApiKey with a debug log when typeToUse is ES but only uiamApiKey is persisted (cloned UIAM task)', () => {
+      const { strategy, logger } = createStrategy(ApiKeyType.ES);
+      // Cloned UIAM tasks persist only a UIAM key, even under an ES typeToUse strategy
+      // (grant_uiam_api_keys=true while api_key_type defaults to es).
+      const task = mockTaskInstance({
+        uiamApiKey: 'essu_uiam-key',
+        userScope: {
+          apiKeyId: 'uiam-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
+      });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
+      expect(logger.debug).toHaveBeenCalledWith(
+        'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     test('returns undefined and does not log when task has no keys', () => {
       const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance();
