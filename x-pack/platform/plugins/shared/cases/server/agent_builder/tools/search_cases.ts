@@ -69,7 +69,9 @@ const casesSchema = z.object({
   similar_to_case_id: z
     .string()
     .optional()
-    .describe('Find cases similar to this case ID based on shared observables. Required for similar mode.'),
+    .describe(
+      'Find cases similar to this case ID based on shared observables. Required for similar mode.'
+    ),
   alert_ids: z
     .array(z.string().min(1))
     .optional()
@@ -239,9 +241,9 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
             return injectAttachmentIds(
               createResult(
                 enrichedCases,
-                `Retrieved ${enrichedCases.length} case(s)` +
-                  (truncated ? ` (first ${BULK_GET_LIMIT} of ${case_ids.length} requested)` : '') +
-                  (bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : '')
+                `Retrieved ${enrichedCases.length} case(s)${
+                  truncated ? ` (first ${BULK_GET_LIMIT} of ${case_ids.length} requested)` : ''
+                }${bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''}`
               ),
               bulkAttachmentIds
             );

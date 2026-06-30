@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { emitFromStepResult, injectAttachmentIds, toCaseAttachmentData } from './emit_attachments';
 import {
-  emitFromStepResult,
-  injectAttachmentIds,
-  toCaseAttachmentData,
-} from './emit_attachments';
-import { CASE_ATTACHMENT_TYPE, CASES_ATTACHMENT_TYPE } from '../../../common/types/agent_builder/attachment_schemas';
+  CASE_ATTACHMENT_TYPE,
+  CASES_ATTACHMENT_TYPE,
+} from '../../../common/types/agent_builder/attachment_schemas';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import type { Case } from '../../../common/types/domain';
 
@@ -176,7 +175,10 @@ describe('toCaseAttachmentData', () => {
   });
 
   it('maps connector name from connector object', () => {
-    const c = { ...buildCase(), connector: { id: 'c1', name: 'Jira', type: '.jira', fields: null } } as unknown as Case;
+    const c = {
+      ...buildCase(),
+      connector: { id: 'c1', name: 'Jira', type: '.jira', fields: null },
+    } as unknown as Case;
     const data = toCaseAttachmentData(c);
     expect(data.connector_name).toBe('Jira');
   });
