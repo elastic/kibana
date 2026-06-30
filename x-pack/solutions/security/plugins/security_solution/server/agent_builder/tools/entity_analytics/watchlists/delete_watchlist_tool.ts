@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -17,8 +17,8 @@ import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlis
 import { createEntitySourcesService } from '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service';
 import { watchlistEntitySourceTypeName } from '../../../../lib/entity_analytics/watchlists/entity_sources/infra';
 import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
-import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../../constants';
+import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const schema = z.object({
   watchlistId: z
@@ -49,28 +49,8 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
     tags: ['security', 'entity-analytics', 'watchlists'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status !== 'available') {
-            return availability;
-          }
-          if (!experimentalFeatures.entityAnalyticsWatchlistEnabled) {
-            return {
-              status: 'unavailable',
-              reason: 'Entity Analytics watchlists are not enabled.',
-            };
-          }
-          return { status: 'available' };
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check ${SECURITY_DELETE_WATCHLIST_TOOL_ID} availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: ({ request }) =>
+        getWatchlistToolAvailability({ core, request, logger, experimentalFeatures }),
     },
     handler: async (params, { spaceId, esClient, request, prompts, callContext }) => {
       logger.debug(

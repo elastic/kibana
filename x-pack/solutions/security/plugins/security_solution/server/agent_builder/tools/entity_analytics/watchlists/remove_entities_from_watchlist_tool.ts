@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { CRUDClient } from '@kbn/entity-store/server/domain/crud';
 import type { Logger } from '@kbn/logging';
@@ -18,9 +18,9 @@ import { getIndexForWatchlist } from '../../../../lib/entity_analytics/watchlist
 import { createManualEntityService } from '../../../../lib/entity_analytics/watchlists/entity_sources/manual/service';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
-import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../../constants';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
+import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
@@ -61,34 +61,22 @@ This tool only removes entities that were **manually assigned** to the watchlist
     tags: ['security', 'entity-analytics', 'watchlists'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status !== 'available') {
-            return availability;
-          }
-          if (!experimentalFeatures.entityAnalyticsWatchlistEnabled) {
-            return {
-              status: 'unavailable',
-              reason: 'Entity Analytics watchlists are not enabled.',
-            };
-          }
-          if (!experimentalFeatures.entityAnalyticsEntityStoreV2) {
-            return {
-              status: 'unavailable',
-              reason:
-                'Entity Store V2 is not enabled (required to sync watchlist membership onto entity records).',
-            };
-          }
-          return { status: 'available' };
-        } catch (error) {
+      handler: async ({ request }) => {
+        const result = await getWatchlistToolAvailability({
+          core,
+          request,
+          logger,
+          experimentalFeatures,
+        });
+        if (result.status !== 'available') return result;
+        if (!experimentalFeatures.entityAnalyticsEntityStoreV2) {
           return {
             status: 'unavailable',
-            reason: `Failed to check ${SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID} availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
+            reason:
+              'Entity Store V2 is not enabled (required to sync watchlist membership onto entity records).',
           };
         }
+        return { status: 'available' };
       },
     },
     handler: async (

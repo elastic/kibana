@@ -8,16 +8,16 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
-import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../../constants';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
+import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const schema = z.object({
   watchlistId: z
@@ -63,28 +63,8 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
     tags: ['security', 'entity-analytics', 'watchlists'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status !== 'available') {
-            return availability;
-          }
-          if (!experimentalFeatures.entityAnalyticsWatchlistEnabled) {
-            return {
-              status: 'unavailable',
-              reason: 'Entity Analytics watchlists are not enabled.',
-            };
-          }
-          return { status: 'available' };
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check ${SECURITY_UPDATE_WATCHLIST_TOOL_ID} availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: ({ request }) =>
+        getWatchlistToolAvailability({ core, request, logger, experimentalFeatures }),
     },
     handler: async (
       params,

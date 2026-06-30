@@ -18,14 +18,14 @@ import {
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
-import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
+import { getWatchlistToolAvailability } from './watchlist_availability';
 import { updateWatchlistTool } from './update_watchlist_tool';
 
-jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
+jest.mock('./watchlist_availability', () => ({
+  getWatchlistToolAvailability: jest.fn(),
 }));
 
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as jest.Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,
@@ -103,7 +103,7 @@ describe('updateWatchlistTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
-    mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
+    mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({
       privileges: {},
       has_all_required: true,
@@ -120,16 +120,15 @@ describe('updateWatchlistTool', () => {
       expect(result.status).toBe('available');
     });
 
-    it('is unavailable when the watchlists feature flag is disabled', async () => {
-      const disabledTool = updateWatchlistTool(mocks.mockCore, mocks.mockLogger, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsWatchlistEnabled: false,
+    it('is unavailable when availability check returns unavailable', async () => {
+      mockGetWatchlistToolAvailability.mockResolvedValueOnce({
+        status: 'unavailable',
+        reason: 'not in a security space',
       });
-      const result = await disabledTool.availability!.handler(
+      const result = await tool.availability!.handler(
         createToolAvailabilityContext(mocks.mockRequest, 'default')
       );
       expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('watchlists');
     });
   });
 
