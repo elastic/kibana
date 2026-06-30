@@ -42,14 +42,14 @@ export function registerNavigationCustomizationEvents(analytics: AnalyticsServic
         type: 'keyword',
         _meta: {
           description:
-            'The solution type of the space in which the navigation was customized (e.g. es, oblt, security).',
+            'The solution type of the space in which the navigation was customized (one of the Kibana solution/project ids, e.g. es, oblt, security, workplaceai, vectordb).',
         },
       },
       did_customize: {
         type: 'boolean',
         _meta: {
           description:
-            'True when the user applied a customization; false when the baseline (default arrangement) was detected at setup.',
+            'True when the user applied a non-default arrangement. False when the layout is the default — either the baseline detected at setup, or a save that produced the default (e.g. "Reset to default").',
         },
       },
       visible_item_ids: {
