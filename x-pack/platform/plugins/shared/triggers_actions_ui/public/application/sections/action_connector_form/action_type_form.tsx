@@ -158,6 +158,7 @@ export const ActionTypeForm = ({
     application: { capabilities },
     settings,
     http,
+    docLinks,
     notifications,
     unifiedSearch,
     data,
@@ -425,6 +426,7 @@ export const ActionTypeForm = ({
       actionTypeId:
         actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
       http,
+      docLinks,
       uiSettings,
     });
 

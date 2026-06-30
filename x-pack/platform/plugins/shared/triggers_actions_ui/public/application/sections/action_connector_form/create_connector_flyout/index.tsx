@@ -139,6 +139,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
     http,
+    docLinks,
     uiSettings,
   });
 

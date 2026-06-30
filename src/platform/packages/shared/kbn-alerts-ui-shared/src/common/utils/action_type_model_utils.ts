@@ -9,7 +9,7 @@
 
 import { lazy, useMemo } from 'react';
 import type { ActionType } from '@kbn/actions-types';
-import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
@@ -55,14 +55,13 @@ export async function fetchConnectorSpec(
   return transformConnectorSpecResponse(wire);
 }
 
-const CONNECTORS_DOCS_BASE = 'https://www.elastic.co/docs/reference/kibana/connectors-kibana/';
-
 /**
  * Derives the documentation URL for a spec-based connector.
  * Uses docsUrl from spec metadata if explicitly set; otherwise derives it from the connector id.
  * Derivation: strip leading '.', convert underscores/camelCase to kebab-case, append '-action-type'.
+ * The base URL comes from the doc links service so it stays in sync if the docs structure changes.
  */
-function getDocsUrlFromSpec(spec: ConnectorSpecResponse): string {
+function getDocsUrlFromSpec(spec: ConnectorSpecResponse, docLinks: DocLinksStart): string {
   if (spec.metadata.docsUrl) {
     return spec.metadata.docsUrl;
   }
@@ -71,7 +70,7 @@ function getDocsUrlFromSpec(spec: ConnectorSpecResponse): string {
     .replace(/_/g, '-')
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .toLowerCase();
-  return `${CONNECTORS_DOCS_BASE}${slug}-action-type`;
+  return `${docLinks.links.alerting.connectors}/${slug}-action-type`;
 }
 
 /**
@@ -98,6 +97,7 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
  */
 export function transformSpecToActionTypeModel(
   spec: ConnectorSpecResponse,
+  docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
   return {
@@ -107,7 +107,7 @@ export function transformSpecToActionTypeModel(
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
-    docsUrl: getDocsUrlFromSpec(spec),
+    docsUrl: getDocsUrlFromSpec(spec, docLinks),
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {

@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
@@ -44,11 +44,13 @@ export function useActionTypeModel({
   actionTypeRegistry,
   actionTypeId,
   http,
+  docLinks,
   uiSettings,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
   http: HttpSetup;
+  docLinks: DocLinksStart;
   uiSettings?: IUiSettingsClient;
 }): UseActionTypeModelResult {
   const registeredModel = useMemo(() => {
@@ -92,8 +94,8 @@ export function useActionTypeModel({
   // renders, preventing infinite re-render loops in React Query (which re-runs select when its
   // function reference changes).
   const specBasedModel = useMemo(
-    () => (data ? transformSpecToActionTypeModel(data, uiSettings) : null),
-    [data, uiSettings]
+    () => (data ? transformSpecToActionTypeModel(data, docLinks, uiSettings) : null),
+    [data, docLinks, uiSettings]
   );
 
   return {

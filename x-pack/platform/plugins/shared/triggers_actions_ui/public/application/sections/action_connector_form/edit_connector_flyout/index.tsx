@@ -150,6 +150,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: connector.actionTypeId,
     http,
+    docLinks,
     uiSettings,
   });
 
