@@ -94,7 +94,7 @@ describe('handleResolutionUnlink', () => {
       operation: 'unlink',
       namespace: NAMESPACE,
     });
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(400);
   });
 
   it('reports error telemetry for MixedEntityTypesError', async () => {

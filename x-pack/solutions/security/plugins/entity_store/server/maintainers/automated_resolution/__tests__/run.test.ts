@@ -229,6 +229,52 @@ describe('Email rule resolution', () => {
           skipped: 1,
           failed: 0,
         },
+        breakdown: [{ name: 'linked_aliases', count: 1 }],
+      });
+    });
+
+    it('should report bucket-based applied and linked_aliases breakdown when one bucket links multiple aliases', async () => {
+      const state = createInitialState();
+      const telemetry = { report: jest.fn() };
+      mockEsClient.search
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
+        .mockResolvedValueOnce(
+          createFindMatchingGroupsResponse([
+            {
+              email: 'a@test.com',
+              unresolved: [
+                { id: 'user-1', namespace: 'okta' },
+                { id: 'user-2', namespace: 'entra_id' },
+                { id: 'user-3', namespace: 'active_directory' },
+              ],
+              existingTargets: [],
+            },
+          ]) as any
+        );
+
+      mockLinkEntities.mockResolvedValueOnce({
+        linked: ['user-2', 'user-3'],
+        skipped: [],
+        target_id: 'user-1',
+        entity_type: 'user',
+      });
+
+      await runEmailRuleResolution(
+        createDeps(state, mockEsClient, mockResolutionClient, { telemetry })
+      );
+
+      expect(telemetry.report).toHaveBeenCalledTimes(1);
+      expect(telemetry.report).toHaveBeenCalledWith({
+        funnel: {
+          scanned: 1,
+          qualified: 1,
+          applied: 1,
+          skipped: 0,
+          failed: 0,
+        },
+        breakdown: [{ name: 'linked_aliases', count: 2 }],
       });
     });
 

@@ -116,7 +116,7 @@ export class ResolutionClient {
     const { sources, docIds } = await this.fetchAndValidateEntities(allIds);
 
     // 4. Validate: all same type
-    const entityType = this.resolveSharedEntityType(sources, { validateSingleType: true });
+    const entityType = this.assertSingleEntityType(sources);
 
     // 5. Validate: target has no resolved_to (is not an alias)
     const targetEntity = sources.get(targetId)!;
@@ -181,7 +181,10 @@ export class ResolutionClient {
     const entityIds = [...new Set(rawEntityIds)];
     const { sources, docIds } = await this.fetchAndValidateEntities(entityIds);
 
-    // 2. Categorize: aliases to unlink vs non-aliases to skip
+    // 2. Validate: entire batch is single-type
+    const entityType = this.assertSingleEntityType(sources);
+
+    // 3. Categorize: aliases to unlink vs non-aliases to skip
     const toUnlink: string[] = [];
     const skipped: string[] = [];
 
@@ -195,11 +198,6 @@ export class ResolutionClient {
       }
     }
 
-    const typeEntityIds = toUnlink.length > 0 ? toUnlink : entityIds;
-    const entityType = this.resolveSharedEntityType(this.getSourcesSubset(sources, typeEntityIds), {
-      validateSingleType: true,
-    });
-
     if (toUnlink.length === 0) {
       return {
         unlinked: [],
@@ -208,7 +206,7 @@ export class ResolutionClient {
       };
     }
 
-    // 3. Bulk update: set resolved_to to null (effectively removes the link)
+    // 4. Bulk update: set resolved_to to null (effectively removes the link)
     this.logger.debug(`Unlinking ${toUnlink.length} entities`);
 
     const updates = toUnlink.map((entityId) => ({
@@ -390,13 +388,10 @@ export class ResolutionClient {
   }
 
   /**
-   * Reads the shared EngineMetadata.Type from entities. When validateSingleType is true,
-   * throws MixedEntityTypesError if more than one distinct type is present.
+   * Asserts all entities share a single EngineMetadata.Type. Returns that type, or '' when
+   * none carry a type. Throws MixedEntityTypesError when more than one distinct type is present.
    */
-  private resolveSharedEntityType(
-    entities: Map<string, Record<string, unknown>>,
-    { validateSingleType }: { validateSingleType: boolean }
-  ): string {
+  private assertSingleEntityType(entities: Map<string, Record<string, unknown>>): string {
     const types = new Set<string>();
     let firstType = '';
 
@@ -410,24 +405,10 @@ export class ResolutionClient {
       }
     }
 
-    if (validateSingleType && types.size > 1) {
+    if (types.size > 1) {
       throw new MixedEntityTypesError([...types]);
     }
 
     return firstType;
-  }
-
-  private getSourcesSubset(
-    sources: Map<string, Record<string, unknown>>,
-    entityIds: string[]
-  ): Map<string, Record<string, unknown>> {
-    const subset = new Map<string, Record<string, unknown>>();
-    for (const entityId of entityIds) {
-      const entity = sources.get(entityId);
-      if (entity) {
-        subset.set(entityId, entity);
-      }
-    }
-    return subset;
   }
 }

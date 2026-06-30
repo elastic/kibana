@@ -61,10 +61,8 @@ export async function handleResolutionLink(
   } catch (error) {
     reportResolutionError(analytics, 'link', namespace, error);
 
-    if (error instanceof EntitiesNotFoundError) {
-      return res.customError({ statusCode: 404, body: error });
-    }
     if (
+      error instanceof EntitiesNotFoundError ||
       error instanceof SelfLinkError ||
       error instanceof MixedEntityTypesError ||
       error instanceof ChainResolutionError ||

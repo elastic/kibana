@@ -47,7 +47,7 @@ export async function handleResolutionGroup(
     reportResolutionError(analytics, 'group', namespace, error);
 
     if (error instanceof EntitiesNotFoundError) {
-      return res.customError({ statusCode: 404, body: error });
+      return res.notFound({ body: error });
     }
     if (error instanceof ResolutionSearchTruncatedError) {
       return res.badRequest({ body: error });

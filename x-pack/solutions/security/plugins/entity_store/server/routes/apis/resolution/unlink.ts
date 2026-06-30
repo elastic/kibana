@@ -53,10 +53,7 @@ export async function handleResolutionUnlink(
   } catch (error) {
     reportResolutionError(analytics, 'unlink', namespace, error);
 
-    if (error instanceof EntitiesNotFoundError) {
-      return res.customError({ statusCode: 404, body: error });
-    }
-    if (error instanceof MixedEntityTypesError) {
+    if (error instanceof EntitiesNotFoundError || error instanceof MixedEntityTypesError) {
       return res.badRequest({ body: error });
     }
 

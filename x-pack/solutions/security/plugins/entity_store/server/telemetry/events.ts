@@ -60,30 +60,31 @@ interface EntityMaintainerEvent {
   errorMessage?: string;
 }
 
-interface ResolutionLinkEvent {
+interface ResolutionEventBase {
+  namespace: string;
+}
+
+interface ResolutionTypedEvent extends ResolutionEventBase {
   entityType: string;
+}
+
+interface ResolutionLinkEvent extends ResolutionTypedEvent {
   entitiesLinked: number;
   entitiesSkipped: number;
-  namespace: string;
 }
 
-interface ResolutionUnlinkEvent {
-  entityType: string;
+interface ResolutionUnlinkEvent extends ResolutionTypedEvent {
   entitiesUnlinked: number;
   entitiesSkipped: number;
-  namespace: string;
 }
 
-interface ResolutionGroupViewEvent {
-  entityType: string;
+interface ResolutionGroupViewEvent extends ResolutionTypedEvent {
   groupSize: number;
-  namespace: string;
 }
 
-interface ResolutionErrorEvent {
+interface ResolutionErrorEvent extends ResolutionEventBase {
   errorType: string;
   operation: string;
-  namespace: string;
 }
 
 interface EntityMaintainerRunSummaryFunnel {

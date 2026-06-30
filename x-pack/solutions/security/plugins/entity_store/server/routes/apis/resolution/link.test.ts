@@ -97,7 +97,7 @@ describe('handleResolutionLink', () => {
       'resolution_search_truncated',
       400,
     ],
-    [new EntitiesNotFoundError(['missing']), 'entities_not_found', 404],
+    [new EntitiesNotFoundError(['missing']), 'entities_not_found', 400],
   ])('reports error telemetry for %s', async (error, errorType, statusCode) => {
     mockLinkEntities.mockRejectedValue(error);
 

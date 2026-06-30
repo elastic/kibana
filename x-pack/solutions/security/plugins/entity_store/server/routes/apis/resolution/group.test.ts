@@ -42,6 +42,7 @@ function createMockResponse() {
     ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
     customError: jest.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
     badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
+    notFound: jest.fn(({ body }) => ({ status: 404, payload: body })),
   } as unknown as KibanaResponseFactory;
 }
 

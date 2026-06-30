@@ -75,11 +75,8 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
   }
 
   // Step 3: Resolve
-  const { resolutionsCreated, skippedAmbiguousBuckets, failedBuckets } = await resolveMatchBuckets(
-    resolutionClient,
-    matchBuckets,
-    logger
-  );
+  const { resolutionsCreated, appliedBuckets, skippedAmbiguousBuckets, failedBuckets } =
+    await resolveMatchBuckets(resolutionClient, matchBuckets, logger);
   logger.info(
     `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped, ${failedBuckets} buckets failed`
   );
@@ -88,10 +85,13 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
     funnel: {
       scanned: values.length,
       qualified: matchBuckets.length,
-      applied: resolutionsCreated,
+      applied: appliedBuckets,
       skipped: skippedAmbiguousBuckets,
       failed: failedBuckets,
     },
+    ...(resolutionsCreated > 0
+      ? { breakdown: [{ name: 'linked_aliases', count: resolutionsCreated }] }
+      : {}),
   });
 
   // Step 4: Update state — don't advance watermark if any buckets failed,
@@ -289,8 +289,14 @@ async function resolveMatchBuckets(
   resolutionClient: ResolutionClient,
   buckets: MatchBucket[],
   logger: Logger
-): Promise<{ resolutionsCreated: number; skippedAmbiguousBuckets: number; failedBuckets: number }> {
+): Promise<{
+  resolutionsCreated: number;
+  appliedBuckets: number;
+  skippedAmbiguousBuckets: number;
+  failedBuckets: number;
+}> {
   let resolutionsCreated = 0;
+  let appliedBuckets = 0;
   let skippedAmbiguousBuckets = 0;
   let failedBuckets = 0;
 
@@ -315,6 +321,9 @@ async function resolveMatchBuckets(
         if (aliasIds.length === 0) continue;
 
         const result = await resolutionClient.linkEntities(targetId, aliasIds);
+        if (result.linked.length > 0) {
+          appliedBuckets++;
+        }
         resolutionsCreated += result.linked.length;
       } else if (unresolvedEntities.length >= 2) {
         // New group: pick target via namespace priority, link the rest
@@ -324,6 +333,9 @@ async function resolveMatchBuckets(
           .map((e) => e.entityId);
 
         const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds);
+        if (result.linked.length > 0) {
+          appliedBuckets++;
+        }
         resolutionsCreated += result.linked.length;
       }
       // else: only 1 unresolved, no existing targets → no match, skip
@@ -333,7 +345,7 @@ async function resolveMatchBuckets(
     }
   }
 
-  return { resolutionsCreated, skippedAmbiguousBuckets, failedBuckets };
+  return { resolutionsCreated, appliedBuckets, skippedAmbiguousBuckets, failedBuckets };
 }
 
 /**
