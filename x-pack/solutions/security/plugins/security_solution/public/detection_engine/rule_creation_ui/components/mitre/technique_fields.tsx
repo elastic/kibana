@@ -18,7 +18,7 @@ import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threat, Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
@@ -26,6 +26,7 @@ import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
 import type {
   MitreSubTechnique,
+  MitreTactic,
   MitreTechnique,
 } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
@@ -71,12 +72,14 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 }): JSX.Element => {
   const values = field.value as Threats;
 
+  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
   const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
   const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
+      setTacticsOptions(mitreConfig.tactics);
       setTechniquesOptions(mitreConfig.techniques);
       setSubtechniquesOptions(mitreConfig.subtechniques);
     }
@@ -140,17 +143,42 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     [field.value, techniquesOptions, threatIndex, onFieldChange]
   );
 
+  const findCurrentTechniqueOption = useCallback(
+    (technique: ThreatTechnique) =>
+      technique.name === 'none' || techniquesOptions.length === 0
+        ? undefined
+        : techniquesOptions.find((t) => t.id === technique.id),
+    [techniquesOptions]
+  );
+
   const isUnsupportedTechnique = useCallback(
     (technique: ThreatTechnique) =>
       techniquesOptions.length > 0 &&
       technique.name !== 'none' &&
-      !techniquesOptions.some((t) => t.id === technique.id),
-    [techniquesOptions]
+      findCurrentTechniqueOption(technique) === undefined,
+    [findCurrentTechniqueOption, techniquesOptions]
+  );
+
+  const getTechniqueRenamedFromName = useCallback(
+    (technique: ThreatTechnique) => {
+      const matchedOption = findCurrentTechniqueOption(technique);
+      return matchedOption && matchedOption.name !== technique.name ? technique.name : undefined;
+    },
+    [findCurrentTechniqueOption]
   );
 
   const getSelectTechnique = useCallback(
-    (tacticName: string, index: number, disabled: boolean, technique: ThreatTechnique) => {
-      const options = techniquesOptions.filter((t) => t.tactics.includes(kebabCase(tacticName)));
+    (
+      parentTactic: Threat['tactic'],
+      index: number,
+      disabled: boolean,
+      technique: ThreatTechnique
+    ) => {
+      // Resolve the cascade filter against the parent tactic's CURRENT name in the
+      // dataset (matched by id), so renames in MITRE upgrades don't blank the list.
+      const currentTactic = tacticsOptions.find((t) => t.id === parentTactic.id);
+      const filterTacticName = kebabCase(currentTactic?.name ?? parentTactic.name);
+      const options = techniquesOptions.filter((t) => t.tactics.includes(filterTacticName));
       const isUnsupported = isUnsupportedTechnique(technique);
       return (
         <>
@@ -166,7 +194,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                     },
                   ]
                 : []),
-              ...(isUnsupported ? [createUnsupportedMitreOption(technique.id)] : []),
+              ...(isUnsupported
+                ? [createUnsupportedMitreOption({ id: technique.id, name: technique.name })]
+                : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
                 value: option.id,
@@ -186,7 +216,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         </>
       );
     },
-    [field.label, isUnsupportedTechnique, techniquesOptions, updateTechnique]
+    [field.label, isUnsupportedTechnique, tacticsOptions, techniquesOptions, updateTechnique]
   );
 
   const techniques = values[threatIndex].technique ?? [];
@@ -195,6 +225,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     <TechniqueContainer>
       {techniques.map((technique, index) => {
         const techniqueUnsupported = isUnsupportedTechnique(technique);
+        const techniqueRenamedFrom = getTechniqueRenamedFromName(technique);
         return (
           <div key={index}>
             <EuiSpacer size="s" />
@@ -205,15 +236,13 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               error={
                 techniqueUnsupported ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id) : undefined
               }
+              helpText={
+                techniqueRenamedFrom ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom) : undefined
+              }
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow>
-                  {getSelectTechnique(
-                    values[threatIndex].tactic.name,
-                    index,
-                    isDisabled,
-                    technique
-                  )}
+                  {getSelectTechnique(values[threatIndex].tactic, index, isDisabled, technique)}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>

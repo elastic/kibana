@@ -17,23 +17,28 @@ const validIdsByType: Record<MitreThreatEntityType, Set<string>> = {
 };
 
 /**
- * Returns the MITRE ATT&CK™ IDs (tactic, technique, or subtechnique) referenced by
- * a rule's threat mappings that are not present in the currently bundled MITRE
- * dataset. Returns an empty array when all referenced IDs are known.
+ * Returns the unique MITRE ATT&CK™ IDs (tactic, technique, or subtechnique)
+ * referenced by a rule's threat mappings that are not present in the currently
+ * bundled MITRE dataset. Returns an empty array when all referenced IDs are
+ * known.
+ *
+ * Each invalid ID is reported at most once even if it is referenced multiple
+ * times across the `threats` array, so callers can safely use the result to
+ * key React elements.
  *
  * Non-MITRE framework entries are skipped. A missing or empty `threats` value
  * results in an empty array.
  */
 export const findInvalidMitreIds = (threats: Threats | undefined): string[] => {
-  const invalidIds: string[] = [];
+  const invalidIds = new Set<string>();
 
   for (const { type, id } of iterateMitreThreatEntities(threats)) {
     if (!validIdsByType[type].has(id)) {
-      invalidIds.push(id);
+      invalidIds.add(id);
     }
   }
 
-  return invalidIds;
+  return Array.from(invalidIds);
 };
 
 /**

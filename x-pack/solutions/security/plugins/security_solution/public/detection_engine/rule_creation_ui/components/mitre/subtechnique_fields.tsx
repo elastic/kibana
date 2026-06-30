@@ -150,12 +150,30 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     [field.value, subtechniquesOptions, technique, techniqueIndex, onFieldChange, threatIndex]
   );
 
+  const findCurrentSubtechniqueOption = useCallback(
+    (subtechnique: ThreatSubtechnique) =>
+      subtechnique.name === 'none' || subtechniquesOptions.length === 0
+        ? undefined
+        : subtechniquesOptions.find((s) => s.id === subtechnique.id),
+    [subtechniquesOptions]
+  );
+
   const isUnsupportedSubtechnique = useCallback(
     (subtechnique: ThreatSubtechnique) =>
       subtechniquesOptions.length > 0 &&
       subtechnique.name !== 'none' &&
-      !subtechniquesOptions.some((s) => s.id === subtechnique.id),
-    [subtechniquesOptions]
+      findCurrentSubtechniqueOption(subtechnique) === undefined,
+    [findCurrentSubtechniqueOption, subtechniquesOptions]
+  );
+
+  const getSubtechniqueRenamedFromName = useCallback(
+    (subtechnique: ThreatSubtechnique) => {
+      const matchedOption = findCurrentSubtechniqueOption(subtechnique);
+      return matchedOption && matchedOption.name !== subtechnique.name
+        ? subtechnique.name
+        : undefined;
+    },
+    [findCurrentSubtechniqueOption]
   );
 
   const getSelectSubtechnique = useCallback(
@@ -179,7 +197,14 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                     },
                   ]
                 : []),
-              ...(isUnsupported ? [createUnsupportedMitreOption(subtechnique.id)] : []),
+              ...(isUnsupported
+                ? [
+                    createUnsupportedMitreOption({
+                      id: subtechnique.id,
+                      name: subtechnique.name,
+                    }),
+                  ]
+                : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
                 value: option.id,
@@ -218,6 +243,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       {subtechniques != null &&
         subtechniques.map((subtechnique, index) => {
           const subtechniqueUnsupported = isUnsupportedSubtechnique(subtechnique);
+          const subtechniqueRenamedFrom = getSubtechniqueRenamedFromName(subtechnique);
           return (
             <div key={index}>
               <EuiSpacer size="s" />
@@ -228,6 +254,11 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                 error={
                   subtechniqueUnsupported
                     ? i18n.UNSUPPORTED_MITRE_ID_ERROR(subtechnique.id)
+                    : undefined
+                }
+                helpText={
+                  subtechniqueRenamedFrom
+                    ? i18n.RENAMED_FROM_HINT(subtechniqueRenamedFrom)
                     : undefined
                 }
               >

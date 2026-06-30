@@ -181,6 +181,36 @@ describe('findInvalidMitreIds', () => {
     ];
     expect(findInvalidMitreIds(threats)).toEqual(['TA9998', 'TA9999']);
   });
+
+  it('deduplicates invalid IDs that appear multiple times across threats', () => {
+    const threats: Threats = [
+      makeThreat({
+        tactic: { id: 'TA9999', name: 'Fake Tactic', reference: 'https://example.com' },
+        technique: [
+          {
+            id: 'T9999',
+            name: 'Fake Technique',
+            reference: 'https://example.com',
+            subtechnique: [
+              { id: 'T9999.001', name: 'Fake Sub', reference: 'https://example.com' },
+              { id: 'T9999.001', name: 'Fake Sub Dup', reference: 'https://example.com' },
+            ],
+          },
+        ],
+      }),
+      makeThreat({
+        tactic: { id: 'TA9999', name: 'Fake Tactic Again', reference: 'https://example.com' },
+        technique: [
+          {
+            id: 'T9999',
+            name: 'Fake Technique Again',
+            reference: 'https://example.com',
+          },
+        ],
+      }),
+    ];
+    expect(findInvalidMitreIds(threats)).toEqual(['TA9999', 'T9999', 'T9999.001']);
+  });
 });
 
 describe('isKnownMitreId', () => {

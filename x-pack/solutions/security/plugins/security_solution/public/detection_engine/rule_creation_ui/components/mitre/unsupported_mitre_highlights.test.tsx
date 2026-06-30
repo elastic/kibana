@@ -85,7 +85,7 @@ describe('AddMitreAttackThreat - unsupported MITRE ID highlighting', () => {
     await waitFor(() => {
       expect(screen.queryByText(/not in the currently supported MITRE/)).toBeNull();
     });
-    expect(screen.queryByText(/\(unsupported\)/)).toBeNull();
+    expect(screen.queryByText(/Fake Tactic/)).toBeNull();
   });
 
   it('renders a ghost option and form-row error when the tactic ID is unsupported', async () => {
@@ -99,7 +99,24 @@ describe('AddMitreAttackThreat - unsupported MITRE ID highlighting', () => {
 
     renderWithThreats(threats);
 
-    expect(await screen.findByText('TA9999 (unsupported)')).toBeInTheDocument();
+    expect(await screen.findByText('Fake Tactic (TA9999)')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/"TA9999" is not in the currently supported MITRE/)
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to the id-only label when the stored tactic has no name', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA9999', name: '', reference: '' },
+        technique: [],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    expect(await screen.findByText('TA9999')).toBeInTheDocument();
     expect(
       await screen.findByText(/"TA9999" is not in the currently supported MITRE/)
     ).toBeInTheDocument();
@@ -122,7 +139,7 @@ describe('AddMitreAttackThreat - unsupported MITRE ID highlighting', () => {
 
     renderWithThreats(threats);
 
-    expect(await screen.findByText('T9999 (unsupported)')).toBeInTheDocument();
+    expect(await screen.findByText('Fake Technique (T9999)')).toBeInTheDocument();
     expect(
       await screen.findByText(/"T9999" is not in the currently supported MITRE/)
     ).toBeInTheDocument();
@@ -146,9 +163,110 @@ describe('AddMitreAttackThreat - unsupported MITRE ID highlighting', () => {
 
     renderWithThreats(threats);
 
-    expect(await screen.findByText('T001.999 (unsupported)')).toBeInTheDocument();
+    expect(await screen.findByText('Fake Subtechnique (T001.999)')).toBeInTheDocument();
     expect(
       await screen.findByText(/"T001.999" is not in the currently supported MITRE/)
     ).toBeInTheDocument();
+  });
+});
+
+describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
+  it('renders the tactic with its current dataset name and a "renamed from" hint when the stored name has drifted', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        // Same id as the dataset, but the saved name predates a rename.
+        tactic: { id: 'TA001', name: 'Tactic Old Name', reference: '' },
+        technique: [],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    // Trigger reflects the current dataset label rather than rendering blank.
+    expect(await screen.findByText('Tactic 1')).toBeInTheDocument();
+    // Helper text explains the drift to the user.
+    expect(await screen.findByText(/Renamed from "Tactic Old Name"/)).toBeInTheDocument();
+    // Not flagged as unsupported (the id is still in the dataset).
+    expect(screen.queryByText(/is not in the currently supported MITRE/)).toBeNull();
+    expect(screen.queryByText(/\(unsupported\)/)).toBeNull();
+  });
+
+  it('still resolves the technique cascade when the parent tactic has been renamed', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic Old Name', reference: '' },
+        technique: [{ id: 'T001', name: 'Technique 1', reference: '' }],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    // The technique trigger renders its label (not the placeholder), proving
+    // the technique was matched against the parent tactic resolved by id.
+    expect(await screen.findByText('Technique 1')).toBeInTheDocument();
+    // No "unsupported" indicators for the technique row either.
+    expect(screen.queryByText(/T001 \(unsupported\)/)).toBeNull();
+  });
+
+  it('renders the technique with its current dataset name and a "renamed from" hint', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic 1', reference: '' },
+        technique: [{ id: 'T001', name: 'Technique Old Name', reference: '' }],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    expect(await screen.findByText('Technique 1')).toBeInTheDocument();
+    expect(await screen.findByText(/Renamed from "Technique Old Name"/)).toBeInTheDocument();
+  });
+
+  it('renders the subtechnique with its current dataset name and a "renamed from" hint', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic 1', reference: '' },
+        technique: [
+          {
+            id: 'T001',
+            name: 'Technique 1',
+            reference: '',
+            subtechnique: [{ id: 'T001.001', name: 'Subtechnique Old Name', reference: '' }],
+          },
+        ],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    expect(await screen.findByText('Subtechnique 1')).toBeInTheDocument();
+    expect(await screen.findByText(/Renamed from "Subtechnique Old Name"/)).toBeInTheDocument();
+  });
+
+  it('does not show a "renamed from" hint when the stored names match the dataset', async () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic 1', reference: '' },
+        technique: [
+          {
+            id: 'T001',
+            name: 'Technique 1',
+            reference: '',
+            subtechnique: [{ id: 'T001.001', name: 'Subtechnique 1', reference: '' }],
+          },
+        ],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Renamed from/)).toBeNull();
+    });
   });
 });

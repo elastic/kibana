@@ -77,15 +77,34 @@ export const SUBTECHNIQUE_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const UNSUPPORTED_MITRE_ID_OPTION_LABEL = (id: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.unsupportedIdOptionLabel', {
-    defaultMessage: '{id} (unsupported)',
-    values: { id },
-  });
+export const UNSUPPORTED_MITRE_OPTION_LABEL = (id: string, name: string | undefined): string => {
+  if (name && name.trim().length > 0) {
+    return i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttack.unsupportedOptionLabelWithName',
+      {
+        defaultMessage: '{name} ({id})',
+        values: { id, name },
+      }
+    );
+  }
+  return i18n.translate(
+    'xpack.securitySolution.detectionEngine.mitreAttack.unsupportedOptionLabelIdOnly',
+    {
+      defaultMessage: '{id}',
+      values: { id },
+    }
+  );
+};
 
 export const UNSUPPORTED_MITRE_ID_ERROR = (id: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.unsupportedIdErrorMessage', {
     defaultMessage:
       '"{id}" is not in the currently supported MITRE ATT&CK® version. Choose a supported value.',
     values: { id },
+  });
+
+export const RENAMED_FROM_HINT = (previousName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.renamedFromHint', {
+    defaultMessage: 'Renamed from "{previousName}" in the current MITRE ATT&CK® version.',
+    values: { previousName },
   });

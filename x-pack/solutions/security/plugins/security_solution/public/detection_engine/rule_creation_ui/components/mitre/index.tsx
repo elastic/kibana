@@ -110,18 +110,40 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     return [...(field.value as Threats)];
   }, [field]);
 
+  const findCurrentTacticOption = useCallback(
+    (threat: Threat) =>
+      threat.tactic.name === 'none' || tacticsOptions.length === 0
+        ? undefined
+        : tacticsOptions.find((t) => t.id === threat.tactic.id),
+    [tacticsOptions]
+  );
+
   const isUnsupportedTactic = useCallback(
     (threat: Threat) =>
       tacticsOptions.length > 0 &&
       threat.tactic.name !== 'none' &&
-      !tacticsOptions.some((t) => t.id === threat.tactic.id),
-    [tacticsOptions]
+      findCurrentTacticOption(threat) === undefined,
+    [findCurrentTacticOption, tacticsOptions]
+  );
+
+  const getRenamedFromName = useCallback(
+    (threat: Threat) => {
+      const matchedOption = findCurrentTacticOption(threat);
+      return matchedOption && matchedOption.name !== threat.tactic.name
+        ? threat.tactic.name
+        : undefined;
+    },
+    [findCurrentTacticOption]
   );
 
   const getSelectTactic = useCallback(
     (threat: Threat, index: number, disabled: boolean) => {
       const tacticName = threat.tactic.name;
       const isUnsupported = isUnsupportedTactic(threat);
+      const matchedOption = findCurrentTacticOption(threat);
+      const valueOfSelected = isUnsupported
+        ? threat.tactic.id
+        : matchedOption?.value ?? camelCase(tacticName);
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow>
@@ -137,7 +159,14 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                       },
                     ]
                   : []),
-                ...(isUnsupported ? [createUnsupportedMitreOption(threat.tactic.id)] : []),
+                ...(isUnsupported
+                  ? [
+                      createUnsupportedMitreOption({
+                        id: threat.tactic.id,
+                        name: threat.tactic.name,
+                      }),
+                    ]
+                  : []),
                 ...tacticsOptions.map((t) => ({
                   inputDisplay: <>{t.label}</>,
                   value: t.value,
@@ -148,7 +177,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
               aria-label=""
               onChange={updateTactic.bind(null, index)}
               fullWidth={true}
-              valueOfSelected={isUnsupported ? threat.tactic.id : camelCase(tacticName)}
+              valueOfSelected={valueOfSelected}
               data-test-subj="mitreAttackTactic"
               placeholder={i18n.TACTIC_PLACEHOLDER}
               isInvalid={isUnsupported}
@@ -170,6 +199,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     },
     [
       field.label,
+      findCurrentTacticOption,
       isDisabled,
       isUnsupportedTactic,
       removeTactic,
@@ -198,6 +228,10 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         const tacticError = tacticUnsupported
           ? i18n.UNSUPPORTED_MITRE_ID_ERROR(threat.tactic.id)
           : undefined;
+        const tacticRenamedFrom = getRenamedFromName(threat);
+        const tacticHelpText = tacticRenamedFrom
+          ? i18n.RENAMED_FROM_HINT(tacticRenamedFrom)
+          : undefined;
         return (
           <div key={index}>
             {index === 0 ? (
@@ -208,6 +242,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                 describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
                 isInvalid={tacticUnsupported}
                 error={tacticError}
+                helpText={tacticHelpText}
               >
                 <>{getSelectTactic(threat, index, isDisabled)}</>
               </EuiFormRow>
@@ -217,6 +252,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                 describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
                 isInvalid={tacticUnsupported}
                 error={tacticError}
+                helpText={tacticHelpText}
               >
                 {getSelectTactic(threat, index, isDisabled)}
               </EuiFormRow>
