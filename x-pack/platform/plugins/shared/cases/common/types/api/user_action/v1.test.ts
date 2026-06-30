@@ -14,11 +14,13 @@ import {
   CaseUserActionStatsResponseRt,
   CaseUserActionStatsRt,
   UserActionFindRequestRt,
+  UserActionInternalFindRequestRt,
   UserActionFindResponseRt,
 } from './v1';
 import {
   CaseUserActionStatsSchema,
   UserActionFindRequestSchema,
+  UserActionInternalFindRequestSchema,
   UserActionFindResponseSchema,
 } from '../../api_zod/user_action/v1';
 
@@ -70,11 +72,79 @@ describe('User actions APIs', () => {
         expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
       });
 
+      it('strips search and author params (internal-only)', () => {
+        const query = UserActionFindRequestRt.decode({
+          ...defaultRequest,
+          search: 'test',
+          author: 'elastic',
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            ...defaultRequest,
+            page: 1,
+            perPage: 10,
+          },
+        });
+      });
+
+      it('zod: strips search and author params (internal-only)', () => {
+        const result = UserActionFindRequestSchema.safeParse({
+          ...defaultRequest,
+          search: 'test',
+          author: 'elastic',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+      });
+    });
+
+    describe('UserActionInternalFindRequestRt', () => {
+      const defaultRequest = {
+        types: [UserActionTypes.comment],
+        sortOrder: 'desc',
+        page: '1',
+        perPage: '10',
+      };
+
+      it('has expected attributes in request', () => {
+        const query = UserActionInternalFindRequestRt.decode({
+          ...defaultRequest,
+          search: 'test',
+          author: 'elastic',
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            ...defaultRequest,
+            page: 1,
+            perPage: 10,
+            search: 'test',
+            author: 'elastic',
+          },
+        });
+      });
+
+      it('removes foo:bar attributes from request', () => {
+        const query = UserActionInternalFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            ...defaultRequest,
+            page: 1,
+            perPage: 10,
+          },
+        });
+      });
+
       it(`throws an error when the search is more than ${MAX_USER_ACTION_SEARCH_LENGTH} characters`, () => {
         const search = 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1);
 
         expect(
-          PathReporter.report(UserActionFindRequestRt.decode({ ...defaultRequest, search }))
+          PathReporter.report(UserActionInternalFindRequestRt.decode({ ...defaultRequest, search }))
         ).toContain(
           `The length of the search is too long. The maximum length is ${MAX_USER_ACTION_SEARCH_LENGTH}.`
         );
@@ -84,14 +154,30 @@ describe('User actions APIs', () => {
         const author = 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1);
 
         expect(
-          PathReporter.report(UserActionFindRequestRt.decode({ ...defaultRequest, author }))
+          PathReporter.report(UserActionInternalFindRequestRt.decode({ ...defaultRequest, author }))
         ).toContain(
           `The length of the author is too long. The maximum length is ${MAX_USER_ACTION_AUTHOR_LENGTH}.`
         );
       });
 
+      it('zod: has expected attributes in request', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          search: 'test',
+          author: 'elastic',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({
+          ...defaultRequest,
+          page: 1,
+          perPage: 10,
+          search: 'test',
+          author: 'elastic',
+        });
+      });
+
       it('zod: throws an error when the search is too long', () => {
-        const result = UserActionFindRequestSchema.safeParse({
+        const result = UserActionInternalFindRequestSchema.safeParse({
           ...defaultRequest,
           search: 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1),
         });
@@ -99,7 +185,7 @@ describe('User actions APIs', () => {
       });
 
       it('zod: throws an error when the author is too long', () => {
-        const result = UserActionFindRequestSchema.safeParse({
+        const result = UserActionInternalFindRequestSchema.safeParse({
           ...defaultRequest,
           author: 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1),
         });
