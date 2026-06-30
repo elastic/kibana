@@ -26,7 +26,12 @@ import type {
 import { normalizeHostsForAgents } from '../../../common/services';
 import { isOtelExporterOutput } from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT, ECH_AGENTLESS_OUTPUT_ID } from '../../constants';
+import {
+  DEFAULT_OUTPUT_ID,
+  DEFAULT_OUTPUT,
+  ECH_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+} from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -66,6 +71,21 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             is_default: false,
             is_default_monitoring: false,
             is_preconfigured: true,
+          } as PreconfiguredOutput,
+        ]
+      : []),
+    // Include private ES output when PrivateLink is enabled (serverless only)
+    ...(config?.internal?.privateElasticsearchHost
+      ? [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private Elasticsearch Output',
+            type: 'elasticsearch' as const,
+            hosts: [config.internal.privateElasticsearchHost],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            is_internal: true,
           } as PreconfiguredOutput,
         ]
       : []),

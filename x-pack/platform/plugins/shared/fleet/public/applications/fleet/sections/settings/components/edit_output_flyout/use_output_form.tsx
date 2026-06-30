@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -106,6 +106,7 @@ export interface OutputFormInputsType {
   otelExporterConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
+  usePrivateEndpointInput?: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
   serviceTokenInput: ReturnType<typeof useInput>;
   serviceTokenSecretInput: ReturnType<typeof useSecretInput>;
@@ -204,7 +205,12 @@ export function extractDefaultDynamicKafkaTopics(
   ];
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
+export function useOutputForm(
+  onSucess: () => void,
+  output?: Output,
+  defaultOutput?: Output,
+  privateOutput?: Output
+) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
   const yaml = useYaml();
@@ -284,12 +290,28 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
   const isEditingRemoteEsOutput = output?.type === outputType.RemoteElasticsearch;
+
+  // Private endpoint switch — only shown in serverless when a private output SO is present.
+  const isCurrentlyUsingPrivateOutput =
+    !!privateOutput &&
+    !!output?.hosts &&
+    JSON.stringify(output.hosts) === JSON.stringify(privateOutput.hosts);
+  const privateEndpointSwitchDisabled = !isServerless || !privateOutput;
+  const usePrivateEndpointInput = useSwitchInput(
+    isCurrentlyUsingPrivateOutput,
+    privateEndpointSwitchDisabled
+  );
+  const usingPrivateOutput = isServerless && !!privateOutput && usePrivateEndpointInput.value;
+
   // When editing a remote ES output, the saved hosts belong to the remote ES input,
   // not the regular ES input. Use the default output hosts instead.
-  const elasticsearchUrlDefaultValue =
-    isEditingRemoteEsOutput || (isServerless && !output?.hosts)
-      ? defaultOutput?.hosts || []
-      : output?.hosts || [];
+  const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
+    ? defaultOutput?.hosts || []
+    : isServerless
+    ? usingPrivateOutput
+      ? privateOutput?.hosts || []
+      : defaultOutput?.hosts || []
+    : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -297,6 +319,24 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     validateESHosts,
     elasticsearchUrlDisabled
   );
+
+  // Sync the ES URL input when the private endpoint toggle changes.
+  const { setValue: setEsHosts } = elasticsearchUrlInput;
+  useEffect(() => {
+    if (!isServerless || isEditingRemoteEsOutput) return;
+    if (usingPrivateOutput) {
+      setEsHosts(privateOutput?.hosts || []);
+    } else {
+      setEsHosts(defaultOutput?.hosts || []);
+    }
+  }, [
+    usingPrivateOutput,
+    isServerless,
+    isEditingRemoteEsOutput,
+    privateOutput,
+    defaultOutput,
+    setEsHosts,
+  ]);
 
   // Remote ES has its own hosts input — separate from the regular ES hosts
   const remoteEsUrlDefaultValue =
@@ -658,6 +698,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     otelDisableBeatsauthInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
+    ...(isServerless && privateOutput ? { usePrivateEndpointInput } : {}),
     caTrustedFingerprintInput,
     serviceTokenInput,
     serviceTokenSecretInput,

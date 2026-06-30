@@ -34,6 +34,7 @@ export interface FleetServerHostSSLInputsType {
   nameInput: ReturnType<typeof useInput>;
   hostUrlsInput: ReturnType<typeof useComboInput>;
   isDefaultInput: ReturnType<typeof useSwitchInput>;
+  usePrivateEndpointInput?: ReturnType<typeof useSwitchInput>;
   proxyIdInput?: ReturnType<typeof useInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
@@ -141,7 +142,8 @@ export function validateName(value: string) {
 export function useFleetServerHostsForm(
   fleetServerHost: FleetServerHost | undefined,
   onSuccess: () => void,
-  defaultFleetServerHost?: FleetServerHost
+  defaultFleetServerHost?: FleetServerHost,
+  privateFleetServerHost?: FleetServerHost
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const { notifications, cloud } = useStartServices();
@@ -156,11 +158,29 @@ export function useFleetServerHostsForm(
   );
 
   const isServerless = cloud?.isServerlessEnabled;
-  // Set the host URLs to default for new Fleet server host in serverless.
-  const hostUrlsDefaultValue =
-    isServerless && !fleetServerHost?.host_urls
-      ? defaultFleetServerHost?.host_urls || []
-      : fleetServerHost?.host_urls || [];
+
+  // Determine initial state of the private endpoint switch.
+  const isCurrentlyUsingPrivate =
+    !!privateFleetServerHost &&
+    !!fleetServerHost?.host_urls &&
+    JSON.stringify(fleetServerHost.host_urls) === JSON.stringify(privateFleetServerHost.host_urls);
+
+  // Always call the hook; disable/hide it when there is no private endpoint SO.
+  const privateEndpointSwitchDisabled = !isServerless || !privateFleetServerHost;
+  const usePrivateEndpointInput = useSwitchInput(
+    isCurrentlyUsingPrivate,
+    privateEndpointSwitchDisabled
+  );
+
+  const usingPrivate = isServerless && !!privateFleetServerHost && usePrivateEndpointInput.value;
+
+  // Set the host URLs based on the private endpoint switch, or fall back to the default.
+  const hostUrlsDefaultValue = isServerless
+    ? usingPrivate
+      ? privateFleetServerHost?.host_urls || []
+      : defaultFleetServerHost?.host_urls || []
+    : fleetServerHost?.host_urls || [];
+
   const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(
     'hostUrls',
@@ -168,6 +188,17 @@ export function useFleetServerHostsForm(
     validateFleetServerHosts,
     hostUrlsDisabled
   );
+
+  // Sync the URL input when the private endpoint toggle changes.
+  const { setValue: setHostUrls } = hostUrlsInput;
+  React.useEffect(() => {
+    if (!isServerless) return;
+    if (usingPrivate) {
+      setHostUrls(privateFleetServerHost?.host_urls || []);
+    } else {
+      setHostUrls(defaultFleetServerHost?.host_urls || []);
+    }
+  }, [usingPrivate, isServerless, privateFleetServerHost, defaultFleetServerHost, setHostUrls]);
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
   const sslCertificateAuthoritiesInput = useComboInput(
@@ -248,6 +279,7 @@ export function useFleetServerHostsForm(
       nameInput,
       isDefaultInput,
       hostUrlsInput,
+      ...(isServerless && privateFleetServerHost ? { usePrivateEndpointInput } : {}),
       proxyIdInput,
       sslCertificateAuthoritiesInput,
       sslCertificateInput,
@@ -267,6 +299,9 @@ export function useFleetServerHostsForm(
       nameInput,
       isDefaultInput,
       hostUrlsInput,
+      isServerless,
+      privateFleetServerHost,
+      usePrivateEndpointInput,
       proxyIdInput,
       sslCertificateAuthoritiesInput,
       sslCertificateInput,

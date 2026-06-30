@@ -9,7 +9,11 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_FLEET_SERVER_HOST_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../../constants';
+import {
+  DEFAULT_FLEET_SERVER_HOST_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+} from '../../constants';
 
 import { FleetError } from '../../errors';
 
@@ -68,6 +72,19 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
             host_urls: cloudServerHosts,
             is_default: false,
             is_preconfigured: true,
+          },
+        ]
+      : []),
+    // Include private Fleet Server host when PrivateLink is enabled (serverless only)
+    ...(config?.internal?.privateFleetServerHost
+      ? [
+          {
+            id: SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+            name: 'Private Fleet Server',
+            host_urls: [config.internal.privateFleetServerHost],
+            is_default: false,
+            is_preconfigured: true,
+            is_internal: true,
           },
         ]
       : []),
