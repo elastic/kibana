@@ -26,7 +26,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 
 const setup = async ({
   dataView,
-  prevSidebarClosed,
+  hideSidebar,
   hideTable = false,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
@@ -34,7 +34,7 @@ const setup = async ({
   },
 }: {
   dataView: DataView;
-  prevSidebarClosed?: boolean;
+  hideSidebar?: boolean;
   hideTable?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
@@ -56,7 +56,7 @@ const setup = async ({
       appState: {
         dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
         hideTable,
-        hideSidebar: prevSidebarClosed,
+        hideSidebar,
         query: { query: '', language: 'kuery' },
       },
     })
@@ -138,7 +138,7 @@ describe('Discover component', () => {
     test('should be opened if hideSidebar is false', async () => {
       await setup({
         dataView: dataViewWithTimefieldMock,
-        prevSidebarClosed: false,
+        hideSidebar: false,
       });
       expect(screen.queryByTestId('fieldList')).toBeInTheDocument();
     }, 10000);
@@ -146,7 +146,7 @@ describe('Discover component', () => {
     test('should be closed if hideSidebar is true', async () => {
       await setup({
         dataView: dataViewWithTimefieldMock,
-        prevSidebarClosed: true,
+        hideSidebar: true,
       });
       await waitFor(() => {
         expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
