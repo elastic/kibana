@@ -7,35 +7,13 @@
 
 import type { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
 import type { GetAllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
+import { transformConnectorResponse } from '../../../common_transforms/transform_connector_response/v1';
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[]
 ): GetAllConnectorsResponseV1 => {
-  return results.map(
-    ({
-      id,
-      name,
-      config,
-      actionTypeId,
-      isPreconfigured,
-      isDeprecated,
-      referencedByCount,
-      isMissingSecrets,
-      isSystemAction,
-      isConnectorTypeDeprecated,
-      authMode,
-    }) => ({
-      id,
-      name,
-      config,
-      connector_type_id: actionTypeId,
-      is_preconfigured: isPreconfigured,
-      is_deprecated: isDeprecated,
-      referenced_by_count: referencedByCount,
-      is_missing_secrets: isMissingSecrets,
-      is_system_action: isSystemAction,
-      is_connector_type_deprecated: isConnectorTypeDeprecated,
-      ...(authMode !== undefined ? { auth_mode: authMode } : {}),
-    })
-  );
+  return results.map(({ referencedByCount, ...connector }) => ({
+    ...transformConnectorResponse(connector),
+    referenced_by_count: referencedByCount,
+  }));
 };

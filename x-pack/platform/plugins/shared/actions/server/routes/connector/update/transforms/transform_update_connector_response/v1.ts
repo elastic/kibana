@@ -5,25 +5,4 @@
  * 2.0.
  */
 
-import type { ConnectorResponseV1 } from '../../../../../../common/routes/connector/response';
-import type { Connector } from '../../../../../application/connector/types';
-
-export const transformUpdateConnectorResponse = ({
-  actionTypeId,
-  isPreconfigured,
-  isMissingSecrets,
-  isDeprecated,
-  isSystemAction,
-  isConnectorTypeDeprecated,
-  authMode,
-  ...res
-}: Connector): ConnectorResponseV1 => ({
-  ...res,
-  connector_type_id: actionTypeId,
-  is_preconfigured: isPreconfigured,
-  is_deprecated: isDeprecated,
-  is_missing_secrets: isMissingSecrets,
-  is_system_action: isSystemAction,
-  is_connector_type_deprecated: isConnectorTypeDeprecated,
-  ...(authMode !== undefined ? { auth_mode: authMode } : {}),
-});
+export { transformConnectorResponse as transformUpdateConnectorResponse } from '../../../common_transforms/transform_connector_response/v1';

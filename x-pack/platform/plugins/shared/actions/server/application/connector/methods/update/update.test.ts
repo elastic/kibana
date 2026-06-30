@@ -736,6 +736,42 @@ describe('update()', () => {
     });
   });
 
+  describe('allowedSubActions', () => {
+    test('stores allowedSubActions when provided on update', async () => {
+      await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: { name: 'n', config: {}, secrets: {}, allowedSubActions: ['searchIssues'] },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ allowedSubActions: ['searchIssues'] }),
+        expect.anything()
+      );
+    });
+
+    test('clears allowedSubActions when omitted (undefined) on update — restriction can be widened', async () => {
+      // Simulate a connector that previously had a restriction stored in attributes
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: { ...existingRawAction.attributes, allowedSubActions: ['searchIssues'] },
+      });
+
+      await update({
+        context: mockContext,
+        id: 'connector-id',
+        action: { name: 'n', config: {}, secrets: {} },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({ allowedSubActions: undefined }),
+        expect.anything()
+      );
+    });
+  });
+
   describe('auditLogger', () => {
     test('logs audit event on successful update', async () => {
       await update({

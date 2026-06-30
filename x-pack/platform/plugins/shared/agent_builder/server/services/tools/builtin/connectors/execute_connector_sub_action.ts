@@ -12,7 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isConnectorMetaSubAction, isConnectorSubActionAllowed, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -86,9 +86,11 @@ export const createExecuteConnectorSubActionTool = ({
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let instanceAllowedSubActions: string[] | undefined;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      instanceAllowedSubActions = connector.allowedSubActions;
     } catch (error) {
       return {
         results: [
@@ -125,6 +127,43 @@ export const createExecuteConnectorSubActionTool = ({
               'Read the connector attachment to find the correct sub-action names.',
             metadata: { connectorId, connectorType, subAction },
           }),
+        ],
+      };
+    }
+
+    // Enforce per-instance allowed sub-actions configured on the connector itself
+    if (!isConnectorSubActionAllowed(subAction, instanceAllowedSubActions)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not permitted on connector '${connectorId}'. ` +
+              `Allowed sub-actions: ${instanceAllowedSubActions!.join(', ')}.`,
+            metadata: { connectorId, subAction, allowedSubActions: instanceAllowedSubActions },
+          }),
+        ],
+      };
+    }
+
+    // listTools reaches the raw MCP server; return the restricted named sub-actions instead.
+    if (instanceAllowedSubActions !== undefined && subAction === 'listTools') {
+      const restrictedTools = instanceAllowedSubActions
+        .filter((name) => !isConnectorMetaSubAction(name) && isToolAction(spec, name) && spec.actions[name])
+        .map((name) => {
+          const action = spec.actions[name];
+          return {
+            name,
+            description: action.description ?? name,
+          };
+        });
+
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+            data: restrictedTools,
+          },
         ],
       };
     }

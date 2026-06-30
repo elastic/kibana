@@ -16,6 +16,7 @@ export const transformConnectorResponse = ({
   isSystemAction,
   isConnectorTypeDeprecated,
   authMode,
+  allowedSubActions,
   ...res
 }: Connector): ConnectorResponseV1 => ({
   ...res,
@@ -26,4 +27,5 @@ export const transformConnectorResponse = ({
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { auth_mode: authMode } : {}),
+  ...(allowedSubActions !== undefined ? { allowed_sub_actions: allowedSubActions } : {}),
 });

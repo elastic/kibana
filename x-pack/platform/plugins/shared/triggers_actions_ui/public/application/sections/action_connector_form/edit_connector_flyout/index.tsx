@@ -244,12 +244,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const { name, config, secrets } = data;
+      const { name, config, secrets, allowedSubActions } = data;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        allowedSubActions,
       };
 
       const updatedConnector = await updateConnector(validConnector);
@@ -379,6 +380,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
                 <>
                   <ConnectorForm
+                    key={`${connector.id}:${(connector.allowedSubActions ?? []).join('\u0000')}`}
                     actionTypeModel={actionTypeModel}
                     connector={connectorWithoutSecrets}
                     isEdit={isEdit}

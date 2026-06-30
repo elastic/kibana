@@ -41,7 +41,7 @@ interface ConnectorDetailPanelProps {
 
 const SubActionsSection: React.FC<{ connector: ConnectorItem }> = ({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const { subActions } = connector;
+  const { subActions, allowedSubActions, totalSubActionCount } = connector;
 
   // Not all agentBuilder-compatible connectors have a kbn-connector-spec (e.g. Tines, ServiceNow,
   // Swimlane register AgentBuilderConnectorFeatureId directly in stack_connectors without a spec).
@@ -50,10 +50,15 @@ const SubActionsSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
     return null;
   }
 
+  const isRestricted = allowedSubActions !== undefined;
+  const sectionTitle = isRestricted && totalSubActionCount !== undefined
+    ? labels.agentConnectors.subActionsRestrictedTitle(subActions.length, totalSubActionCount)
+    : labels.agentConnectors.subActionsSectionTitle(subActions.length);
+
   return (
     <div>
       <EuiTitle size="xxs">
-        <h3>{labels.agentConnectors.subActionsSectionTitle(subActions.length)}</h3>
+        <h3>{sectionTitle}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ul

@@ -93,7 +93,11 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         const soClient = await getActionSavedObjectsClient(context.request);
         const originId = item.origin_id ?? '';
         const so = await soClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          allowedSubActions?: string[];
+        };
         const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
 
@@ -101,6 +105,9 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
           connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
+          ...(attrs.allowedSubActions !== undefined && {
+            allowed_sub_actions: attrs.allowedSubActions,
+          }),
         };
 
         return {

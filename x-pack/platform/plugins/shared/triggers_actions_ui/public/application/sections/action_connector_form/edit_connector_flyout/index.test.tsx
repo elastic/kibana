@@ -463,6 +463,59 @@ describe('EditConnectorFlyout', () => {
       expect(queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
 
+    it('preserves allowedSubActions on update when editing other fields', async () => {
+      const connectorWithRestrictions = createMockActionConnector({
+        ...connector,
+        allowedSubActions: ['searchMessages'],
+      });
+
+      appMockRenderer.coreStart.http.get = jest.fn().mockImplementation((path: string) => {
+        if (path.includes('/spec')) {
+          return Promise.resolve({ tool_sub_actions: ['searchMessages', 'listChannels'] });
+        }
+        return Promise.resolve([
+          {
+            id: '.test',
+            name: 'Test',
+            enabled: true,
+            enabled_in_config: true,
+            enabled_in_license: true,
+            supported_feature_ids: [],
+            minimum_license_required: 'basic',
+            is_system_action_type: false,
+            is_deprecated: false,
+          },
+        ]);
+      });
+
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connectorWithRestrictions}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('allowedSubActionsInput')).toBeInTheDocument();
+      });
+
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
+
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
+          '/api/actions/connector/123',
+          {
+            body: '{"name":"My new name","config":{"testTextField":"My text field"},"secrets":{},"allowed_sub_actions":["searchMessages"]}',
+          }
+        );
+      });
+    });
+
     it('updates connector form field with latest value', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });

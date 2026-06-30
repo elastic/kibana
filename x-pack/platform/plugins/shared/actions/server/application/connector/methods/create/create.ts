@@ -23,7 +23,7 @@ import { validateConnectorId } from '../../../../../common/validate_connector_id
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: { actionTypeId, name, config, secrets, allowedSubActions },
   options,
 }: ConnectorCreateParams): Promise<ActionResult> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -149,6 +149,7 @@ export async function create({
           config: configForSave as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
           ...(authMode !== undefined ? { authMode } : {}),
+          ...(allowedSubActions !== undefined ? { allowedSubActions } : {}),
         },
         { id }
       )
@@ -216,5 +217,8 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(result.attributes.allowedSubActions !== undefined
+      ? { allowedSubActions: result.attributes.allowedSubActions as string[] }
+      : {}),
   };
 }

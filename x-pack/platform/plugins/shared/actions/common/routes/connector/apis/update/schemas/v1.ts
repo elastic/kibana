@@ -26,6 +26,13 @@ export const updateConnectorBodySchema = schema.object(
     secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
       defaultValue: {},
     }),
+    allowed_sub_actions: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: {
+          description: 'Optional list of sub-action names the connector may expose as agent tools.',
+        },
+      })
+    ),
   },
   { meta: { id: 'update_connector' } }
 );
