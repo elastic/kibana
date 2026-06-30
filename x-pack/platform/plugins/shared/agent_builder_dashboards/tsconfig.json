@@ -11,6 +11,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-tools-base",
     "@kbn/agent-builder-server",
+    "@kbn/controls-constants",
     "@kbn/dashboard-plugin",
     "@kbn/agent-builder-dashboards-common",
     "@kbn/zod",
