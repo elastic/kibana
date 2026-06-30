@@ -17,6 +17,7 @@ import type { RuleParams } from '../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth } from '../utils';
+import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../../../prebuilt_rules/constants';
 import type {
   BulkCreatePrebuiltRulesArgs,
   BulkCreatePrebuiltRulesResult,
@@ -35,7 +36,7 @@ export const bulkCreatePrebuiltRules = async ({
   mlAuthz,
   args,
 }: BulkCreatePrebuiltRulesOptions): Promise<BulkCreatePrebuiltRulesResult> => {
-  const { rules } = args;
+  const { rules, batchSize = PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } = args;
   const results: BulkCreatePrebuiltRulesResult['results'] = [];
   const errors: BulkCreatePrebuiltRulesResult['errors'] = [];
 
@@ -54,16 +55,7 @@ export const bulkCreatePrebuiltRules = async ({
     }
   }
 
-  const itemById = new Map<string, PrebuiltRuleAsset>();
-  const bulkInputs: Array<{
-    data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
-      alertTypeId: string;
-      consumer: string;
-      enabled: boolean;
-    };
-    options: { id: string };
-  }> = [];
-
+  const validRules: PrebuiltRuleAsset[] = [];
   for (const rule of rules) {
     const mlError = mlAuthErrorByType.get(rule.type);
     if (mlError) {
@@ -74,6 +66,23 @@ export const bulkCreatePrebuiltRules = async ({
         error: new Error(`Unsupported rule type: ${rule.type}`),
       });
     } else {
+      validRules.push(rule);
+    }
+  }
+
+  for (let i = 0; i < validRules.length; i += batchSize) {
+    const chunk = validRules.slice(i, i + batchSize);
+    const itemById = new Map<string, PrebuiltRuleAsset>();
+    const bulkInputs: Array<{
+      data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
+        alertTypeId: string;
+        consumer: string;
+        enabled: boolean;
+      };
+      options: { id: string };
+    }> = [];
+
+    for (const rule of chunk) {
       const id = uuidv4();
       itemById.set(id, rule);
       const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
@@ -86,39 +95,37 @@ export const bulkCreatePrebuiltRules = async ({
       };
       bulkInputs.push({ data, options: { id } });
     }
-  }
 
-  if (bulkInputs.length === 0) return { results, errors };
+    try {
+      const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
+        rules: bulkInputs,
+        changeTracking: {
+          action: SecurityRuleChangeTrackingAction.ruleInstall,
+          metadata: { bulkCount: rules.length },
+        },
+      });
 
-  try {
-    const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
-      rules: bulkInputs,
-      changeTracking: {
-        action: SecurityRuleChangeTrackingAction.ruleInstall,
-        metadata: { bulkCount: rules.length },
-      },
-    });
-
-    for (const id of successfulIds) {
-      const asset = itemById.get(id);
-      if (asset) {
-        results.push({ id, rule_id: asset.rule_id, version: asset.version });
+      for (const id of successfulIds) {
+        const asset = itemById.get(id);
+        if (asset) {
+          results.push({ id, rule_id: asset.rule_id, version: asset.version });
+        }
       }
-    }
 
-    for (const err of bulkErrors) {
-      const item = itemById.get(err.rule.id);
-      if (item) {
-        errors.push({
-          item,
-          error: Object.assign(new Error(err.message), { statusCode: err.status }),
-        });
+      for (const err of bulkErrors) {
+        const item = itemById.get(err.rule.id);
+        if (item) {
+          errors.push({
+            item,
+            error: Object.assign(new Error(err.message), { statusCode: err.status }),
+          });
+        }
       }
-    }
-  } catch (err) {
-    const wrappedError = err instanceof Error ? err : new Error(String(err));
-    for (const asset of itemById.values()) {
-      errors.push({ item: asset, error: wrappedError });
+    } catch (err) {
+      const wrappedError = err instanceof Error ? err : new Error(String(err));
+      for (const asset of itemById.values()) {
+        errors.push({ item: asset, error: wrappedError });
+      }
     }
   }
 

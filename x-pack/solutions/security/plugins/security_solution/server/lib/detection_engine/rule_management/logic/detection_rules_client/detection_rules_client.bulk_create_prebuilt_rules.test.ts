@@ -264,6 +264,26 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     );
   });
 
+  it('processes rules in chunks when batchSize is specified', async () => {
+    const rules = [
+      { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
+      { ...getCreateRulesSchemaMock(), version: 2, rule_id: 'rule-2' },
+      { ...getCreateRulesSchemaMock(), version: 3, rule_id: 'rule-3' },
+    ];
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [],
+      errors: [],
+      total: 0,
+    });
+
+    await detectionRulesClient.bulkCreatePrebuiltRules({ rules, batchSize: 2 });
+
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(2);
+    expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(2);
+    expect(rulesClient.bulkCreateRules.mock.calls[1][0].rules).toHaveLength(1);
+  });
+
   it('includes bulkCount in changeTracking metadata', async () => {
     (throwAuthzError as jest.Mock).mockImplementation(() => {});
 
