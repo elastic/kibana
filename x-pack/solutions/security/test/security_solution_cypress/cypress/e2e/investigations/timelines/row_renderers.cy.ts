@@ -89,7 +89,11 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).scrollIntoView();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
-    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();
+    cy.get(NETFLOW_CHECKBOX).should('not.be.checked');
+
+    // Register the intercept for the second save (re-including netflow) before triggering it
+    cy.intercept('PATCH', '/api/timeline').as('includeNetflow');
+    cy.get(NETFLOW_CHECKBOX).check();
 
     // close modal and save timeline changes
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
