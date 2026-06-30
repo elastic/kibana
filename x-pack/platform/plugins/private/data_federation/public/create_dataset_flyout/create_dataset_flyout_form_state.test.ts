@@ -69,7 +69,11 @@ describe('create_dataset_flyout_form_state', () => {
 
     it('includes schema_sample_size when set to a positive integer (ndjson)', () => {
       expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), format: 'ndjson', schema_sample_size: '10' })
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'ndjson',
+          schema_sample_size: '10',
+        })
       ).toEqual({ format: 'ndjson', schema_sample_size: 10 });
     });
 
