@@ -82,7 +82,13 @@ export const JobDetails: FC<Props> = ({ id, job }) => {
       </EuiText>
 
       {Array.isArray(job.groups) && job.groups.length > 0 ? (
-        <EuiFlexGroup gutterSize="xs" direction="row" wrap responsive={false}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          direction="row"
+          wrap
+          responsive={false}
+          data-test-subj="mlJobListRowGroups"
+        >
           {job.groups.map((group) => (
             <EuiFlexItem key={group} grow={false}>
               <JobGroup name={group} />
