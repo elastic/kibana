@@ -58,7 +58,7 @@ test.describe(
       });
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: 'false',
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
         },
       });
     });
