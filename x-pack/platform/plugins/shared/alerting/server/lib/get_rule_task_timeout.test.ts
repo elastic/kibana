@@ -17,7 +17,6 @@ const config = {
   run: {
     timeout: '1m',
     actions: { max: 1000 },
-    actionSchedulerYieldAfterMs: 50,
   },
 } as RulesConfig;
 
@@ -39,7 +38,6 @@ const configWithoutTimeout = {
   run: {
     actions: { max: 1000 },
     alerts: { max: 1000 },
-    actionSchedulerYieldAfterMs: 50,
   },
 };
 

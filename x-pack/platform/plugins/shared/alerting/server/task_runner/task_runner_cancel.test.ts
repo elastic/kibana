@@ -146,7 +146,6 @@ describe('Task Runner Cancel', () => {
     logger,
     maintenanceWindowsService,
     maxAlerts: 1000,
-    actionSchedulerYieldAfterMs: 50,
     ruleTypeRegistry,
     rulesSettingsService,
     savedObjects: savedObjectsService,

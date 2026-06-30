@@ -67,7 +67,6 @@ describe('createRuleRoute', () => {
         alerts: {
           max: 1000,
         },
-        actionSchedulerYieldAfterMs: 50,
       },
       apiKeyType: ApiKeyType.ES,
     },

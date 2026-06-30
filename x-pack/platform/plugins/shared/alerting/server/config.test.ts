@@ -38,7 +38,6 @@ describe('config validation', () => {
             "value": "1m",
           },
           "run": Object {
-            "actionSchedulerYieldAfterMs": 50,
             "actions": Object {
               "max": 100000,
             },

@@ -77,7 +77,6 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
         alerts: {
           max: 1000,
         },
-        actionSchedulerYieldAfterMs: 50,
       },
       apiKeyType: ApiKeyType.ES,
     },

@@ -122,7 +122,6 @@ describe('Task Runner Factory', () => {
     logger: loggingSystemMock.create().get(),
     maintenanceWindowsService,
     maxAlerts: 1000,
-    actionSchedulerYieldAfterMs: 50,
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     rulesSettingsService,
     savedObjects: savedObjectsService,

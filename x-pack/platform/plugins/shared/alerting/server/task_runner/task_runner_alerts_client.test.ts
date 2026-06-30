@@ -219,7 +219,6 @@ describe('Task Runner', () => {
       logger,
       maintenanceWindowsService,
       maxAlerts: 1000,
-      actionSchedulerYieldAfterMs: 50,
       ruleTypeRegistry,
       rulesSettingsService,
       savedObjects: savedObjectsService,
