@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { TestProviders } from '../../test_utils/test_providers';
 import { EpisodeDetailsPage } from './episode_details_page';
 
@@ -47,6 +48,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_s
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => ({
   AlertEpisodeRunbookSection: () => <div data-test-subj="stubRunbookSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section', () => ({
+  AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
@@ -104,6 +109,19 @@ const fetchRuleResult = {
     artifacts: [],
   },
   isLoading: false,
+  ruleState: {
+    status: RuleStateStatus.loaded,
+    ruleId: 'rule-1',
+    rule: {
+      id: 'rule-1',
+      kind: 'alerting',
+      enabled: true,
+      metadata: { name: 'Rule A', description: 'Rule description' },
+      grouping: { fields: ['host.name'] },
+      evaluation: { query: { base: 'from index-*' } },
+      artifacts: [],
+    },
+  },
 } as unknown as FetchRuleResult;
 
 const episodeId = 'ep-1';
