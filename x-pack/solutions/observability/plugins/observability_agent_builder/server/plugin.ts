@@ -27,6 +27,10 @@ import {
   observabilityParentFeature,
   observabilityAiInsightsInferenceFeatures,
 } from './inference_feature';
+import {
+  registerConversationWorkflowHookTask,
+  scheduleConversationWorkflowHookTask,
+} from './investigation_conversations/investigation_update_task';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -74,6 +78,13 @@ export class ObservabilityAgentBuilderPlugin
 
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 
+    registerConversationWorkflowHookTask({
+      core,
+      taskManager: plugins.taskManager,
+      workflowsManagement: plugins.workflowsManagement,
+      logger: this.logger,
+    });
+
     if (plugins.searchInferenceEndpoints) {
       plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
 
@@ -104,8 +115,15 @@ export class ObservabilityAgentBuilderPlugin
 
   public start(
     _core: CoreStart,
-    _plugins: ObservabilityAgentBuilderPluginStartDependencies
+    plugins: ObservabilityAgentBuilderPluginStartDependencies
   ): ObservabilityAgentBuilderPluginStart {
+    scheduleConversationWorkflowHookTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.warn(`Error scheduling observability conversation workflow hook task: ${error}`);
+    });
+
     return {};
   }
 

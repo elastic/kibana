@@ -18,7 +18,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
+import { useConversationTitle, useHasPersistedConversation, useConversation } from '../../../hooks/use_conversation';
+import { useCanDeleteConversation } from '../../../hooks/use_can_delete_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -43,6 +44,8 @@ interface ConversationTitleProps {
 
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
+  const { conversation } = useConversation();
+  const canDeleteConversation = useCanDeleteConversation(conversation);
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
 
@@ -84,25 +87,29 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     >
       {labels.rename}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setIsDeleteModalOpen(true);
-      }}
-      css={css`
-        color: ${euiTheme.colors.danger};
-      `}
-      data-test-subj="agentBuilderConversationDeleteButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
-        detail: 'conversation',
-      })}
-    >
-      {labels.delete}
-    </EuiContextMenuItem>,
+    ...(canDeleteConversation
+      ? [
+          <EuiContextMenuItem
+            key="delete"
+            icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+            onClick={() => {
+              setIsPopoverOpen(false);
+              setIsDeleteModalOpen(true);
+            }}
+            css={css`
+              color: ${euiTheme.colors.danger};
+            `}
+            data-test-subj="agentBuilderConversationDeleteButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
+              detail: 'conversation',
+            })}
+          >
+            {labels.delete}
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   const titleButtonStyles = css`

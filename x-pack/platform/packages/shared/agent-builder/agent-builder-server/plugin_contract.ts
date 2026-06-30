@@ -11,7 +11,9 @@ import type {
   Conversation,
   ConversationWithoutRounds,
   ConversationListOptions,
+  UserMessageEvent,
 } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -179,14 +181,58 @@ export interface ReadOnlyConversationClient {
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
 }
 
+export type ConversationCreateRequest = Omit<
+  Conversation,
+  'id' | 'created_at' | 'updated_at' | 'user'
+> & {
+  id?: string;
+};
+
+export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
+  Partial<
+    Pick<
+      Conversation,
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'template_id'
+      | 'custom_fields'
+      | 'events'
+      | 'conversation_mode'
+      | 'status'
+      | 'read'
+      | 'workspace_id'
+    >
+  >;
+
+export interface AppendConversationMessageResult {
+  conversation: Conversation;
+  event: UserMessageEvent;
+}
+
+export interface ConversationClient extends ReadOnlyConversationClient {
+  create(conversation: ConversationCreateRequest): Promise<Conversation>;
+  update(conversation: ConversationUpdateRequest): Promise<Conversation>;
+  appendMessage({
+    conversationId,
+    message,
+    attachment_refs,
+  }: {
+    conversationId: string;
+    message: string;
+    attachment_refs?: AttachmentVersionRef[];
+  }): Promise<AppendConversationMessageResult>;
+}
+
 /**
- * AgentBuilder conversations service's start contract (read-only).
+ * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationClient>;
 }
 
 /**

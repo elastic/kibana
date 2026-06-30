@@ -7,13 +7,17 @@
 
 import {
   significantEventSchema,
+  significantEventInvestigationSchema,
   type Detection,
   type SignificantEvent,
   type Discovery,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/streams-schema';
+import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { attachInvestigationToEvent } from '../../../../lib/significant_events/events/attach_investigation';
+import { triggerInvestigationWorkflow } from '../../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
@@ -214,9 +218,97 @@ const eventsLifecycleRoute = createServerRoute({
   },
 });
 
+const eventsAttachInvestigationRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/events/{id}/investigations',
+  options: {
+    access: 'internal',
+    summary: 'Attach investigation to event',
+    description:
+      'Record an investigation run against a significant event (pending, success, or failed).',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+    body: significantEventInvestigationSchema,
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return attachInvestigationToEvent({
+      eventClient: getEventClient(),
+      eventId: params.path.id,
+      investigation: params.body,
+    });
+  },
+});
+
+const eventsTriggerInvestigationRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/events/{id}/investigate',
+  options: {
+    access: 'internal',
+    summary: 'Trigger investigation workflow for a significant event',
+    description:
+      'Starts the managed investigation workflow for the given significant event and returns the workflow execution id.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ executionId: string; conversationId?: string }> => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { hits } = await getEventClient().findById(params.path.id);
+    if (hits.length === 0) {
+      throw notFound(`Significant event "${params.path.id}" not found.`);
+    }
+
+    const result = await triggerInvestigationWorkflow({
+      workflowsManagement: server.workflowsManagement,
+      agentBuilder: server.agentBuilder,
+      spaces: server.spaces,
+      request,
+      logger,
+      eventClient: getEventClient(),
+      event: hits[0],
+    });
+
+    if (!result) {
+      throw serverUnavailable(
+        'Investigation workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
+      );
+    }
+
+    return result;
+  },
+});
+
 export const internalSigEventsEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
   ...eventsLifecycleRoute,
   ...eventsBulkCreateRoute,
+  ...eventsAttachInvestigationRoute,
+  ...eventsTriggerInvestigationRoute,
 };

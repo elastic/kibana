@@ -22,9 +22,11 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import produce from 'immer';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import { useSendMessageMutation } from './use_send_message_mutation';
+import type { ConversationRoundStep, Conversation } from '@kbn/agent-builder-common';
+import { useSendMessageMutation, shouldInvokeAgentForSend } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
+import { queryKeys } from '../../query_keys';
+import { useQueryClient } from '@kbn/react-query';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import type { ResumeRoundVars } from './use_resume_round_mutation';
 import type { ActiveStream, StreamRecord } from './types';
@@ -45,6 +47,7 @@ const StreamingContext = createContext<StreamingContextValue | null>(null);
 const emptyRecord: StreamRecord = { errorSteps: [] };
 
 export const StreamingProvider = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClient();
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
   const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
 
@@ -162,12 +165,25 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   // asynchronously, so setting the entry from inside `mutationFn` is too late.
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
-      setActiveStream(vars.conversationId, {
-        type: vars.action === 'regenerate' ? 'regenerate' : 'send',
-      });
-      sendMutate(vars);
+      const cachedConversation = queryClient.getQueryData<Conversation>(
+        queryKeys.conversations.byId(vars.conversationId)
+      );
+      const invokesAgent =
+        vars.invokesAgent ??
+        shouldInvokeAgentForSend({
+          message: vars.message,
+          action: vars.action,
+          conversation: cachedConversation,
+        });
+
+      if (invokesAgent) {
+        setActiveStream(vars.conversationId, {
+          type: vars.action === 'regenerate' ? 'regenerate' : 'send',
+        });
+      }
+      sendMutate({ ...vars, invokesAgent });
     },
-    [setActiveStream, sendMutate]
+    [queryClient, setActiveStream, sendMutate]
   );
   const mutateResumeRound = useCallback(
     (vars: ResumeRoundVars) => {

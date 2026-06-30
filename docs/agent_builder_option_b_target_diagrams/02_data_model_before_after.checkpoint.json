@@ -1,0 +1,488 @@
+{
+  "elements": [
+    { "type": "cameraUpdate", "width": 1400, "height": 920, "x": 0, "y": 0 },
+    {
+      "type": "text",
+      "id": "title",
+      "x": 380,
+      "y": 10,
+      "text": "2. Conversation Data Model — Before and After",
+      "fontSize": 24,
+      "strokeColor": "#1e1e1e"
+    },
+    {
+      "type": "rectangle",
+      "id": "before_panel",
+      "x": 30,
+      "y": 55,
+      "width": 400,
+      "height": 820,
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 1,
+      "opacity": 25
+    },
+    {
+      "type": "text",
+      "id": "before_lbl",
+      "x": 45,
+      "y": 62,
+      "text": "Before (today)",
+      "fontSize": 18,
+      "strokeColor": "#9a5030"
+    },
+    {
+      "type": "rectangle",
+      "id": "conv_before",
+      "x": 55,
+      "y": 95,
+      "width": 350,
+      "height": 155,
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "label": {
+        "text": "Conversation\nid · agent_id · user · title\ncreated_at · updated_at\nrounds[] · attachments[]\nstate? · read? · status?",
+        "fontSize": 14
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "round_before",
+      "x": 55,
+      "y": 320,
+      "width": 350,
+      "height": 145,
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#4a9eed",
+      "label": {
+        "text": "ConversationRound\nid · status · input\nsteps · response\nstarted_at · model_usage\nstate? · trace_id?",
+        "fontSize": 14
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "att_before",
+      "x": 55,
+      "y": 535,
+      "width": 350,
+      "height": 90,
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#ef4444",
+      "label": {
+        "text": "VersionedAttachment\ntype: alert | rule | esql | …\nid · version · data",
+        "fontSize": 14
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "b_rounds",
+      "x": 230,
+      "y": 250,
+      "width": 0,
+      "height": 70,
+      "points": [[0, 0], [0, 70]],
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "rounds[]", "fontSize": 14 }
+    },
+    {
+      "type": "arrow",
+      "id": "b_att",
+      "x": 230,
+      "y": 250,
+      "width": 0,
+      "height": 285,
+      "points": [[0, 0], [0, 285]],
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "attachments[]", "fontSize": 14 }
+    },
+    {
+      "type": "text",
+      "id": "before_note",
+      "x": 55,
+      "y": 660,
+      "text": "Single-user chat container.\nAgent work lives in rounds[].",
+      "fontSize": 14,
+      "strokeColor": "#757575"
+    },
+    {
+      "type": "rectangle",
+      "id": "after_panel",
+      "x": 460,
+      "y": 55,
+      "width": 910,
+      "height": 820,
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#22c55e",
+      "strokeWidth": 1,
+      "opacity": 25
+    },
+    {
+      "type": "text",
+      "id": "after_lbl",
+      "x": 475,
+      "y": 62,
+      "text": "After — Option B (investigation record)",
+      "fontSize": 18,
+      "strokeColor": "#15803d"
+    },
+    {
+      "type": "rectangle",
+      "id": "conv_after",
+      "x": 620,
+      "y": 95,
+      "width": 320,
+      "height": 340,
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#22c55e",
+      "strokeWidth": 2,
+      "label": {
+        "text": "Conversation (after)\n── core ──\nid, agent_id, user, title, …\nrounds[], attachments[]\n── B0 metadata ──\ntemplate_id, template_snapshot\ncustom_fields, assignees, labels\n── B5 collaborative ──\nconversation_mode, events[]\n── B4 threading ──\nparent_id, child_ids[]\nthread_kind, fork\n── B6 ITSM ──\nitsm, workflow_ids, connection_ids",
+        "fontSize": 13
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "snap",
+      "x": 485,
+      "y": 120,
+      "width": 120,
+      "height": 110,
+      "backgroundColor": "#dbe4ff",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#4a9eed",
+      "label": {
+        "text": "TemplateSnapshot\n(B0)\ntemplate_id\nchat_mode\ncaptured_at",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "itsm",
+      "x": 485,
+      "y": 260,
+      "width": 120,
+      "height": 90,
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#f59e0b",
+      "label": {
+        "text": "Itsm (B6)\nseverity\nstatus\nexternal_refs",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "timeline",
+      "x": 960,
+      "y": 95,
+      "width": 130,
+      "height": 45,
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#8b5cf6",
+      "label": { "text": "TimelineEvent\n(B5 union)", "fontSize": 12 }
+    },
+    {
+      "type": "rectangle",
+      "id": "ume",
+      "x": 960,
+      "y": 155,
+      "width": 130,
+      "height": 85,
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#06b6d4",
+      "label": {
+        "text": "UserMessageEvent\nuser, message\nattachment_refs",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "aee",
+      "x": 960,
+      "y": 255,
+      "width": 130,
+      "height": 85,
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#06b6d4",
+      "label": {
+        "text": "AgentExecutionEvent\nagent_id, steps\nresponse",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "agent_exec",
+      "x": 1110,
+      "y": 195,
+      "width": 130,
+      "height": 100,
+      "backgroundColor": "#eebefa",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#8b5cf6",
+      "label": {
+        "text": "AgentExecution\n(new base)\nsteps, response\nmodel_usage, trace_id",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "round_after",
+      "x": 1110,
+      "y": 320,
+      "width": 130,
+      "height": 70,
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#4a9eed",
+      "label": {
+        "text": "ConversationRound\nextends AgentExecution\n+ id, input",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "case_att",
+      "x": 620,
+      "y": 470,
+      "width": 155,
+      "height": 85,
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#ef4444",
+      "label": {
+        "text": "CaseChatAttachment\n(N1)\ncase_id, owner\nsnapshot",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "child",
+      "x": 800,
+      "y": 470,
+      "width": 140,
+      "height": 85,
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "roundness": { "type": 3 },
+      "strokeColor": "#f59e0b",
+      "label": {
+        "text": "Child Conversation\n(B4 thread)\ncopy-on-create",
+        "fontSize": 12
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "a_snap",
+      "x": 605,
+      "y": 175,
+      "width": 15,
+      "height": 0,
+      "points": [[0, 0], [15, 0]],
+      "strokeColor": "#4a9eed",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "template_snapshot", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_itsm",
+      "x": 605,
+      "y": 305,
+      "width": 15,
+      "height": -90,
+      "points": [[0, 0], [15, -90]],
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "itsm", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_events",
+      "x": 940,
+      "y": 200,
+      "width": 20,
+      "height": -65,
+      "points": [[0, 0], [20, -65]],
+      "strokeColor": "#8b5cf6",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "events[]", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_tl_ume",
+      "x": 1025,
+      "y": 140,
+      "width": 0,
+      "height": 15,
+      "points": [[0, 0], [0, 15]],
+      "strokeColor": "#06b6d4",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "a_tl_aee",
+      "x": 1025,
+      "y": 240,
+      "width": 0,
+      "height": 15,
+      "points": [[0, 0], [0, 15]],
+      "strokeColor": "#06b6d4",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "a_ae_aee",
+      "x": 1110,
+      "y": 245,
+      "width": -20,
+      "height": 35,
+      "points": [[0, 0], [-20, 35]],
+      "strokeColor": "#8b5cf6",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "extends", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_ae_round",
+      "x": 1175,
+      "y": 295,
+      "width": 0,
+      "height": 25,
+      "points": [[0, 0], [0, 25]],
+      "strokeColor": "#8b5cf6",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "extends", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_rounds_after",
+      "x": 940,
+      "y": 130,
+      "width": 170,
+      "height": 225,
+      "points": [[0, 0], [170, 225]],
+      "strokeColor": "#4a9eed",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "rounds[]", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_case_att",
+      "x": 697,
+      "y": 435,
+      "width": 0,
+      "height": 35,
+      "points": [[0, 0], [0, 35]],
+      "strokeColor": "#ef4444",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "attachments[]", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "a_child",
+      "x": 870,
+      "y": 435,
+      "width": 0,
+      "height": 35,
+      "points": [[0, 0], [0, 35]],
+      "strokeColor": "#f59e0b",
+      "strokeWidth": 2,
+      "endArrowhead": "arrow",
+      "label": { "text": "child threads", "fontSize": 11 }
+    },
+    {
+      "type": "arrow",
+      "id": "migrate",
+      "x": 430,
+      "y": 400,
+      "width": 30,
+      "height": 0,
+      "points": [[0, 0], [30, 0]],
+      "strokeColor": "#8b5cf6",
+      "strokeWidth": 3,
+      "endArrowhead": "arrow",
+      "label": { "text": "Option B", "fontSize": 16 }
+    },
+    {
+      "type": "text",
+      "id": "after_note",
+      "x": 620,
+      "y": 590,
+      "text": "Human + workflow activity in events[]; agent runs in rounds[] and AgentExecutionEvent.\nShared AgentExecution base deduplicates round vs timeline agent payload.",
+      "fontSize": 14,
+      "strokeColor": "#757575"
+    },
+    {
+      "type": "text",
+      "id": "legend_b0",
+      "x": 485,
+      "y": 380,
+      "text": "B0",
+      "fontSize": 11,
+      "strokeColor": "#4a9eed"
+    },
+    {
+      "type": "text",
+      "id": "legend_b5",
+      "x": 960,
+      "y": 360,
+      "text": "B5",
+      "fontSize": 11,
+      "strokeColor": "#8b5cf6"
+    },
+    {
+      "type": "text",
+      "id": "legend_b4",
+      "x": 800,
+      "y": 565,
+      "text": "B4",
+      "fontSize": 11,
+      "strokeColor": "#f59e0b"
+    },
+    {
+      "type": "text",
+      "id": "legend_b6",
+      "x": 485,
+      "y": 355,
+      "text": "B6",
+      "fontSize": 11,
+      "strokeColor": "#f59e0b"
+    }
+  ]
+}

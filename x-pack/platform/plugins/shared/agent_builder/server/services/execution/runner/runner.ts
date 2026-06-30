@@ -14,11 +14,18 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
-import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import type {
+  AgentConfiguration,
+  Conversation,
+  ConverseInput,
+  TimelineConversation,
+} from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
   createInternalError,
+  isTimelineConversation,
   isAgentBuilderError,
+  timelineConversationToConversation,
 } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
@@ -215,22 +222,29 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     request: KibanaRequest;
     defaultConnectorId?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
-    conversation?: Conversation;
+    conversation?: Conversation | TimelineConversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
   }): Promise<ScopedRunner> => {
-    const resultStore = createResultStore({ conversation });
+    const normalizedConversation =
+      conversation && isTimelineConversation(conversation)
+        ? timelineConversationToConversation(conversation)
+        : conversation;
+    const resultStore = createResultStore({ conversation: normalizedConversation });
     const skillsStore = createSkillsStore({ skills: [] });
 
-    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
-      getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
-    });
+    const attachmentStateManager = createAttachmentStateManager(
+      normalizedConversation?.attachments ?? [],
+      {
+        getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
+      }
+    );
 
-    const todoStateManager = createTodoStateManager(conversation?.state?.todos);
+    const todoStateManager = createTodoStateManager(normalizedConversation?.state?.todos);
 
-    const stateManager = createConversationStateManager(conversation);
+    const stateManager = createConversationStateManager(normalizedConversation);
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
@@ -314,17 +328,21 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         ...otherParams
       } = params;
       const { nextInput, conversation } = params.agentParams;
+      const normalizedConversation =
+        conversation && isTimelineConversation(conversation)
+          ? timelineConversationToConversation(conversation)
+          : conversation;
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         telemetryMetadata,
-        conversation,
+        conversation: normalizedConversation,
         nextInput,
         abortSignal,
         executionMode,
         promptState: getAgentPromptStorageState({
           input: nextInput,
-          conversation,
+          conversation: normalizedConversation,
         }),
       });
       return runner.runAgent(otherParams);

@@ -12,7 +12,7 @@ import type {
   ConversationRound,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, attachmentTools } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, attachmentTools, UserActionType } from '@kbn/agent-builder-common';
 import { hashContent } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -25,8 +25,9 @@ describe('Attachment Routes', () => {
   let mockConversationsClient: {
     get: jest.MockedFunction<(id: string) => Promise<Conversation>>;
     update: jest.MockedFunction<
-      (params: { id: string; attachments: VersionedAttachment[] }) => Promise<void>
+      (params: { id: string; attachments: VersionedAttachment[]; events?: unknown[] }) => Promise<void>
     >;
+    getCurrentUser: jest.MockedFunction<() => { id: string; username: string }>;
   };
   let mockGetInternalServices: jest.MockedFunction<
     () => {
@@ -93,6 +94,7 @@ describe('Attachment Routes', () => {
     mockConversationsClient = {
       get: jest.fn(),
       update: jest.fn().mockResolvedValue(undefined),
+      getCurrentUser: jest.fn().mockReturnValue({ id: 'user-1', username: 'Test User' }),
     };
 
     mockGetInternalServices = jest.fn().mockReturnValue({
@@ -372,6 +374,45 @@ describe('Attachment Routes', () => {
       });
       expect(result.body.attachment.id).toBeDefined();
       expect(mockConversationsClient.update).toHaveBeenCalled();
+    });
+
+    it('appends an attachment_added Activity audit event', async () => {
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([]));
+
+      const handler = getHandler('POST', path);
+      const request = {
+        params: { conversation_id: 'conv-1' },
+        body: {
+          type: 'alert',
+          data: { alertId: 'alert-1' },
+          description: 'Suspicious login',
+        },
+      };
+
+      await handler(createMockContext(), request, mockResponse);
+
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conv-1',
+          events: [
+            expect.objectContaining({
+              type: 'user_action',
+              action: UserActionType.attachment_added,
+              user: { id: 'user-1', username: 'Test User' },
+              payload: expect.objectContaining({
+                attachment_type: 'alert',
+                description: 'Suspicious login',
+              }),
+            }),
+          ],
+        })
+      );
+      const updateArgs = mockConversationsClient.update.mock.calls[0][0];
+      expect(updateArgs.events?.[0]).toMatchObject({
+        payload: expect.objectContaining({
+          attachment_id: expect.any(String),
+        }),
+      });
     });
 
     it('creates attachment with client-provided ID', async () => {

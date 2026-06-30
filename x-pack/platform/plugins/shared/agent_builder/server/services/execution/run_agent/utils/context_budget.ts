@@ -7,7 +7,13 @@
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getContextWindowSize } from '@kbn/inference-common';
-import type { CompactionSummary } from '@kbn/agent-builder-common';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import type { CompactionSummary, AgentExecutionEvent } from '@kbn/agent-builder-common';
+import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './prepare_conversation';
+import {
+  isProcessedUserMessageEvent,
+  isProcessedAgentExecutionEvent,
+} from './prepare_conversation';
 
 /**
  * Fraction of the context window reserved for system prompt, output generation,
@@ -46,24 +52,83 @@ export const computeContextBudget = (connector: InferenceConnector): ContextBudg
   return { totalBudget, historyBudget, triggerThreshold };
 };
 
-const sumTokens = (counts: number[]): number => counts.reduce((total, count) => total + count, 0);
+/**
+ * Message structure overhead per event: role markers, JSON structure
+ * for tool calls, separator tokens, etc. Rough empirical estimate.
+ */
+const PER_EVENT_OVERHEAD_TOKENS = 25;
 
 /**
- * Determines whether compaction should be triggered given precomputed per-round
- * token counts, the context budget, and any existing compaction summary.
+ * Estimates the token count for a single timeline event.
+ */
+export const estimateEventTokens = (event: ProcessedTimelineEvent): number => {
+  let tokens = PER_EVENT_OVERHEAD_TOKENS;
+
+  if (isProcessedUserMessageEvent(event)) {
+    const userEvent = event as ProcessedUserMessageEvent;
+    tokens += estimateTokens(userEvent.processedInput.message);
+    for (const attachment of userEvent.processedInput.attachments) {
+      tokens += estimateTokens(attachment.representation.value);
+    }
+  } else if (isProcessedAgentExecutionEvent(event)) {
+    const agentEvent = event as AgentExecutionEvent;
+    // Tool call steps
+    for (const step of agentEvent.steps) {
+      tokens += estimateTokens(step);
+    }
+    // Assistant response
+    tokens += estimateTokens(agentEvent.response.message);
+  }
+
+  return tokens;
+};
+
+/**
+ * Estimates the total token count for all timeline events.
+ */
+export const estimateTimelineTokens = (events: ProcessedTimelineEvent[]): number => {
+  return events.reduce((total, event) => total + estimateEventTokens(event), 0);
+};
+
+/**
+ * Determines whether compaction should be triggered given the current
+ * timeline events, context budget, and any existing compaction summary.
  *
- * When an existing summary is provided, the effective token count is the summary's
- * token cost plus only the rounds not yet covered by the summary, rather than the
- * raw total of all stored rounds.
+ * When an existing summary is provided, the effective token count is the
+ * summary's token cost plus only the events not yet covered by the summary.
+ * `summarized_round_count` maps to the count of AgentExecutionEvents to skip.
  */
 export const shouldTriggerCompaction = (
-  perRoundTokenCounts: number[],
+  events: ProcessedTimelineEvent[],
   budget: ContextBudget,
   existingSummary?: CompactionSummary
 ): boolean => {
-  const effectiveTokens = existingSummary
-    ? existingSummary.token_count +
-      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
-    : sumTokens(perRoundTokenCounts);
+  if (!existingSummary) {
+    return estimateTimelineTokens(events) > budget.triggerThreshold;
+  }
+  // Skip events that are already summarized (count by AgentExecutionEvents)
+  const eventsAfterSummary = skipSummarizedEvents(events, existingSummary.summarized_round_count);
+  const effectiveTokens = existingSummary.token_count + estimateTimelineTokens(eventsAfterSummary);
   return effectiveTokens > budget.triggerThreshold;
+};
+
+/**
+ * Skips events that have already been summarized.
+ * `summarizedCount` is the number of AgentExecutionEvents to skip.
+ */
+export const skipSummarizedEvents = (
+  events: ProcessedTimelineEvent[],
+  summarizedCount: number
+): ProcessedTimelineEvent[] => {
+  let agentResponsesSeen = 0;
+  for (let i = 0; i < events.length; i++) {
+    if (isProcessedAgentExecutionEvent(events[i])) {
+      agentResponsesSeen++;
+      if (agentResponsesSeen >= summarizedCount) {
+        // Return everything after this point (the next event onward)
+        return events.slice(i + 1);
+      }
+    }
+  }
+  return events;
 };

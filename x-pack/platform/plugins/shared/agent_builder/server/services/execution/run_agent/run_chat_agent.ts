@@ -14,11 +14,13 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  resolveConversationEvents,
+  getLastExecutionEvent,
+  ToolOrigin,
   AgentExecutionMode,
-  isToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -33,16 +35,15 @@ import {
   prepareConversation,
   selectSkills,
   selectTools,
-  getPendingRound,
+  getPendingExecution,
   evictInternalEvents,
-  estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
-import { buildPendingRoundActions } from './utils/build_pending_round_actions';
-import { computeContextBudget } from './utils/context_budget';
+import { executionToActions } from './utils/round_to_actions';
+import { computeContextBudget, estimateTimelineTokens } from './utils/context_budget';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
@@ -108,15 +109,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     todoStateManager,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation, action });
+  // Resolve chat events at entry — canonical format for the pipeline
+  const timelineEvents = conversation ? resolveConversationEvents(conversation) : [];
 
-  const pendingRound = getPendingRound(conversation);
+  ensureValidInput({ input: nextInput, timelineEvents, action });
+
+  const pendingExecution = getPendingExecution(timelineEvents);
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
-  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
+  const conversationTimestamp = pendingExecution?.started_at ?? startTime.toISOString();
 
   // Only clear access tracking for a brand new round; keep it when resuming (HITL).
-  if (!pendingRound) {
+  if (!pendingExecution) {
     context.attachmentStateManager.clearAccessTracking();
   }
 
@@ -150,10 +154,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
   toolManager.setEventEmitter(eventEmitter);
 
-  // Pass action so regenerate uses the last round's original input instead of request input
+  // Pass action so regenerate uses the last event's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousEvents: timelineEvents,
     context,
     action,
   });
@@ -215,13 +219,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.previousRounds, {
-    toolManager,
-    toolRegistry,
-  });
-  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
-
   // Create unified result transformer for tool result optimization
+  const conversationTokenEstimate = estimateTimelineTokens(processedConversation.previousEvents);
   const resultTransformer = createResultTransformer({
     toolRegistry,
     toolManager,
@@ -239,7 +238,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     chatModel: model.chatModel,
     contextBudget,
-    perRoundTokenCounts,
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
@@ -283,8 +281,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
-      promptManager,
-      eventEmitter,
     }),
     {
       version: 'v2',
@@ -312,7 +308,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       toolManager,
       logger,
       startTime,
-      pendingRound,
+      pendingExecution,
       structuredOutput,
     }),
     finalize(() => manualEvents$.complete())
@@ -323,12 +319,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
-  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
-  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+  // Use provided overrides, or fall back to pending agent response's overrides (for HITL resume)
+  const effectiveOverrides = configurationOverrides ?? pendingExecution?.configuration_overrides;
+  const effectiveAgentId = agentId ?? conversation?.agent_id ?? agentBuilderDefaultAgentId;
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      agentId: effectiveAgentId,
       getConversationState: () =>
         getConversationState({
           promptManager,
@@ -337,7 +335,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           backgroundExecutionService,
           todoStateManager,
         }),
-      pendingRound,
+      pendingExecution,
       startTime,
       modelProvider,
       stateManager,
@@ -367,9 +365,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } catch (err) {
     logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
   }
-  return {
-    round,
-  };
+
+  return { round };
 };
 
 const getConversationState = ({
@@ -400,45 +397,29 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
-  promptManager,
-  eventEmitter,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
-  promptManager: PromptManager;
-  eventEmitter: AgentEventEmitterFn;
 }): Command => {
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
-  const lastRound = conversation.previousRounds.length
-    ? conversation.previousRounds[conversation.previousRounds.length - 1]
-    : undefined;
+  // Find the last AgentExecutionEvent in previousEvents for HITL resumption
+  const lastAgentResponse = getLastExecutionEvent(conversation.previousEvents);
 
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    const { actions, consumedPromptIds } = buildPendingRoundActions({
-      round: lastRound,
-      promptState: promptManager.dump(),
+  if (lastAgentResponse?.status === ConversationRoundStatus.awaitingPrompt) {
+    initialState.mainActions = executionToActions({
+      execution: lastAgentResponse,
       toolIdMapping: agentBuilderToLangchainIdMap,
-      eventEmitter,
     });
-    initialState.mainActions = actions;
-    // on-resume cleanup: ask_user_question responses are consumed once per round.
-    for (const id of consumedPromptIds) {
-      promptManager.delete(id);
-    }
-    // If any tool-call step is still pending (empty results), executeTool must run it.
-    // Otherwise the only thing that was paused was ask_user_question - so we go straight to the agent loop
-    const hasPendingToolCall = lastRound.steps.some(
-      (step) => isToolCallStep(step) && step.results.length === 0
-    );
-    startAt = hasPendingToolCall ? steps.executeTool : steps.researchAgent;
+
+    startAt = steps.executeTool;
   }
 
-  if (lastRound?.state) {
-    initialState.currentCycle = lastRound.state.agent.current_cycle;
-    initialState.errorCount = lastRound.state.agent.error_count;
+  if (lastAgentResponse?.state) {
+    initialState.currentCycle = lastAgentResponse.state.agent.current_cycle;
+    initialState.errorCount = lastAgentResponse.state.agent.error_count;
   }
 
   return new Command({

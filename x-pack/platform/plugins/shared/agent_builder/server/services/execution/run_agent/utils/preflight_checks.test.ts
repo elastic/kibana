@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { ConverseInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConverseInput, AgentExecutionEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, TimelineEventType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import { ensureValidInput } from './preflight_checks';
 
 describe('preflight_checks', () => {
@@ -18,7 +17,7 @@ describe('preflight_checks', () => {
       it('should not throw when message is provided', () => {
         const input: ConverseInput = { message: 'hello' };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents: [] })).not.toThrow();
       });
 
       it('should not throw when attachments are provided', () => {
@@ -26,7 +25,7 @@ describe('preflight_checks', () => {
           attachments: [{ type: AttachmentType.text, data: { content: 'content' } }],
         };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents: [] })).not.toThrow();
       });
 
       it('should not throw when both message and attachments are provided', () => {
@@ -35,13 +34,13 @@ describe('preflight_checks', () => {
           attachments: [{ type: AttachmentType.text, data: { content: 'content' } }],
         };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents: [] })).not.toThrow();
       });
 
       it('should throw when no input is provided', () => {
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input })).toThrow(
+        expect(() => ensureValidInput({ input, timelineEvents: [] })).toThrow(
           /No standard input was provided to continue the conversation/
         );
       });
@@ -49,61 +48,67 @@ describe('preflight_checks', () => {
       it('should throw when only empty attachments array is provided', () => {
         const input: ConverseInput = { attachments: [] };
 
-        expect(() => ensureValidInput({ input })).toThrow(
+        expect(() => ensureValidInput({ input, timelineEvents: [] })).toThrow(
           /No standard input was provided to continue the conversation/
         );
       });
 
       it('should not throw with completed round in conversation', () => {
-        const conversation = createEmptyConversation({
-          rounds: [createRound({ status: ConversationRoundStatus.completed })],
-        });
+        const timelineEvents: TimelineEvent[] = [
+          {
+            type: TimelineEventType.agentExecution,
+            status: ConversationRoundStatus.completed,
+          } as AgentExecutionEvent,
+        ];
         const input: ConverseInput = { message: 'next message' };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents })).not.toThrow();
       });
 
       it('should not throw when action=regenerate (input comes from last round)', () => {
-        const conversation = createEmptyConversation({
-          rounds: [createRound({ status: ConversationRoundStatus.completed })],
-        });
+        const timelineEvents: TimelineEvent[] = [
+          {
+            type: TimelineEventType.agentExecution,
+            status: ConversationRoundStatus.completed,
+          } as AgentExecutionEvent,
+        ];
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input, conversation, action: 'regenerate' })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, timelineEvents, action: 'regenerate' })
+        ).not.toThrow();
       });
     });
 
     describe('when last round is awaiting prompt', () => {
-      const createConversationAwaitingPrompt = (...promptIds: string[]) =>
-        createEmptyConversation({
-          rounds: [
-            createRound({
-              status: ConversationRoundStatus.awaitingPrompt,
-              pending_prompts: promptIds.map((id) => ({
-                type: AgentPromptType.confirmation,
-                id,
-                title: 'Confirm',
-                message: 'Do you want to proceed?',
-                confirm_text: 'Yes',
-                cancel_text: 'No',
-              })),
-            }),
-          ],
-        });
+      const createTimelineEventsAwaitingPrompt = (...promptIds: string[]): TimelineEvent[] => [
+        {
+          type: TimelineEventType.agentExecution,
+          status: ConversationRoundStatus.awaitingPrompt,
+          pending_prompts: promptIds.map((id) => ({
+            type: AgentPromptType.confirmation,
+            id,
+            title: 'Confirm',
+            message: 'Do you want to proceed?',
+            confirm_text: 'Yes',
+            cancel_text: 'No',
+          })),
+        } as AgentExecutionEvent,
+      ];
 
       it('should not throw when prompt response matches pending prompt ID', () => {
-        const conversation = createConversationAwaitingPrompt('prompt-123');
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-123');
         const input: ConverseInput = {
           prompts: {
             'prompt-123': { allow: true },
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents })).not.toThrow();
       });
 
       it('should not throw when all prompt responses are provided for multiple prompts', () => {
-        const conversation = createConversationAwaitingPrompt('prompt-1', 'prompt-2');
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-1', 'prompt-2');
         const input: ConverseInput = {
           prompts: {
             'prompt-1': { allow: true },
@@ -111,53 +116,53 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
-      });
-
-      it('should throw when no prompt response is provided', () => {
-        const conversation = createConversationAwaitingPrompt('prompt-123');
-        const input: ConverseInput = {};
-
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
-          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
-        );
+        expect(() => ensureValidInput({ input, timelineEvents })).not.toThrow();
       });
 
       it('should throw when only some prompt responses are provided for multiple prompts', () => {
-        const conversation = createConversationAwaitingPrompt('prompt-1', 'prompt-2');
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-1', 'prompt-2');
         const input: ConverseInput = {
           prompts: {
             'prompt-1': { allow: true },
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
-          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        expect(() => ensureValidInput({ input, timelineEvents })).toThrow(
+          'Conversation is awaiting prompt responses, but 1 response(s) are missing'
+        );
+      });
+
+      it('should throw when no prompt response is provided', () => {
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-123');
+        const input: ConverseInput = {};
+
+        expect(() => ensureValidInput({ input, timelineEvents })).toThrow(
+          'Conversation is awaiting prompt responses, but 1 response(s) are missing.'
         );
       });
 
       it('should throw when wrong prompt ID is provided', () => {
-        const conversation = createConversationAwaitingPrompt('prompt-123');
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-123');
         const input: ConverseInput = {
           prompts: {
             'wrong-prompt-id': { allow: true },
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
-          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        expect(() => ensureValidInput({ input, timelineEvents })).toThrow(
+          'Conversation is awaiting prompt responses, but 1 response(s) are missing.'
         );
       });
 
       it('should not throw when prompt response is denied (allow: false)', () => {
-        const conversation = createConversationAwaitingPrompt('prompt-123');
+        const timelineEvents = createTimelineEventsAwaitingPrompt('prompt-123');
         const input: ConverseInput = {
           prompts: {
             'prompt-123': { allow: false },
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() => ensureValidInput({ input, timelineEvents })).not.toThrow();
       });
     });
   });

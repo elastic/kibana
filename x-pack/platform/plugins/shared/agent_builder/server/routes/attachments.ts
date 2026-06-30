@@ -8,11 +8,16 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
-import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
-import { isToolCallStep, attachmentTools } from '@kbn/agent-builder-common';
+import {
+  createAttachmentAddedUserActionEvent,
+  isToolCallStep,
+  attachmentTools,
+  resolveConversationEvents,
+} from '@kbn/agent-builder-common';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -330,10 +335,19 @@ export function registerAttachmentRoutes({
           });
         }
 
-        // Save the updated conversation
+        // Save the updated conversation and append an Activity audit event.
+        const existingEvents = resolveConversationEvents(conversation);
+        const attachmentAddedEvent = createAttachmentAddedUserActionEvent({
+          user: client.getCurrentUser(),
+          attachmentId: attachment.id,
+          attachmentType: attachment.type,
+          description: attachment.description,
+        });
+
         await client.update({
           id: conversationId,
           attachments: stateManager.getAll(),
+          events: [...existingEvents, attachmentAddedEvent],
         });
 
         return response.ok<CreateAttachmentResponse>({

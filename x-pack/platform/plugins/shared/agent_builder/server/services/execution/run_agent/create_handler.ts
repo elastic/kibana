@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AgentConfiguration } from '@kbn/agent-builder-common';
+import {
+  isTimelineConversation,
+  timelineConversationToConversation,
+  type AgentConfiguration,
+} from '@kbn/agent-builder-common';
 import type { AgentHandlerFn } from '@kbn/agent-builder-server';
 import type { InternalAgentDefinition } from '../../agents/agent_registry';
 import { runAgent } from './run_agent';
@@ -38,10 +42,15 @@ export const createAgentHandler = ({
     },
     context
   ) => {
+    const normalizedConversation =
+      conversation && isTimelineConversation(conversation)
+        ? timelineConversationToConversation(conversation)
+        : conversation;
+
     const { round } = await runAgent(
       {
         nextInput,
-        conversation,
+        conversation: normalizedConversation,
         capabilities,
         runId,
         abortSignal,

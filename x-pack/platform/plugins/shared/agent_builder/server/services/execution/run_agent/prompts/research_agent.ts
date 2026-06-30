@@ -9,7 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { getSkillsInstructions } from './utils/skills';
 import { getConversationAttachmentsSection } from '../utils/attachment_presentation';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { convertPreviousEvents } from '../utils/to_langchain_messages';
 import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
@@ -29,7 +29,7 @@ export const getResearchAgentPrompt = async (
   // injecting a compaction summary for older compacted rounds.
   // The summary is sourced from processedConversation.compactionSummary,
   // which is set during the compaction phase in the conversation pipeline.
-  const previousRoundsAsMessages = await convertPreviousRounds({
+  const previousRoundsAsMessages = await convertPreviousEvents({
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,

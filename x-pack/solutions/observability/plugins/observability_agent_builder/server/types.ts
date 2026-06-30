@@ -31,6 +31,11 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -48,7 +53,9 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   ml?: MlPluginSetup;
   inference: InferenceServerSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
+  taskManager: TaskManagerSetupContract;
   cloud?: CloudSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
@@ -64,6 +71,7 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export type ObservabilityAgentBuilderCoreSetup = CoreSetup<

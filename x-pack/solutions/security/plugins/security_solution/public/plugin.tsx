@@ -313,12 +313,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
-      const coreSetup = this._coreSetup;
-      if (!coreSetup) {
-        throw new Error('Security Solution setup contract is required to register attachments');
-      }
-
-      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttachmentUiDefinitions({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+      });
       registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
