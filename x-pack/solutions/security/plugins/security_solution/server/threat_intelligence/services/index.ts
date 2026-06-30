@@ -121,7 +121,7 @@ export type {
 } from './manage_subscriptions';
 
 export { extractIocs } from './extract_iocs';
-export type { ExtractIocsParams, ExtractIocsResult, ExtractedIoc } from './extract_iocs';
+export type { ExtractIocsParams, ExtractIocsResult, ExtractedIoc, IocTier } from './extract_iocs';
 
 export {
   extractDiamond,

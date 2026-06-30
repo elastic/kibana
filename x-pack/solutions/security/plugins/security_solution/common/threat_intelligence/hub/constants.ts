@@ -523,7 +523,7 @@ export type SourceType = (typeof SOURCE_TYPES)[number];
 export const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
 export type SeverityLevel = (typeof SEVERITY_LEVELS)[number];
 
-export const IOC_TYPES = ['hash', 'ip', 'domain', 'url'] as const;
+export const IOC_TYPES = ['hash', 'ip', 'domain', 'url', 'email', 'cidr', 'wallet'] as const;
 export type IocType = (typeof IOC_TYPES)[number];
 
 /**

@@ -133,6 +133,15 @@ const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, un
   if (type === 'domain') {
     return { type: 'domain-name', url: { domain: rawValue } };
   }
+  if (type === 'email') {
+    return { type: 'email-addr', email: rawValue };
+  }
+  if (type === 'cidr') {
+    return { type: 'network', network: { cidr: rawValue } };
+  }
+  if (type === 'wallet') {
+    return { type: 'cryptocurrency-addr', cryptocurrency: { address: rawValue } };
+  }
   // hash — split by length: 32=md5, 40=sha1, 64=sha256.
   const len = rawValue.length;
   const hashField = len === 32 ? 'md5' : len === 40 ? 'sha1' : 'sha256';

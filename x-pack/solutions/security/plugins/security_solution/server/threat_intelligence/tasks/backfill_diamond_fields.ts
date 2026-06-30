@@ -22,6 +22,7 @@ import {
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
 import { enrichTaxonomy } from '../services/enrich_taxonomy';
 import { extractDiamond } from '../services/extract_diamond';
+import { extractIocs } from '../services/extract_iocs';
 import { resolveScopedModel } from '../routes/lib/scoped_model';
 
 export const BACKFILL_DIAMOND_FIELDS_TASK_TYPE = 'threat_intelligence:backfill_diamond_fields';
@@ -320,9 +321,30 @@ export const registerBackfillDiamondFieldsTask = ({
                 gateTotal += 1;
               }
 
+              // Re-extract IOCs (with tier fields) and recompute ioc_set_hash.
+              // This is always done on every backfill pass so tier fields are populated
+              // and the value-only ioc_set_hash is refreshed (it changed from type:value
+              // keying in Cycle A). Both fields are anchor-eligible-only — reference and
+              // denied IOCs are included in the iocs array but excluded from the hash.
+              let iocUpdate: Record<string, unknown> | undefined;
+              try {
+                const iocResult = extractIocs({ text, defang: true });
+                iocUpdate = {
+                  iocs: iocResult.iocs,
+                  ioc_set_hash: iocResult.ioc_set_hash,
+                };
+              } catch (iocErr) {
+                logger.warn(
+                  `backfill_diamond: extractIocs failed for ${reportId}: ${
+                    (iocErr as Error).message
+                  } — ioc fields not updated`
+                );
+              }
+
               // Build update doc — always write suitable so future scans skip this report.
+              const extractedBase = iocUpdate ?? {};
               const updateDoc: Record<string, unknown> = {
-                extracted: { diamond: { suitable: diamondSuitable } },
+                extracted: { ...extractedBase, diamond: { suitable: diamondSuitable } },
               };
 
               // Heavy extraction for suitable reports.
@@ -334,6 +356,9 @@ export const registerBackfillDiamondFieldsTask = ({
                   });
                   extractTotal += 1;
                   updateDoc.extracted = {
+                    ...(typeof updateDoc.extracted === 'object' && updateDoc.extracted !== null
+                      ? updateDoc.extracted
+                      : {}),
                     diamond: {
                       suitable: true,
                       adversary: diamondResult.adversary,

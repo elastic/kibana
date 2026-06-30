@@ -136,6 +136,14 @@ import {
  * mapping is `dynamic: 'strict'` so the field MUST be declared up-front
  * before any write attempts it.
  *
+ * v15: adds IOC tier fields to the `extracted.iocs` nested block:
+ *   - `tier`          (keyword) — active tier assignment (heuristic for now; LLM override in B2).
+ *   - `tier_heuristic`(keyword) — the deterministic heuristic's assignment (preserved for tuning).
+ *   - `tier_basis`    (keyword) — the rule name that fired (e.g. defanged_source, hash_high_entropy).
+ * These fields are DISTINCT from `source.tier` (integer feed-quality snapshot at line ~214).
+ * All three are `dynamic: 'strict'`-safe keyword additions; additive, no data loss.
+ * A `migrateExistingIocTierMappings` call patches pre-v15 backing indices at startup.
+ *
  * v14: adds Diamond Model extraction fields and source-snapshot fields to the
  * threat-reports data stream. Diamond fields under `extracted.diamond.*`:
  *   - Four vertices (adversary / capability / infrastructure / victim), each with:
@@ -153,7 +161,7 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 14;
+const TEMPLATE_VERSION = 15;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -265,6 +273,12 @@ const threatReportsTemplate = {
                 value: { type: 'keyword' as const },
                 defanged: { type: 'keyword' as const },
                 severity: { type: 'keyword' as const },
+                // IOC tier fields (v15). Distinct from source.tier (integer).
+                // tier = active assignment; tier_heuristic = deterministic rule output;
+                // tier_basis = rule name for tuning/observability.
+                tier: { type: 'keyword' as const },
+                tier_heuristic: { type: 'keyword' as const },
+                tier_basis: { type: 'keyword' as const },
               },
             },
             ioc_set_hash: { type: 'keyword' as const },
@@ -785,6 +799,84 @@ const migrateExistingDiamondMappings = async (
   }
 };
 
+/**
+ * Patches the `extracted.iocs[].tier*` keyword fields onto any existing
+ * `.ds-.kibana-threat-reports-*` backing indices created before the v15 template.
+ * The v15 template adds these fields automatically to new rollovers; pre-existing
+ * backing indices keep their original (v14) mapping until explicitly updated.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is idempotent for additive
+ * keyword fields. Without this, writes to pre-v15 indices fail with
+ * `strict_dynamic_mapping_exception` because the iocs nested object is
+ * `dynamic: strict` via the parent mapping.
+ */
+const migrateExistingIocTierMappings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('ioc-tier-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `ioc-tier-mapping-migration: data stream not found — skipping (${(err as Error).message})`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const iocProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, { properties?: Record<string, unknown> }> }>
+            | undefined
+        )?.extracted?.properties?.iocs as
+          | { properties?: Record<string, unknown> }
+          | undefined
+      )?.properties;
+
+      if (!iocProps?.tier) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                iocs: {
+                  type: 'nested',
+                  properties: {
+                    tier: { type: 'keyword' },
+                    tier_heuristic: { type: 'keyword' },
+                    tier_basis: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated ioc tier mappings on ${indexName} (v15 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate ioc tier mappings on ${indexName}: ${(err as Error).message}. ` +
+          `The extracted.iocs tier fields will be rejected by dynamic: strict until the ` +
+          `mapping is updated manually.`
+      );
+    }
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -859,6 +951,8 @@ export const installIndexTemplates = async ({
 
   // Patch diamond fields onto any pre-v14 backing indices. Safe to re-run.
   await migrateExistingDiamondMappings(esClient, log);
+  // Patch ioc tier fields onto any pre-v15 backing indices. Safe to re-run.
+  await migrateExistingIocTierMappings(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };

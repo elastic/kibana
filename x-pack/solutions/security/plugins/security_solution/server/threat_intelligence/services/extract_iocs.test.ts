@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import { extractIocs } from './extract_iocs';
+import { extractIocs, type IocTier } from './extract_iocs';
 
 /** Helper: extract IOC values of a specific type from the result. */
 const valuesOf = (result: ReturnType<typeof extractIocs>, type: string) =>
   result.iocs.filter((ioc) => ioc.type === type).map((ioc) => ioc.value);
 
+const emailValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'email');
+const walletValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'wallet');
+const cidrValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'cidr');
+const ipValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'ip');
+
 const domainValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'domain');
 const hashValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'hash');
 const urlValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'url');
+
+/** Filter to IOCs of a given tier. */
+const tieredValues = (result: ReturnType<typeof extractIocs>, tier: IocTier, type?: string) =>
+  result.iocs
+    .filter((ioc) => ioc.tier === tier && (!type || ioc.type === type))
+    .map((ioc) => ioc.value);
+
+/** All domain values that are anchor-eligible (not reference or denied). */
+const anchorDomainValues = (result: ReturnType<typeof extractIocs>) =>
+  result.iocs
+    .filter((ioc) => ioc.type === 'domain' && ioc.tier !== 'reference' && ioc.tier !== 'denied')
+    .map((ioc) => ioc.value);
 
 // ── Refang + normalization (Phase 1a) ─────────────────────────────────────────
 
@@ -62,15 +79,19 @@ describe('extract_iocs — refang pre-pass and value normalization', () => {
       expect(valuesOf(r, 'ip')).toContain('1.2.3.4');
     });
 
-    test('recovers 10[.]0[.]0[.]1 (private — still dropped)', () => {
-      // Refang recovers the dotted-quad form, but private-IP filter then drops it.
+    test('recovers 10[.]0[.]0[.]1 (private — emitted as reference tier, not anchor-eligible)', () => {
+      // Refang recovers the dotted-quad; private-IP filter tags it reference but keeps it.
       const r = extractIocs({ text: 'LAN hop at 10[.]0[.]0[.]1' });
-      expect(valuesOf(r, 'ip')).not.toContain('10.0.0.1');
+      const ioc = r.iocs.find((i) => i.value === '10.0.0.1');
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('private_ip');
     });
 
-    test('recovers 192[.]168[.]1[.]100 (private — still dropped)', () => {
+    test('recovers 192[.]168[.]1[.]100 (private — emitted as reference tier)', () => {
       const r = extractIocs({ text: 'pivot via 192[.]168[.]1[.]100' });
-      expect(valuesOf(r, 'ip')).not.toContain('192.168.1.100');
+      const ioc = r.iocs.find((i) => i.value === '192.168.1.100');
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('private_ip');
     });
   });
 
@@ -239,35 +260,44 @@ describe('extract_iocs — DROP side (precision filters)', () => {
     });
   });
 
-  describe('noise domain denylist (step 4)', () => {
-    test('rejects elastic.co', () => {
+  describe('noise domain denylist (step 4) — emitted as reference tier, NOT as anchor IOCs', () => {
+    test('elastic.co is emitted with tier=reference, excluded from anchor set', () => {
       const r = extractIocs({ text: 'report analyzed via elastic.co detection rules' });
-      expect(domainValues(r)).toEqual([]);
+      // Now kept (for observability) but tagged reference — not an anchor IOC.
+      expect(anchorDomainValues(r)).not.toContain('elastic.co');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('elastic.co');
     });
 
-    test('rejects urlscan.io', () => {
+    test('urlscan.io is emitted with tier=reference, excluded from anchor set', () => {
       const r = extractIocs({ text: 'scan at urlscan.io shows the payload' });
-      expect(domainValues(r)).toEqual([]);
+      expect(anchorDomainValues(r)).not.toContain('urlscan.io');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('urlscan.io');
     });
 
-    test('rejects virustotal.com', () => {
+    test('virustotal.com is emitted with tier=reference, excluded from anchor set', () => {
       const r = extractIocs({ text: 'virustotal.com detection rate 12/72' });
-      expect(domainValues(r)).toEqual([]);
+      expect(anchorDomainValues(r)).not.toContain('virustotal.com');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('virustotal.com');
     });
 
-    test('rejects abuse.ch', () => {
+    test('abuse.ch and bazaar.abuse.ch are emitted with tier=reference', () => {
       const r = extractIocs({ text: 'hash listed on abuse.ch and bazaar.abuse.ch' });
-      expect(domainValues(r)).toEqual([]);
+      expect(anchorDomainValues(r)).not.toContain('abuse.ch');
+      expect(anchorDomainValues(r)).not.toContain('bazaar.abuse.ch');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('abuse.ch');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('bazaar.abuse.ch');
     });
 
-    test('rejects github.com bare domain', () => {
+    test('github.com bare domain is emitted with tier=reference', () => {
       const r = extractIocs({ text: 'source code at github.com' });
-      expect(domainValues(r)).toEqual([]);
+      expect(anchorDomainValues(r)).not.toContain('github.com');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('github.com');
     });
 
-    test('rejects attack.mitre.org', () => {
+    test('attack.mitre.org is emitted with tier=reference', () => {
       const r = extractIocs({ text: 'technique T1059 at attack.mitre.org' });
-      expect(domainValues(r)).toEqual([]);
+      expect(anchorDomainValues(r)).not.toContain('attack.mitre.org');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('attack.mitre.org');
     });
   });
 
@@ -421,14 +451,16 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
     });
   });
 
-  describe('ioc_set_hash — computed from surviving IOCs only', () => {
-    test('returns null when all tokens are noise', () => {
-      // WScript.Shell excluded: .shell is a real branded IANA gTLD.
+  describe('ioc_set_hash — computed from anchor-eligible IOCs only (not reference/denied)', () => {
+    test('returns null when all tokens are reference or denied tier', () => {
+      // elastic.co → reference; virustotal.com → reference; WScript.Execute → hard drop (non-IANA TLD).
+      // All emitted domains are reference/denied so ioc_set_hash = null.
       const r = extractIocs({
         text: 'svchost.exe explorer.exe WScript.Execute Thread.Sleep elastic.co virustotal.com',
       });
       expect(r.ioc_set_hash).toBeNull();
-      expect(r.count).toBe(0);
+      // count is > 0 now because reference-tier domains are kept for observability
+      expect(r.count).toBeGreaterThan(0);
     });
 
     test('returns a hash when at least one real IOC survives', () => {
@@ -439,15 +471,17 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
     });
   });
 
-  describe('noise domain denylist additions (eval-2026-06-23)', () => {
-    test('rejects registry.npmjs.org', () => {
+  describe('noise domain denylist additions (eval-2026-06-23) — reference tier', () => {
+    test('registry.npmjs.org → reference tier, not anchor-eligible', () => {
       const r = extractIocs({ text: 'package fetched from registry.npmjs.org/lodash' });
-      expect(domainValues(r)).not.toContain('registry.npmjs.org');
+      expect(anchorDomainValues(r)).not.toContain('registry.npmjs.org');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('registry.npmjs.org');
     });
 
-    test('rejects eset.com (vendor self-citation)', () => {
+    test('eset.com → reference tier, not anchor-eligible', () => {
       const r = extractIocs({ text: 'ESET researchers at eset.com published this analysis' });
-      expect(domainValues(r)).not.toContain('eset.com');
+      expect(anchorDomainValues(r)).not.toContain('eset.com');
+      expect(tieredValues(r, 'reference', 'domain')).toContain('eset.com');
     });
   });
 
@@ -485,20 +519,23 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
     });
   });
 
-  describe('corroboration gate for ambiguous TLDs (step e)', () => {
-    test('drops ld.py — ambiguous TLD, uncorroborated', () => {
+  describe('corroboration gate for ambiguous TLDs (step e) — emitted as denied tier', () => {
+    test('ld.py — ambiguous TLD, uncorroborated → tier=denied, not anchor-eligible', () => {
       const r = extractIocs({ text: 'script calls ld.py to link objects' });
-      expect(domainValues(r)).not.toContain('ld.py');
+      expect(anchorDomainValues(r)).not.toContain('ld.py');
+      expect(tieredValues(r, 'denied', 'domain')).toContain('ld.py');
     });
 
-    test('drops subprocess.run — ambiguous TLD, uncorroborated', () => {
+    test('subprocess.run — ambiguous TLD, uncorroborated → tier=denied', () => {
       const r = extractIocs({ text: 'code calls subprocess.run(cmd, shell=True)' });
-      expect(domainValues(r)).not.toContain('subprocess.run');
+      expect(anchorDomainValues(r)).not.toContain('subprocess.run');
+      expect(tieredValues(r, 'denied', 'domain')).toContain('subprocess.run');
     });
 
-    test('drops WScript.Shell — ambiguous TLD, uncorroborated', () => {
+    test('WScript.Shell — ambiguous TLD, uncorroborated → tier=denied', () => {
       const r = extractIocs({ text: 'macro creates WScript.Shell object' });
-      expect(domainValues(r)).not.toContain('wscript.shell');
+      expect(anchorDomainValues(r)).not.toContain('wscript.shell');
+      expect(tieredValues(r, 'denied', 'domain')).toContain('wscript.shell');
     });
 
     test('keeps evil.py when defanged-in-source (defanged corroboration)', () => {
@@ -563,6 +600,73 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
     });
   });
 
+  describe('tier fields — heuristic assignment (Stage B1)', () => {
+    test('hash IOC gets tier=discriminating, basis=hash_high_entropy', () => {
+      const r = extractIocs({ text: 'sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' });
+      const hash = r.iocs.find((ioc) => ioc.type === 'hash');
+      expect(hash?.tier).toBe('discriminating');
+      expect(hash?.tier_heuristic).toBe('discriminating');
+      expect(hash?.tier_basis).toBe('hash_high_entropy');
+    });
+
+    test('defanged domain gets tier=discriminating, basis=defanged_source', () => {
+      const r = extractIocs({ text: 'C2 at evil[.]com' });
+      const ioc = r.iocs.find((i) => i.value === 'evil.com');
+      expect(ioc?.tier).toBe('discriminating');
+      expect(ioc?.tier_basis).toBe('defanged_source');
+    });
+
+    test('ordinary unknown domain gets tier=uncertain', () => {
+      const r = extractIocs({ text: 'C2 callback to qaqkongtiao.com' });
+      const ioc = r.iocs.find((i) => i.value === 'qaqkongtiao.com');
+      expect(ioc?.tier).toBe('uncertain');
+      expect(ioc?.tier_basis).toBe('uncertain_default');
+    });
+
+    test('private IP gets tier=reference, basis=private_ip', () => {
+      // Private IPs are now emitted (previously dropped silently).
+      const r = extractIocs({ text: 'LAN hop at 10.0.0.1' });
+      const ioc = r.iocs.find((i) => i.value === '10.0.0.1');
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('private_ip');
+    });
+
+    test('noise denylist domain gets tier=reference, basis=denylist', () => {
+      const r = extractIocs({ text: 'scan via virustotal.com' });
+      const ioc = r.iocs.find((i) => i.value === 'virustotal.com');
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('denylist');
+    });
+
+    test('uncorroborated ambiguous-TLD token gets tier=denied, basis=code_shaped', () => {
+      const r = extractIocs({ text: 'script calls ld.py' });
+      const ioc = r.iocs.find((i) => i.value === 'ld.py');
+      expect(ioc?.tier).toBe('denied');
+      expect(ioc?.tier_basis).toBe('code_shaped');
+    });
+
+    test('tier == tier_heuristic for all IOCs (no LLM override yet)', () => {
+      const r = extractIocs({ text: 'C2 evil[.]com, hash: d41d8cd98f00b204e9800998ecf8427e' });
+      for (const ioc of r.iocs) {
+        expect(ioc.tier).toBe(ioc.tier_heuristic);
+      }
+    });
+
+    test('amazonaws.com subdomain gets tier=contextual, basis=known_cdn', () => {
+      const r = extractIocs({ text: 'payload from attacker.s3.amazonaws.com' });
+      const ioc = r.iocs.find((i) => i.value === 'attacker.s3.amazonaws.com');
+      expect(ioc?.tier).toBe('contextual');
+      expect(ioc?.tier_basis).toBe('known_cdn');
+    });
+
+    test('ioc_set_hash excludes reference and denied IOCs', () => {
+      const withNoise = extractIocs({ text: 'C2 evil.com virustotal.com' });
+      const withoutNoise = extractIocs({ text: 'C2 evil.com' });
+      // Both should produce the same hash — virustotal.com is reference and excluded.
+      expect(withNoise.ioc_set_hash).toBe(withoutNoise.ioc_set_hash);
+    });
+  });
+
   describe('mixed realistic report — RoningLoader-style smoke test', () => {
     const roningLoaderText = `
       The threat actor distributed a signed driver WinRing0x64.sys
@@ -576,15 +680,17 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       Analysis tools: urlscan.io scan at urlscan.io/result/abc123.
     `;
 
-    test('drops all noise tokens', () => {
+    test('noise tokens are not anchor-eligible (reference/denied tier or hard-dropped)', () => {
       const r = extractIocs({ text: roningLoaderText });
-      const domains = domainValues(r);
-      // These MUST NOT appear
-      expect(domains).not.toContain('wndlogon.hopto'); // truncated
-      expect(domains).not.toContain('hopto.org'); // suffix fragment
-      expect(domains).not.toContain('virustotal.com'); // noise denylist
-      expect(domains).not.toContain('elastic.co'); // noise denylist
-      expect(domains).not.toContain('urlscan.io'); // noise denylist
+      const anchors = anchorDomainValues(r);
+      // File-extension hard drops still absent entirely:
+      expect(domainValues(r)).not.toContain('wndlogon.hopto'); // truncated fragment
+      // hopto.org is longest-match deduped by wndlogon.hopto.org (both are not denylist):
+      expect(anchors).not.toContain('hopto.org'); // suffix fragment
+      // Noise denylist domains are emitted as reference but not anchors:
+      expect(anchors).not.toContain('virustotal.com');
+      expect(anchors).not.toContain('elastic.co');
+      expect(anchors).not.toContain('urlscan.io');
     });
 
     test('retains all real IOCs', () => {
@@ -599,5 +705,268 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       expect(hashes).toContain('0226ab4e2f07ab1c6a4b5e3d8f9c2a1b');
       expect(urls).toContain('https://raw.githubusercontent.com/attacker/malware/main/stage2.bin');
     });
+  });
+});
+
+// ── New type: email ───────────────────────────────────────────────────────────
+
+describe('extract_iocs — email extraction (shred fix)', () => {
+  test('extracts full email address, not bare provider domain', () => {
+    const r = extractIocs({ text: 'contact nrwise@proton.me for attribution' });
+    expect(emailValues(r)).toContain('nrwise@proton.me');
+    // Provider domain must NOT be emitted separately
+    expect(domainValues(r)).not.toContain('proton.me');
+  });
+
+  test('extracts gmail address without emitting gmail.com as a domain', () => {
+    const r = extractIocs({ text: 'attacker used jasonsaayman@gmail.com as comms' });
+    expect(emailValues(r)).toContain('jasonsaayman@gmail.com');
+    expect(domainValues(r)).not.toContain('gmail.com');
+  });
+
+  test('extracts service-account email (complex local-part)', () => {
+    const r = extractIocs({ text: 'actor used dev0-660@project123.iam.gserviceaccount.com' });
+    expect(emailValues(r)).toContain('dev0-660@project123.iam.gserviceaccount.com');
+  });
+
+  test('defanged email with [.] in host is extracted as email, host not emitted separately', () => {
+    const r = extractIocs({ text: 'attacker emailed from bad@evil[.]com' });
+    expect(emailValues(r)).toContain('bad@evil.com');
+    expect(domainValues(r)).not.toContain('evil.com');
+  });
+
+  test('fanged email → uncertain tier (not defanged-in-source)', () => {
+    const r = extractIocs({ text: 'attacker used actor@malicious.org for c2' });
+    const ioc = r.iocs.find((i) => i.value === 'actor@malicious.org');
+    expect(ioc?.type).toBe('email');
+    expect(ioc?.tier).toBe('uncertain');
+  });
+
+  test('email is included in ioc_set_hash (anchor-eligible)', () => {
+    const withEmail = extractIocs({ text: 'attacker actor@malicious.org contacted server' });
+    const withoutEmail = extractIocs({ text: 'attacker contacted server' });
+    expect(withEmail.ioc_set_hash).not.toBe(withoutEmail.ioc_set_hash);
+  });
+});
+
+// ── New type: wallet ──────────────────────────────────────────────────────────
+
+describe('extract_iocs — wallet extraction (shred fix)', () => {
+  test('BTC legacy address (32-hex) extracts as wallet, NOT hash', () => {
+    // 3C75CEDB1196DF5EAB91F31411ED4B33 would be stolen by MD5 regex — but it is
+    // actually base58 format and won't match BTC legacy (starts with 1 or 3, base58).
+    // Use a real-format BTC legacy address for the test.
+    const btcAddr = '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf6n'; // genesis block coinbase
+    const r = extractIocs({ text: `BTC ransom to ${btcAddr}` });
+    expect(walletValues(r)).toContain(btcAddr);
+    expect(hashValues(r)).not.toContain(btcAddr.toLowerCase());
+  });
+
+  test('ETH address extracts as wallet', () => {
+    // Standard 0x + 40 hex chars ETH address
+    const ethAddr = '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe';
+    const r = extractIocs({ text: `ETH wallet ${ethAddr}` });
+    expect(walletValues(r)).toContain(ethAddr);
+    // The 40-hex suffix alone must not appear as a hash
+    expect(hashValues(r)).not.toContain(ethAddr.toLowerCase().slice(2));
+  });
+
+  test('BTC bech32 address extracts as wallet', () => {
+    const bech32 = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
+    const r = extractIocs({ text: `payment to ${bech32}` });
+    expect(walletValues(r)).toContain(bech32);
+  });
+
+  test('wallet tier is discriminating', () => {
+    const btcAddr = '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf6n';
+    const r = extractIocs({ text: `ransom ${btcAddr}` });
+    const ioc = r.iocs.find((i) => i.type === 'wallet');
+    expect(ioc?.tier).toBe('discriminating');
+    expect(ioc?.tier_basis).toBe('wallet_high_entropy');
+  });
+});
+
+// ── New type: cidr ────────────────────────────────────────────────────────────
+
+describe('extract_iocs — cidr extraction (shred fix)', () => {
+  test('CIDR keeps full range value — not shredded to bare network IP', () => {
+    const r = extractIocs({ text: 'blocklist includes 106.41.253.0/24' });
+    expect(cidrValues(r)).toContain('106.41.253.0/24');
+  });
+
+  test('CIDR also derives bare network IP as separate indicator', () => {
+    const r = extractIocs({ text: 'range 106.41.253.0/24 in blocklist' });
+    expect(cidrValues(r)).toContain('106.41.253.0/24');
+    expect(ipValues(r)).toContain('106.41.253.0');
+  });
+
+  test('defanged CIDR with [.] extracts correctly', () => {
+    const r = extractIocs({ text: 'block range 106[.]41[.]253[.]0/24' });
+    expect(cidrValues(r)).toContain('106.41.253.0/24');
+  });
+
+  test('narrow CIDR (/30) → discriminating tier', () => {
+    const r = extractIocs({ text: 'C2 range 185.62.58.204/30' });
+    const cidr = r.iocs.find((i) => i.type === 'cidr');
+    expect(cidr?.tier).toBe('discriminating');
+    expect(cidr?.tier_basis).toBe('cidr_narrow');
+  });
+
+  test('broad CIDR (/16) → contextual tier', () => {
+    const r = extractIocs({ text: 'ASN range 10.20.0.0/16' });
+    const cidr = r.iocs.find((i) => i.type === 'cidr');
+    expect(cidr?.tier).toBe('contextual');
+    expect(cidr?.tier_basis).toBe('cidr_broad');
+  });
+
+  test('/29 boundary → discriminating', () => {
+    const r = extractIocs({ text: 'infra 185.62.58.200/29' });
+    const cidr = r.iocs.find((i) => i.type === 'cidr');
+    expect(cidr?.tier).toBe('discriminating');
+  });
+
+  test('/28 → contextual (below /29 threshold)', () => {
+    const r = extractIocs({ text: 'infra 185.62.58.192/28' });
+    const cidr = r.iocs.find((i) => i.type === 'cidr');
+    expect(cidr?.tier).toBe('contextual');
+    expect(cidr?.tier_basis).toBe('cidr_broad');
+  });
+});
+
+// ── Socket: host:port ─────────────────────────────────────────────────────────
+
+describe('extract_iocs — socket (ip:port / domain:port)', () => {
+  test('ip:port → ip indicator with port field, port not a separate IOC', () => {
+    const r = extractIocs({ text: 'C2 at 185.62.58.207:443' });
+    const ipIoc = r.iocs.find((i) => i.type === 'ip' && i.value === '185.62.58.207');
+    expect(ipIoc).toBeDefined();
+    expect(ipIoc?.port).toBe(443);
+    // Port 443 is not emitted as a separate type
+    expect(r.iocs.filter((i) => i.type === 'ip' && i.value === '443')).toHaveLength(0);
+  });
+
+  test('defanged ip:port retains port', () => {
+    const r = extractIocs({ text: 'callback 31.172.71[.]5:8008' });
+    const ipIoc = r.iocs.find((i) => i.type === 'ip' && i.value === '31.172.71.5');
+    expect(ipIoc?.port).toBe(8008);
+  });
+
+  test('domain:port → domain indicator with port field', () => {
+    const r = extractIocs({ text: 'TOLLBOOTH C2: sfrclak.com:8000' });
+    const domIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'sfrclak.com');
+    expect(domIoc).toBeDefined();
+    expect(domIoc?.port).toBe(8000);
+  });
+
+  test('ip:port does not emit port as an ip value', () => {
+    const r = extractIocs({ text: 'C2 server 1.2.3.4:4444' });
+    expect(ipValues(r)).not.toContain('4444');
+    expect(ipValues(r)).toContain('1.2.3.4');
+  });
+});
+
+// ── Fix 1: socket port merged onto CIDR-derived / atomic IP ──────────────────
+
+describe('extract_iocs — socket port merge onto prior-seen host (Fix 1)', () => {
+  test('CIDR-derived IP followed by socket ip:port retains port (CIDR first)', () => {
+    // 36.35.56.0/24 → derives bare ip:36.35.56.0 (no port). Socket 36.35.56.0:443
+    // arrives later in Pass 5 — port must be merged onto the existing IOC.
+    const r = extractIocs({ text: 'blocklist 36.35.56.0/24 and C2 socket 36.35.56.0:443' });
+    const ipIoc = r.iocs.find((i) => i.type === 'ip' && i.value === '36.35.56.0');
+    expect(ipIoc).toBeDefined();
+    expect(ipIoc?.port).toBe(443);
+    // Only one ip IOC for this value
+    expect(r.iocs.filter((i) => i.type === 'ip' && i.value === '36.35.56.0')).toHaveLength(1);
+  });
+
+  test('socket ip:port followed by CIDR for same IP — port is retained (socket first)', () => {
+    // Socket 36.35.56.0:443 is consumed by Pass 5 and emits ip with port. CIDR
+    // 36.35.56.0/24 derives ip:36.35.56.0 via pushIoc — already in seen, so skipped.
+    // The socket-emitted IOC (with port) is the one retained.
+    const r = extractIocs({ text: 'C2 socket 36.35.56.0:443 and block range 36.35.56.0/24' });
+    const ipIoc = r.iocs.find((i) => i.type === 'ip' && i.value === '36.35.56.0');
+    expect(ipIoc).toBeDefined();
+    expect(ipIoc?.port).toBe(443);
+    expect(r.iocs.filter((i) => i.type === 'ip' && i.value === '36.35.56.0')).toHaveLength(1);
+  });
+
+  test('domain appears bare then as domain:port — port is merged onto existing IOC', () => {
+    const r = extractIocs({ text: 'domain evil.com and socket evil.com:8080' });
+    const domIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'evil.com');
+    expect(domIoc).toBeDefined();
+    expect(domIoc?.port).toBe(8080);
+    expect(r.iocs.filter((i) => i.type === 'domain' && i.value === 'evil.com')).toHaveLength(1);
+  });
+
+  test('first socket port wins when two sockets reference the same host', () => {
+    // Two sockets for same IP — only one IOC emitted; first port (443) wins.
+    const r = extractIocs({ text: 'C2 36.35.56.0:443 and also 36.35.56.0:8080' });
+    const ipIoc = r.iocs.find((i) => i.type === 'ip' && i.value === '36.35.56.0');
+    expect(ipIoc?.port).toBe(443);
+    expect(r.iocs.filter((i) => i.type === 'ip' && i.value === '36.35.56.0')).toHaveLength(1);
+  });
+});
+
+// ── Fix 2: email host domain excluded from defangedDomains ───────────────────
+
+describe('extract_iocs — email host not added to defangedDomains (Fix 2)', () => {
+  test('defanged email host (gmail[.]com) does not make gmail.com discriminating elsewhere', () => {
+    // Report contains evil@gmail[.]com (defanged). gmail.com appears separately bare.
+    // gmail.com must NOT get tier=discriminating from the email host defang.
+    const r = extractIocs({ text: 'attacker used evil@gmail[.]com and also gmail.com as relay' });
+    const domIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'gmail.com');
+    // gmail.com should be emitted (it appears bare in the text) but NOT discriminating.
+    if (domIoc) {
+      expect(domIoc.tier).not.toBe('discriminating');
+      expect(domIoc.tier_basis).not.toBe('defanged_source');
+    }
+    // Email IOC is still extracted correctly
+    expect(r.iocs.filter((i) => i.type === 'email').map((i) => i.value)).toContain('evil@gmail.com');
+  });
+
+  test('defanged email with provider domain — provider domain not emitted as IOC at all', () => {
+    // gmail.com appears ONLY as the email host, not standalone — must not be emitted.
+    const r = extractIocs({ text: 'attacker only used evil@gmail[.]com for comms' });
+    expect(r.iocs.filter((i) => i.type === 'domain' && i.value === 'gmail.com')).toHaveLength(0);
+    expect(r.iocs.filter((i) => i.type === 'email').map((i) => i.value)).toContain('evil@gmail.com');
+  });
+
+  test('domain defanged in email AND standalone keeps discriminating tier', () => {
+    // admin@evil[.]com → email (host suppressed). evil[.]com standalone → defanged domain.
+    // evil.com must still get tier=discriminating/defanged_source from the standalone occurrence.
+    const r = extractIocs({ text: 'actor admin@evil[.]com contacted C2 at evil[.]com' });
+    const domIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'evil.com');
+    expect(domIoc).toBeDefined();
+    expect(domIoc?.tier).toBe('discriminating');
+    expect(domIoc?.tier_basis).toBe('defanged_source');
+  });
+});
+
+// ── URL host tier inheritance ──────────────────────────────────────────────────
+
+describe('extract_iocs — URL tier inherits from host', () => {
+  test('URL with defanged host inherits discriminating tier', () => {
+    const r = extractIocs({ text: 'payload from hxxps://evil[.]com/stage2.bin' });
+    const url = r.iocs.find((i) => i.type === 'url');
+    expect(url?.tier).toBe('discriminating');
+    expect(url?.tier_basis).toMatch(/url_host_inherited:defanged_source/);
+  });
+
+  test('URL with CDN host inherits contextual tier', () => {
+    const r = extractIocs({ text: 'C2 at https://attacker.s3.amazonaws.com/payload' });
+    const url = r.iocs.find((i) => i.type === 'url');
+    expect(url?.tier).toBe('contextual');
+    expect(url?.tier_basis).toMatch(/url_host_inherited:known_cdn/);
+  });
+
+  test('URL with ordinary unknown host is uncertain', () => {
+    const r = extractIocs({ text: 'C2 at https://sfrclak.com/6202033' });
+    const url = r.iocs.find((i) => i.type === 'url');
+    expect(url?.tier).toBe('uncertain');
+  });
+
+  test('C2 URL with port preserves port in value', () => {
+    const r = extractIocs({ text: 'beacon to http://sfrclak.com:8000/6202033' });
+    expect(urlValues(r)).toContain('http://sfrclak.com:8000/6202033');
   });
 });

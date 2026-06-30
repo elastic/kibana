@@ -139,6 +139,9 @@ const IOC_FIELD_MAP: Record<IocType, readonly string[]> = {
   domain: ['dns.question.name', 'destination.domain', 'url.domain'],
   url: ['url.full', 'url.original'],
   hash: ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'],
+  email: ['user.email', 'source.user.email'],
+  cidr: ['source.ip', 'destination.ip'],
+  wallet: [],
 } as const;
 
 /**
