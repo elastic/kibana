@@ -272,7 +272,7 @@ describe('detectionExceptionList', () => {
           },
         },
       },
-    } as Ecs;
+    } as unknown as Ecs;
 
     expect(detectionExceptionList(ecsData)).toEqual([
       {
@@ -301,7 +301,7 @@ describe('detectionExceptionList', () => {
           },
         },
       },
-    } as Ecs;
+    } as unknown as Ecs;
 
     expect(() => detectionExceptionList(ecsData)).not.toThrow();
     expect(detectionExceptionList(ecsData)).toEqual([]);
