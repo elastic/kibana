@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
+import type { useFetchRuleExecutions } from '../../hooks/use_fetch_rule_executions';
 import { ExecutionHistoryPage } from './execution_history_page';
 
 const mockUseFetchExecutionHistory = jest.fn();
@@ -145,26 +146,7 @@ const renderPage = () =>
   );
 
 const mockRuleFetchResult = (
-  overrides: Partial<{
-    data: {
-      items: Array<{
-        id: string;
-        rule: { id: string; name: string | null };
-        spaceId: string;
-        startedAt: string;
-        endedAt: string;
-        timings: { duration: number; scheduledDelay: number };
-        outcome: 'success' | 'failure';
-        reason: string | null;
-        error: { message: string; stackTrace: string | null } | null;
-      }>;
-      total: number;
-      page: number;
-      perPage: number;
-    };
-    isFetching: boolean;
-    isError: boolean;
-  }> = {}
+  overrides: Partial<ReturnType<typeof useFetchRuleExecutions>> = {}
 ) => {
   mockUseFetchRuleExecutions.mockReturnValue({
     data: { items: [], total: 0, page: 1, perPage: 10 },

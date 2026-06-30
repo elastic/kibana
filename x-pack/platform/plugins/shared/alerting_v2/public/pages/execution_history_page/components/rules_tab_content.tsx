@@ -163,8 +163,8 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     services: { http },
   });
 
-  const onOutcomeChange = useCallback((value: RuleOutcomeFilter) => {
-    setOutcomeFilter(value);
+  const onOutcomeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setOutcomeFilter(e.target.value as RuleOutcomeFilter);
     setPage(0);
   }, []);
 
@@ -199,7 +199,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
             data-test-subj="ruleExecutionHistoryOutcomeFilter"
             options={OUTCOME_OPTIONS}
             value={outcomeFilter}
-            onChange={(e) => onOutcomeChange(e.target.value as RuleOutcomeFilter)}
+            onChange={onOutcomeChange}
             prepend={i18n.translate('xpack.alertingV2.executionHistory.rulesTab.outcomeLabel', {
               defaultMessage: 'Response',
             })}

@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import { RuleExecutionHistoryApi } from '../services/rule_execution_history_api';
+import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { useFetchRuleExecutions } from './use_fetch_rule_executions';
 
 jest.mock('@kbn/core-di-browser');
@@ -32,7 +32,7 @@ describe('useFetchRuleExecutions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
-      if (service === RuleExecutionHistoryApi) {
+      if (service === ExecutionHistoryApi) {
         return { getRuleExecutions: mockGetRuleExecutions } as any;
       }
       return undefined as any;

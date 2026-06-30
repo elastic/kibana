@@ -8,11 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import type { GetRuleExecutionsQuery, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
-import { RuleExecutionHistoryApi } from '../services/rule_execution_history_api';
+import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { ruleExecutionKeys } from './query_key_factory';
 
 export const useFetchRuleExecutions = (params: Partial<GetRuleExecutionsQuery>) => {
-  const api = useService(RuleExecutionHistoryApi);
+  const api = useService(ExecutionHistoryApi);
 
   return useQuery<GetRuleExecutionsResponse, Error>({
     queryKey: ruleExecutionKeys.list(params),
