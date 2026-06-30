@@ -486,12 +486,33 @@ describe('CountTimeframeStrategy', () => {
 
     it.each<[AlertEpisodeStatus]>([
       [alertEpisodeStatus.inactive],
-      [alertEpisodeStatus.pending],
       [alertEpisodeStatus.active],
       [alertEpisodeStatus.recovering],
-    ])('sets the status %s straight to active without setting status_count', (from) => {
+    ])('transitions %s → active', (from) => {
       expectTransition({
         from,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'emit',
+      });
+    });
+
+    it('keeps a pending episode in pending when the consecutive-breach threshold is not yet met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        noDataStrategy: 'emit',
+        statusCount: 1,
+        expectedStatusCount: 2,
+      });
+    });
+
+    it('advances a pending episode to active once the consecutive-breach threshold is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.active,
         stateTransition,

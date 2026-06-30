@@ -217,37 +217,35 @@ For each active group missing from the current breach batch, the executor runs a
 
 The step also keeps a defensive runtime skip if no data-presence query is available — this only protects against stale saved objects that pre-date the schema constraint or non-API write paths.
 
+### Recovery takes priority
+
+If the recovery step already emitted a `recovered` event for a group, the no-data step leaves that event intact regardless of the `no_data_strategy`. Only groups **without** an upstream recovered event receive a `no_data` event.
+
 ### `no_data_strategy` outcomes (no-data partition)
 
-The executor emits the rule event; the director's FSM consumes it and decides the next episode status.
+The executor emits a `no_data` rule event; the director's FSM consumes it and decides the next episode status based on the strategy.
 
 | `no_data_strategy` | Rule event the step writes | Episode status the FSM lands on |
 | --- | --- | --- |
-| `'emit'` | Drop any `recovered` event recovery emitted for this group; append a `no_data` event. | Set the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
-| `'last_known_status'` | Same as `'emit'` — drop any upstream `recovered` event for the group; append a `no_data` event. | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
-| `'recover'` | Force recovery: leave any existing `recovered` event in place, or emit one if recovery skipped this group (e.g. `recovery_strategy: 'none'`). | Follows the normal recovery transitions (`active → recovering → inactive`). |
+| `'emit'` | Append a `no_data` event (groups that already have a `recovered` event are skipped — recovery takes priority). | Set the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
+| `'last_known_status'` | Same as `'emit'` — append a `no_data` event for groups without an upstream `recovered` event. | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
+| `'recover'` | Append a `no_data` event for groups without an upstream `recovered` event. The director applies the same FSM transitions as a `recovered` event would. | Follows the recovery transitions — the episode moves toward `inactive` via the normal lifecycle. |
 | `'none'` | No-op. The recovery step's output stands. When `recovery_strategy` is also `'none'`, no event is written for this group and the episode drifts out of lookback windows over time. | n/a (no event is produced). |
 
-The `no_data_strategy` branch lives in `BasicTransitionStrategy.getNextState`. There is no `'no_data'` episode status; the FSM sets the episode to `'active'` for `'emit'`, and falls through to preserve the prior status for `'last_known_status'`.
+The `no_data_strategy` branch lives in `BasicTransitionStrategy.getNextState`. There is no `'no_data'` episode status; the FSM sets the episode to `'active'` for `'emit'`, preserves the prior status for `'last_known_status'`, and mirrors the `'recovered'` FSM transitions for `'recover'`.
 
 ### Data-present partition
 
-When the no-data query reports the group as still having data:
-
-| `recovery_strategy` | Outcome |
-| --- | --- |
-| `'no_breach'` | The group already has a `recovered` event from the recovery step — `no_breach` recovers any active group missing from breach. Leave it alone. |
-| `'query'` | If the recovery query matched the group, recovery already wrote a `recovered` event — leave it. If it didn't match (data is present but neither breaching nor recovering), append a synthetic `breached` event so the episode stays alive. |
-| `'none'` | No recovery is configured and the group is present but not breaching. No event is written; the episode drifts out of lookback windows over time. This is the documented trade-off of opting out of recovery. |
+When the no-data query reports the group as still having data, the no-data step is a no-op regardless of the `recovery_strategy`. If recovery already emitted a `recovered` event for that group it passes through unchanged; if recovery did not fire (e.g. the recovery query did not match), no additional event is written. The episode drifts out of lookback windows over time if neither breach nor recovery fires — this is the documented trade-off of using a narrow recovery query.
 
 ### Summary
 
 | `no_data_strategy` | What the step writes |
 | --- | --- |
 | absent / `'none'` | Nothing. The step is a no-op apart from the active-groups lookup, which is also skipped when both strategies are off. |
-| `'emit'` | One `no_data` event per active-but-absent group with no data. The FSM lifts the alive episode to `'active'`. |
-| `'last_known_status'` | One `no_data` event per active-but-absent group with no data. The FSM preserves the prior episode status. |
-| `'recover'` | One `recovered` event per active-but-absent group with no data, unless recovery already emitted one. |
+| `'emit'` | One `no_data` event per active-but-absent group with no data and no upstream `recovered` event. The FSM sets the episode to `'active'`. |
+| `'last_known_status'` | One `no_data` event per active-but-absent group with no data and no upstream `recovered` event. The FSM preserves the prior episode status. |
+| `'recover'` | One `no_data` event per active-but-absent group with no data and no upstream `recovered` event. The director FSM drives the episode toward recovery (`active → recovering → inactive`). |
 
 ## Severity behavior
 

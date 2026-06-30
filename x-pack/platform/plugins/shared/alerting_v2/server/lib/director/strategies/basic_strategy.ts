@@ -78,6 +78,8 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
   ): AlertEpisodeStatus {
     if (rule.no_data_strategy === 'emit') {
       return alertEpisodeStatus.active;
+    } else if (rule.no_data_strategy === 'recover') {
+      return this.stateMachine[currentStatus]?.recovered ?? currentStatus;
     }
     // for all other no_data_strategy types return the last known episode status
     return currentStatus;

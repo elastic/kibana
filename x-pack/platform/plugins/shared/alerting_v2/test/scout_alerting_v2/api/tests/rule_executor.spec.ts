@@ -1745,6 +1745,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
           },
         },
+        // Use recovery_strategy 'none' so the recovery step never fires.
+        recovery_strategy: 'none',
         no_data_strategy: 'emit',
       })
     );
@@ -1800,6 +1802,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
             },
           },
+          // Use recovery_strategy 'none' so the recovery step never fires.
+          recovery_strategy: 'none',
           no_data_strategy: 'last_known_status',
         })
       );
@@ -1827,7 +1831,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest("no_data_strategy 'recover' writes a recovered rule event", async ({ apiServices }) => {
+  apiTest("no_data_strategy 'recover' writes a no_data rule event", async ({ apiServices }) => {
     const HOST = 'host-no-data-recover';
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -1855,9 +1859,9 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           },
         },
         // Pair 'recover' no-data strategy with recovery_strategy 'none' so
-        // the recovery step doesn't already emit a recovered event for the
-        // group — that way the recovered event we observe must come from
-        // the no-data step.
+        // the recovery step does not emit a recovered event for the group —
+        // confirming the no_data event comes from the no-data step and the
+        // director drives the episode toward recovery.
         recovery_strategy: 'none',
         no_data_strategy: 'recover',
       })
@@ -1875,19 +1879,21 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       query: { term: { 'host.name': HOST } },
     });
 
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
-
-    const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-      status: 'recovered',
-    });
-
-    expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
-    expect(recoveredEvents[0].group_hash).toBe(breachedHash);
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
 
     const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
       status: 'no_data',
     });
-    expect(noDataEvents).toHaveLength(0);
+
+    expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
+    expect(noDataEvents[0].group_hash).toBe(breachedHash);
+
+    // The no-data step writes a no_data event; the recovery step is
+    // disabled so no recovered rule event should exist.
+    const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+      status: 'recovered',
+    });
+    expect(recoveredEvents).toHaveLength(0);
   });
 
   apiTest("no_data_strategy 'none' does not write no_data events", async ({ apiServices }) => {

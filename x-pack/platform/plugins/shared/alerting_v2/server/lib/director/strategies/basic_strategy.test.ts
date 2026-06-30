@@ -196,5 +196,22 @@ describe('BasicTransitionStrategy', () => {
       });
       expect(result).toEqual({ status: from });
     });
+
+    it.each<[AlertEpisodeStatus, AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive, alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.pending, alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.active, alertEpisodeStatus.recovering],
+      [alertEpisodeStatus.recovering, alertEpisodeStatus.inactive],
+    ])("'recover' transitions %s → %s (mirrors recovered-event FSM)", (from, to) => {
+      const result = getNextState({
+        eventStatus: alertEventStatus.no_data,
+        noDataStrategy: 'recover',
+        previousEpisode: buildLatestAlertEvent({
+          episodeStatus: from,
+          eventStatus: alertEventStatus.no_data,
+        }),
+      });
+      expect(result).toEqual({ status: to });
+    });
   });
 });

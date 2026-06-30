@@ -11,14 +11,8 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { stableStringify } from '@kbn/std';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../../errors/esql_user_error';
-import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
-import {
-  buildGroupHash,
-  buildNoDataAlertEvents,
-  buildRecoveryAlertEvents,
-  createAlertEventsBatchBuilder,
-  rowToDocument,
-} from '../build_alert_events';
+import type { PipelineStateStream, RuleExecutionInput, RuleExecutionStep } from '../types';
+import { buildGroupHash, buildNoDataAlertEvents, rowToDocument } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
 import {
@@ -42,10 +36,12 @@ import type { AlertEvent } from '../../../resources/datastreams/alert_events';
  * breach batch, this step decides whether the absence is because the group
  * has data but is not breaching, or because the group has no data at all.
  *
- * The `no_data` ES|QL query (when configured on standalone-format rules)
- * defines the set of groups that have data. Groups absent from that result
- * are treated as "no data" and the rule's `no_data_strategy` decides the
- * outcome (emit a `no_data` event, force recovery, etc.).
+ * Recovery always takes priority, only groups without an upstream recovered event receive
+ * a `no_data` event.
+ *
+ * The `no_data` ES|QL query defines the set of groups that have data.
+ * Groups absent from that result are treated as "no data" and in the director, the rule's `no_data_strategy` decides the
+ * outcome.
  */
 @injectable()
 export class CreateNoDataEventsStep implements RuleExecutionStep {
@@ -139,49 +135,22 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
 
       const noDataQueryResult = await step.executeNoDataQuery({ rule, noDataQuery, input });
 
-      const noDataGroupHashes: string[] = [];
-      const dataPresentGroupHashes: string[] = [];
-      for (const { group_hash } of activeButAbsentGroups) {
-        if (noDataQueryResult.groupHashes.has(group_hash)) {
-          dataPresentGroupHashes.push(group_hash);
-        } else {
-          noDataGroupHashes.push(group_hash);
-        }
-      }
+      const noDataGroupHashes = activeButAbsentGroups
+        .filter(({ group_hash }) => !noDataQueryResult.groupHashes.has(group_hash))
+        .map(({ group_hash }) => group_hash);
 
-      const groupsToReplace = new Set<string>();
       const eventsToAppend: AlertEvent[] = [];
 
       step.applyNoDataStrategy({
         rule,
         noDataGroupHashes,
         recoveredEventsByGroup,
-        groupsToReplace,
         eventsToAppend,
         scheduledTimestamp: input.scheduledAt,
         spaceId: input.spaceId,
       });
 
-      step.applyDataPresentStrategy({
-        rule,
-        input,
-        dataPresentGroupHashes,
-        rowsByGroupHash: noDataQueryResult.rowsByGroupHash,
-        recoveredEventsByGroup,
-        eventsToAppend,
-      });
-
-      let filteredBatch = alertEventsBatch;
-      if (groupsToReplace.size !== 0) {
-        filteredBatch = alertEventsBatch.filter(
-          (event) => !(event.status === 'recovered' && groupsToReplace.has(event.group_hash))
-        );
-        step.logger.debug({
-          message: `[${step.name}] Rewrote ${groupsToReplace.size} recovery events and appended ${eventsToAppend.length} events for rule ${input.ruleId}`,
-        });
-      }
-
-      const nextBatch = [...filteredBatch, ...eventsToAppend];
+      const nextBatch = [...alertEventsBatch, ...eventsToAppend];
 
       yield {
         type: 'continue',
@@ -190,11 +159,23 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
     });
   }
 
+  /**
+   * Applies the rule's `no_data_strategy` for groups in the no-data partition.
+   *
+   * Recovery takes priority: groups that already have an upstream `recovered`
+   * event are left untouched regardless of the strategy. Only groups without
+   * a recovered event receive a `no_data` event.
+   *
+   * - `emit` / `last_known_status`: append a `no_data` event. The director
+   *   FSM decides the next episode status based on the strategy.
+   * - `recover`: append a `no_data` event. The director FSM applies the same
+   *   transitions as a `recovered` event would, driving the episode toward
+   *   recovery.
+   */
   private applyNoDataStrategy({
     rule,
     noDataGroupHashes,
     recoveredEventsByGroup,
-    groupsToReplace,
     eventsToAppend,
     scheduledTimestamp,
     spaceId,
@@ -202,94 +183,28 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
     rule: RuleResponse;
     noDataGroupHashes: string[];
     recoveredEventsByGroup: Map<string, AlertEvent>;
-    groupsToReplace: Set<string>;
     eventsToAppend: AlertEvent[];
     scheduledTimestamp: string;
     spaceId: string;
   }): void {
     if (noDataGroupHashes.length === 0) return;
 
-    const strategy = rule.no_data_strategy;
-    if (strategy === 'emit' || strategy === 'last_known_status') {
-      for (const groupHash of noDataGroupHashes) {
-        // replace previously reported recovered event groups with no_data events
-        if (recoveredEventsByGroup.has(groupHash)) {
-          groupsToReplace.add(groupHash);
-        }
-      }
-      eventsToAppend.push(
-        ...buildNoDataAlertEvents({
-          ruleId: rule.id,
-          ruleVersion: 1,
-          spaceId,
-          groupHashes: noDataGroupHashes,
-          scheduledTimestamp,
-        })
-      );
-    } else if (strategy === 'recover') {
-      const groupsMissingRecovery = noDataGroupHashes.filter(
-        (groupHash) => !recoveredEventsByGroup.has(groupHash)
-      );
+    // Recovery takes priority: skip groups that already have a recovered event.
+    const groupsWithoutRecovery = noDataGroupHashes.filter(
+      (groupHash) => !recoveredEventsByGroup.has(groupHash)
+    );
 
-      if (groupsMissingRecovery.length === 0) return;
+    if (groupsWithoutRecovery.length === 0) return;
 
-      eventsToAppend.push(
-        ...buildRecoveryAlertEvents({
-          ruleId: rule.id,
-          ruleVersion: 1,
-          spaceId,
-          activeGroupHashes: groupsMissingRecovery.map((group_hash) => ({ group_hash })),
-          breachedGroupHashes: new Set(),
-          scheduledTimestamp,
-        })
-      );
-    }
-  }
-
-  /**
-   * When `recovery_strategy: 'query'`: a group with data
-   * that didn't match either the breach or recovery query gets a re-asserted
-   * `breached` event.
-   */
-  private applyDataPresentStrategy({
-    rule,
-    input,
-    dataPresentGroupHashes,
-    rowsByGroupHash,
-    recoveredEventsByGroup,
-    eventsToAppend,
-  }: {
-    rule: RuleResponse;
-    input: RulePipelineState['input'];
-    dataPresentGroupHashes: string[];
-    rowsByGroupHash: Map<string, Record<string, unknown>>;
-    recoveredEventsByGroup: Map<string, AlertEvent>;
-    eventsToAppend: AlertEvent[];
-  }): void {
-    if (dataPresentGroupHashes.length === 0) return;
-
-    if (rule.recovery_strategy !== 'query') return;
-
-    const reassertRows: Array<Record<string, unknown>> = [];
-    for (const groupHash of dataPresentGroupHashes) {
-      if (recoveredEventsByGroup.has(groupHash)) continue;
-      const row = rowsByGroupHash.get(groupHash);
-      if (row) {
-        reassertRows.push(row);
-      }
-    }
-
-    if (reassertRows.length === 0) return;
-
-    const buildBatch = createAlertEventsBatchBuilder({
-      ruleId: rule.id,
-      ruleVersion: 1,
-      spaceId: input.spaceId,
-      ruleAttributes: rule,
-      scheduledTimestamp: input.scheduledAt,
-    });
-
-    eventsToAppend.push(...buildBatch(reassertRows));
+    eventsToAppend.push(
+      ...buildNoDataAlertEvents({
+        ruleId: rule.id,
+        ruleVersion: 1,
+        spaceId,
+        groupHashes: groupsWithoutRecovery,
+        scheduledTimestamp,
+      })
+    );
   }
 
   private async executeNoDataQuery({
@@ -299,7 +214,7 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
   }: {
     rule: RuleResponse;
     noDataQuery: string;
-    input: RulePipelineState['input'];
+    input: RuleExecutionInput;
   }): Promise<NoDataQueryResult> {
     const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -341,7 +256,6 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
 
 interface NoDataQueryResult {
   groupHashes: Set<string>;
-  rowsByGroupHash: Map<string, Record<string, unknown>>;
 }
 function collectRowsFromNoDataQueryResponse({
   rule,
@@ -354,12 +268,11 @@ function collectRowsFromNoDataQueryResponse({
   const values = esqlResponse.values ?? [];
 
   if (columns.length === 0 || values.length === 0) {
-    return { groupHashes: new Set(), rowsByGroupHash: new Map() };
+    return { groupHashes: new Set() };
   }
 
   const groupingFields = rule.grouping?.fields ?? [];
   const groupHashes = new Set<string>();
-  const rowsByGroupHash = new Map<string, Record<string, unknown>>();
 
   for (let i = 0; i < values.length; i++) {
     const rowDoc = rowToDocument(columns, values[i]);
@@ -371,10 +284,7 @@ function collectRowsFromNoDataQueryResponse({
     });
 
     groupHashes.add(hash);
-    if (!rowsByGroupHash.has(hash)) {
-      rowsByGroupHash.set(hash, rowDoc);
-    }
   }
 
-  return { groupHashes, rowsByGroupHash };
+  return { groupHashes };
 }
