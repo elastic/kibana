@@ -15,7 +15,7 @@ import axios from 'axios';
 // drop-in replacement for v2 (same request/response/auth) with server-side
 // caching and gzip request support. Switch to 'v2' to roll back; everything
 // version-specific is keyed off this constant below.
-const PICK_RUN_ORDER_VERSION: 'v2' | 'v3' = 'v3';
+const PICK_RUN_ORDER_VERSION: 'v2' | 'v3' = 'v2' as 'v2' | 'v3';
 
 // v3 accepts gzip-compressed request bodies (Content-Encoding: gzip); v2 does not.
 const PICK_RUN_ORDER_GZIP_REQUEST = PICK_RUN_ORDER_VERSION === 'v3';
@@ -207,9 +207,7 @@ export class CiStatsClient {
       data = json;
     }
 
-    if (PICK_RUN_ORDER_VERSION === 'v3') {
-      console.time('request');
-    }
+    console.time('request');
     const resp = await axios.request<TestGroupRunOrderResponse>({
       method: 'POST',
       baseURL: this.baseUrl,
@@ -221,10 +219,7 @@ export class CiStatsClient {
       url: `/${PICK_RUN_ORDER_VERSION}/_pick_test_group_run_order`,
       data,
     });
-
-    if (PICK_RUN_ORDER_VERSION === 'v3') {
-      console.timeEnd('request');
-    }
+    console.timeEnd('request');
 
     return resp.data;
   };
