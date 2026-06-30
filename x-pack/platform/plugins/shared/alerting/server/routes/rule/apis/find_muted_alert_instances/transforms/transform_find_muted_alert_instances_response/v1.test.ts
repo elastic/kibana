@@ -9,14 +9,27 @@ import type { FindMutedAlertsResult } from '../../../../../../application/rule/m
 import { transformFindMutedAlertInstancesResponse } from './v1';
 
 describe('transformFindMutedAlertInstancesResponse', () => {
-  it('maps pagination metadata and renames muted instance ids', () => {
+  it('maps pagination metadata, renames muted instance ids and snoozed instances', () => {
     const result: FindMutedAlertsResult = {
       page: 1,
       perPage: 10,
       total: 2,
       data: [
-        { id: 'rule-1', mutedInstanceIds: ['instance-1', 'instance-2'] },
-        { id: 'rule-2', mutedInstanceIds: ['instance-3'] },
+        {
+          id: 'rule-1',
+          mutedInstanceIds: ['instance-1', 'instance-2'],
+          snoozedInstances: [
+            {
+              instanceId: 'instance-1',
+              expiresAt: '2099-01-01T00:00:00.000Z',
+              conditions: [{ type: 'field_change', field: 'host.name' }],
+              conditionOperator: 'any',
+              snoozedAt: '2026-01-01T00:00:00.000Z',
+              snoozedBy: 'elastic',
+            },
+          ],
+        },
+        { id: 'rule-2', mutedInstanceIds: ['instance-3'], snoozedInstances: [] },
       ],
     };
 
@@ -25,18 +38,31 @@ describe('transformFindMutedAlertInstancesResponse', () => {
       per_page: 10,
       total: 2,
       data: [
-        { id: 'rule-1', muted_alert_ids: ['instance-1', 'instance-2'] },
-        { id: 'rule-2', muted_alert_ids: ['instance-3'] },
+        {
+          id: 'rule-1',
+          muted_alert_ids: ['instance-1', 'instance-2'],
+          snoozed_alert_instances: [
+            {
+              instance_id: 'instance-1',
+              expires_at: '2099-01-01T00:00:00.000Z',
+              conditions: [{ type: 'field_change', field: 'host.name' }],
+              condition_operator: 'any',
+              snoozed_at: '2026-01-01T00:00:00.000Z',
+              snoozed_by: 'elastic',
+            },
+          ],
+        },
+        { id: 'rule-2', muted_alert_ids: ['instance-3'], snoozed_alert_instances: [] },
       ],
     });
   });
 
-  it('defaults muted_alert_ids to an empty array when missing', () => {
+  it('defaults muted_alert_ids and snoozed_alert_instances to empty arrays when missing', () => {
     const result = {
       page: 1,
       perPage: 10,
       total: 1,
-      // mutedInstanceIds intentionally omitted to exercise the `?? []` fallback
+      // mutedInstanceIds and snoozedInstances intentionally omitted to exercise the `?? []` fallback
       data: [{ id: 'rule-1' }],
     } as unknown as FindMutedAlertsResult;
 
@@ -44,7 +70,7 @@ describe('transformFindMutedAlertInstancesResponse', () => {
       page: 1,
       per_page: 10,
       total: 1,
-      data: [{ id: 'rule-1', muted_alert_ids: [] }],
+      data: [{ id: 'rule-1', muted_alert_ids: [], snoozed_alert_instances: [] }],
     });
   });
 

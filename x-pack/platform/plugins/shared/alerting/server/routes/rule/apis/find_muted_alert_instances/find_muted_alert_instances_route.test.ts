@@ -33,7 +33,7 @@ describe('findMutedAlertInstancesRoute', () => {
     expect(config.options).toEqual(expect.objectContaining({ access: 'internal' }));
   });
 
-  it('transforms the request body and returns only id + muted_alert_ids', async () => {
+  it('transforms the request body and returns id + muted_alert_ids + snoozed_alert_instances', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -45,7 +45,20 @@ describe('findMutedAlertInstancesRoute', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [{ id: 'rule-1', mutedInstanceIds: ['instance-1', 'instance-2'] }],
+      data: [
+        {
+          id: 'rule-1',
+          mutedInstanceIds: ['instance-1', 'instance-2'],
+          snoozedInstances: [
+            {
+              instanceId: 'instance-3',
+              expiresAt: '2099-01-01T00:00:00.000Z',
+              snoozedAt: '2026-01-01T00:00:00.000Z',
+              snoozedBy: 'elastic',
+            },
+          ],
+        },
+      ],
     };
     rulesClient.findMutedAlerts.mockResolvedValueOnce(findResult);
 
@@ -81,7 +94,20 @@ describe('findMutedAlertInstancesRoute', () => {
         page: 1,
         per_page: 10,
         total: 1,
-        data: [{ id: 'rule-1', muted_alert_ids: ['instance-1', 'instance-2'] }],
+        data: [
+          {
+            id: 'rule-1',
+            muted_alert_ids: ['instance-1', 'instance-2'],
+            snoozed_alert_instances: [
+              {
+                instance_id: 'instance-3',
+                expires_at: '2099-01-01T00:00:00.000Z',
+                snoozed_at: '2026-01-01T00:00:00.000Z',
+                snoozed_by: 'elastic',
+              },
+            ],
+          },
+        ],
       },
     });
   });
@@ -153,7 +179,7 @@ describe('findMutedAlertInstancesRoute', () => {
         page: 1,
         per_page: 10,
         total: 1,
-        data: [{ id: 'rule-1', muted_alert_ids: ['instance-1'] }],
+        data: [{ id: 'rule-1', muted_alert_ids: ['instance-1'], snoozed_alert_instances: [] }],
       },
     });
   });

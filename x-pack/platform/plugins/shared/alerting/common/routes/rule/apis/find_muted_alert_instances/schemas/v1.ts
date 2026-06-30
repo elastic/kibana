@@ -10,6 +10,7 @@ import {
   MAX_RESULT_WINDOW,
   MAX_ALERTS_PER_PAGE,
 } from '../../../../../max_alert_limit';
+import { snoozedAlertInstanceSchemaV1 } from '../../../response';
 
 export const findMutedAlertInstancesRequestBodySchema = schema.object(
   {
@@ -38,6 +39,7 @@ const findMutedAlertInstancesResponseDataSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
     muted_alert_ids: schema.arrayOf(schema.string()),
+    snoozed_alert_instances: schema.maybe(schema.arrayOf(snoozedAlertInstanceSchemaV1)),
   })
 );
 

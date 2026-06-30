@@ -8,10 +8,13 @@
 export const ALLOWED_MAX_ALERTS = 5000;
 
 export const MAX_SNOOZED_INSTANCE_CONDITIONS = 10;
+export const MAX_SNOOZED_ALERT_INSTANCES = 1000;
 
+export const MAX_ID_LENGTH = 256;
 export const MAX_SNOOZED_INSTANCE_ID_LENGTH = 1000;
 export const MAX_SNOOZED_BY_LENGTH = 256;
 export const MAX_SNOOZED_CONDITION_FIELD_LENGTH = 1000;
+export const MAX_SNOOZE_EXPIRES_AT_LENGTH = 30;
 
 export const MAX_KQL_FILTER_LENGTH = 8192;
 // Matches Elasticsearch's default `index.max_result_window`, the ceiling for paginated results.

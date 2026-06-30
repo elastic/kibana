@@ -14,6 +14,7 @@ import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { RawRuleSnoozedInstance } from '../../../../saved_objects/schemas/raw_rule';
 import type { FindMutedAlertsParams } from './types';
 import { findMutedAlertsParamsSchema } from './schemas';
 import { findRulesSo } from '../../../../data/rule';
@@ -22,7 +23,11 @@ export interface FindMutedAlertsResult {
   page: number;
   perPage: number;
   total: number;
-  data: Array<{ id: string; mutedInstanceIds: string[] }>;
+  data: Array<{
+    id: string;
+    mutedInstanceIds: string[];
+    snoozedInstances: RawRuleSnoozedInstance[];
+  }>;
 }
 
 export async function findMutedAlerts(
@@ -74,7 +79,7 @@ export async function findMutedAlerts(
     savedObjectsFindOptions: {
       ...options,
       filter: finalFilter,
-      fields: ['alertTypeId', 'consumer', 'name', 'mutedInstanceIds'],
+      fields: ['alertTypeId', 'consumer', 'name', 'mutedInstanceIds', 'snoozedInstances'],
     },
   });
 
@@ -96,7 +101,12 @@ export async function findMutedAlerts(
       throw error;
     }
 
-    return { id, name: attributes.name, mutedInstanceIds: attributes.mutedInstanceIds ?? [] };
+    return {
+      id,
+      name: attributes.name,
+      mutedInstanceIds: attributes.mutedInstanceIds ?? [],
+      snoozedInstances: attributes.snoozedInstances ?? [],
+    };
   });
 
   // Log success events only after every returned rule has passed authorization, so a
@@ -114,6 +124,10 @@ export async function findMutedAlerts(
     page,
     perPage,
     total,
-    data: authorizedData.map(({ id, mutedInstanceIds }) => ({ id, mutedInstanceIds })),
+    data: authorizedData.map(({ id, mutedInstanceIds, snoozedInstances }) => ({
+      id,
+      mutedInstanceIds,
+      snoozedInstances,
+    })),
   };
 }

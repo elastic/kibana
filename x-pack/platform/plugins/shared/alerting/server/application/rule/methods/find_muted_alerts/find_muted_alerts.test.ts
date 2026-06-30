@@ -84,6 +84,7 @@ const mockSavedObjectsFindResponse = (
       consumer: string;
       name?: string;
       mutedInstanceIds?: string[];
+      snoozedInstances?: Array<Record<string, unknown>>;
     };
   }>
 ) => {
@@ -116,12 +117,20 @@ describe('findMutedAlerts()', () => {
           consumer: 'myApp',
           name: 'fakeRuleName',
           mutedInstanceIds: ['instance-1', 'instance-2'],
+          snoozedInstances: [
+            {
+              instanceId: 'instance-3',
+              expiresAt: '2099-01-01T00:00:00.000Z',
+              snoozedAt: '2026-01-01T00:00:00.000Z',
+              snoozedBy: 'elastic',
+            },
+          ],
         },
       },
     ]);
   });
 
-  test('returns only rule id and muted instance ids, plus pagination metadata', async () => {
+  test('returns rule id, muted instance ids and snoozed instances, plus pagination metadata', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.findMutedAlerts({ options: {} });
 
@@ -129,23 +138,36 @@ describe('findMutedAlerts()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [{ id: '1', mutedInstanceIds: ['instance-1', 'instance-2'] }],
+      data: [
+        {
+          id: '1',
+          mutedInstanceIds: ['instance-1', 'instance-2'],
+          snoozedInstances: [
+            {
+              instanceId: 'instance-3',
+              expiresAt: '2099-01-01T00:00:00.000Z',
+              snoozedAt: '2026-01-01T00:00:00.000Z',
+              snoozedBy: 'elastic',
+            },
+          ],
+        },
+      ],
     });
   });
 
-  test('only requests the fields needed to authorize and report muted state', async () => {
+  test('only requests the fields needed to authorize and report muted/snoozed state', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.findMutedAlerts({ options: {} });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
         type: RULE_SAVED_OBJECT_TYPE,
-        fields: ['alertTypeId', 'consumer', 'name', 'mutedInstanceIds'],
+        fields: ['alertTypeId', 'consumer', 'name', 'mutedInstanceIds', 'snoozedInstances'],
       })
     );
   });
 
-  test('defaults muted instance ids to an empty array when the attribute is missing', async () => {
+  test('defaults muted instance ids and snoozed instances to empty arrays when the attributes are missing', async () => {
     mockSavedObjectsFindResponse([
       { id: '1', attributes: { alertTypeId: 'myType', consumer: 'myApp', name: 'noMutes' } },
     ]);
@@ -153,14 +175,27 @@ describe('findMutedAlerts()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.findMutedAlerts({ options: {} });
 
-    expect(result.data).toEqual([{ id: '1', mutedInstanceIds: [] }]);
+    expect(result.data).toEqual([{ id: '1', mutedInstanceIds: [], snoozedInstances: [] }]);
   });
 
   test('works without params', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.findMutedAlerts();
 
-    expect(result.data).toEqual([{ id: '1', mutedInstanceIds: ['instance-1', 'instance-2'] }]);
+    expect(result.data).toEqual([
+      {
+        id: '1',
+        mutedInstanceIds: ['instance-1', 'instance-2'],
+        snoozedInstances: [
+          {
+            instanceId: 'instance-3',
+            expiresAt: '2099-01-01T00:00:00.000Z',
+            snoozedAt: '2026-01-01T00:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      },
+    ]);
   });
 
   test('throws a bad request error when params fail schema validation', async () => {

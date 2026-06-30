@@ -108,6 +108,31 @@ describe('findMutedAlertInstancesResponseSchema', () => {
     expect(findMutedAlertInstancesResponseSchema.validate(response)).toEqual(response);
   });
 
+  test('accepts snoozed_alert_instances', () => {
+    const response = {
+      page: 1,
+      per_page: 10,
+      total: 1,
+      data: [
+        {
+          id: 'rule-1',
+          muted_alert_ids: ['instance-1'],
+          snoozed_alert_instances: [
+            {
+              instance_id: 'instance-2',
+              expires_at: '2099-01-01T00:00:00.000Z',
+              conditions: [{ type: 'field_change', field: 'host.name' }],
+              condition_operator: 'any',
+              snoozed_at: '2026-01-01T00:00:00.000Z',
+              snoozed_by: 'elastic',
+            },
+          ],
+        },
+      ],
+    };
+    expect(findMutedAlertInstancesResponseSchema.validate(response)).toEqual(response);
+  });
+
   test('throws when muted_alert_ids is missing', () => {
     expect(() =>
       findMutedAlertInstancesResponseSchema.validate({
