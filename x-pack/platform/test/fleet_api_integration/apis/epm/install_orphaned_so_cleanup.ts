@@ -53,24 +53,25 @@ export default function (providerContext: FtrProviderContext) {
   /**
    * Injects a tag SO directly into .kibana with originId = TAG_ARCHIVE_ID.
    *
-   * In the default space the ES _id is `tag:{soId}`.
-   * In a non-default space it is `{spaceId}:tag:{soId}`, and the document carries
-   * `namespaces: [spaceId]`.  This mirrors how the SO importer stores multiple-isolated
-   * types after a real (but failed) install attempt.
+   * `tag` is a `multiple-isolated` type. Unlike single-namespace types whose ES _id is
+   * prefixed with the namespace (`{space}:{type}:{id}`), multiple-isolated objects always
+   * use `{type}:{id}` as the raw ES _id regardless of which space they belong to.  Space
+   * membership is tracked exclusively via the `namespaces` array in the document body.
    *
-   * Two such orphans sharing the same originId trigger the ambiguous_conflict error on
-   * the next import; the fix deletes them before the import runs.
+   * Two orphans sharing the same originId trigger the ambiguous_conflict error on the
+   * next import; the fix deletes them before the import runs.
    */
   const injectOrphanedTag = async (soId: string, spaceId = 'default') => {
-    const esId = spaceId === 'default' ? `tag:${soId}` : `${spaceId}:tag:${soId}`;
     await es.index({
       index: '.kibana',
-      id: esId,
+      // No namespace prefix — multiple-isolated types use 'tag:{id}' for all spaces.
+      id: `tag:${soId}`,
       refresh: 'wait_for',
       document: {
         type: 'tag',
         tag: { name: `fleet-test-orphan-${soId}`, description: '', color: '#000000' },
         originId: TAG_ARCHIVE_ID,
+        // Space membership for multiple-isolated types is encoded in the namespaces array.
         namespaces: [spaceId],
         managed: false,
         references: [],
@@ -80,14 +81,12 @@ export default function (providerContext: FtrProviderContext) {
     });
   };
 
-  const deleteOrphanedTag = async (soId: string, spaceId = 'default') => {
-    const esId = spaceId === 'default' ? `tag:${soId}` : `${spaceId}:tag:${soId}`;
-    await es.delete({ index: '.kibana', id: esId, refresh: 'wait_for' }).catch(() => {});
+  const deleteOrphanedTag = async (soId: string) => {
+    await es.delete({ index: '.kibana', id: `tag:${soId}`, refresh: 'wait_for' }).catch(() => {});
   };
 
-  const orphanExists = async (soId: string, spaceId = 'default') => {
-    const esId = spaceId === 'default' ? `tag:${soId}` : `${spaceId}:tag:${soId}`;
-    return es.exists({ index: '.kibana', id: esId }).catch(() => false);
+  const orphanExists = async (soId: string) => {
+    return es.exists({ index: '.kibana', id: `tag:${soId}` }).catch(() => false);
   };
 
   describe('Orphaned multiple-isolated SO cleanup during package install', () => {
@@ -164,45 +163,48 @@ export default function (providerContext: FtrProviderContext) {
       afterEach(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage();
-        await deleteOrphanedTag('fleet-orphan-test-1', TEST_SPACE);
-        await deleteOrphanedTag('fleet-orphan-test-2', TEST_SPACE);
-        // Also clean up any default-space orphans injected by cross-space isolation tests.
-        await deleteOrphanedTag('fleet-orphan-test-1');
+        // Clean up all soIds used across these tests.
+        await deleteOrphanedTag('fleet-orphan-space-1');
+        await deleteOrphanedTag('fleet-orphan-space-2');
+        // Used by the cross-space isolation test (lives in the default space).
+        await deleteOrphanedTag('fleet-orphan-default-1');
       });
 
       it('succeeds on a fresh install when two orphaned tag SOs share the same originId in the target space', async () => {
-        await injectOrphanedTag('fleet-orphan-test-1', TEST_SPACE);
-        await injectOrphanedTag('fleet-orphan-test-2', TEST_SPACE);
+        await injectOrphanedTag('fleet-orphan-space-1', TEST_SPACE);
+        await injectOrphanedTag('fleet-orphan-space-2', TEST_SPACE);
 
         const response = await installPackage(TEST_SPACE);
         expect(response.status).to.be(200);
       });
 
       it('removes orphaned tag SOs scoped to the target space during install', async () => {
-        await injectOrphanedTag('fleet-orphan-test-1', TEST_SPACE);
-        await injectOrphanedTag('fleet-orphan-test-2', TEST_SPACE);
+        await injectOrphanedTag('fleet-orphan-space-1', TEST_SPACE);
+        await injectOrphanedTag('fleet-orphan-space-2', TEST_SPACE);
 
         await installPackage(TEST_SPACE).expect(200);
 
-        expect(await orphanExists('fleet-orphan-test-1', TEST_SPACE)).to.be(false);
-        expect(await orphanExists('fleet-orphan-test-2', TEST_SPACE)).to.be(false);
+        expect(await orphanExists('fleet-orphan-space-1')).to.be(false);
+        expect(await orphanExists('fleet-orphan-space-2')).to.be(false);
       });
 
       it('does not delete orphaned tag SOs that belong to a different space', async () => {
-        // Orphan is in the default space; install runs in TEST_SPACE.
-        // The cleanup must be scoped to TEST_SPACE only and must not touch other namespaces.
-        await injectOrphanedTag('fleet-orphan-test-1');
+        // Inject an orphan in the DEFAULT space using a distinct soId so it can coexist
+        // in .kibana alongside any TEST_SPACE orphans (multiple-isolated types share the
+        // 'tag:{id}' _id format, so each orphan must have a unique soId).
+        await injectOrphanedTag('fleet-orphan-default-1');
 
+        // Install in TEST_SPACE — the cleanup must be scoped to TEST_SPACE only and must
+        // not touch objects whose namespaces array contains only 'default'.
         await installPackage(TEST_SPACE).expect(200);
 
-        // The default-space orphan must still be present — the install in TEST_SPACE
-        // must not have deleted it.
-        expect(await orphanExists('fleet-orphan-test-1')).to.be(true);
+        // The default-space orphan must still be present.
+        expect(await orphanExists('fleet-orphan-default-1')).to.be(true);
       });
 
       it('succeeds on reinstall when an orphaned tag SO from a prior failed reinstall is present in the space', async () => {
         await installPackage(TEST_SPACE).expect(200);
-        await injectOrphanedTag('fleet-orphan-test-1', TEST_SPACE);
+        await injectOrphanedTag('fleet-orphan-space-1', TEST_SPACE);
 
         const reinstallResponse = await installPackage(TEST_SPACE);
         expect(reinstallResponse.status).to.be(200);
@@ -210,11 +212,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('removes the orphaned SO left by a failed reinstall in the space', async () => {
         await installPackage(TEST_SPACE).expect(200);
-        await injectOrphanedTag('fleet-orphan-test-1', TEST_SPACE);
+        await injectOrphanedTag('fleet-orphan-space-1', TEST_SPACE);
 
         await installPackage(TEST_SPACE).expect(200);
 
-        expect(await orphanExists('fleet-orphan-test-1', TEST_SPACE)).to.be(false);
+        expect(await orphanExists('fleet-orphan-space-1')).to.be(false);
       });
     });
   });
