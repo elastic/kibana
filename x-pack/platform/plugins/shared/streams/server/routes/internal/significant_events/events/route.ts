@@ -16,8 +16,8 @@ import {
 } from '@kbn/streams-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { attachInvestigationToEvent } from '../../../../lib/sig_events/events/attach_investigation';
-import { triggerInvestigationWorkflow } from '../../../../lib/sig_events/events/trigger_investigation_workflow';
+import { attachInvestigationToEvent } from '../../../../lib/significant_events/events/attach_investigation';
+import { triggerInvestigationWorkflow } from '../../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';

@@ -155,29 +155,6 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-<<<<<<< HEAD:x-pack/platform/plugins/shared/streams/server/lib/significant_events/events/attach_investigation.test.ts
-  it('preserves existing investigation entries when appending a new one', async () => {
-    const first = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const existing = createEvent({ event_id: 'event-1', investigations: [first] });
-    const { client, dataStreamClient } = createEventClient([existing]);
-
-    const second = createInvestigation({ workflow_execution_id: 'exec-2' });
-    await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'event-1',
-      investigation: second,
-    });
-
-    const [[callArg]] = dataStreamClient.create.mock.calls;
-    const written: SignificantEvent = callArg.documents[0];
-
-    expect(written.investigations).toHaveLength(2);
-    expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
-    expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
-  });
-
-=======
->>>>>>> 446e735fb8c9 (fixup! fixup! [Investigation] Attach investigation results back to significant events):x-pack/platform/plugins/shared/streams/server/lib/sig_events/events/attach_investigation.test.ts
   it('carries forward the previous_event_id lineage', async () => {
     const existing = createEvent({ event_id: 'event-3', previous_event_id: 'event-2' });
     const { client } = createEventClient([existing]);

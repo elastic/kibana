@@ -17,7 +17,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { StreamsServer } from '../../../types';
-import { createSigEventsAvailability } from '../sig_events_availability';
+import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { attachEventInvestigationToolHandler } from './handler';
 
 export const STREAMS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
@@ -86,7 +86,7 @@ export const createEventInvestigationAttachTool = ({
     `,
     schema: eventInvestigationAttachSchema,
     tags: ['streams', 'significant_events'],
-    availability: createSigEventsAvailability({ server, logger }),
+    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
       try {

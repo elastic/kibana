@@ -6,8 +6,8 @@
  */
 
 import type { SigEventInvestigationStatus } from '@kbn/streams-schema';
-import { attachInvestigationToEvent } from '../../../lib/sig_events/events/attach_investigation';
-import type { EventClient } from '../../../lib/sig_events/events';
+import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
+import type { EventClient } from '../../../lib/significant_events/events';
 
 export const attachEventInvestigationToolHandler = async ({
   eventClient,
