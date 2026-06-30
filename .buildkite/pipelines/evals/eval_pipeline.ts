@@ -124,11 +124,13 @@ function buildEvalsYaml({
   resolveModelGroups,
   evaluationConnectorId,
   hasEisJudge,
+  isPrBuild,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
+  isPrBuild: boolean;
 }): string {
   const suiteSteps = selectedSuites
     .map((suite) => {
@@ -180,6 +182,85 @@ function buildEvalsYaml({
     })
     .join('\n');
 
+  const suiteIds = selectedSuites.map((s) => s.id).join(',');
+  const suiteStepKeys = selectedSuites.map((s) => `kbn-evals-${normalizeBuildkiteKey(s.id)}`);
+
+  const postCompareStep = isPrBuild
+    ? [
+        `      - label: 'LLM Evals: Post Comparison'`,
+        `        key: kbn-evals-post-comparison`,
+        `        command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh`,
+        `        env:`,
+        `          KBN_EVALS: '1'`,
+        `          EVAL_SUITE_IDS: '${suiteIds}'`,
+        `        depends_on:`,
+        ...suiteStepKeys.map((k) => `          - ${k}`),
+        `        allow_dependency_failure: true`,
+        `        timeout_in_minutes: 10`,
+        `        agents:`,
+        `          image: family/kibana-ubuntu-2404`,
+        `          imageProject: elastic-images-prod`,
+        `          provider: gcp`,
+        `          machineType: n2-standard-2`,
+        `          preemptible: true`,
+      ].join('\n')
+    : null;
+
+  const prBuildId = process.env.BUILDKITE_BUILD_ID ?? '';
+  const prNumber = process.env.BUILDKITE_PULL_REQUEST ?? '';
+
+  // Block + trigger steps live OUTSIDE the eval group so the group itself
+  // completes cleanly and doesn't cause a "blocked" state on the GitHub check.
+  const refreshBlockStep = isPrBuild
+    ? [
+        `  - block: 'LLM Evals: Refresh Baseline'`,
+        `    key: kbn-evals-refresh-block`,
+        `    blocked_state: passed`,
+        `    depends_on:`,
+        `      - kbn-evals-post-comparison`,
+        `    allow_dependency_failure: true`,
+      ].join('\n')
+    : null;
+
+  const refreshTriggerSteps = isPrBuild
+    ? selectedSuites.map((suite) => {
+        const triggerKey = `kbn-evals-refresh-${normalizeBuildkiteKey(suite.id)}`;
+        const suiteModelGroups = resolveModelGroups(suite);
+        const includeEisModels =
+          hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
+        const triggerEnvLines: string[] = [
+          `        EVAL_SUITE_ID: '${suite.id}'`,
+          `        EVAL_SUITE_IDS: '${suite.id}'`,
+          `        FRESH_BASELINE_PR_EXPERIMENT_ID: 'bk-${prBuildId}'`,
+          `        GITHUB_PR_NUMBER: '${prNumber}'`,
+        ];
+        if (evaluationConnectorId) {
+          triggerEnvLines.push(`        EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`);
+        }
+        if (includeEisModels) {
+          triggerEnvLines.push(`        EVAL_INCLUDE_EIS_MODELS: '1'`);
+        }
+        if (suiteModelGroups.length > 0) {
+          triggerEnvLines.push(`        EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`);
+        }
+        if (suite.serverConfigSet) {
+          triggerEnvLines.push(`        EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`);
+        }
+        return [
+          `  - trigger: kibana-evals-on-demand`,
+          `    label: 'LLM Evals: Refresh ${suite.name || suite.id}'`,
+          `    key: ${triggerKey}`,
+          `    depends_on:`,
+          `      - kbn-evals-refresh-block`,
+          `    build:`,
+          `      branch: main`,
+          `      message: 'Fresh baseline for PR #${prNumber}: ${suite.id}'`,
+          `      env:`,
+          ...triggerEnvLines,
+        ].join('\n');
+      })
+    : [];
+
   return [
     // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
     // under the single top-level `steps:` key. This must follow that convention.
@@ -189,6 +270,11 @@ function buildEvalsYaml({
     `      - build`,
     `    steps:`,
     suiteSteps,
+    ...(postCompareStep ? [postCompareStep] : []),
+    // Block + trigger steps are top-level (outside the group) so the group
+    // completes independently and reports a clean status to GitHub.
+    ...(refreshBlockStep ? [refreshBlockStep] : []),
+    ...refreshTriggerSteps,
   ].join('\n');
 }
 
@@ -269,10 +355,14 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
 
+  const isPrBuild =
+    !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+
   return buildEvalsYaml({
     selectedSuites: runnableSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,
+    isPrBuild,
   });
 }

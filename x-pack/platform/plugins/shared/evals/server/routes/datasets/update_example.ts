@@ -139,10 +139,11 @@ export const registerUpdateExampleRoute = ({
             });
           }
 
-          logger.error(`Failed to update evaluation dataset example: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to update evaluation dataset example: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to update evaluation dataset example' },
+            body: { message: `Failed to update evaluation dataset example: ${errorMessage}` },
           });
         }
       }
