@@ -148,10 +148,10 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
   );
 
   apiTest(
-    'authorization - returns 403 if the user does not have permission to update',
+    'authorization - returns 403 if the user does not have permission to create through PUT',
     async ({ apiClient }) => {
       const id = 'links-item-for-403-test';
-
+      // links panel does not exist with this ID so will go through create path
       const response = await apiClient.put(`${LINKS_API_PATH}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
@@ -163,6 +163,30 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
 
       expect(response).toHaveStatusCode(403);
       expect(response.body.message).toBe('Unable to create links');
+    }
+  );
+
+  apiTest(
+    'authorization - returns 403 if the user does not have permission to update',
+    async ({ apiClient }) => {
+      // create the links panel so that we go through the update path
+      const created = await apiClient.post(LINKS_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: MINIMAL_LINKS_BODY,
+        responseType: 'json',
+      });
+      // update the links panel library item
+      const response = await apiClient.put(`${LINKS_API_PATH}/${created.body.id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: MINIMAL_LINKS_BODY,
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to update links');
     }
   );
 });

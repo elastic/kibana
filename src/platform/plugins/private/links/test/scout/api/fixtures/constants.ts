@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PUBLIC_API_VERSION } from '../../../../common/constants';
+
 /** The base API path for links endpoints (no leading slash for apiClient). */
 export const LINKS_API_PATH = 'api/links';
-export const LINKS_API_VERSION = '2023-10-31';
 
 /** Common headers for Links API requests */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': LINKS_API_VERSION,
+  'elastic-api-version': PUBLIC_API_VERSION,
 } as const;
 
 /** Minimal valid external link object */
