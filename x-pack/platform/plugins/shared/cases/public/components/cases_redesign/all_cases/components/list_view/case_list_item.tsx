@@ -47,19 +47,9 @@ export const CaseListItem: React.FC<{
 
   const caseUrl = getCaseViewUrl({ detailName: theCase.id });
 
-  const handleCardClick = useCallback(
-    (e: React.MouseEvent | React.KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('button')) {
-        if ('button' in e) {
-          e.preventDefault();
-        }
-        return;
-      }
-      if ('key' in e && e.key !== 'Enter' && e.key !== ' ') {
-        return;
-      }
-      if ('button' in e && (e.button === 1 || e.metaKey || e.ctrlKey)) {
+  const handleLinkClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button === 1 || e.metaKey || e.ctrlKey) {
         return;
       }
       e.preventDefault();
@@ -70,11 +60,21 @@ export const CaseListItem: React.FC<{
 
   const styles = useMemo(
     () => ({
-      mainFlexGroup: css`
-        height: 100%;
+      panel: css`
+        position: relative;
+        isolation: isolate;
+        min-height: ${LIST_ITEM_HEIGHT}px;
+        border-radius: ${euiTheme.border.radius.medium};
+        transition: background-color 150ms ease-in-out;
+
+        &:hover {
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        }
       `,
-      cardLink: css`
+      stretchedLink: css`
         display: block;
+        flex: 1;
+        min-width: 0;
         text-decoration: none;
         color: inherit;
 
@@ -83,16 +83,16 @@ export const CaseListItem: React.FC<{
           text-decoration: none;
           color: inherit;
         }
-      `,
-      panel: css`
-        min-height: ${LIST_ITEM_HEIGHT}px;
-        border-radius: ${euiTheme.border.radius.medium};
-        transition: background-color 150ms ease-in-out;
-        cursor: pointer;
 
-        &:hover {
-          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          cursor: pointer;
         }
+      `,
+      actions: css`
+        position: relative;
       `,
       title: css`
         font-size: ${euiTheme.size.base};
@@ -120,29 +120,22 @@ export const CaseListItem: React.FC<{
   const reporterName = theCase.createdBy.fullName ?? theCase.createdBy.username ?? i18n.UNKNOWN;
 
   return (
-    <EuiLink
-      href={caseUrl}
-      onClick={handleCardClick}
-      onKeyDown={handleCardClick}
-      css={styles.cardLink}
-      aria-label={CASE_DETAILS_LINK_ARIA(theCase.title)}
-      data-test-subj={`cases-list-item-clickable-${theCase.id}`}
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj={`cases-list-item-${theCase.id}`}
+      css={styles.panel}
     >
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="m"
-        data-test-subj={`cases-list-item-${theCase.id}`}
-        css={styles.panel}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          wrap={false}
-          css={styles.mainFlexGroup}
-        >
-          <EuiFlexItem grow>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        <EuiFlexItem grow>
+          <EuiLink
+            href={caseUrl}
+            onClick={handleLinkClick}
+            css={styles.stretchedLink}
+            aria-label={CASE_DETAILS_LINK_ARIA(theCase.title)}
+            data-test-subj={`cases-list-item-clickable-${theCase.id}`}
+          >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
               {theCase.incrementalId != null && (
                 <EuiFlexItem grow={false}>
@@ -240,27 +233,27 @@ export const CaseListItem: React.FC<{
               )}
             </EuiFlexGroup>
             <ListItemOptionalFields theCase={theCase} selectedFields={selectedFields} />
-          </EuiFlexItem>
+          </EuiLink>
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color={euiTheme.colors.backgroundLightText}
-                  iconType="comment"
-                  data-test-subj="cases-list-item-comments-badge"
-                >
-                  {String(theCase.totalComment)}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ActionColumn theCase={theCase} disableActions={disableActions} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiLink>
+        <EuiFlexItem grow={false} css={styles.actions}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color={euiTheme.colors.backgroundLightText}
+                iconType="comment"
+                data-test-subj="cases-list-item-comments-badge"
+              >
+                {String(theCase.totalComment)}
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ActionColumn theCase={theCase} disableActions={disableActions} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 });
 

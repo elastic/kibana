@@ -180,7 +180,7 @@ describe('CaseListItem', () => {
     expect(screen.getByTestId('mock-action-column')).toBeInTheDocument();
   });
 
-  it('renders as a real anchor with href and aria-label', () => {
+  it('renders the link with href and aria-label inside the card', () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
     const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
@@ -189,7 +189,16 @@ describe('CaseListItem', () => {
     expect(link).toHaveAttribute('aria-label', `click to visit case with title ${mockCase.title}`);
   });
 
-  it('navigates to case view when the card is clicked', async () => {
+  it('renders the action button as a sibling outside the link', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    const actionButton = screen.getByTestId('mock-action-column');
+
+    expect(link.contains(actionButton)).toBe(false);
+  });
+
+  it('navigates to case view when the link content is clicked', async () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
     await userEvent.click(screen.getByTestId('cases-list-item-reporter'));
