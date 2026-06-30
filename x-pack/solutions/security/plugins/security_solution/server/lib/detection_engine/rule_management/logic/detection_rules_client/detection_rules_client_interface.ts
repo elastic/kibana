@@ -135,6 +135,6 @@ export interface BulkCreatePrebuiltRulesResultItem {
 }
 
 export interface BulkCreatePrebuiltRulesResult {
-  results: Array<{ result: BulkCreatePrebuiltRulesResultItem }>;
+  results: BulkCreatePrebuiltRulesResultItem[];
   errors: Array<{ item: PrebuiltRuleAsset; error: Error }>;
 }

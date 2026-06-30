@@ -112,7 +112,7 @@ export const performRuleInstallationHandler = async (
     const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: ruleAssets,
     });
-    installedRules.push(...results.map(({ result }) => result));
+    installedRules.push(...results);
     ruleErrors.push(...errors);
     logger.debug(
       `bulkCreatePrebuiltRules: ${results.length} created, ${errors.length} failed out of ${ruleAssets.length} total`

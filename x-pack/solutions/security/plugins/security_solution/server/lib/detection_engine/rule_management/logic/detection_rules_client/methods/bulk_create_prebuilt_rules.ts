@@ -102,7 +102,7 @@ export const bulkCreatePrebuiltRules = async ({
     for (const id of successfulIds) {
       const asset = itemById.get(id);
       if (asset) {
-        results.push({ result: { id, rule_id: asset.rule_id, version: asset.version } });
+        results.push({ id, rule_id: asset.rule_id, version: asset.version });
       }
     }
 

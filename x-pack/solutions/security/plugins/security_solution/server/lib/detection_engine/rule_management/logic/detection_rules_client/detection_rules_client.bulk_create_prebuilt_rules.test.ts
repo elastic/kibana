@@ -118,11 +118,9 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     expect(result.results).toEqual([
       {
-        result: {
-          id: preAssignedId,
-          rule_id: 'my-rule',
-          version: 3,
-        },
+        id: preAssignedId,
+        rule_id: 'my-rule',
+        version: 3,
       },
     ]);
     expect(result.errors).toEqual([]);
