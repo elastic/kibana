@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent, SignificantEventInvestigationStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEvent,
+  SignificantEventInvestigationStatus,
+} from '@kbn/significant-events-schema';
 
 export const INVESTIGATION_STATUS_COLORS: Record<SignificantEventInvestigationStatus, string> = {
   pending: 'warning',
