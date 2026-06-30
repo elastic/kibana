@@ -75,7 +75,7 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.clearConfirmation"
-            defaultMessage="This will delete all Security Entity store records. Source data, Entity risk scores, and Asset criticality assignments are unaffected by this action. This operation cannot be undone."
+            defaultMessage="This will delete all Security Entity store records and entity relationship history. Source data, Entity risk scores, and Asset criticality assignments are unaffected by this action. This operation cannot be undone."
           />
         </EuiConfirmModal>
       )}
