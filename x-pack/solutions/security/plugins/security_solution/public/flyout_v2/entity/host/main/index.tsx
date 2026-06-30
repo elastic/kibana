@@ -399,6 +399,7 @@ export const Host: FC<HostProps> = memo(function Host({
             // TODO: remove this prop (and `enableGraphAndResolutionNavigation` in content.tsx) once
             // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
             enableGraphAndResolutionNavigation={false}
+            hideHeaderIcons
           />
         )}
       </EuiFlyoutBody>

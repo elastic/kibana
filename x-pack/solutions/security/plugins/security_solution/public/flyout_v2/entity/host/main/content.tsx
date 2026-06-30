@@ -66,6 +66,8 @@ export interface ContentProps {
    * it sets this to `false` to hide the (otherwise no-op) Show-graph icon and Resolution-group link.
    */
   enableGraphAndResolutionNavigation?: boolean;
+  /** When true, hides the chevron icons in the risk summary and alerts section headers. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }
 
 /**
@@ -87,6 +89,7 @@ export const Content = ({
   entityStoreEntityId,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
+  hideHeaderIcons = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
@@ -124,6 +127,7 @@ export const Content = ({
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
+              hideHeaderIcon={hideHeaderIcons}
             />
             <EuiHorizontalRule />
           </>
@@ -175,6 +179,7 @@ export const Content = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
+        hideHeaderIcons={hideHeaderIcons}
       />
       <ObservedDataSection
         entityType={EntityType.host}
