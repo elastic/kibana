@@ -151,7 +151,7 @@
       "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:nightshift-context-and-research-team"],
+      "addLabels": ["Team:nightshift-context-and-research"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
