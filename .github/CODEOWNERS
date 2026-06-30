@@ -15,7 +15,7 @@ x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant-default-llm-setting @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
-src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
+src/platform/plugins/shared/ai_assistant_management/selection @elastic/nightshift-context-and-research-team
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
@@ -381,7 +381,7 @@ x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
-x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+x-pack/platform/plugins/private/data_usage @elastic/nightshift-context-and-research-team @elastic/security-solution
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
@@ -563,7 +563,7 @@ src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
-x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
@@ -616,7 +616,7 @@ x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
-packages/kbn-lock-manager @elastic/obs-ai-assistant
+packages/kbn-lock-manager @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-kbn-client @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
@@ -697,11 +697,11 @@ x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
-x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
-x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
-x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
+x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
@@ -1021,7 +1021,7 @@ x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
-src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/nightshift-context-and-research-team
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
 x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
@@ -1049,7 +1049,7 @@ src/platform/packages/shared/kbn-timerange @elastic/obs-onboarding-team
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
-src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-tracing-config @elastic/kibana-core
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
@@ -1338,10 +1338,10 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ### Observability Plugins
 
 # Observability AI Assistant
-/x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-assistant
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/nightshift-context-and-research-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/nightshift-context-and-research-team
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-onboarding-team as codeowner of the plugin manifest without requiring a review for all the other code changes
@@ -1937,7 +1937,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # AppEx AI Infra
-/x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 /x-pack/platform/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
@@ -2402,23 +2402,23 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandabl
 
 ## Generative AI owner connectors
 # OpenAI
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
 # Bedrock
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
 
 # Gemini
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/nightshift-context-and-research-team @elastic/appex-ai-infra
 
 # Inference API
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
-/x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/nightshift-context-and-research-team
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/nightshift-context-and-research-team
+/x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/nightshift-context-and-research-team
 
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
