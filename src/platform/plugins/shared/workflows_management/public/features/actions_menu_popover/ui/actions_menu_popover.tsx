@@ -7,14 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiPopoverProps } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiPortal } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useEffect } from 'react';
 import { ActionsMenu } from './actions_menu';
 import type { ActionsMenuProps } from './actions_menu';
 
-interface ActionsMenuPopoverProps extends EuiPopoverProps, ActionsMenuProps {}
+interface ActionsMenuPopoverProps extends ActionsMenuProps {
+  isOpen: boolean;
+  closePopover: () => void;
+}
+
+const backdropCss = css({
+  position: 'fixed',
+  inset: 0,
+  zIndex: 2000,
+});
+
+const panelCss = css({
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 2001,
+  width: '1085px',
+  overflow: 'hidden',
+});
 
 export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onActionSelected,
@@ -23,29 +41,30 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onCommandSelected,
   onJumpToStep,
   closePopover,
-  ...props
+  isOpen,
 }: ActionsMenuPopoverProps) {
+  useEffect(() => {
+    if (isOpen) {
+      const el = document.querySelector("[name='actions-menu-search']") as HTMLElement | null;
+      el?.focus();
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
   return (
-    <EuiPopover
-      panelPaddingSize="none"
-      aria-label={i18n.translate('workflows.actionsMenu.modalTitle', {
-        defaultMessage: 'Actions menu',
-      })}
-      hasArrow={false}
-      display="block"
-      initialFocus="[name='actions-menu-search']"
-      panelStyle={{ width: '1085px', maxWidth: 'none', maxHeight: 'none' }}
-      closePopover={closePopover}
-      {...props}
-    >
-      <ActionsMenu
-        onActionSelected={onActionSelected}
-        commands={commands}
-        jumpToStepEntries={jumpToStepEntries}
-        onCommandSelected={onCommandSelected}
-        onJumpToStep={onJumpToStep}
-        onClose={closePopover}
-      />
-    </EuiPopover>
+    <EuiPortal>
+      <div css={backdropCss} onClick={closePopover} />
+      <EuiPanel paddingSize="none" hasShadow css={panelCss}>
+        <ActionsMenu
+          onActionSelected={onActionSelected}
+          commands={commands}
+          jumpToStepEntries={jumpToStepEntries}
+          onCommandSelected={onCommandSelected}
+          onJumpToStep={onJumpToStep}
+          onClose={closePopover}
+        />
+      </EuiPanel>
+    </EuiPortal>
   );
 });
