@@ -107,6 +107,7 @@ export const DeleteAgentlessPolicyRequestSchema = {
   }),
   params: schema.object({
     policyId: schema.string({
+      maxLength: 256,
       meta: {
         description: 'The ID of the policy to delete.',
       },
@@ -201,6 +202,7 @@ export type GetBulkAgentlessPolicyThroughputResponse = TypeOf<
 export const GetAgentlessPolicyRequestSchema = {
   params: schema.object({
     policyId: schema.string({
+      maxLength: 256,
       meta: {
         description: 'The ID of the agentless policy to retrieve.',
       },
@@ -226,6 +228,7 @@ export const ListAgentlessPoliciesRequestQuerySchema = schema.object({
   ),
   sortField: schema.maybe(
     schema.string({
+      maxLength: 256,
       meta: { description: 'Field to sort results by. Defaults to `updated_at`.' },
     })
   ),
@@ -236,6 +239,7 @@ export const ListAgentlessPoliciesRequestQuerySchema = schema.object({
   ),
   kuery: schema.maybe(
     schema.string({
+      maxLength: 4096,
       meta: { description: 'A KQL query string to filter results.' },
     })
   ),

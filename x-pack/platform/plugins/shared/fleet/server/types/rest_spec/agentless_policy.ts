@@ -90,6 +90,7 @@ export const ListAgentlessPoliciesRequestSchema = {
   query: ListAgentlessPoliciesRequestQuerySchema.extends({
     kuery: schema.maybe(
       schema.string({
+        maxLength: 4096,
         meta: {
           description: `A KQL query string to filter results. Filtering is restricted to the following fields: ${ALLOWED_FILTER_FIELDS_LIST}.`,
         },
