@@ -45,6 +45,7 @@ describe('getDefaultAppState', () => {
     const prevAppState: DefaultAppStateExtension = {
       hideChart: true,
       hideTable: false,
+      hideSidebar: false,
     };
 
     const appState = createGetDefaultAppState(prevAppState)(params);
@@ -52,6 +53,7 @@ describe('getDefaultAppState', () => {
     expect(appState).toEqual({
       hideChart: false,
       hideTable: true,
+      hideSidebar: true,
     });
   });
 });
