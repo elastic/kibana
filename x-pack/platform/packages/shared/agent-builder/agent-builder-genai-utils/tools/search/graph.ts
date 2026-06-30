@@ -11,7 +11,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createToolCallMessage, extractTextContent, generateFakeToolCallId } from '../../langchain';
@@ -61,35 +61,40 @@ const isPatternTargetEnabled = (state: StateType): state is StateType & { target
       state.targetPattern !== '*'
   );
 
-export const createSearchToolGraph = ({
-  model,
+export const createSearchToolGraph = async ({
+  modelProvider,
   esClient,
   logger,
   events,
   topSnippetsConfig,
+  includeDatasets = false,
 }: {
-  model: ScopedModel;
+  modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeDatasets?: boolean;
 }) => {
+  const defaultModel = await modelProvider.getDefaultModel();
+
   const getTools = (state: StateType) => {
     const relevanceTool = createRelevanceSearchTool({
-      model,
+      model: defaultModel,
       esClient,
       events,
       logger,
       topSnippetsConfig,
     });
     const nlSearchTool = createNaturalLanguageSearchTool({
-      model,
+      modelProvider,
       esClient,
       events,
       logger,
       rowLimit: state.rowLimit,
       customInstructions: state.customInstructions,
       timeRange: state.timeRange,
+      includeDatasets,
     });
     const noMatchTool = createNoMatchingResourceTool();
     return [relevanceTool, nlSearchTool, noMatchTool];
@@ -103,10 +108,14 @@ export const createSearchToolGraph = ({
         pattern: state.targetPattern,
         excludeIndicesRepresentedAsDatastream: true,
         excludeIndicesRepresentedAsAlias: false,
+        includeDatasets,
         esClient,
       });
       const matchedResourceCount =
-        sources.indices.length + sources.aliases.length + sources.data_streams.length;
+        sources.indices.length +
+        sources.aliases.length +
+        sources.data_streams.length +
+        sources.datasets.length;
 
       if (matchedResourceCount === 0) {
         return { error: `No resources found for pattern "${state.targetPattern}"` };
@@ -128,6 +137,7 @@ export const createSearchToolGraph = ({
 
     const resources = await gatherResourceDescriptors({
       indexPattern: state.targetPattern ?? '*',
+      includeDatasets,
       esClient,
     });
 
@@ -136,7 +146,7 @@ export const createSearchToolGraph = ({
     }
 
     const tools = getTools(state);
-    const searchModel = model.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
+    const searchModel = defaultModel.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
       tags: ['agent-builder-search-tool'],
     });
 
