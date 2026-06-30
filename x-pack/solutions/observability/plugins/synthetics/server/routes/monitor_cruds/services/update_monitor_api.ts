@@ -61,7 +61,6 @@ import {
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils/secrets';
-import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 
 export type UpdateMonitorErrorCode =
   | 'not_found'
@@ -120,16 +119,9 @@ export class UpdateMonitorAPI {
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
 
-    /*
-     * Fetched once per `execute()` to avoid an SO read per monitor inside the
-     * per-id loop. Skipped entirely if no patch can touch private locations —
-     * most patches (e.g. `{ enabled: false }`) won't.
-     */
-    const allPrivateLocations = await this.maybeLoadPrivateLocations(updates, decryptedMonitors);
-
     for (const decryptedMonitor of decryptedMonitors) {
       const patch = patchById.get(decryptedMonitor.id) ?? {};
-      await this.processMonitor(decryptedMonitor, patch, allPrivateLocations);
+      await this.processMonitor(decryptedMonitor, patch);
     }
 
     return this.result;
@@ -169,8 +161,7 @@ export class UpdateMonitorAPI {
 
   private async processMonitor(
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
-    patch: Partial<EncryptedSyntheticsMonitor>,
-    allPrivateLocations: SyntheticsPrivateLocations
+    patch: Partial<EncryptedSyntheticsMonitor>
   ) {
     const monitorId = decryptedMonitor.id;
 
@@ -241,9 +232,15 @@ export class UpdateMonitorAPI {
       return;
     }
 
+    /*
+     * `normalizeMonitor` already resolved (and cached on `editMonitorAPI`) the
+     * private locations covering this monitor's spaces — same fetch the
+     * single-monitor PUT relies on. A public-only monitor leaves it `[]`, which
+     * `checkPrivateLocationSpaces` short-circuits.
+     */
     const plSpaceError = this.checkPrivateLocationSpaces(
       decodedMonitor,
-      editMonitorAPI.allPrivateLocations ?? allPrivateLocations
+      editMonitorAPI.allPrivateLocations ?? []
     );
     if (plSpaceError) {
       this.result.perIdErrors[monitorId] = plSpaceError;
@@ -411,53 +408,6 @@ export class UpdateMonitorAPI {
       this.spacePermissionCache.set(key, cached);
     }
     return cached;
-  }
-
-  /**
-   * Pre-fetch the private location SOs only when at least one patch in the
-   * batch could plausibly affect private-location-space coverage: either it
-   * references `locations` directly, or it changes the spaces the monitor is
-   * shared to (because that broadens the set of spaces the existing private
-   * locations must already cover).
-   *
-   * Uses the internal repository over the union of the request space, each
-   * monitor's current `KIBANA_SPACES`, and each patch's `KIBANA_SPACES`, so
-   * this validation fetch sees the same private locations the sync step
-   * (`loadPrivateLocationsForSurvivors`) and the single-monitor PUT
-   * (`add_monitor_api.normalizeMonitor`) see. The request-scoped client with
-   * no namespace expansion would only see locations in the request space and
-   * could wrongly reject a legitimate multi-space patch.
-   */
-  private async maybeLoadPrivateLocations(
-    updates: MonitorBulkUpdate[],
-    decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>
-  ): Promise<SyntheticsPrivateLocations> {
-    const touchesLocationsOrSpaces = updates.some(
-      ({ attributes }) =>
-        attributes[ConfigKey.LOCATIONS] !== undefined ||
-        attributes[ConfigKey.KIBANA_SPACES] !== undefined
-    );
-    if (!touchesLocationsOrSpaces) {
-      return [];
-    }
-
-    const { server, spaceId } = this.routeContext;
-    const namespaces = new Set<string>([spaceId]);
-    for (const monitor of decryptedMonitors) {
-      const prevSpaces = monitor.attributes[ConfigKey.KIBANA_SPACES] ?? [];
-      for (const s of prevSpaces) {
-        if (s) namespaces.add(s);
-      }
-    }
-    for (const { attributes } of updates) {
-      const patchSpaces = attributes[ConfigKey.KIBANA_SPACES] ?? [];
-      for (const s of patchSpaces) {
-        if (s) namespaces.add(s);
-      }
-    }
-
-    const internalClient = server.coreStart.savedObjects.createInternalRepository();
-    return getPrivateLocationsForNamespaces(internalClient, [...namespaces]);
   }
 
   private checkPrivateLocationSpaces(

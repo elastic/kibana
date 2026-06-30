@@ -609,7 +609,9 @@ describe('UpdateMonitorAPI', () => {
   });
 
   describe('private locations fetch', () => {
-    it('skips the SO read when the patch does not touch locations or spaces', async () => {
+    it('does not fetch private locations for a public-only monitor', async () => {
+      // A public-location monitor has no private locations to validate, so the
+      // per-monitor `normalizeMonitor` resolution must not hit the SO store.
       const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
       );
@@ -623,61 +625,42 @@ describe('UpdateMonitorAPI', () => {
       expect(getPrivateLocationsForNamespaces).not.toHaveBeenCalled();
     });
 
-    it('fetches once per execute when the patch touches locations', async () => {
-      const { getPrivateLocationsForNamespaces } = jest.requireMock(
-        '../../../synthetics_service/get_private_locations'
-      );
-
-      const { routeContext, mocks } = createMockRouteContext();
-      mocks.findDecryptedMonitors.mockResolvedValue([
-        mockDecryptedMonitor({ id: 'mon-1' }),
-        mockDecryptedMonitor({ id: 'mon-2' }),
-      ]);
-
-      const api = new UpdateMonitorAPI(routeContext);
-      await api.execute({
-        updates: updatesFor(['mon-1', 'mon-2'], {
-          locations: [{ id: 'us_central', label: 'US Central', isServiceManaged: true }],
-        }),
-      });
-
-      expect(getPrivateLocationsForNamespaces).toHaveBeenCalledTimes(1);
-    });
-
-    it('uses the internal repository and expands to monitor + patch spaces', async () => {
+    it('resolves private locations via the internal repo over the monitor spaces', async () => {
       /*
-       * Regression: the previous implementation used the request-scoped
-       * savedObjectsClient with no namespace expansion, so a multi-space patch
-       * could see fewer private locations than the sync step / single-PUT and
-       * wrongly report `forbidden`. The fetch must agree with
-       * `loadPrivateLocationsForSurvivors` in `update_monitor_bulk.ts` and
-       * `normalizeMonitor` in `add_monitor_api.ts`: internal repo +
-       * union(spaceId, every monitor's KIBANA_SPACES, every patch's
-       * KIBANA_SPACES).
+       * Parity with the single-monitor PUT: a monitor that has a private
+       * location resolves its private locations inside `normalizeMonitor`,
+       * which uses the internal repository and the union of the request space
+       * and the monitor's `KIBANA_SPACES`. There is no separate request-scoped
+       * batch fetch — that earlier pre-fetch was redundant because
+       * `normalizeMonitor` already performs (and caches) this lookup per
+       * monitor, just like `editSyntheticsMonitorRoute`.
        */
       const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
       );
+      getPrivateLocationsForNamespaces.mockResolvedValue([
+        { id: 'pl-1', label: 'PL', spaces: ['default', 'team-a'], isServiceManaged: false },
+      ]);
       const internalClient = { id: 'internal' };
       const { routeContext, mocks } = createMockRouteContext();
       mocks.createInternalRepository.mockReturnValue(internalClient);
       mocks.findDecryptedMonitors.mockResolvedValue([
         mockDecryptedMonitor({
-          id: 'mon-1',
-          attributes: { [ConfigKey.KIBANA_SPACES]: ['team-a'] },
+          attributes: {
+            locations: [{ id: 'pl-1', label: 'PL', isServiceManaged: false }],
+            [ConfigKey.KIBANA_SPACES]: ['team-a'],
+          },
         }),
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      await api.execute({
-        updates: updatesFor(['mon-1'], { [ConfigKey.KIBANA_SPACES]: ['team-b', 'team-c'] }),
-      });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
-      expect(mocks.createInternalRepository).toHaveBeenCalledTimes(1);
+      expect(result.survivors).toHaveLength(1);
       expect(getPrivateLocationsForNamespaces).toHaveBeenCalledTimes(1);
       const [client, namespaces] = getPrivateLocationsForNamespaces.mock.calls[0];
       expect(client).toBe(internalClient);
-      expect([...namespaces].sort()).toEqual(['default', 'team-a', 'team-b', 'team-c']);
+      expect([...namespaces].sort()).toEqual(['default', 'team-a']);
     });
   });
 
