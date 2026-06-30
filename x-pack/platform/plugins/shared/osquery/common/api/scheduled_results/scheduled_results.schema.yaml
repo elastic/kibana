@@ -191,20 +191,10 @@ paths:
         Export all result rows for a specific scheduled query execution as a
         downloadable file. The response is a streaming file attachment in the
         requested format.
-
-        This endpoint is gated behind the `exportResults` experimental feature
-        flag and must be enabled in `kibana.yml` before use:
-
-        ```yaml
-        xpack.osquery.enableExperimental:
-          - exportResults
-        ```
       operationId: OsqueryExportScheduledQueryResults
       x-codegen-enabled: true
-      x-labels: [ ]
-      # TODO: Uncomment when feature flag exportResults is set to true
-      #      x-labels: [ess]
-      #      x-state: Added in 9.5.0
+      x-labels: [ serverless, ess ]
+      x-state: Added in 9.5.0
       parameters:
         - name: scheduleId
           in: path
