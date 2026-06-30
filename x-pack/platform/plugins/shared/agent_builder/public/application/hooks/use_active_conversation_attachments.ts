@@ -6,24 +6,21 @@
  */
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import { getActiveAttachments } from '@kbn/agent-builder-common/attachments';
 import { useMemo } from 'react';
-import { mapAttachmentsForCart } from '../components/conversations/conversation_rounds/round_response/attachments/to_unknown_attachment_for_cart';
 import { useConversationContext } from '../context/conversation/conversation_context';
-import { upsertAttachmentsIntoList } from '../context/conversation/upsert_attachments_into_list';
+import { getMergedCartAttachments } from './get_merged_cart_attachments';
 import { useConversation } from './use_conversation';
 
 /**
- * Active conversation attachments for cart display — same merge as the cart badge count,
- * mapped to UnknownAttachment for UI definitions (label, icon, subtitle).
+ * Active conversation attachments for cart display — visible cart cards only,
+ * aligned with the attachment cart badge count.
  */
 export const useActiveConversationAttachments = (): UnknownAttachment[] => {
   const { attachments: pendingAttachments } = useConversationContext();
   const { conversation } = useConversation();
 
-  return useMemo(() => {
-    const activePersisted = getActiveAttachments(conversation?.attachments ?? []);
-    const merged = upsertAttachmentsIntoList(activePersisted, pendingAttachments ?? []);
-    return mapAttachmentsForCart(merged);
-  }, [conversation?.attachments, pendingAttachments]);
+  return useMemo(
+    () => getMergedCartAttachments(conversation?.attachments, pendingAttachments),
+    [conversation?.attachments, pendingAttachments]
+  );
 };
