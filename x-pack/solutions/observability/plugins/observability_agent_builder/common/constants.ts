@@ -21,3 +21,13 @@ export const OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID = 'observability.slo';
 export const OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID = 'observability.host';
 export const OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID = 'observability.transaction';
 export const OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID = 'observability.synthetics_monitor';
+
+// Conversation template IDs used by the Agent Builder Option B POC.
+export const OBSERVABILITY_INVESTIGATION_TEMPLATE_ID = 'observability-investigation-v1';
+export const OBSERVABILITY_INCIDENT_TEMPLATE_ID = 'observability-incident-v1';
+
+// Periodic updater for persisted investigation conversations.
+export const OBSERVABILITY_INVESTIGATION_UPDATE_TASK_TYPE =
+  'observability-agent-builder:investigation-state-updater';
+export const OBSERVABILITY_INVESTIGATION_UPDATE_TASK_ID =
+  'observability-agent-builder:investigation-state-updater';

@@ -13,9 +13,12 @@ import type {
   ReasoningStep,
   ToolCallStep,
   ToolCallWithResult,
+  AgentExecutionEvent,
+  ConversationRound,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  TimelineEventType,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
@@ -31,7 +34,15 @@ import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/to
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type {
+  ProcessedConversation,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './prepare_conversation';
+import {
+  isProcessedUserMessageEvent,
+  isProcessedAgentExecutionEvent,
+} from './prepare_conversation';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
@@ -49,7 +60,7 @@ export interface ConversationToLangchainOptions {
    */
   ignoreSteps?: boolean;
   /**
-   * Optional compaction summary to inject before the remaining rounds.
+   * Optional compaction summary to inject before the remaining events.
    * When provided, the summary is serialized and prepended as a
    * user/assistant message pair representing the compacted history.
    */
@@ -57,12 +68,12 @@ export interface ConversationToLangchainOptions {
 }
 
 /**
- * Converts a conversation to langchain format.
+ * Converts processed conversation events to langchain message format.
  *
- * When `resultTransformer` is provided, tool results from previous rounds
+ * When `resultTransformer` is provided, tool results from previous events
  * will be passed through the transformer function.
  */
-export const convertPreviousRounds = async ({
+export const convertPreviousEvents = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,
@@ -70,35 +81,75 @@ export const convertPreviousRounds = async ({
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
-  let rounds = conversation.previousRounds;
+  let events = conversation.previousEvents;
   let input = conversation.nextInput;
 
-  // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
-  // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
-  const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
-  if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
-    rounds = rounds.slice(0, rounds.length - 1);
-    input = lastRound.input;
+  // Need to ignore the last agent response if it's awaiting a prompt.
+  // The graph handles resuming the actions.
+  // We use the preceding user message's input as the "next" input
+  // (given the actual input will be the prompt response).
+  const lastAgentResponse = findLastAgentResponse(events);
+  if (lastAgentResponse?.status === ConversationRoundStatus.awaitingPrompt) {
+    // Find the preceding user message
+    const lastAgentIdx = events.lastIndexOf(lastAgentResponse);
+    const precedingUserMsg = findPrecedingUserMessage(events, lastAgentIdx);
+    if (precedingUserMsg) {
+      input = precedingUserMsg.processedInput;
+    }
+    // Strip the last agent response from events
+    events = events.slice(0, lastAgentIdx);
   }
 
-  // Inject compaction summary as a user/assistant exchange before remaining rounds
+  // Inject compaction summary as a user/assistant exchange before remaining events
   if (compactionSummary) {
     const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
     messages.push(createUserMessage('[Previous conversation context was compacted]'));
     messages.push(createAIMessage(summaryText));
   }
 
-  for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+  for (const event of events) {
+    if (isProcessedUserMessageEvent(event)) {
+      messages.push(formatProcessedInput({ input: event.processedInput }));
+    } else if (isProcessedAgentExecutionEvent(event)) {
+      messages.push(...(await agentResponseToLangchain(event, { resultTransformer, ignoreSteps })));
+    }
   }
 
-  messages.push(formatRoundInput({ input }));
+  messages.push(formatProcessedInput({ input }));
 
   return messages;
 };
 
+/** @deprecated Use convertPreviousEvents for event-based history. */
 export const roundToLangchain = async (
-  round: ProcessedConversationRound,
+  round: ConversationRound,
+  {
+    resultTransformer,
+    ignoreSteps = false,
+  }: { resultTransformer?: ToolCallResultTransformer; ignoreSteps?: boolean } = {}
+): Promise<BaseMessage[]> => {
+  const input: ProcessedRoundInput = {
+    message: round.input.message,
+    attachments: [],
+  };
+  const agentExecution: AgentExecutionEvent = {
+    ...round,
+    timestamp: round.started_at,
+    type: TimelineEventType.agentExecution,
+    agent_id: 'agent',
+  };
+
+  return [
+    formatProcessedInput({ input }),
+    ...(await agentResponseToLangchain(agentExecution, { resultTransformer, ignoreSteps })),
+  ];
+};
+
+/**
+ * Converts an AgentExecutionEvent to langchain messages (steps + response).
+ */
+export const agentResponseToLangchain = async (
+  agentResponse: AgentExecutionEvent,
   {
     resultTransformer,
     ignoreSteps = false,
@@ -106,21 +157,17 @@ export const roundToLangchain = async (
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
-  // user message
-  messages.push(formatRoundInput({ input: round.input }));
-
   // steps
   if (!ignoreSteps) {
-    const groups = groupToolCallSteps(round.steps);
-    const reasoningSteps = round.steps.filter(isReasoningStep);
+    const groups = groupToolCallSteps(agentResponse.steps);
+    const reasoningSteps = agentResponse.steps.filter(isReasoningStep);
 
     let groupIndex = 0;
-    for (const step of round.steps) {
+    for (const step of agentResponse.steps) {
       if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
-        // Other tool calls in the same group are handled by createGroupedToolCallMessages
         const group = groups[groupIndex];
         if (group && group[0] === step) {
           messages.push(
@@ -128,6 +175,7 @@ export const roundToLangchain = async (
           );
           groupIndex++;
         }
+        // Other tool calls in the same group are handled by createGroupedToolCallMessages
       } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
         // Render answered ask_user_question steps as a tool-call / tool-response pair.
         const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
@@ -147,12 +195,12 @@ export const roundToLangchain = async (
   }
 
   // assistant response
-  messages.push(formatAssistantResponse({ response: round.response }));
+  messages.push(formatAssistantResponse({ response: agentResponse.response }));
 
   return messages;
 };
 
-const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
+const formatProcessedInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
   const { message, attachments } = input;
 
   let content = message;
@@ -312,4 +360,31 @@ export const createToolCallMessages = async (
   });
 
   return [toolCallMessage, toolResultMessage];
+};
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const findLastAgentResponse = (
+  events: ProcessedTimelineEvent[]
+): AgentExecutionEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    if (isProcessedAgentExecutionEvent(events[i])) {
+      return events[i] as AgentExecutionEvent;
+    }
+  }
+  return undefined;
+};
+
+const findPrecedingUserMessage = (
+  events: ProcessedTimelineEvent[],
+  beforeIndex: number
+): ProcessedUserMessageEvent | undefined => {
+  for (let i = beforeIndex - 1; i >= 0; i--) {
+    if (isProcessedUserMessageEvent(events[i])) {
+      return events[i] as ProcessedUserMessageEvent;
+    }
+  }
+  return undefined;
 };

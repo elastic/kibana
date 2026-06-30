@@ -15,6 +15,7 @@
       "inference",
       "security",
       "ruleRegistry",
+      "taskManager",
       "dataViews",
       "metricsDataAccess",
       "inference",

@@ -29,6 +29,11 @@ export const fullWidthAndHeightStyles = css`
   height: 100%;
 `;
 
+export const templateDetailElementWidthStyles = css`
+  width: 100%;
+  max-width: none;
+`;
+
 export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   background: linear-gradient(
     180deg,

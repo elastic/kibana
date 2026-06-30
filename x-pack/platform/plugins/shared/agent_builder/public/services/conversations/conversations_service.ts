@@ -7,11 +7,15 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { ConversationMetadataUpdate } from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  PatchConversationResponse,
+  AppendConversationMessageResponse,
 } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
@@ -58,6 +62,38 @@ export class ConversationsService {
     );
   }
 
+  async patch({
+    conversationId,
+    ...update
+  }: { conversationId: string } & ConversationMetadataUpdate & { title?: string }) {
+    return await this.http.patch<PatchConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}`,
+      {
+        body: JSON.stringify(update),
+      }
+    );
+  }
+
+  async appendMessage({
+    conversationId,
+    message,
+    attachmentRefs,
+  }: {
+    conversationId: string;
+    message: string;
+    attachmentRefs?: AttachmentVersionRef[];
+  }) {
+    return await this.http.post<AppendConversationMessageResponse>(
+      `${publicApiPath}/conversations/${conversationId}/messages`,
+      {
+        body: JSON.stringify({
+          message,
+          ...(attachmentRefs !== undefined && { attachment_refs: attachmentRefs }),
+        }),
+      }
+    );
+  }
+
   async updateReadStatus({
     conversationId,
     read,
@@ -68,6 +104,16 @@ export class ConversationsService {
     return await this.http.post<MarkReadConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_mark_read`,
       { body: JSON.stringify({ read }) }
+    );
+  }
+
+  async createIncidentFromInvestigation({ conversationId }: { conversationId: string }) {
+    return await this.http.post<{
+      incidentConversation: Conversation;
+      investigationConversation: Conversation;
+      created: boolean;
+    }>(
+      `/internal/observability_agent_builder/investigation_conversations/${conversationId}/incident`
     );
   }
 }

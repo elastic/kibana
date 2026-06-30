@@ -127,6 +127,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               agentId={agentId}
               conversationId={conversation.id}
               title={conversation.title || conversation.id}
+              owner={conversation.user}
               isActive={isActive}
               routeConversationId={currentConversationId}
               showActionsMenu={!isStreaming}

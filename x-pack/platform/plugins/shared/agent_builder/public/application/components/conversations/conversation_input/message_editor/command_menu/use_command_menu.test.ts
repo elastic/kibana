@@ -7,6 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useCommandMenu } from './use_command_menu';
+import { CommandId } from './types';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
 jest.mock('../../../../../hooks/use_context_engine_enabled', () => ({
@@ -120,6 +121,19 @@ describe('useCommandMenuCommand', () => {
     mockGetTextBeforeCursor.mockReturnValue('/summarize');
 
     const { result } = renderHook(() => useCommandMenu({ enabled: false }));
+
+    act(() => {
+      result.current.checkInputForCommand(mockElement);
+    });
+    expect(result.current.match.isActive).toBe(false);
+  });
+
+  it('excludeCommandIds omits @ semantic knowledge so @agent stays plain text', () => {
+    mockGetTextBeforeCursor.mockReturnValue('@agent');
+
+    const { result } = renderHook(() =>
+      useCommandMenu({ excludeCommandIds: [CommandId.Sml] })
+    );
 
     act(() => {
       result.current.checkInputForCommand(mockElement);

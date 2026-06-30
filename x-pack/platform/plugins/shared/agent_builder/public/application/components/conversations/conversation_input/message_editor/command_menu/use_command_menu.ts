@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { CommandMatchResult } from './types';
+import { CommandId } from './types';
 import { matchCommand } from './command_matcher';
 import { useAvailableCommandDefinitions } from './command_definitions';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
@@ -23,6 +24,8 @@ interface CommandMenuState {
 interface UseCommandMenuOptions {
   /** Whether command detection is enabled. Defaults to true. */
   readonly enabled?: boolean;
+  /** Commands to omit from detection (e.g. SML `@` in collaborative mode for `@agent`). */
+  readonly excludeCommandIds?: readonly CommandId[];
 }
 
 const INACTIVE_MATCH: CommandMatchResult = {
@@ -37,8 +40,15 @@ const INACTIVE_MATCH: CommandMatchResult = {
  * user types. Check `match.isActive` to show/hide the command menu.
  */
 export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenuState => {
-  const { enabled = true } = options;
+  const { enabled = true, excludeCommandIds } = options;
   const definitions = useAvailableCommandDefinitions();
+  const activeDefinitions = useMemo(() => {
+    if (!excludeCommandIds?.length) {
+      return definitions;
+    }
+    const excluded = new Set(excludeCommandIds);
+    return definitions.filter((definition) => !excluded.has(definition.id));
+  }, [definitions, excludeCommandIds]);
 
   const [match, setMatch] = useState<CommandMatchResult>(INACTIVE_MATCH);
 
@@ -49,10 +59,10 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
         return;
       }
       const textBeforeCursor = getTextBeforeCursor(element);
-      const nextMatch = matchCommand(textBeforeCursor, definitions);
+      const nextMatch = matchCommand(textBeforeCursor, activeDefinitions);
       setMatch(nextMatch);
     },
-    [enabled, definitions]
+    [enabled, activeDefinitions]
   );
 
   const dismiss = useCallback(() => {

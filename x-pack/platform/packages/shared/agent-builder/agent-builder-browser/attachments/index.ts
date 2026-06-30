@@ -15,6 +15,7 @@ export type {
   GetHeaderParams,
   HeaderData,
   HeaderBadge,
+  AttachmentSourceLink,
   ActionButton,
   AttachmentPreviewState,
   AttachmentLifecycleParams,

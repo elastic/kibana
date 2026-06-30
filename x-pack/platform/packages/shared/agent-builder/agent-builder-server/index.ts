@@ -144,6 +144,10 @@ export type {
   PluginsStart,
   RuntimeStart,
   ReadOnlyConversationClient,
+  ConversationClient,
+  ConversationCreateRequest,
+  ConversationUpdateRequest,
+  AppendConversationMessageResult,
   ConversationsStart,
 } from './plugin_contract';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

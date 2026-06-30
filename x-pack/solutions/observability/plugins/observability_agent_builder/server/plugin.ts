@@ -27,6 +27,10 @@ import {
   observabilityParentFeature,
   observabilityAiInsightsInferenceFeatures,
 } from './inference_feature';
+import {
+  registerInvestigationConversationUpdateTask,
+  scheduleInvestigationConversationUpdateTask,
+} from './investigation_conversations/investigation_update_task';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -74,6 +78,12 @@ export class ObservabilityAgentBuilderPlugin
 
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 
+    registerInvestigationConversationUpdateTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    });
+
     if (plugins.searchInferenceEndpoints) {
       plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
 
@@ -104,8 +114,15 @@ export class ObservabilityAgentBuilderPlugin
 
   public start(
     _core: CoreStart,
-    _plugins: ObservabilityAgentBuilderPluginStartDependencies
+    plugins: ObservabilityAgentBuilderPluginStartDependencies
   ): ObservabilityAgentBuilderPluginStart {
+    scheduleInvestigationConversationUpdateTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.warn(`Error scheduling observability investigation updater task: ${error}`);
+    });
+
     return {};
   }
 

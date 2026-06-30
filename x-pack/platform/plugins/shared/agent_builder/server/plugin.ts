@@ -320,6 +320,9 @@ export class AgentBuilderPlugin
           return {
             get: client.get.bind(client),
             list: client.list.bind(client),
+            create: client.create.bind(client),
+            update: client.update.bind(client),
+            appendMessage: client.appendMessage.bind(client),
           };
         },
       },

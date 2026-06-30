@@ -8,6 +8,7 @@
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   isConversationCreatedEvent,
+  isConversationUpdatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isPromptRequestEvent,
@@ -133,6 +134,8 @@ export const subscribeToChatEvents = ({
       conversationActions.onRoundComplete(event.data.round);
     } else if (isConversationCreatedEvent(event)) {
       conversationActions.onConversationCreated({ title: event.data.title });
+    } else if (isConversationUpdatedEvent(event)) {
+      conversationActions.invalidateConversation();
     } else if (isThinkingCompleteEvent(event)) {
       conversationActions.setTimeToFirstToken({
         timeToFirstToken: event.data.time_to_first_token,
