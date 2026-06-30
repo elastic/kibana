@@ -16,6 +16,7 @@ import {
   createAgentBuilderError,
   isAgentNotFoundError,
   isAgentUnavailableError,
+  createAgentUnavailableError,
   createAgentNotFoundError,
   createHooksExecutionError,
   createWorkflowExecutionError,
@@ -164,14 +165,17 @@ describe('AgentBuilder errors', () => {
   });
 
   describe('isAgentUnavailableError', () => {
-    it('should return true for the matching agent unavailable error', () => {
-      const error = createBadRequestError('Agent test-agent is not available');
+    it('should return true for an agent unavailable error regardless of message', () => {
+      const error = createAgentUnavailableError({
+        agentId: 'test-agent',
+        customMessage: 'Custom unavailable message',
+      });
 
       expect(isAgentUnavailableError(error, 'test-agent')).toBe(true);
     });
 
-    it('should return false for a different agent unavailable error', () => {
-      const error = createBadRequestError('Agent other-agent is not available');
+    it('should return false for a bad request with the legacy agent unavailable message', () => {
+      const error = createBadRequestError('Agent test-agent is not available');
 
       expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
     });

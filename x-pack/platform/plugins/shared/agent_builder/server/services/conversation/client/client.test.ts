@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
+import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control/types';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
@@ -276,7 +276,7 @@ describe('ConversationClient', () => {
     });
 
     it('returns not found when the underlying agent is unavailable', async () => {
-      agentRegistry.get.mockRejectedValue(createBadRequestError('Agent agent-1 is not available'));
+      agentRegistry.get.mockRejectedValue(createAgentUnavailableError({ agentId: 'agent-1' }));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument()],
