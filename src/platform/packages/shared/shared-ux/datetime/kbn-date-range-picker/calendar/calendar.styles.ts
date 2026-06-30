@@ -10,23 +10,21 @@
 import { css } from '@emotion/react';
 import { useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
 
-/**
- * Fixed panel height for the calendar scroll area.
- * The value is something that doesn't produce a second scrollbar in the `PanelBody`.
- */
-const CALENDAR_HEIGHT = 394;
-
 export const useCalendarStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const container = css`
     position: relative;
-    height: ${CALENDAR_HEIGHT}px;
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    /* needed so the popover's dynamic height drives the scroll area (no fixed height) */
+    min-block-size: 0;
   `;
 
   const scroller = css`
-    height: 100%;
+    flex: 1 1 auto;
+    min-block-size: 0;
     padding-left: ${euiTheme.size.base};
     padding-right: ${euiTheme.size.base};
     ${useEuiOverflowScroll('y', true)}

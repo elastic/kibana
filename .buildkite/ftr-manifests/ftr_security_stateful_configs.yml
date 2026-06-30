@@ -101,7 +101,6 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_score_maintainer/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/ml_anomaly_detection_maintainer/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
@@ -156,7 +155,6 @@ enabled:
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_trial.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_basic.ts
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config.ts
-  - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/solutions/security/test/api_integration_basic/config.ts

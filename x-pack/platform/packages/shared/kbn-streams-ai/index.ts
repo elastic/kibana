@@ -25,10 +25,10 @@ export {
   type SimulationFeedback,
 } from './workflows/suggest_processing_pipeline';
 export {
-  generateSignificantEvents,
+  identifyKIQueries,
   DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
-} from './src/significant_events/generate_significant_events';
+} from './src/significant_events/identify_ki_queries';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
@@ -43,6 +43,14 @@ export {
   type IgnoredFeature,
 } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  CODE_ANALYSIS_PROVIDER_KEY,
+  codeAnalysisGenerator,
+} from './src/features/computed/code_analysis';
+export type {
+  ComputedFeatureProvider,
+  ComputedFeatureGeneratorOptions,
+} from './src/features/computed/types';
 
 export {
   searchKnowledgeIndicators,

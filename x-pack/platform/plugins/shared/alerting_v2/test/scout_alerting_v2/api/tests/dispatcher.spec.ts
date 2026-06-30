@@ -209,11 +209,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
 
     await apiServices.alertingV2.actionPolicies.upsert(SINGLE_RULE_POLICY_ID, {
-      name: 'Single-rule policy bound to rule-001',
+      name: 'Rule-scoped policy bound to rule-001',
       description: 'Must filter to its linked rule only',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      type: 'single_rule',
-      ruleId: 'rule-001',
+      matcher: 'rule.id: "rule-001"',
     });
 
     await apiServices.alertingV2.actionPolicies.disable(SINGLE_RULE_POLICY_ID);
@@ -1452,12 +1451,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'single_rule policy / dispatches only for the linked rule and skips unrelated rules',
+    'rule-scoped policy / dispatches only for the linked rule and skips unrelated rules',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.enable(SINGLE_RULE_POLICY_ID);
 
       await apiServices.alertingV2.ruleEvents.seed([
-        // Linked rule: matched by np-1 (catch-all) AND by the single-rule policy.
+        // Linked rule: matched by np-1 (catch-all) AND by the rule-scoped policy.
         buildAlertEvent({
           ruleId: 'rule-001',
           groupHash: 'rule-001-single-series',
@@ -1466,7 +1465,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: relativeTime(20),
         }),
-        // Unrelated rule: matched by np-1; the single-rule policy MUST NOT match.
+        // Unrelated rule: matched by np-1; the rule-scoped policy MUST NOT match.
         buildAlertEvent({
           ruleId: 'rule-002',
           groupHash: 'rule-002-single-series',
@@ -1490,7 +1489,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // rule-002 must produce exactly one fire (np-1 only). A second fire
-      // here would mean the single-rule filter leaked across rules.
+      // here would mean the rule-scoped matcher leaked across rules.
       const rule002Fires = await expectStableCount(apiServices, 1, {
         ruleId: 'rule-002',
         actionTypes: ['fire'],

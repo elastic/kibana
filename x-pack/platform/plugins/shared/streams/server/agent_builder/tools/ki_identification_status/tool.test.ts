@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
+import { SignificantEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
@@ -40,6 +40,7 @@ describe('createKiIdentificationStatusTool', () => {
     };
     const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
+      telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
 
     const tool = createKiIdentificationStatusTool({
@@ -59,7 +60,7 @@ describe('createKiIdentificationStatusTool', () => {
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
           stream_name: 'logs.nginx',
-          status: SigEventsWorkflowStatus.Completed,
+          status: SignificantEventsWorkflowStatus.Completed,
         })
       );
     }
