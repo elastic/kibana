@@ -32,15 +32,19 @@ export const AnomalyJobName: React.FC<AnomalyJobNameProps> = ({
 
   const handleClick = useCallback(async () => {
     if (!getUrl || !ml?.mlApi) return;
-    const result = await ml.mlApi.results.anomalySearch(
-      { size: 1, query: { ids: { values: [recordId] } } },
-      [jobId]
-    );
-    const record = result.hits.hits[0]?._source;
-    if (!record) return;
-    const url = await getUrl(record);
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    try {
+      const result = await ml.mlApi.results.anomalySearch(
+        { size: 1, query: { ids: { values: [recordId] } } },
+        [jobId]
+      );
+      const record = result.hits.hits[0]?._source;
+      if (!record) return;
+      const url = await getUrl(record);
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      // Failed to open anomaly in Single Metric Viewer
     }
   }, [getUrl, ml, jobId, recordId]);
 
