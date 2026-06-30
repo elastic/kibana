@@ -3508,7 +3508,7 @@ paths:
                     version_conflicts: 0
               schema:
                 additionalProperties: true
-                description: Elasticsearch update by query response.
+                description: Elasticsearch update by query response
                 type: object
           description: Successful response
         '400':
