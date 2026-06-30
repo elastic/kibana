@@ -7,13 +7,6 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-const baseConfig = createPlaywrightConfig({
+export default createPlaywrightConfig({
   testDir: './tests',
 });
-
-const config: ReturnType<typeof createPlaywrightConfig> = {
-  ...baseConfig,
-  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}_snapshots/{arg}_{projectName}{ext}',
-};
-
-export default config;

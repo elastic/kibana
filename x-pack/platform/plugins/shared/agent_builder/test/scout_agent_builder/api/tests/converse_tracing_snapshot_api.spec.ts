@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -212,28 +214,41 @@ apiTest.describe(
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
         // Wait for the spans to be indexed
-        await expect(async () => {
-          await esClient.indices.refresh({ index: TRACE_INDEX });
-          const traceResult = await esClient.search({
-            index: TRACE_INDEX,
-            sort: [{ '@timestamp': 'asc' }],
-            query: {
-              term: { 'attributes.gen_ai.conversation.id': conversationId },
+        await expect
+          .poll(
+            async () => {
+              await esClient.indices.refresh({ index: TRACE_INDEX });
+              const traceResult = await esClient.search({
+                index: TRACE_INDEX,
+                sort: [{ '@timestamp': 'asc' }],
+                query: {
+                  term: { 'attributes.gen_ai.conversation.id': conversationId },
+                },
+              });
+              hits = traceResult.hits.hits;
+              return hits.length;
             },
-          });
-          hits = traceResult.hits.hits;
-          expect(hits).toHaveLength(EXPECTED_SPAN_COUNT);
-        }).toPass({ timeout: 10_000, intervals: [500, 1000, 2000] });
+            { timeout: 10_000, intervals: [500, 1000, 2000] }
+          )
+          .toBe(EXPECTED_SPAN_COUNT);
 
         // Sanitize the spans and sort them by name
+        const getSpanKind = (span: Record<string, unknown>): string => {
+          const attrs = span.attributes as Record<string, unknown> | undefined;
+          return String(attrs?.['elastic.inference.span.kind'] ?? '');
+        };
+
         const spans = hits
           .map((hit) => sanitizeSpan(hit._source as Record<string, unknown>))
           .sort((a, b) => {
             const byName = String(a.name ?? '').localeCompare(String(b.name ?? ''));
-            return byName !== 0 ? byName : JSON.stringify(a).localeCompare(JSON.stringify(b));
+            return byName !== 0 ? byName : getSpanKind(a).localeCompare(getSpanKind(b));
           });
 
-        expect(JSON.stringify(spans, null, 2)).toMatchSnapshot('agent_builder_traces.json');
+        const expectedSpans = JSON.parse(
+          readFileSync(resolve(__dirname, './fixtures/expected_trace_spans.json'), 'utf-8')
+        );
+        expect(spans).toStrictEqual(expectedSpans);
       }
     );
   }

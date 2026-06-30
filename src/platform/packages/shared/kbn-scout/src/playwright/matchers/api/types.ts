@@ -62,10 +62,6 @@ export interface GenericMatchers {
   toThrow(expected?: unknown): void;
   /** An alias for `toThrow` */
   toThrowError(expected?: unknown): void;
-  /** Asserts the value matches a stored snapshot. Creates the snapshot on first run */
-  toMatchSnapshot(nameOrOptions?: string | { name?: string }): void;
-  /** Retries the async function until it passes without assertion errors */
-  toPass(options?: { intervals?: number[]; timeout?: number }): Promise<void>;
 
   /** Async matchers for promises that are expected to reject */
   rejects: {
@@ -111,10 +107,8 @@ export type AsymmetricMatcher = ReturnType<typeof baseExpect.anything>;
 type PlaywrightPoll = Expect['poll'];
 type PlaywrightPollResult = ReturnType<PlaywrightPoll>;
 export type PollOptions = NonNullable<Parameters<PlaywrightPoll>[1]>;
-export type PollMatchers = {
-  [K in keyof GenericMatchers]: K extends keyof PlaywrightPollResult
-    ? PlaywrightPollResult[K]
-    : GenericMatchers[K];
+export type PollMatchers = Pick<PlaywrightPollResult, keyof GenericMatchers> & {
+  not: Pick<PlaywrightPollResult['not'], keyof GenericMatchers['not']>;
 };
 
 /**

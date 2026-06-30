@@ -83,19 +83,6 @@
   },
   {
     "attributes": {
-      "elastic.inference.span.kind": "CHAIN",
-      "gen_ai.agent.id": "[AGENT_ID]",
-      "gen_ai.agent.name": "test_agent",
-      "gen_ai.conversation.id": "[CONVERSATION_ID]",
-      "gen_ai.operation.name": "invoke_agent",
-      "gen_ai.provider.name": "OpenAI",
-      "kibana.inference.root": true
-    },
-    "kind": "Internal",
-    "name": "invoke_agent test_agent"
-  },
-  {
-    "attributes": {
       "elastic.inference.span.kind": "AGENT",
       "gen_ai.agent.id": "[AGENT_ID]",
       "gen_ai.agent.name": "test_agent",
@@ -103,6 +90,19 @@
       "gen_ai.operation.name": "invoke_agent",
       "gen_ai.provider.name": "OpenAI",
       "kibana.inference.root": false
+    },
+    "kind": "Internal",
+    "name": "invoke_agent test_agent"
+  },
+  {
+    "attributes": {
+      "elastic.inference.span.kind": "CHAIN",
+      "gen_ai.agent.id": "[AGENT_ID]",
+      "gen_ai.agent.name": "test_agent",
+      "gen_ai.conversation.id": "[CONVERSATION_ID]",
+      "gen_ai.operation.name": "invoke_agent",
+      "gen_ai.provider.name": "OpenAI",
+      "kibana.inference.root": true
     },
     "kind": "Internal",
     "name": "invoke_agent test_agent"
