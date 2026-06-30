@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readdir } from 'fs/promises';
+
 import { run } from '../../lib/spawn.mjs';
 import { moonRun } from '../../lib/moon.mjs';
 import External from '../../lib/external_packages.js';
@@ -27,6 +29,19 @@ import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
+
+const hasNodeModulePatches = async () => {
+  try {
+    const entries = await readdir('patches', { withFileTypes: true });
+    return entries.some((entry) => entry.isFile() && entry.name.endsWith('.patch'));
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return false;
+    }
+
+    throw error;
+  }
+};
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -122,7 +137,7 @@ export const command = {
       log.info('skipping pre-built webpack bundles (--no-prebuilt)');
     }
 
-    if (await areNodeModulesPresent()) {
+    if ((await areNodeModulesPresent()) && (await hasNodeModulePatches())) {
       await time('apply node_modules patches', async () => {
         log.info('applying node_modules patches via patch-package');
         // The patch-package command is used to apply patches to the node_modules directory.
