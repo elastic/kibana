@@ -206,7 +206,9 @@ describe('case mapping covers every doc-builder field', () => {
  * exactly what this layer exists to prevent.
  */
 const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
-  // Empty. The intentional divergences are all covered by an opaque
+  // Empty. (`owner` is mirrored at `cases.owner` in addition to its
+  // top-level DLS copy, so it satisfies the Layer 2 mirror directly.)
+  // The intentional divergences are all covered by an opaque
   // (`enabled: false`) or `dynamic: true` parent in v2 and caught by
   // the `isCovered` rule:
   //  - cases.settings.{syncAlerts,extractObservables}

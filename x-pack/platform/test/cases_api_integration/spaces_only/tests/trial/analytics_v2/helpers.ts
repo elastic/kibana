@@ -313,11 +313,15 @@ const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms
 
 export interface AnalyticsCaseSource {
   '@timestamp': string;
-  kibana: { space_ids: string[] };
+  // Top-level scoping fields for implicit-privileges DLS (singular space_id —
+  // cases are space-isolated). See server `mappings/case.ts`.
+  space_id: string;
+  owner: string;
   cases: {
     id: string;
     title: string;
     description?: string;
+    // Mirror of top-level `owner` for data-view grouping.
     owner: string;
     status: string;
     severity: string;

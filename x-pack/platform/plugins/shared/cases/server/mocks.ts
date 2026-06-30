@@ -794,7 +794,7 @@ export const mockCasesContract = (): CasesServerStart => ({
     analyticsV2: {
       enabled: false,
       reconciliationIntervalMinutes: 30,
-      enable_admin_routes: false,
+      enableAdminRoutes: false,
       resetTaskTimeoutMinutes: 60,
       resetPageDelayMs: 0,
     },

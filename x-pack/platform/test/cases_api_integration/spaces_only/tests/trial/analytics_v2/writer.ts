@@ -60,8 +60,9 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(doc.cases.severity).to.eql('low');
       // `getAuthWithSuperUser()` defaults to `space1` → case lives in
       // space1 → analytics doc inherits that namespace (non-default
-      // propagation).
-      expect(doc.kibana.space_ids).to.eql(['space1']);
+      // propagation). Top-level singular `space_id` (implicit-privileges
+      // DLS convention; cases are space-isolated).
+      expect(doc.space_id).to.eql('space1');
     });
 
     it('updateCase → analytics doc is upserted (single doc, latest values)', async () => {

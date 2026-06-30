@@ -131,7 +131,7 @@ interface RegisterArgs {
   enabled: boolean;
   /**
    * Resolved config value for
-   * `xpack.cases.analyticsV2.enable_admin_routes`. Gates the mutating
+   * `xpack.cases.analyticsV2.enableAdminRoutes`. Gates the mutating
    * administrator routes (`/reset` and `/reconcile/run_soon`) at
    * registration time — when false, neither route is registered and a
    * request to either path returns 404. The read-only `/state` route
@@ -313,13 +313,13 @@ export const registerCasesAnalyticsV2Routes = ({
   );
 
   // The two routes below mutate subsystem state cluster-wide and are
-  // gated behind `xpack.cases.analyticsV2.enable_admin_routes`. When the
+  // gated behind `xpack.cases.analyticsV2.enableAdminRoutes`. When the
   // flag is off, neither route is registered and requests return 404.
   // See the `enableAdminRoutes` JSDoc on `RegisterArgs` for the
   // route-registration-vs-runtime-403 rationale.
   if (!enableAdminRoutes) {
     log.debug(
-      'cases-analyticsV2: admin routes (/reset, /reconcile/run_soon) are NOT registered; set xpack.cases.analyticsV2.enable_admin_routes: true to enable.'
+      'cases-analyticsV2: admin routes (/reset, /reconcile/run_soon) are NOT registered; set xpack.cases.analyticsV2.enableAdminRoutes: true to enable.'
     );
     return;
   }

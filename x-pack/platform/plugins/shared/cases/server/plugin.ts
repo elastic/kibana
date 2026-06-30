@@ -135,42 +135,27 @@ export class CasePlugin
       analyticsConfig: this.caseConfig.analytics,
     });
 
-    // Cases-as-data v2 — independent of v1, gated by its own feature flag. The
-    // service is a no-op until `xpack.cases.analyticsV2.enabled` is true.
-    // Setup registers Task Manager task types (must run before start). Start
-    // (further down) bootstraps indices, the writer, and schedules the
-    // reconciliation task.
+    // Cases-as-data v2 — independent of v1, gated by its own feature flag;
+    // a no-op until `xpack.cases.analyticsV2.enabled` is true. setup()
+    // registers the Task Manager task types (must precede start()); start()
+    // bootstraps indices, the writer, and the reconciliation task.
     this.casesAnalyticsV2Service = new CasesAnalyticsV2Service({
       logger: this.logger,
       enabled: this.caseConfig.analyticsV2.enabled,
       reconciliationIntervalMinutes: this.caseConfig.analyticsV2.reconciliationIntervalMinutes,
-      // `xpack.cases.analyticsV2.enable_admin_routes` gates the v2 admin
-      // routes that mutate subsystem state (`/reset`,
-      // `/reconcile/run_soon`). Lives under `analyticsV2` (not the
-      // legacy `analytics` namespace, which is the v1-only surface and
-      // will eventually be removed) so the gating retires alongside v2
-      // if both are ever sunset together. Default false; administrators
-      // set this to true in `kibana.yml` when they need the debug
-      // surface (mapping migrations, sustained writer failures, dev
-      // iteration).
-      enableAdminRoutes: this.caseConfig.analyticsV2.enable_admin_routes,
-      // Reset-task tunables. Threaded through to the
-      // `cases.analyticsV2.fullReset` task type's `timeout` and to the
-      // reconciliation runner's inter-page sleep when invoked from the
-      // reset task. Both have safe defaults; large-tenant administrators
-      // raise them in `kibana.yml` to keep the post-`/reset` backfill
-      // within budget without blocking the HTTP request.
+      // Gates the state-mutating admin routes (`/reset`,
+      // `/reconcile/run_soon`); default false. See the config schema for the
+      // namespace and opt-in rationale.
+      enableAdminRoutes: this.caseConfig.analyticsV2.enableAdminRoutes,
+      // Reset-task tunables (task `timeout` + reset-path inter-page sleep).
+      // Safe defaults; raised on large tenants to keep the post-`/reset`
+      // backfill within budget. See the config schema.
       resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
       resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
-      // `xpack.cases.templates.enabled` gates whether `cases-templates`
-      // is registered with core (see `saved_object_types/index.ts`). The
-      // v2 data view sub-service reads template SOs to derive per-space
-      // runtime field overlays; if templates is off there are no SOs to
-      // read, and asking the SO client for the type would throw
-      // "Missing mappings for saved objects types: 'cases-templates'".
-      // Threading the flag through here lets the data view sub-service
-      // short-circuit to an empty runtime field map (the base data view
-      // is still bootstrapped — it just has no extended-field overlays).
+      // When templates is off, `cases-templates` isn't registered with core,
+      // so reading it would throw "Missing mappings for saved objects types".
+      // The flag lets the data view sub-service short-circuit to an empty
+      // runtime field map (base data view still bootstrapped, no overlays).
       templatesEnabled: this.caseConfig.templates?.enabled === true,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
@@ -342,27 +327,18 @@ export class CasePlugin
       }
     }
 
-    // Cases-as-data v2. Internally a no-op when the feature flag is off, so
-    // safe to call unconditionally. Bootstrap errors are logged inside the
-    // service and never propagate; `void`-ing keeps plugin start non-blocking.
-    //
-    // The internal SO client is constructed once here and handed to the
-    // service for use by the reconciliation runner (which scans cases on a
-    // timer, with no request context).
-    //
-    // **dataViews is optional** — it's only consumed by the v2 service for
-    // managed data view bootstrap. If v2 is enabled but dataViews isn't
-    // installed, log loudly and skip v2 start. The flag-vs-dependency
-    // mismatch is an administrator config error, not a runtime crash.
+    // Cases-as-data v2 start. A no-op when disabled (via the writer/refresher
+    // proxies); bootstrap errors are logged inside the service and `void`-ed
+    // here to keep plugin start non-blocking. dataViews is an optional dep
+    // consumed only by v2 — if v2 is enabled but it's absent, that's an admin
+    // config error, so log and skip rather than crash.
     if (this.casesAnalyticsV2Service) {
       if (!this.caseConfig.analyticsV2.enabled) {
-        // v2 disabled — every method on the service is already a no-op via
-        // the writer / refresher proxy contracts. Don't construct the
-        // internal repo at all: the `cases-templates` SO type registration
-        // is gated on `templates.enabled`, and stripped configs (OAS
-        // capture, certain test harnesses) that disable both flags would
-        // otherwise throw "Missing mappings for saved objects types:
-        // 'cases-templates'" from `createInternalRepository`.
+        // Disabled: skip building the internal repo entirely. With templates
+        // also off, naming `cases-templates` below would throw "Missing
+        // mappings for saved objects types" (it's registered only when
+        // `templates.enabled`), breaking stripped configs (OAS capture, some
+        // test harnesses).
       } else if (plugins.dataViews == null) {
         this.logger.error(
           'cases-analyticsV2 is enabled but the `dataViews` plugin is not installed. ' +
@@ -370,31 +346,16 @@ export class CasePlugin
             'Skipping v2 start.'
         );
       } else {
-        // The internal repo serves four consumers:
-        //  - The cases-surface reconciliation runner walks `cases` SOs.
-        //  - The activity-surface reconciliation runner walks
-        //    `cases-user-actions` SOs (created-only, no `updated_at`
-        //    filter — see `reconciliation/activity_runner.ts`).
-        //  - The data view sub-service reads `cases-templates` SOs per-space
-        //    to derive runtime fields. Only included when templates is on
-        //    — `cases-templates` is registered with core only when
-        //    `xpack.cases.templates.enabled` is true (see
-        //    `saved_object_types/index.ts`), and naming it here when the
-        //    mapping isn't registered throws "Missing mappings for saved
-        //    objects types: 'cases-templates'" from
-        //    `createInternalRepository`. With templates off, the data view
-        //    sub-service short-circuits its template read and bootstraps
-        //    per-space data views with an empty runtime field overlay.
-        //  - The `/reset` admin route deletes per-space `index-pattern` SOs
-        //    across namespaces. A request-scoped SO client can't do this:
-        //    the spaces extension scopes `delete` to the request's namespace,
-        //    so deleting a data view in space `analytics-1` from a `/reset`
-        //    request that arrived in `default` 404s on the existence check
-        //    (even with `force: true`).
-        // The cases SO types are hidden, so they must be opted in
-        // explicitly. `index-pattern` is a globally-registered SO type
-        // (data-views plugin); opting it in here grants the internal client
-        // the cross-namespace delete it needs.
+        // Internal (unscoped) repo for four consumers: the cases-surface
+        // reconciliation runner (walks `cases` SOs), the activity-surface
+        // runner (walks `cases-user-actions` SOs), the data view sub-service
+        // (reads `cases-templates` per-space for runtime fields), and `/reset`
+        // (deletes per-space `index-pattern` SOs across namespaces — a
+        // request-scoped client 404s outside its own space). The hidden cases
+        // SO types must be opted in explicitly; `cases-templates` only when
+        // templates is on (else "Missing mappings for saved objects types");
+        // `index-pattern` grants the cross-namespace data-view delete `/reset`
+        // needs.
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
@@ -462,24 +423,17 @@ export class CasePlugin
               return Promise.resolve(false);
             }
           : undefined,
-      // Stable proxy from the v2 service. Resolves to a no-op writer when v2
-      // is disabled, the real writer once `casesAnalyticsV2Service.start()`
-      // has run. The proxy is safe to capture before start.
-      //
-      // The fallback to `V2_NOOP_WRITER` is defensive — production always
-      // runs `setup()` before `start()`, so the service is never undefined
-      // here. But test harnesses that exercise `start()` in isolation get a
-      // no-op writer instead of a runtime crash.
+      // Stable v2 proxy: no-op until `start()` runs, real writer after; safe
+      // to capture before start. The `V2_NOOP_WRITER` fallback is defensive —
+      // setup() always precedes start() in production, but it keeps
+      // start()-in-isolation test harnesses from crashing.
       analyticsV2Writer: this.casesAnalyticsV2Service?.getWriter() ?? V2_NOOP_WRITER,
-      // Activity surface companion. Same lifetime + same defensive fallback
-      // as `analyticsV2Writer`. Captured by the user-actions service via
-      // the cases client factory.
+      // Activity-surface companion (same lifetime + fallback). Captured by the
+      // user-actions service via the cases client factory.
       analyticsV2ActivityWriter:
         this.casesAnalyticsV2Service?.getActivityWriter() ?? V2_NOOP_ACTIVITY_WRITER,
-      // Companion data-view refresher proxy. Same lifetime + same defensive
-      // fallback as `analyticsV2Writer`. Captured by the templates service
-      // through the cases client factory and called fire-and-forget after
-      // every template create / update / delete.
+      // Companion refresher proxy (same lifetime + fallback). The templates
+      // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:
         this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
     });
@@ -507,23 +461,25 @@ export class CasePlugin
     spaces?: CasesServerSetupDependencies['spaces'];
   }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
-      // Cases-as-data v2 — lazy bootstrap of the per-space `Cases` data view.
-      // Fires on every cases request; idempotent + cached in-process so the
-      // cost after the first ensure per space is a single `Set.has()` check.
-      // No-op when v2 is disabled or before start has completed. Errors are
-      // swallowed inside the data view service so the request handler is
-      // unaffected.
-      const coreContext = await context.core;
-      const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-      this.casesAnalyticsV2Service?.ensureDataViewForSpace({
-        spaceId,
-        request,
-        savedObjectsClient: coreContext.savedObjects.client,
-      });
+      // Cases-as-data v2 — lazy per-space `Cases` data view bootstrap.
+      // Idempotent + in-process cached (a `Set.has()` check after the first
+      // ensure per space); errors are swallowed inside the service. Gated on
+      // `analyticsV2.enabled` so the disabled default path skips resolving
+      // `context.core` + the space id just to reach a no-op.
+      if (this.caseConfig.analyticsV2.enabled) {
+        const coreContext = await context.core;
+        const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        this.casesAnalyticsV2Service?.ensureDataViewForSpace({
+          spaceId,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }
 
       return {
         getCasesClient: async () => {
           const [{ savedObjects }] = await core.getStartServices();
+          const coreContext = await context.core;
 
           return this.clientFactory.create({
             request,

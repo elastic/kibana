@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
  *
  * Runs under `config_analytics_v2_admin_routes_off.ts`, which boots
  * Kibana with `xpack.cases.analyticsV2.enabled=true` and
- * `xpack.cases.analyticsV2.enable_admin_routes=false`. In that
+ * `xpack.cases.analyticsV2.enableAdminRoutes=false`. In that
  * configuration:
  *
  *   - `GET  /internal/cases/_analyticsV2/state`               → 200
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
     'x-elastic-internal-origin': 'kibana',
   };
 
-  describe('cases-analytics v2 admin routes gating (enable_admin_routes=false)', () => {
+  describe('cases-analytics v2 admin routes gating (enableAdminRoutes=false)', () => {
     it('GET /state still returns 200 — the read-only health surface is always registered', async () => {
       // `/state` is polled by the Case Settings page and on-call
       // tooling. It must remain reachable even when the mutating

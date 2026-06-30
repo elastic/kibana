@@ -242,12 +242,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   runToolReturn = afterToolHooksResult.toolReturn;
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
-    runToolReturn.results.forEach((result) => {
-      resultStore.add({
-        tool_id: tool.id,
-        tool_call_id: toolCallId,
-        result,
-      });
+    resultStore.add({
+      tool_id: tool.id,
+      tool_call_id: toolCallId,
+      params: toolParams,
+      results: runToolReturn.results,
     });
   }
 

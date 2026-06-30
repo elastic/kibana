@@ -32,8 +32,11 @@ import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
  *     can balloon the field count under sustained ingest.
  *   - `extended_fields` lives in a flattened sub-object with snake-key
  *     suffixes (`<name>_as_<type>`); the SO has no equivalent.
- *   - `@timestamp` and `kibana.space_ids` are derived, not direct SO
- *     attributes.
+ *   - `@timestamp` and `space_id` are derived, not direct SO attributes.
+ *   - `space_id` and `owner` are emitted at the document root to match the
+ *     implicit-privileges DLS convention (see `mappings/case.ts`).
+ *     `space_id` is singular — cases are space-isolated. `owner` is also
+ *     mirrored at `cases.owner` for data-view grouping.
  *
  * Coupling the two via `extends` would force every additive change to
  * the cases SO into the analytics doc surface. The analytics-doc shape
@@ -49,11 +52,15 @@ import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
  */
 export interface CaseAnalyticsDoc {
   '@timestamp': string;
-  kibana: {
-    space_ids: string[];
-  };
+  // Top-level scoping fields for implicit-privileges DLS. `space_id` is
+  // singular (cases are space-isolated); `owner` carries the solution
+  // dimension. See `mappings/case.ts`.
+  space_id: string;
+  owner: string;
   cases: {
     id: string;
+    // Mirror of the top-level `owner` (the DLS field), kept under `cases.*`
+    // for data-view grouping. See `mappings/case.ts`.
     owner: string;
     title: string;
     description: string;
@@ -149,15 +156,16 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
 
   return {
     '@timestamp': timestamp,
-    kibana: {
-      // `namespaces` is the multi-namespace API core SO returns. For
-      // namespace-scoped types like `cases` it's a single-element array
-      // of the space id. Default to `['default']` so the field is
-      // always populated.
-      space_ids: so.namespaces ?? ['default'],
-    },
+    // Top-level scoping fields for implicit-privileges DLS. `namespaces` is
+    // the multi-namespace array core SO returns; cases are
+    // `multiple-isolated`, so it's a single-element array of the space id.
+    // Take the first element (default `'default'`) so `space_id` is the
+    // singular scalar the DLS convention expects.
+    space_id: so.namespaces?.[0] ?? 'default',
+    owner: a.owner,
     cases: {
       id: so.id,
+      // Mirror of the top-level `owner` for data-view grouping.
       owner: a.owner,
       title: a.title,
       description: a.description,
