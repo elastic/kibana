@@ -71,6 +71,7 @@ steps:
         x-elastic-internal-origin: "kibana"
       body:
         lookback: '{{ inputs.lookback }}'
+        spaceId: '{{ variables.spaceId }}'
     on-failure:
       continue: true
 
@@ -218,6 +219,7 @@ steps:
           body:
             lookback: "now-{{ foreach.item._source.resolution_lookback_minutes | default: 30 }}m"
             ruleUuid: "${{ foreach.item._source.rule_uuid }}"
+            spaceId: '{{ variables.spaceId }}'
         on-failure:
           continue: true
 
@@ -263,6 +265,7 @@ steps:
       body:
         lookback: '{{ inputs.lookback }}'
         bucketInterval: '{{ inputs.bucketInterval }}'
+        spaceId: '{{ variables.spaceId }}'
 
   # -----------------------------------------------------------------------
   # Step 2: Foreach rule bucket — detect, recover, resolve.
@@ -425,6 +428,7 @@ steps:
                 ruleUuid: "{{ foreach.item.key }}"
                 lookback: '{{ inputs.quickRecoveryLookback }}'
                 bucketInterval: '{{ inputs.bucketInterval }}'
+                spaceId: '{{ variables.spaceId }}'
             on-failure:
               continue: true
 
@@ -445,6 +449,7 @@ steps:
                 currentLookback: '{{ inputs.quickRecoveryLookback }}'
                 referenceLookbackGte: "now-1d{{ inputs.quickRecoveryLookback | remove: 'now' }}"
                 referenceLookbackLt: "now-1d"
+                spaceId: '{{ variables.spaceId }}'
             on-failure:
               continue: true
 
@@ -490,6 +495,7 @@ steps:
             ruleUuid: "{{ foreach.item.key }}"
             lookback: '{{ consts.ACTIVITY_HISTORY_LOOKBACK }}'
             windowInterval: '{{ consts.ACTIVITY_WINDOW_INTERVAL }}'
+            spaceId: '{{ variables.spaceId }}'
         on-failure:
           continue: true
 

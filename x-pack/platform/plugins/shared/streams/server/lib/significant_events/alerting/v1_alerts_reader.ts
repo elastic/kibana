@@ -250,6 +250,9 @@ export class V1SignificantEventsAlertsReader implements ISignificantEventsAlerts
     bucket: RawRuleBucket,
     ruleMetadata: Map<string, RuleMetadata>
   ): ChangePointRuleBucket {
+    // These sub-aggs are absent when a rule produced too few/no docs in the window: ES omits the
+    // `change_points` result, the `rule_name` top hit, and the `stream` terms buckets. We then fall
+    // back to the rule/stream identity from the queryLinks metadata so the bucket shape stays stable.
     const meta = ruleMetadata.get(bucket.key);
     const ruleName = meta?.ruleName ?? 'unknown';
     const streamName = meta?.streamName ?? 'unknown';

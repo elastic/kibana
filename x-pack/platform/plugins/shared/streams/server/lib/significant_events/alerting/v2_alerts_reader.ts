@@ -89,6 +89,9 @@ export class V2SignificantEventsAlertsReader implements ISignificantEventsAlerts
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      // Drop the per-bucket `over_time` series from the response: it can be large and is only
+      // needed server-side as the buckets_path input for the change_point pipeline agg, not in
+      // the payload the Detection workflow consumes.
       filter_path: '-aggregations.by_rule.buckets.over_time',
       ...this.buildChangePointScanBody(params),
     });

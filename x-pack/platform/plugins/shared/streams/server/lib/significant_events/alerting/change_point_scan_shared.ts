@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregationContainer,
+  AggregationsExtendedBounds,
+  AggregationsFieldDateMath,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export const RULES_BUCKET_SIZE = 1000;
 export const RECENT_ACTIVITY_MINUTES = 5;
@@ -15,29 +19,20 @@ const SIGNAL_COUNT_CARDINALITY = {
   signal_count: { cardinality: { field: 'group_hash' } },
 } as const;
 
-export function recentActivityTimestampFilter() {
-  return { range: { '@timestamp': { gte: `now-${RECENT_ACTIVITY_MINUTES}m` } } };
-}
-
-export function floorWindowTimestampFilter() {
-  return { range: { '@timestamp': { gte: `now-${LOOKBACK_MINUTES_FLOOR}m` } } };
-}
-
-export interface ChangePointHistogramBounds {
-  min: string;
-  max: string;
+function timestampGteFilter(minutes: number) {
+  return { range: { '@timestamp': { gte: `now-${minutes}m` } } };
 }
 
 export function buildChangePointHistogramBounds(
   lookback: string,
   bucketInterval: string
-): ChangePointHistogramBounds {
+): AggregationsExtendedBounds<AggregationsFieldDateMath> {
   return { min: lookback, max: `now-${bucketInterval}` };
 }
 
 export function buildDateHistogramAgg(
   bucketInterval: string,
-  extendedBounds: ChangePointHistogramBounds
+  extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>
 ) {
   return {
     date_histogram: {
@@ -58,7 +53,7 @@ export function buildChangePointTimeSeriesAggs(
   }: {
     useDistinctSignalCount: boolean;
     includeFloorWindow?: boolean;
-    extendedBounds: ChangePointHistogramBounds;
+    extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   }
 ): Record<string, AggregationsAggregationContainer> {
   const countPath = useDistinctSignalCount ? 'signal_count' : '_count';
@@ -66,8 +61,8 @@ export function buildChangePointTimeSeriesAggs(
     ? { ...buildDateHistogramAgg(bucketInterval, extendedBounds), aggs: SIGNAL_COUNT_CARDINALITY }
     : buildDateHistogramAgg(bucketInterval, extendedBounds);
   const last5m: AggregationsAggregationContainer = useDistinctSignalCount
-    ? { filter: recentActivityTimestampFilter(), aggs: SIGNAL_COUNT_CARDINALITY }
-    : { filter: recentActivityTimestampFilter() };
+    ? { filter: timestampGteFilter(RECENT_ACTIVITY_MINUTES), aggs: SIGNAL_COUNT_CARDINALITY }
+    : { filter: timestampGteFilter(RECENT_ACTIVITY_MINUTES) };
 
   const aggs: Record<string, AggregationsAggregationContainer> = {
     over_time: overTime,
@@ -77,8 +72,8 @@ export function buildChangePointTimeSeriesAggs(
 
   if (includeFloorWindow) {
     aggs.last_floor_window = useDistinctSignalCount
-      ? { filter: floorWindowTimestampFilter(), aggs: SIGNAL_COUNT_CARDINALITY }
-      : { filter: floorWindowTimestampFilter() };
+      ? { filter: timestampGteFilter(LOOKBACK_MINUTES_FLOOR), aggs: SIGNAL_COUNT_CARDINALITY }
+      : { filter: timestampGteFilter(LOOKBACK_MINUTES_FLOOR) };
   }
 
   return aggs;
