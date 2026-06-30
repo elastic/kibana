@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -73,6 +73,13 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   const initialIdNormalized = initialDataSet?.name?.trim().toLowerCase() ?? '';
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  const flyoutTopRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (saveError) {
+      flyoutTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [saveError]);
 
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
@@ -204,6 +211,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <div ref={flyoutTopRef} />
         <EuiForm component="form" id="createDatasetForm" onSubmit={handleSubmit(onSubmit)}>
           {saveError ? (
             <>
