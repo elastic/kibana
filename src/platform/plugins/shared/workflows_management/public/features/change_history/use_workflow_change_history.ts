@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { ChangeHistoryAdapter } from '@kbn/change-history-ui';
 import { useGlobalUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_VERSIONING_SETTING_ID } from '@kbn/workflows/common/constants';
