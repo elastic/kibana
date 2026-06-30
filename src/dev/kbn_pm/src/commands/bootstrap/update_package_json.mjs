@@ -63,21 +63,13 @@ export async function updatePackageJson(pkgs, log) {
   changes ||= updatePkgEntries(
     pkgJson.dependencies,
     new Map(Object.entries(pkgJson.dependencies).filter(([k]) => k.startsWith('@kbn/'))),
-    new Map(
-      pkgs
-        .filter((p) => !p.isDevOnly())
-        .map((p) => [p.manifest.id, `link:${p.normalizedRepoRelativeDir}`])
-    )
+    new Map(pkgs.filter((p) => !p.isDevOnly()).map((p) => [p.manifest.id, 'workspace:*']))
   );
 
   changes ||= updatePkgEntries(
     pkgJson.devDependencies,
     new Map(Object.entries(pkgJson.devDependencies).filter(([k]) => k.startsWith('@kbn/'))),
-    new Map(
-      pkgs
-        .filter((p) => p.isDevOnly())
-        .map((p) => [p.manifest.id, `link:${p.normalizedRepoRelativeDir}`])
-    )
+    new Map(pkgs.filter((p) => p.isDevOnly()).map((p) => [p.manifest.id, 'workspace:*']))
   );
 
   if (changes) {
