@@ -45,7 +45,6 @@ export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
   fleetServerHost?: FleetServerHost;
   defaultFleetServerHost?: FleetServerHost;
-  privateFleetServerHost?: FleetServerHost;
   proxies: FleetProxy[];
 }
 
@@ -53,19 +52,13 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   onClose,
   fleetServerHost,
   defaultFleetServerHost,
-  privateFleetServerHost,
   proxies,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const { docLinks, cloud } = useStartServices();
 
-  const form = useFleetServerHostsForm(
-    fleetServerHost,
-    onClose,
-    defaultFleetServerHost,
-    privateFleetServerHost
-  );
+  const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
   const { inputs } = form;
 
   const proxiesOptions = useMemo(
@@ -188,23 +181,6 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               { defaultMessage: 'Specify name' }
             )}
           />
-          {cloud?.isServerlessEnabled && inputs.usePrivateEndpointInput && (
-            <>
-              <EuiFormRow fullWidth {...inputs.usePrivateEndpointInput.formRowProps}>
-                <EuiSwitch
-                  data-test-subj="fleetServerHostsFlyout.usePrivateEndpointSwitch"
-                  {...inputs.usePrivateEndpointInput.props}
-                  label={
-                    <FormattedMessage
-                      id="xpack.fleet.settings.fleetServerHostsFlyout.usePrivateEndpointLabel"
-                      defaultMessage="Use PrivateLink endpoint"
-                    />
-                  }
-                />
-              </EuiFormRow>
-              <EuiSpacer size="m" />
-            </>
-          )}
           <EuiFormRow
             fullWidth
             label={
@@ -251,8 +227,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                 )}
                 isUrl
                 helpText={
-                  cloud?.isServerlessEnabled &&
-                  !inputs.usePrivateEndpointInput?.props.checked && (
+                  cloud?.isServerlessEnabled && (
                     <FormattedMessage
                       id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessHostUrlsHelpText"
                       defaultMessage="Custom host URLs are not allowed in serverless."

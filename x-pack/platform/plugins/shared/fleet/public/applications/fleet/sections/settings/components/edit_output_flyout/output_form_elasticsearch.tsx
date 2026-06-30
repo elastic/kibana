@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -67,23 +67,6 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
 
   return (
     <>
-      {cloud?.isServerlessEnabled && inputs.usePrivateEndpointInput && (
-        <>
-          <EuiFormRow fullWidth {...inputs.usePrivateEndpointInput.formRowProps}>
-            <EuiSwitch
-              data-test-subj="settingsOutputsFlyout.usePrivateEndpointSwitch"
-              {...inputs.usePrivateEndpointInput.props}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.usePrivateEndpointLabel"
-                  defaultMessage="Use PrivateLink endpoint"
-                />
-              }
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </>
-      )}
       <MultiRowInput
         data-test-subj="settingsOutputsFlyout.hostUrlInput"
         label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
@@ -98,8 +81,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
         {...inputs.elasticsearchUrlInput.props}
         isUrl
         helpText={
-          cloud?.isServerlessEnabled &&
-          !inputs.usePrivateEndpointInput?.props.checked && (
+          cloud?.isServerlessEnabled && (
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.serverlessHostUrlsHelpText"
               defaultMessage="Custom host URLs are not allowed in serverless."

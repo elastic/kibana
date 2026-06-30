@@ -67,7 +67,6 @@ import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
 
 export interface EditOutputFlyoutProps {
   defaultOutput?: Output;
-  privateOutput?: Output;
   output?: Output;
   onClose: () => void;
   proxies: FleetProxy[];
@@ -75,14 +74,13 @@ export interface EditOutputFlyoutProps {
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
   defaultOutput,
-  privateOutput,
   onClose,
   output,
   proxies,
 }) => {
   useBreadcrumbs('settings');
   const yaml = useYaml();
-  const form = useOutputForm(onClose, output, defaultOutput, privateOutput);
+  const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
   const parseFn = yaml?.parse;
   const { docLinks, cloud } = useStartServices();

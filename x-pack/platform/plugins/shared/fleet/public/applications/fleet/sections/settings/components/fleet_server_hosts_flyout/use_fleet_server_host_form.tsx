@@ -34,7 +34,6 @@ export interface FleetServerHostSSLInputsType {
   nameInput: ReturnType<typeof useInput>;
   hostUrlsInput: ReturnType<typeof useComboInput>;
   isDefaultInput: ReturnType<typeof useSwitchInput>;
-  usePrivateEndpointInput?: ReturnType<typeof useSwitchInput>;
   proxyIdInput?: ReturnType<typeof useInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
@@ -142,44 +141,32 @@ export function validateName(value: string) {
 export function useFleetServerHostsForm(
   fleetServerHost: FleetServerHost | undefined,
   onSuccess: () => void,
-  defaultFleetServerHost?: FleetServerHost,
-  privateFleetServerHost?: FleetServerHost
+  defaultFleetServerHost?: FleetServerHost
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const { notifications, cloud } = useStartServices();
   const authz = useAuthz();
   const { confirm } = useConfirmModal();
   const isEditDisabled = (fleetServerHost?.is_preconfigured || !authz.fleet.allSettings) ?? false;
+  // Fields listed in allow_edit on a preconfigured host can be changed at runtime.
+  const allowEdit = fleetServerHost?.allow_edit ?? [];
 
   const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isEditDisabled);
   const isDefaultInput = useSwitchInput(
     fleetServerHost?.is_default ?? false,
-    isEditDisabled || fleetServerHost?.is_default
+    (isEditDisabled && !allowEdit.includes('is_default')) || !!fleetServerHost?.is_default
   );
 
   const isServerless = cloud?.isServerlessEnabled;
 
-  // Determine initial state of the private endpoint switch.
-  const isCurrentlyUsingPrivate =
-    !!privateFleetServerHost &&
-    !!fleetServerHost?.host_urls &&
-    JSON.stringify(fleetServerHost.host_urls) === JSON.stringify(privateFleetServerHost.host_urls);
-
-  // Always call the hook; disable/hide it when there is no private endpoint SO.
-  const privateEndpointSwitchDisabled = !isServerless || !privateFleetServerHost;
-  const usePrivateEndpointInput = useSwitchInput(
-    isCurrentlyUsingPrivate,
-    privateEndpointSwitchDisabled
-  );
-
-  const usingPrivate = isServerless && !!privateFleetServerHost && usePrivateEndpointInput.value;
-
-  // Set the host URLs based on the private endpoint switch, or fall back to the default.
-  const hostUrlsDefaultValue = isServerless
-    ? usingPrivate
-      ? privateFleetServerHost?.host_urls || []
-      : defaultFleetServerHost?.host_urls || []
-    : fleetServerHost?.host_urls || [];
+  // For an existing row always show that row's own URLs; only fall back to the default
+  // host URLs when creating a new Fleet Server host in serverless (no fleetServerHost yet).
+  const hostUrlsDefaultValue =
+    fleetServerHost?.host_urls?.length
+      ? fleetServerHost.host_urls
+      : isServerless
+      ? defaultFleetServerHost?.host_urls || []
+      : [];
 
   const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(
@@ -189,16 +176,6 @@ export function useFleetServerHostsForm(
     hostUrlsDisabled
   );
 
-  // Sync the URL input when the private endpoint toggle changes.
-  const { setValue: setHostUrls } = hostUrlsInput;
-  React.useEffect(() => {
-    if (!isServerless) return;
-    if (usingPrivate) {
-      setHostUrls(privateFleetServerHost?.host_urls || []);
-    } else {
-      setHostUrls(defaultFleetServerHost?.host_urls || []);
-    }
-  }, [usingPrivate, isServerless, privateFleetServerHost, defaultFleetServerHost, setHostUrls]);
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
   const sslCertificateAuthoritiesInput = useComboInput(
@@ -279,7 +256,6 @@ export function useFleetServerHostsForm(
       nameInput,
       isDefaultInput,
       hostUrlsInput,
-      ...(isServerless && privateFleetServerHost ? { usePrivateEndpointInput } : {}),
       proxyIdInput,
       sslCertificateAuthoritiesInput,
       sslCertificateInput,
@@ -299,9 +275,6 @@ export function useFleetServerHostsForm(
       nameInput,
       isDefaultInput,
       hostUrlsInput,
-      isServerless,
-      privateFleetServerHost,
-      usePrivateEndpointInput,
       proxyIdInput,
       sslCertificateAuthoritiesInput,
       sslCertificateInput,
@@ -329,41 +302,47 @@ export function useFleetServerHostsForm(
         return;
       }
       setIsLoading(true);
-      const data: Partial<NewFleetServerHost> = {
-        name: nameInput.value,
-        host_urls: hostUrlsInput.value,
-        is_default: isDefaultInput.value,
-        proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
-        ssl: {
-          certificate: sslCertificateInput.value,
-          key: sslKeyInput.value || undefined,
-          certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
-          es_certificate: sslEsCertificateInput.value,
-          es_key: sslESKeyInput.value || undefined,
-          es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
-            (val) => val !== ''
-          ),
-          agent_certificate: sslAgentCertificateInput.value,
-          agent_key: sslAgentKeyInput.value || undefined,
-          agent_certificate_authorities: sslAgentCertificateAuthoritiesInput.value.filter(
-            (val) => val !== ''
-          ),
-          ...(sslClientAuthInput.value !== clientAuth.None && {
-            client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
-          }),
-        },
-        ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
-          (!sslESKeyInput.value && sslESKeySecretInput.value) ||
-          (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
-          secrets: {
+      // For preconfigured hosts only the fields listed in allow_edit may be sent —
+      // the serverless URL guard blocks any PUT that includes host_urls.
+      const data: Partial<NewFleetServerHost> = fleetServerHost?.is_preconfigured
+        ? { is_default: isDefaultInput.value }
+        : {
+            name: nameInput.value,
+            host_urls: hostUrlsInput.value,
+            is_default: isDefaultInput.value,
+            proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
             ssl: {
-              key: sslKeySecretInput.value || undefined,
-              es_key: sslESKeySecretInput.value || undefined,
-              agent_key: sslAgentKeySecretInput.value || undefined,
+              certificate: sslCertificateInput.value,
+              key: sslKeyInput.value || undefined,
+              certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+              es_certificate: sslEsCertificateInput.value,
+              es_key: sslESKeyInput.value || undefined,
+              es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+              agent_certificate: sslAgentCertificateInput.value,
+              agent_key: sslAgentKeyInput.value || undefined,
+              agent_certificate_authorities: sslAgentCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+              ...(sslClientAuthInput.value !== clientAuth.None && {
+                client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
+              }),
             },
-          },
-        }),
-      };
+            ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
+              (!sslESKeyInput.value && sslESKeySecretInput.value) ||
+              (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
+              secrets: {
+                ssl: {
+                  key: sslKeySecretInput.value || undefined,
+                  es_key: sslESKeySecretInput.value || undefined,
+                  agent_key: sslAgentKeySecretInput.value || undefined,
+                },
+              },
+            }),
+          };
 
       if (fleetServerHost) {
         const res = await sendPutFleetServerHost(fleetServerHost.id, data);
@@ -416,30 +395,27 @@ export function useFleetServerHostsForm(
     onSuccess,
   ]);
 
-  const hasChanged =
-    Object.values(inputs).some((input) => input.hasChanged) ||
-    (usePrivateEndpointInput.hasChanged && !privateEndpointSwitchDisabled);
+  const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
 
-  const privateEndpointToggleChanged =
-    usePrivateEndpointInput.hasChanged && !privateEndpointSwitchDisabled;
-
-  const isDisabled =
-    (isEditDisabled && !privateEndpointToggleChanged) ||
-    isLoading ||
-    !hasChanged ||
-    !nameInput.value ||
-    !hostUrlsInput.value.some((v) => v.trim()) ||
-    hostUrlsInput.props.isInvalid ||
-    nameInput.props.isInvalid ||
-    sslCertificateAuthoritiesInput.props.isInvalid ||
-    sslCertificateInput.props.isInvalid ||
-    sslKeyInput.props.isInvalid ||
-    sslEsCertificateAuthoritiesInput.props.isInvalid ||
-    sslEsCertificateInput.props.isInvalid ||
-    sslESKeyInput.props.isInvalid ||
-    sslAgentCertificateAuthoritiesInput.props.isInvalid ||
-    sslAgentCertificateInput.props.isInvalid ||
-    sslAgentKeyInput.props.isInvalid;
+  // For preconfigured hosts, only the allow_edit fields can change — skip URL/name/SSL checks.
+  const isDisabled = fleetServerHost?.is_preconfigured
+    ? isLoading || !isDefaultInput.hasChanged
+    : isEditDisabled ||
+      isLoading ||
+      !hasChanged ||
+      !nameInput.value ||
+      !hostUrlsInput.value.some((v) => v.trim()) ||
+      hostUrlsInput.props.isInvalid ||
+      nameInput.props.isInvalid ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      sslKeyInput.props.isInvalid ||
+      sslEsCertificateAuthoritiesInput.props.isInvalid ||
+      sslEsCertificateInput.props.isInvalid ||
+      sslESKeyInput.props.isInvalid ||
+      sslAgentCertificateAuthoritiesInput.props.isInvalid ||
+      sslAgentCertificateInput.props.isInvalid ||
+      sslAgentKeyInput.props.isInvalid;
 
   return {
     isLoading,

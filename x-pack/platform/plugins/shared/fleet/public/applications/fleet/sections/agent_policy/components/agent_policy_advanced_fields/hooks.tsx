@@ -239,8 +239,8 @@ function getDefaultDownloadSource(
 export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy | AgentPolicy>) {
   const fleetServerHostsRequest = useGetFleetServerHosts();
   const { isAgentlessAgentPolicy } = useAgentless();
-  const { cloud } = useStartServices();
   const isAgentless = isAgentlessAgentPolicy(agentPolicy as AgentPolicy);
+  const { cloud } = useStartServices();
   const isServerless = cloud?.isServerlessEnabled ?? false;
 
   const fleetServerHostsOptions = useMemo(() => {
