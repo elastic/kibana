@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>DOM Anomaly Detector — Test Fixture</title></head>
+<body>
+
+<!-- Level 1: error toast (euiToast--danger class) -->
+<div class="euiToast euiToast--danger" id="toast-danger">
+  Error toast: something went wrong
+</div>
+
+<!-- Level 1: global danger banner inside globalBannerList -->
+<div data-test-subj="globalBannerList">
+  <div class="euiBanner euiBanner--danger" id="banner-danger">
+    Global danger banner
+  </div>
+</div>
+
+<!-- Level 2: embeddable error -->
+<div data-embeddable-error id="embeddable-error">
+  Embeddable failed to load
+</div>
+
+<!-- Level 2: EUI danger callout -->
+<div class="euiCallOut euiCallOut--danger" id="callout-danger">
+  Callout: configuration error
+</div>
+
+<!-- Level 2: panel with data-render-complete=false -->
+<div data-render-complete="false" id="panel-not-rendered">
+  Panel content
+</div>
+
+<!-- Level 3: loading spinner -->
+<div class="euiLoadingSpinner" id="spinner">Loading...</div>
+
+<!-- Control: a completed panel (should NOT appear in level2 panels_not_rendered) -->
+<div data-render-complete="true" id="panel-ok">Completed panel</div>
+
+<!-- Control: hidden spinner (should NOT appear — has hidden attr) -->
+<div class="euiLoadingSpinner" hidden id="spinner-hidden">Hidden spinner</div>
+
+</body>
+</html>
