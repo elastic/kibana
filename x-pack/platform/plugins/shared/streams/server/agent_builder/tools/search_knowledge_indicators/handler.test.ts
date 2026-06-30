@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KnowledgeIndicatorClient } from '../../../lib/streams/ki';
 import type { StreamsClient } from '../../../lib/streams/client';
@@ -14,6 +15,7 @@ import { searchKnowledgeIndicatorsToolHandler } from './handler';
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
     id: 'feature-id',
+    uuid: 'feature-uuid',
     stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
