@@ -57,8 +57,7 @@ export const listEndpointsTool = (
           const endpointState = (metadata?.Endpoint as Record<string, unknown> | undefined)
             ?.state as Record<string, unknown> | undefined;
 
-          const osLabel =
-            os.name && os.version ? `${os.name} ${os.version}` : os.name || 'Unknown';
+          const osLabel = os.name && os.version ? `${os.name} ${os.version}` : os.name || 'Unknown';
 
           return {
             hostName: (host.hostname as string) || 'unknown',
