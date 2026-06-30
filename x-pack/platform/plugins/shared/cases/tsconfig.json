@@ -14,6 +14,7 @@
     "@kbn/core",
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
+    "@kbn/lens-common",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
     // Required from './kibana.json'
