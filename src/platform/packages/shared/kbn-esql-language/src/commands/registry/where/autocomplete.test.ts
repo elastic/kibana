@@ -33,11 +33,6 @@ const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
 
-const whereContext = {
-  ...mockContext,
-  subquerySupport: true,
-};
-
 export const EMPTY_WHERE_SUGGESTIONS = [...getFieldNamesByType('any'), ...allEvalFns];
 
 export const EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS = [
@@ -51,7 +46,7 @@ const whereExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
-  context = whereContext,
+  context = mockContext,
   offset?: number
 ) => {
   return expectSuggestions(
@@ -465,7 +460,7 @@ describe('WHERE Autocomplete', () => {
     it('rangeToReplace starts at the typed word, not at the """ delimiter', async () => {
       const query = 'from index | WHERE KQL("""field_na';
       const kqlStartOffset = 'from index | WHERE KQL("""'.length;
-      const results = await suggest(query, whereContext, 'where', mockCallbacks, autocomplete);
+      const results = await suggest(query, mockContext, 'where', mockCallbacks, autocomplete);
 
       const suggestion = results.find((s) => s.text === 'field_name');
       expect(suggestion).toBeDefined();
@@ -478,7 +473,7 @@ describe('WHERE Autocomplete', () => {
     it('rangeToReplace covers only the current word in multi-token KQL queries', async () => {
       const query = 'from index | WHERE KQL("""fieldA AND field_na';
       const wordStart = query.lastIndexOf('field_na');
-      const results = await suggest(query, whereContext, 'where', mockCallbacks, autocomplete);
+      const results = await suggest(query, mockContext, 'where', mockCallbacks, autocomplete);
 
       const suggestion = results.find((s) => s.text === 'field_name');
       expect(suggestion).toBeDefined();

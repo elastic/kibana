@@ -37,9 +37,6 @@ export const forkCommand = {
 | KEEP emp_no, _fork
 | SORT emp_no`,
     ],
-    subqueryRestrictions: {
-      hideInside: true,
-      hideOutside: true,
-    },
+    hiddenWhenQueryContainsSubqueries: true,
   },
 };
