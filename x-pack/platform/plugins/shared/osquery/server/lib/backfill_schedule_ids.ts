@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEqual, unset } from 'lodash';
 import { produce } from 'immer';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -60,17 +60,30 @@ export const reconcileScheduleIdsToWire = async ({
 }): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
-  const allPacks = await internalClient.find<PackSavedObject>({
-    type: packSavedObjectType,
-    perPage: 1000,
-    namespaces: ['*'],
-  });
+  // Page through every pack across all spaces — a deployment can have >1000
+  // packs, and a single missed page leaves those packs' `schedule_id` never
+  // projected onto the wire.
+  const PER_PAGE = 1000;
+  const allPackSavedObjects: Array<SavedObjectsFindResult<PackSavedObject>> = [];
+  let page = 1;
+  let total = Infinity;
+  do {
+    const response = await internalClient.find<PackSavedObject>({
+      type: packSavedObjectType,
+      perPage: PER_PAGE,
+      page,
+      namespaces: ['*'],
+    });
+    allPackSavedObjects.push(...response.saved_objects);
+    total = response.total;
+    page += 1;
+  } while (allPackSavedObjects.length < total);
 
   // Only enabled packs reach the Fleet wire. A pack whose SO carries
   // `schedule_id` values (guaranteed post-V4 for every query) is a reconcile
   // candidate; the per-policy wire-vs-SO diff gate below decides whether a
   // write is actually needed, so an already-in-sync pack is skipped.
-  const packsToReconcile = allPacks.saved_objects.filter(
+  const packsToReconcile = allPackSavedObjects.filter(
     (pack) => pack.attributes.enabled && pack.attributes.queries?.length
   );
 
@@ -116,11 +129,22 @@ export const reconcileScheduleIdsToWire = async ({
         continue;
       }
 
-      const { items: packagePolicies } = (await packagePolicyService.list(spaceClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      })) ?? { items: [] };
+      // Page through every osquery package policy in the space — a single
+      // space can hold >1000, and a missed page leaves that policy's wire
+      // unreconciled with no signal.
+      const packagePolicies: PackagePolicy[] = [];
+      let policyPage = 1;
+      let policyTotal = Infinity;
+      do {
+        const result = (await packagePolicyService.list(spaceClient, {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: PER_PAGE,
+          page: policyPage,
+        })) ?? { items: [], total: 0 };
+        packagePolicies.push(...result.items);
+        policyTotal = result.total ?? result.items.length;
+        policyPage += 1;
+      } while (packagePolicies.length < policyTotal);
 
       for (const pp of packagePolicies) {
         if (policyHasPack(pp, packSO.attributes.name, spaceId)) {

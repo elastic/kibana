@@ -10,7 +10,13 @@ import type {
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 import { v4 as uuidv4 } from 'uuid';
-import { savedQuerySchemaV2, packSchemaV2, packSchemaV3, packSchemaV4 } from './schemas';
+import {
+  savedQuerySchemaV2,
+  packSchemaV2,
+  packSchemaV3,
+  packSchemaV3ForwardCompat,
+  packSchemaV4,
+} from './schemas';
 
 export const savedQueryModelVersion1: SavedObjectsModelVersion = {
   changes: [
@@ -92,7 +98,7 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
     },
   ],
   schemas: {
-    forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
+    forwardCompatibility: packSchemaV3ForwardCompat.extends({}, { unknowns: 'ignore' }),
     // `create` is required for new model versions per #240919 (rollback support
     // soft-enforced 2025-11-05). The pack SO root is NOT `dynamic: false`,
     // so the SO-types lint requires every mapping field be declared here.

@@ -123,6 +123,34 @@ export const packSchemaV3 = packSchemaV2.extends({
   rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
 });
 
+const packQuerySchemaV3ForwardCompat = schema.object(
+  {
+    id: schema.maybe(schema.string()),
+    query: schema.maybe(schema.string()),
+    interval: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+    timeout: schema.maybe(schema.number()),
+    platform: schema.maybe(schema.string()),
+    version: schema.maybe(schema.string()),
+    ecs_mapping: schema.maybe(ecsMappingSchema),
+    snapshot: schema.maybe(schema.boolean()),
+    removed: schema.maybe(schema.boolean()),
+    schedule_type: schema.maybe(
+      schema.nullable(schema.oneOf([schema.literal('interval'), schema.literal('rrule')]))
+    ),
+    rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
+  },
+  { unknowns: 'ignore' }
+);
+
+export const packSchemaV3ForwardCompat = packSchemaV3.extends({
+  queries: schema.maybe(
+    schema.oneOf([
+      schema.recordOf(schema.string(), packQuerySchemaV3ForwardCompat),
+      schema.arrayOf(packQuerySchemaV3ForwardCompat, { maxSize: 1000 }),
+    ])
+  ),
+});
+
 // V4 is the deterministic `schedule_id` backfill model version.
 // It adds NO new top-level pack field: the backfilled
 // per-query `schedule_id` lives inside `queries`, which is `dynamic: false`,

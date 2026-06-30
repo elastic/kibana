@@ -163,6 +163,66 @@ describe('Pack saved object model version 3 forward compatibility', () => {
 
     expect(() => (forwardCompatibility as ObjectType).validate(syntheticV4Doc)).not.toThrow();
   });
+
+  it('strips the V4 per-query `schedule_id` on rollback read, keeping every other field', () => {
+    const v4StampedDoc = {
+      name: 'test-pack-1',
+      description: 'A test pack',
+      enabled: true,
+      created_at: '2024-01-01T00:00:00.000Z',
+      created_by: 'elastic',
+      updated_at: '2024-01-01T00:00:00.000Z',
+      updated_by: 'elastic',
+      queries: [
+        {
+          id: 'query1',
+          query: 'select * from processes;',
+          interval: 3600,
+          timeout: 300,
+          schedule_id: '310db1f6-e680-4471-982a-dfe304b6cf5a',
+        },
+      ],
+    };
+
+    const out = (forwardCompatibility as ObjectType).validate(v4StampedDoc) as {
+      queries: Array<Record<string, unknown>>;
+    };
+
+    expect(out.queries[0]).not.toHaveProperty('schedule_id');
+    // The rest of the query round-trips untouched.
+    expect(out.queries[0]).toMatchObject({
+      id: 'query1',
+      query: 'select * from processes;',
+      interval: 3600,
+      timeout: 300,
+    });
+  });
+
+  it('preserves per-query rrule overrides on rollback read (only schedule_id is shed)', () => {
+    const v4RruleDoc = {
+      name: 'rrule-pack',
+      enabled: true,
+      queries: [
+        {
+          id: 'q1',
+          query: 'select * from uptime;',
+          schedule_type: 'rrule',
+          rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-05-01T00:00:00.000Z' },
+          schedule_id: '00000000-0000-4000-8000-000000000000',
+        },
+      ],
+    };
+
+    const out = (forwardCompatibility as ObjectType).validate(v4RruleDoc) as {
+      queries: Array<Record<string, unknown>>;
+    };
+
+    expect(out.queries[0]).not.toHaveProperty('schedule_id');
+    expect(out.queries[0]).toMatchObject({
+      schedule_type: 'rrule',
+      rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-05-01T00:00:00.000Z' },
+    });
+  });
 });
 
 describe('Pack saved object model version 4 — schedule_id backfill (security-team#17841)', () => {

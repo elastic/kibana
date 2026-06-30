@@ -125,14 +125,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         title: 'Reconcile osquery pack schedule IDs onto the Fleet wire',
         timeout: '5m',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, abortController }) => ({
+        createTaskRunner: ({ abortController }) => ({
           run: async () => {
-            if (taskInstance.state?.completed) {
-              this.logger.debug('reconcileScheduleIdsToWire task: already completed, skipping');
-
-              return { state: { completed: true } };
-            }
-
             if (!this.coreStart) {
               throw new Error('Core not started');
             }
