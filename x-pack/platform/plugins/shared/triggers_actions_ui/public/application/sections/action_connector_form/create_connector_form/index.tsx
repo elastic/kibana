@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -17,14 +15,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import type { ActionConnector, ActionTypeRegistryContract } from '../../../../types';
-import { hasSaveActionsCapability } from '../../../lib/capabilities';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useCreateConnector } from '../../../hooks/use_create_connector';
-import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
+import { useConnectorCreateForm } from '../use_connector_create_form';
 
 export interface CreateConnectorFormProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -58,11 +51,11 @@ export interface CreateConnectorFormHandle {
  * type picker, so it can be embedded in another container (e.g. the Agent
  * Builder attachment canvas) without nesting a flyout/focus-trap.
  *
- * It reuses the same load-bearing pieces as the flyout: `useActionTypeModel`
- * (resolves stack or spec-based models), `ConnectorForm` (renders the type's
- * config/secret fields, validation, serializer), and `useCreateConnector`
- * (POSTs to the Actions API). Config and secrets go straight to that API and
- * never pass through the host.
+ * The create-form core (action type model resolution, form state, validation +
+ * create) is shared with the flyout via {@link useConnectorCreateForm}; this
+ * component only renders that single-type form and exposes a submit handle.
+ * Config and secrets go straight to the Actions API and never pass through the
+ * host.
  */
 const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   actionTypeRegistry,
@@ -72,87 +65,23 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   onReady,
 }) => {
   const {
-    application: { capabilities },
-    http,
-    uiSettings,
-  } = useKibana().services;
-  const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
-
-  const isMounted = useRef(false);
-  const canSave = hasSaveActionsCapability(capabilities);
-  const [showFormErrors, setShowFormErrors] = useState(false);
-  const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
-    useState<ReactNode>(null);
-  const [formState, setFormState] = useState<ConnectorFormState>({
-    isSubmitted: false,
-    isSubmitting: false,
-    isValid: undefined,
-    submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
-    preSubmitValidator: null,
-  });
-  const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
-
-  const {
     actionTypeModel,
-    isLoading: isLoadingActionTypeModel,
-    error: actionTypeModelError,
-    refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, uiSettings });
-
-  // Delay the spinner so quick model loads don't flash a loading state.
-  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
-  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
     isLoadingActionTypeModel,
-  ]);
-
-  const defaultConnector = useMemo(
-    () => ({
-      actionTypeId,
-      name: initialName ?? '',
-      isDeprecated: false,
-      config: {},
-      secrets: {},
-      isMissingSecrets: false,
-    }),
-    [actionTypeId, initialName]
-  );
-
-  const hasErrors = isFormValid === false;
-  const isSaving = isSavingConnector || isSubmitting;
-  const isSubmitDisabled =
-    hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError || !actionTypeModel;
-
-  const validateAndCreateConnector = useCallback(async (): Promise<ActionConnector | undefined> => {
-    setPreSubmitValidationErrorMessage(null);
-    setShowFormErrors(false);
-
-    const { isValid, data } = await submit();
-    if (!isMounted.current) {
-      return undefined;
-    }
-
-    if (isValid) {
-      if (preSubmitValidator) {
-        const validatorRes = await preSubmitValidator();
-        if (validatorRes) {
-          setPreSubmitValidationErrorMessage(validatorRes.message);
-          return undefined;
-        }
-      }
-
-      const { actionTypeId: typeId, name, config, secrets, id } = data;
-      return createConnector({
-        actionTypeId: typeId,
-        name: name ?? '',
-        config: config ?? {},
-        secrets: secrets ?? {},
-        id: id ?? '',
-      });
-    }
-
-    setShowFormErrors(true);
-    return undefined;
-  }, [submit, preSubmitValidator, createConnector]);
+    actionTypeModelError,
+    refetchConnectorSpec,
+    showLoadingSpinner,
+    setFormState,
+    defaultConnector,
+    isSaving,
+    isSubmitDisabled,
+    showFormErrors,
+    preSubmitValidationErrorMessage,
+    validateAndCreateConnector,
+  } = useConnectorCreateForm({
+    actionTypeRegistry,
+    actionTypeId,
+    initialConnector: initialName ? { name: initialName } : undefined,
+  });
 
   // Expose a stable handle whose submit always runs the latest logic.
   const submitRef = useRef(validateAndCreateConnector);
@@ -170,13 +99,6 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   useEffect(() => {
     onStateChange?.({ isSubmitDisabled, isSaving });
   }, [onStateChange, isSubmitDisabled, isSaving]);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   const handleErrorFocus = useCallback((node: HTMLDivElement) => {
     node?.focus();
