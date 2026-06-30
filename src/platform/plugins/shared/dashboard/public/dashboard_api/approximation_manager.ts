@@ -50,7 +50,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
           map(([latestState, lastSavedState]) => {
             return diffComparators(
               comparators,
-              { use_approximation: lastSavedState.use_approximation },
+              { use_approximation: lastSavedState.use_approximation ?? false },
               latestState
             );
           })
