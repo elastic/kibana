@@ -143,6 +143,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return (record: Ecs): boolean =>
           Boolean(
             [
+              // Requests may log the embeddable context without an enclosing app context
+              'kibana:',
               'kibana:application:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;',
               // Race conditions may miss the dashboard ID at the top level
               'kibana:application:dashboards:;',
