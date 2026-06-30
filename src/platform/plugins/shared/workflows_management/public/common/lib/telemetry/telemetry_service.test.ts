@@ -16,11 +16,13 @@ import { workflowsTelemetryEvents } from './events/workflows';
 import { TelemetryService } from './telemetry_service';
 
 describe('TelemetryService', () => {
-  it('registers workflow and change history event types', () => {
+  it('registers workflow and change history event types', async () => {
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     const service = new TelemetryService();
 
     service.setup({ analytics });
+
+    await new Promise((resolve) => setImmediate(resolve));
 
     const expectedEventCount =
       workflowsTelemetryEvents.length + changeHistoryTelemetryEvents.length;

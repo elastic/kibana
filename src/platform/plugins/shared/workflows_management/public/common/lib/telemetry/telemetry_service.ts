@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { changeHistoryTelemetryEvents } from '@kbn/change-history-ui';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { workflowsTelemetryEvents } from './events/workflows';
 import type { TelemetryServiceClient, TelemetryServiceSetupParams } from './types';
@@ -21,8 +20,16 @@ export class TelemetryService {
 
   public setup({ analytics }: TelemetryServiceSetupParams) {
     this.analytics = analytics;
-    [...workflowsTelemetryEvents, ...changeHistoryTelemetryEvents].forEach((eventConfig) =>
-      analytics.registerEventType(eventConfig)
+    workflowsTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
+
+    // Lazy-load change-history telemetry schemas to avoid pulling the full
+    // @kbn/change-history-ui package into the plugin page-load bundle.
+    void import('@kbn/change-history-ui/src/telemetry/events').then(
+      ({ changeHistoryTelemetryEvents }) => {
+        changeHistoryTelemetryEvents.forEach((eventConfig) =>
+          analytics.registerEventType(eventConfig)
+        );
+      }
     );
   }
 
