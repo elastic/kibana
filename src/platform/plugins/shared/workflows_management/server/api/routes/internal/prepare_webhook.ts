@@ -8,7 +8,7 @@
  */
 
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import { AVAILABILITY, INTERNAL_API_VERSION, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
@@ -32,7 +32,7 @@ export function registerPrepareWebhookRoute(deps: RouteDependencies) {
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: INTERNAL_API_VERSION,
         validate: {
           request: {
             params: idParamSchema,
