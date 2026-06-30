@@ -192,9 +192,7 @@ describe('getOptionInputText', () => {
     const start = '2026-05-01T00:00:00.000Z';
     const end = '2026-05-02T23:59:00.000Z';
 
-    expect(
-      getOptionInputText({ start, end, label: 'May 1, 00:00 → May 2, 23:59' })
-    ).toBe(
+    expect(getOptionInputText({ start, end, label: 'May 1, 00:00 → May 2, 23:59' })).toBe(
       `${moment.utc(start).local().format('MMM D, YYYY, HH:mm:ss.SSS')} to ${moment
         .utc(end)
         .local()
