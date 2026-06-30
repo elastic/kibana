@@ -28,11 +28,11 @@ rule-management,platform,Update my CPU spike alert rule to notify via PagerDuty 
 rule-management,platform,I need to get paged when my database response time stays above 500ms for 5 minutes straight,indirect,rule-management,
 rule-management,platform,Set up a notification so my team knows when disk usage hits 80 percent on any production host,indirect,rule-management,
 rule-management,platform,Show me all the detection rules currently enabled in my security environment,distractor,find-security-rules,Distractor: listing rules sounds like rule-management but security detection rules belong to find-rules
-sig-events-memory,streams,Search the significant events knowledge base for what we know about the payments service architecture,direct,sig-events-memory,
-sig-events-memory,streams,Add a knowledge base entry describing the normal traffic patterns of our auth microservice,direct,sig-events-memory,
-sig-events-memory,streams,What does the system know about our Kafka cluster and its typical behavior?,indirect,sig-events-memory,
-sig-events-memory,streams,Update the memory with the fact that our order-service was migrated to Kubernetes last week,indirect,sig-events-memory,
-sig-events-memory,streams,Find recent significant events related to latency spikes in the checkout service,distractor,sig-events-management,AMBIGUOUS: knowledge base read vs event search are easy to confuse; distractor targets sig-events-management
+significant-events-memory,streams,Search the significant events knowledge base for what we know about the payments service architecture,direct,significant-events-memory,
+significant-events-memory,streams,Add a knowledge base entry describing the normal traffic patterns of our auth microservice,direct,significant-events-memory,
+significant-events-memory,streams,What does the system know about our Kafka cluster and its typical behavior?,indirect,significant-events-memory,
+significant-events-memory,streams,Update the memory with the fact that our order-service was migrated to Kubernetes last week,indirect,significant-events-memory,
+significant-events-memory,streams,Find recent significant events related to latency spikes in the checkout service,distractor,significant-events-management,AMBIGUOUS: knowledge base read vs event search are easy to confuse; distractor targets significant-events-management
 streams-management,streams,Show me the schema and field mappings for the logs.otel stream,direct,streams-management,
 streams-management,streams,Update the retention policy on the logs.ecs.android stream to 90 days,direct,streams-management,
 streams-management,streams,Some of my log events are being dropped at ingestion — what is going wrong with my pipeline?,indirect,streams-management,
