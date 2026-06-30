@@ -33,7 +33,7 @@ export enum ChangeHistoryTelemetryEventTypes {
   RestoreFailed = 'change_history_restore_failed',
 }
 
-export type ChangeHistorySelectionSource = 'user_click' | 'auto_latest' | 'deep_link';
+export type ChangeHistorySelectionSource = 'user_click' | 'auto_latest';
 
 export type ChangeHistoryFilterType = 'timeRange' | 'actor';
 
@@ -55,7 +55,7 @@ export interface ReportChangeHistoryChangeSelectedActionParams
   eventName: string;
   hasSequence: boolean;
   eventAction?: string;
-  selectionSource?: ChangeHistorySelectionSource;
+  selectionSource: ChangeHistorySelectionSource;
 }
 
 export interface ReportChangeHistoryFilterAppliedActionParams

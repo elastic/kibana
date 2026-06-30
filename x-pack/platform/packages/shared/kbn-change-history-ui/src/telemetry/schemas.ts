@@ -86,8 +86,8 @@ const changeSelectedSchema: RootSchema<ReportChangeHistoryChangeSelectedActionPa
   selectionSource: {
     type: 'keyword',
     _meta: {
-      description: 'How selection happened: user_click, auto_latest, or deep_link',
-      optional: true,
+      description: 'How selection happened: user_click or auto_latest',
+      optional: false,
     },
   },
 };

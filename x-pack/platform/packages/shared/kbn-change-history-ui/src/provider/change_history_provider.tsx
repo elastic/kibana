@@ -55,14 +55,6 @@ export const ChangeHistoryProvider = ({
     setIsOpen(false);
   }
 
-  const openModal = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
   const supports = useMemo(
     () => resolveChangeHistorySupports(adapter, { features, permissions }),
     [adapter, features, permissions]
@@ -77,6 +69,19 @@ export const ChangeHistoryProvider = ({
       }),
     [analytics, features?.telemetry, scope]
   );
+
+  const openModal = useCallback(() => {
+    setIsOpen((wasOpen) => {
+      if (!wasOpen) {
+        telemetry.reportOpened();
+      }
+      return true;
+    });
+  }, [telemetry]);
+
+  const closeModal = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   const configValue = useMemo(
     () => ({

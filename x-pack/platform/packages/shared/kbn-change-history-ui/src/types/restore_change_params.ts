@@ -6,8 +6,18 @@
  */
 
 /** Parameters for restoring a historical change through the domain adapter. */
+export interface ChangeHistoryRestoreTelemetryParams {
+  restoredFromSequence?: number;
+  currentSequence?: number;
+  rollbackDistance?: number;
+}
+
 export interface RestoreChangeParams {
   objectId: string;
   changeId: string;
   signal?: AbortSignal;
+  /** Sequence context for restore KPI telemetry (confirm/complete events). */
+  restoreTelemetry?: ChangeHistoryRestoreTelemetryParams;
+  /** Timestamp captured when the user confirmed restore — used for durationMs. */
+  confirmedAtMs?: number;
 }

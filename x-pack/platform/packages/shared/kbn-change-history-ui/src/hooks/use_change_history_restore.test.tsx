@@ -10,9 +10,16 @@ import React from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { useChangeHistoryRestore } from './use_change_history_restore';
+import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
 import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../test_utils/change_history_test_fixtures';
 import { changeHistoryObjectQueryKeyPrefix } from './change_history_list_query_key';
 import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+
+const testScope = {
+  module: 'stack',
+  dataset: 'workflows',
+  objectType: 'workflow',
+};
 
 const createAdapter = (
   restoreChange: ChangeHistoryAdapter['restoreChange']
@@ -25,7 +32,8 @@ const createAdapter = (
 const createHarness = (
   adapter: ChangeHistoryAdapter,
   features: { restore?: boolean } = { restore: true },
-  permissions: { canRestore?: boolean } = { canRestore: true }
+  permissions: { canRestore?: boolean } = { canRestore: true },
+  reportEvent?: jest.Mock
 ) => {
   const { wrapper: QueryClientWrapper, queryClient } = createQueryClientWrapper();
 
@@ -38,6 +46,8 @@ const createHarness = (
         permissions={permissions}
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => null}
+        scope={reportEvent ? testScope : undefined}
+        analytics={reportEvent ? { reportEvent } : undefined}
       >
         {children}
       </ChangeHistoryProvider>
@@ -145,5 +155,78 @@ describe('useChangeHistoryRestore', () => {
     expect(invalidateSpy).not.toHaveBeenCalled();
     expect(onRestored).not.toHaveBeenCalled();
     expect(result.current.canRestore).toBe(false);
+  });
+
+  it('reports restore_completed telemetry on success', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const adapter = createAdapter(restoreChange);
+    const { wrapper } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
+
+    await act(async () => {
+      await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: {
+          restoredFromSequence: 3,
+          currentSequence: 7,
+          rollbackDistance: 4,
+        },
+        confirmedAtMs: Date.now() - 25,
+      });
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+      expect.objectContaining({
+        eventName: 'Change history restore completed',
+        ...testScope,
+        restoredFromSequence: 3,
+        currentSequence: 7,
+        rollbackDistance: 4,
+        durationMs: expect.any(Number),
+      })
+    );
+  });
+
+  it('reports restore_failed telemetry when restore fails', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockRejectedValue({
+      body: {
+        code: 'RESTORE_CONFLICT',
+        message: 'Object was updated by another user.',
+      },
+    });
+    const adapter = createAdapter(restoreChange);
+    const { wrapper } = createHarness(
+      adapter,
+      { restore: true },
+      { canRestore: true },
+      reportEvent
+    );
+
+    const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
+
+    await act(async () => {
+      await result.current.restoreChange({
+        objectId: TEST_OBJECT_ID,
+        changeId: 'evt-3',
+        restoreTelemetry: { rollbackDistance: 4 },
+        confirmedAtMs: Date.now(),
+      });
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.RestoreFailed, {
+      eventName: 'Change history restore failed',
+      ...testScope,
+      errorCode: 'RESTORE_CONFLICT',
+    });
   });
 });

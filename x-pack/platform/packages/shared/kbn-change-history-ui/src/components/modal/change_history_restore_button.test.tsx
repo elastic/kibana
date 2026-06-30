@@ -12,6 +12,7 @@ import React from 'react';
 import { ChangeHistoryProvider } from '../../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../../types/change_history_detail';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { ChangeHistoryRestoreButton } from './change_history_restore_button';
 import {
   TEST_OBJECT_ID,
@@ -19,6 +20,13 @@ import {
   TEST_SNAPSHOT_OLD,
 } from '../../test_utils/change_history_test_fixtures';
 import { createQueryClientWrapper } from '../../test_utils/create_query_client_wrapper';
+import { ChangeHistoryTelemetryEventTypes } from '../../telemetry/types';
+
+const testScope = {
+  module: 'stack',
+  dataset: 'workflows',
+  objectType: 'workflow',
+};
 
 const historicalChange: ChangeHistoryDetail = {
   id: 'evt-3',
@@ -29,7 +37,7 @@ const historicalChange: ChangeHistoryDetail = {
   snapshot: TEST_SNAPSHOT_OLD,
 };
 
-const currentChange: ChangeHistoryDetail = {
+const liveChange: ChangeHistoryDetail = {
   ...historicalChange,
   id: 'evt-7',
   isCurrent: true,
@@ -38,14 +46,18 @@ const currentChange: ChangeHistoryDetail = {
 
 const renderButton = ({
   change = historicalChange,
+  currentChange,
   features = { restore: true },
   permissions = { canRestore: true },
   restoreChange = jest.fn().mockResolvedValue(undefined),
+  reportEvent,
 }: {
   change?: ChangeHistoryDetail;
+  currentChange?: ChangeHistoryListItem;
   features?: { restore?: boolean };
   permissions?: { canRestore?: boolean };
   restoreChange?: ChangeHistoryAdapter['restoreChange'];
+  reportEvent?: jest.Mock;
 } = {}) => {
   const adapter: ChangeHistoryAdapter = {
     listChanges: jest.fn(),
@@ -65,8 +77,10 @@ const renderButton = ({
           features={features}
           permissions={permissions}
           renderPreview={() => null}
+          scope={reportEvent ? testScope : undefined}
+          analytics={reportEvent ? { reportEvent } : undefined}
         >
-          <ChangeHistoryRestoreButton change={change} />
+          <ChangeHistoryRestoreButton change={change} currentChange={currentChange} />
         </ChangeHistoryProvider>
       </QueryClientWrapper>
     </I18nProvider>
@@ -75,7 +89,7 @@ const renderButton = ({
 
 describe('ChangeHistoryRestoreButton', () => {
   it('renders nothing for the current version', () => {
-    renderButton({ change: currentChange });
+    renderButton({ change: liveChange });
 
     expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
   });
@@ -106,6 +120,66 @@ describe('ChangeHistoryRestoreButton', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('changeHistoryRestoreConfirmModal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('reports restore_confirmed and restore_completed telemetry on successful restore', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockResolvedValue(undefined);
+
+    renderButton({ restoreChange, reportEvent, currentChange: liveChange });
+
+    fireEvent.click(screen.getByTestId('changeHistoryRestoreButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(
+        ChangeHistoryTelemetryEventTypes.RestoreConfirmed,
+        expect.objectContaining({
+          eventName: 'Change history restore confirmed',
+          ...testScope,
+          restoredFromSequence: 3,
+          currentSequence: 7,
+          rollbackDistance: 4,
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(
+        ChangeHistoryTelemetryEventTypes.RestoreCompleted,
+        expect.objectContaining({
+          eventName: 'Change history restore completed',
+          ...testScope,
+          restoredFromSequence: 3,
+          currentSequence: 7,
+          rollbackDistance: 4,
+          durationMs: expect.any(Number),
+        })
+      );
+    });
+  });
+
+  it('reports restore_failed telemetry when restore fails', async () => {
+    const reportEvent = jest.fn();
+    const restoreChange = jest.fn().mockRejectedValue({
+      body: {
+        code: 'RESTORE_VALIDATION',
+        message: 'Validation failed.',
+      },
+    });
+
+    renderButton({ restoreChange, reportEvent, currentChange: liveChange });
+
+    fireEvent.click(screen.getByTestId('changeHistoryRestoreButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.RestoreFailed, {
+        eventName: 'Change history restore failed',
+        ...testScope,
+        errorCode: 'RESTORE_VALIDATION',
+      });
     });
   });
 

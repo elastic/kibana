@@ -23,7 +23,10 @@ export type {
   ChangeHistorySupports,
 } from './change_history_features';
 export type { ChangeHistoryLabels } from './change_history_labels';
-export type { RestoreChangeParams } from './restore_change_params';
+export type {
+  RestoreChangeParams,
+  ChangeHistoryRestoreTelemetryParams,
+} from './restore_change_params';
 export type {
   ChangeHistoryHttpClient,
   ChangeHistoryHttpGetOptions,

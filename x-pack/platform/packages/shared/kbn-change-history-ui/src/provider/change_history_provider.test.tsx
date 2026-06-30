@@ -14,6 +14,7 @@ import { ChangeHistoryTrigger } from '../components/modal/change_history_trigger
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { ChangeHistoryProvider } from './change_history_provider';
 import { useChangeHistoryConfig } from './use_change_history_config';
+import { useChangeHistoryModal } from './use_change_history_modal';
 import {
   TEST_OBJECT_ID_A,
   TEST_OBJECT_ID_B,
@@ -63,6 +64,69 @@ const Harness = ({
 );
 
 describe('ChangeHistoryProvider', () => {
+  it('reports change_history_opened when the modal is opened', () => {
+    const reportEvent = jest.fn();
+    render(<Harness objectId={TEST_OBJECT_ID_A} reportEvent={reportEvent} />);
+
+    fireEvent.click(screen.getByTestId('changeHistoryTrigger'));
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.Opened, {
+      eventName: 'Change history opened',
+      ...testScope,
+    });
+  });
+
+  it('does not report change_history_opened when telemetry is disabled', () => {
+    const reportEvent = jest.fn();
+    render(
+      <Harness objectId={TEST_OBJECT_ID_A} reportEvent={reportEvent} telemetryEnabled={false} />
+    );
+
+    fireEvent.click(screen.getByTestId('changeHistoryTrigger'));
+
+    expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('reports change_history_opened only once per open transition', () => {
+    const reportEvent = jest.fn();
+
+    const Probe = () => {
+      const { openModal } = useChangeHistoryModal();
+      return (
+        <button
+          type="button"
+          data-test-subj="openTwice"
+          onClick={() => {
+            openModal();
+            openModal();
+          }}
+        />
+      );
+    };
+
+    render(
+      <I18nProvider>
+        <QueryClientWrapper>
+          <ChangeHistoryProvider
+            objectId={TEST_OBJECT_ID_A}
+            adapter={adapter}
+            labels={{ previewTitle: TEST_OBJECT_TITLE }}
+            renderPreview={() => null}
+            scope={testScope}
+            analytics={{ reportEvent }}
+          >
+            <Probe />
+          </ChangeHistoryProvider>
+        </QueryClientWrapper>
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('openTwice'));
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+  });
+
   it('closes the modal when objectId changes', () => {
     const { rerender } = render(<Harness objectId={TEST_OBJECT_ID_A} />);
 
