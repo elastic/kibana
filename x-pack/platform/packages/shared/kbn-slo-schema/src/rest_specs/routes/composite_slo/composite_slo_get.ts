@@ -6,11 +6,12 @@
  */
 import { z } from '@kbn/zod';
 import {
+  compositeSloDefinitionResponseSchema,
   compositeSloIdSchema,
   compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
-const getCompositeSLOParamsSchema = z.object({
+const getCompositeSLODefinitionParamsSchema = z.object({
   path: z.object({
     id: compositeSloIdSchema,
   }),
@@ -18,7 +19,12 @@ const getCompositeSLOParamsSchema = z.object({
 
 const getCompositeSLOResponseSchema = compositeSloWithSummaryResponseSchema;
 
+const getCompositeSLOParamsSchema = getCompositeSLODefinitionParamsSchema;
+
+const getCompositeSLODefinitionResponseSchema = compositeSloDefinitionResponseSchema;
+
 type GetCompositeSLOResponse = z.output<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLODefinitionResponse = z.output<typeof getCompositeSLODefinitionResponseSchema>;
 
 export { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema };
-export type { GetCompositeSLOResponse };
+export type { GetCompositeSLOResponse, GetCompositeSLODefinitionResponse };
