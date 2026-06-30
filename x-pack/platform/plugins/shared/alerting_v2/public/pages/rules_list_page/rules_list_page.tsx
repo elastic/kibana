@@ -39,7 +39,10 @@ import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_po
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
-import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import {
+  RuleCreateOptionsPanel,
+  CREATE_WITH_AGENT_DISABLED_TOOLTIP,
+} from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 
 const DEFAULT_PER_PAGE = 20;
@@ -68,6 +71,11 @@ export const RulesListPage = () => {
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
+  // We always render the "Create with agent" entry points; when the skill is unavailable they
+  // are shown disabled with a tooltip rather than hidden.
+  const createWithAgentDisabledReason = isRuleManagementABSkillAvailable
+    ? undefined
+    : CREATE_WITH_AGENT_DISABLED_TOOLTIP;
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -210,22 +218,20 @@ export const RulesListPage = () => {
                                   },
                                   'data-test-subj': 'createEsqlRuleButton',
                                 },
-                                ...(isRuleManagementABSkillAvailable
-                                  ? [
-                                      {
-                                        name: i18n.translate(
-                                          'xpack.alertingV2.rulesList.createWithAgentButton',
-                                          { defaultMessage: 'Create with agent' }
-                                        ),
-                                        icon: 'sparkles' as const,
-                                        onClick: () => {
-                                          closeCreateMenu();
-                                          navigateToAgentBuilder();
-                                        },
-                                        'data-test-subj': 'createWithAgentButton',
-                                      },
-                                    ]
-                                  : []),
+                                {
+                                  name: i18n.translate(
+                                    'xpack.alertingV2.rulesList.createWithAgentButton',
+                                    { defaultMessage: 'Create with agent' }
+                                  ),
+                                  icon: 'sparkles' as const,
+                                  disabled: !isRuleManagementABSkillAvailable,
+                                  toolTipContent: createWithAgentDisabledReason,
+                                  onClick: () => {
+                                    closeCreateMenu();
+                                    navigateToAgentBuilder();
+                                  },
+                                  'data-test-subj': 'createWithAgentButton',
+                                },
                               ],
                             },
                           ]}
@@ -267,7 +273,8 @@ export const RulesListPage = () => {
       {showEmptyState ? (
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined}
+          onCreateWithAgent={navigateToAgentBuilder}
+          createWithAgentDisabledReason={createWithAgentDisabledReason}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
@@ -320,9 +327,8 @@ export const RulesListPage = () => {
         <RuleCreateOptionsFlyout
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
-          onCreateWithAgent={
-            isRuleManagementABSkillAvailable ? onCreateWithAgentFromOptionsFlyout : undefined
-          }
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          createWithAgentDisabledReason={createWithAgentDisabledReason}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}

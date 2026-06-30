@@ -83,19 +83,24 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the AI Agent option when onCreateWithAgent is not provided', () => {
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentDisabledReason is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsFlyout
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabledReason="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
       </I18nProvider>
     );
 
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
-    expect(screen.queryByText('Create with AI Agent')).not.toBeInTheDocument();
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    const agentButton = screen.getByRole('button', { name: /create with ai agent/i });
+    expect(agentButton).toBeInTheDocument();
+    expect(agentButton).toBeDisabled();
+
+    fireEvent.click(agentButton);
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });

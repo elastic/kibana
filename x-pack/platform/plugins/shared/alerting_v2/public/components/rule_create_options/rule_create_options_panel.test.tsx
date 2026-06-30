@@ -75,18 +75,40 @@ describe('RuleCreateOptionsPanel', () => {
     expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the agent card when onCreateWithAgent is not provided', () => {
+  it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentDisabledReason is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsPanel
           onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabledReason="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
-    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
-    expect(screen.getByTestId('createThresholdAlertCard')).toBeInTheDocument();
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    expect(agentCard).toBeDisabled();
+
+    fireEvent.click(agentCard);
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
+  });
+
+  it('shows the disabled reason as a tooltip when the disabled agent card is hovered', async () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabledReason="Missing privileges"
+          onCreateThresholdAlert={onCreateThresholdAlert}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.mouseOver(screen.getByTestId('createWithAgentCard'));
+
+    expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
   });
 });
