@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * This file is loaded only when generating the public OpenAPI spec. Always import it lazily
- * from a route's `oasOperationObject` thunk so the example payloads do not ship with the
- * server bundle at runtime.
- */
-
 import type { MarkdownCreateRequestBody, MarkdownCreateResponseBody } from './create/types';
 import type { MarkdownReadResponseBody } from './read/types';
 import type { MarkdownSearchResponseBody } from './search/types';
