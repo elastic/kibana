@@ -7,13 +7,13 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
+import type { TaskStatus } from '@kbn/streams-schema';
 import {
   esqlQuerySchema,
   queryFeatureSchema,
   queryTypeSchema,
   type StreamQuery,
 } from '../../queries';
-import type { TaskStatus } from '../../tasks/types';
 import type { Discovery } from '../../significant_events/discoveries';
 import type { Detection } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
