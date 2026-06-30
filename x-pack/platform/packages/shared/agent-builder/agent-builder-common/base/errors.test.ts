@@ -8,12 +8,14 @@
 import {
   isAgentBuilderError,
   createInternalError,
+  createBadRequestError,
   createToolNotFoundError,
   isInternalError,
   isToolNotFoundError,
   AgentBuilderErrorCode,
   createAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   createAgentNotFoundError,
   createHooksExecutionError,
   createWorkflowExecutionError,
@@ -158,6 +160,28 @@ describe('AgentBuilder errors', () => {
     it('should return false for a regular Error', () => {
       const error = new Error('test error');
       expect(isAgentNotFoundError(error)).toBe(false);
+    });
+  });
+
+  describe('isAgentUnavailableError', () => {
+    it('should return true for the matching agent unavailable error', () => {
+      const error = createBadRequestError('Agent test-agent is not available');
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(true);
+    });
+
+    it('should return false for a different agent unavailable error', () => {
+      const error = createBadRequestError('Agent other-agent is not available');
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
+    });
+
+    it('should return false for an agent not found error', () => {
+      const error = createAgentNotFoundError({
+        agentId: 'test-agent',
+      });
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
     });
   });
 

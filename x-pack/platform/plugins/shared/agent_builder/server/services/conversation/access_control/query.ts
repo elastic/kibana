@@ -38,7 +38,7 @@ const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
  * Builds the Elasticsearch filter for listing readable conversations.
  *
  * A conversation is listable when it is public or owned by the current user, and
- * its underlying agent is one the user can access.
+ * its underlying agent is one the user can currently access.
  */
 export const buildReadAccessFilter = ({
   user,

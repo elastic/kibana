@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { createAgentNotFoundError } from '@kbn/agent-builder-common';
+import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control/types';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
@@ -211,6 +211,14 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
+
+    it('returns an empty list when the user cannot access any underlying agents', async () => {
+      agentRegistry.list.mockResolvedValue([]);
+
+      await expect(client.list()).resolves.toEqual([]);
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
   });
 
   describe('get', () => {
@@ -244,6 +252,34 @@ describe('ConversationClient', () => {
               accessMode: ConversationAccessControlMode.Public,
             }),
           ],
+        },
+      });
+
+      await expect(client.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+    });
+
+    it('returns not found for owned conversations when agent use access fails', async () => {
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument()],
+        },
+      });
+
+      await expect(client.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+    });
+
+    it('returns not found when the underlying agent is unavailable', async () => {
+      agentRegistry.get.mockRejectedValue(createBadRequestError('Agent agent-1 is not available'));
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument()],
         },
       });
 
@@ -362,6 +398,22 @@ describe('ConversationClient', () => {
 
       await expect(
         client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('returns not found for owned converse updates when agent use access fails', async () => {
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument()],
+        },
+      });
+
+      await expect(
+        client.update({ id: 'conversation-1', read: true }, { access: 'converse' })
       ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });

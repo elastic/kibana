@@ -397,6 +397,15 @@ apiTest.describe(
           accessMode: ConversationAccessControlMode.Public,
         });
 
+        const bobOwnedPublicConversation = await createConversationAs({
+          apiClient,
+          user: bob,
+          agentId,
+          input: 'Bob-owned public conversation access test',
+          title: 'Bob-Owned Public Conversation Access Test',
+          accessMode: ConversationAccessControlMode.Public,
+        });
+
         const privateConversation = await createConversationAs({
           apiClient,
           user: alice,
@@ -501,12 +510,13 @@ apiTest.describe(
         });
 
         await apiTest.step(
-          'Bob loses list and get access when the underlying agent becomes private',
+          'Bob loses access when the underlying agent becomes private',
           async () => {
             await setAgentAccessModeAs(apiClient, alice, agentId, AgentAccessControlMode.Private);
 
             const bobConversationIds = await listConversationIdsAs(apiClient, bob);
             expect(bobConversationIds).not.toContain(publicConversation.conversation_id);
+            expect(bobConversationIds).not.toContain(bobOwnedPublicConversation.conversation_id);
 
             const getPublicResponse = await apiClient.get(
               `${accessControlApiBase}/conversations/${encodeURIComponent(
@@ -516,6 +526,30 @@ apiTest.describe(
             );
             expect(getPublicResponse).toHaveStatusCode(404);
 
+            const getOwnPublicResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                bobOwnedPublicConversation.conversation_id
+              )}`,
+              { headers: headersFor(bob), responseType: 'json' }
+            );
+            expect(getOwnPublicResponse).toHaveStatusCode(404);
+
+            const continueOwnPublicResponse = await apiClient.post(
+              `${accessControlApiBase}/converse`,
+              {
+                headers: headersFor(bob),
+                body: {
+                  agent_id: agentId,
+                  conversation_id: bobOwnedPublicConversation.conversation_id,
+                  input: 'Bob-owned public follow-up after revocation',
+                  connector_id: connectorId,
+                  _execution_mode: 'local',
+                },
+                responseType: 'json',
+              }
+            );
+            expect(continueOwnPublicResponse).toHaveStatusCode(404);
+
             const markReadResponse = await markConversationReadAs(
               apiClient,
               bob,
@@ -523,6 +557,14 @@ apiTest.describe(
               false
             );
             expect(markReadResponse).toHaveStatusCode(404);
+
+            const markOwnReadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              bobOwnedPublicConversation.conversation_id,
+              false
+            );
+            expect(markOwnReadResponse).toHaveStatusCode(404);
           }
         );
       }

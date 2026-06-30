@@ -165,6 +165,10 @@ export const isAgentNotFoundError = (err: unknown): err is AgentBuilderAgentNotF
   return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.agentNotFound;
 };
 
+export const isAgentUnavailableError = (err: unknown, agentId: string): boolean => {
+  return isBadRequestError(err) && err.message === `Agent ${agentId} is not available`;
+};
+
 export const createAgentNotFoundError = ({
   agentId,
   customMessage,
@@ -385,6 +389,7 @@ export const AgentBuilderErrorUtils = {
   isToolNotFoundError,
   isSkillNotFoundError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
   isPluginNotFoundError,
   isWorkflowAbortedError,

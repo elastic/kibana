@@ -13,6 +13,7 @@ import {
   type Conversation,
   createConversationNotFoundError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
@@ -223,8 +224,9 @@ class ConversationClientImpl implements ConversationClient {
 
   /**
    * Fetches a conversation and applies the requested access gate. Converse access
-   * also requires use access to the underlying agent; all denials are masked as
-   * not-found responses so callers cannot distinguish inaccessible conversations.
+   * requires current use access to the underlying agent even for conversation
+   * owners; all denials are masked as not-found responses so callers cannot
+   * distinguish inaccessible conversations.
    */
   private async getDocumentWithAccess({
     conversationId,
@@ -250,7 +252,10 @@ class ConversationClientImpl implements ConversationClient {
           try {
             await this.agentRegistry.get(conversation.agent_id, { access: 'use' });
           } catch (error) {
-            if (!isAgentNotFoundError(error)) {
+            if (
+              !isAgentNotFoundError(error) &&
+              !isAgentUnavailableError(error, conversation.agent_id)
+            ) {
               throw error;
             }
 

@@ -61,6 +61,7 @@ export {
   isSkillNotFoundError,
   isAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
   isPluginNotFoundError,
   isBadRequestError,
