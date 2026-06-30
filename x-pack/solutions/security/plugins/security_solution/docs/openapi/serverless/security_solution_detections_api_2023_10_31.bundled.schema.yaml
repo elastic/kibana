@@ -3508,7 +3508,7 @@ paths:
                     version_conflicts: 0
               schema:
                 additionalProperties: true
-                description: Elasticsearch update by query response
+                description: Elasticsearch update by query response.
                 type: object
           description: Successful response
         '400':
@@ -4575,21 +4575,17 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Reason'
-        rule_ids:
-          description: Optional list of detection rule_ids (the static rule.rule_id, not
-            the saved-object id) whose declared source indices the server reads
-            runtime field mappings from. Resolved runtime fields are attached to
-            the underlying updateByQuery as runtime_mappings so the exception
-            filter can reference them (e.g. the workaround in
-            elastic/security-ml#677 where a runtime field is defined on the ML
-            anomaly results index). Server-side resolution ensures users cannot
-            supply arbitrary index patterns.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 100
-          type: array
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry,
+            the server defines a runtime field of the given type that reads its
+            value from `_source[fieldName]` and attaches it to the underlying
+            `_update_by_query` as `runtime_mappings`. Allows the `query` to
+            reference non-ECS fields stored on the alert `_source` but not in
+            the alerts index mapping — for example, runtime fields the rule's
+            source index defined at the time the alerts were created.
+          type: object
         status:
           enum:
             - closed
@@ -8416,6 +8412,17 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
       required:
         - command
+    RuntimeFieldType:
+      description: Elasticsearch runtime field type.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -9010,21 +9017,17 @@ components:
         query:
           additionalProperties: true
           type: object
-        rule_ids:
-          description: Optional list of detection rule_ids (the static rule.rule_id, not
-            the saved-object id) whose declared source indices the server reads
-            runtime field mappings from. Resolved runtime fields are attached to
-            the underlying updateByQuery as runtime_mappings so the exception
-            filter can reference them (e.g. the workaround in
-            elastic/security-ml#677 where a runtime field is defined on the ML
-            anomaly results index). Server-side resolution ensures users cannot
-            supply arbitrary index patterns.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 100
-          type: array
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry,
+            the server defines a runtime field of the given type that reads its
+            value from `_source[fieldName]` and attaches it to the underlying
+            `_update_by_query` as `runtime_mappings`. Allows the `query` to
+            reference non-ECS fields stored on the alert `_source` but not in
+            the alerts index mapping — for example, runtime fields the rule's
+            source index defined at the time the alerts were created.
+          type: object
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
