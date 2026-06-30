@@ -90,6 +90,7 @@ describe('Execution Routes', () => {
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
+      enqueueWebhookInvocation: jest.fn(),
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
@@ -136,6 +137,48 @@ describe('Execution Routes', () => {
   });
 
   const handler = (method: string, path: string) => routeHandlers[`${method}:${path}`]?.handler;
+
+  describe('/api/workflows/workflow/{id}/execute (webhook)', () => {
+    const path = '/api/workflows/workflow/{id}/execute';
+
+    it('should enqueue GET query parameters as webhook inputs', async () => {
+      mockApi.enqueueWebhookInvocation.mockResolvedValue({ invocationId: 'inv-1', accepted: true });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { id: 'wf-1' },
+        query: { message: 'hello', apiKey: 'secret' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.enqueueWebhookInvocation).toHaveBeenCalledWith({
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        inputs: { message: 'hello' },
+        request,
+      });
+      expect(result).toEqual({ type: 'ok', body: { invocationId: 'inv-1', accepted: true } });
+    });
+
+    it('should enqueue POST body as webhook inputs', async () => {
+      mockApi.enqueueWebhookInvocation.mockResolvedValue({ invocationId: 'inv-2', accepted: true });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { id: 'wf-1' },
+        body: { message: 'hello' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.enqueueWebhookInvocation).toHaveBeenCalledWith({
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        inputs: { message: 'hello' },
+        request,
+      });
+      expect(result).toEqual({ type: 'ok', body: { invocationId: 'inv-2', accepted: true } });
+    });
+  });
 
   describe('POST /api/workflows/workflow/{id}/run (run_workflow)', () => {
     const path = '/api/workflows/workflow/{id}/run';

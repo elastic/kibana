@@ -23,6 +23,7 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
+import { isWebhookTrigger } from './schema/triggers/webhook_trigger_schema';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -736,6 +737,38 @@ describe('JsonModelSchema', () => {
         description: "User's username",
       });
       expect(jsonSchemaInputs?.required).toEqual(['username']);
+    }
+  });
+
+  it('should accept webhook trigger inputs and auth configuration', () => {
+    const workflow = {
+      version: '1',
+      name: 'webhook-test',
+      triggers: [
+        {
+          type: 'webhook',
+          auth: { type: 'apiKey' },
+          inputs: [
+            {
+              name: 'message',
+              type: 'string',
+              required: true,
+            },
+          ],
+        },
+      ],
+      steps: [{ name: 'step1', type: 'console' }],
+    };
+    const result = WorkflowSchema.safeParse(workflow);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const webhookTrigger = result.data.triggers?.find((trigger) => isWebhookTrigger(trigger));
+      if (!webhookTrigger) {
+        fail('Webhook trigger should be defined');
+      }
+      const inputs = JsonModelSchema.parse(webhookTrigger.inputs);
+      expect(inputs.properties?.message).toEqual({ type: 'string' });
+      expect(inputs.required).toEqual(['message']);
     }
   });
 

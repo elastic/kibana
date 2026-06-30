@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -37,28 +38,46 @@ const toRecord = (value: unknown): Record<string, unknown> => {
 export function registerExecuteWebhookRoutes(deps: RouteDependencies) {
   const { router, api, spaces } = deps;
 
-  const createHandler = (source: 'query' | 'body') =>
-    withAvailabilityCheck(async (context, request, response) => {
-      try {
-        const { id } = request.params;
-        const spaceId = spaces.getSpaceId(request);
-        const inputs = source === 'query' ? toRecord(request.query) : toRecord(request.body);
-        const { apiKey, ...inputsWithoutAuth } = inputs;
-        const result = await api.enqueueWebhookInvocation({
-          workflowId: id,
-          spaceId,
-          inputs: source === 'query' ? inputsWithoutAuth : inputs,
-          request,
-        });
-        return response.ok({ body: result });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        if (message.includes('not authorized') || message.includes('credentials')) {
-          return response.customError({ statusCode: 401, body: { message } });
-        }
-        return handleRouteError(response, error as Error);
+  const enqueue = async (
+    request: { params: { id: string }; query?: unknown; body?: unknown },
+    response: KibanaResponseFactory,
+    source: 'query' | 'body'
+  ) => {
+    try {
+      const { id } = request.params;
+      const spaceId = spaces.getSpaceId(request as KibanaRequest);
+      const inputs = source === 'query' ? toRecord(request.query) : toRecord(request.body);
+      const { apiKey, ...inputsWithoutAuth } = inputs;
+      const result = await api.enqueueWebhookInvocation({
+        workflowId: id,
+        spaceId,
+        inputs: source === 'query' ? inputsWithoutAuth : inputs,
+        request: request as KibanaRequest,
+      });
+      return response.ok({ body: result });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('not authorized') || message.includes('credentials')) {
+        return response.customError({ statusCode: 401, body: { message } });
       }
-    });
+      return handleRouteError(response, error as Error);
+    }
+  };
+
+  const getHandler = withAvailabilityCheck<{ id: string }, Record<string, unknown>, unknown, 'get'>(
+    async (context, request, response) => {
+      return enqueue(request, response, 'query');
+    }
+  );
+
+  const postHandler = withAvailabilityCheck<
+    { id: string },
+    unknown,
+    Record<string, unknown> | undefined,
+    'post'
+  >(async (context, request, response) => {
+    return enqueue(request, response, 'body');
+  });
 
   router.versioned
     .get({
@@ -66,7 +85,8 @@ export function registerExecuteWebhookRoutes(deps: RouteDependencies) {
       access: 'public',
       security: PUBLIC_WEBHOOK_SECURITY,
       summary: 'Execute a workflow webhook trigger',
-      description: 'Public endpoint that invokes a workflow with a webhook trigger using query parameters as inputs.',
+      description:
+        'Public endpoint that invokes a workflow with a webhook trigger using query parameters as inputs.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -82,7 +102,7 @@ export function registerExecuteWebhookRoutes(deps: RouteDependencies) {
           },
         },
       },
-      createHandler('query')
+      getHandler
     );
 
   router.versioned
@@ -90,12 +110,13 @@ export function registerExecuteWebhookRoutes(deps: RouteDependencies) {
       path: '/api/workflows/workflow/{id}/execute',
       access: 'public',
       security: PUBLIC_WEBHOOK_SECURITY,
-      xsrfRequired: false,
       summary: 'Execute a workflow webhook trigger',
-      description: 'Public endpoint that invokes a workflow with a webhook trigger using the raw JSON body as inputs.',
+      description:
+        'Public endpoint that invokes a workflow with a webhook trigger using the raw JSON body as inputs.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
+        xsrfRequired: false,
       },
     })
     .addVersion(
@@ -108,6 +129,6 @@ export function registerExecuteWebhookRoutes(deps: RouteDependencies) {
           },
         },
       },
-      createHandler('body')
+      postHandler
     );
 }

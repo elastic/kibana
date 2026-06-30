@@ -43,7 +43,7 @@ import { registerWorkflowRoutes } from '../workflows';
 interface CapturedRoute {
   method: string;
   path: string;
-  security: { authz: { requiredPrivileges: any[] } };
+  security: { authz: { requiredPrivileges?: any[]; enabled?: false } };
   handler: (...args: any[]) => Promise<any>;
 }
 
@@ -267,6 +267,14 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   'POST:/api/workflows/workflow/{id}/run': {
     params: { id: 'test-workflow-id' },
     body: { inputs: {} },
+  },
+  'GET:/api/workflows/workflow/{id}/execute': {
+    params: { id: 'test-workflow-id' },
+    query: { message: 'hello' },
+  },
+  'POST:/api/workflows/workflow/{id}/execute': {
+    params: { id: 'test-workflow-id' },
+    body: { message: 'hello' },
   },
   'POST:/api/workflows/test': {
     body: { workflowId: 'test-workflow-id', inputs: {} },
@@ -590,8 +598,10 @@ describe('Route privilege/ES-operation consistency', () => {
 
   it('should have security config on every route', () => {
     for (const [, route] of capturedRoutes) {
-      expect(route.security?.authz?.requiredPrivileges).toBeDefined();
-      expect(route.security.authz.requiredPrivileges.length).toBeGreaterThan(0);
+      if (route.security?.authz?.enabled !== false) {
+        expect(route.security?.authz?.requiredPrivileges).toBeDefined();
+        expect(route.security.authz.requiredPrivileges?.length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -601,6 +611,9 @@ describe('Route privilege/ES-operation consistency', () => {
       async (routeKey) => {
         const route = capturedRoutes.get(routeKey);
         if (!route) {
+          return;
+        }
+        if (route.security?.authz?.enabled === false) {
           return;
         }
 
