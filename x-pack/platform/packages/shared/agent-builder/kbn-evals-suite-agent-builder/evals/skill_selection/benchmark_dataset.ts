@@ -15,14 +15,15 @@
  * Query types:
  *   direct     — query that explicitly calls for this skill
  *   indirect   — describes the problem without naming the skill domain
- *   distractor — sounds similar to a neighbouring skill but should NOT trigger this one
+ *   distractor — sounds like the skill but should route to a neighbouring skill instead
  *
  * Ground truth wiring (in `output`, read by evaluators via the `expected` parameter):
- *   direct/indirect  → expectedSkill = skill_id  (the skill must load)
- *   distractor       → shouldNotActivateSkill = skill_id  (the skill must NOT load)
+ *   direct/indirect  → expectedSkill = expected_skill  (that skill must load)
+ *   distractor       → expectedSkill = expected_skill  (the correct neighbour skill must load)
+ *   distractor (no expected_skill) → shouldNotActivateSkill = skill_id  (no skill loads; fallback)
  *
- * Descriptive metadata (in `metadata`, for human understanding only):
- *   skillId, category, queryType, notes
+ * `skill_id` is used only as a grouping key (metadata.skillId) and never as a routing assertion.
+ * `expected_skill` is the authoritative routing target for all positive assertions.
  */
 
 import * as fs from 'fs';
@@ -66,19 +67,26 @@ function parseCsv(): BenchmarkExample[] {
     skipEmptyLines: true,
   });
 
-  return data.map(({ skill_id, category, query, query_type, notes }) => ({
-    input: { question: query.trim() },
-    output:
-      query_type === 'distractor'
-        ? { shouldNotActivateSkill: skill_id }
-        : { expectedSkill: skill_id },
-    metadata: {
-      skillId: skill_id,
-      category,
-      queryType: query_type,
-      ...(notes.trim() ? { notes: notes.trim() } : {}),
-    },
-  }));
+  return data.map(({ skill_id, category, query, query_type, expected_skill, notes }) => {
+    if (query_type !== 'distractor' && !expected_skill.trim()) {
+      throw new Error(`expected_skill is required for direct/indirect row: "${query}"`);
+    }
+
+    const output: BenchmarkExample['output'] = expected_skill.trim()
+      ? { expectedSkill: expected_skill.trim() }
+      : { shouldNotActivateSkill: skill_id };
+
+    return {
+      input: { question: query.trim() },
+      output,
+      metadata: {
+        skillId: skill_id,
+        category,
+        queryType: query_type,
+        ...(notes.trim() ? { notes: notes.trim() } : {}),
+      },
+    };
+  });
 }
 
 const ALL_EXAMPLES: BenchmarkExample[] = parseCsv();
