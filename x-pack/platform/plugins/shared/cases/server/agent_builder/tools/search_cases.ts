@@ -120,24 +120,17 @@ async function fetchCasesByAlertIds(
     return [];
   }
 
-  const caseFetchResults = await Promise.allSettled(
-    relatedCases.map((relatedCase) =>
-      casesClient.cases.get({
-        id: relatedCase.id,
-        includeComments: false,
-      })
-    )
-  );
-
-  return caseFetchResults.flatMap((result, index) => {
-    if (result.status === 'fulfilled') {
-      return [result.value];
-    }
-    logger.warn(
-      `[Cases Tool] Failed to fetch full details for case ${relatedCases[index].id}: ${result.reason}`
-    );
-    return [];
+  const bulkResult = await casesClient.cases.bulkGet({
+    ids: relatedCases.map((c) => c.id),
   });
+
+  if (bulkResult.errors.length > 0) {
+    logger.warn(
+      `[Cases Tool] Failed to fetch full details for ${bulkResult.errors.length} case(s) by alert IDs`
+    );
+  }
+
+  return bulkResult.cases;
 }
 
 function enhanceCases(
@@ -236,16 +229,19 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
                 logger
               );
             }
-            logger.info(`[Cases Tool] Bulk-getting ${case_ids.length} cases`);
-            const bulkResult = await casesClient.cases.bulkGet({ ids: case_ids });
+            const BULK_GET_LIMIT = 10;
+            const ids = case_ids.slice(0, BULK_GET_LIMIT);
+            const truncated = case_ids.length > BULK_GET_LIMIT;
+            logger.info(`[Cases Tool] Bulk-getting ${ids.length} cases`);
+            const bulkResult = await casesClient.cases.bulkGet({ ids });
             const enrichedCases = enhanceCases(bulkResult.cases, request, coreServices, logger);
             const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
             return injectAttachmentIds(
               createResult(
                 enrichedCases,
-                `Retrieved ${enrichedCases.length} case(s)${
-                  bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''
-                }`
+                `Retrieved ${enrichedCases.length} case(s)` +
+                  (truncated ? ` (first ${BULK_GET_LIMIT} of ${case_ids.length} requested)` : '') +
+                  (bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : '')
               ),
               bulkAttachmentIds
             );
@@ -323,6 +319,14 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
           }
 
           case 'search': {
+            if (!owner) {
+              return createErrorResponse(
+                new Error('owner is required for search mode'),
+                '[Cases Tool] Missing required field',
+                'Missing required field: owner is required for search mode',
+                logger
+              );
+            }
             // Single page; agent paginates explicitly via `page` / `perPage`.
             const requestedPerPage = Math.min(perPage ?? 10, 50);
             const requestedPage = page ?? 1;
@@ -331,7 +335,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
               sortOrder: sortOrder ?? 'desc',
               perPage: requestedPerPage,
               page: requestedPage,
-              ...(owner && { owner }),
+              owner,
               ...(search && { search }),
               ...(searchFields && {
                 searchFields: searchFields as CasesFindRequest['searchFields'],

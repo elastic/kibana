@@ -15,7 +15,7 @@ import {
 const formatCasesDescription = (data: CasesAttachmentData): string => {
   // Keep this terse on purpose: the LLM should rely on the rich attachment
   // rendering (via <render_attachment id="..." />) rather than restating each
-  // case in prose. The inline UI surfaces up to 5 cases with severity, counts,
+  // case in prose. The inline UI surfaces up to 10 cases with severity, counts,
   // and links automatically.
   return `${data.cases.length} of ${data.total} case(s)`;
 };
@@ -42,5 +42,5 @@ export const createCasesAttachmentType = (): AttachmentTypeDefinition<
   }),
 
   getAgentDescription: () =>
-    'List of Elastic cases from search, bulk-get, find-similar, or find-by-alert. Rendering inline shows a grouped card with up to 5 case rows (severity, counts, per-row links) plus "Filters" and "Go to cases" buttons. Emit `<render_attachment id="..." />` for the ID in the tool result\'s `attachment_ids`; without it the user sees only a text label.',
+    'List of Elastic cases from search, bulk-get, find-similar, or find-by-alert. Rendering inline shows a grouped card with up to 10 case rows (severity, counts, per-row links) plus a "Go to cases" button. Emit `<render_attachment id="..." />` for the ID in the tool result\'s `attachment_ids`; without it the user sees only a text label.',
 });

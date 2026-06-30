@@ -29,7 +29,7 @@ import type {
 import { SeverityHealth } from '../../components/severity/config';
 import { CaseMetaRow } from './case_meta_row';
 import { getAppIdForOwner, getCasesListPathForOwner, getCaseUrls } from './route_helpers';
-import { CASES_HEADER, GO_TO_CASES, SHOWING_FOOTER } from './translations';
+import { CASES_HEADER, GO_TO_CASES, NO_CASES, SHOWING_FOOTER } from './translations';
 import type { CaseSeverity } from '../../../common/types/domain';
 
 const MAX_VISIBLE_ROWS = 10;
@@ -105,19 +105,30 @@ interface InlineContentProps extends AttachmentRenderProps<CasesAttachment> {
 const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }) => {
   const { data } = attachment;
   const visible = data.cases.slice(0, MAX_VISIBLE_ROWS);
-  const owner = visible.length > 0 ? visible[0].owner : null;
+
+  // Only show "Go to cases" when all visible cases share the same owner — a
+  // mixed-owner list (possible from by_alert mode) has no single correct target.
+  const sharedOwner = useMemo(() => {
+    if (visible.length === 0) return null;
+    const first = visible[0].owner;
+    return visible.every((c) => c.owner === first) ? first : null;
+  }, [visible]);
 
   const casesUrl = useMemo(
     () =>
-      owner &&
-      application.getUrlForApp(getAppIdForOwner(owner), {
-        path: getCasesListPathForOwner(owner),
+      sharedOwner &&
+      application.getUrlForApp(getAppIdForOwner(sharedOwner), {
+        path: getCasesListPathForOwner(sharedOwner),
       }),
-    [application, owner]
+    [application, sharedOwner]
   );
 
-  if (!owner) {
-    return null;
+  if (visible.length === 0) {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="cases-attachment-empty">
+        {NO_CASES}
+      </EuiText>
+    );
   }
 
   return (
@@ -132,19 +143,21 @@ const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }
               <strong>{CASES_HEADER(data.total)}</strong>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="popout"
-              iconSide="right"
-              href={casesUrl}
-              target="_blank"
-              color="text"
-              data-test-subj="cases-attachment-go-to-cases"
-            >
-              {GO_TO_CASES}
-            </EuiButton>
-          </EuiFlexItem>
+          {sharedOwner && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="popout"
+                iconSide="right"
+                href={casesUrl || undefined}
+                target="_blank"
+                color="text"
+                data-test-subj="cases-attachment-go-to-cases"
+              >
+                {GO_TO_CASES}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>

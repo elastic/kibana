@@ -82,3 +82,7 @@ export const SHOWING_FOOTER = (visible: number, total: number) =>
     defaultMessage: 'Showing {visible} of {total}',
     values: { visible, total },
   });
+
+export const NO_CASES = i18n.translate('xpack.cases.agentBuilder.cases.noCases', {
+  defaultMessage: 'No cases to display',
+});

@@ -43,6 +43,9 @@ export async function invokeStepHandler(
     rawInput: input,
     contextManager: fakeContextManager,
     logger: toolContext.logger,
+    // ToolHandlerContext does not expose an AbortSignal, so step handlers
+    // cannot be cancelled when the HTTP request is aborted. Using a fresh
+    // (never-aborted) signal satisfies the StepHandlerContext type contract.
     abortSignal: new AbortController().signal,
     stepId: stepDef.id,
     stepType: stepDef.id,
