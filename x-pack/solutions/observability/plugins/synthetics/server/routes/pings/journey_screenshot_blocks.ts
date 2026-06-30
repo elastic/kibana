@@ -16,15 +16,17 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
   validate: {
     body: schema.object({
       hashes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   writeAccess: false,
   handler: async ({ request, syntheticsEsClient }) => {
-    const { hashes: blockIds } = request.body;
+    const { hashes: blockIds, remoteName } = request.body;
 
     const result = await getJourneyScreenshotBlocks({
       blockIds,
       syntheticsEsClient,
+      remoteName,
     });
 
     return {

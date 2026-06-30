@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiPopover, EuiText, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../common/lib/kibana';

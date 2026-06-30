@@ -13,15 +13,17 @@ import {
   type ContextSwitcherSpacesConfig,
 } from '@kbn/context-switcher-components';
 import type { CoreStart } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import {
   useActiveSpace,
   useEnvironmentContext,
+  useFooterLinks,
   useManagementActions,
   useSpaceItems,
 } from './hooks';
-import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../common';
+import { ENTER_SPACE_PATH } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -71,6 +73,13 @@ const ContextSwitcherInner = ({
     isServerless,
   });
 
+  const footerLinks = useFooterLinks({
+    application: core.application,
+    cloud,
+    isServerless,
+    activeSpaceSolution: activeSpace?.solution,
+  });
+
   const managementActions = useManagementActions({
     application: core.application,
     canManageSpaces: core.application.capabilities.spaces?.manage === true,
@@ -106,6 +115,7 @@ const ContextSwitcherInner = ({
       spaces={spacesConfig}
       environmentContext={environmentContext}
       onOpen={handleOpen}
+      footerLinks={footerLinks}
     />
   );
 };

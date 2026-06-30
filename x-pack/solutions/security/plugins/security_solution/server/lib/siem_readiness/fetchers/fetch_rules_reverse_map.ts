@@ -19,6 +19,7 @@ import type {
   TacticTotals,
   MachineLearningRuleIndex,
   ReverseMapResult,
+  ReverseMapErrors,
   CategoriesResponse,
 } from '@kbn/siem-readiness';
 
@@ -75,13 +76,18 @@ const buildRuleEntry = (rule: AlertingRule): RuleIndexEntry => ({
   enabled: rule.enabled,
 });
 
+interface ResolveResult {
+  indices: string[];
+  failed: boolean;
+}
+
 const resolvePatterns = async (
   patterns: string[],
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<string[]> => {
+): Promise<ResolveResult> => {
   if (patterns.length === 0) {
-    return [];
+    return { indices: [], failed: false };
   }
 
   try {
@@ -90,12 +96,20 @@ const resolvePatterns = async (
       expand_wildcards: 'open',
     });
 
-    return [
-      ...result.indices.map((i) => i.name),
-      ...(result.data_streams?.flatMap((ds) => [ds.name, ...ds.backing_indices]) ?? []),
-    ];
-  } catch {
-    return [];
+    return {
+      indices: [
+        ...result.indices.map((i) => i.name),
+        ...(result.data_streams?.flatMap((ds) => [ds.name, ...ds.backing_indices]) ?? []),
+      ],
+      failed: false,
+    };
+  } catch (err: unknown) {
+    logger.warn(
+      `siem_readiness: resolveIndex failed for patterns [${patterns.join(',')}] — ${
+        (err as { message?: string }).message ?? 'unknown error'
+      }`
+    );
+    return { indices: [], failed: true };
   }
 };
 
@@ -104,15 +118,20 @@ const resolveRuleIndices = async (
   esClient: ElasticsearchClient,
   dataViewsService: DataViewsService,
   logger: Logger
-): Promise<string[]> => {
+): Promise<ResolveResult> => {
   const dataViewId = (params as { dataViewId?: string }).dataViewId;
   if (dataViewId) {
     try {
       const dataView = await dataViewsService.get(dataViewId);
       const patterns = dataView.getIndexPattern().split(',').filter(Boolean);
       return resolvePatterns(patterns, esClient, logger);
-    } catch {
-      // Data view resolution failed, fall through to index patterns
+    } catch (err: unknown) {
+      logger.warn(
+        `siem_readiness: data view resolution failed for id "${dataViewId}" — ${
+          (err as { message?: string }).message ?? 'unknown error'
+        }, falling through to index patterns`
+      );
+      // Fall through to index patterns below
     }
   }
 
@@ -121,7 +140,74 @@ const resolveRuleIndices = async (
     return resolvePatterns(index, esClient, logger);
   }
 
-  return [];
+  return { indices: [], failed: false };
+};
+
+interface ProcessRuleContext {
+  indexToRules: IndexToRulesMap;
+  tacticTotals: TacticTotals;
+  mlRules: MachineLearningRuleIndex;
+  esClient: ElasticsearchClient;
+  dataViewsService: DataViewsService;
+  logger: Logger;
+}
+
+/**
+ * Processes a single enabled rule: updates tacticTotals, mlRules, and indexToRules.
+ * Returns whether any index resolution for this rule failed (sets rulesPartial upstream).
+ */
+const processRule = async (ruleData: unknown, ctx: ProcessRuleContext): Promise<boolean> => {
+  const rule = ruleData as unknown as AlertingRule;
+  const entry = buildRuleEntry(rule);
+  let anyFailed = false;
+
+  for (const tactic of entry.tactics) {
+    const existing = ctx.tacticTotals.get(tactic.id);
+    ctx.tacticTotals.set(tactic.id, {
+      id: tactic.id,
+      name: tactic.name,
+      totalRules: (existing?.totalRules ?? 0) + 1,
+    });
+  }
+
+  const ruleType = rule.params.type;
+
+  if (ruleType === 'machine_learning') {
+    ctx.mlRules.push(entry);
+  } else {
+    const { indices, failed } = await resolveRuleIndices(
+      rule.params,
+      ctx.esClient,
+      ctx.dataViewsService,
+      ctx.logger
+    );
+    if (failed) anyFailed = true;
+
+    for (const index of indices) {
+      const existing = ctx.indexToRules.get(index) ?? [];
+      existing.push(entry);
+      ctx.indexToRules.set(index, existing);
+    }
+
+    if (ruleType === 'threat_match') {
+      const threatIndex = (rule.params as { threatIndex?: string[] }).threatIndex;
+      if (threatIndex && threatIndex.length > 0) {
+        const { indices: threatIndices, failed: threatFailed } = await resolvePatterns(
+          threatIndex,
+          ctx.esClient,
+          ctx.logger
+        );
+        if (threatFailed) anyFailed = true;
+        for (const index of threatIndices) {
+          const existing = ctx.indexToRules.get(index) ?? [];
+          existing.push(entry);
+          ctx.indexToRules.set(index, existing);
+        }
+      }
+    }
+  }
+
+  return anyFailed;
 };
 
 export const fetchRulesReverseMap = async ({
@@ -137,6 +223,7 @@ export const fetchRulesReverseMap = async ({
   const tacticTotals: TacticTotals = new Map();
   const mlRules: MachineLearningRuleIndex = [];
   const ruleRequiredFields: Map<string, RequiredField[]> = new Map();
+  const errors: ReverseMapErrors = { pipelineMap: false, categoryMap: false, rulesPartial: false };
 
   // 1. Build pipeline -> indices map from index settings
   try {
@@ -154,8 +241,13 @@ export const fetchRulesReverseMap = async ({
         pipelineToIndices.set(pipeline, indices);
       }
     }
-  } catch {
-    // Pipeline mapping failed, continue without it
+  } catch (err: unknown) {
+    logger.warn(
+      `siem_readiness: failed to build pipeline->indices map — ${
+        (err as { message?: string }).message ?? 'unknown error'
+      }`
+    );
+    errors.pipelineMap = true;
   }
 
   // 2. Build category -> indices map. Use pre-fetched categoriesData if provided
@@ -166,83 +258,74 @@ export const fetchRulesReverseMap = async ({
       const indices = categoryGroup.indices.map((idx) => idx.indexName);
       categoryToIndices.set(categoryGroup.category, indices);
     }
-  } catch {
-    // Category mapping failed, continue without it
+  } catch (err: unknown) {
+    logger.warn(
+      `siem_readiness: failed to build category->indices map — ${
+        (err as { message?: string }).message ?? 'unknown error'
+      }`
+    );
+    errors.categoryMap = true;
   }
 
-  // 3. Build index -> rules map by paginating through all enabled rules
+  // 3. Build index -> rules map by paginating through all enabled rules.
+  //    findRules failures are fatal — hasDetectionRules cannot be trusted if rules cannot be listed.
   let searchAfter: SortResults | undefined;
   let pageCount = 0;
   const maxPages = 100;
+  const ruleCtx: ProcessRuleContext = {
+    indexToRules,
+    tacticTotals,
+    mlRules,
+    esClient,
+    dataViewsService,
+    logger,
+  };
 
-  do {
-    pageCount++;
-    if (pageCount > maxPages) {
-      break;
-    }
-
-    const result = await findRules({
-      rulesClient,
-      filter: 'alert.attributes.enabled:true',
-      perPage: 1000,
-      page: undefined,
-      sortField: 'createdAt',
-      sortOrder: 'asc',
-      searchAfter,
-    });
-
-    for (const ruleData of result.data) {
-      const rule = ruleData as unknown as AlertingRule;
-      const entry = buildRuleEntry(rule);
-
-      // Capture required_fields so fetch_rule_field_caps can check mapping coverage.
-      // The alerting framework stores this as camelCase requiredFields inside params
-      // (convert_rule_response_to_alerting_rule maps required_fields → requiredFields).
-      const requiredFields =
-        (rule.params as { requiredFields?: RequiredField[] }).requiredFields ?? [];
-      ruleRequiredFields.set(rule.id, requiredFields);
-
-      for (const tactic of entry.tactics) {
-        const existing = tacticTotals.get(tactic.id);
-        tacticTotals.set(tactic.id, {
-          id: tactic.id,
-          name: tactic.name,
-          totalRules: (existing?.totalRules ?? 0) + 1,
-        });
+  try {
+    do {
+      pageCount++;
+      if (pageCount > maxPages) {
+        break;
       }
 
-      const ruleType = rule.params.type;
+      const result = await findRules({
+        rulesClient,
+        filter: 'alert.attributes.enabled:true',
+        perPage: 1000,
+        page: undefined,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+        searchAfter,
+      });
 
-      if (ruleType === 'machine_learning') {
-        mlRules.push(entry);
-      } else {
-        const indices = await resolveRuleIndices(rule.params, esClient, dataViewsService, logger);
+      for (const ruleData of result.data) {
+        // Capture required_fields so fetch_rule_field_caps can check mapping coverage.
+        // The alerting framework stores this as camelCase requiredFields inside params
+        // (convert_rule_response_to_alerting_rule maps required_fields → requiredFields).
+        const rule = ruleData as unknown as AlertingRule;
+        const requiredFields =
+          (rule.params as { requiredFields?: RequiredField[] }).requiredFields ?? [];
+        ruleRequiredFields.set(rule.id, requiredFields);
 
-        for (const index of indices) {
-          const existing = indexToRules.get(index) ?? [];
-          existing.push(entry);
-          indexToRules.set(index, existing);
-        }
-
-        if (ruleType === 'threat_match') {
-          const threatIndex = (rule.params as { threatIndex?: string[] }).threatIndex;
-          if (threatIndex && threatIndex.length > 0) {
-            const threatIndices = await resolvePatterns(threatIndex, esClient, logger);
-            for (const index of threatIndices) {
-              const existing = indexToRules.get(index) ?? [];
-              existing.push(entry);
-              indexToRules.set(index, existing);
-            }
-          }
+        const anyFailed = await processRule(ruleData, ruleCtx);
+        if (anyFailed) {
+          errors.rulesPartial = true;
         }
       }
-    }
 
-    searchAfter =
-      result.data.length > 0
-        ? (result.data[result.data.length - 1] as unknown as { sort?: SortResults }).sort
-        : undefined;
-  } while (searchAfter);
+      searchAfter =
+        result.data.length > 0
+          ? (result.data[result.data.length - 1] as unknown as { sort?: SortResults }).sort
+          : undefined;
+    } while (searchAfter);
+  } catch (err: unknown) {
+    logger.warn(
+      `siem_readiness: rule pagination failed — ${
+        (err as { message?: string }).message ?? 'unknown error'
+      }`
+    );
+    throw err;
+  }
 
   return {
     indexToRules,
@@ -251,5 +334,6 @@ export const fetchRulesReverseMap = async ({
     tacticTotals,
     mlRules,
     ruleRequiredFields,
+    errors,
   };
 };

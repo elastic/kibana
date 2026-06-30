@@ -175,8 +175,9 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
   }
 
   private async recreate(definition: ResourceDefinition): Promise<void> {
-    // Manual construction instead of DI: DatastreamInitializer is wired to
-    // the internal ES client via @inject, and we want the request-scoped one.
+    // DatastreamInitializer takes a per-resource definition plus an ES client;
+    // here we pass the request-scoped client (startup registration passes the
+    // internal one instead).
     const initializer = new DatastreamInitializer(this.ctx.logger, this.esClient, definition);
     await initializer.initialize();
   }

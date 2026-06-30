@@ -13,8 +13,9 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
 import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
-  (prev) => (params) => ({
+  (prev, { toolkit }) =>
+  (params) => ({
     ...prev(params),
-    [SOURCE_COLUMN]: getTracesSummaryColumn(params),
-    [SERVICE_NAME_FIELD]: getServiceNameCell(SERVICE_NAME_FIELD, params),
+    [SOURCE_COLUMN]: getTracesSummaryColumn(params, toolkit),
+    [SERVICE_NAME_FIELD]: getServiceNameCell(SERVICE_NAME_FIELD, toolkit),
   });

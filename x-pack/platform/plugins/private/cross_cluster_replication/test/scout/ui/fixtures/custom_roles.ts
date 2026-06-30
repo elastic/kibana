@@ -16,4 +16,10 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
     elasticsearch: { cluster: ['manage', 'manage_ccr', 'monitor', 'read_ccr'] },
     kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
   },
+  // CCR cluster privileges with only dashboard read in Kibana: the CCR
+  // management link is visible thanks to manage_ccr.
+  ccr_dashboard_user_role: {
+    elasticsearch: { cluster: ['manage', 'manage_ccr'] },
+    kibana: [{ base: [], feature: { dashboard: ['read'] }, spaces: ['*'] }],
+  },
 };

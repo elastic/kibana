@@ -7,3 +7,4 @@
 
 export * from './es_test_index_tool';
 export * from './get_proxy_server';
+export * from './alert_deletion_test_utils';

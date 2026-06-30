@@ -8,45 +8,71 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { FieldIcon, typeToEuiIconMap } from './field_icon';
+import { render, screen } from '@testing-library/react';
 
 const availableTypes = Object.keys(typeToEuiIconMap);
 
-describe('FieldIcon renders known field types', () => {
-  availableTypes.forEach((type) => {
-    test(`${type} is rendered`, () => {
-      const component = shallow(<FieldIcon type={type} />);
-      expect(component).toMatchSnapshot();
+const getFieldIcon = (title: string) => screen.getByText(title);
+
+const getFieldIconToken = (title: string) => getFieldIcon(title).closest('.kbnFieldIcon');
+
+describe('FieldIcon', () => {
+  describe('FieldIcon renders known field types', () => {
+    it.each(availableTypes)('%s is rendered', (type) => {
+      const expected = typeToEuiIconMap[type as keyof typeof typeToEuiIconMap];
+
+      render(<FieldIcon type={type} />);
+
+      const icon = getFieldIcon(type);
+      expect(icon).toBeVisible();
+      expect(icon).toHaveAttribute('data-euiicon-type', expected.iconType);
+
+      const token = getFieldIconToken(type);
+      expect(token).toBeVisible();
     });
   });
-});
 
-test('FieldIcon renders an icon for an unknown type', () => {
-  const component = shallow(<FieldIcon type="sdfsdf" label="test" />);
-  expect(component).toMatchSnapshot();
-});
+  it('FieldIcon renders an icon for an unknown type', () => {
+    render(<FieldIcon label="test" type="sdfsdf" />);
 
-test('FieldIcon supports same props as EuiToken', () => {
-  const component = shallow(
-    <FieldIcon
-      type="number"
-      label="test"
-      color="euiColorVis0"
-      size="l"
-      shape="circle"
-      fill="none"
-    />
-  );
-  expect(component).toMatchSnapshot();
-});
+    const icon = getFieldIcon('test');
+    expect(icon).toBeVisible();
+    expect(icon).toHaveAttribute('data-euiicon-type', 'question');
+    expect(getFieldIconToken('test')).toBeVisible();
+  });
 
-test('FieldIcon changes fill when scripted is true', () => {
-  const component = shallow(<FieldIcon type="number" label="test" scripted={true} />);
-  expect(component).toMatchSnapshot();
-});
+  it('FieldIcon supports same props as EuiToken', () => {
+    render(
+      <FieldIcon
+        color="euiColorVis0"
+        fill="none"
+        label="test"
+        shape="circle"
+        size="l"
+        type="number"
+      />
+    );
 
-test('FieldIcon renders with className if provided', () => {
-  const component = shallow(<FieldIcon type="sdfsdf" label="test" className="myClass" />);
-  expect(component).toMatchSnapshot();
+    const icon = getFieldIcon('test');
+    expect(icon).toHaveAttribute('data-euiicon-type', 'tokenNumber');
+
+    const token = getFieldIconToken('test');
+    expect(token?.className).toMatch(/euiToken-circle-none-l/);
+    expect(token?.className).toContain('euiColorVis0');
+  });
+
+  it('FieldIcon changes fill when scripted is true', () => {
+    render(<FieldIcon label="test" scripted={true} type="number" />);
+
+    expect(getFieldIcon('test')).toBeVisible();
+    expect(getFieldIconToken('test')?.className).toMatch(/euiToken-square-dark-s/);
+  });
+
+  it('FieldIcon renders with className if provided', () => {
+    render(<FieldIcon className="myClass" label="test" type="sdfsdf" />);
+
+    const token = getFieldIconToken('test');
+    expect(token).toHaveClass('kbnFieldIcon', 'myClass');
+  });
 });

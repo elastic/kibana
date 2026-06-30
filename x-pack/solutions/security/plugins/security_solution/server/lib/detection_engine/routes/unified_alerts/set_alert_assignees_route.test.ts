@@ -73,6 +73,7 @@ describe('set unified alerts assignees', () => {
           index: [
             '.alerts-security.alerts-default',
             '.alerts-security.attack.discovery.alerts-default',
+            '.adhoc.alerts-security.attack.discovery.alerts-default',
           ],
         })
       );

@@ -18,10 +18,10 @@ fi
 # The value should be the platform-level `pluginId` use-case identifier.
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
 
-# Set a base run id from the Buildkite build. The evaluator fixture appends the
-# connector id to produce a unique run_id per model (e.g. bk-<build>-<connector>).
-# Correlation across models in the same build uses ci.buildkite.build_id which
-# is populated automatically from BUILDKITE_BUILD_ID in score_repository.ts.
+# Set a base build run ID from the Buildkite build. This is used as a seed for
+# generating deterministic per-task experiment IDs (not as the experiment_id itself).
+# Suite-run grouping in the UI uses metadata.ci.build_id which is populated
+# automatically from BUILDKITE_BUILD_ID in the Buildkite metadata.
 if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi
@@ -186,6 +186,8 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+          EVAL_GREP: "${EVAL_GREP:-}"
+          EVALUATION_REPETITIONS: "${EVALUATION_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -365,10 +367,16 @@ done
 
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
+# If EVAL_GREP is set, pass Playwright --grep to filter tests by name/pattern.
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
+EVAL_RUN_ARGS=()
+if [[ -n "${EVAL_GREP:-}" ]]; then
+  EVAL_RUN_ARGS+=(--grep "${EVAL_GREP}")
+fi
+
 if [[ -n "${EVAL_PROJECT:-}" ]]; then
-  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}"
 else
-  node scripts/evals run --suite "$EVAL_SUITE_ID"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
 fi
 

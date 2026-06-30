@@ -186,6 +186,7 @@ const DraggablePatternInput = ({
             <EuiFlexItem style={{ minWidth: 0 }}>
               <Expression
                 pattern={pattern}
+                patternSlotId={idx}
                 grokCollection={grokCollection}
                 dataTestSubj="streamsAppPatternExpression"
                 onChange={onChange}

@@ -350,4 +350,151 @@ describe('fetchRulesReverseMap', () => {
       expect(result.pipelineToIndices.get('aws-pipeline')).toContain('logs-aws');
     });
   });
+
+  describe('error flags', () => {
+    it('should set errors.pipelineMap and warn when getSettings rejects', async () => {
+      const logger = createMockLogger();
+      const esClient = createMockEsClient({
+        indices: {
+          getSettings: jest.fn().mockRejectedValue(new Error('ES unavailable')),
+          resolveIndex: jest.fn().mockResolvedValue({ indices: [], data_streams: [] }),
+        },
+      } as unknown as ElasticsearchClient);
+
+      const result = await fetchRulesReverseMap({
+        rulesClient: createMockRulesClient([]),
+        esClient,
+        dataViewsService: createMockDataViewsService(),
+        logger,
+      });
+
+      expect(result.errors.pipelineMap).toBe(true);
+      expect(result.errors.categoryMap).toBe(false);
+      expect(result.errors.rulesPartial).toBe(false);
+      expect(result.pipelineToIndices.size).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to build pipeline->indices map')
+      );
+    });
+
+    it('should set errors.categoryMap and warn when the category iteration throws', async () => {
+      const logger = createMockLogger();
+      // Provide malformed categoriesData that will throw during iteration
+      const badCategoriesData = {
+        rawCategoriesMap: [],
+        // mainCategoriesMap is not an array — iterating it will throw
+        mainCategoriesMap: null as unknown as [],
+      };
+
+      const result = await fetchRulesReverseMap({
+        rulesClient: createMockRulesClient([]),
+        esClient: createMockEsClient(),
+        dataViewsService: createMockDataViewsService(),
+        logger,
+        categoriesData: badCategoriesData,
+      });
+
+      expect(result.errors.categoryMap).toBe(true);
+      expect(result.errors.pipelineMap).toBe(false);
+      expect(result.errors.rulesPartial).toBe(false);
+      expect(result.categoryToIndices.size).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to build category->indices map')
+      );
+    });
+
+    it('should set errors.rulesPartial and warn when resolveIndex rejects for a rule', async () => {
+      const logger = createMockLogger();
+      const mockRule = {
+        id: 'rule-1',
+        name: 'Test Rule',
+        enabled: true,
+        params: { type: 'query', index: ['logs-*'], threat: [] },
+        tags: [],
+      };
+
+      const esClient = createMockEsClient({
+        indices: {
+          getSettings: jest.fn().mockResolvedValue({}),
+          resolveIndex: jest.fn().mockRejectedValue(new Error('index resolution failed')),
+        },
+      } as unknown as ElasticsearchClient);
+
+      const result = await fetchRulesReverseMap({
+        rulesClient: createMockRulesClient([mockRule]),
+        esClient,
+        dataViewsService: createMockDataViewsService(),
+        logger,
+      });
+
+      expect(result.errors.rulesPartial).toBe(true);
+      expect(result.errors.pipelineMap).toBe(false);
+      expect(result.indexToRules.size).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('resolveIndex failed'));
+    });
+
+    it('should propagate (rethrow) when rule pagination (findRules) fails', async () => {
+      const logger = createMockLogger();
+      const rulesClient = {
+        find: jest.fn().mockRejectedValue(new Error('findRules failed')),
+      } as unknown as RulesClient;
+
+      await expect(
+        fetchRulesReverseMap({
+          rulesClient,
+          esClient: createMockEsClient(),
+          dataViewsService: createMockDataViewsService(),
+          logger,
+        })
+      ).rejects.toThrow('findRules failed');
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('rule pagination failed'));
+    });
+
+    it('should set errors.pipelineMap but still build the rules map when only getSettings fails', async () => {
+      const mockRule = {
+        id: 'rule-1',
+        name: 'Test Rule',
+        enabled: true,
+        params: { type: 'query', index: ['logs-*'], threat: [] },
+        tags: [],
+      };
+
+      const esClient = createMockEsClient({
+        indices: {
+          getSettings: jest.fn().mockRejectedValue(new Error('ES unavailable')),
+          resolveIndex: jest.fn().mockResolvedValue({
+            indices: [{ name: 'logs-test' }],
+            data_streams: [],
+          }),
+        },
+      } as unknown as ElasticsearchClient);
+
+      const result = await fetchRulesReverseMap({
+        rulesClient: createMockRulesClient([mockRule]),
+        esClient,
+        dataViewsService: createMockDataViewsService(),
+        logger: createMockLogger(),
+      });
+
+      expect(result.errors.pipelineMap).toBe(true);
+      // Rules map still built from successful resolveIndex
+      expect(result.indexToRules.has('logs-test')).toBe(true);
+    });
+
+    it('should return errors object with all false when everything succeeds', async () => {
+      const result = await fetchRulesReverseMap({
+        rulesClient: createMockRulesClient([]),
+        esClient: createMockEsClient(),
+        dataViewsService: createMockDataViewsService(),
+        logger: createMockLogger(),
+      });
+
+      expect(result.errors).toEqual({
+        pipelineMap: false,
+        categoryMap: false,
+        rulesPartial: false,
+      });
+    });
+  });
 });

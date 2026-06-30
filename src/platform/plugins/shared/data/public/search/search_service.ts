@@ -71,6 +71,7 @@ import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
+import { SearchMethodsService } from '../../common/search';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -106,6 +107,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
+  private searchMethodsService!: SearchMethodsService;
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
@@ -256,6 +258,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
+    this.searchMethodsService = new SearchMethodsService(
+      this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric
+    );
+
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
@@ -319,6 +325,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       search,
+      dsl: (params, options) => this.searchMethodsService.dsl(params, options),
+      dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
+      esql: (params, options) => this.searchMethodsService.esql(params, options),
+      eql: (params, options) => this.searchMethodsService.eql(params, options),
+      sql: (params, options) => this.searchMethodsService.sql(params, options),
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },

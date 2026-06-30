@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { AlertingDomainEventBus } from './event_bus';
+import { AsyncDomainEventBus } from './event_bus';
 import type { DomainEvent } from './types';
 
 interface FooEvent extends DomainEvent {
@@ -40,14 +40,14 @@ const flushAsync = async (): Promise<void> => {
   await new Promise((resolve) => setImmediate(resolve));
 };
 
-describe('AlertingDomainEventBus', () => {
+describe('AsyncDomainEventBus', () => {
   let loggerService: LoggerService;
   let mockLogger: jest.Mocked<Logger>;
-  let bus: AlertingDomainEventBus<TestEvent>;
+  let bus: AsyncDomainEventBus<TestEvent>;
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    bus = new AlertingDomainEventBus<TestEvent>(loggerService);
+    bus = new AsyncDomainEventBus<TestEvent>(loggerService);
   });
 
   describe('publish / subscribe', () => {
@@ -285,6 +285,80 @@ describe('AlertingDomainEventBus', () => {
       await flushAsync();
 
       expect(handler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('context-carrying', () => {
+    interface TestContext {
+      readonly tag: string;
+    }
+
+    let ctxBus: AsyncDomainEventBus<TestEvent, TestContext>;
+
+    beforeEach(() => {
+      ctxBus = new AsyncDomainEventBus<TestEvent, TestContext>(loggerService);
+    });
+
+    it('threads the publisher-provided context through to each subscribed handler unchanged', async () => {
+      const handler = jest.fn();
+      ctxBus.subscribe<FooEvent>('foo', handler);
+
+      const event = fooEvent('with-context');
+      const context: TestContext = { tag: 'ctx-1' };
+      ctxBus.publish(event, context);
+
+      await flushAsync();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(event, context);
+      // Reference equality: the bus must not clone or wrap context.
+      expect(handler.mock.calls[0][1]).toBe(context);
+    });
+
+    it('isolates context between successive publish calls (no cross-talk)', async () => {
+      const handler = jest.fn();
+      ctxBus.subscribe<FooEvent>('foo', handler);
+
+      const ctxA: TestContext = { tag: 'A' };
+      const ctxB: TestContext = { tag: 'B' };
+      ctxBus.publish(fooEvent('a'), ctxA);
+      ctxBus.publish(fooEvent('b'), ctxB);
+
+      await flushAsync();
+
+      expect(handler).toHaveBeenCalledTimes(2);
+      expect(handler.mock.calls[0][1]).toBe(ctxA);
+      expect(handler.mock.calls[1][1]).toBe(ctxB);
+    });
+
+    it('still skips reserved event types and never invokes handlers when context is supplied', async () => {
+      const handler = jest.fn();
+      ctxBus.subscribe('error', handler);
+      // @ts-expect-error: we're testing the reserved type
+      ctxBus.publish({ type: 'error' }, { tag: 'ignored' });
+
+      await flushAsync();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues dispatching to sibling handlers (with their context) when one handler throws', async () => {
+      const failing = jest.fn(() => {
+        throw new Error('boom');
+      });
+
+      const succeeding = jest.fn();
+      ctxBus.subscribe<FooEvent>('foo', failing);
+      ctxBus.subscribe<FooEvent>('foo', succeeding);
+
+      const context: TestContext = { tag: 'shared' };
+      ctxBus.publish(fooEvent(), context);
+
+      await flushAsync();
+
+      expect(failing).toHaveBeenCalledWith(expect.objectContaining({ type: 'foo' }), context);
+      expect(succeeding).toHaveBeenCalledWith(expect.objectContaining({ type: 'foo' }), context);
     });
   });
 });

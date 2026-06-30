@@ -7,22 +7,24 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
+  EuiRange,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiSelect,
-  EuiRange,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,6 +103,7 @@ export const LegendControls = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverState] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const defaultLegendSteps = useMemo<LegendStep[]>(
     () => [
       { color: euiTheme.colors.severity.success, label: 'OK', value: 0 },
@@ -127,17 +130,24 @@ export const LegendControls = ({
   }, [autoBounds, boundsOverride, options, defaultLegendSteps]);
 
   const buttonComponent = (
-    <EuiButtonIcon
-      iconType="paintBucket"
-      color="text"
-      display="base"
-      size="s"
-      aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.infra.legendControls.buttonLabel', {
         defaultMessage: 'configure legend',
       })}
-      onClick={handleOpenPopover}
-      data-test-subj="openLegendControlsButton"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="paintBucket"
+        color="text"
+        display="base"
+        size="s"
+        aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
+          defaultMessage: 'configure legend',
+        })}
+        onClick={handleOpenPopover}
+        data-test-subj="openLegendControlsButton"
+      />
+    </EuiToolTip>
   );
 
   const handleAutoChange = useCallback(
@@ -254,11 +264,12 @@ export const LegendControls = ({
       isOpen={isPopoverOpen}
       closePopover={handleCancelClick}
       id="legendControls"
+      aria-labelledby={popoverTitleId}
       button={buttonComponent}
       anchorPosition="leftCenter"
       data-test-subj="legendControls"
     >
-      <EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTitleLabel', {
           defaultMessage: 'Legend Options',
         })}

@@ -6,12 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useAnonymizationProfilesSectionState } from './use_anonymization_profiles_section_state';
-
-jest.mock('@kbn/spaces-utils', () => ({
-  getSpaceIdFromPath: jest.fn(),
-}));
 
 const setupServices = () => {
   const addSuccess = jest.fn();
@@ -31,6 +26,7 @@ const setupServices = () => {
         },
       },
       http: {
+        spaceId: 'space-a',
         basePath: {
           get: jest.fn().mockReturnValue('/s/space-a/app/management'),
           serverBasePath: '/s/space-a',
@@ -60,10 +56,6 @@ describe('useAnonymizationProfilesSectionState', () => {
   });
 
   it('derives active space id and capabilities', () => {
-    jest.mocked(getSpaceIdFromPath).mockReturnValue({
-      spaceId: 'space-a',
-      pathHasExplicitSpaceIdentifier: true,
-    });
     const { services } = setupServices();
 
     const { result } = renderHook(() =>
@@ -77,12 +69,9 @@ describe('useAnonymizationProfilesSectionState', () => {
     expect(result.current.canManage).toBe(true);
   });
 
-  it('uses parser default space and hidden capabilities when capability shape is invalid', () => {
-    jest.mocked(getSpaceIdFromPath).mockReturnValue({
-      spaceId: 'default',
-      pathHasExplicitSpaceIdentifier: false,
-    });
+  it('uses http.spaceId and hidden capabilities when capability shape is invalid', () => {
     const { services } = setupServices();
+    (services.http as Record<string, unknown>).spaceId = 'default';
     services.application.capabilities.anonymization = {} as never;
 
     const { result } = renderHook(() =>
@@ -97,10 +86,6 @@ describe('useAnonymizationProfilesSectionState', () => {
   });
 
   it('resolves data view title and loads preview document source', async () => {
-    jest.mocked(getSpaceIdFromPath).mockReturnValue({
-      spaceId: 'space-a',
-      pathHasExplicitSpaceIdentifier: true,
-    });
     const { services, fetch, post } = setupServices();
     fetch.mockResolvedValue({ data_view: { title: 'logs-*' } });
     post.mockResolvedValue({
@@ -128,10 +113,6 @@ describe('useAnonymizationProfilesSectionState', () => {
   });
 
   it('shows success/warning/error toasts via callback handlers', () => {
-    jest.mocked(getSpaceIdFromPath).mockReturnValue({
-      spaceId: 'space-a',
-      pathHasExplicitSpaceIdentifier: true,
-    });
     const { services, addSuccess, addWarning, addError } = setupServices();
 
     const { result } = renderHook(() =>

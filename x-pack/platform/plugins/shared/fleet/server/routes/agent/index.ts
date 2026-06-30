@@ -10,10 +10,6 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
-import {
-  GetCollectorGroupsRequestSchema,
-  GetCollectorGroupsResponseSchema,
-} from '../../../common/types/rest_spec/collector';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
@@ -113,7 +109,6 @@ import {
   postBulkRemoveCollectorsHandler,
   postRemoveCollectorHandler,
 } from './remove_collector_handler';
-import { getCollectorGroupsHandler } from './collector_groups_handler';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 import {
   bulkRequestDiagnosticsHandler,
@@ -309,48 +304,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           },
         },
         postBulkRemoveCollectorsHandler
-      );
-
-    // Get collector groups
-    router.versioned
-      .get({
-        path: AGENT_API_ROUTES.COLLECTOR_GROUPS_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
-          },
-        },
-        summary: `Get collector groups`,
-        description: `Get OpAMP collectors grouped by elastic.collector.group with cursor-based pagination.`,
-        options: {
-          tags: ['oas-tag:Elastic Agents'],
-          availability: {
-            since: '9.5.0',
-            stability: 'experimental',
-          },
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          options: {
-            oasOperationObject: () => path.join(__dirname, 'examples/get_collector_groups.yaml'),
-          },
-          validate: {
-            request: GetCollectorGroupsRequestSchema,
-            response: {
-              200: {
-                description: 'OK: A successful request.',
-                body: () => GetCollectorGroupsResponseSchema,
-              },
-              400: {
-                description: 'A bad request.',
-                body: genericErrorResponse,
-              },
-            },
-          },
-        },
-        getCollectorGroupsHandler
       );
   }
 

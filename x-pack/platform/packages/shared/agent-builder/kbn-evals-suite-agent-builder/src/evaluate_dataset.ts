@@ -257,7 +257,7 @@ function configureExperiment({
 | STATS skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.elastic.tool.parameters LIKE "*/${skillName}/SKILL.md*",
+        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
       1,
       NULL
     )
@@ -331,7 +331,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task,
       },
       selectedEvaluators
@@ -363,14 +363,16 @@ export function createEvaluateExternalDataset({
 
     await executorClient.runExperiment(
       {
-        dataset: {
-          name: datasetName,
-          description: resolvesFromPhoenix
-            ? 'External dataset resolved from Phoenix by name'
-            : 'External dataset resolved from Elasticsearch by name',
-          // Examples are resolved from upstream dataset storage, not provided in code.
-          examples: [],
-        },
+        datasets: [
+          {
+            name: datasetName,
+            description: resolvesFromPhoenix
+              ? 'External dataset resolved from Phoenix by name'
+              : 'External dataset resolved from Elasticsearch by name',
+            // Examples are resolved from upstream dataset storage, not provided in code.
+            examples: [],
+          },
+        ],
         task,
         trustUpstreamDataset: true,
       },

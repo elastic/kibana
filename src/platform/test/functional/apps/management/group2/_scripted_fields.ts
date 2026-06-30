@@ -43,12 +43,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('scripted fields', function () {
     this.tags(['skipFirefox']);
 
+    let logstashDataViewId: string;
+
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await kibanaServer.uiSettings.replace({});
+      // Navigate once to capture the actual data view ID (importExport may assign a new UUID).
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+      logstashDataViewId = await PageObjects.settings.getIndexPatternIdFromUrl();
     });
 
     after(async function afterAll() {
@@ -60,9 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not allow saving of invalid scripts', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
       await PageObjects.settings.goToAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
       await PageObjects.settings.setScriptedFieldScript(`i n v a l i d  s c r i p t`);
@@ -77,9 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const scriptedPainlessFieldName = 'ram_Pain_reg';
 
       it('should create and edit scripted field', async function () {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await log.debug('add scripted field');
         const script = `1`;
@@ -110,9 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await log.debug('add scripted field');
         const script = `if (doc['machine.ram'].size() == 0) return -1;
@@ -224,9 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
@@ -327,9 +326,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
@@ -423,9 +420,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(

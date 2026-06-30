@@ -152,11 +152,13 @@ export function createEvaluateEsqlGenerationDataset({
     const examples = sliceDataset(esqlGenerationDataset);
     await executorClient.runExperiment(
       {
-        dataset: {
-          name: 'security-esql-generation: regression suite',
-          description: `Security ES|QL generation: ${examples.length} examples (natural-language question → ground-truth query)`,
-          examples,
-        },
+        datasets: [
+          {
+            name: 'security-esql-generation: regression suite',
+            description: `Security ES|QL generation: ${examples.length} examples (natural-language question → ground-truth query)`,
+            examples,
+          },
+        ],
         task: async ({ input }) => {
           const question = input?.question ?? '';
           // Drive the full Agent Builder default agent (`elastic-ai-agent`)

@@ -231,6 +231,9 @@ export const agentlessPolicyRouteService = {
   getDeletePath: (policyId: string) => {
     return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
   },
+  getBulkThroughputPath: () => {
+    return AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN;
+  },
 };
 
 export const agentPolicyRouteService = {
@@ -370,7 +373,6 @@ export const agentRouteService = {
   postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
   getAgentEffectiveConfig: (agentId: string) =>
     AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
-  getCollectorGroupsPath: () => AGENT_API_ROUTES.COLLECTOR_GROUPS_PATTERN,
 };
 
 export const outputRoutesService = {

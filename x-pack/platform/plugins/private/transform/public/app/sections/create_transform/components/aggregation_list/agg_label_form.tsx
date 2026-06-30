@@ -10,7 +10,14 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import type { AggName } from '../../../../../../common/types/aggregations';
 
@@ -91,15 +98,22 @@ export const AggLabelForm: React.FC<Props> = ({
               defaultMessage: 'Edit aggregation',
             })}
             button={
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.transform.aggLabelForm.editAggAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.transform.aggLabelForm.editAggAriaLabel', {
                   defaultMessage: 'Edit aggregation',
                 })}
-                size="s"
-                iconType="pencil"
-                onClick={() => setPopoverVisibility(!isPopoverVisible)}
-                data-test-subj={`transformAggregationEntryEditButton_${item.aggName}`}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate('xpack.transform.aggLabelForm.editAggAriaLabel', {
+                    defaultMessage: 'Edit aggregation',
+                  })}
+                  size="s"
+                  iconType="pencil"
+                  onClick={() => setPopoverVisibility(!isPopoverVisible)}
+                  data-test-subj={`transformAggregationEntryEditButton_${item.aggName}`}
+                />
+              </EuiToolTip>
             }
             isOpen={isPopoverVisible}
             closePopover={() => setPopoverVisibility(false)}
@@ -113,15 +127,22 @@ export const AggLabelForm: React.FC<Props> = ({
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={intervalButtonStyles}>
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
               defaultMessage: 'Delete item',
             })}
-            size="s"
-            iconType="cross"
-            onClick={() => deleteHandler(item.aggName)}
-            data-test-subj="transformAggregationEntryDeleteButton"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
+                defaultMessage: 'Delete item',
+              })}
+              size="s"
+              iconType="cross"
+              onClick={() => deleteHandler(item.aggName)}
+              data-test-subj="transformAggregationEntryDeleteButton"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 

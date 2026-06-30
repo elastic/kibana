@@ -38,6 +38,9 @@ const requestCache = new WeakMap<KibanaRequest, Promise<SiemReadinessSharedConte
  * Returns the per-request lazy shared context for SIEM readiness.
  * The first call for a given request performs the fetch; subsequent calls return the cached Promise.
  *
+ * On failure the cache entry is evicted so a later tool call within the same request can retry
+ * rather than inheriting a permanently poisoned, already-rejected promise.
+ *
  * @param request - The Kibana request object (used as the cache key)
  * @param fetch   - Factory that performs the actual fetches when the cache is cold
  */
@@ -49,7 +52,10 @@ export const getSiemReadinessSharedContext = (
   if (cached) {
     return cached;
   }
-  const promise = fetch();
+  const promise = fetch().catch((err) => {
+    requestCache.delete(request);
+    throw err;
+  });
   requestCache.set(request, promise);
   return promise;
 };

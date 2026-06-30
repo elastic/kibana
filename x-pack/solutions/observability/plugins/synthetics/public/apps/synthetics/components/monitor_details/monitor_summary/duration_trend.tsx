@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 
 interface MonitorDurationTrendProps {
   from: string;
@@ -22,6 +23,7 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
   } = useKibana<ClientPluginsStart>().services;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!queryIdFilter) {
     return null;
@@ -32,6 +34,7 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
       id="monitorDurationTrend"
       customHeight="240px"
       reportType="kpi-over-time"
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={Object.keys(metricsToShow).map((metric) => ({
         dataType: 'synthetics',
         time: props,

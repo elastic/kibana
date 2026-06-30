@@ -20,6 +20,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -147,18 +148,28 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="closePopover"
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.stackAlerts.components.ui.alertParams.closeIndexPopoverLabel',
                   {
                     defaultMessage: 'Close',
                   }
                 )}
-                onClick={closeIndexPopover}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="closePopover"
+                  iconType="cross"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.stackAlerts.components.ui.alertParams.closeIndexPopoverLabel',
+                    {
+                      defaultMessage: 'Close',
+                    }
+                  )}
+                  onClick={closeIndexPopover}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>

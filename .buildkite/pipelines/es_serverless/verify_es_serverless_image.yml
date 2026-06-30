@@ -75,9 +75,8 @@ steps:
         depends_on:
           - build
         env:
-          SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+          SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
           SERVERLESS_TESTS_ONLY: 'true'
-          SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
         retry:
           automatic:
             - exit_status: '*'
@@ -281,7 +280,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-highmem-4
-          diskSizeGb: 120
+          diskSizeGb: 125
         depends_on: build
         timeout_in_minutes: 75
         parallelism: 12

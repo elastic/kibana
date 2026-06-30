@@ -12,7 +12,6 @@ import { UnifiedTimeline } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import {
   createSecuritySolutionStorageMock,
@@ -46,7 +45,6 @@ jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -180,10 +178,6 @@ const useTimelineEventsMock = jest.fn(() => [
   },
 ]);
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 describe('unified timeline', () => {
@@ -218,8 +212,6 @@ describe('unified timeline', () => {
     (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock

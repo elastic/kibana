@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlUpsertHttpResponse } from '../../common/http_api/sml';
 import { smlByIdPath } from '../../common/constants';
-import type { SmlService } from '../services/sml/types';
+import type { SmlDocumentInput, SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 
@@ -38,8 +38,47 @@ export const registerUpsertRoute = ({
           title: schema.string({ minLength: 1 }),
           origin_id: schema.string({ minLength: 1 }),
           content: schema.string(),
+          tags: schema.maybe(
+            schema.arrayOf(
+              schema.string({
+                maxLength: 100,
+                validate: (v) =>
+                  /^[a-z0-9][a-z0-9_-]*$/.test(v)
+                    ? undefined
+                    : 'must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "my-tag", "otel_v2")',
+                meta: {
+                  description:
+                    'A single tag value. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. "otel", "my-tag", "v2_data"). Commas are not allowed — use separate array entries.',
+                },
+              }),
+              {
+                maxSize: 100,
+                meta: {
+                  description:
+                    'Optional tags for grouping and retrieval. Tags are matched with OR semantics on the list endpoint — a document is returned if it has any of the requested tags. Maximum 100 tags per document; each tag is at most 100 characters.',
+                },
+              }
+            )
+          ),
           permissions: schema.maybe(
-            schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 100 })
+            schema.object({
+              kibana: schema.maybe(
+                schema.object({
+                  privileges: schema.arrayOf(
+                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
+                    { maxSize: 100 }
+                  ),
+                })
+              ),
+              elasticsearch: schema.maybe(
+                schema.object({
+                  indices: schema.arrayOf(
+                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
+                    { maxSize: 100 }
+                  ),
+                })
+              ),
+            })
           ),
         }),
       },
@@ -59,13 +98,7 @@ export const registerUpsertRoute = ({
         const result = await sml.upsertDocument({
           id,
           spaceId,
-          document: request.body as {
-            type: string;
-            title: string;
-            origin_id: string;
-            content: string;
-            permissions?: string[];
-          },
+          document: request.body as SmlDocumentInput,
           esClient,
         });
         if (!result) {

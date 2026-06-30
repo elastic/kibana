@@ -23,7 +23,7 @@ import type { IconType } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
-import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
@@ -74,7 +74,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     http,
     uiSettings,
   } = useKibana().services;
-  const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
+  const {
+    isLoading: isSavingConnector,
+    createConnector,
+    createConnectorError,
+  } = useCreateConnector();
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -83,6 +87,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
+  const [selectedFeatureIds, setSelectedFeatureIds] = useState<string[]>(
+    featureId ? [featureId] : []
+  );
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -266,6 +273,25 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     setSearchValue(newValue);
   }, []);
 
+  const handleSelectedFeatureIdsChange = useCallback((ids: string[]) => {
+    setSelectedFeatureIds(ids);
+  }, []);
+
+  const featureFilterOptions = useMemo(() => {
+    if (!allActionTypes) {
+      return [];
+    }
+    const uniqueFeatureIds = new Set<string>();
+    for (const actionTypeItem of Object.values(allActionTypes)) {
+      for (const supportedFeatureId of actionTypeItem.supportedFeatureIds ?? []) {
+        uniqueFeatureIds.add(supportedFeatureId);
+      }
+    }
+    return Array.from(uniqueFeatureIds)
+      .map((id) => ({ value: id, label: getConnectorFeatureName(id) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [allActionTypes]);
+
   useEffect(() => {
     isMounted.current = true;
 
@@ -314,6 +340,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             <CreateConnectorFilter
               searchValue={searchValue}
               onSearchValueChange={handleSearchValueChange}
+              selectedFeatureIds={selectedFeatureIds}
+              onSelectedFeatureIdsChange={handleSelectedFeatureIdsChange}
+              featureOptions={featureFilterOptions}
+              featureFilterDisabled={Boolean(featureId)}
             />
             <EuiSpacer size="m" />
           </>
@@ -442,6 +472,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
+            {createConnectorError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="create-connector-api-error"
+                  title={createConnectorError.title}
+                >
+                  <p>{createConnectorError.message}</p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             {!isLoadingActionTypeModel &&
               !showLoadingSpinner &&
               !actionTypeModelError &&
@@ -466,6 +512,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             setAllActionTypes={setAllActionTypes}
             actionTypeRegistry={actionTypeRegistry}
             searchValue={searchValue}
+            selectedFeatureIds={selectedFeatureIds}
           />
         )}
       </EuiFlyoutBody>

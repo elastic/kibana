@@ -31,13 +31,13 @@ export const createChangePointDataSourceProfileProvider =
     profileId: CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
     profile: {
       getChartSectionConfiguration:
-        (prev, { context }) =>
-        (params) => ({
-          ...prev(params),
+        (prev, { toolkit }) =>
+        () => ({
+          ...prev(),
           renderChartSection: (props) =>
             React.createElement(LazyChangePointExperienceGrid, {
               ...props,
-              actions: params.actions,
+              actions: toolkit.actions,
             }),
           replaceDefaultChart: true as const,
           localStorageKeyPrefix: CHANGE_POINT_CHART_LOCAL_STORAGE_KEY,

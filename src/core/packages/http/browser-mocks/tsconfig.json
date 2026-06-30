@@ -14,7 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-http-browser-internal",
     "@kbn/core-http-browser",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/core-spaces-common"
   ],
   "exclude": [
     "target/**/*",

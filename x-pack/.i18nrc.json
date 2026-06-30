@@ -112,6 +112,7 @@
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
     "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
+    "xpack.searchGettingStarted": "solutions/search/plugins/search_getting_started",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
     "xpack.searchNotebooks": "solutions/search/plugins/search_notebooks",
@@ -133,6 +134,8 @@
     "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "solutions/security/plugins/session_view",
+    "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
+    "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
     "xpack.streams": ["platform/plugins/shared/streams_app"],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
@@ -154,7 +157,9 @@
     "xpack.ux": ["solutions/observability/plugins/ux"],
     "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
     "xpack.watcher": "platform/plugins/private/watcher",
-    "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace"
+    "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
+    "xpack.notificationCenter": "platform/plugins/shared/notification_center"
+    
   },
   "exclude": ["examples"],
   "translations": [

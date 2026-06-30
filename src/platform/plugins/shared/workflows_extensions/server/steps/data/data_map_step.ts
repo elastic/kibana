@@ -128,7 +128,7 @@ export const dataMapStepDefinition = createServerStepDefinition({
   ...dataMapStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
+      const items = context.config.items;
       const rawFields = context.rawInput.fields as Record<string, FieldsNode>;
 
       if (items == null) {

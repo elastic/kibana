@@ -16,12 +16,23 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 // ── createInitialState ────────────────────────────────────────────────────────
 
 describe('createInitialState', () => {
-  it('creates default state for create mode (signal)', () => {
+  it('creates default state for create mode (alert)', () => {
     const state = createInitialState({ mode: 'create' });
 
     expect(state.mode).toBe('create');
     expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
+    /*
+     * Create uses a single unified editor (no split tabs), so the default tab
+     * falls back to 'alert'.
+     */
+    expect(state.activeTab).toBe('alert');
+  });
+
+  it('starts on the alert tab for signal create (single editor)', () => {
+    const state = createInitialState({ mode: 'create', initialKind: 'signal' });
+
+    expect(state.activeTab).toBe('alert');
   });
 
   it('sets recoveryType to default when initialKind is alert', () => {
@@ -61,11 +72,38 @@ describe('createInitialState', () => {
     expect(withSignal.recoveryType).toBe('default');
   });
 
-  it('sets childOpen false in create mode when isBuilderMode is true', () => {
-    const state = createInitialState({ mode: 'create', isBuilderMode: true });
+  it('opens the query preview in create mode', () => {
+    const state = createInitialState({ mode: 'create' });
 
-    expect(state.childOpen).toBe(false);
+    expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
+  });
+
+  it('sets queryCommitted true in create mode when isQueryPrePopulated is true', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: true });
+
+    expect(state.queryCommitted).toBe(true);
+    expect(state.childOpen).toBe(true);
+  });
+
+  it('sets queryCommitted false when Discover query has no splittable alert condition', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: false });
+
+    expect(state.queryCommitted).toBe(false);
+  });
+
+  it('starts in YAML mode with sandbox open when forceYamlMode is true', () => {
+    const state = createInitialState({ mode: 'edit', forceYamlMode: true });
+
+    expect(state.yamlMode).toBe(true);
+    expect(state.childOpen).toBe(true);
+  });
+
+  it('does not start in YAML mode when forceYamlMode is false', () => {
+    const state = createInitialState({ mode: 'edit', forceYamlMode: false });
+
+    expect(state.yamlMode).toBe(false);
+    expect(state.childOpen).toBe(false);
   });
 });
 
@@ -73,12 +111,13 @@ describe('createInitialState', () => {
 
 describe('reducer', () => {
   describe('KIND_CHANGE', () => {
-    it('kind=alert opens child and resets to step 0', () => {
-      const state = createState({ step: 2, childOpen: false });
+    it('kind=alert opens child on the base tab and resets to step 0', () => {
+      const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
       expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
+      expect(next.activeTab).toBe('base');
     });
 
     it('kind=signal keeps child open, resets step and recoveryType', () => {
@@ -158,6 +197,50 @@ describe('reducer', () => {
     });
   });
 
+  describe('GO_NEXT', () => {
+    it('closes preview when advancing in non-builder mode', () => {
+      const state = createState({ step: 0, childOpen: true });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('preserves preview state when advancing in builder mode', () => {
+      const state = createState({ step: 0, childOpen: true });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(true);
+    });
+
+    it('keeps preview closed if user closed it in builder mode', () => {
+      const state = createState({ step: 0, childOpen: false });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+  });
+
+  describe('GO_BACK', () => {
+    it('closes preview when going back in non-builder mode', () => {
+      const state = createState({ step: 2, childOpen: true });
+      const next = reducer(state, { type: 'GO_BACK' });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('preserves preview state when going back in builder mode', () => {
+      const state = createState({ step: 2, childOpen: true });
+      const next = reducer(state, { type: 'GO_BACK', isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(true);
+    });
+  });
+
   describe('CLOSE_CHILD', () => {
     it('sets childOpen false without changing other fields', () => {
       const state = createState({ childOpen: true, queryCommitted: true });
@@ -177,8 +260,13 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(false, state)).toBeUndefined();
   });
 
-  it('returns [base, alert] on alertCondition step with isAlert true', () => {
-    const state = createState({ step: 0 });
+  it('returns undefined on alertCondition step in create mode (single unified editor)', () => {
+    const state = createState({ step: 0, mode: 'create' });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
+  });
+
+  it('returns [base, alert] on alertCondition step in edit mode', () => {
+    const state = createState({ step: 0, mode: 'edit' });
     expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
   });
 

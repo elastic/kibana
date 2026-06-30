@@ -12,13 +12,14 @@ import {
   ACTION_POLICY_SML_TYPE,
   actionPolicyAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
-import type { GetScopedActionPolicyClient } from '../scoped_action_policy_client_factory';
+import type { ActionPolicyClient } from '../../lib/action_policy_client';
 
 interface CreateActionPolicySmlTypeOptions {
-  getScopedActionPolicyClient: GetScopedActionPolicyClient;
+  getScopedActionPolicyClient: (request: KibanaRequest) => ActionPolicyClient;
   getInternalRepository: () => ISavedObjectsRepository;
 }
 
@@ -76,7 +77,12 @@ export const createActionPolicySmlType = ({
             type: ACTION_POLICY_SML_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}`],
+            permissions: {
+              kibana: {
+                privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+              },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -91,7 +97,7 @@ export const createActionPolicySmlType = ({
   toAttachment: async (item, context) => {
     try {
       const client = getScopedActionPolicyClient(context.request);
-      const policy = await client.getActionPolicy({ id: item.origin_id });
+      const policy = await client.getActionPolicy({ id: item.origin_id ?? '' });
       return {
         type: ACTION_POLICY_ATTACHMENT_TYPE,
         data: actionPolicyAttachmentDataSchema.parse(policy),

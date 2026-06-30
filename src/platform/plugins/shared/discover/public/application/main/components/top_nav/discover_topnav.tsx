@@ -129,7 +129,7 @@ export const DiscoverTopNav = ({
 
   const onOpenQueryInNewTab = useCallback(
     async (tabName: string, esqlQuery: string) => {
-      dispatch(
+      await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
           appState: { query: { esql: esqlQuery } },
@@ -415,6 +415,7 @@ export const DiscoverTopNav = ({
                 onSaveControl,
                 controlsWrapper: (
                   <ControlGroupRenderer
+                    query={query}
                     onApiAvailable={setControlGroupApi}
                     timeRange={timeRangeAbsolute}
                     getCreationOptions={async (initialState) => {

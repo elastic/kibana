@@ -11,7 +11,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen } from '@testing-library/react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
 import { TestChromeProviders } from '../test_helpers';
@@ -50,7 +50,26 @@ describe('useHasChromeAppHeaderContent', () => {
   it('detects favorite-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.next.appHeader.set({
-      favorite: <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />,
+      favorite: (
+        <EuiToolTip content="Favorite" disableScreenReaderOutput>
+          <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
+        </EuiToolTip>
+      ),
+    });
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('has content')).toBeInTheDocument();
+  });
+
+  it('detects metadata-only registered content', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.next.appHeader.set({
+      metadata: [{ type: 'text', label: 'Created by: analyst' }],
     });
 
     render(

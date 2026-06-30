@@ -39,6 +39,7 @@ import {
   isPromqlParamName,
   looksLikePromqlParamAssignment,
   PromqlParamName,
+  PROMQL_RANGE_PARAM_NAMES,
 } from './utils';
 
 // ISO 8601 with Z, optional milliseconds (e.g. 2024-01-15T10:00:00Z or ...00.000Z).
@@ -80,6 +81,21 @@ export const validate = (
 
   const hasStep = usedParams.has(PromqlParamName.Step);
   const hasBuckets = usedParams.has(PromqlParamName.Buckets);
+  const hasTime = usedParams.has(PromqlParamName.Time);
+  const hasRangeParam = PROMQL_RANGE_PARAM_NAMES.some((param) => usedParams.has(param));
+
+  if (hasTime && hasRangeParam) {
+    messages.push({
+      ...getMessageFromId({
+        messageId: 'promqlInvalidParam',
+        values: {
+          reason:
+            'Specify either [time] for instant query or any of [step], [buckets], [start], [end]',
+        },
+        locations: command.location,
+      }),
+    });
+  }
 
   if (hasStep && hasBuckets) {
     messages.push({
@@ -94,7 +110,7 @@ export const validate = (
   const hasStart = usedParams.has(PromqlParamName.Start);
   const hasEnd = usedParams.has(PromqlParamName.End);
 
-  if (hasStart !== hasEnd) {
+  if (!hasTime && hasStart !== hasEnd) {
     const param = hasStart ? PromqlParamName.End : PromqlParamName.Start;
     messages.push({
       ...getMessageFromId({
@@ -123,7 +139,11 @@ export const validate = (
       continue;
     }
 
-    if (param === PromqlParamName.Start || param === PromqlParamName.End) {
+    if (
+      param === PromqlParamName.Start ||
+      param === PromqlParamName.End ||
+      param === PromqlParamName.Time
+    ) {
       const normalized = stripQuotes(value);
       const isPlaceholder = normalized === '?_tstart' || normalized === '?_tend';
 

@@ -142,7 +142,9 @@ export class ContentListWrapper {
     this.itemLinks = page.testSubj.locator('content-list-table-item-link');
     this.noResultsPanel = page.testSubj.locator('contentListNoResults');
     this.tableSelectAllCheckbox = page.testSubj.locator('checkboxSelectAll');
-    this.selectionBarDeleteButton = page.testSubj.locator('contentListSelectionBar-deleteButton');
+    this.selectionBarDeleteButton = page.testSubj.locator(
+      'contentListToolbar-selectionBar-deleteButton'
+    );
     this.deleteConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
   }
 

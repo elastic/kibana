@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiSpacer } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import {
   ContentList,
@@ -18,8 +18,16 @@ import {
   ContentListFooter,
   ContentListToolbar,
 } from '@kbn/content-list';
+import {
+  ContentListClientProvider,
+  defineContentListFilter,
+  defineContentListSortField,
+  type ContentListClientProviderProps,
+  type TableListViewFindItemsFn,
+} from '@kbn/content-list-provider-client';
 import { KibanaContentListPage } from '@kbn/content-list-page';
 import {
+  type DashboardMockItem,
   MOCK_DASHBOARDS,
   createMockFavoritesClient,
   mockContentListUserProfilesServices,
@@ -52,6 +60,93 @@ const labels = {
   entity: 'dashboard',
   entityPlural: 'dashboards',
 } as const;
+
+type TimeRestoreFilterValue = 'restoresTime' | 'usesGlobalTime';
+
+const getTimeRestoreValue = (item: DashboardMockItem): TimeRestoreFilterValue =>
+  item.attributes.timeRestore ? 'restoresTime' : 'usesGlobalTime';
+
+const timeRestoreFilter = defineContentListFilter<DashboardMockItem, TimeRestoreFilterValue>({
+  id: 'timeRestore',
+  title: 'Time behavior',
+  getItemValue: getTimeRestoreValue,
+  options: [
+    { value: 'restoresTime', label: 'Restores time range' },
+    { value: 'usesGlobalTime', label: 'Uses global time' },
+  ],
+});
+
+const timeRestoreSort = defineContentListSortField<DashboardMockItem>({
+  id: 'timeRestore',
+  title: 'Time behavior',
+  getValue: getTimeRestoreValue,
+});
+
+const clientProviderFeatures = {
+  sorting: {
+    initialSort: { field: 'updatedAt', direction: 'desc' },
+    fields: (defaults) => ({
+      ...defaults,
+      timeRestore: timeRestoreSort,
+    }),
+  },
+  pagination: { initialPageSize: 20 },
+  filters: (defaults) => ({
+    ...defaults,
+    timeRestore: timeRestoreFilter,
+  }),
+} satisfies ContentListClientProviderProps['features'];
+
+const clientStoryCore = {
+  analytics: { reportEvent: () => undefined },
+  i18n: {},
+  theme: { theme$: {} },
+  userProfile: { bulkGet: async () => [] },
+  overlays: {
+    openSystemFlyout: () => ({
+      onClose: Promise.resolve(),
+      close: async () => undefined,
+    }),
+  },
+  notifications: {
+    toasts: {
+      addDanger: () => undefined,
+    },
+  },
+  rendering: {
+    addContext: (element: React.ReactNode) => <>{element}</>,
+  },
+  uiSettings: {
+    get: <T,>(key: string): T => (key === 'savedObjects:listingLimit' ? 1000 : 20) as T,
+  },
+} as unknown as ContentListClientProviderProps['core'];
+
+const findDashboardItems: TableListViewFindItemsFn = async (searchQuery, options, signal) => {
+  if (signal?.aborted) {
+    throw new DOMException('The operation was aborted.', 'AbortError');
+  }
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const matchingItems = normalizedSearch
+    ? MOCK_DASHBOARDS.filter((dashboard) =>
+        [dashboard.attributes.title, dashboard.attributes.description]
+          .filter((text): text is string => Boolean(text))
+          .some((text) => text.toLowerCase().includes(normalizedSearch))
+      )
+    : MOCK_DASHBOARDS;
+  const limitedItems = matchingItems.slice(0, options?.listingLimit ?? matchingItems.length);
+
+  return {
+    hits: limitedItems,
+    total: matchingItems.length,
+  };
+};
+
+const TimeBehaviorBadge = ({ restoresTime }: { restoresTime: boolean }) => (
+  <EuiBadge color={restoresTime ? 'primary' : 'hollow'}>
+    {restoresTime ? 'Restores time range' : 'Uses global time'}
+  </EuiBadge>
+);
 
 const useDashboardProviderProps = ({
   openContentEditor,
@@ -229,6 +324,56 @@ const ProposalStory = () => {
   );
 };
 
+const ClientProviderExtensionsStory = () => {
+  const pageElement = useMemo(
+    () => (
+      <KibanaContentListPage>
+        <KibanaContentListPage.Header
+          title="Dashboards"
+          tabs={[{ label: 'Dashboards', isSelected: true, onClick: () => undefined }]}
+        />
+        <Section>
+          <ContentList emptyState={<DashboardListingEmptyPromptMock />}>
+            <ContentListToolbar />
+            <ContentListTable title="Dashboards">
+              <Column.Name showDescription showTags />
+              <Column
+                id="timeRestore"
+                name="Time behavior"
+                sortable
+                width="180px"
+                render={(item) => <TimeBehaviorBadge restoresTime={Boolean(item.timeRestore)} />}
+              />
+              <Column.CreatedBy />
+              <Column.UpdatedAt />
+            </ContentListTable>
+            <ContentListFooter />
+          </ContentList>
+        </Section>
+      </KibanaContentListPage>
+    ),
+    []
+  );
+
+  return (
+    <ContentListClientProvider
+      id="dashboard-listing-client-provider-extensions"
+      labels={labels}
+      core={clientStoryCore}
+      services={{
+        tags: mockTagsService,
+        userProfiles: mockContentListUserProfilesServices,
+      }}
+      features={clientProviderFeatures}
+      findItems={findDashboardItems}
+    >
+      {pageElement}
+      <EuiSpacer size="m" />
+      <StateDiagnosticPanel element={pageElement} />
+    </ContentListClientProvider>
+  );
+};
+
 // =============================================================================
 // Bulk-delete partition and selection gating
 // =============================================================================
@@ -362,6 +507,10 @@ export const Original: StoryObj = {
 
 export const Proposal: StoryObj = {
   render: () => <ProposalStory />,
+};
+
+export const ClientProviderExtensions: StoryObj = {
+  render: () => <ClientProviderExtensionsStory />,
 };
 
 /**

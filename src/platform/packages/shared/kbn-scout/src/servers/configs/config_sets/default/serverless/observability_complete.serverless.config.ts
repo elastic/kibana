@@ -22,6 +22,11 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
+      // Synthetics service config — matches the FTR deployment-agnostic serverless base
+      // so the Elastic-managed `dev` public location is available for Synthetics API tests.
+      '--xpack.uptime.service.password=test',
+      '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+      '--xpack.uptime.service.devUrl=mockDevUrl',
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
     ],
   },

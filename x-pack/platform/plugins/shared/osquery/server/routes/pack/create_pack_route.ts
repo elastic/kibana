@@ -17,7 +17,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -145,7 +145,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           queries: gatedQueries as Record<string, PackQueryInput>,
         });
         if (scheduleErr) {
-          return response.badRequest({ body: scheduleErr });
+          return response.badRequest({ body: { message: scheduleErr } });
         }
 
         const now = moment().toISOString();

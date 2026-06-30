@@ -133,6 +133,24 @@ describe('buildThresholdEsql', () => {
       expect(result).toContain('errors = COUNT(*) WHERE status >= 500');
     });
 
+    it('escapes stat labels containing spaces', () => {
+      const result = buildThresholdEsql(
+        makeValues({
+          stats: [{ id: '1', label: 'error count', aggregation: Aggregation.COUNT }],
+          alertConditions: [
+            { id: '1', metric: 'error count', comparator: Comparator.GT, threshold: [100] },
+          ],
+        })
+      );
+      expect(result).toContain('`error count` = COUNT(*)');
+    });
+
+    it('does not escape simple stat labels', () => {
+      const result = buildThresholdEsql(makeValues());
+      expect(result).toContain('count = COUNT(*)');
+      expect(result).not.toContain('`count`');
+    });
+
     it('includes multiple stats', () => {
       const result = buildThresholdEsql(
         makeValues({

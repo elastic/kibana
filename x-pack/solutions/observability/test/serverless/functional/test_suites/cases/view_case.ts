@@ -397,9 +397,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds a file to the case', async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
-
         await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');

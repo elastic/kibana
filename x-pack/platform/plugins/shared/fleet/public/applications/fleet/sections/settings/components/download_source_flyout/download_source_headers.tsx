@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -182,19 +183,29 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} style={{ marginTop: index === 0 ? 28 : 0 }}>
-                <EuiButtonIcon
-                  data-test-subj={`downloadSourceHeadersDeleteButton${index}`}
-                  color="text"
-                  onClick={() => deleteKeyValuePair(index)}
-                  iconType="cross"
-                  disabled={deleteButtonDisabled}
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.fleet.settings.editDownloadSourcesFlyout.deleteHeaderButton',
                     {
                       defaultMessage: 'Delete header',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj={`downloadSourceHeadersDeleteButton${index}`}
+                    color="text"
+                    onClick={() => deleteKeyValuePair(index)}
+                    iconType="cross"
+                    disabled={deleteButtonDisabled}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.editDownloadSourcesFlyout.deleteHeaderButton',
+                      {
+                        defaultMessage: 'Delete header',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

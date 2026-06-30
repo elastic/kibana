@@ -130,6 +130,7 @@ export const subscribeToChatEvents = ({
       if (event.data.attachments) {
         conversationActions.setAttachments({ attachments: event.data.attachments });
       }
+      conversationActions.onRoundComplete(event.data.round);
     } else if (isConversationCreatedEvent(event)) {
       conversationActions.onConversationCreated({ title: event.data.title });
     } else if (isThinkingCompleteEvent(event)) {

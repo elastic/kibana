@@ -9,24 +9,22 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { getProxyRouteHandlerDeps } from './mocks';
-import { createResponseStub } from './stubs';
-import * as requestModule from '../../../../lib/proxy_request';
+import { getProxyRouteHandlerDeps, getRequestHandlerContext } from './mocks';
 
 import { createHandler } from './create_handler';
 
 describe('Console Proxy Route', () => {
   let request: (method: string, path: string) => Promise<IKibanaResponse> | IKibanaResponse;
-  const proxyRequestMock = requestModule.proxyRequest as jest.Mock;
+  let transportRequest: ReturnType<typeof getRequestHandlerContext>['transportRequest'];
 
   beforeEach(() => {
-    (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
-
     request = async (method: string, path: string) => {
       const handler = createHandler(getProxyRouteHandlerDeps({}));
+      const { core, transportRequest: transportRequestMock } = getRequestHandlerContext('foo');
+      transportRequest = transportRequestMock;
 
       return handler(
-        {} as any,
+        { core } as any,
         { headers: {}, query: { method, path } } as any,
         kibanaResponseFactory
       );
@@ -42,25 +40,24 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
-          expect(proxyRequestMock.mock.calls.length).toBe(1);
-          const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).toBe('http://localhost:9200/http%3A//evil.com/test?pretty=true');
+          expect(transportRequest).toHaveBeenCalledTimes(1);
+          expect(transportRequest.mock.calls[0][0].path).toBe(
+            '/http%3A//evil.com/test?pretty=true'
+          );
         });
       });
       describe('starts with a slash', () => {
         it('combines well with the base url', async () => {
           await request('GET', '/index/id');
-          expect(proxyRequestMock.mock.calls.length).toBe(1);
-          const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
+          expect(transportRequest).toHaveBeenCalledTimes(1);
+          expect(transportRequest.mock.calls[0][0].path).toBe('/index/id?pretty=true');
         });
       });
       describe(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
           await request('GET', 'index/id');
-          expect(proxyRequestMock.mock.calls.length).toBe(1);
-          const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
+          expect(transportRequest).toHaveBeenCalledTimes(1);
+          expect(transportRequest.mock.calls[0][0].path).toBe('/index/id?pretty=true');
         });
       });
       describe('contains special characters', () => {
@@ -69,10 +66,9 @@ describe('Console Proxy Route', () => {
 
           const { status } = await request('GET', path);
           expect(status).toBe(200);
-          expect(proxyRequestMock.mock.calls.length).toBe(1);
-          const [[args]] = proxyRequestMock.mock.calls;
-          expect(args.uri.search).toEqual(
-            '?q=create_date%3A%5B2022-03-10T08%3A00%3A00.000%2B08%3A00+TO+*%5D&pretty=true'
+          expect(transportRequest).toHaveBeenCalledTimes(1);
+          expect(transportRequest.mock.calls[0][0].path).toBe(
+            '/_search?q=create_date%3A%5B2022-03-10T08%3A00%3A00.000%2B08%3A00+TO+*%5D&pretty=true'
           );
         });
       });

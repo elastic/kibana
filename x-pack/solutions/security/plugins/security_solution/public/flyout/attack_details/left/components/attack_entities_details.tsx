@@ -11,8 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAttackDetailsContext } from '../../context';
 import { useHeaderData } from '../../hooks/use_header_data';
 import { useAttackEntitiesLists } from '../../hooks/use_attack_entities_lists';
-import { UserDetails } from '../../../document_details/left/components/user_details';
-import { HostDetails } from '../../../document_details/left/components/host_details';
+import { AttackHostInsightsRow, AttackUserInsightsRow } from './attack_entity_insight_rows';
 
 const ATTACK_ENTITIES_DETAILS_TEST_ID = 'attack-entities-details';
 
@@ -24,7 +23,7 @@ const ATTACK_ENTITIES_DETAILS_TEST_ID = 'attack-entities-details';
 export const AttackEntitiesDetails: React.FC = memo(() => {
   const { scopeId } = useAttackDetailsContext();
   const { timestamp } = useHeaderData();
-  const { userEntityIdentifiers, hostEntityIdentifiers, loading, error } = useAttackEntitiesLists();
+  const { userEntityEntries, hostEntityEntries, loading, error } = useAttackEntitiesLists();
 
   const timestampOrFallback = timestamp ?? '';
 
@@ -43,7 +42,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
     );
   }
 
-  const hasEntities = userEntityIdentifiers.length > 0 || hostEntityIdentifiers.length > 0;
+  const hasEntities = userEntityEntries.length > 0 || hostEntityEntries.length > 0;
 
   if (!hasEntities) {
     return (
@@ -66,21 +65,22 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             <FormattedMessage
               id="xpack.securitySolution.flyout.attackDetails.left.insights.entities.userDetailsTitle"
               defaultMessage="{userCount, plural, one {User} other {Users}}:"
-              values={{ userCount: userEntityIdentifiers.length }}
+              values={{ userCount: userEntityEntries.length }}
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {userEntityIdentifiers.map((identifiers, index) => (
+        {userEntityEntries.map((entry, index) => (
           <React.Fragment
-            key={`user-${index}-${identifiers['user.name'] ?? Object.values(identifiers)[0]}`}
+            key={`user-${index}-${
+              entry.identityFields['user.name'] ?? entry.identityFields['entity.id'] ?? index
+            }`}
           >
-            <UserDetails
-              userName={identifiers['user.name'] ?? Object.values(identifiers)[0]}
+            <AttackUserInsightsRow
+              identityFields={entry.identityFields}
+              sampleSource={entry.sampleSource}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
-              expandedOnFirstRender={false}
-              isAttackDetails={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -92,21 +92,22 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
             <FormattedMessage
               id="xpack.securitySolution.flyout.attackDetails.left.insights.entities.hostDetailsTitle"
               defaultMessage="{hostCount, plural, one {Host} other {Hosts}}:"
-              values={{ hostCount: hostEntityIdentifiers.length }}
+              values={{ hostCount: hostEntityEntries.length }}
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {hostEntityIdentifiers.map((identifiers, index) => (
+        {hostEntityEntries.map((entry, index) => (
           <React.Fragment
-            key={`host-${index}-${identifiers['host.name'] ?? Object.values(identifiers)[0]}`}
+            key={`host-${index}-${
+              entry.identityFields['host.name'] ?? entry.identityFields['entity.id'] ?? index
+            }`}
           >
-            <HostDetails
-              hostName={identifiers['host.name'] ?? Object.values(identifiers)[0]}
+            <AttackHostInsightsRow
+              identityFields={entry.identityFields}
+              sampleSource={entry.sampleSource}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
-              expandedOnFirstRender={false}
-              isAttackDetails={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

@@ -8,7 +8,7 @@
 import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import pMap from 'p-map';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { stringify } from '../../endpoint/utils/stringify';
 import { catchAndWrapError } from '../../endpoint/utils';
 import { protectionUpdatesNoteSavedObjectType } from '../../endpoint/lib/protection_updates_note/saved_object_mappings';

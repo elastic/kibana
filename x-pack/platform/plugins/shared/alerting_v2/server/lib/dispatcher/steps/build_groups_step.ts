@@ -14,6 +14,8 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
+  Rule,
+  RuleId,
 } from '../types';
 
 @injectable()
@@ -21,15 +23,18 @@ export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [] } = state;
+    const { matched = [], rules } = state;
 
-    const groups = buildActionGroups(matched);
+    const groups = buildActionGroups(matched, rules);
 
     return { type: 'continue', data: { groups } };
   }
 }
 
-export function buildActionGroups(matched: readonly MatchedPair[]): ActionGroup[] {
+export function buildActionGroups(
+  matched: readonly MatchedPair[],
+  rules?: Map<RuleId, Rule>
+): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
   for (const { episode, policy } of matched) {
@@ -64,10 +69,16 @@ export function buildActionGroups(matched: readonly MatchedPair[]): ActionGroup[
         destinations: policy.destinations,
         groupKey,
         episodes: [],
+        rules: {},
       });
     }
 
-    groupMap.get(actionGroupId)!.episodes.push(episode);
+    const group = groupMap.get(actionGroupId)!;
+    group.episodes.push(episode);
+    const rule = rules?.get(episode.rule_id);
+    if (rule) {
+      group.rules[episode.rule_id] = { name: rule.name };
+    }
   }
 
   return [...groupMap.values()];

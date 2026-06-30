@@ -10,6 +10,11 @@ import { manageRuleTool } from '../tools/manage_rule';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { alertingTools } from '../common/constants';
+import {
+  generateRuleSchemaDoc,
+  generateRuleOperationsDoc,
+  generateActionPolicySchemaDoc,
+} from './schema_to_skill_docs';
 
 export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
   defineSkillType({
@@ -30,16 +35,16 @@ Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important 
 
 ### Alert (\`kind: alert\`)
 - **Stateful alerting** with full episode lifecycle: pending, active, recovering, inactive.
-- Supports state transitions (\`consecutive_breaches\`), recovery detection, and notification dispatch.
+- Supports state transitions (\`pending_count\` / \`recovering_count\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
-- UI label: **"Alerting"**.
+- UI label: **"Alert"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
 
 ### Signal (\`kind: signal\`)
 - **Stateless detection** (observation-only).
 - Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
 - No notifications, no recovery, no state transitions.
-- UI label: **"Detect only"**.
+- UI label: **"Signal"**.
 - Use for logging or detection without automated action.
 
 ### Immutability
@@ -83,9 +88,7 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`last_event_timestamp\` | Timestamp of the most recent event |
 | \`rule.id\` | The rule's saved object ID |
 | \`rule.name\` | The rule's display name |
-| \`rule.description\` | The rule's description |
 | \`rule.tags\` | The rule's tags array |
-| \`rule.enabled\` | Whether the rule is enabled |
 | \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
 
 ### Grouping Modes
@@ -135,6 +138,21 @@ The end-to-end notification path:
 
 Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.`,
       },
+      {
+        name: 'rule-schema',
+        relativePath: './references',
+        content: generateRuleSchemaDoc(),
+      },
+      {
+        name: 'rule-operations-schema',
+        relativePath: './references',
+        content: generateRuleOperationsDoc(),
+      },
+      {
+        name: 'action-policy-schema',
+        relativePath: './references',
+        content: generateActionPolicySchemaDoc(),
+      },
     ],
     content: `## Domain Knowledge
 
@@ -180,6 +198,11 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 ## ES|QL Query Guidance
 
+- Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
+  - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
+    \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
+  - **Standalone** uses independent full queries:
+    \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
@@ -192,10 +215,36 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
-## State Transition and Recovery
+## State Transition
 
-- \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
-- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when the user needs explicit recovery detection.
+Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
+
+- \`pending_count: N\` — breaches required before transitioning from pending to active (e.g. \`pending_count: 3\` means 3 consecutive breach cycles).
+- \`pending_timeframe\` — optional time window for the pending evaluation (e.g. \`"15m"\`).
+- \`recovering_count: N\` — non-breach cycles required before transitioning from recovering to inactive.
+- \`recovering_timeframe\` — optional time window for the recovering evaluation.
+
+State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
+
+## Recovery Strategy
+
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+
+When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
+- **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
+- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
+
+Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
+
+## No-Data Strategy
+
+\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present. Only meaningful for standalone queries with a \`no_data\` block.
+
+When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
+\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
+
+Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
+Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
 
 ## Final Validation
 
@@ -225,13 +274,33 @@ After composing or modifying a rule, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
 where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageRule} tool result.
 
+## Save Order
+
+When a conversation creates a full alerting setup (rule + workflow + action policy), the artifacts must be saved in a specific order because of cross-references:
+
+1. **Rule** — save first. The action policy's matcher references \`rule.id\`, which must exist.
+2. **Workflow** — save second. The action policy destination references the workflow ID, which must exist.
+3. **Action Policy** — save last. It depends on both the persisted rule and the persisted workflow.
+
+After composing all three artifacts, guide the user through saving in order:
+> "To activate notifications, please save in this order:
+> 1. Click **Create rule** on the rule card
+> 2. Click **Save workflow** on the workflow card
+> 3. Click **Create policy** on the action policy card
+>
+> The action policy references both the rule and the workflow, so they need to exist first."
+
+If the user tries to save out of order, the action policy will fail because its referenced rule or workflow hasn't been persisted yet. The action policy card automatically detects unsaved dependencies and disables the Create button until they are saved.
+
+---
+
 ## Notifications Require Alert Kind
 
 Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch.
 
 When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
 
-1. **Explain the difference**: signal rules are observation-only ("Detect only") and do not trigger notifications. Alert rules ("Alerting") track episode lifecycle and can dispatch to action policies.
+1. **Explain the difference**: signal rules are observation-only ("Signal") and do not trigger notifications. Alert rules ("Alert") track episode lifecycle and can dispatch to action policies.
 2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then proceed with notification setup (Part 3).
 3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing signal rule cannot be converted. Offer to create a new alert rule with the same query and schedule, then set up notifications on the new rule.
 4. After ensuring the rule is \`kind: alert\`, proceed with the notification setup flow (Part 3).
@@ -265,7 +334,7 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
 3. **\`set_matcher\`** — set a KQL query to filter which alert episodes trigger this policy. Set to \`null\` for a catch-all that matches all episodes. Available matcher fields:
    - \`episode_id\`, \`episode_status\` (inactive | pending | active | recovering)
    - \`group_hash\`, \`last_event_timestamp\`
-   - \`rule.id\`, \`rule.name\`, \`rule.description\`, \`rule.tags\`, \`rule.enabled\`
+   - \`rule.id\`, \`rule.name\`, \`rule.tags\`
    - \`data.*\` (rule-specific fields)
 4. **\`set_grouping\`** — set \`groupingMode\` and optionally \`groupBy\` fields:
    - \`per_episode\` (default): one notification per alert episode lifecycle.
@@ -275,9 +344,8 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
    - For \`per_episode\` grouping: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
    - For \`all\` / \`per_field\` grouping: \`time_interval\`, \`every_time\`.
    - \`per_status_interval\` and \`time_interval\` require an \`interval\` value (e.g. \`"5m"\`, \`"1h"\`).
-6. **\`set_type\`** — set the policy type and optional \`ruleId\`:
-   - \`type: "single_rule"\` with \`ruleId\`: scopes the policy to a single rule. This is the **default** for new policies created alongside a rule. No matcher is needed for rule scoping.
-   - \`type: "global"\`: matches alerts from any rule in the space. Use when the user explicitly wants a cross-rule or shared policy.
+
+Action policies are always space-wide: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`.
 
 ### Throttle / Grouping Compatibility
 
@@ -344,11 +412,11 @@ steps:
     with:
       to:
         - <user-provided-email>
-      subject: "Alert: <rule-name> — {{ inputs.episodes | size }} episode(s)"
+      subject: "Alert: <rule-name> — {{ inputs.payload.episodes | size }} episode(s)"
       message: >
-        Rule "<rule-name>" triggered {{ inputs.episodes | size }} alert episode(s).
+        Rule "<rule-name>" triggered {{ inputs.payload.episodes | size }} alert episode(s).
 
-        {% for ep in inputs.episodes %}
+        {% for ep in inputs.payload.episodes %}
         - Host: {{ ep.data.host.name | default: "unknown" }}
           Errors: {{ ep.data.error_count | default: "n/a" }}
           Status: {{ ep.episode_status }}
@@ -375,14 +443,14 @@ steps:
 
 | Variable | Description |
 |---|---|
-| \`inputs.episodes\` | Array of alert episodes |
-| \`inputs.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
-| \`inputs.episodes[].rule_id\` | The rule's saved object ID |
-| \`inputs.episodes[].episode_id\` | The episode UUID |
-| \`inputs.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
-| \`inputs.policyId\` | The action policy ID |
-| \`inputs.id\` | The action group ID |
-| \`inputs.groupKey\` | The grouping key object |
+| \`inputs.payload.episodes\` | Array of alert episodes |
+| \`inputs.payload.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
+| \`inputs.payload.episodes[].rule_id\` | The rule's saved object ID |
+| \`inputs.payload.episodes[].episode_id\` | The episode UUID |
+| \`inputs.payload.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
+| \`inputs.payload.policyId\` | The action policy ID |
+| \`inputs.payload.id\` | The action group ID |
+| \`inputs.payload.groupKey\` | The grouping key object |
 | \`triggeredBy\` | Always \`"action_policy"\` |
 | \`spaceId\` | The Kibana space |
 | \`execution.url\` | Direct link to the workflow execution in Kibana |
@@ -403,10 +471,10 @@ Use ${alertingTools.manageActionPolicy} with these operations in order:
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
    - **IMPORTANT**: Use the \`workflowId\` you generated in step 3 (passed to \`generate_workflow\`), NOT the \`attachmentId\`. The \`workflowId\` is the stable workflow ID used for persistence and cross-references. Using the attachment ID will cause a validation error.
-3. \`set_type\`: \`{ type: "single_rule", ruleId: "<ruleId>" }\`
-   - Use the \`ruleId\` value from the \`manage_rule\` tool result. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
+3. \`set_matcher\`: \`rule.id: "<ruleId>"\`
+   - Use the \`ruleId\` value from the \`manage_rule\` tool result to scope this policy to the new rule. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
    - The \`ruleId\` is always available — even for unsaved/proposed rules — so you never need to ask the user to save the rule first.
-   - If the user explicitly requests a cross-rule or shared policy, use \`set_type: { type: "global" }\` with \`set_matcher\` instead.
+   - If the user explicitly requests a cross-rule or shared policy, omit the \`rule.id\` matcher (or use a broader matcher) so it matches alerts from any rule in the space.
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: "on_status_change" }\`
 
@@ -414,11 +482,17 @@ Render the action policy inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
 where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageActionPolicy} tool result.
 
+## Save Order Reminder
+
+After rendering all three attachments (rule, workflow, action policy), remind the user of the required save order:
+
+> "To activate this alerting setup, please save in order: **Rule → Workflow → Action Policy**. The action policy depends on both the rule and the workflow being saved first."
+
 ## Customization Hints
 
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
 - They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
-- They can switch to a global policy (\`set_type: { type: "global" }\`) with a matcher to cover multiple rules.`,
+- They can broaden the policy to cover multiple rules by removing the \`rule.id\` matcher or replacing it with a broader matcher.`,
     getInlineTools: () => [manageRuleTool(), manageActionPolicyTool(deps)],
   });

@@ -1,0 +1,9 @@
+steps:
+  - command: .buildkite/scripts/steps/console_packaging_publish.sh
+    label: console packaging publish
+    timeout_in_minutes: 30
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

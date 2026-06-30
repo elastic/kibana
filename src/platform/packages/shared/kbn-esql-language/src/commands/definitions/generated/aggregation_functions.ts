@@ -714,6 +714,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -733,6 +736,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -752,6 +758,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -782,6 +791,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -801,6 +813,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -820,6 +835,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -850,6 +868,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -869,6 +890,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -888,6 +912,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -918,6 +945,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -937,6 +967,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -956,6 +989,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -986,6 +1022,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1005,6 +1044,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1024,6 +1066,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1054,6 +1099,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1073,6 +1121,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1092,6 +1143,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1122,6 +1176,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1141,6 +1198,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1160,6 +1220,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1190,6 +1253,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1209,6 +1275,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1228,6 +1297,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1258,6 +1330,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1277,6 +1352,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1296,6 +1374,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1326,6 +1407,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1345,6 +1429,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1364,6 +1451,9 @@ const countDistinctDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -1448,12 +1538,34 @@ const earliestDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'exponential_histogram',
     },
     {
       params: [
@@ -1553,6 +1665,17 @@ const earliestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+      ],
+      returnType: 'tdigest',
     },
     {
       params: [
@@ -1949,6 +2072,74 @@ const firstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'The search field',
@@ -2012,6 +2203,74 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'exponential_histogram',
     },
     {
       params: [
@@ -2624,6 +2883,74 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'tdigest',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'long',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'tdigest',
     },
     {
       params: [
@@ -4083,6 +4410,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4101,6 +4431,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4119,6 +4452,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4137,6 +4473,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4155,6 +4494,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4173,6 +4515,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4191,6 +4536,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4209,6 +4557,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4227,6 +4578,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4245,6 +4599,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4263,6 +4620,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4281,6 +4641,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4299,6 +4662,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4317,6 +4683,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4335,6 +4704,9 @@ const percentileDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: '',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -4646,6 +5018,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -4663,6 +5038,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -4680,6 +5058,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4697,6 +5078,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date',
@@ -4714,6 +5098,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date_nanos',
@@ -4731,6 +5118,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -4748,6 +5138,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -4765,6 +5158,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4782,6 +5178,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geohash',
@@ -4799,6 +5198,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geohex',
@@ -4816,6 +5218,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geotile',
@@ -4833,6 +5238,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'integer',
@@ -4850,6 +5258,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'ip',
@@ -4867,6 +5278,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'keyword',
@@ -4884,6 +5298,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -4901,6 +5318,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'keyword',
@@ -4918,6 +5338,9 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'unsigned_long',
@@ -4935,13 +5358,19 @@ const sampleDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'version',
     },
   ],
   locationsAvailable: [Location.STATS],
-  examples: ['FROM employees\n| STATS sample = SAMPLE(gender, 5)'],
+  examples: [
+    'FROM sample_data\n| STATS sample_messages = SAMPLE(message, 3)',
+    'FROM sample_data\n| STATS sample_messages = SAMPLE(message, 2) BY client_ip\n| SORT client_ip',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -4952,6 +5381,7 @@ const sparklineDefinition: FunctionDefinition = {
     defaultMessage:
       'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
   }),
+  tsdbCompatible: false,
   preview: true,
   alias: undefined,
   signatures: [
@@ -5374,6 +5804,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -5392,6 +5825,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5400,6 +5836,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5419,6 +5859,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -5437,6 +5880,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5445,6 +5891,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5464,6 +5914,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5472,6 +5925,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5498,6 +5955,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5506,6 +5966,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5532,6 +5996,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5540,6 +6007,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5566,6 +6037,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5574,6 +6048,352 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'text',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5600,24 +6420,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'The field to collect the top values for.',
-        },
-        {
-          name: 'limit',
-          type: 'integer',
-          optional: false,
-          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5626,147 +6431,22 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'The field to collect the top values for.',
-        },
-        {
-          name: 'limit',
-          type: 'integer',
-          optional: false,
-          description: 'The maximum number of values to collect.',
-          constantOnly: true,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
         {
           name: 'outputField',
-          type: 'date',
+          type: 'text',
           optional: true,
           description:
             'The extra field that, if present, will be the output of the TOP call instead of `field`.',
         },
       ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'The field to collect the top values for.',
-        },
-        {
-          name: 'limit',
-          type: 'integer',
-          optional: false,
-          description: 'The maximum number of values to collect.',
-          constantOnly: true,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
-        },
-        {
-          name: 'outputField',
-          type: 'double',
-          optional: true,
-          description:
-            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'The field to collect the top values for.',
-        },
-        {
-          name: 'limit',
-          type: 'integer',
-          optional: false,
-          description: 'The maximum number of values to collect.',
-          constantOnly: true,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
-        },
-        {
-          name: 'outputField',
-          type: 'integer',
-          optional: true,
-          description:
-            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'The field to collect the top values for.',
-        },
-        {
-          name: 'limit',
-          type: 'integer',
-          optional: false,
-          description: 'The maximum number of values to collect.',
-          constantOnly: true,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          description:
-            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
-        },
-        {
-          name: 'outputField',
-          type: 'long',
-          optional: true,
-          description:
-            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
-        },
-      ],
-      returnType: 'long',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -5781,6 +6461,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -5799,6 +6482,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5807,6 +6493,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5826,6 +6516,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5834,6 +6527,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5860,6 +6557,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5868,6 +6568,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5894,6 +6598,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5902,6 +6609,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5928,6 +6639,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5936,6 +6650,51 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -5948,6 +6707,47 @@ const topDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'text',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
     },
     {
       params: [
@@ -5962,6 +6762,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -5980,6 +6783,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -5988,6 +6794,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -6007,6 +6817,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -6025,6 +6838,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6033,8 +6849,258 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'text',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
         },
       ],
       returnType: 'keyword',
@@ -6052,6 +7118,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
       ],
@@ -6070,6 +7139,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6078,6 +7150,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -6097,6 +7173,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6105,6 +7184,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -6131,6 +7214,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6139,6 +7225,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -6165,6 +7255,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6173,6 +7266,10 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -6199,6 +7296,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6207,6 +7307,352 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'text',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The field to collect the top values for.',
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          description:
+            'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -6233,24 +7679,9 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'The maximum number of values to collect.',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-          description: 'The field to collect the top values for.',
-        },
-        {
-          name: 'limit',
-          type: 'integer',
-          optional: false,
-          description: 'The maximum number of values to collect.',
+          hint: {
+            kind: 'constant',
+          },
           constantOnly: true,
         },
         {
@@ -6259,8 +7690,19 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.',
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'text',
+          optional: true,
+          description:
+            'The extra field that, if present, will be the output of the TOP call instead of `field`.',
         },
       ],
       returnType: 'keyword',

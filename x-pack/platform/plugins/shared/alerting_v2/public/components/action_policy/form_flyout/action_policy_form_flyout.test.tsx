@@ -113,7 +113,7 @@ const renderFlyout = ({
 
 describe('ActionPolicyFormFlyout', () => {
   it('renders create mode and closes on cancel', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onClose = jest.fn();
 
     renderFlyout({ onClose, onSave: jest.fn() });
@@ -126,7 +126,7 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('submits create payload and omits optional empty fields', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
@@ -145,11 +145,10 @@ describe('ActionPolicyFormFlyout', () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     await user.click(saveButton);
 
-    expect(onSave).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
-      type: 'global',
       groupingMode: 'per_episode',
       throttle: { strategy: 'on_status_change', interval: null },
       destinations: [{ type: 'workflow', id: 'wf-1' }],
@@ -157,15 +156,13 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('renders edit mode and submits update payload with optional fields and version', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onUpdate = jest.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
       version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
-      type: 'global',
-      ruleId: null,
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name', 'service.name'],
@@ -198,7 +195,7 @@ describe('ActionPolicyFormFlyout', () => {
     await waitFor(() => expect(updateButton).toBeEnabled());
     await user.click(updateButton);
 
-    expect(onUpdate).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
     expect(onUpdate).toHaveBeenCalledWith('policy-1', {
       version: 'WzEsMV0=',
       name: 'Critical production alerts',

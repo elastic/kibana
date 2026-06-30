@@ -22,9 +22,11 @@ const createResourceSlug = (resource: string): string => {
 
 export const getDefaultActions = (
   finding: ActionableFinding,
-  dimension: string
+  dimension: string,
+  caseTag?: string
 ): RecommendedAction[] => {
   const slug = createResourceSlug(finding.resource);
+  const tag = caseTag ?? finding.severity.toLowerCase();
 
   return [
     {
@@ -33,7 +35,7 @@ export const getDefaultActions = (
     },
     {
       label: 'Open case',
-      href: `/app/security/cases/create?tags=readiness:${dimension},${finding.severity.toLowerCase()},${slug}`,
+      href: `/app/security/cases/create?tags=readiness:${dimension},${tag},${slug}`,
     },
   ];
 };
@@ -55,6 +57,17 @@ export const getDimensionActions = (dimension: string): RecommendedAction[] => {
   }
 };
 
+const getSilenceActions = (finding: ActionableFinding): RecommendedAction[] => [
+  { label: 'Check Fleet integrations', href: '/app/integrations' },
+  ...getDefaultActions(finding, 'continuity', 'silence'),
+];
+
+const getVolumeDropActions = (finding: ActionableFinding): RecommendedAction[] => [
+  { label: 'Review integration policy', href: '/app/integrations' },
+  { label: 'Open ingest pipelines', href: '/app/management/ingest/ingest_pipelines' },
+  ...getDefaultActions(finding, 'continuity', 'volume-drop'),
+];
+
 export const buildRecommendedActions = (
   finding: ActionableFinding,
   dimension: string
@@ -72,6 +85,13 @@ export const buildRecommendedActions = (
     ];
   }
 
+  if (dimension === 'continuity') {
+    if (finding.type === 'silence') return getSilenceActions(finding);
+    if (finding.type === 'volume_drop_warning' || finding.type === 'volume_drop_critical') {
+      return getVolumeDropActions(finding);
+    }
+  }
+
   const findingType: FindingType = `${dimension}:${finding.category ?? 'general'}`;
   const customBuilder = recommendedActionsRegistry.get(findingType);
 
@@ -79,5 +99,5 @@ export const buildRecommendedActions = (
     return customBuilder(finding);
   }
 
-  return [...getDefaultActions(finding, dimension), ...getDimensionActions(dimension)];
+  return [...getDimensionActions(dimension), ...getDefaultActions(finding, dimension)];
 };

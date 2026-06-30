@@ -195,11 +195,12 @@ describe('WorkflowsPlugin', () => {
           'globalSearch',
           'home',
           'kibanaOverview',
-          'sideNav',
+          'classicSideNav',
+          'projectSideNav',
         ]);
       });
 
-      it('should hide the app from sideNav when the user lacks read capability', () => {
+      it('should hide the app from classicSideNav and projectSideNav when the user lacks read capability', () => {
         setReadCapability(false);
         setLicenseValid(true);
         const updates = captureAppUpdates();
@@ -209,10 +210,15 @@ describe('WorkflowsPlugin', () => {
         const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
         expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
         expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual(['globalSearch']);
-        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain('sideNav');
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
+          'classicSideNav'
+        );
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
+          'projectSideNav'
+        );
       });
 
-      it('should keep the app in sideNav and globalSearch when authorized but unavailable', () => {
+      it('should keep the app in classicSideNav and projectSideNav and globalSearch when authorized but unavailable', () => {
         setReadCapability(true);
         setLicenseValid(false);
         const updates = captureAppUpdates();
@@ -223,11 +229,12 @@ describe('WorkflowsPlugin', () => {
         expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
         expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
           'globalSearch',
-          'sideNav',
+          'classicSideNav',
+          'projectSideNav',
         ]);
       });
 
-      it('should hide the app from sideNav for unauthorized users even when unavailable', () => {
+      it('should hide the app from classicSideNav and projectSideNav for unauthorized users even when unavailable', () => {
         setReadCapability(false);
         setLicenseValid(false);
         const updates = captureAppUpdates();
@@ -238,7 +245,8 @@ describe('WorkflowsPlugin', () => {
         expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
         expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
           'globalSearch',
-          'sideNav',
+          'classicSideNav',
+          'projectSideNav',
         ]);
       });
     });

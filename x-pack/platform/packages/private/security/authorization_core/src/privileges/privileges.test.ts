@@ -571,6 +571,7 @@ describe('features', () => {
         'getExecutionLog',
         'getActionErrorLog',
         'find',
+        'findMutedAlerts',
         'getRuleExecutionKPI',
         'getBackfill',
         'findBackfill',
@@ -578,6 +579,7 @@ describe('features', () => {
         'bulkEditParams',
         'getGapAutoFillScheduler',
         'findGapAutoFillSchedulerLogs',
+        'getHistory',
       ],
       ...[
         'create',
@@ -744,6 +746,7 @@ describe('features', () => {
         'getExecutionLog',
         'getActionErrorLog',
         'find',
+        'findMutedAlerts',
         'getRuleExecutionKPI',
         'getBackfill',
         'findBackfill',
@@ -751,6 +754,7 @@ describe('features', () => {
         'bulkEditParams',
         'getGapAutoFillScheduler',
         'findGapAutoFillSchedulerLogs',
+        'getHistory',
       ],
       ...[
         'create',

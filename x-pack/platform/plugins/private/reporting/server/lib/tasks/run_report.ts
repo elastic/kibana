@@ -38,7 +38,7 @@ import {
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
@@ -355,21 +355,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     spaceId: string | undefined,
     logger = this.logger
   ): KibanaRequest {
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      logger.info(`Generating request for space: ${spaceId}`);
+    }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
+      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
     };
-    const fakeRequest = kibanaRequestFactory(rawRequest);
-
-    const setupDeps = this.opts.reporting.getPluginSetupDeps();
-    const spacesService = setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
+    return kibanaRequestFactory(rawRequest);
   }
 
   protected async performJob({

@@ -4,6 +4,8 @@
 
 This section provides a complete guide for contributors who want to add event-driven triggers so workflows can subscribe and run when events occur. Triggers are registered from **your plugin**, not from inside `workflows_extensions` (same ownership rule as [custom steps](STEPS.md#contributing-custom-step-types)).
 
+**Agent skill:** Cursor and Claude agents should use the [`workflows-custom-triggers`](../.claude/skills/workflows-custom-triggers/SKILL.md) skill for plugin discovery, file layout conventions, and review checklists. This doc remains the canonical source for implementation steps and code templates.
+
 **Quick checklist:**
 
 1. Define common trigger (id, eventSchema, title, description; optional documentation and snippets) in your plugin

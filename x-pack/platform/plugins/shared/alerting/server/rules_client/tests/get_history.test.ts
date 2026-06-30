@@ -6,6 +6,7 @@
  */
 
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { ConstructorOptions } from '../rules_client';
 import { RulesClient } from '../rules_client';
 import { RuleChangeTrackingDisabledError } from '../methods/get_rule_history';
@@ -162,10 +163,29 @@ describe('getHistory()', () => {
         hash: '',
         fields: {
           hashed: [],
+          redacted: [],
         },
         snapshot: {
-          attributes: ruleSO.attributes,
-          references: ruleSO.references,
+          id: ruleSO.id,
+          enabled: ruleSO.attributes.enabled,
+          name: ruleSO.attributes.name,
+          tags: ruleSO.attributes.tags,
+          alertTypeId: ruleSO.attributes.alertTypeId,
+          consumer: ruleSO.attributes.consumer,
+          legacyId: ruleSO.attributes.legacyId,
+          schedule: ruleSO.attributes.schedule,
+          actions: ruleSO.attributes.actions,
+          params: ruleSO.attributes.params,
+          createdBy: ruleSO.attributes.createdBy,
+          updatedBy: ruleSO.attributes.updatedBy,
+          createdAt: ruleSO.attributes.createdAt,
+          updatedAt: ruleSO.attributes.updatedAt,
+          apiKey: ruleSO.attributes.apiKey,
+          apiKeyOwner: ruleSO.attributes.apiKeyOwner,
+          throttle: ruleSO.attributes.throttle,
+          notifyWhen: ruleSO.attributes.notifyWhen,
+          muteAll: ruleSO.attributes.muteAll,
+          revision: ruleSO.attributes.revision,
         },
       },
     });
@@ -297,8 +317,99 @@ describe('getHistory()', () => {
     });
   });
 
+  describe('deleted rule', () => {
+    const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      RULE_SAVED_OBJECT_TYPE,
+      '1'
+    );
+
+    const makeSnapshotItem = (attrs: Partial<RawRule> = {}) => {
+      const ruleSO = getRuleSavedObject();
+      const mergedAttrs = { ...ruleSO.attributes, ...attrs };
+      return generateChangeHistoryDocument({
+        object: {
+          id: ruleSO.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          hash: '',
+          fields: { hashed: [] },
+          snapshot: {
+            id: ruleSO.id,
+            alertTypeId: mergedAttrs.alertTypeId,
+            consumer: mergedAttrs.consumer,
+            name: mergedAttrs.name,
+            enabled: mergedAttrs.enabled,
+            tags: mergedAttrs.tags,
+            schedule: mergedAttrs.schedule,
+            actions: mergedAttrs.actions,
+            params: mergedAttrs.params,
+            createdBy: mergedAttrs.createdBy,
+            updatedBy: mergedAttrs.updatedBy,
+            createdAt: mergedAttrs.createdAt,
+            updatedAt: mergedAttrs.updatedAt,
+            revision: mergedAttrs.revision,
+            muteAll: mergedAttrs.muteAll,
+          },
+        },
+      });
+    };
+
+    test('returns history items when rule is deleted', async () => {
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);
+
+      const historyItem = makeSnapshotItem();
+
+      // first call: auth-info lookup (size: 1)
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+      // second call: actual history fetch
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+
+      const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(changeTrackingService.getHistory).toHaveBeenCalledTimes(2);
+      expect(result.items).toHaveLength(1);
+    });
+
+    test('uses snapshot alertTypeId and consumer for authorization when rule is deleted', async () => {
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);
+
+      const historyItem = makeSnapshotItem({ alertTypeId: 'snap-type', consumer: 'snap-consumer' });
+
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+
+      await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleTypeId: 'snap-type', consumer: 'snap-consumer' })
+      );
+    });
+
+    test('returns empty result when rule is deleted and no history records exist', async () => {
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 0, items: [] });
+
+      const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(result).toEqual({ total: 0, items: [] });
+      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+      // only the auth-info lookup; no second history call
+      expect(changeTrackingService.getHistory).toHaveBeenCalledTimes(1);
+    });
+
+    test('rethrows non-404 errors from getRuleSo', async () => {
+      const serverError = new Error('Internal server error');
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(serverError);
+
+      await expect(rulesClient.getHistory({ module: 'security', ruleId: '1' })).rejects.toThrow(
+        'Internal server error'
+      );
+
+      expect(changeTrackingService.getHistory).not.toHaveBeenCalled();
+    });
+  });
+
   describe('rule hydration', () => {
-    test('hydrates `rule` from `object.snapshot.attributes` on each item', async () => {
+    test('hydrates `rule` from `object.snapshot` on each item', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
       ruleTypeRegistry.get.mockReturnValue({
         id: 'siem.queryRule',
@@ -322,8 +433,23 @@ describe('getHistory()', () => {
               hash: 'h',
               fields: { hashed: [] },
               snapshot: {
-                attributes: { alertTypeId: 'siem.queryRule', name: 'My rule' },
-                references: [],
+                id: 'rule-1',
+                alertTypeId: 'siem.queryRule',
+                name: 'My rule',
+                enabled: true,
+                consumer: 'rule-consumer',
+                schedule: { interval: '1m' },
+                revision: 0,
+                muteAll: false,
+                actions: [],
+                tags: [],
+                params: {},
+                createdBy: null,
+                updatedBy: null,
+                createdAt: '2026-05-01T10:00:00.000Z',
+                updatedAt: '2026-05-01T10:00:00.000Z',
+                apiKey: null,
+                apiKeyOwner: null,
               },
             },
           } as never,
@@ -347,6 +473,7 @@ describe('getHistory()', () => {
           hash: '',
           fields: {
             hashed: [],
+            redacted: [],
           },
           snapshot: {
             references: ruleSO.references,

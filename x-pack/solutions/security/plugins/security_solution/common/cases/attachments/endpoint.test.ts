@@ -16,14 +16,18 @@ const validTarget = {
 
 const validMetadata = {
   command: 'isolate',
-  comment: 'Isolated host because of suspicious activity',
   targets: [validTarget],
+};
+
+const validData = {
+  content: 'Isolated host because of suspicious activity',
 };
 
 const validPayload = {
   type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   owner: 'securitySolution',
   attachmentId: 'action-1',
+  data: validData,
   metadata: validMetadata,
 };
 
@@ -92,16 +96,36 @@ describe('EndpointAttachmentPayloadSchema', () => {
     expect(
       EndpointAttachmentPayloadSchema.safeParse({
         ...validPayload,
-        metadata: { comment: 'c', targets: validMetadata.targets },
+        metadata: { targets: validMetadata.targets },
       }).success
     ).toBe(false);
   });
 
-  it('rejects missing comment', () => {
+  it('rejects missing data', () => {
+    const { data, ...rest } = validPayload;
+    expect(EndpointAttachmentPayloadSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it('rejects missing data.content', () => {
+    expect(EndpointAttachmentPayloadSchema.safeParse({ ...validPayload, data: {} }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects unknown data keys (strict)', () => {
     expect(
       EndpointAttachmentPayloadSchema.safeParse({
         ...validPayload,
-        metadata: { command: 'isolate', targets: validMetadata.targets },
+        data: { ...validData, extra: 'nope' },
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a stray `comment` in metadata (lifted to data.content on read/write)', () => {
+    expect(
+      EndpointAttachmentPayloadSchema.safeParse({
+        ...validPayload,
+        metadata: { ...validMetadata, comment: 'should live on data.content' },
       }).success
     ).toBe(false);
   });

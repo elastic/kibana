@@ -12,14 +12,14 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
 import { getIndexCategoryMap, isQualityIncompatible, enrichFindings } from '@kbn/siem-readiness';
-import { fetchRuleFieldCaps } from '../../../lib/siem_readiness/fetchers';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { getQuality } from '../../../lib/siem_readiness/dimensions';
 import {
+  fetchRuleFieldCaps,
   getSiemReadinessSharedContext,
   fetchSiemReadinessSharedContext,
 } from '../../../lib/siem_readiness/fetchers';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import { getQuality } from '../../../lib/siem_readiness/dimensions';
 import { SIEM_READINESS_QUALITY_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -104,11 +104,15 @@ export const getQualityTool = (
 
       // ECS findings are keyed by index name — filter to categorized indices and attach category.
       // Missing-field findings are keyed by field name (not index) — pass through without filtering.
-      const enrichedFindings = allEnrichedFindings.map((finding) => {
-        if (finding.type === 'missingField') return finding;
-        const category = indexToCategoryMap.get(finding.resource) as MainCategories | undefined;
-        return category ? { ...finding, category } : finding;
-      }).filter((finding) => finding.type === 'missingField' || indexToCategoryMap.has(finding.resource));
+      const enrichedFindings = allEnrichedFindings
+        .map((finding) => {
+          if (finding.type === 'missingField') return finding;
+          const category = indexToCategoryMap.get(finding.resource) as MainCategories | undefined;
+          return category ? { ...finding, category } : finding;
+        })
+        .filter(
+          (finding) => finding.type === 'missingField' || indexToCategoryMap.has(finding.resource)
+        );
 
       const incompatibleCount = categorizedItems.filter((item) =>
         isQualityIncompatible(item.incompatibleFieldCount)
@@ -123,13 +127,17 @@ export const getQualityTool = (
 
       const parts: string[] = [];
       if (incompatibleCount > 0)
-        parts.push(`${incompatibleCount} of ${categorizedItems.length} indices have incompatible ECS field mappings`);
+        parts.push(
+          `${incompatibleCount} of ${categorizedItems.length} indices have incompatible ECS field mappings`
+        );
       if (missingFieldCount > 0)
-        parts.push(`${missingFieldCount} rule(s) have required fields not mapped in their queried indices`);
+        parts.push(
+          `${missingFieldCount} rule(s) have required fields not mapped in their queried indices`
+        );
       const filteredSummary =
         filteredStatus === 'noData'
           ? 'No quality check results available. Run the Data Quality dashboard or enable rules with required_fields to see results.'
-          : parts.join('; ') + '.';
+          : `${parts.join('; ')}.`;
 
       return {
         results: [

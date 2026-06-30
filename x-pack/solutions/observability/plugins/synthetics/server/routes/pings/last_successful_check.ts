@@ -22,6 +22,7 @@ export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () 
       stepIndex: schema.number(),
       timestamp: schema.string(),
       location: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async (routeProps) => {
@@ -34,13 +35,14 @@ export const getLastSuccessfulCheckScreenshot = async ({
   request,
   syntheticsEsClient,
 }: RouteContext) => {
-  const { timestamp, monitorId, stepIndex, location } = request.query;
+  const { timestamp, monitorId, stepIndex, location, remoteName } = request.query;
 
   const check: Ping | null = await getLastSuccessfulCheck({
     syntheticsEsClient,
     monitorId,
     timestamp,
     location,
+    remoteName,
   });
 
   if (check === null) {
@@ -55,6 +57,11 @@ export const getLastSuccessfulCheckScreenshot = async ({
     syntheticsEsClient,
     checkGroup: check.monitor.check_group,
     stepIndex,
+    remoteName,
+    // The screenshot documents share the resolved check's `@timestamp`, so
+    // bound the lookup to that run to allow shard pruning instead of scanning
+    // every backing index (including frozen-tier ones).
+    timestamp: check['@timestamp'],
   });
 
   if (screenshot === null) {

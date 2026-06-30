@@ -99,6 +99,15 @@ export interface PipelineStats {
   /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
   statsAvailable: boolean;
   categories?: string[];
+  // Volume / silence health — null means "insufficient history or no events ever"
+  lastEventMs?: number | null;
+  silenceMs?: number | null;
+  isSilent?: boolean;
+  /** Doc count for yesterday (the most recent complete day); the in-progress current day is excluded. */
+  lastFullDayDocs?: number | null;
+  baseline7dAvg?: number | null;
+  /** Clamped to [0, ∞) — negative means volume spike (not a drop). */
+  volumeDropPct?: number | null;
 }
 export interface CasesSearchResponse {
   total: number;
@@ -137,8 +146,15 @@ export interface IndexDocCount {
 // Blast radius types for finding enrichment
 export type FindingSeverity = 'CRITICAL' | 'WARNING' | 'INFORMATIONAL';
 
+/** Finding sub-type emitted by the Continuity dimension. */
+export type ContinuityFindingType =
+  | 'pipeline_failure'
+  | 'silence'
+  | 'volume_drop_warning'
+  | 'volume_drop_critical';
+
 /** Finding sub-type across all SIEM readiness dimensions. Used to route recommended actions. */
-export type SiemReadinessFindingType = 'missingField';
+export type SiemReadinessFindingType = ContinuityFindingType | 'missingField';
 
 export interface AffectedRule {
   id: string;
@@ -173,6 +189,15 @@ export interface ActionableFinding {
   affectedTactics?: AffectedTactic[];
   affectedPlatform?: string;
   recommendedActions?: RecommendedAction[];
+  /**
+   * Indicates the reliability of the blast-radius fields on this finding.
+   * - 'healthy': blast radius is complete and trustworthy.
+   * - 'unavailable': a lookup that this dimension depends on failed entirely (e.g. pipeline map
+   *   for continuity, category map for coverage). The affected* fields are intentionally omitted.
+   * - 'partial': at least one rule's index resolution failed, so affectedRules/Tactics may be
+   *   undercounted.
+   */
+  blastRadiusStatus?: 'healthy' | 'partial' | 'unavailable';
 }
 
 export interface CoveragePayload {

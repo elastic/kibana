@@ -15,7 +15,6 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -28,7 +27,6 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  onUpdateESQLQuery?: UpdateESQLQueryFn;
 }
 
 /**
@@ -41,11 +39,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     cascadedDocumentsContext,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
-    onUpdateESQLQuery,
     onFullScreenChange,
     ...props
   }) => {
-    const { dataView, setExpandedDoc, renderDocumentView } = props;
+    const { dataView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -56,10 +53,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     );
     const rowAdditionalLeadingControls = useMemo(() => {
       return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-        actions: {
-          updateESQLQuery: onUpdateESQLQuery,
-          setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
-        },
         dataView,
         query,
       });
@@ -67,10 +60,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       customRowAdditionalLeadingControls,
       dataView,
       getRowAdditionalLeadingControlsAccessor,
-      onUpdateESQLQuery,
       query,
-      setExpandedDoc,
-      renderDocumentView,
     ]);
 
     const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');

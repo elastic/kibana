@@ -35,6 +35,7 @@ export const JourneyScreenshotDialog = ({
   initialStepNumber,
   isOpen,
   onClose,
+  remoteName,
 }: {
   timestamp?: string;
   checkGroup: string | undefined;
@@ -43,13 +44,14 @@ export const JourneyScreenshotDialog = ({
   maxSteps: number | undefined;
   isOpen: boolean;
   onClose: () => void;
+  remoteName?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isSmall = useIsWithinMaxBreakpoint('m');
   const [stepNumber, setStepNumber] = useState(initialStepNumber);
 
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber });
+  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber, remoteName });
 
   const imageResult = useRetrieveStepImage({
     hasIntersected: true,
@@ -232,18 +234,36 @@ export const getScreenshotUrl = ({
   basePath,
   checkGroup,
   stepNumber,
+  remoteName,
+  timestamp,
 }: {
   basePath: string;
   checkGroup?: string;
   stepNumber: number;
+  remoteName?: string;
+  timestamp?: string;
 }) => {
   if (!checkGroup) {
     return '';
   }
-  return `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
+  const path = `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
     '{checkGroup}',
     checkGroup
   ).replace('{stepIndex}', stepNumber.toString())}`;
+
+  const params: string[] = [];
+  // For remote monitors forward `remoteName` so the route handler targets
+  // `${remoteName}:synthetics-*` via CCS.
+  if (remoteName) {
+    params.push(`remoteName=${encodeURIComponent(remoteName)}`);
+  }
+  // Forward the run timestamp so the screenshot query can be bounded to a
+  // narrow window and prune frozen-tier shards instead of scanning every index.
+  if (timestamp) {
+    params.push(`timestamp=${encodeURIComponent(timestamp)}`);
+  }
+
+  return params.length ? `${path}?${params.join('&')}` : path;
 };
 
 const prevAriaLabel = i18n.translate('xpack.synthetics.monitor.step.previousStep', {

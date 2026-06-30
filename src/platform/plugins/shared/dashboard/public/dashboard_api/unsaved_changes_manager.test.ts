@@ -10,7 +10,7 @@
 import { BehaviorSubject, Subject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
 import type { DashboardState } from '../../common';
@@ -100,6 +100,7 @@ describe('unsavedChangesManager', () => {
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
+
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
         });
@@ -126,6 +127,7 @@ describe('unsavedChangesManager', () => {
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
+
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
         });
@@ -181,6 +183,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
+
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
       });
@@ -216,6 +219,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
+
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
       });
@@ -241,6 +245,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: projectRoutingManagerMock,
+
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
       });

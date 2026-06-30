@@ -19,10 +19,7 @@ import type {
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
 import { createChartSection } from './chart_section';
-import type {
-  ChartSectionConfiguration,
-  ChartSectionConfigurationExtensionParams,
-} from '../../../../types';
+import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
 import {
   useAppStateSelector,
@@ -30,9 +27,11 @@ import {
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
+import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 type UnifiedGridProps = ChartSectionProps & {
-  actions: ChartSectionConfigurationExtensionParams['actions'];
+  actions: ContextAwarenessToolkitActions;
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
   externalServices?: {
@@ -108,6 +107,9 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
 };
 
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
+  const toolkitActions: ContextAwarenessToolkitActions = {
+    addFilter: jest.fn(),
+  };
   const getChartSection = createChartSection();
 
   if (!getChartSection) {
@@ -116,20 +118,28 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
 
   const configFactory = getChartSection(
     () => ({ replaceDefaultChart: false } as ChartSectionConfiguration),
-    { context: { category: DataSourceCategory.Metrics } }
+    {
+      context: { category: DataSourceCategory.Metrics },
+      toolkit: {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        actions: toolkitActions,
+      },
+    }
   );
 
   if (!configFactory) {
     throw new Error('getChartSectionConfiguration was not created.');
   }
 
-  const config = configFactory({ actions: {} } as ChartSectionConfigurationExtensionParams);
+  const config = configFactory();
 
   if (!config.replaceDefaultChart) {
     throw new Error('Expected chart section configuration to replace the default chart.');
   }
 
   render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
+
+  return { toolkitActions };
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -189,5 +199,11 @@ describe('MetricsExperienceGridWrapper', () => {
       }),
       logger: mockScopedLogger,
     });
+  });
+
+  it('passes toolkit actions to UnifiedMetricsExperienceGrid', () => {
+    const { toolkitActions } = renderChartSection();
+
+    expect(unifiedGridProps?.actions).toBe(toolkitActions);
   });
 });

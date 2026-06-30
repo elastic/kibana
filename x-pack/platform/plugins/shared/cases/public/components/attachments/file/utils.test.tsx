@@ -10,7 +10,10 @@ import {
   pdfMimeTypes,
   textMimeTypes,
 } from '../../../../common/constants/mime_types';
-import { isImage, parseMimeType } from './utils';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { basicComment } from '../../../containers/mock';
+import { makeFileComment } from './case_view_files.test';
+import { getFileIdsFromComments, isImage, parseMimeType } from './utils';
 
 const imageMimeTypes = Array.from(IMAGE_MIME_TYPES);
 
@@ -62,5 +65,42 @@ describe('parseMimeType', () => {
 
   it.each(pdfMimeTypes)('should return "Pdf" for text mime type: %s', (mimeType) => {
     expect(parseMimeType(mimeType)).toBe('PDF');
+  });
+});
+
+describe('getFileIdsFromComments', () => {
+  const owner = SECURITY_SOLUTION_OWNER;
+
+  it('returns an empty set when there are no file comments', () => {
+    expect(getFileIdsFromComments([basicComment], owner)).toEqual(new Set());
+  });
+
+  it('extracts a single file id from a string attachmentId', () => {
+    const result = getFileIdsFromComments([makeFileComment('c1', 'file-1', owner)], owner);
+    expect(result).toEqual(new Set(['file-1']));
+  });
+
+  it('expands array-shaped attachmentId values into individual ids', () => {
+    const result = getFileIdsFromComments(
+      [makeFileComment('c1', ['file-1', 'file-2'], owner)],
+      owner
+    );
+    expect(result).toEqual(new Set(['file-1', 'file-2']));
+  });
+
+  it('deduplicates ids across multiple file comments', () => {
+    const result = getFileIdsFromComments(
+      [makeFileComment('c1', 'file-1', owner), makeFileComment('c2', 'file-1', owner)],
+      owner
+    );
+    expect(result).toEqual(new Set(['file-1']));
+  });
+
+  it('ignores non-file comments', () => {
+    const result = getFileIdsFromComments(
+      [basicComment, makeFileComment('c1', 'file-1', owner)],
+      owner
+    );
+    expect(result).toEqual(new Set(['file-1']));
   });
 });

@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { getIngestionPath } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IngestionTimeRange, IngestionTimeRanges } from '../../../../common/metrics_types';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { isLeftClick, isModifiedClick } from '../../../utils/mouse_event';
 import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
 
 export function NoDataForRangeCallout() {
@@ -93,28 +97,56 @@ export function MixedAgentCallout({
   onNavigateToIngestionType,
 }: MixedAgentCalloutProps) {
   const { docLinks } = useApmPluginContext().core;
+  const {
+    services: { telemetry },
+  } = useKibana<ApmPluginStartDeps & ApmServices>();
   const history = useHistory();
   const location = useLocation();
 
+  const hasOverlap = useMemo(() => {
+    return ingestionTimeRanges
+      ? ingestionTimeRanges.classicApm.from < ingestionTimeRanges.otelNative.to &&
+          ingestionTimeRanges.otelNative.from < ingestionTimeRanges.classicApm.to
+      : false;
+  }, [ingestionTimeRanges]);
+
+  const getIngestionRangeLocation = useCallback(
+    (range: IngestionTimeRange) => ({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        rangeFrom: new Date(range.from).toISOString(),
+        rangeTo: new Date(range.to).toISOString(),
+      }),
+    }),
+    [location]
+  );
+
   const navigateToIngestionRange = useCallback(
-    (range: IngestionTimeRange, type: IngestionType) => {
+    (
+      event: React.MouseEvent<HTMLAnchorElement>,
+      range: IngestionTimeRange,
+      type: IngestionType
+    ) => {
       try {
-        onNavigateToIngestionType?.(type);
-        history.push({
-          ...location,
-          search: fromQuery({
-            ...toQuery(location.search),
-            rangeFrom: new Date(range.from).toISOString(),
-            rangeTo: new Date(range.to).toISOString(),
-          }),
+        telemetry.reportMetricsCalloutDateRangeSelected({
+          calloutType: hasOverlap ? 'overlap' : 'non_overlap',
+          selectedInstrumentationType: getIngestionPath(type === 'otelNative'),
         });
+        if (event.defaultPrevented || !isLeftClick(event) || isModifiedClick(event)) {
+          return;
+        }
+
+        event.preventDefault();
+        onNavigateToIngestionType?.(type);
+        history.push(getIngestionRangeLocation(range));
       } catch (error) {
         if (!isInactiveHistoryError(error)) {
           throw error;
         }
       }
     },
-    [history, location, onNavigateToIngestionType]
+    [getIngestionRangeLocation, hasOverlap, history, onNavigateToIngestionType, telemetry]
   );
 
   const baseDetails = useMemo(
@@ -140,13 +172,20 @@ export function MixedAgentCallout({
     };
   }, [baseDetails, forcedIngestionType]);
 
+  useEffect(() => {
+    if (!details) {
+      return;
+    }
+
+    telemetry.reportMetricsCalloutLoaded({
+      calloutType: hasOverlap ? 'overlap' : 'non_overlap',
+      shownInstrumentationType: getIngestionPath(details.currentKey === 'otelNative'),
+    });
+  }, [details, hasOverlap, telemetry]);
+
   if (!ingestionTimeRanges || !details) {
     return null;
   }
-
-  const hasOverlap =
-    ingestionTimeRanges.classicApm.from < ingestionTimeRanges.otelNative.to &&
-    ingestionTimeRanges.otelNative.from < ingestionTimeRanges.classicApm.to;
 
   const title = hasOverlap
     ? i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.title', {
@@ -183,7 +222,10 @@ export function MixedAgentCallout({
             timePeriod: (
               <EuiLink
                 data-test-subj="apmMetricsCurrentTimeRangeLink"
-                onClick={() => navigateToIngestionRange(details.currentRange, details.currentKey)}
+                href={history.createHref(getIngestionRangeLocation(details.currentRange))}
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                  navigateToIngestionRange(event, details.currentRange, details.currentKey)
+                }
               >
                 {formatRange(details.currentRange)}
               </EuiLink>
@@ -200,7 +242,10 @@ export function MixedAgentCallout({
             previousDateRange: (
               <EuiLink
                 data-test-subj="apmMetricsPreviousTimeRangeLink"
-                onClick={() => navigateToIngestionRange(details.previousRange, details.previousKey)}
+                href={history.createHref(getIngestionRangeLocation(details.previousRange))}
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                  navigateToIngestionRange(event, details.previousRange, details.previousKey)
+                }
               >
                 {formatRange(details.previousRange)}
               </EuiLink>

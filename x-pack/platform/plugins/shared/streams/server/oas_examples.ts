@@ -48,7 +48,6 @@ export const createWiredStreamRequest: Streams.WiredStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -80,7 +79,6 @@ export const updateClassicStreamRequest: Streams.ClassicStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -98,7 +96,6 @@ export const createQueryStreamRequest: Streams.QueryStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -230,7 +227,6 @@ export const getWiredStreamResponse: Streams.WiredStream.GetResponse = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
   data_stream_exists: true,
   inherited_fields: {
     '@timestamp': { type: 'date', from: 'logs' },
@@ -401,18 +397,6 @@ export const getSignificantEventsResponse: SignificantEventsGetResponse = {
     { date: '2025-01-15T11:00:00.000Z', count: 18 },
     { date: '2025-01-15T12:00:00.000Z', count: 7 },
   ],
-};
-
-// ---------------------------------------------------------------------------
-// POST /api/streams/{name}/significant_events/_preview
-// ---------------------------------------------------------------------------
-
-export const previewSignificantEventsRequest = {
-  query: {
-    esql: {
-      query: 'FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
-    },
-  },
 };
 
 // ---------------------------------------------------------------------------
