@@ -44,6 +44,21 @@ import { findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 
+interface StatsFunctionParameterContext {
+  functionDefinition?: {
+    type: FunctionDefinitionTypes;
+  };
+  paramDefinitions: Array<{
+    hint?: {
+      kind?: string;
+    };
+  }>;
+}
+
+type StatsFunctionsToIgnore = (
+  functionParameterContext?: StatsFunctionParameterContext
+) => { names: string[] } | undefined;
+
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
@@ -64,13 +79,12 @@ export async function autocomplete(
 
   // Find the function at cursor position for suggestions
   const foundFunction = cursorPosition ? findFunctionForSuggestions(command, cursorPosition) : null;
+  const getFunctionsToIgnore = buildStatsFunctionsToIgnore(command, foundFunction);
 
   if (
     foundFunction &&
     (foundFunction.subtype === 'variadic-call' || foundFunction.subtype === 'binary-expression')
   ) {
-    const getFunctionsToIgnore = buildStatsFunctionsToIgnore(command, foundFunction);
-
     if (getFunctionsToIgnore) {
       const isInBy = isNodeWithinByClause(foundFunction, command);
 
@@ -135,6 +149,7 @@ export async function autocomplete(
         suggestColumns: false,
         suggestFunctions: true,
         controlType: ESQLVariableType.FUNCTIONS,
+        getFunctionsToIgnore,
       });
 
       return expressionSuggestions;
@@ -163,6 +178,7 @@ export async function autocomplete(
         suggestColumns: false,
         suggestFunctions: true,
         controlType: ESQLVariableType.FUNCTIONS,
+        getFunctionsToIgnore,
       });
 
       return expressionSuggestions;
@@ -228,6 +244,7 @@ export async function autocomplete(
         addSpaceAfterFirstField: false,
         ignoredColumns,
         openSuggestions: true,
+        getFunctionsToIgnore,
       });
     }
 
@@ -263,6 +280,7 @@ export async function autocomplete(
         addSpaceAfterFirstField: false,
         ignoredColumns,
         openSuggestions: true,
+        getFunctionsToIgnore,
       });
     }
 
@@ -287,6 +305,7 @@ async function getExpressionSuggestions({
   controlType,
   ignoredColumns = [],
   openSuggestions,
+  getFunctionsToIgnore,
 }: {
   query: string;
   command: ESQLAstAllCommands;
@@ -303,6 +322,7 @@ async function getExpressionSuggestions({
   controlType?: ESQLVariableType;
   ignoredColumns?: string[];
   openSuggestions?: boolean;
+  getFunctionsToIgnore?: StatsFunctionsToIgnore;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -323,6 +343,7 @@ async function getExpressionSuggestions({
       suggestFunctions,
       controlType,
       openSuggestions,
+      getFunctionsToIgnore,
     },
   });
 
@@ -371,23 +392,10 @@ function alreadyUsedColumns(command: ESQLAstAllCommands) {
   return columnNodes.map((node) => node.parts.join('.'));
 }
 
-interface StatsFunctionParameterContext {
-  functionDefinition?: {
-    type: FunctionDefinitionTypes;
-  };
-  paramDefinitions: Array<{
-    hint?: {
-      kind?: string;
-    };
-  }>;
-}
-
 function buildStatsFunctionsToIgnore(
   command: ESQLAstAllCommands,
   foundFunction: ESQLFunction | null
-):
-  | ((functionParameterContext?: StatsFunctionParameterContext) => { names: string[] } | undefined)
-  | undefined {
+): StatsFunctionsToIgnore | undefined {
   if (!foundFunction) {
     return undefined;
   }
