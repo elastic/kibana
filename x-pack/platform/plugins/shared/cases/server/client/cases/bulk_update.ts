@@ -403,6 +403,16 @@ function partitionPatchRequest(
   };
 }
 
+/**
+ * Fields that are allowed to be present when users reopen cases
+ */
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+
+/**
+ * Fields that are allowed to be present when case is reassigned
+ */
+const ASSIGN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'assignees']);
+
 export function getOperationsToAuthorize({
   reopenedCases,
   changedAssignees,
@@ -414,9 +424,17 @@ export function getOperationsToAuthorize({
 }): OperationDetails[] {
   const operations: OperationDetails[] = [];
   const onlyAssigneeOperations =
-    reopenedCases.length === 0 && changedAssignees.length === allCases.length;
+    reopenedCases.length === 0 &&
+    changedAssignees.length === allCases.length &&
+    changedAssignees.every((caseReq) =>
+      Object.keys(caseReq).every((key) => ASSIGN_ONLY_CASE_FIELDS.has(key))
+    );
   const onlyReopenOperations =
-    changedAssignees.length === 0 && reopenedCases.length === allCases.length;
+    changedAssignees.length === 0 &&
+    reopenedCases.length === allCases.length &&
+    reopenedCases.every((caseReq) =>
+      Object.keys(caseReq).every((key) => REOPEN_ONLY_CASE_FIELDS.has(key))
+    );
 
   if (reopenedCases.length > 0) {
     operations.push(Operations.reopenCase);

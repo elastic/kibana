@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
-import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -381,22 +381,62 @@ describe('update', () => {
       expect(operations).toEqual([Operations.updateCase]);
     });
 
-    it('returns only assignCase operation when all cases are assignee changes', () => {
+    it('returns only assignCase operation when all cases are assignee-only changes', () => {
+      const assignOnlyCases = [
+        { id: mockCases[0].id, version: mockCases[0].version ?? '', assignees: [{ uid: '1' }] },
+      ];
       const operations = getOperationsToAuthorize({
         reopenedCases: [],
-        changedAssignees: cases.cases,
-        allCases: cases.cases,
+        changedAssignees: assignOnlyCases,
+        allCases: assignOnlyCases,
       });
       expect(operations).toEqual([Operations.assignCase]);
     });
 
-    it('returns only reopenCase operation when all cases are being reopened', () => {
+    it('returns assignCase and updateCase when an assignee-change request includes an injected title field', () => {
+      const assignWithTitle = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          assignees: [{ uid: '1' }],
+          title: 'injected',
+        },
+      ];
       const operations = getOperationsToAuthorize({
-        reopenedCases: cases.cases,
+        reopenedCases: [],
+        changedAssignees: assignWithTitle,
+        allCases: assignWithTitle,
+      });
+      expect(operations).toEqual([Operations.assignCase, Operations.updateCase]);
+    });
+
+    it('returns only reopenCase operation when all cases are being reopened with only status', () => {
+      const statusOnlyCases = [
+        { id: mockCases[0].id, version: mockCases[0].version ?? '', status: CaseStatuses.open },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: statusOnlyCases,
         changedAssignees: [],
-        allCases: cases.cases,
+        allCases: statusOnlyCases,
       });
       expect(operations).toEqual([Operations.reopenCase]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case includes assignees', () => {
+      const reopenWithAssignees = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          assignees: [{ uid: '1' }],
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithAssignees,
+        changedAssignees: [],
+        allCases: reopenWithAssignees,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
     });
 
     it('returns assignCase and updateCase when some cases have non-assignee changes', () => {
@@ -454,6 +494,57 @@ describe('update', () => {
         Operations.assignCase,
         Operations.updateCase,
       ]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case has an injected title field', () => {
+      const reopenWithTitle = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          title: 'injected',
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithTitle,
+        changedAssignees: [],
+        allCases: reopenWithTitle,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case has an injected description field', () => {
+      const reopenWithDescription = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          description: 'injected',
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithDescription,
+        changedAssignees: [],
+        allCases: reopenWithDescription,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when a reopened case has an injected severity field', () => {
+      const reopenWithSeverity = [
+        {
+          id: mockCases[0].id,
+          version: mockCases[0].version ?? '',
+          status: CaseStatuses.open,
+          severity: CaseSeverity.CRITICAL,
+        },
+      ];
+      const operations = getOperationsToAuthorize({
+        reopenedCases: reopenWithSeverity,
+        changedAssignees: [],
+        allCases: reopenWithSeverity,
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
     });
 
     it('should filter out empty user profiles', async () => {
@@ -1944,6 +2035,89 @@ describe('update', () => {
           entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
           operation: [Operations.reopenCase],
         });
+      });
+
+      it('checks authorization for reopenCase and updateCase when reopening with extra fields', async () => {
+        const closedCase = {
+          ...mockCases[0],
+          attributes: {
+            ...mockCases[0].attributes,
+            status: CaseStatuses.closed,
+          },
+        };
+
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
+
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...closedCase }],
+        });
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: closedCase.id,
+                version: closedCase.version ?? '',
+                status: CaseStatuses.open,
+                title: 'injected title',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+          entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
+          operation: [Operations.reopenCase, Operations.updateCase],
+        });
+      });
+
+      it('throws when a reopen request contains an injected title and the user lacks updateCase permission', async () => {
+        const closedCase = {
+          ...mockCases[0],
+          attributes: { ...mockCases[0].attributes, status: CaseStatuses.closed },
+        };
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: closedCase.id,
+                  version: closedCase.version ?? '',
+                  status: CaseStatuses.open,
+                  title: 'injected title',
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Unauthorized');
+      });
+
+      it('throws when an assignee-change request contains an injected title and the user lacks updateCase permission', async () => {
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  assignees: [{ uid: '1' }],
+                  title: 'injected title',
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Unauthorized');
       });
 
       it('throws when user is not authorized to update case', async () => {
