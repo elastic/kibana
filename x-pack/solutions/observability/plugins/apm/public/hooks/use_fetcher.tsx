@@ -16,6 +16,8 @@ import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
 import { getApmInternalServices } from '../plugin';
+import { reportFetchError } from '../services/rest/report_fetch_error';
+import type { FetcherOperationId } from './fetcher_operation_ids';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -118,6 +120,8 @@ export interface UseFetcherOptions {
   preservePreviousData?: boolean;
   showToastOnError?: boolean;
   skipTimeRangeRefreshUpdate?: boolean;
+  /** When provided, non-aborted fetch failures are reported to APM RUM under this label. Register new values in `fetcher_operation_ids.ts`. */
+  operationId?: FetcherOperationId;
 }
 
 // Temporary: useLegacyCallApmApi overloads exist while migrating APIs from the APM plugin's
@@ -148,6 +152,7 @@ export function useFetcher<TReturn>(
     preservePreviousData = true,
     showToastOnError = true,
     useLegacyCallApmApi = false,
+    operationId,
   } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
@@ -239,6 +244,14 @@ export function useFetcher<TReturn>(
               ),
             });
           }
+
+          if (operationId) {
+            reportFetchError({
+              error: err,
+              operationId,
+            });
+          }
+
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,

@@ -8,10 +8,8 @@
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { getApmInternalServices } from '../../plugin';
 import { reportFetchError } from './report_fetch_error';
-export const FETCH_TRACE_ROOT_SPAN_OPERATION_ID = 'fetch-trace-root-span';
-
+import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
-
 export const fetchRootSpanByTraceId = (
   {
     traceId,
@@ -37,7 +35,7 @@ export const fetchRootSpanByTraceId = (
       signal,
     });
   } catch (error) {
-    reportFetchError({ error, operationId: FETCH_TRACE_ROOT_SPAN_OPERATION_ID });
+    reportFetchError({ error, operationId: FETCHER_OPERATION_IDS.FETCH_TRACE_ROOT_SPAN });
     throw error;
   }
 };

@@ -8,9 +8,10 @@
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { getApmInternalServices } from '../../plugin';
 import { reportFetchError } from './report_fetch_error';
-export const FETCH_TRACE_ERRORS_OPERATION_ID = 'fetch-trace-errors';
+import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 
 type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
+
 export const fetchErrorsByTraceId = (
   {
     traceId,
@@ -39,7 +40,7 @@ export const fetchErrorsByTraceId = (
       signal,
     });
   } catch (error) {
-    reportFetchError({ error, operationId: FETCH_TRACE_ERRORS_OPERATION_ID });
+    reportFetchError({ error, operationId: FETCHER_OPERATION_IDS.FETCH_TRACE_ERRORS });
     throw error;
   }
 };
