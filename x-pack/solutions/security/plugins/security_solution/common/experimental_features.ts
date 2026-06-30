@@ -66,7 +66,7 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true, // FIXME:PT done only for POC. DO NOT COMMIT
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
