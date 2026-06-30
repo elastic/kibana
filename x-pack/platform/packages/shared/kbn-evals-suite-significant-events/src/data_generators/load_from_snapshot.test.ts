@@ -18,7 +18,7 @@ jest.mock('@kbn/es-snapshot-loader', () => ({
   restoreSnapshot: mockRestoreSnapshot,
 }));
 
-describe('load_ki_features_from_snapshot', () => {
+describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
   interface EsClientMock {
     indices: {
       delete: jest.MockedFunction<Client['indices']['delete']>;
@@ -57,7 +57,7 @@ describe('load_ki_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    const { loadKIFeaturesFromSnapshot } = await import('./load_ki_features_from_snapshot');
+    const { loadKIFeaturesFromSnapshot } = await import('./load_from_snapshot');
     esClient.indices.delete.mockResolvedValue({} as never);
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
@@ -100,7 +100,7 @@ describe('load_ki_features_from_snapshot', () => {
       },
     } as never);
 
-    const { loadKIFeaturesFromSnapshot } = await import('./load_ki_features_from_snapshot');
+    const { loadKIFeaturesFromSnapshot } = await import('./load_from_snapshot');
     const features = await loadKIFeaturesFromSnapshot(
       esClient as unknown as Client,
       log as unknown as ToolingLog,
@@ -144,7 +144,7 @@ describe('load_ki_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    const { loadKIFeaturesFromSnapshot } = await import('./load_ki_features_from_snapshot');
+    const { loadKIFeaturesFromSnapshot } = await import('./load_from_snapshot');
     esClient.indices.delete.mockResolvedValue({} as never);
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
@@ -160,7 +160,7 @@ describe('load_ki_features_from_snapshot', () => {
   });
 
   it('cleans up the temp index at the end even if search throws', async () => {
-    const { loadKIFeaturesFromSnapshot } = await import('./load_ki_features_from_snapshot');
+    const { loadKIFeaturesFromSnapshot } = await import('./load_from_snapshot');
     mockRestoreSnapshot.mockImplementation(
       async ({
         snapshotName,
