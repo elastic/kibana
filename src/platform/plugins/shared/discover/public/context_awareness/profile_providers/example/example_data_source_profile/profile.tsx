@@ -32,6 +32,39 @@ import {
   type ExampleProfileState,
 } from '../profile_state';
 
+const commonColorOptions = [
+  {
+    value: 'primary',
+    text: i18n.translate('discover.exampleProfile.colorPrimaryDropDownOptionLabel', {
+      defaultMessage: 'Primary',
+    }),
+  },
+  {
+    value: 'accent',
+    text: i18n.translate('discover.exampleProfile.colorAccentDropDownOptionLabel', {
+      defaultMessage: 'Accent',
+    }),
+  },
+  {
+    value: 'success',
+    text: i18n.translate('discover.exampleProfile.colorSuccessDropDownOptionLabel', {
+      defaultMessage: 'Success',
+    }),
+  },
+  {
+    value: 'warning',
+    text: i18n.translate('discover.exampleProfile.colorWarningDropDownOptionLabel', {
+      defaultMessage: 'Warning',
+    }),
+  },
+  {
+    value: 'danger',
+    text: i18n.translate('discover.exampleProfile.colorDangerDropDownOptionLabel', {
+      defaultMessage: 'Danger',
+    }),
+  },
+] as const;
+
 const timestampColorOptions = [
   {
     value: 'hollow',
@@ -42,51 +75,7 @@ const timestampColorOptions = [
       }
     ),
   },
-  {
-    value: 'primary',
-    text: i18n.translate(
-      'discover.exampleProfile.profileStateTimestampColorPrimaryDropDownOptionLabel',
-      {
-        defaultMessage: 'Primary',
-      }
-    ),
-  },
-  {
-    value: 'accent',
-    text: i18n.translate(
-      'discover.exampleProfile.profileStateTimestampColorAccentDropDownOptionLabel',
-      {
-        defaultMessage: 'Accent',
-      }
-    ),
-  },
-  {
-    value: 'success',
-    text: i18n.translate(
-      'discover.exampleProfile.profileStateTimestampColorSuccessDropDownOptionLabel',
-      {
-        defaultMessage: 'Success',
-      }
-    ),
-  },
-  {
-    value: 'warning',
-    text: i18n.translate(
-      'discover.exampleProfile.profileStateTimestampColorWarningDropDownOptionLabel',
-      {
-        defaultMessage: 'Warning',
-      }
-    ),
-  },
-  {
-    value: 'danger',
-    text: i18n.translate(
-      'discover.exampleProfile.profileStateTimestampColorDangerDropDownOptionLabel',
-      {
-        defaultMessage: 'Danger',
-      }
-    ),
-  },
+  ...commonColorOptions,
 ];
 
 const rowControlColorOptions: Array<{
@@ -99,36 +88,7 @@ const rowControlColorOptions: Array<{
       defaultMessage: 'Text',
     }),
   },
-  {
-    value: 'primary',
-    text: i18n.translate('discover.exampleProfile.rowControlColorPrimaryDropDownOptionLabel', {
-      defaultMessage: 'Primary',
-    }),
-  },
-  {
-    value: 'accent',
-    text: i18n.translate('discover.exampleProfile.rowControlColorAccentDropDownOptionLabel', {
-      defaultMessage: 'Accent',
-    }),
-  },
-  {
-    value: 'success',
-    text: i18n.translate('discover.exampleProfile.rowControlColorSuccessDropDownOptionLabel', {
-      defaultMessage: 'Success',
-    }),
-  },
-  {
-    value: 'warning',
-    text: i18n.translate('discover.exampleProfile.rowControlColorWarningDropDownOptionLabel', {
-      defaultMessage: 'Warning',
-    }),
-  },
-  {
-    value: 'danger',
-    text: i18n.translate('discover.exampleProfile.rowControlColorDangerDropDownOptionLabel', {
-      defaultMessage: 'Danger',
-    }),
-  },
+  ...commonColorOptions,
 ];
 
 const getRowControlColor = (value: string) =>
