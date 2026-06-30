@@ -68,7 +68,14 @@ const mockDecryptedMonitor = (overrides: Partial<Record<string, unknown>> = {}) 
     type: 'http',
     name: 'My Monitor',
     enabled: true,
-    locations: [{ id: 'us_central', isServiceManaged: true }],
+    locations: [
+      {
+        id: 'us_central',
+        label: 'US Central',
+        geo: { lat: 0, lon: 0 },
+        isServiceManaged: true,
+      },
+    ],
     schedule: { number: '5', unit: 'm' },
     tags: ['tag-a'],
     [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
@@ -97,10 +104,11 @@ const mockValidationResultFor = (attributes: Record<string, unknown>) => ({
 
 const createMockRouteContext = () => {
   const findDecryptedMonitors = jest.fn().mockResolvedValue([]);
+  const find = jest.fn().mockResolvedValue({ total: 0 });
   const createInternalRepository = jest.fn().mockReturnValue({});
   return {
     routeContext: {
-      request: {} as any,
+      request: { query: {} } as any,
       response: { forbidden: jest.fn((opts: any) => opts) } as any,
       spaceId: 'default',
       server: {
@@ -108,9 +116,21 @@ const createMockRouteContext = () => {
         coreStart: { savedObjects: { createInternalRepository } },
       } as any,
       savedObjectsClient: {} as any,
-      monitorConfigRepository: { findDecryptedMonitors } as any,
+      syntheticsMonitorClient: {
+        syntheticsService: {
+          locations: [
+            {
+              id: 'us_central',
+              label: 'US Central',
+              geo: { lat: 0, lon: 0 },
+              isServiceManaged: true,
+            },
+          ],
+        },
+      } as any,
+      monitorConfigRepository: { findDecryptedMonitors, find } as any,
     } as any,
-    mocks: { findDecryptedMonitors, createInternalRepository },
+    mocks: { findDecryptedMonitors, find, createInternalRepository },
   };
 };
 
@@ -180,7 +200,14 @@ describe('UpdateMonitorAPI', () => {
       expect(attrs.name).toBe('My Monitor');
       expect(attrs.tags).toEqual(['tag-a']);
       expect(attrs.schedule).toEqual({ number: '5', unit: 'm' });
-      expect(attrs.locations).toEqual([{ id: 'us_central', isServiceManaged: true }]);
+      expect(attrs.locations).toEqual([
+        {
+          id: 'us_central',
+          label: 'US Central',
+          geo: { lat: 0, lon: 0 },
+          isServiceManaged: true,
+        },
+      ]);
       expect(attrs.enabled).toBe(false);
     });
 
@@ -202,6 +229,39 @@ describe('UpdateMonitorAPI', () => {
         'mon-1',
         'mon-2',
       ]);
+    });
+
+    it('uses the normalized API config before validation and persistence', async () => {
+      const { normalizeAPIConfig, validateMonitor } = jest.requireMock('../monitor_validation');
+      normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => {
+        const { url, ...rest } = m;
+        return { formattedConfig: { ...rest, [ConfigKey.URLS]: url } };
+      });
+
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ attributes: { [ConfigKey.URLS]: 'https://old.example.com' } }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: [
+          {
+            id: 'mon-1',
+            attributes: { url: 'https://new.example.com' } as never,
+          },
+        ],
+      });
+
+      expect(result.perIdErrors).toEqual({});
+      expect(result.survivors).toHaveLength(1);
+      expect(validateMonitor).toHaveBeenCalledWith(
+        expect.objectContaining({ [ConfigKey.URLS]: 'https://new.example.com' }),
+        'default'
+      );
+      const persisted = result.survivors[0].monitorWithRevision as Record<string, unknown>;
+      expect(persisted[ConfigKey.URLS]).toBe('https://new.example.com');
+      expect(persisted).not.toHaveProperty('url');
     });
   });
 
@@ -278,6 +338,50 @@ describe('UpdateMonitorAPI', () => {
         details: 'Invalid schedule 7 minutes...',
       });
     });
+
+    it('records a validation error when a name patch conflicts with an existing monitor', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.find.mockResolvedValue({ total: 1 });
+      mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1'], { [ConfigKey.NAME]: 'Already Taken' }),
+      });
+
+      expect(mocks.find).toHaveBeenCalledTimes(1);
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1']).toMatchObject({
+        code: 'validation_failed',
+        message: expect.stringContaining('already exists'),
+      });
+    });
+
+    it('records validation errors when a batch patches multiple monitors to the same name', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ id: 'mon-1' }),
+        mockDecryptedMonitor({ id: 'mon-2' }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: [
+          { id: 'mon-1', attributes: { [ConfigKey.NAME]: 'Same Name' } },
+          { id: 'mon-2', attributes: { [ConfigKey.NAME]: 'Same Name' } },
+        ],
+      });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1']).toMatchObject({
+        code: 'validation_failed',
+        message: expect.stringContaining('Duplicate monitor name'),
+      });
+      expect(result.perIdErrors['mon-2']).toMatchObject({
+        code: 'validation_failed',
+        message: expect.stringContaining('Duplicate monitor name'),
+      });
+    });
   });
 
   describe('forbidden', () => {
@@ -321,9 +425,10 @@ describe('UpdateMonitorAPI', () => {
       const { getPrivateLocationsForNamespaces } = jest.requireMock(
         '../../../synthetics_service/get_private_locations'
       );
-      getPrivateLocationsForNamespaces.mockResolvedValue([
-        { id: 'pl-1', label: 'PL', spaces: ['default'] },
-      ]);
+      const privateLocations = [
+        { id: 'pl-1', label: 'PL', spaces: ['default'], isServiceManaged: false },
+      ];
+      getPrivateLocationsForNamespaces.mockResolvedValue(privateLocations);
 
       const { validateMonitorPrivateLocationSpaces } = jest.requireMock(
         '../monitor_locations_utils'

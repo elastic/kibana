@@ -48,7 +48,7 @@ import {
   validateMonitorPrivateLocationSpaces,
 } from '../monitor_locations_utils';
 import { normalizeAPIConfig, validateMonitor } from '../monitor_validation';
-import type { CreateMonitorPayLoad } from '../add_monitor/add_monitor_api';
+import { AddEditMonitorAPI, type CreateMonitorPayLoad } from '../add_monitor/add_monitor_api';
 import { validateLocationPermissions } from '../edit_monitor';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from '../project_monitor/add_monitor_project';
 import type { RouteContext } from '../../types';
@@ -93,6 +93,7 @@ interface ExecuteParams {
 export class UpdateMonitorAPI {
   routeContext: RouteContext;
   result: UpdateMonitorPreprocessResult = { survivors: [], perIdErrors: {} };
+  private patchNameCounts = new Map<string, number>();
 
   /*
    * Request-scoped permission caches. A new instance is created per request,
@@ -114,6 +115,7 @@ export class UpdateMonitorAPI {
     const patchById = new Map<string, Partial<EncryptedSyntheticsMonitor>>(
       updates.map((update) => [update.id, update.attributes])
     );
+    this.patchNameCounts = this.buildPatchNameCounts(updates);
 
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
@@ -182,10 +184,19 @@ export class UpdateMonitorAPI {
 
     const { prevAttrs, merged } = this.mergePatch(decryptedMonitor, patch);
 
+    const nameError = await this.validateNamePatch(monitorId, patch);
+    if (nameError) {
+      this.result.perIdErrors[monitorId] = {
+        code: 'validation_failed',
+        message: nameError,
+      };
+      return;
+    }
+
     // Reject unknown/unsupported keys, matching the single-monitor PUT
     // (`editSyntheticsMonitorRoute`). Without this, io-ts `t.exact` in
     // `validateMonitor` would silently strip them instead of failing.
-    const { errorMessage: unsupportedKeysError } = normalizeAPIConfig(
+    const { errorMessage: unsupportedKeysError, formattedConfig } = normalizeAPIConfig(
       merged as CreateMonitorPayLoad
     );
     if (unsupportedKeysError) {
@@ -196,7 +207,24 @@ export class UpdateMonitorAPI {
       return;
     }
 
-    const validation = validateMonitor(merged as MonitorFields, this.routeContext.spaceId);
+    const editMonitorAPI = new AddEditMonitorAPI(this.routeContext);
+    let normalizedMonitor: MonitorFields;
+    try {
+      editMonitorAPI.validateMonitorType(merged as MonitorFields, prevAttrs as MonitorFields);
+      normalizedMonitor = await editMonitorAPI.normalizeMonitor(
+        (formattedConfig ?? merged) as CreateMonitorPayLoad,
+        patch as CreateMonitorPayLoad,
+        (prevAttrs as MonitorFields)[ConfigKey.LOCATIONS]
+      );
+    } catch (error) {
+      this.result.perIdErrors[monitorId] = {
+        code: 'validation_failed',
+        message: getErrorMessage(error),
+      };
+      return;
+    }
+
+    const validation = validateMonitor(normalizedMonitor, this.routeContext.spaceId);
     if (!validation.valid || !validation.decodedMonitor) {
       this.result.perIdErrors[monitorId] = {
         code: 'validation_failed',
@@ -213,7 +241,10 @@ export class UpdateMonitorAPI {
       return;
     }
 
-    const plSpaceError = this.checkPrivateLocationSpaces(decodedMonitor, allPrivateLocations);
+    const plSpaceError = this.checkPrivateLocationSpaces(
+      decodedMonitor,
+      editMonitorAPI.allPrivateLocations ?? allPrivateLocations
+    );
     if (plSpaceError) {
       this.result.perIdErrors[monitorId] = plSpaceError;
       return;
@@ -254,6 +285,33 @@ export class UpdateMonitorAPI {
       patch as EncryptedSyntheticsMonitor
     );
     return { prevAttrs, merged };
+  }
+
+  private async validateNamePatch(
+    monitorId: string,
+    patch: Partial<EncryptedSyntheticsMonitor>
+  ): Promise<string | undefined> {
+    const nextName = patch[ConfigKey.NAME];
+    if (typeof nextName !== 'string') {
+      return;
+    }
+    if ((this.patchNameCounts.get(nextName) ?? 0) > 1) {
+      return duplicateNamePatchMessage(nextName);
+    }
+
+    const editMonitorAPI = new AddEditMonitorAPI(this.routeContext);
+    return editMonitorAPI.validateUniqueMonitorName(nextName, monitorId);
+  }
+
+  private buildPatchNameCounts(updates: MonitorBulkUpdate[]): Map<string, number> {
+    const counts = new Map<string, number>();
+    for (const { attributes } of updates) {
+      const nextName = attributes[ConfigKey.NAME];
+      if (typeof nextName === 'string') {
+        counts.set(nextName, (counts.get(nextName) ?? 0) + 1);
+      }
+    }
+    return counts;
   }
 
   /**
@@ -449,3 +507,17 @@ const insufficientSpacePermissionsMessage = () =>
     defaultMessage:
       'Insufficient permissions to update this monitor in all spaces it is shared to.',
   });
+
+const duplicateNamePatchMessage = (name: string) =>
+  i18n.translate('xpack.synthetics.server.bulkUpdate.duplicateNamePatch', {
+    defaultMessage:
+      'Duplicate monitor name "{name}" in updates; each monitor name may appear at most once.',
+    values: { name },
+  });
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
