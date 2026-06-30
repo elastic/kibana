@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Browser apps', () => {
     let logs: Ecs[];
+    const log = getService('log');
     const retry = getService('retry');
 
     const logContains = async ({
@@ -30,6 +31,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // if we did not find our predicate in the logs, wait a bit and parse them again
           await new Promise((resolve) => setTimeout(resolve, 10000));
           logs = await readLogFile();
+          if (description.includes('fetch documents')) {
+            log.info(
+              logs
+                .filter(
+                  (record) =>
+                    record.log?.logger === 'execution_context' &&
+                    Boolean(record.message?.includes('discover'))
+                )
+                .slice(-20)
+                .map((record) => record.message)
+                .join('\n')
+            );
+          }
           throw err;
         }
       });
