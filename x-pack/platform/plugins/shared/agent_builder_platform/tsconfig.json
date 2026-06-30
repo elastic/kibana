@@ -34,5 +34,6 @@
     "@kbn/agent-context-layer-plugin",
     "@kbn/actions-plugin",
     "@kbn/triggers-actions-ui-plugin",
+    "@kbn/agent-builder-plugin",
   ]
 }
