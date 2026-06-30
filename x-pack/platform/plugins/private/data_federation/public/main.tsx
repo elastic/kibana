@@ -291,7 +291,7 @@ export const Main: FunctionComponent<MainProps> = ({
     );
     if (hasRelatedDataSets) {
       setDeleteDataSourcesError(
-        'Unable to delete one or more data sources because datasets read from them. Delete those datasets first.'
+        mainTranslations.confirmDeleteDataSources.hasRelatedDataSetsError
       );
       return;
     }

@@ -200,6 +200,13 @@ export const mainTranslations = {
     errorTitle: i18n.translate('xpack.dataFederation.confirmDeleteDataSources.errorTitle', {
       defaultMessage: 'Delete failed',
     }),
+    hasRelatedDataSetsError: i18n.translate(
+      'xpack.dataFederation.confirmDeleteDataSources.hasRelatedDataSetsError',
+      {
+        defaultMessage:
+          'Unable to delete one or more data sources because datasets read from them. Delete those datasets first.',
+      }
+    ),
   },
 
   confirmDeleteDataSet: {
