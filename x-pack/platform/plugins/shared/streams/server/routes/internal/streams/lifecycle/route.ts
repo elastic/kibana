@@ -259,7 +259,7 @@ const lifecycleDslPhaseStatsRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
-  }): Promise<{ phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> }> => {
+  }): Promise<{ phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> | undefined }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
 
@@ -277,15 +277,18 @@ const lifecycleDslPhaseStatsRoute = createServerRoute({
       );
     }
 
-    // Gracefully degrade to empty phases on any unexpected ES error rather than returning a 500.
-    let phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>>;
+    // Degrade gracefully on any unexpected ES error rather than returning a 500. We return
+    // `phases: undefined` (not `{}`) so the client can distinguish "stats unavailable" from
+    // "resolved, but no data in any phase". An empty object would be treated as authoritative and
+    // render hot/frozen as 0 B / 0 docs (real-looking lifecycle data); `undefined` instead lets the
+    // client treat the per-phase split as unavailable.
     try {
-      phases = await getDslPhaseStats(scopedClusterClient, name, dataStream.name);
+      const phases = await getDslPhaseStats(scopedClusterClient, name, dataStream.name);
+      return { phases };
     } catch (error) {
       logger.warn('Failed to fetch DSL phase stats', { error: error as Error });
-      phases = {};
+      return { phases: undefined };
     }
-    return { phases };
   },
 });
 

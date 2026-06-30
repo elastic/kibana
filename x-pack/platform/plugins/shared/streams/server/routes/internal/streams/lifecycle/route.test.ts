@@ -229,11 +229,13 @@ describe('lifecycle _dsl_phase_stats route', () => {
     });
   });
 
-  it('returns empty phases and logs a warning when the ES search throws', async () => {
+  it('returns undefined phases and logs a warning when the ES search throws', async () => {
+    // `undefined` (not `{}`) signals "stats unavailable" so the client can hide the per-phase
+    // indicators instead of rendering misleading 0 B / 0 docs per phase.
     const searchError = new Error('search_phase_execution_exception');
     const result = await callHandler({ name: 'my-stream', searchError });
 
-    expect(result).toEqual({ phases: {} });
+    expect(result).toEqual({ phases: undefined });
     expect(mockWarn).toHaveBeenCalledWith('Failed to fetch DSL phase stats', {
       error: searchError,
     });

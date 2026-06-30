@@ -114,22 +114,41 @@ export const useDslLifecycleSummary = ({
     const retentionPeriod = isDsl ? effectiveLifecycle.dsl.data_retention : undefined;
     const phaseStats = phaseStatsFetch.value?.phases;
 
-    // Prefer per-phase stats (derived from `_tier`) so each phase reflects only the data actually
-    // allocated to it. The whole-stream fallback (`stats`) is only used while per-phase data isn't
-    // available yet (i.e. the request is still in flight, `phaseStats === undefined`). It must be
-    // all-or-nothing: once `phaseStats` has resolved, an absent `hot` entry means hot genuinely
-    // holds no data (e.g. after all backing indices rolled into frozen), so it resolves to `0`.
-    // Falling back to the whole-stream total there would double-count the frozen bytes/docs across
-    // both the hot and frozen bars.
-    // Once per-phase stats have resolved, a phase with no allocated data resolves to `0` rather than
-    // blank, mirroring ILM (where every configured phase always reports a size, defaulting to 0).
-    // The `_tier` aggregation only returns a key for tiers that currently hold data, so an absent
-    // `hot`/`frozen` entry means that phase is genuinely empty — not unknown.
+    // Per-phase size/doc indicators are only meaningful when we can attribute data to a phase.
+    //
+    // - No frozen phase configured: `phaseStatsFetch` is skipped by design (`!frozenAfter`), so the
+    //   timeline has a single Hot phase. The whole-stream total (`stats`) belongs entirely to Hot,
+    //   so showing it there is correct and unambiguous.
+    // - Frozen phase configured and per-phase stats resolved: each phase reflects only the data
+    //   actually allocated to it via `_tier`. An absent `hot`/`frozen` entry means that tier is
+    //   genuinely empty (the `_tier` aggregation only returns keys for tiers that hold data), so it
+    //   resolves to `0`, mirroring ILM (where every configured phase always reports a size).
+    // - Frozen phase configured but per-phase stats unavailable (request in flight, or the server
+    //   returned `phases: undefined` after an ES error): we cannot reliably split size/docs by
+    //   phase. The whole-stream total can't be used here — it would land entirely on Hot and leave
+    //   Frozen blank, which reads as authoritative "all data is hot" rather than "unknown". So we
+    //   hide the indicators on every phase (size/docs `undefined`) until reliable data is available.
+    // `hasFrozenPhase` is always false on serverless: the frozen tier can't be configured there, so
+    // `frozenAfter` is never set and serverless always takes the whole-stream branch below.
+    const hasFrozenPhase = frozenAfter !== undefined;
     const hasPhaseStats = phaseStats !== undefined;
-    const hotSizeInBytes = hasPhaseStats ? phaseStats.hot?.size_in_bytes ?? 0 : stats?.sizeBytes;
-    const hotDocsCount = hasPhaseStats ? phaseStats.hot?.docs_count ?? 0 : stats?.totalDocs;
-    const frozenSizeInBytes = hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
-    const frozenDocsCount = hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
+    // When a frozen phase exists, only show indicators once per-phase stats have resolved.
+    const canShowPerPhaseStats = hasFrozenPhase ? hasPhaseStats : true;
+
+    const hotSizeInBytes = !canShowPerPhaseStats
+      ? undefined
+      : hasPhaseStats
+      ? phaseStats.hot?.size_in_bytes ?? 0
+      : stats?.sizeBytes;
+    const hotDocsCount = !canShowPerPhaseStats
+      ? undefined
+      : hasPhaseStats
+      ? phaseStats.hot?.docs_count ?? 0
+      : stats?.totalDocs;
+    const frozenSizeInBytes =
+      canShowPerPhaseStats && hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
+    const frozenDocsCount =
+      canShowPerPhaseStats && hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
 
     return buildLifecyclePhases({
       label: isServerless
