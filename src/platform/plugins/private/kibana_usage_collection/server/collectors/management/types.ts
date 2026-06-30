@@ -56,9 +56,18 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'contextEngine:enabled': boolean;
   'agentBuilder:uiamOAuthClientManagement': boolean;
+  'agentBuilder:tracing:enabled': boolean;
+  'agentBuilder:tracing:includeLlmResponses': boolean;
+  'agentBuilder:tracing:includeRealIds': boolean;
+  'agentBuilder:tracing:includeRealNames': boolean;
+  'agentBuilder:tracing:includeSystemPrompt': boolean;
+  'agentBuilder:tracing:includeToolDetails': boolean;
+  'agentBuilder:tracing:includeUserPrompts': boolean;
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
+  'workflows:ui:showManagedWorkflows': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;

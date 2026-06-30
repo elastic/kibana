@@ -57,6 +57,7 @@ const MyEuiButtonIcon = styled(EuiButtonIcon)`
 
 interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
+  ruleId: string; // RuleObjectId
   isDisabled: boolean;
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
@@ -70,6 +71,7 @@ interface RuleActionsOverflowComponentProps {
  */
 const RuleActionsOverflowComponent = ({
   rule,
+  ruleId,
   isDisabled,
   canDuplicateRuleWithActions,
   showBulkDuplicateExceptionsConfirmation,
@@ -108,33 +110,33 @@ const RuleActionsOverflowComponent = ({
   const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
 
   const actions = useMemo(
-    () =>
-      rule != null
+    () => [
+      ...(isRuleChangesHistoryEnabled
         ? [
-            ...(isRuleChangesHistoryEnabled
-              ? [
-                  <EuiContextMenuItem
-                    key={i18nActions.RULE_CHANGES_HISTORY}
-                    icon="clock"
-                    data-test-subj="rules-details-history"
-                    onClick={() => {
-                      closePopover();
-                      // We can't use SecurityPageName.rulesChangesHistory here for
-                      // deepLinkId as deep linking doesn't support path parameters.
-                      navigateToApp(APP_UI_ID, {
-                        deepLinkId: SecurityPageName.rules,
-                        path: getRuleChangesHistoryUrl(rule.id),
-                      });
-                    }}
-                  >
-                    {i18nActions.RULE_CHANGES_HISTORY}
-                  </EuiContextMenuItem>,
-                ]
-              : []),
+            <EuiContextMenuItem
+              key={i18nActions.RULE_CHANGES_HISTORY}
+              icon="clock"
+              data-test-subj="rules-details-history"
+              onClick={() => {
+                closePopover();
+                // We can't use SecurityPageName.rulesChangesHistory here for
+                // deepLinkId as deep linking doesn't support path parameters.
+                navigateToApp(APP_UI_ID, {
+                  deepLinkId: SecurityPageName.rules,
+                  path: getRuleChangesHistoryUrl(ruleId),
+                });
+              }}
+            >
+              {i18nActions.RULE_CHANGES_HISTORY}
+            </EuiContextMenuItem>,
+          ]
+        : []),
+      ...(rule != null
+        ? [
             <EuiContextMenuItem
               key={i18nActions.DUPLICATE_RULE}
               icon="copy"
-              disabled={!canDuplicateRuleWithActions || !canEditRules}
+              disabled={isDisabled || !canDuplicateRuleWithActions || !canEditRules}
               data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
@@ -180,7 +182,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="upload"
-              disabled={!canReadRules}
+              disabled={isDisabled || !canReadRules}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -196,7 +198,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.MANUAL_RULE_RUN}
               icon="play"
-              disabled={!canManualRunRules || !rule.enabled}
+              disabled={isDisabled || !canManualRunRules || !rule.enabled}
               toolTipContent={
                 !canManualRunRules
                   ? i18nActions.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
@@ -237,7 +239,7 @@ const RuleActionsOverflowComponent = ({
                       'data-test-subj': 'rules-details-revert-rule-tooltip',
                     }}
                     icon="refreshTime"
-                    disabled={!canEditRules || !doesBaseVersionExist}
+                    disabled={isDisabled || !canEditRules || !doesBaseVersionExist}
                     data-test-subj="rules-details-revert-rule"
                     onClick={() => {
                       closePopover();
@@ -268,7 +270,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
-              disabled={!canEditRules}
+              disabled={isDisabled || !canEditRules}
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
                 closePopover();
@@ -290,10 +292,13 @@ const RuleActionsOverflowComponent = ({
               {i18nActions.DELETE_RULE}
             </EuiContextMenuItem>,
           ]
-        : [],
+        : []),
+    ],
     [
       rule,
+      ruleId,
       isRuleChangesHistoryEnabled,
+      isDisabled,
       canDuplicateRuleWithActions,
       canEditRules,
       canReadRules,
@@ -323,13 +328,13 @@ const RuleActionsOverflowComponent = ({
         <MyEuiButtonIcon
           iconType="boxesVertical"
           aria-label={i18n.ALL_ACTIONS}
-          isDisabled={isDisabled}
+          isDisabled={isDisabled && !isRuleChangesHistoryEnabled}
           data-test-subj="rules-details-popover-button-icon"
           onClick={togglePopover}
         />
       </EuiToolTip>
     ),
-    [togglePopover, isDisabled]
+    [togglePopover, isDisabled, isRuleChangesHistoryEnabled]
   );
 
   return (
