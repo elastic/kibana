@@ -18,6 +18,7 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsUtils, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 
 import { partition, chunk, once } from 'lodash';
@@ -42,6 +43,22 @@ import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
+
+// SO types that are "multiple-isolated" and can accumulate orphaned UUID copies when
+// installs fail or two install operations race in the same space. These orphans cause
+// "ambiguous_conflict" errors on the next import attempt (checkOriginConflicts.ts).
+const MULTIPLE_ISOLATED_KIBANA_SO_TYPES: ReadonlySet<KibanaSavedObjectType> = new Set([
+  KibanaSavedObjectType.tag,
+  KibanaSavedObjectType.alertingRuleTemplate,
+]);
+
+// Replicates core's createOriginQuery() from import-export-server-internal, which is not
+// exported publicly. Produces a simple_query_string that matches objects by raw _id or
+// originId field value, as used by checkOriginConflicts.ts.
+function buildOriginSearchQuery(type: string, id: string): string {
+  const escape = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escape(`${type}:${id}`)}" | "${escape(id)}"`;
+}
 
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -288,6 +305,79 @@ export async function installKibanaAssetsAndReferencesMultispace({
   });
 }
 
+/**
+ * Before importing kibana assets, delete any saved objects of multiple-isolated types
+ * that share an origin with an incoming archive asset but are NOT tracked in
+ * installed_kibana. These orphans accumulate from failed installs or concurrent installs
+ * in the same space and cause "ambiguous_conflict" errors on the next import attempt.
+ */
+export async function deleteOrphanedMultipleIsolatedAssets({
+  kibanaAssetsArchiveIterator,
+  installedPkg,
+  spaceId,
+  logger,
+}: {
+  kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
+  installedPkg: SavedObject<Installation> | undefined;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const trackedIds = new Set<string>();
+  if (installedPkg) {
+    const { installed_kibana_space_id: installedSpaceId } = installedPkg.attributes;
+    const refsForSpace =
+      !spaceId || spaceId === installedSpaceId
+        ? installedPkg.attributes.installed_kibana
+        : installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [];
+
+    for (const ref of refsForSpace) {
+      trackedIds.add(ref.id);
+      if (ref.originId) trackedIds.add(ref.originId);
+    }
+  }
+
+  const internalSoClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
+    excludedExtensions: [SPACES_EXTENSION_ID],
+  });
+
+  const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
+  const orphansToDelete: Array<{ id: string; type: string }> = [];
+
+  await kibanaAssetsArchiveIterator(async ({ asset }) => {
+    if (!MULTIPLE_ISOLATED_KIBANA_SO_TYPES.has(asset.type)) return;
+
+    const findResult = await internalSoClient.find<Record<string, unknown>>({
+      type: asset.type,
+      search: buildOriginSearchQuery(asset.type, asset.id),
+      rootSearchFields: ['_id', 'originId'],
+      perPage: 100,
+      namespaces: [spaceId],
+    });
+
+    for (const foundObj of findResult.saved_objects) {
+      if (!trackedIds.has(foundObj.id)) {
+        orphansToDelete.push({ id: foundObj.id, type: foundObj.type });
+      }
+    }
+  });
+
+  if (!orphansToDelete.length) return;
+
+  logger.info(
+    `[Fleet] Deleting ${orphansToDelete.length} orphaned saved object(s) before package install ` +
+      `to prevent ambiguous_conflict errors`
+  );
+  logger.debug(
+    () =>
+      `Orphaned objects: ${JSON.stringify(orphansToDelete.map(({ id, type }) => ({ id, type })))}`
+  );
+
+  for (const assetsChunk of chunk(orphansToDelete, 1000)) {
+    await internalSoClient.bulkDelete(assetsChunk, { namespace });
+  }
+}
+
 export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
   logger,
@@ -317,6 +407,12 @@ export async function installKibanaAssetsAndReferences({
   if (installedPkg) {
     await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   }
+  await deleteOrphanedMultipleIsolatedAssets({
+    kibanaAssetsArchiveIterator,
+    installedPkg,
+    spaceId,
+    logger,
+  });
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
 
   const importedAssets = await installKibanaAssets({
