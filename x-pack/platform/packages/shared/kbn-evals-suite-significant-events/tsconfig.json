@@ -18,7 +18,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/core",
     "@kbn/inference-common",
-    "@kbn/inference-plugin",
     "@kbn/inference-prompt-utils",
     "@kbn/zod",
     "@kbn/es-snapshot-loader",
