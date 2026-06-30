@@ -108,7 +108,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? param.name === 'field'
               ? { fieldsOnly: true }
-              : { hint: { kind: 'constant' as const } }
+              !param.hint ? { hint: { kind: 'constant' as const } } : {}
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),
