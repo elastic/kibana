@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { isCommentUserAction } from '../../../../common/utils/user_actions';
@@ -35,7 +36,12 @@ export const findUserActionsRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const options = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)(request.query);
+      const query = request.query as Record<string, unknown>;
+      const { types, ...restQuery } = query;
+      const options = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
+        ...restQuery,
+        ...(types != null ? { types: castArray(types) } : {}),
+      });
 
       const userActionsResponse: userActionApiV1.UserActionFindResponse =
         await casesClient.userActions.find({
