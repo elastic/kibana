@@ -49,6 +49,12 @@ import { produce } from 'immer-v9';
 - **`@elastic/charts`** still depends on RTK v1 internally. Yarn resolutions pin its nested copies to v1-era versions, and a `NormalModuleReplacementPlugin` in the shared deps webpack config redirects resolution for imports originating from `@elastic/charts` to its nested `node_modules`.
 - **`kea`** depends on `react-redux` v7. The webpack and rspack optimizer configs use function-based externals combined with `NormalModuleReplacementPlugin` to rewrite kea's `react-redux` import to `react-redux-v7`.
 
+## ESLint enforcement
+
+The custom rule `@kbn/imports/no_redux_toolkit_v2_imports` flags any import of v2 default packages and auto-fixes them to v1 aliases. It is enabled per-path in `.eslintrc.js` for all plugins and packages that currently use RTK v1.
+
+When your plugin migrates to v2, remove its entry from the override list in `.eslintrc.js` to lift the restriction for that code path.
+
 ## Migrating your plugin
 
 1. Update imports from aliased names (e.g. `redux-toolkit-v1`) to the default packages (e.g. `@reduxjs/toolkit`).
