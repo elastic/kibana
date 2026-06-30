@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  PostBlockkitSubActionParamsSchema as SlackApiPostBlockkitParamsSchema,
+  PostMessageSubActionParamsSchema as SlackApiPostMessageParamsSchema,
+  ValidChannelIdSubActionParamsSchema as SlackApiValidChannelIdParamsSchema,
+} from '@kbn/connector-schemas/slack_api';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
@@ -93,9 +98,6 @@ import {
   ServiceNowGetIncidentParamsSchema,
   ServiceNowIncidentResponseSchema,
   ServiceNowUpdateIncidentParamsSchema,
-  SlackApiGetChannelsParamsSchema,
-  SlackApiGetUsersParamsSchema,
-  SlackApiPostMessageParamsSchema,
   SlackApiResponseSchema,
   SlackParamsSchema,
   SlackResponseSchema,
@@ -117,7 +119,7 @@ import {
   TorqResponseSchema,
 } from './stack_connectors_schema';
 import type { BaseConnectorContract } from '../../types/v1';
-import { FetcherConfigSchema, KibanaStepMetaSchema } from '../schema';
+import { FetcherConfigSchema, KibanaHttpMethodSchema, KibanaStepMetaSchema } from '../schema';
 
 /**
  * Connector input schemas
@@ -231,9 +233,9 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
   [
     '.slack_api',
     {
+      validChannelId: SlackApiValidChannelIdParamsSchema,
       postMessage: SlackApiPostMessageParamsSchema,
-      getChannels: SlackApiGetChannelsParamsSchema,
-      getUsers: SlackApiGetUsersParamsSchema,
+      postBlockkit: SlackApiPostBlockkitParamsSchema,
     },
   ],
   [
@@ -389,9 +391,9 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
   [
     '.slack_api',
     {
+      validChannelId: SlackApiResponseSchema,
       postMessage: SlackApiResponseSchema,
-      getChannels: SlackApiResponseSchema,
-      getUsers: SlackApiResponseSchema,
+      postBlockkit: SlackApiResponseSchema,
     },
   ],
   [
@@ -486,7 +488,7 @@ export const staticConnectors: BaseConnectorContract[] = [
     type: 'kibana.request',
     summary: 'Kibana Request',
     paramsSchema: z.object({
-      method: z.string().optional(),
+      method: KibanaHttpMethodSchema.optional().describe('The HTTP method to use for the request.'),
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
