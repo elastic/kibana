@@ -35,9 +35,9 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
     const message = useMemo(() => {
       const indexPrivileges: MissingIndexPrivileges[] = [
         ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
-        ...getEntityStoreMissingReadPrivileges(entityEnginePrivileges),
-        ...getEntityStoreMissingReadPrivileges(leadGenerationPrivileges),
-        ...getEntityStoreMissingReadPrivileges(anomalyPrivileges),
+        ...getAnyMissingReadPrivileges(entityEnginePrivileges),
+        ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
+        ...getAnyMissingReadPrivileges(anomalyPrivileges),
       ];
 
       const featurePrivileges: MissingFeaturePrivileges[] = [
@@ -75,7 +75,7 @@ EntityAnalyticsReadPrivilegesCallout.displayName = 'EntityAnalyticsPrivilegesCal
 
 const READ_RELEVANT_PRIVILEGES = new Set(['read', 'view_index_metadata']);
 
-const getEntityStoreMissingReadPrivileges = (
+const getAnyMissingReadPrivileges = (
   privileges: EntityAnalyticsPrivileges | undefined
 ): MissingIndexPrivileges[] => {
   if (!privileges) return [];

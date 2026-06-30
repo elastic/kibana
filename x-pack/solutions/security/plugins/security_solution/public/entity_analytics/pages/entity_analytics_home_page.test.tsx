@@ -15,6 +15,7 @@ import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entit
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
+import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 
@@ -132,6 +133,13 @@ jest.mock('../api/hooks/use_lead_generation_privileges', () => ({
   })),
 }));
 
+jest.mock('../api/hooks/use_anomaly_privileges', () => ({
+  useAnomalyPrivileges: jest.fn(() => ({
+    isLoading: false,
+    data: undefined,
+  })),
+}));
+
 jest.mock('../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads', () => ({
   useHuntingLeads: jest.fn(() => ({
     leads: [],
@@ -185,6 +193,7 @@ const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 const mockUseMissingRiskEnginePrivileges = useMissingRiskEnginePrivileges as jest.Mock;
 const mockUseEntityEnginePrivileges = useEntityEnginePrivileges as jest.Mock;
 const mockUseLeadGenerationPrivileges = useLeadGenerationPrivileges as jest.Mock;
+const mockUseAnomalyPrivileges = useAnomalyPrivileges as jest.Mock;
 const mockUseHuntingLeads = useHuntingLeads as jest.Mock;
 
 describe('EntityAnalyticsHomePage', () => {
@@ -215,6 +224,11 @@ describe('EntityAnalyticsHomePage', () => {
     });
 
     mockUseLeadGenerationPrivileges.mockReturnValue({
+      isLoading: false,
+      data: undefined,
+    });
+
+    mockUseAnomalyPrivileges.mockReturnValue({
       isLoading: false,
       data: undefined,
     });
@@ -278,6 +292,34 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByTestId('recent-anomalies-panel')).toBeInTheDocument();
+  });
+
+  it('hides the anomalies panel and shows a callout when user lacks read permissions on the ML anomalies index', () => {
+    const mlAnomaliesIndex = '.ml-anomalies-shared*';
+    mockUseAnomalyPrivileges.mockReturnValue({
+      isLoading: false,
+      data: {
+        has_all_required: false,
+        has_read_permissions: false,
+        privileges: {
+          elasticsearch: {
+            index: { [mlAnomaliesIndex]: { read: false, view_index_metadata: true } },
+          },
+          kibana: {},
+        },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByTestId('recent-anomalies-panel')).not.toBeInTheDocument();
+    expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+    expect(screen.getByText(mlAnomaliesIndex)).toBeInTheDocument();
   });
 
   it('renders the entities table', () => {
