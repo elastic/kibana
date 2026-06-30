@@ -290,15 +290,10 @@ function SectionPreviewPanel({
   return (
     <div css={styles.panel}>
       <div css={styles.titleBlock}>
-        <p css={styles.titleBlockText}>
-          {section.label}
-          {section.description && (
-            <>
-              <br />
-              {section.description}
-            </>
-          )}
-        </p>
+        <p css={styles.titleBlockText}>{section.label}</p>
+        {section.description && (
+          <p css={styles.descriptionText}>{section.description}</p>
+        )}
       </div>
       <div css={styles.stepList}>
         {steps.map((step) => (
@@ -332,26 +327,19 @@ function StepDetailPanel({
   yamlSnippet: string;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
+  const displayTitle = step.label || step.id;
+  const displayDescription =
+    step.description && step.description !== step.id && step.description !== displayTitle
+      ? step.description
+      : null;
+
   return (
     <div css={styles.panel}>
       <div css={styles.titleBlock}>
-        <p css={styles.titleBlockText}>
-          {step.id}
-          {(() => {
-            const subtitle =
-              step.description && step.description !== step.id
-                ? step.description
-                : step.label && step.label !== step.id
-                ? step.label
-                : null;
-            return subtitle ? (
-              <>
-                <br />
-                {subtitle}
-              </>
-            ) : null;
-          })()}
-        </p>
+        <p css={styles.titleBlockText}>{displayTitle}</p>
+        {displayDescription && (
+          <p css={styles.descriptionText}>{displayDescription}</p>
+        )}
       </div>
 
       <div css={styles.tabsAndFields}>
@@ -489,6 +477,9 @@ const panelStyles = {
     }),
   titleBlock: css({
     flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
   }),
   // Figma: fs=14, fw=500, lh=24, max 3 lines (3×24=72px as in Figma node)
   titleBlockText: ({ euiTheme }: UseEuiTheme) =>
@@ -497,6 +488,14 @@ const panelStyles = {
       fontWeight: 500,
       lineHeight: '24px',
       color: euiTheme.colors.textParagraph,
+      margin: 0,
+    }),
+  descriptionText: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontSize: '12px',
+      fontWeight: 400,
+      lineHeight: '18px',
+      color: euiTheme.colors.textSubdued,
       margin: 0,
       display: '-webkit-box',
       WebkitBoxOrient: 'vertical',

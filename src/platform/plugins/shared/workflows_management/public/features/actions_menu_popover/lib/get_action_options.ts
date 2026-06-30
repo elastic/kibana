@@ -18,6 +18,12 @@ import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
+function firstSentence(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const dot = text.indexOf('. ');
+  return dot !== -1 && dot < 180 ? text.slice(0, dot + 1) : text.slice(0, 180);
+}
+
 export function getActionOptions(
   euiTheme: UseEuiTheme['euiTheme'],
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
@@ -280,8 +286,8 @@ export function getActionOptions(
       } else if (connector.type.startsWith('elasticsearch.')) {
         elasticSearchGroup.options.push({
           id: connector.type,
-          label: connector.description || connector.type,
-          description: connector.type,
+          label: connector.summary || connector.description || connector.type,
+          description: firstSentence(connector.description) || connector.type,
           iconType: 'logoElasticsearch',
           stability: connector.stability,
         });
@@ -289,7 +295,7 @@ export function getActionOptions(
         kibanaGroup.options.push({
           id: connector.type,
           label: connector.summary || connector.description || connector.type,
-          description: connector.type,
+          description: firstSentence(connector.description) || connector.type,
           iconType: 'logoKibana',
           stability: connector.stability,
         });
@@ -324,8 +330,8 @@ export function getActionOptions(
         if (isActionGroup(groupOption)) {
           groupOption.options.push({
             id: connector.type,
-            label: connector.description || connector.type,
-            description: connector.type,
+            label: connector.summary || connector.description || connector.type,
+            description: firstSentence(connector.description) || connector.type,
             connectorType: connector.type,
             instancesLabel: getInstancesLabel(connector.instances?.length),
             iconType,

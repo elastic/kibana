@@ -102,9 +102,33 @@ export function ActionsMenu({
     currentPath,
   });
 
-  const handleMouseEnter = useCallback((action: ActionOptionData) => {
-    setHoveredOption(action);
-  }, []);
+  const handleListMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const el = e.target as HTMLElement;
+
+      const jumpTarget = el.closest('[data-jump-id]');
+      if (jumpTarget) {
+        const jumpId = jumpTarget.getAttribute('data-jump-id');
+        const entry = jumpToStepEntries?.find((j) => j.id === jumpId);
+        if (entry && entry.id !== hoveredJumpEntry?.id) {
+          setHoveredJumpEntry(entry);
+          setHoveredOption(null);
+        }
+        return;
+      }
+
+      const optionTarget = el.closest('[data-option-id]');
+      if (!optionTarget) return;
+      const optionId = optionTarget.getAttribute('data-option-id');
+      if (!optionId) return;
+      const found = flatOptions.find((o) => o.id === optionId);
+      if (found && found.id !== hoveredOption?.id) {
+        setHoveredOption(found);
+        setHoveredJumpEntry(null);
+      }
+    },
+    [flatOptions, hoveredOption, hoveredJumpEntry, jumpToStepEntries]
+  );
 
   const handleMouseLeave = useCallback(() => {
     setHoveredOption(null);
@@ -133,7 +157,7 @@ export function ActionsMenu({
       return (
         <div
           css={styles.compactOptionWrapper}
-          onMouseEnter={() => setHoveredJumpEntry(itemData.entry)}
+          data-jump-id={itemData.entry.id}
         >
           <EuiText size="s">
             <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
@@ -172,7 +196,7 @@ export function ActionsMenu({
       <div
         css={styles.actionOptionWrapper}
         className="actionOptionWrapper"
-        onMouseEnter={() => handleMouseEnter(action)}
+        data-option-id={action.id}
       >
         <EuiFlexGroup alignItems="center" css={styles.actionOption} gutterSize="none">
           <EuiFlexItem
@@ -439,7 +463,7 @@ export function ActionsMenu({
           {/* Two-column body */}
           <EuiFlexGroup gutterSize="none" css={styles.body} onMouseLeave={handleMouseLeave}>
             {/* Left column — list */}
-            <EuiFlexItem css={styles.leftColumn}>
+            <EuiFlexItem css={styles.leftColumn} onMouseMove={handleListMouseMove}>
               {currentPath.length > 0 && (
                 <div css={styles.backRow}>
                   <EuiButtonEmpty
