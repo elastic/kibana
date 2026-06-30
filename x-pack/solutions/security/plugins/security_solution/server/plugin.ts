@@ -291,7 +291,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless
+      this.isServerless,
+      this.pluginContext.env.packageInfo.version
     ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });

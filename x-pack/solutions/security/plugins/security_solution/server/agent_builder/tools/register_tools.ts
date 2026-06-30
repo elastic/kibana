@@ -46,7 +46,8 @@ export const registerTools = async (
   experimentalFeatures: ExperimentalFeatures,
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
-  isServerless: boolean = false
+  isServerless: boolean = false,
+  kibanaVersion: string
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -55,7 +56,9 @@ export const registerTools = async (
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(setAssetCriticalityTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
+  );
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

@@ -58,6 +58,7 @@ export const runResolutionScoringStep = async ({
   let pagesProcessed = 0;
   let scoresWrittenResolution = 0;
   let abortedBetweenPages = false;
+  const newScores: Record<string, number> = {};
 
   for await (const pageScores of calculateResolutionEntityScores({
     esClient,
@@ -95,6 +96,12 @@ export const runResolutionScoringStep = async ({
         scores: pageScores,
         enabled: idBasedRiskScoringEnabled,
       });
+
+      for (const score of pageScores) {
+        if ((score.related_entities?.length ?? 0) > 0) {
+          newScores[score.id_value] = score.calculated_score_norm;
+        }
+      }
     }
   }
 
@@ -111,6 +118,7 @@ export const runResolutionScoringStep = async ({
       scoresWritten: 0,
       pagesProcessed,
       skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
+      scores: newScores,
     };
   }
 
@@ -121,5 +129,6 @@ export const runResolutionScoringStep = async ({
   return {
     scoresWritten: scoresWrittenResolution,
     pagesProcessed,
+    scores: newScores,
   };
 };

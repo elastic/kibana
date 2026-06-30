@@ -16,6 +16,10 @@ import {
 } from '../../__mocks__/test_helpers';
 import { setAssetCriticalityTool } from './set_asset_criticality_tool';
 
+jest.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score', () => ({
+  recalculateEntityRiskScore: jest.fn().mockResolvedValue(undefined),
+}));
+
 const ENTITY_ID = 'host:server1';
 const ENTITY_TYPE = 'host' as const;
 const CRITICALITY = 'high_impact' as const;
@@ -32,6 +36,19 @@ describe('setAssetCriticalityTool', () => {
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
+  const mockCheckPrivileges = jest.fn().mockResolvedValue({
+    privileges: {
+      elasticsearch: {
+        index: new Proxy({}, { get: () => [{ privilege: 'write', authorized: true }] }),
+      },
+    },
+  });
+  const mockSecurity = {
+    authz: {
+      checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockBulkUpdateEntity = jest.fn().mockResolvedValue([]);
@@ -44,12 +61,13 @@ describe('setAssetCriticalityTool', () => {
       mockCoreStart,
       {
         entityStore: { createCRUDClient: mockCreateCRUDClient },
+        security: mockSecurity,
       },
       {},
     ]);
   });
 
-  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures);
+  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures, '8.0.0');
 
   describe('schema', () => {
     it('accepts valid inputs', () => {
@@ -279,6 +297,53 @@ describe('setAssetCriticalityTool', () => {
       expect((other.data as { success: boolean }).success).toBe(true);
       expect((other.data as { entityId: string }).entityId).toBe(ENTITY_ID);
       expect((other.data as { criticality: string }).criticality).toBe(CRITICALITY);
+    });
+
+    it('includes the updated risk score in the response when recalculation returns a score', async () => {
+      const { recalculateEntityRiskScore: mockRecalculate } = jest.requireMock(
+        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
+      );
+      mockRecalculate.mockResolvedValueOnce({ baseScore: 75.5, resolutionScore: undefined });
+
+      const ctx = acceptedCtx();
+      const result = (await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      const other = result.results[0] as OtherResult;
+      expect(
+        (
+          other.data as {
+            riskScore: {
+              recalculated: true;
+              entityRiskScore: number;
+              resolutionGroupRiskScore?: number;
+            };
+          }
+        ).riskScore
+      ).toEqual({ recalculated: true, entityRiskScore: 75.5, resolutionGroupRiskScore: undefined });
+    });
+
+    it('omits riskScore from the response when recalculation fails', async () => {
+      const { recalculateEntityRiskScore: mockRecalculate } = jest.requireMock(
+        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
+      );
+      mockRecalculate.mockRejectedValueOnce(new Error('No Risk engine configuration found'));
+
+      const ctx = acceptedCtx();
+      const result = (await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const other = result.results[0] as OtherResult;
+      expect(other.type).toBe(ToolResultType.other);
+      expect((other.data as { success: boolean }).success).toBe(true);
+      expect((other.data as { riskScore: { recalculated: boolean } }).riskScore).toEqual({
+        recalculated: false,
+      });
     });
 
     it('returns error result when bulkUpdateEntity returns errors', async () => {
