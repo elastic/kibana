@@ -97,6 +97,7 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
   ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
+  ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL,
   ENTITY_ANOMALY_SUMMARY_INTERNAL_URL,
 } from '../../../common/constants';
 import {
@@ -930,6 +931,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    const fetchAnomalyPrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+      });
+
     const fetchAnomalySummary = ({
       entityType,
       entityId,
@@ -1031,6 +1038,7 @@ export const useEntityAnalyticsRoutes = () => {
       enableLeadGeneration,
       disableLeadGeneration,
       fetchLeadGenerationPrivileges,
+      fetchAnomalyPrivileges,
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
