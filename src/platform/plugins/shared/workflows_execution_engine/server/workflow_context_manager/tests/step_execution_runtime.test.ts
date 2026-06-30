@@ -78,7 +78,13 @@ describe('StepExecutionRuntime', () => {
     stepId: 'fakeStepId1',
     stepType: 'fakeStepType1',
   } as GraphNodeUnion;
-  const fakeStackFrames: StackFrame[] = [];
+  // Mirrors the scope the runtime is constructed with in production (the
+  // current node scope). Step executions record THIS, not the live global
+  // scope, so parallel branches each persist their own branch scope.
+  const fakeStackFrames: StackFrame[] = [
+    { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1', nodeType: 'enter-foreach' }] },
+    { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2', nodeType: 'enter-foreach' }] },
+  ];
   const originalDateCtor = global.Date;
   let mockDateNow: Date;
 
@@ -305,13 +311,19 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should save step path from the workflow execution stack', () => {
+    it('should save the runtime own stack frames as the step scope', () => {
       underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeStack: [
-            { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-            { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
+            {
+              stepId: 'firstScope',
+              nestedScopes: [{ nodeId: 'node1', nodeType: 'enter-foreach' }],
+            },
+            {
+              stepId: 'secondScope',
+              nestedScopes: [{ nodeId: 'node2', nodeType: 'enter-foreach' }],
+            },
           ] as StackFrame[],
         })
       );

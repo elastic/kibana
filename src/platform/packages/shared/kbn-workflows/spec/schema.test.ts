@@ -11,10 +11,12 @@ import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
   EventTimestampSchema,
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
   LIQUID_RENDER_LIMIT_MAX,
+  ParallelStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -885,6 +887,145 @@ describe('EventTimestampSchema', () => {
 
   it('should reject missing timestamp', () => {
     const result = EventTimestampSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('ParallelStepSchema', () => {
+  const baseParallel = {
+    name: 'fan-out',
+    type: 'parallel',
+    foreach: '{{ steps.list.output }}',
+    steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+  };
+
+  it('accepts a dynamic parallel step with a foreach and single branch step', () => {
+    expect(ParallelStepSchema.safeParse(baseParallel).success).toBe(true);
+  });
+
+  it('accepts a bare-number concurrency shorthand within the ceiling', () => {
+    const result = ParallelStepSchema.safeParse({ ...baseParallel, concurrency: 3 });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a concurrency object with max and count-waiting', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      concurrency: { max: 4, 'count-waiting': false },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a bare-number concurrency above the ceiling', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      concurrency: DEFAULT_PARALLEL_MAX_CONCURRENCY + 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a concurrency.max above the ceiling', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      concurrency: { max: DEFAULT_PARALLEL_MAX_CONCURRENCY + 1 },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty branch body', () => {
+    const result = ParallelStepSchema.safeParse({ ...baseParallel, steps: [] });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts fail-fast and settled modes and rejects others', () => {
+    expect(ParallelStepSchema.safeParse({ ...baseParallel, mode: 'fail-fast' }).success).toBe(true);
+    expect(ParallelStepSchema.safeParse({ ...baseParallel, mode: 'settled' }).success).toBe(true);
+    expect(ParallelStepSchema.safeParse({ ...baseParallel, mode: 'whatever' }).success).toBe(false);
+  });
+
+  it('accepts overall and per-branch timeouts in duration format', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...baseParallel,
+      timeout: '5m',
+      'branch-timeout': '30s',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an invalid branch-timeout duration', () => {
+    const result = ParallelStepSchema.safeParse({ ...baseParallel, 'branch-timeout': 'soon' });
+    expect(result.success).toBe(false);
+  });
+
+  const staticParallel = {
+    name: 'fan-out',
+    type: 'parallel',
+    branches: [
+      { name: 'a', steps: [{ name: 'sa', type: 'console', with: { message: 'a' } }] },
+      { name: 'b', steps: [{ name: 'sb', type: 'console', with: { message: 'b' } }] },
+    ],
+  };
+
+  it('accepts a static parallel step with named branches', () => {
+    expect(ParallelStepSchema.safeParse(staticParallel).success).toBe(true);
+  });
+
+  it('rejects a static branch with an empty body', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...staticParallel,
+      branches: [
+        { name: 'a', steps: [] },
+        { name: 'b', steps: [{ name: 'sb', type: 'console', with: { message: 'b' } }] },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a static parallel with a single branch (requires >= 2)', () => {
+    const result = ParallelStepSchema.safeParse({
+      name: 'fan-out',
+      type: 'parallel',
+      branches: [{ name: 'only', steps: [{ name: 's', type: 'console', with: { message: 'x' } }] }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects duplicate static branch names (name doubles as the aggregate key)', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...staticParallel,
+      branches: [
+        { name: 'dup', steps: [{ name: 's1', type: 'console', with: { message: '1' } }] },
+        { name: 'dup', steps: [{ name: 's2', type: 'console', with: { message: '2' } }] },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts distinct static branch names', () => {
+    expect(ParallelStepSchema.safeParse(staticParallel).success).toBe(true);
+  });
+
+  it('rejects mixing foreach and branches', () => {
+    const result = ParallelStepSchema.safeParse({
+      name: 'fan-out',
+      type: 'parallel',
+      foreach: '{{ steps.list.output }}',
+      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+      branches: staticParallel.branches,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a step with neither foreach nor branches', () => {
+    const result = ParallelStepSchema.safeParse({ name: 'fan-out', type: 'parallel' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects top-level steps alongside branches (static mode must omit steps)', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...staticParallel,
+      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+    });
     expect(result.success).toBe(false);
   });
 });

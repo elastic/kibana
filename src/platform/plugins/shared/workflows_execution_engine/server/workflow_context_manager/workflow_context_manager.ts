@@ -507,7 +507,10 @@ export class WorkflowContextManager {
         buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
       scopeEntries.push({ topFrame, stepExecution });
-      if (stepExecution?.stepType === 'foreach') {
+      // Parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
+      // context as a sequential foreach: each branch scope carries the item it
+      // is processing, derived from the persisted index + re-evaluated list.
+      if (stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'parallel') {
         foreachEntries.push({ topFrame, stepExecution });
       }
       if (stepExecution?.stepType === 'while') {
@@ -525,9 +528,20 @@ export class WorkflowContextManager {
 
     // Build foreach context in outer-to-inner order so inner expressions like
     // {{foreach.item}} resolve against the outer foreach context.
-    for (const { stepExecution } of foreachEntries.toReversed()) {
+    for (const { topFrame, stepExecution } of foreachEntries.toReversed()) {
       if (stepExecution) {
-        const foreachCtx = this.buildForeachContext(stepExecution, stepContext);
+        // For parallel branches the per-branch item index lives on the scope
+        // frame (each branch runs in its own scopeId), not in the shared step
+        // state. Pass it through so {{ foreach.item }} resolves per branch.
+        const branchIndexOverride =
+          stepExecution.stepType === 'parallel'
+            ? this.parseScopeIndex(topFrame.scopeId)
+            : undefined;
+        const foreachCtx = this.buildForeachContext(
+          stepExecution,
+          stepContext,
+          branchIndexOverride
+        );
         stepContext.foreach = foreachCtx;
         /**
          * Merge foreach context into step context so that inner foreach can
@@ -583,12 +597,20 @@ export class WorkflowContextManager {
    * with items derived by re-evaluating the foreach expression at resolution time.
    * This avoids storing the entire items array in the step execution state on every iteration.
    */
+  private parseScopeIndex(scopeId: string | undefined): number | undefined {
+    if (scopeId == null) return undefined;
+    const parsed = Number(scopeId);
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
+  }
+
   private buildForeachContext(
     stepExecution: StepExecutionMetadata,
-    stepContext: StepContext
+    stepContext: StepContext,
+    indexOverride?: number
   ): StepContext['foreach'] {
     const foreachState = stepExecution.state ?? {};
-    const index = typeof foreachState.index === 'number' ? foreachState.index : 0;
+    const index =
+      indexOverride ?? (typeof foreachState.index === 'number' ? foreachState.index : 0);
     const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
 
     // Re-evaluate the foreach expression (stored in the step input at entry

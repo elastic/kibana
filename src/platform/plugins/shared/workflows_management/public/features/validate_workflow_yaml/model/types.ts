@@ -154,6 +154,18 @@ interface YamlValidationResultEsql extends YamlValidationResultBase {
   owner: 'esql-validation';
 }
 
+interface YamlValidationResultParallelFanOut extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'parallel-fan-out-validation';
+}
+
+interface YamlValidationResultGraphBuild extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'graph-build-validation';
+}
+
 export type StepPropertyValidationResult =
   | YamlValidationResultStepPropertyError
   | YamlValidationResultStepPropertyValid;
@@ -177,6 +189,8 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'if-condition-validation',
   'deprecated-step-validation',
   'esql-validation',
+  'parallel-fan-out-validation',
+  'graph-build-validation',
 ] as const;
 
 export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
@@ -205,7 +219,9 @@ export type YamlValidationResult =
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError
   | YamlValidationResultDeprecatedStep
-  | YamlValidationResultEsql;
+  | YamlValidationResultEsql
+  | YamlValidationResultParallelFanOut
+  | YamlValidationResultGraphBuild;
 
 export function validationResultFingerprint(r: YamlValidationResult): string {
   return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;

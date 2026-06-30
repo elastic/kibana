@@ -44,6 +44,61 @@ describe('structuralStepOutputSchemas', () => {
     });
   });
 
+  it('contains a "parallel" step output schema', () => {
+    expect(structuralStepOutputSchemas).toHaveProperty('parallel');
+  });
+
+  describe('parallel schema', () => {
+    const parallelSchema = structuralStepOutputSchemas.parallel;
+
+    it('accepts the aggregate fan-out output shape', () => {
+      const result = parallelSchema.safeParse({
+        results: [
+          { index: 0, key: 'alpha', status: 'completed', output: { ok: true }, durationMs: 12 },
+          { index: 1, status: 'failed', error: { type: 'Error', message: 'boom' } },
+        ],
+        total: 2,
+        succeeded: 1,
+        failed: 1,
+        status: 'failed',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a completed run with no failures', () => {
+      const result = parallelSchema.safeParse({
+        results: [{ index: 0, status: 'completed' }],
+        total: 1,
+        succeeded: 1,
+        failed: 0,
+        status: 'completed',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects an unknown aggregate status', () => {
+      const result = parallelSchema.safeParse({
+        results: [],
+        total: 0,
+        succeeded: 0,
+        failed: 0,
+        status: 'running',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a branch result with an invalid status', () => {
+      const result = parallelSchema.safeParse({
+        results: [{ index: 0, status: 'bogus' }],
+        total: 1,
+        succeeded: 0,
+        failed: 0,
+        status: 'completed',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   it('is a Record<string, z.ZodSchema>', () => {
     for (const [key, schema] of Object.entries(structuralStepOutputSchemas)) {
       expect(typeof key).toBe('string');

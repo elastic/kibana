@@ -10,7 +10,13 @@
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema, getStepId, WhileContextSchema } from '@kbn/workflows';
-import { isAtomic, isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  isAtomic,
+  isEnterForeach,
+  isEnterParallel,
+  isEnterWhile,
+  type WorkflowGraph,
+} from '@kbn/workflows/graph';
 import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
 import type { z } from '@kbn/zod/v4';
 import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
@@ -143,7 +149,11 @@ function getStepContextSchemaEnrichmentEntries(
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);
 
-    if (isEnterForeach(node)) {
+    // A dynamic `foreach` parallel step fans out over a list, exposing the same
+    // `foreach.item` / `foreach.index` context to each branch body as a foreach
+    // loop. (For static `branches`, `getForeachStateSchema` returns a permissive
+    // schema since there is no per-item context.)
+    if (isEnterForeach(node) || isEnterParallel(node)) {
       enrichments.push({
         key: 'foreach',
         value: getForeachStateSchema(stepContextSchema, node.configuration),

@@ -770,4 +770,51 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).not.toHaveProperty('timeoutExceededByMs');
     });
   });
+
+  describe('reportParallelStepExecuted', () => {
+    const baseParams = {
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      stepId: 'fan_out',
+      isTestRun: false,
+      total: 4,
+      succeeded: 3,
+      failed: 1,
+      skipped: 0,
+      timedOut: 0,
+      status: 'failed' as const,
+      concurrency: 5,
+      countWaiting: true,
+      mode: 'fail-fast' as const,
+      hasExplicitConcurrency: false,
+      hasTimeout: false,
+      hasBranchTimeout: false,
+    };
+
+    it('reports the parallel step event with a computed rejection rate', () => {
+      client.reportParallelStepExecuted(baseParams);
+
+      expect(telemetry.reportEvent).toHaveBeenCalledTimes(1);
+      const [eventType, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventType).toBe(WorkflowExecutionTelemetryEventTypes.ParallelStepExecuted);
+      expect(eventData).toMatchObject({
+        ...baseParams,
+        eventName: 'Parallel step executed',
+        rejectionRate: 0.25,
+      });
+    });
+
+    it('uses a rejection rate of 0 when there are no branches', () => {
+      client.reportParallelStepExecuted({
+        ...baseParams,
+        total: 0,
+        succeeded: 0,
+        failed: 0,
+        status: 'completed',
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ rejectionRate: 0 });
+    });
+  });
 });

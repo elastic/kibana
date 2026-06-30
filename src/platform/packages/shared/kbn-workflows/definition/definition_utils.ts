@@ -35,8 +35,16 @@ const getChildStepArrays = (step: Step): ReadonlyArray<WorkflowYaml['steps']> =>
     if (Array.isArray(step.default)) arrays.push(step.default);
     return arrays;
   }
-  if (isParallelStep(step) && Array.isArray(step.branches)) {
-    return step.branches.map((b) => b.steps);
+  if (isParallelStep(step)) {
+    // Dynamic fan-out exposes a single shared body (`steps`); static branches
+    // expose one body per named branch (`branches[].steps`). Collect both so
+    // nested steps are visited in either mode.
+    if (Array.isArray(step.steps)) {
+      return [step.steps];
+    }
+    if (Array.isArray(step.branches)) {
+      return step.branches.map((branch) => branch.steps);
+    }
   }
   if (isMergeStep(step) && Array.isArray(step.steps)) {
     return [step.steps];

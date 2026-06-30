@@ -41,6 +41,7 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
 } from './nodes/on_failure_nodes';
+import type { EnterParallelNode, ExitParallelNode } from './nodes/parallel_nodes';
 import type {
   EnterCaseBranchNode,
   EnterDefaultBranchNode,
@@ -98,6 +99,12 @@ export const isLoopEnterNode = (node: GraphNodeUnion): node is LoopEnterNode =>
 
 export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
   node.type === 'exit-while';
+
+export const isEnterParallel = (node: GraphNodeUnion): node is EnterParallelNode =>
+  node.type === 'enter-parallel';
+
+export const isExitParallel = (node: GraphNodeUnion): node is ExitParallelNode =>
+  node.type === 'exit-parallel';
 
 export const isEnterRetry = (node: GraphNodeUnion): node is EnterRetryNode =>
   node.type === 'enter-retry';
