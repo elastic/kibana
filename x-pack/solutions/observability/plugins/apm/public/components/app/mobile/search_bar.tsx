@@ -8,6 +8,7 @@
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TimeComparison } from '../../shared/time_comparison';
@@ -47,6 +48,10 @@ export function MobileSearchBar({
   const searchBarDirection: EuiFlexGroupProps['direction'] =
     isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
+  const filterControlCss = css`
+    width: ${isSmall ? '100%' : '225px'};
+  `;
+
   return (
     <>
       <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
@@ -76,17 +81,17 @@ export function MobileSearchBar({
             <ApmEnvironmentFilter
               fullWidth
               compressed
-              cssOverride={isLarge ? {} : { width: '225px' }}
+              cssOverride={isLarge ? {} : filterControlCss}
             />
           </EuiFlexItem>
         )}
         {showTimeComparison && (
-          <EuiFlexItem grow={isSmall} css={{ width: '225px' }}>
+          <EuiFlexItem grow={isSmall} css={filterControlCss}>
             <TimeComparison fullWidth compressed />
           </EuiFlexItem>
         )}
         {showAnomalyThresholdSelector && (
-          <EuiFlexItem grow={isSmall} css={{ width: '225px' }}>
+          <EuiFlexItem grow={isSmall} css={filterControlCss}>
             <AnomalyThresholdSelect compressed fullWidth />
           </EuiFlexItem>
         )}
