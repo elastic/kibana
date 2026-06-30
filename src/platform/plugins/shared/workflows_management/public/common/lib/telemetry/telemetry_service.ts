@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { changeHistoryTelemetryEvents } from '@kbn/change-history-ui';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { workflowsTelemetryEvents } from './events/workflows';
-import type {
-  TelemetryEventTypeData,
-  TelemetryEventTypes,
-  TelemetryServiceClient,
-  TelemetryServiceSetupParams,
-} from './types';
+import type { TelemetryServiceClient, TelemetryServiceSetupParams } from './types';
 
 /**
  * Service that interacts with the Core's analytics module
@@ -25,8 +21,8 @@ export class TelemetryService {
 
   public setup({ analytics }: TelemetryServiceSetupParams) {
     this.analytics = analytics;
-    workflowsTelemetryEvents.forEach((eventConfig) =>
-      analytics.registerEventType<TelemetryEventTypeData<TelemetryEventTypes>>(eventConfig)
+    [...workflowsTelemetryEvents, ...changeHistoryTelemetryEvents].forEach((eventConfig) =>
+      analytics.registerEventType(eventConfig)
     );
   }
 

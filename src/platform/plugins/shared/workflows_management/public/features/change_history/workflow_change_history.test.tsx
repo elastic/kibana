@@ -10,6 +10,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
   WorkflowChangeHistoryListItem,
@@ -17,6 +18,9 @@ import {
 } from './workflow_change_history';
 import { INTERNAL_API_VERSION } from '../../../common/lib/api_constants';
 import {
+  WORKFLOW_CHANGE_HISTORY_DATASET,
+  WORKFLOW_CHANGE_HISTORY_MODULE,
+  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
   WorkflowChangeHistoryAction,
 } from '../../../common/lib/workflow_change_history/constants';
@@ -167,6 +171,39 @@ describe('WorkflowChangeHistoryListItem', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('reports change_history_opened when the history modal opens', async () => {
+    const reportEvent = jest.fn();
+    const http = {
+      get: jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse),
+      post: jest.fn().mockResolvedValue({}),
+    };
+    useKibana.mockReturnValue({
+      services: {
+        http,
+        workflowsManagement: { telemetry: { reportEvent } },
+      },
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowChangeHistoryProvider workflowId="workflow-1" workflowName="My workflow">
+          <WorkflowChangeHistoryListItem />
+        </WorkflowChangeHistoryProvider>
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('changeHistoryListGroupItem'));
+
+    await waitFor(() => {
+      expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.Opened, {
+        eventName: 'Change history opened',
+        module: WORKFLOW_CHANGE_HISTORY_MODULE,
+        dataset: WORKFLOW_CHANGE_HISTORY_DATASET,
+        objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+      });
+    });
   });
 
   it('opens modal and loads workflow yaml preview through the real change history UI', async () => {
