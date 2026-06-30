@@ -53,8 +53,12 @@ describe('create_dataset_flyout_form_state', () => {
     });
 
     it('ignores format-specific fields when no format is selected', () => {
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })).toBeUndefined();
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })).toBeUndefined();
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), error_mode: 'skip_row' })
+      ).toBeUndefined();
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), delimiter: ',', schema_sample_size: '10' })
+      ).toBeUndefined();
     });
 
     it('includes schema_sample_size when set to a positive integer', () => {
@@ -136,6 +140,5 @@ describe('create_dataset_flyout_form_state', () => {
       });
       expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50, segment_size: '5mb' });
     });
-
   });
 });
