@@ -347,18 +347,28 @@ export async function deleteOrphanedMultipleIsolatedAssets({
   await kibanaAssetsArchiveIterator(async ({ asset }) => {
     if (!MULTIPLE_ISOLATED_KIBANA_SO_TYPES.has(asset.type)) return;
 
-    const findResult = await internalSoClient.find<Record<string, unknown>>({
-      type: asset.type,
-      search: buildOriginSearchQuery(asset.type, asset.id),
-      rootSearchFields: ['_id', 'originId'],
-      perPage: 100,
-      namespaces: [spaceId],
-    });
+    for (let page = 1, fetched = 0; ; page++) {
+      const findResult = await internalSoClient.find<Record<string, unknown>>({
+        type: asset.type,
+        search: buildOriginSearchQuery(asset.type, asset.id),
+        rootSearchFields: ['_id', 'originId'],
+        perPage: 100,
+        page,
+        namespaces: [spaceId],
+      });
 
-    for (const foundObj of findResult.saved_objects) {
-      if (!trackedIds.has(foundObj.id)) {
-        orphansToDelete.push({ id: foundObj.id, type: foundObj.type });
+      for (const foundObj of findResult.saved_objects) {
+        // A genuine orphan always has a UUID id with originId === asset.id.
+        // An object whose raw _id === asset.id (no originId) is a legitimately
+        // shared package/user object — matching it only by _id risks deleting
+        // another package's or a user's tag with the same archive id.
+        if (foundObj.originId === asset.id && !trackedIds.has(foundObj.id)) {
+          orphansToDelete.push({ id: foundObj.id, type: foundObj.type });
+        }
       }
+
+      fetched += findResult.saved_objects.length;
+      if (fetched >= findResult.total) break;
     }
   });
 

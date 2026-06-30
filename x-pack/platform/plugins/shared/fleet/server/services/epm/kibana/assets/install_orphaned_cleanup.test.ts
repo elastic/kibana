@@ -92,13 +92,17 @@ const makeInstalledPkg = (
     } as unknown as Installation,
   } as SavedObject<Installation>);
 
-const makeFindResult = (objects: Array<{ id: string; type: string }>) => ({
-  total: objects.length,
+const makeFindResult = (
+  objects: Array<{ id: string; type: string; originId?: string }>,
+  total?: number
+) => ({
+  total: total ?? objects.length,
   page: 1,
   per_page: 100,
   saved_objects: objects.map((o) => ({
     id: o.id,
     type: o.type,
+    ...(o.originId !== undefined && { originId: o.originId }),
     attributes: {},
     references: [],
     score: 1,
@@ -165,7 +169,7 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
   it('deletes untracked objects found for a tag asset on a fresh install', async () => {
     const orphanId = 'uuid-orphan-from-failed-install';
     mockFind.mockResolvedValueOnce(
-      makeFindResult([{ id: orphanId, type: KibanaSavedObjectType.tag }])
+      makeFindResult([{ id: orphanId, type: KibanaSavedObjectType.tag, originId: 'my-tag' }])
     );
 
     const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
@@ -185,7 +189,7 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
   it('does not delete an object whose id is tracked in installed_kibana', async () => {
     const trackedId = 'uuid-tracked';
     mockFind.mockResolvedValueOnce(
-      makeFindResult([{ id: trackedId, type: KibanaSavedObjectType.tag }])
+      makeFindResult([{ id: trackedId, type: KibanaSavedObjectType.tag, originId: 'my-tag' }])
     );
 
     const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
@@ -205,7 +209,9 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     const uuid = 'uuid-for-my-tag';
     const archiveId = 'my-tag';
     // find() returns the object by its UUID id; the tracked ref stores that UUID with originId
-    mockFind.mockResolvedValueOnce(makeFindResult([{ id: uuid, type: KibanaSavedObjectType.tag }]));
+    mockFind.mockResolvedValueOnce(
+      makeFindResult([{ id: uuid, type: KibanaSavedObjectType.tag, originId: archiveId }])
+    );
 
     const iterator = makeArchiveIterator([makeTagAsset(archiveId)]);
     await deleteOrphanedMultipleIsolatedAssets({
@@ -225,8 +231,8 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     const orphanId = 'uuid-orphan';
     mockFind.mockResolvedValueOnce(
       makeFindResult([
-        { id: trackedId, type: KibanaSavedObjectType.tag },
-        { id: orphanId, type: KibanaSavedObjectType.tag },
+        { id: trackedId, type: KibanaSavedObjectType.tag, originId: 'my-tag' },
+        { id: orphanId, type: KibanaSavedObjectType.tag, originId: 'my-tag' },
       ])
     );
 
@@ -290,9 +296,17 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     const orphan1 = 'uuid-orphan-tag';
     const orphan2 = 'uuid-orphan-rule-template';
     mockFind
-      .mockResolvedValueOnce(makeFindResult([{ id: orphan1, type: KibanaSavedObjectType.tag }]))
       .mockResolvedValueOnce(
-        makeFindResult([{ id: orphan2, type: KibanaSavedObjectType.alertingRuleTemplate }])
+        makeFindResult([{ id: orphan1, type: KibanaSavedObjectType.tag, originId: 'my-tag' }])
+      )
+      .mockResolvedValueOnce(
+        makeFindResult([
+          {
+            id: orphan2,
+            type: KibanaSavedObjectType.alertingRuleTemplate,
+            originId: 'my-rule-template',
+          },
+        ])
       );
 
     const iterator = makeArchiveIterator([
@@ -321,8 +335,8 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
     const orphanId = 'uuid-orphan-in-space-b';
     mockFind.mockResolvedValueOnce(
       makeFindResult([
-        { id: trackedId, type: KibanaSavedObjectType.tag },
-        { id: orphanId, type: KibanaSavedObjectType.tag },
+        { id: trackedId, type: KibanaSavedObjectType.tag, originId: 'my-tag' },
+        { id: orphanId, type: KibanaSavedObjectType.tag, originId: 'my-tag' },
       ])
     );
 
@@ -349,5 +363,60 @@ describe('deleteOrphanedMultipleIsolatedAssets', () => {
 
     const [deletedObjects] = mockBulkDelete.mock.calls[0];
     expect(deletedObjects).toEqual([{ id: orphanId, type: KibanaSavedObjectType.tag }]);
+  });
+
+  it('does not delete an object that has no originId (matched only by raw _id, not a genuine orphan)', async () => {
+    // An object whose raw _id equals the archive asset id but has no originId is a
+    // legitimately shared object from another package or a user-created one — it must
+    // not be deleted.
+    const sharedObjectId = 'my-tag'; // raw _id matches the archive asset id
+    mockFind.mockResolvedValueOnce(
+      makeFindResult([{ id: sharedObjectId, type: KibanaSavedObjectType.tag }]) // no originId
+    );
+
+    const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
+    await deleteOrphanedMultipleIsolatedAssets({
+      kibanaAssetsArchiveIterator: iterator,
+      installedPkg: undefined,
+      spaceId: 'default',
+      logger: mockLogger,
+    });
+
+    expect(mockBulkDelete).not.toHaveBeenCalled();
+  });
+
+  it('fetches all pages when find() returns more than perPage results', async () => {
+    // Build 150 orphans spread across two pages (100 + 50).
+    const makeOrphans = (count: number, prefix: string) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `${prefix}-${i}`,
+        type: KibanaSavedObjectType.tag,
+        originId: 'my-tag',
+      }));
+    const page1Orphans = makeOrphans(100, 'orphan-p1');
+    const page2Orphans = makeOrphans(50, 'orphan-p2');
+    const totalOrphans = page1Orphans.length + page2Orphans.length;
+
+    mockFind
+      .mockResolvedValueOnce(makeFindResult(page1Orphans, totalOrphans))
+      .mockResolvedValueOnce(makeFindResult(page2Orphans, totalOrphans));
+
+    const iterator = makeArchiveIterator([makeTagAsset('my-tag')]);
+    await deleteOrphanedMultipleIsolatedAssets({
+      kibanaAssetsArchiveIterator: iterator,
+      installedPkg: undefined,
+      spaceId: 'default',
+      logger: mockLogger,
+    });
+
+    // Two pages fetched for the single tag asset.
+    expect(mockFind).toHaveBeenCalledTimes(2);
+    expect(mockFind).toHaveBeenNthCalledWith(1, expect.objectContaining({ page: 1 }));
+    expect(mockFind).toHaveBeenNthCalledWith(2, expect.objectContaining({ page: 2 }));
+
+    // All 150 orphans collected and deleted in one bulkDelete call.
+    expect(mockBulkDelete).toHaveBeenCalledTimes(1);
+    const [deletedObjects] = mockBulkDelete.mock.calls[0];
+    expect(deletedObjects).toHaveLength(totalOrphans);
   });
 });
