@@ -15,7 +15,6 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { SERVICE_MAP_URL_PARAM_ROUTES } from '../constants';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
@@ -30,7 +29,12 @@ const INITIAL_STATE: Partial<DependencyReturn> = {
 };
 
 export function DependencyContents({ selection, environment, start, end }: ContentsProps) {
-  const { query } = useAnyOfApmParams(...SERVICE_MAP_URL_PARAM_ROUTES);
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview'
+  );
   const { offset, comparisonEnabled } = query;
   const apmRouter = useApmRouter();
 

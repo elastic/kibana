@@ -29,7 +29,8 @@ import { applyDagreLayout } from '../../../shared/service_map/layout';
 import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../../shared/service_map/grouped_resources_node';
 import { ServiceMapHighlightProvider } from '../../../shared/service_map/service_map_search_context';
-import { ServiceMapAlertsNavigateGraphWrapper } from '../service_map_alerts_navigate_graph_wrapper';
+import { ServiceMapAlertsNavigateProvider } from '../../../shared/service_map/service_map_alerts_navigate_context';
+import { useServiceMapAlertsNavigateFactory } from '../use_service_map_alerts_tab_href';
 import { ServiceMapEdge as ServiceMapEdgeComponent } from '../service_map_edge';
 import { MapPopover } from '../popover';
 import { useEdgeHighlighting } from '../use_edge_highlighting';
@@ -102,6 +103,7 @@ function ContextualGraphInner({
   alwaysNavigateOnPopoverFocus,
   showContextControls = true,
 }: ContextualServiceMapGraphProps) {
+  const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
   const { getAnimationDuration } = useReducedMotion();
@@ -231,117 +233,119 @@ function ContextualGraphInner({
 
   return (
     <ServiceMapHighlightProvider>
-      <CollapsibleServiceMapProvider value={collapseContext}>
-        <div
-          data-test-subj="contextualServiceMapGraph"
-          style={{ height, width: '100%', position: 'relative' }}
-        >
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            nodeTypes={contextualNodeTypes}
-            edgeTypes={edgeTypes}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onNodeClick={handleNodeClick}
-            onPaneClick={handlePopoverClose}
-            onInit={() => {
-              if (layoutedNodes.length > 0) {
-                fitView(getFitViewOptions());
-              }
-            }}
-            fitView
-            fitViewOptions={getFitViewOptions()}
-            minZoom={0.2}
-            maxZoom={3}
-            proOptions={{ hideAttribution: true }}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            nodesFocusable
-            edgesFocusable={false}
+      <ServiceMapAlertsNavigateProvider makeAlertsNavigateHandler={makeAlertsNavigateHandler}>
+        <CollapsibleServiceMapProvider value={collapseContext}>
+          <div
+            data-test-subj="contextualServiceMapGraph"
+            style={{ height, width: '100%', position: 'relative' }}
           >
-            <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
-            <Panel position="top-left" css={topLeftToolbarStyles}>
-              {showContextControls && (
-                <ContextualServiceMapControls
-                  baseMaxHops={baseMaxHops}
-                  maxVisibleNodes={maxVisibleNodes}
-                  onBaseMaxHopsChange={onBaseMaxHopsChange}
-                  onMaxVisibleNodesChange={onMaxVisibleNodesChange}
-                />
-              )}
-              <EuiPanel hasBorder paddingSize="none" grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-                  <EuiToolTip content={zoomInLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      data-test-subj="contextualServiceMapZoomInButton"
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="plus"
-                      onClick={() => zoomIn()}
-                      aria-label={zoomInLabel}
-                      css={mapToolbarControlIconCss}
-                    />
-                  </EuiToolTip>
-                  <EuiToolTip content={zoomOutLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      data-test-subj="contextualServiceMapZoomOutButton"
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="minus"
-                      onClick={() => zoomOut()}
-                      aria-label={zoomOutLabel}
-                      css={mapToolbarControlIconCss}
-                    />
-                  </EuiToolTip>
-                  <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      data-test-subj="contextualServiceMapFitViewButton"
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="crosshair"
-                      onClick={() => fitView(getFitViewOptions())}
-                      aria-label={fitViewLabel}
-                      css={mapToolbarControlIconCss}
-                    />
-                  </EuiToolTip>
-                  {fullMapHref && (
-                    <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              nodeTypes={contextualNodeTypes}
+              edgeTypes={edgeTypes}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onNodeClick={handleNodeClick}
+              onPaneClick={handlePopoverClose}
+              onInit={() => {
+                if (layoutedNodes.length > 0) {
+                  fitView(getFitViewOptions());
+                }
+              }}
+              fitView
+              fitViewOptions={getFitViewOptions()}
+              minZoom={0.2}
+              maxZoom={3}
+              proOptions={{ hideAttribution: true }}
+              nodesDraggable={false}
+              nodesConnectable={false}
+              nodesFocusable
+              edgesFocusable={false}
+            >
+              <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
+              <Panel position="top-left" css={topLeftToolbarStyles}>
+                {showContextControls && (
+                  <ContextualServiceMapControls
+                    baseMaxHops={baseMaxHops}
+                    maxVisibleNodes={maxVisibleNodes}
+                    onBaseMaxHopsChange={onBaseMaxHopsChange}
+                    onMaxVisibleNodesChange={onMaxVisibleNodesChange}
+                  />
+                )}
+                <EuiPanel hasBorder paddingSize="none" grow={false}>
+                  <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+                    <EuiToolTip content={zoomInLabel} disableScreenReaderOutput>
                       <EuiButtonIcon
+                        data-test-subj="contextualServiceMapZoomInButton"
                         display="empty"
                         color="text"
                         size="s"
-                        iconType="apps"
-                        href={fullMapHref}
-                        aria-label={viewFullMapButtonLabel}
-                        data-test-subj="serviceMapViewFullMapButton"
+                        iconType="plus"
+                        onClick={() => zoomIn()}
+                        aria-label={zoomInLabel}
                         css={mapToolbarControlIconCss}
                       />
                     </EuiToolTip>
-                  )}
-                </EuiFlexGroup>
-              </EuiPanel>
-            </Panel>
-          </ReactFlow>
-          <MapPopover
-            selectedNode={selectedNodeForPopover}
-            selectedEdge={null}
-            focusedServiceName={focalServiceId}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-            onClose={handlePopoverClose}
-            isEmbedded
-            showFocusMap={showFocusMap}
-            alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
-            clearKueryOnNavigation={clearKueryOnPopoverNavigation}
-          />
-        </div>
-      </CollapsibleServiceMapProvider>
+                    <EuiToolTip content={zoomOutLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        data-test-subj="contextualServiceMapZoomOutButton"
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="minus"
+                        onClick={() => zoomOut()}
+                        aria-label={zoomOutLabel}
+                        css={mapToolbarControlIconCss}
+                      />
+                    </EuiToolTip>
+                    <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        data-test-subj="contextualServiceMapFitViewButton"
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="crosshair"
+                        onClick={() => fitView(getFitViewOptions())}
+                        aria-label={fitViewLabel}
+                        css={mapToolbarControlIconCss}
+                      />
+                    </EuiToolTip>
+                    {fullMapHref && (
+                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType="apps"
+                          href={fullMapHref}
+                          aria-label={viewFullMapButtonLabel}
+                          data-test-subj="serviceMapViewFullMapButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
+                    )}
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </Panel>
+            </ReactFlow>
+            <MapPopover
+              selectedNode={selectedNodeForPopover}
+              selectedEdge={null}
+              focusedServiceName={focalServiceId}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              onClose={handlePopoverClose}
+              isEmbedded
+              showFocusMap={showFocusMap}
+              alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
+              clearKueryOnNavigation={clearKueryOnPopoverNavigation}
+            />
+          </div>
+        </CollapsibleServiceMapProvider>
+      </ServiceMapAlertsNavigateProvider>
     </ServiceMapHighlightProvider>
   );
 }
@@ -349,9 +353,7 @@ function ContextualGraphInner({
 export function ContextualServiceMapGraph(props: ContextualServiceMapGraphProps) {
   return (
     <ReactFlowProvider>
-      <ServiceMapAlertsNavigateGraphWrapper>
-        <ContextualGraphInner {...props} />
-      </ServiceMapAlertsNavigateGraphWrapper>
+      <ContextualGraphInner {...props} />
     </ReactFlowProvider>
   );
 }

@@ -7,11 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import {
-  EXPLORE_IN_SERVICE_MAP_LABEL,
-  SERVICE_MAP_EMBED_PANEL_HEIGHT,
-  SERVICE_MAP_EMBED_PANEL_TITLE,
-} from '../../../../embeddable/service_map/service_map_embed_panel_messages';
+import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -22,6 +18,17 @@ import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
 } from '../../service_map/contextual_map/constants';
+
+const SERVICE_MAP_PANEL_HEIGHT = 400;
+
+const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.serviceOverview.serviceMapPanel.title', {
+  defaultMessage: 'Service map',
+});
+
+const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
+  'xpack.apm.serviceOverview.serviceMapPanel.exploreInServiceMap',
+  { defaultMessage: 'Explore in Service map' }
+);
 
 export function ServiceOverviewServiceMapSection() {
   const { core } = useApmPluginContext();
@@ -92,7 +99,7 @@ export function ServiceOverviewServiceMapSection() {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h3>{SERVICE_MAP_EMBED_PANEL_TITLE}</h3>
+                <h3>{SERVICE_MAP_PANEL_TITLE}</h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -122,7 +129,7 @@ export function ServiceOverviewServiceMapSection() {
           <EuiPanel
             hasBorder
             paddingSize="none"
-            css={{ overflow: 'hidden', height: SERVICE_MAP_EMBED_PANEL_HEIGHT }}
+            css={{ overflow: 'hidden', height: SERVICE_MAP_PANEL_HEIGHT }}
             data-test-subj="apmServiceOverviewServiceMapEmbeddableContainer"
           >
             <ServiceMapEmbeddable

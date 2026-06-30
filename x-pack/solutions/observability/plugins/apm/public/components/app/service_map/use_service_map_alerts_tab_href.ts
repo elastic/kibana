@@ -10,8 +10,9 @@
  *
  * The module exposes three related hooks that all resolve the
  * service-scoped alerts-tab destination from the current map route
- * (`/service-map`, `/services/{serviceName}/service-map`, or
- * `/mobile-services/{serviceName}/service-map`) while preserving the
+ * (`/service-map`, `/services/{serviceName}/service-map`,
+ * `/mobile-services/{serviceName}/service-map`, or
+ * `/services/{serviceName}/overview`) while preserving the
  * shared time range / environment params and **stripping `kuery`** (alerts
  * aggregate across all visible services, so a node-scoped click would
  * otherwise carry the map's service-name filter into a destination where
@@ -29,8 +30,9 @@
  * kuery-stripping rule is enforced in one place.
  *
  * All three rely on `useAnyOfApmParams` and will throw if called outside a
- * matching APM map route — mount inside `ServiceMapAlertsNavigateGraphWrapper`
- * (`ServiceMapGraph`, `ContextualServiceMapGraph`, or alert embeds).
+ * matching APM map route — callers must mount inside `ServiceMapGraph` or
+ * `ContextualServiceMapGraph`, which are wrapped by `ApmEmbeddableContext` on
+ * dashboard embeds.
  */
 
 import type { KeyboardEvent, MouseEvent } from 'react';
@@ -40,7 +42,6 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { MakeAlertsNavigateHandler } from '../../shared/service_map/service_map_alerts_navigate_context';
-import { SERVICE_MAP_ALERTS_NAVIGATE_ROUTES } from './constants';
 
 /**
  * Returns a stable `(serviceName) => href` builder for the alerts tab of any
@@ -49,7 +50,12 @@ import { SERVICE_MAP_ALERTS_NAVIGATE_ROUTES } from './constants';
 function useAlertsTabHrefBuilder(): (serviceName: string) => string {
   const apmRouter = useApmRouter();
   const routePath = useApmRoutePath();
-  const { query } = useAnyOfApmParams(...SERVICE_MAP_ALERTS_NAVIGATE_ROUTES);
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview'
+  );
 
   return useCallback(
     (serviceName: string) => {

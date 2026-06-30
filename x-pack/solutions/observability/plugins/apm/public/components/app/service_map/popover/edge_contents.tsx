@@ -16,7 +16,6 @@ import {
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { SERVICE_MAP_URL_PARAM_ROUTES } from '../constants';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -66,7 +65,12 @@ export function EdgeContents({
   start,
   end,
 }: Pick<ContentsProps, 'selection' | 'environment' | 'start' | 'end'>) {
-  const { query } = useAnyOfApmParams(...SERVICE_MAP_URL_PARAM_ROUTES);
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map',
+    '/services/{serviceName}/overview'
+  );
   const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 
   const isEdgeSelection = isEdge(selection);
