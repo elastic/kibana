@@ -6,10 +6,10 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/streams-schema';
 import { triggerInvestigationWorkflow } from './trigger_investigation_workflow';
 
-const createEvent = (overrides: Partial<SigEvent> = {}): SigEvent => ({
+const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',

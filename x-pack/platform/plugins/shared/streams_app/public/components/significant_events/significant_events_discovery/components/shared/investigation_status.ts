@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SigEvent, SignificantEventInvestigationStatus } from '@kbn/streams-schema';
+import type { SignificantEvent, SignificantEventInvestigationStatus } from '@kbn/streams-schema';
 
 export const INVESTIGATION_STATUS_COLORS: Record<SignificantEventInvestigationStatus, string> = {
   pending: 'warning',
@@ -27,5 +27,5 @@ export const INVESTIGATION_STATUS_LABELS: Record<SignificantEventInvestigationSt
 };
 
 /** Returns true when the event has at least one investigation currently in flight. */
-export const hasPendingInvestigation = (event: SigEvent): boolean =>
+export const hasPendingInvestigation = (event: SignificantEvent): boolean =>
   event.investigations?.some((i) => i.status === 'pending') ?? false;

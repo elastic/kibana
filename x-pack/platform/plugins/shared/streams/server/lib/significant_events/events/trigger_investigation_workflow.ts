@@ -10,7 +10,7 @@ import { STREAMS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/streams-schema';
 
 /**
  * Runs the managed investigation workflow for the given significant event in the
@@ -28,7 +28,7 @@ export const triggerInvestigationWorkflow = async ({
   spaces?: SpacesPluginStart;
   request: KibanaRequest;
   logger: Logger;
-  event: SigEvent;
+  event: SignificantEvent;
 }): Promise<string | undefined> => {
   if (!workflowsManagement) {
     logger.debug('Workflows management not available, skipping investigation trigger');

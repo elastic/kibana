@@ -52,7 +52,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
     <EuiButtonIcon
       iconType="inspect"
       aria-label={RUN_ARIA_LABEL}
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         if (!isTriggering) triggerInvestigation(event.event_id);
       }}
