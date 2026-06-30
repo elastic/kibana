@@ -65,8 +65,8 @@ describe('listLeadsTool', () => {
       getStatus: mockGetStatus,
     });
     mockGetUserLeadPrivileges.mockResolvedValue({
-      has_read_permissions: true,
-      has_write_permissions: true,
+      adhoc: { has_read_permissions: true, has_write_permissions: true },
+      scheduled: { has_read_permissions: true, has_write_permissions: true },
       has_all_required: true,
       privileges: {},
     });
@@ -101,8 +101,8 @@ describe('listLeadsTool', () => {
 
     it('returns permission error when user lacks read permissions', async () => {
       mockGetUserLeadPrivileges.mockResolvedValue({
-        has_read_permissions: false,
-        has_write_permissions: false,
+        adhoc: { has_read_permissions: false, has_write_permissions: false },
+        scheduled: { has_read_permissions: false, has_write_permissions: false },
         has_all_required: false,
         privileges: {},
       });

@@ -64,7 +64,7 @@ export const listLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.has_read_permissions) {
+        if (!privileges.adhoc.has_read_permissions || !privileges.scheduled.has_read_permissions) {
           return {
             results: [
               {

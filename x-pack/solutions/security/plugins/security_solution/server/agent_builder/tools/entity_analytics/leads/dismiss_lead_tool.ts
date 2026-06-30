@@ -51,50 +51,53 @@ export const dismissLeadTool = (
     handler: async (params, { request, spaceId, esClient, prompts, callContext }) => {
       logger.debug(`${SECURITY_DISMISS_LEAD_TOOL_ID} tool called for lead ${params.id}`);
 
-      const [, { security }] = await core.getStartServices();
-      const privileges = await getUserLeadPrivileges(request, security, spaceId);
-      if (!privileges.has_write_permissions) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message: 'You do not have permission to dismiss leads in this space.',
-              },
-            },
-          ],
-        };
-      }
-
-      const promptId = `dismiss_lead.confirm.${callContext.toolCallId}`;
-      const { status } = prompts.checkConfirmationStatus(promptId);
-
-      if (status === ConfirmationStatus.unprompted) {
-        return prompts.askForConfirmation({
-          id: promptId,
-          title: 'Dismiss lead',
-          message: `Dismiss **${
-            params.title ?? params.id
-          }**? It will be marked as triaged and hidden from the active leads list.`,
-          confirm_text: 'Dismiss',
-          cancel_text: 'Cancel',
-        });
-      }
-
-      if (status === ConfirmationStatus.rejected) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: { message: 'Dismiss was cancelled.' },
-            },
-          ],
-        };
-      }
-
       try {
+        const [, { security }] = await core.getStartServices();
+        const privileges = await getUserLeadPrivileges(request, security, spaceId);
+        if (
+          !privileges.adhoc.has_write_permissions ||
+          !privileges.scheduled.has_write_permissions
+        ) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+                data: {
+                  message: 'You do not have permission to dismiss leads in this space.',
+                },
+              },
+            ],
+          };
+        }
+
+        const promptId = `dismiss_lead.confirm.${callContext.toolCallId}`;
+        const { status } = prompts.checkConfirmationStatus(promptId);
+
+        if (status === ConfirmationStatus.unprompted) {
+          return prompts.askForConfirmation({
+            id: promptId,
+            title: 'Dismiss lead',
+            message: `Dismiss **${
+              params.title ?? params.id
+            }**? It will be marked as triaged and hidden from the active leads list.`,
+            confirm_text: 'Dismiss',
+            cancel_text: 'Cancel',
+          });
+        }
+
+        if (status === ConfirmationStatus.rejected) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+                data: { message: 'Dismiss was cancelled.' },
+              },
+            ],
+          };
+        }
+
         const dataClient = createLeadDataClient({
           esClient: esClient.asCurrentUser,
           logger,

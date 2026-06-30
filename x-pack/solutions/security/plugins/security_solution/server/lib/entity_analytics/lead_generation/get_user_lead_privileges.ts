@@ -35,7 +35,13 @@ export const getUserLeadPrivileges = async (
   return {
     privileges: _formatPrivileges(privileges),
     has_all_required: hasAllRequested,
-    has_read_permissions: adhocPerms.has_read_permissions && scheduledPerms.has_read_permissions,
-    has_write_permissions: adhocPerms.has_write_permissions && scheduledPerms.has_write_permissions,
+    adhoc: {
+      has_read_permissions: adhocPerms.has_read_permissions,
+      has_write_permissions: adhocPerms.has_write_permissions,
+    },
+    scheduled: {
+      has_read_permissions: scheduledPerms.has_read_permissions,
+      has_write_permissions: scheduledPerms.has_write_permissions,
+    },
   };
 };

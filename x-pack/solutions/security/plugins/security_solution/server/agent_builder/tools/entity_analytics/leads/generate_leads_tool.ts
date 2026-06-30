@@ -111,49 +111,49 @@ export const generateLeadsTool = (
     ) => {
       logger.debug(`${SECURITY_GENERATE_LEADS_TOOL_ID} tool called`);
 
-      const [, { security }] = await core.getStartServices();
-      const privileges = await getUserLeadPrivileges(request, security, spaceId);
-      if (!privileges.has_write_permissions) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message: 'You do not have permission to generate leads in this space.',
-              },
-            },
-          ],
-        };
-      }
-
-      const promptId = `generate_leads.confirm.${callContext.toolCallId}`;
-      const { status } = prompts.checkConfirmationStatus(promptId);
-
-      if (status === ConfirmationStatus.unprompted) {
-        return prompts.askForConfirmation({
-          id: promptId,
-          title: 'Generate investigation leads',
-          message:
-            'This will start an AI lead generation run. It may take a few minutes and uses AI inference. Proceed?',
-          confirm_text: 'Generate leads',
-          cancel_text: 'Cancel',
-        });
-      }
-
-      if (status === ConfirmationStatus.rejected) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: { message: 'Lead generation was cancelled.' },
-            },
-          ],
-        };
-      }
-
       try {
+        const [, { security }] = await core.getStartServices();
+        const privileges = await getUserLeadPrivileges(request, security, spaceId);
+        if (!privileges.adhoc.has_write_permissions) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+                data: {
+                  message: 'You do not have permission to generate leads in this space.',
+                },
+              },
+            ],
+          };
+        }
+
+        const promptId = `generate_leads.confirm.${callContext.toolCallId}`;
+        const { status } = prompts.checkConfirmationStatus(promptId);
+
+        if (status === ConfirmationStatus.unprompted) {
+          return prompts.askForConfirmation({
+            id: promptId,
+            title: 'Generate investigation leads',
+            message:
+              'This will start an AI lead generation run. It may take a few minutes and uses AI inference. Proceed?',
+            confirm_text: 'Generate leads',
+            cancel_text: 'Cancel',
+          });
+        }
+
+        if (status === ConfirmationStatus.rejected) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+                data: { message: 'Lead generation was cancelled.' },
+              },
+            ],
+          };
+        }
+
         const [coreStart, startPlugins] = await getStartServices();
 
         let resolvedConnectorId: string | undefined;
