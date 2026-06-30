@@ -9,7 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { hasStartEndParams, getStartEndParams } from '@kbn/esql-utils';
+import {
+  hasStartEndParams,
+  getStartEndParams,
+  getTimeFieldFromESQLQuery,
+  injectWhereClauseAfterSourceCommand,
+} from '@kbn/esql-utils';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
 import type { Data, EsqlUrlObject, Bool } from './types';
@@ -178,20 +183,24 @@ export class EsqlQueryParser {
    * Inject named parameters for time range
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
+    let effectiveQuery = query;
     const params: Record<string, unknown>[] = [];
 
     // Check if we should inject time parameters
     if (url._useTimeParams) {
-      if (hasStartEndParams(query)) {
+      if (hasStartEndParams(effectiveQuery)) {
+        const filterTimefield = getTimeFieldFromESQLQuery(effectiveQuery);
+        if (filterTimefield) {
+          const whereExpression = `${filterTimefield} >= ?_tstart AND ${filterTimefield} <= ?_tend`;
+          effectiveQuery = injectWhereClauseAfterSourceCommand(effectiveQuery, whereExpression);
+        }
+
         const bounds = this._timeCache.getTimeBounds();
 
-        // Convert numeric bounds to TimeRange format for shared utility
-        const timeRange = {
+        params.push(...getStartEndParams(effectiveQuery, {
           from: new Date(bounds.min).toISOString(),
           to: new Date(bounds.max).toISOString(),
-        };
-
-        params.push(...getStartEndParams(query, timeRange));
+        }));
       } else {
         // Warn user that timefield was specified but no parameters in query
         this._onWarning(strings.timeFieldWithoutParamsWarning());
@@ -203,7 +212,7 @@ export class EsqlQueryParser {
       params.push(...url.params);
     }
 
-    return { query, params };
+    return { query: effectiveQuery, params };
   }
 
   /**
