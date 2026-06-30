@@ -98,8 +98,12 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
       };
     }
 
-    const data: SkillAttachmentData = parsed.data;
-    const toolValidation = await validateToolIdsAgainstRegistry(context, data.tool_ids);
+    const data: SkillAttachmentData = {
+      mode: 'create',
+      skill: parsed.data,
+      originalContent: parsed.data.content,
+    };
+    const toolValidation = await validateToolIdsAgainstRegistry(context, data.skill.tool_ids);
     if (!toolValidation.ok) {
       return {
         results: [
@@ -123,7 +127,7 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
         {
           type: SKILL_ATTACHMENT_TYPE,
           data,
-          description: data.description,
+          description: data.skill.description,
         },
         'agent'
       );
@@ -136,10 +140,10 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
             data: {
               attachment_id: attachment.id,
               version: attachment.current_version,
-              skill_id: data.id,
-              skill_name: data.name,
-              referenced_files: data.referenced_content?.length ?? 0,
-              tool_ids: data.tool_ids,
+              skill_id: data.skill.id,
+              skill_name: data.skill.name,
+              referenced_files: data.skill.referenced_content?.length ?? 0,
+              tool_ids: data.skill.tool_ids,
             },
           },
         ],

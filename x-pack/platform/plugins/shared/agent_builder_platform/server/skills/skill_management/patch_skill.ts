@@ -147,7 +147,7 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
   id: 'patch_skill',
   type: ToolType.builtin,
   description:
-    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. If you are changing `tool_ids`, call `list_tools` first and pick ids verbatim from the result — invalid ids will cause this call to fail. After patching, re-render the draft via `<render_attachment id="ATTACHMENT_ID" />`.',
+    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. If you are changing `tool_ids`, call `list_tools` first and pick ids verbatim from the result — invalid ids will cause this call to fail. After the final patch in this round, render the draft via `<render_attachment id="ATTACHMENT_ID" />`. If you plan to apply more patches before responding to the user, hold the render until after the last one.',
   schema: patchSkillSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
@@ -180,9 +180,10 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
     }
 
     const current = stored.data.data as SkillAttachmentData;
-    let nextContent = current.content;
-    let nextReferenced = current.referenced_content
-      ? current.referenced_content.map((item) => ({ ...item }))
+    const currentSkill = current.skill;
+    let nextContent = currentSkill.content;
+    let nextReferenced = currentSkill.referenced_content
+      ? currentSkill.referenced_content.map((item) => ({ ...item }))
       : [];
     const errors: string[] = [];
 
@@ -253,16 +254,16 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       };
     }
 
-    const merged: SkillAttachmentData = {
-      id: current.id,
-      name: name ?? current.name,
-      description: description ?? current.description,
+    const nextSkillInput: SkillAttachmentData['skill'] = {
+      id: currentSkill.id,
+      name: name ?? currentSkill.name,
+      description: description ?? currentSkill.description,
       content: nextContent,
-      tool_ids: toolIds ?? current.tool_ids,
+      tool_ids: toolIds ?? currentSkill.tool_ids,
       ...(nextReferenced.length > 0 ? { referenced_content: nextReferenced } : {}),
     };
 
-    const validated = skillCreateRequestSchema.safeParse(merged);
+    const validated = skillCreateRequestSchema.safeParse(nextSkillInput);
     if (!validated.success) {
       return {
         results: [
@@ -275,7 +276,14 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       };
     }
 
-    const toolValidation = await validateToolIdsAgainstRegistry(context, validated.data.tool_ids);
+    const merged: SkillAttachmentData = {
+      mode: current.mode,
+      skill: validated.data,
+      ...(current.originalContent !== undefined
+        ? { originalContent: current.originalContent }
+        : {}),
+    };
+    const toolValidation = await validateToolIdsAgainstRegistry(context, merged.skill.tool_ids);
     if (!toolValidation.ok) {
       return {
         results: [
@@ -298,7 +306,7 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       const updated = await attachments.update(
         attachmentId,
         {
-          data: validated.data,
+          data: merged,
           description: validated.data.description,
         },
         'agent'

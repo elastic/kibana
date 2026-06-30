@@ -37,14 +37,16 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
 
   const openCanvas = useCallback((attachment: UnknownAttachment, isSidebar: boolean) => {
     setCanvasState({ attachment, isSidebar });
-    setPreviewedAttachmentKey(getAttachmentPreviewKey(attachment.id, attachment.version));
+    setPreviewedAttachmentKey(
+      getAttachmentPreviewKey(attachment.id, attachment.versionData?.version)
+    );
   }, []);
 
   const closeCanvas = useCallback(() => {
     if (canvasState) {
       const canvasPreviewKey = getAttachmentPreviewKey(
         canvasState.attachment.id,
-        canvasState.attachment.version
+        canvasState.attachment.versionData?.version
       );
       if (previewedAttachmentKey === canvasPreviewKey) {
         setPreviewedAttachmentKey(null);

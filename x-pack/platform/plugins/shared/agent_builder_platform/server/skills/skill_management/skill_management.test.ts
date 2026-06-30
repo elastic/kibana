@@ -145,8 +145,11 @@ describe('propose_skill tool', () => {
     const stored = attachments.get(data.attachment_id);
     expect(stored?.type).toBe(SKILL_ATTACHMENT_TYPE);
     expect(stored?.data.data).toMatchObject({
-      id: 'incident-triage',
-      tool_ids: ['platform.core.execute_esql'],
+      mode: 'create',
+      skill: {
+        id: 'incident-triage',
+        tool_ids: ['platform.core.execute_esql'],
+      },
     });
   });
 
@@ -236,7 +239,9 @@ describe('patch_skill tool', () => {
     const data = result.results[0].data as { version: number };
     expect(data.version).toBe(2);
     const stored = attachments.get(attachmentId);
-    expect((stored?.data.data as { name: string }).name).toBe('Incident triage v2');
+    expect((stored?.data.data as { skill: { name: string } }).skill.name).toBe(
+      'Incident triage v2'
+    );
   });
 
   it('applies a search-replace patch to content', async () => {
@@ -257,7 +262,7 @@ describe('patch_skill tool', () => {
 
     expect(result.results[0].type).toBe(ToolResultType.other);
     const stored = attachments.get(attachmentId);
-    expect((stored?.data.data as { content: string }).content).toContain(
+    expect((stored?.data.data as { skill: { content: string } }).skill.content).toContain(
       'triaging production incidents quickly'
     );
   });
@@ -305,7 +310,8 @@ describe('patch_skill tool', () => {
 
     const stored = attachments.get(attachmentId);
     expect(
-      (stored?.data.data as { referenced_content?: Array<{ name: string }> }).referenced_content
+      (stored?.data.data as { skill: { referenced_content?: Array<{ name: string }> } }).skill
+        .referenced_content
     ).toHaveLength(1);
 
     const removeResult = (await createPatchSkillTool().handler(
@@ -319,7 +325,8 @@ describe('patch_skill tool', () => {
 
     const finalStored = attachments.get(attachmentId);
     expect(
-      (finalStored?.data.data as { referenced_content?: unknown[] }).referenced_content?.length ?? 0
+      (finalStored?.data.data as { skill: { referenced_content?: unknown[] } }).skill
+        .referenced_content?.length ?? 0
     ).toBe(0);
   });
 
@@ -347,7 +354,7 @@ describe('patch_skill tool', () => {
 
     // The draft's tool_ids should be untouched.
     const stored = attachments.get(attachmentId);
-    expect((stored?.data.data as { tool_ids: string[] }).tool_ids).toEqual([
+    expect((stored?.data.data as { skill: { tool_ids: string[] } }).skill.tool_ids).toEqual([
       'platform.core.execute_esql',
     ]);
   });

@@ -35,7 +35,7 @@ export type ListToolsInput = z.infer<typeof listToolsSchema>;
  * Inline tool that enumerates every Agent Builder tool currently available
  * to the requesting user/space.
  *
- * The `skill-authoring` skill mandates that the agent call this **before**
+ * The `skill-management` skill mandates that the agent call this **before**
  * `propose_skill` (and again, when adding tools via `patch_skill`) so the
  * draft references only real ids.
  */

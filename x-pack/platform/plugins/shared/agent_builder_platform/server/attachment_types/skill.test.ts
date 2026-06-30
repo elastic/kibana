@@ -11,18 +11,21 @@ import { createSkillAttachmentType } from './skill';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 const validSkill: SkillAttachmentData = {
-  id: 'incident-triage',
-  name: 'Incident triage',
-  description: 'Use when investigating production incidents.',
-  content: '## When to Use\n\nUse this skill when triaging incidents.',
-  tool_ids: ['platform.core.execute_esql'],
-  referenced_content: [
-    {
-      name: 'examples',
-      relativePath: './examples',
-      content: '# Triage examples\n\nN/A.',
-    },
-  ],
+  mode: 'create',
+  skill: {
+    id: 'incident-triage',
+    name: 'Incident triage',
+    description: 'Use when investigating production incidents.',
+    content: '## When to Use\n\nUse this skill when triaging incidents.',
+    tool_ids: ['platform.core.execute_esql'],
+    referenced_content: [
+      {
+        name: 'examples',
+        relativePath: './examples',
+        content: '# Triage examples\n\nN/A.',
+      },
+    ],
+  },
 };
 
 const formatContext = {
@@ -46,24 +49,33 @@ describe('skill attachment type', () => {
       const result = await definition.validate(validSkill);
       expect(result.valid).toBe(true);
       if (result.valid) {
-        expect(result.data.id).toBe('incident-triage');
+        expect(result.data.skill.id).toBe('incident-triage');
       }
     });
 
     it('rejects an empty content body', async () => {
-      const result = await definition.validate({ ...validSkill, content: '' });
+      const result = await definition.validate({
+        ...validSkill,
+        skill: { ...validSkill.skill, content: '' },
+      });
       expect(result.valid).toBe(false);
     });
 
     it('rejects an id with uppercase letters', async () => {
-      const result = await definition.validate({ ...validSkill, id: 'Incident-Triage' });
+      const result = await definition.validate({
+        ...validSkill,
+        skill: { ...validSkill.skill, id: 'Incident-Triage' },
+      });
       expect(result.valid).toBe(false);
     });
 
     it('rejects a referenced file with a path outside ./', async () => {
       const result = await definition.validate({
         ...validSkill,
-        referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+        skill: {
+          ...validSkill.skill,
+          referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+        },
       });
       expect(result.valid).toBe(false);
     });
@@ -71,7 +83,10 @@ describe('skill attachment type', () => {
     it('rejects more than 5 tool_ids', async () => {
       const result = await definition.validate({
         ...validSkill,
-        tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+        skill: {
+          ...validSkill.skill,
+          tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+        },
       });
       expect(result.valid).toBe(false);
     });
@@ -84,7 +99,7 @@ describe('skill attachment type', () => {
       const repr = await formatted.getRepresentation?.();
       expect(repr?.type).toBe('text');
       expect(repr?.value).toContain('Skill (id: incident-triage)');
-      expect(repr?.value).toContain(validSkill.content);
+      expect(repr?.value).toContain(validSkill.skill.content);
       expect(repr?.value).toContain('platform.core.execute_esql');
     });
   });
