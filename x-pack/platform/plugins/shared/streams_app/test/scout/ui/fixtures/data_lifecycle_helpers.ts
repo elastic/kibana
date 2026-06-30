@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type Locator, type ScoutPage } from '@kbn/scout';
+import { type ApiServicesFixture, type Locator, type ScoutPage } from '@kbn/scout';
+import { omit } from 'lodash';
 
 export const RETENTION_TEST_IDS = {
   // Entry points (lifecycle summary header actions)
@@ -42,6 +43,29 @@ export const RETENTION_TEST_IDS = {
   failureStoreRetentionMetric: 'failureStoreRetention-metric',
   failureStoreRetentionMetricSubtitle: 'failureStoreRetention-metric-subtitle',
 } as const;
+
+/**
+ * Sets the DSL lifecycle for a stream via the Streams API.
+ *
+ * Preserves the stream's existing ingest config and strips the read-only
+ * `processing.updated_at` field (the PUT endpoint rejects it), then applies the
+ * provided `dsl` lifecycle. Used by specs to seed a known lifecycle state before
+ * navigating to the data lifecycle tab.
+ */
+export async function setStreamDslLifecycle(
+  streamsApi: ApiServicesFixture['streams'],
+  streamName: string,
+  dsl: Record<string, unknown>
+): Promise<void> {
+  const { stream } = await streamsApi.getStreamDefinition(streamName);
+  await streamsApi.updateStream(streamName, {
+    ingest: {
+      ...stream.ingest,
+      processing: omit(stream.ingest.processing, 'updated_at'),
+      lifecycle: { dsl },
+    },
+  });
+}
 
 /**
  * Confirms the "This will override index template settings" modal.

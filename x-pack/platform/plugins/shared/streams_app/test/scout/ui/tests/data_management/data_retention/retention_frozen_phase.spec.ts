@@ -7,40 +7,26 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { omit } from 'lodash';
 
 import { test } from '../../../fixtures';
-import { closeToastsIfPresent } from '../../../fixtures/data_lifecycle_helpers';
+import {
+  closeToastsIfPresent,
+  setStreamDslLifecycle,
+} from '../../../fixtures/data_lifecycle_helpers';
 
 // Frozen phase is a stateful-only feature — serverless does not support the frozen tier.
 test.describe('Stream data retention - frozen phase', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.streams.clearStreamChildren('logs.otel');
-    const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
-    await apiServices.streams.updateStream('logs.otel', {
-      ingest: {
-        ...logsDefinition.stream.ingest,
-        processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
-        lifecycle: { dsl: {} },
-      },
-    });
+    await setStreamDslLifecycle(apiServices.streams, 'logs.otel', {});
     await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',
     });
   });
 
-  test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
-    await apiServices.streams.updateStream('logs.otel.nginx', {
-      ingest: {
-        ...childDefinition.stream.ingest,
-        processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-        lifecycle: { dsl: {} },
-      },
-    });
-    await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
   });
 
   test.afterEach(async ({ page }) => {
@@ -56,14 +42,7 @@ test.describe('Stream data retention - frozen phase', { tag: [...tags.stateful.c
     apiServices,
     pageObjects,
   }) => {
-    const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
-    await apiServices.streams.updateStream('logs.otel.nginx', {
-      ingest: {
-        ...childDefinition.stream.ingest,
-        processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-        lifecycle: { dsl: { frozen_after: '10d' } },
-      },
-    });
+    await setStreamDslLifecycle(apiServices.streams, 'logs.otel.nginx', { frozen_after: '10d' });
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
     await expect(page.getByTestId('lifecyclePhase-Frozen-button')).toBeVisible();
@@ -74,13 +53,9 @@ test.describe('Stream data retention - frozen phase', { tag: [...tags.stateful.c
     apiServices,
     pageObjects,
   }) => {
-    const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
-    await apiServices.streams.updateStream('logs.otel.nginx', {
-      ingest: {
-        ...childDefinition.stream.ingest,
-        processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-        lifecycle: { dsl: { frozen_after: '10d', data_retention: '30d' } },
-      },
+    await setStreamDslLifecycle(apiServices.streams, 'logs.otel.nginx', {
+      frozen_after: '10d',
+      data_retention: '30d',
     });
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
@@ -92,14 +67,7 @@ test.describe('Stream data retention - frozen phase', { tag: [...tags.stateful.c
     apiServices,
     pageObjects,
   }) => {
-    const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
-    await apiServices.streams.updateStream('logs.otel.nginx', {
-      ingest: {
-        ...childDefinition.stream.ingest,
-        processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
-        lifecycle: { dsl: { frozen_after: '10d' } },
-      },
-    });
+    await setStreamDslLifecycle(apiServices.streams, 'logs.otel.nginx', { frozen_after: '10d' });
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
     await page.getByTestId('lifecyclePhase-Frozen-button').click();
