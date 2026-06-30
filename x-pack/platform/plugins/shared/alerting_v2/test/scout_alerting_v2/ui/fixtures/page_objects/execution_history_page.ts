@@ -18,7 +18,8 @@ export class ExecutionHistoryPage {
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
   }
 
-  async goto() {
-    await this.page.gotoApp('management/alertingV2/execution_history');
+  async goto(spaceId?: string) {
+    const prefix = spaceId ? `s/${spaceId}/` : '';
+    await this.page.gotoApp(`${prefix}management/alertingV2/execution_history`);
   }
 }
