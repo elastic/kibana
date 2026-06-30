@@ -140,7 +140,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
-    describe('Export', () => {
+    describe('Export', function () {
+      // Flaky on ECH: unskip when https://github.com/elastic/kibana/issues/265720 is fixed.
+      this.tags(['skipCloud']);
+
       it('exports all streams from logs.otel', async () => {
         const exportBody = {
           name: 'logs_content_pack',
@@ -395,7 +398,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Import', () => {
+    describe('Import', function () {
+      // Flaky on ECH: unskip when https://github.com/elastic/kibana/issues/265720 is fixed.
+      this.tags(['skipCloud']);
+
       it('fails if an object is too large', async () => {
         const twoMB = 2 * 1024 * 1024;
         const archive = await generateArchive(

@@ -77,7 +77,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
-    describe('Exclude and restore', () => {
+    describe('Exclude and restore', function () {
+      // Flaky on ECH: unskip when https://github.com/elastic/kibana/issues/265720 is fixed.
+      this.tags(['skipCloud']);
+
       it('creates a feature and lists it', async () => {
         const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
         expect(id).to.be.a('string');
@@ -200,7 +203,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('POST /internal/streams/features/_bulk', () => {
+    describe('POST /internal/streams/features/_bulk', function () {
+      // Flaky on ECH: unskip when https://github.com/elastic/kibana/issues/265720 is fixed.
+      this.tags(['skipCloud']);
+
       beforeEach(async () => {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           stream: secondStreamDefinition,

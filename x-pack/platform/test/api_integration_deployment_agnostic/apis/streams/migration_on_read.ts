@@ -210,7 +210,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('read existing stream definition and asset link format', function () {
     // This test can't run on MKI because there is no way to create a stream definition document that doesn't match the
     // currently valid format. The test is designed to verify that the migration logic is working correctly.
-    this.tags(['failsOnMKI']);
+    // Flaky on ECH: revert to 'failsOnMKI' when https://github.com/elastic/kibana/issues/265720 is fixed.
+    this.tags(['skipCloud']);
     before(async () => {
       await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
