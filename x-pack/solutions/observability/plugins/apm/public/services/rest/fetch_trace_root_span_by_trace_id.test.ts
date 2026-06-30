@@ -6,10 +6,8 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import {
-  fetchRootSpanByTraceId,
-  FETCH_TRACE_ROOT_SPAN_OPERATION_ID,
-} from './fetch_trace_root_span_by_trace_id';
+import { fetchRootSpanByTraceId } from './fetch_trace_root_span_by_trace_id';
+import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 import * as createCallApmApi from './create_call_apm_api';
 
 const signal = new AbortController().signal;
@@ -36,7 +34,7 @@ describe('fetchRootSpanByTraceId', () => {
     ).rejects.toThrow('boom');
 
     expect(captureErrorSpy).toHaveBeenCalledWith(error, {
-      labels: { kibana_meta_operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID },
+      labels: { kibana_meta_operation_id: FETCHER_OPERATION_IDS.FETCH_TRACE_ROOT_SPAN },
     });
   });
 

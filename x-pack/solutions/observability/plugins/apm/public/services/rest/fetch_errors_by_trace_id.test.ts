@@ -6,7 +6,8 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import { fetchErrorsByTraceId, FETCH_TRACE_ERRORS_OPERATION_ID } from './fetch_errors_by_trace_id';
+import { fetchErrorsByTraceId } from './fetch_errors_by_trace_id';
+import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 import * as createCallApmApi from './create_call_apm_api';
 
 const signal = new AbortController().signal;
@@ -33,7 +34,7 @@ describe('fetchErrorsByTraceId', () => {
     ).rejects.toThrow('boom');
 
     expect(captureErrorSpy).toHaveBeenCalledWith(error, {
-      labels: { kibana_meta_operation_id: FETCH_TRACE_ERRORS_OPERATION_ID },
+      labels: { kibana_meta_operation_id: FETCHER_OPERATION_IDS.FETCH_TRACE_ERRORS },
     });
   });
 
