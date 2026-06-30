@@ -19,13 +19,13 @@ paths:
         > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
-        - in: query
+        - description: Value list identifier to delete, including all of its list items.
+          in: query
           name: id
           required: true
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: >-
-            Determines whether exception items referencing this value list
+        - description: Determines whether exception items referencing this value list
             should be deleted.
           in: query
           name: deleteReferences
@@ -34,8 +34,7 @@ paths:
             default: false
             example: false
             type: boolean
-        - description: >-
-            Determines whether to delete value list without performing any
+        - description: Determines whether to delete value list without performing any
             additional checks of where this list may be utilized.
           in: query
           name: ignoreReferences
@@ -52,8 +51,8 @@ paths:
                 ipList:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': 2025-01-08T04:47:34.273Z
-                    created_at: 2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: List of bad internet ips.
                     id: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -61,7 +60,7 @@ paths:
                     name: Bad ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: 2025-01-08T05:39:39.292Z
+                    updated_at: '2025-01-08T05:39:39.292Z'
                     updated_by: elastic
                     version: 3
               schema:
@@ -88,12 +87,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -105,10 +102,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [DELETE /api/lists?id=ip_list] is unauthorized for
-                      user, this action is granted by the Kibana privileges
-                      [lists-all]
+                    message: API [DELETE /api/lists?id=ip_list] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -142,7 +137,8 @@ paths:
       description: Get the details of a value list using the list ID.
       operationId: ReadList
       parameters:
-        - in: query
+        - description: Value list identifier (`id`) returned when the list was created.
+          in: query
           name: id
           required: true
           schema:
@@ -155,8 +151,8 @@ paths:
                 ip:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': 2025-01-08T04:47:34.273Z
-                    created_at: 2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: This list describes bad internet ip
                     id: ip_list
@@ -164,7 +160,7 @@ paths:
                     name: My bad ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: 2025-01-08T05:21:53.843Z
+                    updated_at: '2025-01-08T05:21:53.843Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -191,7 +187,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -203,10 +202,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [GET /api/lists?id=ip_list] is unauthorized for user,
-                      this action is granted by the Kibana privileges
-                      [lists-read]
+                    message: API [GET /api/lists?id=ip_list] is unauthorized for user, this action
+                      is granted by the Kibana privileges [lists-read]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -242,6 +239,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              patchName:
+                value:
+                  id: ip_list
+                  name: Bad ips list - UPDATED
             schema:
               example:
                 id: ip_list
@@ -272,8 +274,8 @@ paths:
                 ip:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': 2025-01-08T04:47:34.273Z
-                    created_at: 2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: This list describes bad internet ips
                     id: ip_list
@@ -281,7 +283,7 @@ paths:
                     name: Bad ips list - UPDATED
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: 2025-01-08T05:21:53.843Z
+                    updated_at: '2025-01-08T05:21:53.843Z'
                     updated_by: elastic
                     version: 2
               schema:
@@ -308,12 +310,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -325,9 +325,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [PATCH /api/lists] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: API [PATCH /api/lists] is unauthorized for user, this action is granted
+                      by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -419,8 +418,8 @@ paths:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': 2025-01-08T04:47:34.273Z
-                    created_at: 2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: This list describes bad internet ips
                     id: ip_list
@@ -428,14 +427,14 @@ paths:
                     name: Simple list with ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: 2025-01-08T04:47:34.273Z
+                    updated_at: '2025-01-08T04:47:34.273Z'
                     updated_by: elastic
                     version: 1
                 ip_range:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': 2025-01-09T18:23:52.241Z
-                    created_at: 2025-01-09T18:23:52.241Z
+                    '@timestamp': '2025-01-09T18:23:52.241Z'
+                    created_at: '2025-01-09T18:23:52.241Z'
                     created_by: elastic
                     description: This list has ip ranges
                     id: ip_range_list
@@ -443,14 +442,14 @@ paths:
                     name: Simple list with ip ranges
                     tie_breaker_id: 74aebdaf-601f-4940-b351-155728ff7003
                     type: ip_range
-                    updated_at: 2025-01-09T18:23:52.241Z
+                    updated_at: '2025-01-09T18:23:52.241Z'
                     updated_by: elastic
                     version: 1
                 keyword:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': 2025-01-09T18:24:55.786Z
-                    created_at: 2025-01-09T18:24:55.786Z
+                    '@timestamp': '2025-01-09T18:24:55.786Z'
+                    created_at: '2025-01-09T18:24:55.786Z'
                     created_by: elastic
                     description: This list describes bad host names
                     id: keyword_list
@@ -458,14 +457,14 @@ paths:
                     name: Simple list with a keyword
                     tie_breaker_id: f7e7dbaa-daf7-4c9a-a3dc-56643923ef68
                     type: keyword
-                    updated_at: 2025-01-09T18:24:55.786Z
+                    updated_at: '2025-01-09T18:24:55.786Z'
                     updated_by: elastic
                     version: 1
                 keyword_custom_format:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': 2025-01-09T18:25:39.604Z
-                    created_at: 2025-01-09T18:25:39.604Z
+                    '@timestamp': '2025-01-09T18:25:39.604Z'
+                    created_at: '2025-01-09T18:25:39.604Z'
                     created_by: elastic
                     description: This parses the first found ipv4 only
                     id: keyword_custom_format_list
@@ -473,7 +472,7 @@ paths:
                     name: Simple list with a keyword using a custom format
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
-                    updated_at: 2025-01-09T18:25:39.604Z
+                    updated_at: '2025-01-09T18:25:39.604Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -485,9 +484,8 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: >-
-                      To create a list, the data stream must exist first. Data
-                      stream \".lists-default\" does not exist
+                    message: To create a list, the data stream must exist first. Data stream
+                      \".lists-default\" does not exist
                     status_code: 400
               schema:
                 oneOf:
@@ -501,12 +499,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -518,9 +514,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [POST /api/lists] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: API [POST /api/lists] is unauthorized for user, this action is granted
+                      by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -562,6 +557,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              replaceList:
+                value:
+                  description: Latest list of bad ips
+                  id: ip_list
+                  name: Bad ips - updated
             schema:
               example:
                 description: Latest list of bad ips
@@ -595,8 +596,8 @@ paths:
                 ip:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': 2025-01-08T04:47:34.273Z
-                    created_at: 2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: Latest list of bad ips
                     id: ip_list
@@ -604,7 +605,7 @@ paths:
                     name: Bad ips - updated
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: 2025-01-08T05:39:39.292Z
+                    updated_at: '2025-01-08T05:39:39.292Z'
                     updated_by: elastic
                     version: 3
               schema:
@@ -631,12 +632,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -648,9 +647,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [PUT /api/lists] is unauthorized for user, this action
-                      is granted by the Kibana privileges [lists-all]
+                    message: API [PUT /api/lists] is unauthorized for user, this action is granted
+                      by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -682,9 +680,8 @@ paths:
         - Security Lists API
   /api/lists/_find:
     get:
-      description: >-
-        Get a paginated subset of value lists. By default, the first page is
-        returned, with 20 results per page.
+      description: Get a paginated subset of value lists. By default, the first page
+        is returned, with 20 results per page.
       operationId: FindLists
       parameters:
         - description: The page number to return.
@@ -720,8 +717,7 @@ paths:
               - asc
             example: asc
             type: string
-        - description: >-
-            Returns the lists that come after the last lists returned in the
+        - description: Returns the lists that come after the last lists returned in the
             previous call (use the `cursor` value returned in the previous
             call). This parameter uses the `tie_breaker_id` field to ensure all
             lists are sorted and returned correctly.
@@ -747,8 +743,7 @@ paths:
               examples:
                 ipList:
                   value:
-                    cursor: >-
-                      WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
+                    cursor: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
                     data:
                       - _version: WzAsMV0=
                         '@timestamp': |
@@ -815,12 +810,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -832,10 +825,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [GET /api/lists/_find?page=1&per_page=20] is
-                      unauthorized for user, this action is granted by the
-                      Kibana privileges [lists-read]
+                    message: API [GET /api/lists/_find?page=1&per_page=20] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-read]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -862,6 +854,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -873,6 +869,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: 'Unable to delete value list data streams: invalid or missing index
+                      metadata'
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -885,12 +887,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -898,12 +898,24 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [DELETE /api/lists/index] is not authorized; lists-all (or
+                      equivalent) is required to delete data streams
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: The value list data stream was not found in this space
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream not found response
@@ -928,6 +940,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bothExist:
+                  value:
+                    list_index: true
+                    list_item_index: true
               schema:
                 type: object
                 properties:
@@ -942,6 +959,11 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: Unable to read value list data stream status for this space
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -954,12 +976,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -967,12 +987,24 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [GET /api/lists/index] is not authorized; list read permissions are
+                      required
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: Value list backing indices were not found for this space
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream(s) not found response
@@ -992,12 +1024,30 @@ paths:
         - Security Lists API
     post:
       deprecated: true
-      description: Create `.lists` and `.items` data streams in the relevant space.
+      description: >
+        **DEPRECATED.** `deprecated: true` is set on this operation. Value list
+        backing data streams for the space
+
+        are now created as part of supported workflows; calling this explicitly
+        is rarely required.
+
+        **WARNING:** Do not use for new integrations. Prefer the UI or the list
+        and list-item APIs after confirming
+
+        indices exist with `GET /api/lists/index`.
+
+
+        Creates the `.lists` and `.items` data streams in the current Kibana
+        space.
       operationId: CreateListIndex
       responses:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -1009,6 +1059,13 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: Indices exist but the request could not be completed for the current
+                      space. Check that Elasticsearch and Kibana privileges
+                      allow index creation for lists.
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1034,6 +1091,13 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [POST /api/lists/index] is unauthorized for user, this action is
+                      granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1043,9 +1107,7 @@ paths:
               examples:
                 alreadyExists:
                   value:
-                    message: >-
-                      data stream: \".lists-default\" and \".items-default\"
-                      already exists
+                    message: 'data stream: \".lists-default\" and \".items-default\" already exists'
                     status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
@@ -1066,13 +1128,11 @@ paths:
         - Security Lists API
   /api/lists/items:
     delete:
-      description: >-
-        Delete a value list item using its `id`, or its `list_id` and `value`
-        fields.
+      description: Delete a value list item using its `id`, or its `list_id` and
+        `value` fields.
       operationId: DeleteListItem
       parameters:
-        - description: >-
-            Value list item's identifier. Required if `list_id` and `value` are
+        - description: Value list item's identifier. Required if `list_id` and `value` are
             not specified.
           in: query
           name: id
@@ -1085,8 +1145,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: >-
-            The value used to evaluate exceptions. Required if `id` is not
+        - description: The value used to evaluate exceptions. Required if `id` is not
             specified.
           in: query
           name: value
@@ -1094,8 +1153,7 @@ paths:
           schema:
             example: 255.255.255.255
             type: string
-        - description: >-
-            Determines when changes made by the request are made visible to
+        - description: Determines when changes made by the request are made visible to
             search.
           in: query
           name: refresh
@@ -1116,14 +1174,14 @@ paths:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    '@timestamp': 2025-01-08T05:15:05.159Z
-                    created_at: 2025-01-08T05:15:05.159Z
+                    '@timestamp': '2025-01-08T05:15:05.159Z'
+                    created_at: '2025-01-08T05:15:05.159Z'
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: 2025-01-08T05:44:14.009Z
+                    updated_at: '2025-01-08T05:44:14.009Z'
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1139,9 +1197,7 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: >-
-                      Either \"list_id\" or \"id\" needs to be defined in the
-                      request
+                    message: Either \"list_id\" or \"id\" needs to be defined in the request
                     status_code: 400
               schema:
                 oneOf:
@@ -1155,12 +1211,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1172,10 +1226,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [DELETE /api/lists/items?id=pd1WRJQBs4HAK3VQeHFI] is
-                      unauthorized for user, this action is granted by the
-                      Kibana privileges [lists-all]
+                    message: API [DELETE /api/lists/items?id=pd1WRJQBs4HAK3VQeHFI] is unauthorized
+                      for user, this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1209,24 +1262,21 @@ paths:
       description: Get the details of a value list item.
       operationId: ReadListItem
       parameters:
-        - description: >-
-            Value list item identifier. Required if `list_id` and `value` are
+        - description: Value list item identifier. Required if `list_id` and `value` are
             not specified.
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: >-
-            Value list item list's `id` identfier. Required if `id` is not
+        - description: Value list item list's `id` identfier. Required if `id` is not
             specified.
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ListId'
-        - description: >-
-            The value used to evaluate exceptions. Required if `id` is not
+        - description: The value used to evaluate exceptions. Required if `id` is not
             specified.
           in: query
           name: value
@@ -1242,14 +1292,14 @@ paths:
                 ip:
                   value:
                     _version: WzExLDFd
-                    '@timestamp': 2025-01-08T05:16:25.882Z
-                    created_at: 2025-01-08T05:16:25.882Z
+                    '@timestamp': '2025-01-08T05:16:25.882Z'
+                    created_at: '2025-01-08T05:16:25.882Z'
                     created_by: elastic
                     id: qN1XRJQBs4HAK3VQs3Gc
                     list_id: ip_list
                     tie_breaker_id: a9a34c02-a385-436e-86a0-02a3942f3537
                     type: ip
-                    updated_at: 2025-01-08T05:16:25.882Z
+                    updated_at: '2025-01-08T05:16:25.882Z'
                     updated_by: elastic
                     value: 127.0.0.2
               schema:
@@ -1265,9 +1315,7 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: >-
-                      Either \"list_id\" or \"id\" needs to be defined in the
-                      request
+                    message: Either \"list_id\" or \"id\" needs to be defined in the request
                     status_code: 400
               schema:
                 oneOf:
@@ -1281,12 +1329,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1298,10 +1344,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [GET /api/lists/items?id=qN1XRJQBs4HAK3VQs3Gc] is
-                      unauthorized for user, this action is granted by the
-                      Kibana privileges [lists-read]
+                    message: API [GET /api/lists/items?id=qN1XRJQBs4HAK3VQs3Gc] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-read]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1332,17 +1377,18 @@ paths:
       tags:
         - Security Lists API
     patch:
-      description: >-
-        Update specific fields of an existing value list item using the item
-        `id`.
+      description: Update specific fields of an existing value list item using the
+        item `id`.
       operationId: PatchListItem
       requestBody:
         content:
           application/json:
+            examples:
+              changeValue:
+                value:
+                  id: pd1WRJQBs4HAK3VQeHFI
+                  value: 255.255.255.255
             schema:
-              example:
-                id: pd1WRJQBs4HAK3VQeHFI
-                value: 255.255.255.255
               type: object
               properties:
                 _version:
@@ -1352,9 +1398,8 @@ paths:
                 meta:
                   $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
-                  description: >-
-                    Determines when changes made by the request are made visible
-                    to search.
+                  description: Determines when changes made by the request are made visible to
+                    search.
                   enum:
                     - 'true'
                     - 'false'
@@ -1374,14 +1419,14 @@ paths:
                 ipItem:
                   value:
                     _version: WzE5LDFd
-                    '@timestamp': 2025-01-08T05:15:05.159Z
-                    created_at: 2025-01-08T05:15:05.159Z
+                    '@timestamp': '2025-01-08T05:15:05.159Z'
+                    created_at: '2025-01-08T05:15:05.159Z'
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: 2025-01-08T05:23:37.602Z
+                    updated_at: '2025-01-08T05:23:37.602Z'
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1393,12 +1438,11 @@ paths:
               examples:
                 badRequest:
                   value:
-                    message: >-
-                      {"took":15,"timed_out":false,"total":1,"updated":0,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[{"index":".ds-.items-default-2025.01.09-000001","id":"ip_item","cause":{"type":"document_parsing_exception","reason":"[1:107]
+                    message: '{"took":15,"timed_out":false,"total":1,"updated":0,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[{"index":".ds-.items-default-2025.01.09-000001","id":"ip_item","cause":{"type":"document_parsing_exception","reason":"[1:107]
                       failed to parse field [ip] of type [ip] in document with
                       id ip_item. Preview of fields value:
                       2","caused_by":{"type":"illegal_argument_exception","reason":"2
-                      is not an IP string literal."}},"status":400}]}
+                      is not an IP string literal."}},"status":400}]}'
                     status_code: 400
               schema:
                 oneOf:
@@ -1412,12 +1456,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1429,10 +1471,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [PATCH /api/lists/items] is unauthorized for user,
-                      this action is granted by the Kibana privileges
-                      [lists-all]
+                    message: API [PATCH /api/lists/items] is unauthorized for user, this action is
+                      granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1501,9 +1541,8 @@ paths:
                 meta:
                   $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
-                  description: >-
-                    Determines when changes made by the request are made visible
-                    to search.
+                  description: Determines when changes made by the request are made visible to
+                    search.
                   enum:
                     - 'true'
                     - 'false'
@@ -1525,40 +1564,40 @@ paths:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': 2025-01-08T04:59:06.154Z
-                    created_at: 2025-01-08T04:59:06.154Z
+                    '@timestamp': '2025-01-08T04:59:06.154Z'
+                    created_at: '2025-01-08T04:59:06.154Z'
                     created_by: elastic
                     id: 21b01cfb-058d-44b9-838c-282be16c91cc
                     list_id: ip_list
                     tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
                     type: ip
-                    updated_at: 2025-01-08T04:59:06.154Z
+                    updated_at: '2025-01-08T04:59:06.154Z'
                     updated_by: elastic
                     value: 127.0.0.1
                 ip_range:
                   value:
                     _version: WzEsMV0=
-                    '@timestamp': 2025-01-09T18:33:08.202Z
-                    created_at: 2025-01-09T18:33:08.202Z
+                    '@timestamp': '2025-01-09T18:33:08.202Z'
+                    created_at: '2025-01-09T18:33:08.202Z'
                     created_by: elastic
                     id: ip_range_item
                     list_id: ip_range_list
                     tie_breaker_id: ea1b4189-efda-4637-b8f9-74655a5ebb61
                     type: ip_range
-                    updated_at: 2025-01-09T18:33:08.202Z
+                    updated_at: '2025-01-09T18:33:08.202Z'
                     updated_by: elastic
                     value: 192.168.0.0/16
                 keyword:
                   value:
                     _version: WzIsMV0=
-                    '@timestamp': 2025-01-09T18:34:29.422Z
-                    created_at: 2025-01-09T18:34:29.422Z
+                    '@timestamp': '2025-01-09T18:34:29.422Z'
+                    created_at: '2025-01-09T18:34:29.422Z'
                     created_by: elastic
                     id: 7f24737d-1da8-4626-a568-33070591bb4e
                     list_id: keyword_list
                     tie_breaker_id: 2108ced2-5e5d-401e-a88e-4dd69fc5fa27
                     type: keyword
-                    updated_at: 2025-01-09T18:34:29.422Z
+                    updated_at: '2025-01-09T18:34:29.422Z'
                     updated_by: elastic
                     value: zeek
               schema:
@@ -1571,9 +1610,8 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: >-
-                      uri [/api/lists/items] with method [post] exists but is
-                      not available with the current configuration
+                    message: uri [/api/lists/items] with method [post] exists but is not available
+                      with the current configuration
                     statusCode: 400
               schema:
                 oneOf:
@@ -1587,12 +1625,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1604,9 +1640,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [POST /api/lists/items] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: API [POST /api/lists/items] is unauthorized for user, this action is
+                      granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1659,10 +1694,15 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              id: ip_item
-              value: 255.255.255.255
+            examples:
+              fullReplace:
+                value:
+                  id: ip_item
+                  value: 255.255.255.255
             schema:
+              example:
+                id: ip_item
+                value: 255.255.255.255
               type: object
               properties:
                 _version:
@@ -1686,14 +1726,14 @@ paths:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    '@timestamp': 2025-01-08T05:15:05.159Z
-                    created_at: 2025-01-08T05:15:05.159Z
+                    '@timestamp': '2025-01-08T05:15:05.159Z'
+                    created_at: '2025-01-08T05:15:05.159Z'
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
                     list_id: ip_list
                     tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                     type: ip
-                    updated_at: 2025-01-08T05:44:14.009Z
+                    updated_at: '2025-01-08T05:44:14.009Z'
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
@@ -1720,12 +1760,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1737,10 +1775,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [PATCH /api/lists/items] is unauthorized for user,
-                      this action is granted by the Kibana privileges
-                      [lists-all]
+                    message: API [PATCH /api/lists/items] is unauthorized for user, this action is
+                      granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1785,6 +1821,12 @@ paths:
         '200':
           content:
             application/ndjson:
+              examples:
+                ipLines:
+                  value: |
+                    127.0.0.1
+                    127.0.0.2
+                    127.0.0.3
               schema:
                 description: A `.txt` file containing list items from the specified list
                 example: |
@@ -1820,12 +1862,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1837,10 +1877,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [POST /api/lists/items/_export?list_id=ips.txt] is
-                      unauthorized for user, this action is granted by the
-                      Kibana privileges [lists-read]
+                    message: API [POST /api/lists/items/_export?list_id=ips.txt] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-read]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1848,6 +1887,11 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: "unknown_list" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
@@ -1870,7 +1914,8 @@ paths:
       description: Get all value list items in the specified list.
       operationId: FindListItems
       parameters:
-        - in: query
+        - description: Parent value list's `id` to page through items for.
+          in: query
           name: list_id
           required: true
           schema:
@@ -1908,7 +1953,10 @@ paths:
               - asc
             example: asc
             type: string
-        - in: query
+        - description: >
+            Opaque cursor returned in a previous response; pass it to continue
+            listing from the next page. Omit on the first request.
+          in: query
           name: cursor
           required: false
           schema:
@@ -1930,18 +1978,17 @@ paths:
               examples:
                 ip:
                   value:
-                    cursor: >-
-                      WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+                    cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
                     data:
                       - _version: WzAsMV0=
-                        '@timestamp': 2025-01-08T04:59:06.154Z
-                        created_at: 2025-01-08T04:59:06.154Z
+                        '@timestamp': '2025-01-08T04:59:06.154Z'
+                        created_at: '2025-01-08T04:59:06.154Z'
                         created_by: elastic
                         id: 21b01cfb-058d-44b9-838c-282be16c91cc
                         list_id: ip_list
                         tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
                         type: ip
-                        updated_at: 2025-01-08T04:59:06.154Z
+                        updated_at: '2025-01-08T04:59:06.154Z'
                         updated_by: elastic
                         value: 127.0.0.1
                     page: 1
@@ -1993,12 +2040,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2010,10 +2055,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [GET
-                      /api/lists/items/_find?list_id=ip_list&page=1&per_page=20]
-                      is unauthorized for user, this action is granted by the
+                    message: API [GET /api/lists/items/_find?list_id=ip_list&page=1&per_page=20] is
+                      unauthorized for user, this action is granted by the
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
@@ -2064,8 +2107,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-        - description: >-
-            Determines when changes made by the request are made visible to
+        - description: Determines when changes made by the request are made visible to
             search.
           in: query
           name: refresh
@@ -2080,13 +2122,15 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              ipLinesFile:
+                value:
+                  file: list_values.txt
             schema:
               type: object
               properties:
                 file:
-                  description: >-
-                    A `.txt` or `.csv` file containing newline separated list
-                    items.
+                  description: A `.txt` or `.csv` file containing newline separated list items.
                   example: |
                     127.0.0.1
                     127.0.0.2
@@ -2108,8 +2152,8 @@ paths:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': 2025-01-08T04:47:34.273Z
-                    created_at: 2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: This list describes bad internet ip
                     id: ip_list
@@ -2117,7 +2161,7 @@ paths:
                     name: Simple list with an ip
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: 2025-01-08T04:47:34.273Z
+                    updated_at: '2025-01-08T04:47:34.273Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -2143,12 +2187,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2160,10 +2202,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [POST /api/lists/items/_import?list_id=ip_list] is
-                      unauthorized for user, this action is granted by the
-                      Kibana privileges [lists-all]
+                    message: API [POST /api/lists/items/_import?list_id=ip_list] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2171,6 +2212,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  value:
+                    message: List with the specified list_id does not exist, create the list or fix
+                      list_id to import to an existing one
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List with specified list_id does not exist response
@@ -2190,6 +2237,15 @@ paths:
         - Security Lists API
   /api/lists/privileges:
     get:
+      description: >
+        Returns the caller's authentication state and the Elasticsearch
+        `cluster`, `index`, and `application`
+
+        privileges for `.lists` and `.items` data streams in the current Kibana
+        space. Use this to decide which list
+
+        APIs (`read` vs `all` operations) are available before you create or
+        import lists.
       operationId: ReadListPrivileges
       responses:
         '200':
@@ -2280,6 +2336,13 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: 'Unable to resolve list privileges: invalid or missing space context
+                      for this request'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2292,12 +2355,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
-                      [security_exception\n\tRoot
-                      causes:\n\t\tsecurity_exception: unable to authenticate
-                      user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2309,10 +2370,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: >-
-                      API [GET /api/lists/privileges] is unauthorized for user,
-                      this action is granted by the Kibana privileges
-                      [lists-read]
+                    message: API [GET /api/lists/privileges] is unauthorized for user, this action
+                      is granted by the Kibana privileges [lists-read]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2334,11 +2393,10 @@ paths:
 components:
   schemas:
     FindListItemsCursor:
-      description: >-
-        Returns the items that come after the last item returned in the previous
-        call (use the `cursor` value returned in the previous call). This
-        parameter uses the `tie_breaker_id` field to ensure all items are sorted
-        and returned correctly.
+      description: Returns the items that come after the last item returned in the
+        previous call (use the `cursor` value returned in the previous call).
+        This parameter uses the `tie_breaker_id` field to ensure all items are
+        sorted and returned correctly.
       example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
       format: nonempty
       minLength: 1
@@ -2360,12 +2418,12 @@ components:
         _version:
           $ref: '#/components/schemas/ListVersionId'
         '@timestamp':
-          example: 2025-01-08T04:47:34.273Z
+          example: '2025-01-08T04:47:34.273Z'
           format: date-time
           type: string
         created_at:
           description: Autogenerated date of object creation.
-          example: 2025-01-08T04:47:34.273Z
+          example: '2025-01-08T04:47:34.273Z'
           format: date-time
           type: string
         created_by:
@@ -2383,8 +2441,7 @@ components:
         name:
           $ref: '#/components/schemas/ListName'
         tie_breaker_id:
-          description: >-
-            Field used in search to ensure all containers are sorted and
+          description: Field used in search to ensure all containers are sorted and
             returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
@@ -2392,7 +2449,7 @@ components:
           $ref: '#/components/schemas/ListType'
         updated_at:
           description: Autogenerated date of last object update.
-          example: 2025-01-08T04:47:34.273Z
+          example: '2025-01-08T04:47:34.273Z'
           format: date-time
           type: string
         updated_by:
@@ -2430,12 +2487,12 @@ components:
         _version:
           $ref: '#/components/schemas/ListVersionId'
         '@timestamp':
-          example: 2025-01-08T04:47:34.273Z
+          example: '2025-01-08T04:47:34.273Z'
           format: date-time
           type: string
         created_at:
           description: Autogenerated date of object creation.
-          example: 2025-01-08T04:47:34.273Z
+          example: '2025-01-08T04:47:34.273Z'
           format: date-time
           type: string
         created_by:
@@ -2449,8 +2506,7 @@ components:
         meta:
           $ref: '#/components/schemas/ListItemMetadata'
         tie_breaker_id:
-          description: >-
-            Field used in search to ensure all containers are sorted and
+          description: Field used in search to ensure all containers are sorted and
             returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
@@ -2458,7 +2514,7 @@ components:
           $ref: '#/components/schemas/ListType'
         updated_at:
           description: Autogenerated date of last object update.
-          example: 2025-01-08T04:47:34.273Z
+          example: '2025-01-08T04:47:34.273Z'
           format: date-time
           type: string
         updated_by:
@@ -2634,16 +2690,12 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: >
-      Lists can be used with detection rule exceptions to define values that
-      prevent a rule from generating alerts.
-
+  - description: |
+      Lists can be used with detection rule exceptions to define values that prevent a rule from generating alerts.
 
       Lists are made up of:
 
-
-      * **List containers**: A container for values of the same Elasticsearch
-      data type. The following data types can be used:
+      * **List containers**: A container for values of the same Elasticsearch data type. The following data types can be used:
           * `boolean`
           * `byte`
           * `date`
@@ -2663,50 +2715,21 @@ tags:
           * `long_range`
           * `short`
           * `text`
-      * **List items**: The values used to determine whether the exception
-      prevents an alert from being generated.
+      * **List items**: The values used to determine whether the exception prevents an alert from being generated.
 
-
-      All list items in the same list container must be of the same data type,
-      and each item defines a single value. For example, an IP list container
-      named `internal-ip-addresses-southport` contains five items, where each
-      item defines one internal IP address:
-
+      All list items in the same list container must be of the same data type, and each item defines a single value. For example, an IP list container named `internal-ip-addresses-southport` contains five items, where each item defines one internal IP address:
       1. `192.168.1.1`
-
       2. `192.168.1.3`
-
       3. `192.168.1.18`
-
       4. `192.168.1.12`
-
       5. `192.168.1.7`
 
-
-      To use these IP addresses as values for defining rule exceptions, use the
-      Security exceptions API to [create an exception list
-      item](../operation/operation-createexceptionlistitem) that references the
-      `internal-ip-addresses-southport` list.
-
+      To use these IP addresses as values for defining rule exceptions, use the Security exceptions API to [create an exception list item](../operation/operation-createexceptionlistitem) that references the `internal-ip-addresses-southport` list.
       > info
-
-      > Lists cannot be added directly to rules, nor do they define the
-      operators used to determine when exceptions are applied (`is in list`, `is
-      not in list`). Use an exception item to define the operator and associate
-      it with an [exception
-      container](../operation/operation-createexceptionlist). You can then add
-      the exception container to a rule's `exceptions_list` object.
-
+      > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an [exception container](../operation/operation-createexceptionlist). You can then add the exception container to a rule's `exceptions_list` object.
 
       ## Lists requirements
 
-
-      Before you can start using lists, you must create the `.lists` and
-      `.items` data streams for the relevant Kibana space. To do this, use the
-      [Create list data streams](../operation/operation-createlistindex)
-      endpoint. Once these data streams are created, your role needs privileges
-      to manage rules. Refer to [Enable and access
-      detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui)
-      for a complete list of requirements.
+      Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists

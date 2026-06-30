@@ -22,6 +22,14 @@ export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = 
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
   };
 
+export const updateAdHocDataViews: InternalStateThunkActionCreator<[DataView[]], Promise<void>> = (
+  adHocDataViews
+) =>
+  async function updateAdHocDataViewsThunkFn(dispatch) {
+    await dispatch(loadDataViewList());
+    dispatch(setAdHocDataViews(adHocDataViews));
+  };
+
 export const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = (
   defaultProfileAdHocDataViews
 ) =>

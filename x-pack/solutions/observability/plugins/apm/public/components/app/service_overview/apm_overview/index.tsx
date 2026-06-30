@@ -97,12 +97,21 @@ export function ApmOverview() {
     trackEvent({ metric: 'slo_callout_dismissed', metricType: METRIC_TYPE.CLICK });
   }, [trackEvent, setSloCalloutDismissed]);
 
-  const handleOnLoadTable = (key: keyof TablesLoadedState) =>
-    setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
+  const handleOnLoadTable = useCallback((key: keyof TablesLoadedState) => {
+    setHaveTablesLoaded((currentValues) =>
+      currentValues[key] ? currentValues : { ...currentValues, [key]: true }
+    );
+  }, []);
 
-  const onTransactionsTableLoad = useCallback(() => handleOnLoadTable('transactions'), []);
-  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
-  const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
+  const onTransactionsTableLoad = useCallback(
+    () => handleOnLoadTable('transactions'),
+    [handleOnLoadTable]
+  );
+  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), [handleOnLoadTable]);
+  const onDependenciesTableLoad = useCallback(
+    () => handleOnLoadTable('dependencies'),
+    [handleOnLoadTable]
+  );
 
   const shouldRenderCallout =
     !sloCalloutDismissed && !hasSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
@@ -134,7 +143,7 @@ export function ApmOverview() {
           <EuiFlexItem grow={3}>
             <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
           </EuiFlexItem>
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <TransactionsTable
                 kuery={kuery}
@@ -162,7 +171,7 @@ export function ApmOverview() {
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
@@ -194,7 +203,7 @@ export function ApmOverview() {
             )
           )}
           {!isRumAgent && (
-            <EuiFlexItem grow={7}>
+            <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
                   onLoadTable={onDependenciesTableLoad}

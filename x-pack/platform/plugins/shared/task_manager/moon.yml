@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/tracing-utils'
+  - '@kbn/uiam-api-keys-provisioning-status'
   - '@kbn/usage-collection-plugin'
   - '@kbn/config-schema'
   - '@kbn/config'
@@ -46,7 +47,7 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/response-ops-scheduling-types'
   - '@kbn/logging-mocks'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
   - '@kbn/security-plugin-types-server'
@@ -56,6 +57,7 @@ dependsOn:
   - '@kbn/core-execution-context-common'
   - '@kbn/core-http-server'
   - '@kbn/core-security-server'
+  - '@kbn/core-security-common'
   - '@kbn/scout'
 tags:
   - plugin

@@ -31,6 +31,7 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
@@ -1514,6 +1515,51 @@ describe('Action Executor', () => {
       });
     });
 
+    test(`${label} returns structured error result when executor throws ConnectorAuthorizationError`, async () => {
+      const err = new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'refresh_token_expired',
+        message: 'Refresh token expired. User must re-authorize.',
+      });
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult).toEqual({
+        actionId: CONNECTOR_ID,
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'Refresh token expired. User must re-authorize.',
+        errorName: 'ConnectorAuthorizationError',
+        errorMeta: {
+          connectorName: '1',
+          authMethod: 'oauth_authorization_code',
+          reason: 'refresh_token_expired',
+        },
+        retry: false,
+        errorSource: TaskErrorSource.USER,
+      });
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Refresh token expired. User must re-authorize.'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed', 'user-error'],
+      });
+    });
+
     test(`${label} logs warning when executor returns invalid status`, async () => {
       (
         connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
@@ -1669,6 +1715,72 @@ describe('Action Executor', () => {
       expect(result.message).toMatch(/error validating connector type config/);
       expect(result.errorSource).toBe(TaskErrorSource.FRAMEWORK);
       expect(typeWithStringBar.executor).not.toHaveBeenCalled();
+    });
+
+    test('writes execute-start and failed execute event log entries when params fail Zod validation', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      await actionExecutor.execute({
+        ...executeParams,
+        params: { foo: 'not-a-boolean' },
+      });
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute-start' }),
+          message: 'action started: test:1: 1',
+        })
+      );
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute', outcome: 'failure' }),
+          message: 'action execution failure: test:1: 1',
+          error: expect.objectContaining({
+            message: expect.stringMatching(/error validating action params/),
+          }),
+        })
+      );
+    });
+
+    test('writes execute-start and failed execute event log entries when config fails Zod validation', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      const typeWithStringBar: jest.Mocked<ConnectorType> = {
+        ...connectorType,
+        validate: {
+          ...connectorType.validate,
+          config: { schema: z.object({ bar: z.string() }) },
+        },
+      };
+      connectorTypeRegistry.get.mockReturnValueOnce(typeWithStringBar);
+
+      await actionExecutor.execute(executeParams);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute-start' }),
+          message: 'action started: test:1: 1',
+        })
+      );
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute', outcome: 'failure' }),
+          message: 'action execution failure: test:1: 1',
+          error: expect.objectContaining({
+            message: expect.stringMatching(/error validating connector type config/),
+          }),
+        })
+      );
     });
   });
 });

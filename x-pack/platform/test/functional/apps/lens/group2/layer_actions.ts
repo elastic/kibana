@@ -170,13 +170,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to pie chart and have layer settings available', async () => {
-      await retry.try(async () => {
-        // click on the tab navigation left button 10 times to make the first tab visible
-        for (let i = 0; i < 10; i++) {
-          await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
-        }
-        await lens.ensureLayerTabIsActive(0);
-      });
+      await lens.ensureLayerTabIsActive(0);
+
       await lens.switchToVisualization('pie');
       // layer settings still available
       // open the panel

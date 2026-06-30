@@ -60,9 +60,30 @@ export interface UserProfileUserInfo {
 }
 
 /**
- * Placeholder for data stored in user profile.
+ * Placeholder for data stored in user profile,
+ * services that store data in the user profile should specify said data by augmenting this type in it's implementation,
+ * like so:
+ *
+ * @example
+ * ```ts
+ * declare module '@kbn/core-user-profile-common' {
+ *   interface UserProfileData {
+ *     myService: {
+ *       myData: string;
+ *     };
+ *   }
+ * }
+ * ```
+ * This will make it such that the return value for the invocation of `getCurrent` is typed matching the defined augmentation
+ *
+ * ```ts
+ * const userProfile = await userProfileService.getCurrent();
+ * // accessing 'myService.myData' is now typed as 'string'
+ * console.log(userProfile.data.myService.myData);
+ * ```
  */
-export type UserProfileData = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface -- See the comment above for an explanation.
+export interface UserProfileData {}
 
 /**
  * Type of the user profile labels structure (currently

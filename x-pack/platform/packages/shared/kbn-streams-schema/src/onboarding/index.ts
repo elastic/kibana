@@ -5,16 +5,46 @@
  * 2.0.
  */
 
-import type { IdentifyFeaturesResult } from '../api/features';
-import type { SignificantEventsQueriesGenerationResult } from '../api/significant_events';
-import type { TaskResult } from '../tasks/types';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { BaseFeature } from '../feature';
+import type { GeneratedSignificantEventQuery } from '../api/significant_events';
+import {
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
+} from '../workflows';
 
-export interface OnboardingResult {
-  featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
-  queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
+/** Summary of the features identification step of a completed onboarding run. */
+export interface StreamsKIsOnboardingFeaturesResult {
+  skipped: boolean;
+  discovered: BaseFeature[];
+  connectorUsed: string;
+  tokensUsed: ChatCompletionTokenCount;
 }
 
-export enum OnboardingStep {
+/** Summary of the queries generation step of a completed onboarding run. */
+export interface StreamsKIsOnboardingQueriesResult {
+  skipped: boolean;
+  persisted: GeneratedSignificantEventQuery[];
+  connectorUsed: string;
+  tokensUsed: ChatCompletionTokenCount;
+}
+
+export interface StreamsKIsOnboardingResult {
+  features: StreamsKIsOnboardingFeaturesResult;
+  queries: StreamsKIsOnboardingQueriesResult;
+}
+
+export type StreamsKIsOnboardingStatusResult =
+  SignificantEventsWorkflowStatusResult<StreamsKIsOnboardingResult>;
+
+export enum StreamsKIsOnboardingStep {
   FeaturesIdentification = 'features_identification',
   QueriesGeneration = 'queries_generation',
 }
+
+/** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
+export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<SignificantEventsWorkflowStatus> =
+  new Set([
+    SignificantEventsWorkflowStatus.InProgress,
+    SignificantEventsWorkflowStatus.BeingCanceled,
+  ]);

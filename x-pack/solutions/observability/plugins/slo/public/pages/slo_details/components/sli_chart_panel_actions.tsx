@@ -9,7 +9,9 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SLO_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 import { useFetchApmIndices } from '../../../hooks/use_fetch_apm_indices';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { getResolvedApmParams } from '../../../utils/slo/get_apm_source_field_link';
@@ -113,6 +115,11 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
           data-test-subj="sliHistoryChartViewInApmLink"
           data-action="openInApm"
           data-source={slo.indicator.type}
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
+            element: SLO_DETAILS_EBT_ELEMENTS.SLI_CHART,
+            detail: slo.indicator.type,
+          })}
         >
           {inApmLabel}
         </EuiContextMenuItem>
@@ -122,6 +129,11 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
           data-test-subj="sliHistoryChartOpenInDiscoverLink"
           data-action="openTracesInDiscover"
           data-source={slo.indicator.type}
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+            element: SLO_DETAILS_EBT_ELEMENTS.SLI_CHART,
+            detail: slo.indicator.type,
+          })}
         >
           {tracesInDiscoverLabel}
         </EuiContextMenuItem>

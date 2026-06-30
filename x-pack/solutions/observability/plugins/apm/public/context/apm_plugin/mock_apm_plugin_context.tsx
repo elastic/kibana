@@ -27,6 +27,7 @@ import { useHistory } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
+import { mockTelemetryClient } from '../../services/telemetry/__mocks__/telemetry_client_mock';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
@@ -146,6 +147,11 @@ const mockCore = merge({}, coreStart, {
       PageTemplate: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     },
   },
+  triggersActionsUi: {
+    ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+    actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+  },
+  telemetry: mockTelemetryClient,
 });
 
 const mockConfig: ConfigSchema = {
@@ -214,6 +220,9 @@ const mockPlugin = {
         },
       },
     },
+  },
+  observability: {
+    useRulesLink: () => ({ href: '/app/rules', onClick: jest.fn() }),
   },
 };
 

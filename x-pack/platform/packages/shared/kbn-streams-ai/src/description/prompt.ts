@@ -8,8 +8,10 @@ import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import descriptionSystemPrompt from './system_prompt.text';
 import descriptionUserPrompt from './user_prompt.text';
+import overviewDescriptionSystemPrompt from './overview_system_prompt.text';
 
 export { descriptionSystemPrompt as descriptionPrompt };
+export { overviewDescriptionSystemPrompt as overviewDescriptionPrompt };
 
 export function createGenerateStreamDescriptionPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({

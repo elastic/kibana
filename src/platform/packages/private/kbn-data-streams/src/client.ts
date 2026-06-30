@@ -12,11 +12,19 @@ import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch'
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
-import type { BaseSearchRuntimeMappings, IDataStreamClient, DataStreamDefinition } from './types';
+import type {
+  AnyDataStreamDefinition,
+  BaseSearchRuntimeMappings,
+  IDataStreamClient,
+  DataStreamDefinition,
+} from './types';
 import type { ClientHelpers } from './types/client';
 import type { ClientSearchRequest, ClientCreateRequest } from './types/es_api';
 
 import { initialize } from './initialize';
+import { initializeIndexTemplate } from './initialize/index_template';
+import { initializeDataStream } from './initialize/data_stream';
+import { getExistingDataStream, getExistingIndexTemplate } from './initialize/exists_checks';
 import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
@@ -71,6 +79,83 @@ export class DataStreamClient<
     return new DataStreamClient(args.elasticsearchClient, args.dataStream);
   }
 
+  /**
+   * Install or update the index template for a data stream without creating the data stream.
+   *
+   * Use this at plugin setup time (e.g. with the internal/system user) to ensure the template
+   * is in place before the first write happens. The data stream itself will be auto-created by
+   * Elasticsearch on the first write.
+   *
+   * If a data stream already exists when this is called (e.g. on a deploy that bumps `version`),
+   * mapping changes are applied to the current write index — same contract as
+   * {@link DataStreamClient.initialize}, minus the data stream creation step.
+   *
+   * Use {@link DataStreamClient.fromDefinition} to obtain a client at runtime.
+   *
+   * @remark Idempotent: subsequent calls with the same definition are no-ops; calls with a higher
+   *         `version` will update the template and migrate mappings on the existing write index.
+   */
+  public static async initializeTemplate(args: {
+    dataStream: AnyDataStreamDefinition;
+    elasticsearchClient: ElasticsearchClient;
+    logger: Logger;
+  }): Promise<void> {
+    validateClientArgs(args);
+    const { dataStream, elasticsearchClient } = args;
+    const logger = args.logger.get('data-streams-setup');
+
+    if (!dataStream.name) {
+      throw new Error('Data stream name is required');
+    }
+
+    const [existingDataStream, existingIndexTemplate] = await Promise.all([
+      getExistingDataStream(elasticsearchClient, dataStream.name, logger),
+      getExistingIndexTemplate(elasticsearchClient, dataStream.name, logger),
+    ]);
+
+    await initializeIndexTemplate({
+      logger,
+      dataStream,
+      elasticsearchClient,
+      existingIndexTemplate,
+      skipCreation: false,
+    });
+
+    // Apply mapping migrations to the existing write index when present. The pre-update
+    // `existingIndexTemplate` reference is intentional: it lets `initializeDataStream` detect
+    // a version bump and run `simulateIndexTemplate` + `putMapping` against the write index.
+    // When no data stream exists yet, this is a no-op thanks to the `skipCreation` guard.
+    await initializeDataStream({
+      logger,
+      dataStream,
+      elasticsearchClient,
+      existingDataStream,
+      existingIndexTemplate,
+      skipCreation: true,
+    });
+  }
+
+  /**
+   * Build a client for an already-initialized data stream.
+   *
+   * Use this in request-scoped code paths to avoid re-running setup on every call. The
+   * data stream's index template should already have been installed at startup via
+   * {@link DataStreamClient.initializeTemplate} (or {@link DataStreamClient.initialize}).
+   *
+   * If the data stream does not exist yet, Elasticsearch will auto-create it on the first
+   * write through this client, provided a matching index template is in place.
+   */
+  public static fromDefinition<
+    MappingsInDefinition extends MappingsDefinition,
+    FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
+    SRM extends BaseSearchRuntimeMappings = never
+  >(args: {
+    dataStream: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>;
+    elasticsearchClient: ElasticsearchClient;
+  }): DataStreamClient<MappingsInDefinition, FullDocumentType, SRM> {
+    return new DataStreamClient(args.elasticsearchClient, args.dataStream);
+  }
+
   public helpers: ClientHelpers<SRM> = {
     getFieldsFromHit: (hit) => {
       const fields = (hit.fields ?? {}) as Record<keyof SRM, unknown[]>;
@@ -79,7 +164,8 @@ export class DataStreamClient<
   };
 
   public async create(args: ClientCreateRequest<FullDocumentType>) {
-    const { space, documents, ...restArgs } = args;
+    const { space: rawSpace, documents, ...restArgs } = args;
+    const space = rawSpace === '' ? DEFAULT_SPACE : rawSpace;
 
     // Convert documents to ES bulk format: [metadata, document] pairs
     const operations: Array<api.BulkOperationContainer | FullDocumentType> = [];
@@ -97,8 +183,8 @@ export class DataStreamClient<
       let processedId: string | undefined = _id;
       let processedDocument: FullDocumentType;
 
-      if (this.isNonDefaultSpace(space)) {
-        // Space-aware mode: prefix ID and decorate document
+      if (space !== undefined) {
+        // Space-aware mode: prefix ID and decorate document (including 'default' space)
         processedId = generateSpacePrefixedId(space, _id);
         processedDocument = decorateDocumentWithSpace(documentWithoutId as FullDocumentType, space);
       } else {
@@ -132,7 +218,8 @@ export class DataStreamClient<
     args: ClientSearchRequest<SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
   ) {
-    const { space, query, ...restArgs } = args;
+    const { space: rawSpace, query, ...restArgs } = args;
+    const space = rawSpace === '' ? DEFAULT_SPACE : rawSpace;
 
     // Build the space-aware query
     const spaceQuery = this.buildSpaceAwareQuery(query, space);
@@ -147,8 +234,8 @@ export class DataStreamClient<
       transportOpts
     );
 
-    // Strip kibana.space_ids from all hits if space was provided
-    if (this.isNonDefaultSpace(space) && response.hits?.hits) {
+    // Strip the system-managed kibana.space_ids property from all hits
+    if (space !== undefined && response.hits?.hits) {
       return {
         ...response,
         hits: {
@@ -164,52 +251,30 @@ export class DataStreamClient<
     return response;
   }
 
-  private isNonDefaultSpace(space?: string): space is string {
-    return typeof space !== 'undefined' && space !== DEFAULT_SPACE;
+  /**
+   * Remove the system-managed `kibana` property from a document before returning to the caller.
+   */
+  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
+    if (typeof doc !== 'object' || doc === null) {
+      return doc;
+    }
+    const { kibana: _, ...rest } = doc as Record<string, unknown>;
+    return rest as FullDocumentType;
   }
 
   /**
    * Build a space-aware query by wrapping the original query with space filtering.
+   * All named spaces (including 'default') filter strictly by kibana.space_ids.
+   * When space is undefined, only space-agnostic documents (no kibana.space_ids) are returned.
    */
   private buildSpaceAwareQuery(
     originalQuery?: api.QueryDslQueryContainer,
     space?: string
   ): api.QueryDslQueryContainer {
-    if (this.isNonDefaultSpace(space)) {
-      // Space-aware mode: filter to only documents in this space
-      const spaceFilter = buildSpaceFilter(space);
-      if (originalQuery) {
-        return {
-          bool: {
-            must: [originalQuery],
-            filter: [spaceFilter],
-          },
-        };
-      }
-      return spaceFilter;
-    } else {
-      // Space-agnostic mode: exclude documents that have kibana.space_ids
-      const agnosticFilter = buildSpaceAgnosticFilter();
-      if (originalQuery) {
-        return {
-          bool: {
-            must: [originalQuery],
-            filter: [agnosticFilter],
-          },
-        };
-      }
-      return agnosticFilter;
+    const filter = space !== undefined ? buildSpaceFilter(space) : buildSpaceAgnosticFilter();
+    if (originalQuery) {
+      return { bool: { must: [originalQuery], filter: [filter] } };
     }
-  }
-
-  /**
-   * Remove kibana.space_ids from document before returning to caller.
-   */
-  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
-    if (typeof doc !== 'object') {
-      return doc;
-    }
-    const { kibana, ...rest } = doc as Record<string, unknown>;
-    return rest as FullDocumentType;
+    return filter;
   }
 }

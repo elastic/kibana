@@ -13,7 +13,10 @@ import {
   DocumentAttachmentAttributesRtV2,
 } from './v2';
 import { AttachmentType } from './v1';
-import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../../constants/attachments';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../constants/attachments';
 
 describe('Unified Attachments', () => {
   describe('UnifiedAttachmentPayloadRt', () => {
@@ -509,6 +512,26 @@ describe('Unified Attachments', () => {
       };
 
       expect(DocumentAttachmentAttributesRtV2.decode(unifiedEvent)._tag).toBe('Right');
+    });
+
+    it('accepts unified security.alert attributes with rule metadata', () => {
+      const unifiedAlert = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: ['alert-1'],
+        metadata: {
+          index: ['alerts-index-1'],
+          rule: { id: 'rule-id-1', name: 'rule-name-1' },
+        },
+        owner: 'securitySolution',
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+      };
+
+      expect(DocumentAttachmentAttributesRtV2.decode(unifiedAlert)._tag).toBe('Right');
     });
   });
 });

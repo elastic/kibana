@@ -6,6 +6,7 @@
  */
 
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
@@ -540,7 +541,7 @@ describe('rules_list ', () => {
       fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(
+        expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
           'The length of time it took for the rule to run (mm:ss).'
         )
       );
@@ -668,7 +669,7 @@ describe('rules_list ', () => {
 
     it('Select P95', async () => {
       renderWithProviders(<RulesList />);
-      const percentilePopoverButton = await screen.findByTitle('select percentile');
+      const percentilePopoverButton = await screen.findByLabelText('select percentile');
       fireEvent.click(percentilePopoverButton);
 
       await screen.findAllByTestId('percentileSelectablePopover-selectable');
@@ -698,7 +699,7 @@ describe('rules_list ', () => {
 
     it('Click column to sort by P95', async () => {
       renderWithProviders(<RulesList />);
-      const percentilePopoverButton = await screen.findByTitle('select percentile');
+      const percentilePopoverButton = await screen.findByLabelText('select percentile');
       fireEvent.click(percentilePopoverButton);
       await screen.findAllByTestId('percentileSelectablePopover-selectable');
       const options = screen.getAllByRole('option');
@@ -1512,5 +1513,101 @@ describe('MaintenanceWindowsMock', () => {
     ).toBeInTheDocument();
 
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('UIAM API Key Banner', () => {
+  beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 0,
+      data: mockedRulesData,
+    });
+    loadActionTypes.mockResolvedValue([]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
+    loadRuleTags.mockResolvedValue({
+      data: [],
+      page: 1,
+      perPage: 50,
+      total: 0,
+    });
+
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const ruleTypeRegistry = ruleTypeRegistryMock.create();
+
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    actionTypeRegistry.list.mockReturnValue([]);
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    };
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  it('renders UIAM API key banner when isServerless is true and apiKeyType is uiam', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    expect(await screen.findByTestId('rulesListUiamApiKeyBanner')).toBeInTheDocument();
+  });
+
+  it('does not render UIAM API key banner when isServerless is false', async () => {
+    useKibanaMock().services.isServerless = false;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not render UIAM API key banner when apiKeyType is not uiam', async () => {
+    useKibanaMock().services.isServerless = true;
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays correct banner content when rendered', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    const banner = await screen.findByTestId('rulesListUiamApiKeyBanner');
+    expect(banner).toBeInTheDocument();
+    expect(screen.getByText('UIAM API key rollout for rules')).toBeInTheDocument();
   });
 });

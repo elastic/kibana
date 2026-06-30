@@ -22,10 +22,10 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalyChartsEmbeddableState } from '..';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
 import { useMlLink } from '../../application/contexts/kibana';
 import { getJobSelectionErrors } from '../utils';
@@ -34,13 +34,9 @@ import type { MlApi } from '../../application/services/ml_api_service';
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {
   initialInput?: Partial<
-    Pick<AnomalyChartsEmbeddableState, 'title' | 'jobIds' | 'maxSeriesToPlot'>
+    Pick<AnomalyChartsEmbeddableState, 'title' | 'job_ids' | 'max_series_to_plot'>
   >;
-  onCreate: (props: {
-    jobIds: AnomalyChartsEmbeddableState['jobIds'];
-    title: string;
-    maxSeriesToPlot: number;
-  }) => void;
+  onCreate: (props: AnomalyChartsEmbeddableState) => void;
   onCancel: () => void;
   adJobsApiService: MlApi['jobs'];
 }
@@ -55,14 +51,14 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
 
   const [panelTitle, setPanelTitle] = useState(initialInput?.title ?? '');
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
-    initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
+    initialInput?.max_series_to_plot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
   const isPanelTitleValid = panelTitle?.length > 0;
   const isMaxSeriesToPlotValid =
     maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
 
-  const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+  const [jobIds, setJobIds] = useState(initialInput?.job_ids ?? []);
   const jobIdsErrors = getJobSelectionErrors(jobIds);
 
   const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid && jobIdsErrors === undefined;
@@ -174,8 +170,8 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             isDisabled={!isFormValid}
             onClick={onCreate.bind(null, {
               title: panelTitle,
-              maxSeriesToPlot,
-              jobIds,
+              max_series_to_plot: maxSeriesToPlot,
+              job_ids: jobIds,
             })}
             fill
           >

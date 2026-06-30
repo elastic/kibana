@@ -182,6 +182,57 @@ describe('useOnSubmit', () => {
     });
   });
 
+  describe('submitAttempted', () => {
+    // Regression test for validation errors being shown on initial load. The UI
+    // gates forced validation errors behind `submitAttempted`, so the flag must
+    // stay `false` on load even when the form already has errors, and only flip
+    // to `true` once a save is attempted.
+    it('should not set submitAttempted on load with validation errors, only after submit', async () => {
+      // agentCount > 0 makes onSubmit short-circuit on the confirm step, so it
+      // never reaches the real save path regardless of the (timing-dependent)
+      // form state set during init.
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 1,
+          packageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      // Give the form validation errors (e.g. an empty required var) as if they
+      // existed as soon as the form loaded.
+      act(() => {
+        renderResult.result.current.setValidationResults({
+          name: null,
+          description: null,
+          namespace: null,
+          additional_datastreams_permissions: null,
+          condition: null,
+          inputs: null,
+          vars: { 'Required var': ['Required var is required'] },
+        });
+      });
+
+      // Errors are present, but until a save is attempted the flag stays false.
+      expect(renderResult.result.current.hasErrors).toBe(true);
+      expect(renderResult.result.current.submitAttempted).toBe(false);
+
+      await act(async () => {
+        await renderResult.result.current.onSubmit();
+      });
+
+      // Only after attempting to save does submitAttempted flip to true.
+      expect(renderResult.result.current.submitAttempted).toBe(true);
+    });
+  });
+
   it('should set incremented name if other package policies exist', async () => {
     (sendGetPackagePolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
@@ -536,6 +587,181 @@ describe('useOnSubmit', () => {
         // Both inputs should remain enabled for default mode
         expect(logsInput?.enabled).toBe(true);
         expect(metricsInput?.enabled).toBe(true);
+      });
+    });
+
+    it('should auto-enable a single disabled input when switching to agentless deployment mode', async () => {
+      // Single-input agentless package whose stream has enabled:false in the spec.
+      // The simplified UX shows no toggle, so the input must be auto-enabled so that
+      // configuration fields are visible and the integration can actually be deployed.
+      const packageInfoWithDisabledInputs: PackageInfo = {
+        ...packageInfo,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'test.access',
+            path: 'access',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache access logs',
+            streams: [
+              {
+                input: 'logfile',
+                enabled: false,
+                vars: [],
+              },
+            ],
+          },
+        ] as any,
+        policy_templates: [
+          {
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache integration',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logfile',
+                title: 'Log files',
+                description: 'Collect Apache log files',
+                deployment_modes: ['default', 'agentless'],
+              },
+            ],
+          },
+        ],
+      };
+
+      (useConfig as MockFn).mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithDisabledInputs,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      // Verify input starts disabled (stream has enabled:false in spec)
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        expect(logfileInput?.enabled).toBe(false);
+      });
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        // Single agentless input should be auto-enabled so config fields are visible
+        expect(logfileInput?.enabled).toBe(true);
+        expect(logfileInput?.streams.every((s: any) => s.enabled)).toBe(true);
+      });
+    });
+
+    it('should not auto-enable disabled inputs for multi-input agentless packages', async () => {
+      // Multi-input package: the user should be able to choose which inputs to enable,
+      // so we must not blindly enable everything when switching to agentless.
+      const packageInfoMultiInput: PackageInfo = {
+        ...packageInfo,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'test.access',
+            path: 'access',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache access logs',
+            streams: [{ input: 'logfile', enabled: false, vars: [] }],
+          },
+          {
+            type: 'metrics',
+            dataset: 'test.metrics',
+            path: 'metrics',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache metrics',
+            streams: [{ input: 'apache/metrics', enabled: false, vars: [] }],
+          },
+        ] as any,
+        policy_templates: [
+          {
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache integration',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logfile',
+                title: 'Log files',
+                description: 'Collect Apache log files',
+                deployment_modes: ['default', 'agentless'],
+              },
+              {
+                type: 'apache/metrics',
+                title: 'Metrics',
+                description: 'Collect Apache metrics',
+                deployment_modes: ['default', 'agentless'],
+              },
+            ],
+          },
+        ],
+      };
+
+      (useConfig as MockFn).mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoMultiInput,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        const metricsInput = packagePolicy.inputs.find(
+          (input: any) => input.type === 'apache/metrics'
+        );
+        // Multi-input packages are not auto-enabled; user must enable them explicitly
+        expect(logfileInput?.enabled).toBe(false);
+        expect(metricsInput?.enabled).toBe(false);
       });
     });
   });

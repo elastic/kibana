@@ -7,19 +7,21 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  EuiPopover,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiText,
-  useEuiTheme,
-  useEuiFontSize,
-  useGeneratedHtmlId,
+  EuiToolTip,
   keys,
+  useEuiFontSize,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AiButtonIcon, type AiButtonIconType } from '@kbn/shared-ux-ai-components';
 import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
 import { ConnectorPickerPopover } from '../../../../connector_list_button/connector_picker_popover';
@@ -45,8 +47,16 @@ export const RefinementPopover = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const editorId = useGeneratedHtmlId({ prefix: 'refinementEditor' });
 
-  const openPopover = useCallback(() => {
-    setIsPopoverOpen(true);
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((prev) => {
+      if (prev) {
+        setUserPrompt('');
+        if (editorRef.current) {
+          editorRef.current.textContent = '';
+        }
+      }
+      return !prev;
+    });
   }, []);
 
   const closePopover = useCallback(() => {
@@ -123,25 +133,10 @@ export const RefinementPopover = ({
     border-color: ${euiTheme.colors.borderBaseSubdued};
   `;
 
-  const aiGradient = `linear-gradient(130.84deg, ${euiTheme.colors.backgroundFilledPrimary} 2.98%, ${euiTheme.colors.backgroundFilledAssistance} 66.24%)`;
-
-  const submitButtonStyles = css`
-    background: ${aiGradient};
-    border-color: transparent;
-    &:hover:not(:disabled) {
-      background: ${aiGradient};
-      filter: brightness(1.1);
-      transform: none;
-    }
-    &:focus {
-      background: ${aiGradient};
-    }
-  `;
-
   const triggerButton = (
     <GenerateSuggestionButton
       size="s"
-      onClick={openPopover}
+      onClick={togglePopover}
       isLoading={isLoading}
       isDisabled={isDisabled}
       aiFeatures={aiFeatures}
@@ -215,14 +210,16 @@ export const RefinementPopover = ({
                     onClose={() => setIsConnectorPopoverOpen(false)}
                     aria-label={connectorPickerAriaLabel}
                     button={
-                      <EuiButtonIcon
-                        data-test-subj="streamsAppRefinementPickConnectorButton"
-                        onClick={() => setIsConnectorPopoverOpen((prev) => !prev)}
-                        color="text"
-                        size="s"
-                        iconType="controlsHorizontal"
-                        aria-label={connectorPickerAriaLabel}
-                      />
+                      <EuiToolTip content={connectorPickerAriaLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          data-test-subj="streamsAppRefinementPickConnectorButton"
+                          onClick={() => setIsConnectorPopoverOpen((prev) => !prev)}
+                          color="text"
+                          size="s"
+                          iconType="controlsHorizontal"
+                          aria-label={connectorPickerAriaLabel}
+                        />
+                      </EuiToolTip>
                     }
                   />
                 </EuiFlexItem>
@@ -257,13 +254,12 @@ export const RefinementPopover = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="sortUp"
-                  display="fill"
+                <AiButtonIcon
+                  iconType={'sortUp' as AiButtonIconType}
+                  variant="accent"
                   size="s"
-                  css={submitButtonStyles}
                   onClick={handleRefine}
-                  disabled={!aiFeatures.genAiConnectors.selectedConnector}
+                  isDisabled={!aiFeatures.genAiConnectors.selectedConnector}
                   aria-label={submitAriaLabel}
                   data-test-subj="streamsAppRefinementSubmitButton"
                 />

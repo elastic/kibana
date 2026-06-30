@@ -6,25 +6,33 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
 import type { LogExtractionConfig } from '../../domain/saved_objects';
+import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
-type LogExtractionStateForV1 = Omit<
-  LogExtractionConfig,
-  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
->;
-interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
+interface LegacyEngineDescriptorV1 {
+  filter: '';
+  delay: string;
+  timeout: string;
+  frequency: string;
+  lookbackPeriod: string;
+  fieldHistoryLength: number;
+  maxLogsPerPage: number;
+  maxTimeWindowSize: string;
+  maxLogsPerWindow: number;
+  maxLogsPerWindowCapBehavior: 'defer' | 'drop';
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
@@ -39,7 +47,7 @@ type StatusEngine = Omit<
 > &
   LegacyEngineDescriptorV1;
 
-interface EntityStoreStatusResponseBody {
+export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
 }
@@ -56,25 +64,37 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
-    logsExtractionConfig;
-
-  return {
-    ...rest,
-    // TODO: Remove the legacy fields once we stop supporting V1.
-    filter,
+  const {
     delay,
     timeout,
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
     maxLogsPerPage,
+    maxTimeWindowSize,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
+  } = logsExtractionConfig;
+
+  return {
+    ...rest,
+    // TODO: Remove the legacy fields once we stop supporting V1.
+    filter: '',
+    delay,
+    timeout,
+    frequency,
+    lookbackPeriod,
+    fieldHistoryLength,
+    maxLogsPerPage: capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow),
+    maxTimeWindowSize,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
-    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
   };
 }
 
@@ -99,7 +119,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(querySchema),
+            query: buildStrictRouteValidationWithZod(querySchema),
           },
         },
         options: {

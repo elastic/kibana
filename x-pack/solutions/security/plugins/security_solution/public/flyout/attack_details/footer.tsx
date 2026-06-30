@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AttacksGroupTakeActionItems } from '../../detections/components/attacks/table/attacks_group_take_action_items';
 import { AttackAiAssistantButton } from '../../detections/components/attacks/table/attack_details/attack_ai_assistant_button';
 import {
@@ -31,7 +32,7 @@ export { FLYOUT_FOOTER_TEST_ID };
  */
 export const PanelFooter = () => {
   const { attack, indexName, refetch } = useAttackDetailsContext();
-  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -78,6 +79,10 @@ export const PanelFooter = () => {
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="AttackDetailsTakeActionPanel"
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.attackDetails.footer.takeActionPopoverAriaLabel',
+                { defaultMessage: 'Take action' }
+              )}
               button={takeActionButton}
               isOpen={isPopoverOpen}
               closePopover={closePopover}
@@ -89,7 +94,6 @@ export const PanelFooter = () => {
                 attack={attack}
                 onActionSuccess={onActionSuccess}
                 closePopover={closePopover}
-                size="s"
                 telemetrySource="attacks_page_flyout_take_action"
                 showAiAssistantAction={false}
                 isRemoteDocument={isRemoteDocument}

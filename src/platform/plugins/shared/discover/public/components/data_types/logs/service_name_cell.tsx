@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
@@ -15,13 +15,14 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import {
-  formatFieldValue,
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  formatFieldStringValueWithHighlights,
 } from '@kbn/discover-utils';
+import { extractTextFromReactNode } from '@kbn/discover-contextual-components/src/data_types/logs/components/utils';
 import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { CellRenderersExtensionParams } from '../../../context_awareness';
+import type { ContextAwarenessToolkit } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
@@ -32,7 +33,7 @@ const agentIconStyle = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 export const getServiceNameCell =
-  (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
+  (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);
@@ -55,21 +56,27 @@ export const getServiceNameCell =
       </EuiToolTip>
     );
 
-    const value = formatFieldValue(
-      serviceNameValue,
-      props.row.raw,
-      props.fieldFormats,
-      props.dataView,
-      field,
-      'html'
+    const formattedValue = useMemo(
+      () =>
+        formatFieldStringValueWithHighlights({
+          value: serviceNameValue,
+          hit: props.row.raw,
+          fieldFormats: props.fieldFormats,
+          dataView: props.dataView,
+          fieldName: serviceNameField,
+        }),
+      [serviceNameValue, props.row.raw, props.fieldFormats, props.dataView]
     );
+
+    const textValue = useMemo(() => extractTextFromReactNode(formattedValue), [formattedValue]);
 
     return (
       <FieldBadgeWithActions
-        onFilter={actions.addFilter}
+        onFilter={toolkit.actions.addFilter}
         icon={getIcon}
         rawValue={serviceNameValue}
-        value={value}
+        formattedValue={formattedValue}
+        textValue={textValue}
         name={serviceNameField}
         property={field}
         core={core}

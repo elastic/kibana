@@ -54,6 +54,7 @@ describe('addGeneratedActionValues()', () => {
     namespace: 'default',
     getUserName: jest.fn(),
     createAPIKey: jest.fn(),
+    cloneAPIKey: jest.fn(),
     logger,
     internalSavedObjectsRepository,
     encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -118,7 +119,6 @@ describe('addGeneratedActionValues()', () => {
       [mockSystemAction],
       {
         ...rulesClientParams,
-        fieldsToExcludeFromPublicApi: [],
         minimumScheduleIntervalInMs: 0,
       }
     );
@@ -139,7 +139,6 @@ describe('addGeneratedActionValues()', () => {
       [mockSystemAction],
       {
         ...rulesClientParams,
-        fieldsToExcludeFromPublicApi: [],
         minimumScheduleIntervalInMs: 0,
       }
     );
@@ -184,7 +183,6 @@ describe('addGeneratedActionValues()', () => {
         [mockSystemAction],
         {
           ...rulesClientParams,
-          fieldsToExcludeFromPublicApi: [],
           minimumScheduleIntervalInMs: 0,
         }
       )

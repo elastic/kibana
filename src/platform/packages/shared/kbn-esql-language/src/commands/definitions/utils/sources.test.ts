@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { joinIndices, timeseriesIndices } from '../../../__tests__/commands/context_fixtures';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
@@ -16,7 +16,9 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
+  buildViewsDefinitions,
   getLookupJoinSource,
+  hasWiredStreamsInQuery,
   getIndexSourcesFromQuery,
 } from './sources';
 import { EsqlQuery, synth, Walker } from '@elastic/esql';
@@ -316,6 +318,103 @@ describe('buildSourcesDefinitions', () => {
   });
 });
 
+describe('buildViewsDefinitions', () => {
+  describe('basic', () => {
+    it('creates a suggestion for each view', () => {
+      const suggestions = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*' },
+        { name: 'another-view', query: 'FROM metrics*' },
+      ]);
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.map((s) => s.label)).toEqual(['my-view', 'another-view']);
+    });
+
+    it('filters out already used views', () => {
+      const suggestions = buildViewsDefinitions(
+        [
+          { name: 'my-view', query: 'FROM logs*' },
+          { name: 'used-view', query: 'FROM metrics*' },
+        ],
+        ['used-view']
+      );
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].label).toBe('my-view');
+    });
+
+    it('quotes view names containing special characters', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my:view', query: 'FROM logs*' }]);
+      expect(suggestion.text).toBe('"my:view"');
+    });
+  });
+
+  describe('detail', () => {
+    it('defaults to View when type is not provided', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my-view', query: 'FROM logs*' }]);
+      expect(suggestion.detail).toBe('View');
+    });
+
+    it('shows the type when provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*', type: SOURCES_TYPES.QUERY_STREAM },
+      ]);
+      expect(suggestion.detail).toBe(SOURCES_TYPES.QUERY_STREAM);
+    });
+  });
+
+  describe('documentation', () => {
+    it('is undefined when neither description nor links are provided', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my-view', query: 'FROM logs*' }]);
+      expect(suggestion.documentation).toBeUndefined();
+    });
+
+    it('includes only description when no links are provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*', description: 'A query stream description' },
+      ]);
+      expect(suggestion.documentation).toEqual({ value: 'A query stream description' });
+    });
+
+    it('includes only links when no description is provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        {
+          name: 'my-view',
+          query: 'FROM logs*',
+          links: [
+            {
+              label: 'View details',
+              url: 'http://localhost:5699/foo/app/streams/my-view/management/overview',
+            },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value: '[View details](http://localhost:5699/foo/app/streams/my-view/management/overview)',
+      });
+    });
+
+    it('includes links followed by a blank line and description when both are provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        {
+          name: 'my-view',
+          query: 'FROM logs*',
+          description: 'Error logs from all sources',
+          links: [
+            {
+              label: 'View details',
+              url: 'http://localhost:5699/foo/app/streams/my-view/management/overview',
+            },
+            { label: 'Docs', url: 'https://example.com/docs' },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value:
+          '[View details](http://localhost:5699/foo/app/streams/my-view/management/overview)\n[Docs](https://example.com/docs)\n\nError logs from all sources',
+      });
+    });
+  });
+});
+
 describe('getIndexSourcesFromQuery', () => {
   it('returns multiple index names from a comma-separated FROM clause', () => {
     expect(getIndexSourcesFromQuery('FROM stream-a, stream-b')).toEqual(['stream-a', 'stream-b']);
@@ -349,5 +448,55 @@ describe('getSourceOfJoinTarget', () => {
     const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
     expect(joinTarget).toBe('lookup_index');
+  });
+});
+
+describe('hasWiredStreamsInQuery', () => {
+  const wiredStreamSource = (name: string) =>
+    ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM } as ESQLSourceResult);
+
+  const indexSource = (name: string) =>
+    ({ name, hidden: false, type: SOURCES_TYPES.INDEX } as ESQLSourceResult);
+
+  it('returns false when getSources is missing', async () => {
+    const result = await hasWiredStreamsInQuery('FROM logs-ds', {});
+    expect(result).toBe(false);
+  });
+
+  it('returns false and does not call any callbacks when the query has no FROM sources', async () => {
+    const getSources = jest.fn(async () => [wiredStreamSource('ignored')]);
+
+    const result = await hasWiredStreamsInQuery('ROW x = 1', { getSources });
+
+    expect(result).toBe(false);
+    expect(getSources).not.toHaveBeenCalled();
+  });
+
+  it('returns false when a data stream is used but it is not a wired stream', async () => {
+    const getSources = jest.fn(async () => [indexSource('logs')]);
+
+    const result = await hasWiredStreamsInQuery('FROM logs', { getSources });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns true when the query has a source that is a wired stream', async () => {
+    const getSources = jest.fn(async () => [wiredStreamSource('logs.otel.child')]);
+
+    const result = await hasWiredStreamsInQuery('FROM logs.otel.child | LIMIT 10', {
+      getSources,
+    });
+
+    expect(result).toBe(true);
+    expect(getSources).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns true when the wired stream has a wildcard in the name', async () => {
+    const getSources = jest.fn(async () => [wiredStreamSource('logs')]);
+
+    const result = await hasWiredStreamsInQuery('FROM logs*', { getSources });
+
+    expect(result).toBe(true);
+    expect(getSources).toHaveBeenCalledTimes(1);
   });
 });

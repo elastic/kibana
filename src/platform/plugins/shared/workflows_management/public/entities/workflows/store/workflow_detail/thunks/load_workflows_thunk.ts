@@ -8,7 +8,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
@@ -28,45 +28,56 @@ export const loadWorkflowsThunk = createAsyncThunk<
   LoadWorkflowsResponse,
   LoadWorkflowsParams,
   { state: RootState; extra: { services: WorkflowsServices } }
->('detail/loadWorkflowsThunk', async (_, { dispatch, rejectWithValue, extra: { services } }) => {
-  const { http, notifications } = services;
-  try {
-    const api = new WorkflowApi(http);
-    const response = await api.getWorkflows({ size: MAX_WORKFLOWS_LOOKUP_SIZE, page: 1 });
+>(
+  'detail/loadWorkflowsThunk',
+  async (_, { dispatch, getState, rejectWithValue, extra: { services } }) => {
+    const { http, notifications } = services;
+    try {
+      const isCurrentWorkflowManaged = getState().detail.workflow?.managed === true;
+      const api = new WorkflowApi(http);
+      const response = await api.getWorkflows({
+        size: MAX_WORKFLOWS_LOOKUP_SIZE,
+        page: 1,
+        managed: isCurrentWorkflowManaged ? 'all' : 'unmanaged',
+      });
 
-    const workflowsMap: WorkflowsResponse['workflows'] = {};
-    response.results.forEach((workflow) => {
-      workflowsMap[workflow.id] = {
-        id: workflow.id,
-        name: workflow.name,
-        inputsSchema: normalizeFieldsToJsonSchema(workflow.definition?.inputs),
+      const workflowsMap: WorkflowsResponse['workflows'] = {};
+      response.results.forEach((workflow) => {
+        const inputsSchema = getInputsFromDefinition(workflow.definition);
+
+        workflowsMap[workflow.id] = {
+          id: workflow.id,
+          name: workflow.name,
+          managed: workflow.managed,
+          inputsSchema,
+        };
+      });
+
+      const workflowsResponse: WorkflowsResponse = {
+        workflows: workflowsMap,
+        totalWorkflows: response.total || 0,
       };
-    });
 
-    const workflowsResponse: WorkflowsResponse = {
-      workflows: workflowsMap,
-      totalWorkflows: response.total || 0,
-    };
+      dispatch(setWorkflows(workflowsResponse));
 
-    dispatch(setWorkflows(workflowsResponse));
+      return workflowsResponse;
+    } catch (error) {
+      const errorMessage =
+        error && typeof error === 'object' && 'body' in error
+          ? (error as { body?: { message?: string } }).body?.message
+          : undefined;
+      const message =
+        typeof errorMessage === 'string'
+          ? errorMessage
+          : error instanceof Error
+          ? error.message
+          : 'Failed to load workflows';
 
-    return workflowsResponse;
-  } catch (error) {
-    const errorMessage =
-      error && typeof error === 'object' && 'body' in error
-        ? (error as { body?: { message?: string } }).body?.message
-        : undefined;
-    const message =
-      typeof errorMessage === 'string'
-        ? errorMessage
-        : error instanceof Error
-        ? error.message
-        : 'Failed to load workflows';
-
-    notifications.toasts.addError(new Error(message), {
-      title: 'Failed to load workflows',
-    });
-    dispatch(setWorkflows(initialWorkflowsState));
-    return rejectWithValue(message);
+      notifications.toasts.addError(new Error(message), {
+        title: 'Failed to load workflows',
+      });
+      dispatch(setWorkflows(initialWorkflowsState));
+      return rejectWithValue(message);
+    }
   }
-});
+);

@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingElastic,
   useEuiTheme,
 } from '@elastic/eui';
@@ -47,6 +48,7 @@ export function StreamListView() {
     },
     core,
   } = context;
+  const streamsDocsLink = core.docLinks.links.observability.logsStreams;
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
 
@@ -196,7 +198,7 @@ export function StreamListView() {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={router.link('/_discovery')}
-                  iconType="crosshairs"
+                  iconType="significantEvents"
                   size="s"
                   data-test-subj="streamsSignificantEventsDiscoveryButton"
                 >
@@ -212,6 +214,19 @@ export function StreamListView() {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+        }
+        description={
+          <>
+            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+              defaultMessage:
+                'Manage how your data is ingested, structured, and retained across all your streams.',
+            })}{' '}
+            <EuiLink href={streamsDocsLink} target="_blank">
+              {i18n.translate('xpack.streams.streamsListView.pageHeaderDescriptionLearnMoreLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </>
         }
       />
       <StreamsAppPageTemplate.Body grow>

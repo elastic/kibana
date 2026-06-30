@@ -15,13 +15,22 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
+  type EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import type { FlowType } from '../../../hooks/use_wired_streams_status';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EnableWiredStreamsConfirmModal } from './enable_wired_streams_confirm_modal';
 
 export type IngestionMode = 'classic' | 'wired';
+
+const INGESTION_MODES: readonly IngestionMode[] = ['classic', 'wired'] as const;
+
+const isIngestionMode = (value: string | null | undefined): value is IngestionMode =>
+  typeof value === 'string' && (INGESTION_MODES as readonly string[]).includes(value);
+
+// Falls back to 'classic' for unknown/missing values so stale URLs never break.
+export const parseIngestionMode = (raw: string | null | undefined): IngestionMode =>
+  isIngestionMode(raw) ? raw : 'classic';
 
 interface WiredStreamsIngestionSelectorProps {
   ingestionMode: IngestionMode;
@@ -76,7 +85,7 @@ export function WiredStreamsIngestionSelector({
     }
   }, [onEnableWiredStreams, flowType, onChange]);
 
-  const ingestionModeOptions = [
+  const ingestionModeOptions: EuiButtonGroupOptionProps[] = [
     {
       id: 'classic' as const,
       label: i18n.translate('xpack.observability_onboarding.wiredStreams.classicIngestion', {
@@ -85,65 +94,44 @@ export function WiredStreamsIngestionSelector({
     },
     {
       id: 'wired' as const,
+      toolTipContent: i18n.translate(
+        'xpack.observability_onboarding.wiredStreams.tooltip.description',
+        {
+          defaultMessage:
+            'Route logs to a managed hierarchy instead of classic data streams. Streams inherit lifecycle settings and processors from parent streams, enabling centralized configuration for data retention and routing.',
+        }
+      ),
+      toolTipProps: {
+        title: i18n.translate('xpack.observability_onboarding.wiredStreams.tooltip.title', {
+          defaultMessage: 'Wired Streams (Tech Preview)',
+        }),
+      },
       label: (
-        <EuiToolTip
-          position="top"
-          title={i18n.translate('xpack.observability_onboarding.wiredStreams.tooltip.title', {
-            defaultMessage: 'Wired Streams (Tech Preview)',
-          })}
-          content={
-            <>
-              {i18n.translate('xpack.observability_onboarding.wiredStreams.tooltip.description', {
-                defaultMessage:
-                  'Route logs to a managed hierarchy instead of classic data streams. Streams inherit lifecycle settings and processors from parent streams, enabling centralized configuration for data retention and routing.',
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+          <EuiFlexItem grow={false} component="span">
+            {i18n.translate('xpack.observability_onboarding.wiredStreams.wiredStreamsOption', {
+              defaultMessage: 'Wired Streams',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} component="span">
+            <EuiBetaBadge
+              label={i18n.translate('xpack.observability_onboarding.wiredStreams.techPreview', {
+                defaultMessage: 'Tech Preview',
               })}
-              {streamsDocLink && (
-                <>
-                  {' '}
-                  <EuiLink
-                    href={streamsDocLink}
-                    target="_blank"
-                    external
-                    data-test-subj="observabilityOnboardingWiredStreamsTooltipLearnMoreLink"
-                  >
-                    {i18n.translate(
-                      'xpack.observability_onboarding.wiredStreams.tooltip.learnMore',
-                      {
-                        defaultMessage: 'Learn more',
-                      }
-                    )}
-                  </EuiLink>
-                </>
-              )}
-            </>
-          }
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+              size="s"
+              color="hollow"
+              alignment="middle"
+            />
+          </EuiFlexItem>
+          {isEnabling && (
             <EuiFlexItem grow={false} component="span">
-              {i18n.translate('xpack.observability_onboarding.wiredStreams.wiredStreamsOption', {
-                defaultMessage: 'Wired Streams',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <EuiBetaBadge
-                label={i18n.translate('xpack.observability_onboarding.wiredStreams.techPreview', {
-                  defaultMessage: 'Tech Preview',
-                })}
+              <EuiLoadingSpinner
                 size="s"
-                color="hollow"
-                alignment="middle"
+                data-test-subj="observabilityOnboardingWiredStreamsEnablingSpinner"
               />
             </EuiFlexItem>
-            {isEnabling && (
-              <EuiFlexItem grow={false} component="span">
-                <EuiLoadingSpinner
-                  size="s"
-                  data-test-subj="observabilityOnboardingWiredStreamsEnablingSpinner"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiToolTip>
+          )}
+        </EuiFlexGroup>
       ),
     },
   ];

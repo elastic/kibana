@@ -7,15 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { EuiSearchBar } from '@elastic/eui';
+import { EuiSearchBar, EuiText } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
+import {
+  useContentListConfig,
+  useContentListSearch,
+  useContentListSelection,
+  useContentListPhase,
+} from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
+import {
+  CONTENT_LIST_TEST_SUBJECTS,
+  getContentListToolbarSubjects,
+} from '@kbn/content-list-common';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
 import { SelectionBar } from './selection_bar';
+import { ToolbarSkeleton } from './skeleton/toolbar_skeleton';
 
 /**
  * Props for the {@link ContentListToolbar} component.
@@ -32,17 +42,25 @@ const defaultPlaceholder = i18n.translate(
   { defaultMessage: 'Search…' }
 );
 
+const parseErrorPrefix = i18n.translate(
+  'contentManagement.contentList.toolbar.searchParseErrorPrefix',
+  { defaultMessage: 'Invalid search:' }
+);
+
 /**
  * `ContentListToolbar` component.
  *
  * `queryText` from state flows directly to `EuiSearchBar`'s `query` prop.
- * When the user types, `onChange` stores `query.text` back to state.
- * No displayText, no typingRef, no sync hacks — one source of truth.
+ * When the user types or commits a filter, `onChange` stores `query.text`
+ * back to state. No displayText, no typingRef, no sync hacks — one source
+ * of truth.
  */
 const ContentListToolbarComponent = ({
   children,
-  'data-test-subj': dataTestSubj = 'contentListToolbar',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.toolbar,
 }: ContentListToolbarProps) => {
+  const subjects = useMemo(() => getContentListToolbarSubjects(dataTestSubj), [dataTestSubj]);
+  const phase = useContentListPhase();
   const { labels, supports } = useContentListConfig();
   const {
     queryText,
@@ -50,27 +68,40 @@ const ContentListToolbarComponent = ({
     isSupported: searchIsSupported,
     fieldNames,
   } = useContentListSearch();
+  const { selectedCount } = useContentListSelection();
   const filters = useFilters(children);
+
+  // Surface `EuiSearchBar` parse errors below the input — the built-in
+  // invalid-icon + browser `title` tooltip is easy to miss
+  // ({@link https://github.com/elastic/kibana/issues/271705}).
+  const [parseError, setParseError] = useState<string | null>(null);
 
   const handleSearchChange = useCallback(
     ({ query, error }: EuiSearchBarOnChangeArgs) => {
       if (error || !query) {
-        // Return without updating state when EuiSearchBar reports a parse error.
-        //
-        // EuiSearchBar maintains its own internal `queryText` during error states,
-        // so the input continues to show what the user typed. Passing the raw
-        // error text to the controlled `query` prop is unsafe: EuiSearchBar's
-        // `getDerivedStateFromProps` calls `parseQuery` on any new prop value and
-        // would throw if the text is unparseable, crashing the component.
-        //
-        // Known limitation: if an external query change (e.g. a filter-toggle
-        // avatar click) fires while the user has an in-progress parse error, the
-        // input will snap to the new external query value.
+        // Capture the parse message for the hint popover but do not echo the
+        // raw text back through the controlled `query` prop —
+        // `EuiSearchBar.getDerivedStateFromProps` re-parses every new value
+        // and would throw on unparseable text.
+        setParseError(error ? error.message : null);
         return;
       }
+      setParseError(null);
       setQueryFromEuiQuery(query);
     },
     [setQueryFromEuiQuery]
+  );
+
+  const searchHint = useMemo(
+    () => ({
+      content: (
+        <EuiText color="danger" size="s" data-test-subj={subjects.searchParseError}>
+          {parseErrorPrefix} {parseError}
+        </EuiText>
+      ),
+      popoverProps: { isOpen: Boolean(parseError) },
+    }),
+    [parseError, subjects]
   );
 
   // Build an EuiSearchBar schema so it recognizes registered fields (e.g., `tag`,
@@ -86,14 +117,27 @@ const ContentListToolbarComponent = ({
     return { strict: false, fields: schemaFields };
   }, [fieldNames]);
 
-  // Only include the selection bar when selection is supported.
+  // Only pass the SelectionBar as a toolsLeft item when there are actually
+  // selected items. EuiSearchBar renders every toolsLeft entry as a flex item
+  // regardless of whether the child renders null, producing an empty gap when
+  // nothing is selected.
   const toolsLeft = useMemo(
     () =>
-      supports.selection
-        ? [<SelectionBar key="selection" data-test-subj={`${dataTestSubj}-selectionBar`} />]
+      supports.selection && selectedCount > 0
+        ? [<SelectionBar key="selection" data-test-subj={subjects.selectionBar} />]
         : undefined,
-    [supports.selection, dataTestSubj]
+    [supports.selection, selectedCount, subjects]
   );
+
+  if (phase === 'initialLoad') {
+    return (
+      <ToolbarSkeleton
+        filterCount={filters.length}
+        hasSelection={supports.selection}
+        data-test-subj={subjects.skeleton}
+      />
+    );
+  }
 
   return (
     <EuiSearchBar
@@ -101,13 +145,14 @@ const ContentListToolbarComponent = ({
       box={{
         placeholder: labels.searchPlaceholder ?? defaultPlaceholder,
         incremental: true,
-        'data-test-subj': `${dataTestSubj}-searchBox`,
+        'data-test-subj': subjects.searchBox,
         disabled: !searchIsSupported,
         ...(boxSchema && { schema: boxSchema }),
       }}
       onChange={handleSearchChange}
       toolsLeft={toolsLeft}
       filters={filters}
+      hint={searchHint}
       data-test-subj={dataTestSubj}
     />
   );

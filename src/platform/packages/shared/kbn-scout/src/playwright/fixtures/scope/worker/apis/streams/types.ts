@@ -128,8 +128,17 @@ export interface ClassicStreamDefinition {
 
 export type IngestStreamDefinition = WiredStreamDefinition | ClassicStreamDefinition;
 
+/** Common fields present in every stream GET response beyond the ingest shape. */
+export interface StreamCommonResponseFields {
+  name?: string;
+  type?: string;
+  description?: string;
+  dashboards?: string[];
+  rules?: string[];
+}
+
 export interface StreamsIngestGetResponse {
-  stream: IngestStreamDefinition;
+  stream: IngestStreamDefinition & StreamCommonResponseFields;
 }
 
 export type IngestUpsertRequest = WiredIngestShape | ClassicIngestShape;

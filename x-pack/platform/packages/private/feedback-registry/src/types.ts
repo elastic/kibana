@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
+import type { FeedbackRegistryEntry } from '@kbn/ui-feedback';
 
 /**
  * The id of the application associated with this feedback entry, e.g. 'dashboard', 'discover'
@@ -15,5 +15,7 @@ export type FeedbackRegistryEntryId = string;
 
 /**
  * List of feedback plugin questions for a given application.
+ * Each entry is a lazy loader that returns the questions for a specific app,
+ * ensuring only the relevant questions are loaded at runtime.
  */
-export type FeedbackRegistry = Map<FeedbackRegistryEntryId, FeedbackRegistryEntry[]>;
+export type FeedbackRegistry = Map<FeedbackRegistryEntryId, () => Promise<FeedbackRegistryEntry[]>>;

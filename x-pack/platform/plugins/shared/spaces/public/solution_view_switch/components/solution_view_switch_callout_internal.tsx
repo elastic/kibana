@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -77,19 +78,26 @@ export const SolutionViewSwitchCalloutInternal = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="solutionViewSwitchCalloutDismissButton"
-                iconType="cross"
-                size="xs"
-                color="text"
-                aria-label={i18n.translate(
-                  'xpack.spaces.solutionViewSwitch.callout.dismissButton',
-                  {
-                    defaultMessage: 'Dismiss',
-                  }
-                )}
-                onClick={onDismiss}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.spaces.solutionViewSwitch.callout.dismissButton', {
+                  defaultMessage: 'Dismiss',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="solutionViewSwitchCalloutDismissButton"
+                  iconType="cross"
+                  size="xs"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.spaces.solutionViewSwitch.callout.dismissButton',
+                    {
+                      defaultMessage: 'Dismiss',
+                    }
+                  )}
+                  onClick={onDismiss}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />

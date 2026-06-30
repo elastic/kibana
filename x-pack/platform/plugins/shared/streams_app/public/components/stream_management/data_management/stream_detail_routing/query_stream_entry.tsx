@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  EuiPanel,
-  useEuiTheme,
   EuiLink,
+  EuiPanel,
   EuiSkeletonText,
-  EuiCodeBlock,
-  EuiCallOut,
-  EuiButtonEmpty,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { css as cssReact } from '@emotion/react';
-import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName } from '@kbn/streams-schema';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -113,14 +114,24 @@ export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntr
             <QueryStreamBadge />
             {onEdit && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  aria-label={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
                     defaultMessage: 'Edit query stream',
                   })}
-                  data-test-subj={`streamsAppQueryStreamEditButton-${streamName}`}
-                  onClick={() => onEdit(streamName)}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    aria-label={i18n.translate(
+                      'xpack.streams.queryStreamEntry.editButtonAriaLabel',
+                      {
+                        defaultMessage: 'Edit query stream',
+                      }
+                    )}
+                    data-test-subj={`streamsAppQueryStreamEditButton-${streamName}`}
+                    onClick={() => onEdit(streamName)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -166,6 +177,11 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const isClassicParent = Streams.ClassicStream.Definition.is(definition.stream);
 
+  const existingSiblingNames = useMemo(
+    () => definition.stream.query_streams?.map((ref) => ref.name) ?? [],
+    [definition.stream.query_streams]
+  );
+
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { creating: 'saving' } } })
   );
@@ -177,18 +193,9 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
     }
   }, debouncingOptions);
 
-  // Validate and save the query stream
   const handleSave = useCallback(
     ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
-      // Validate name follows child naming convention
       const fullName = `${parentStreamName}.${name}`;
-      if (!name || name.trim() === '' || !isChildOf(parentStreamName, fullName)) {
-        return;
-      }
-      if (!esqlQuery || esqlQuery.trim() === '') {
-        return;
-      }
-      // Trigger save with the form data
       saveQueryStream({ name: fullName, esqlQuery });
     },
     [parentStreamName, saveQueryStream]
@@ -199,12 +206,12 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
 
   return (
     <InlineQueryStreamForm
-      parentStreamName={parentStreamName}
       initialEsqlQuery={`FROM ${initialFromSource}`}
       onSave={handleSave}
       onCancel={cancelQueryStreamCreation}
       onQueryChange={debouncedExecuteQuery}
       isSaving={isSaving}
+      existingSiblingNames={existingSiblingNames}
     />
   );
 }
@@ -287,6 +294,7 @@ export function EditingQueryStreamEntry({
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.streams.editingQueryStreamEntry.fetchError', {
             defaultMessage: 'Unable to load query stream details',
           })}
@@ -307,7 +315,6 @@ export function EditingQueryStreamEntry({
   return (
     <>
       <InlineQueryStreamForm
-        parentStreamName={parentStreamName}
         initialName={suffix}
         initialEsqlQuery={currentEsql}
         onSave={handleSave}

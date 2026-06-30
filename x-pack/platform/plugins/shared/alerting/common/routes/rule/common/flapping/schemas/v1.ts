@@ -24,7 +24,7 @@ export const flappingSchema = schema.object(
     status_change_threshold: schema.number({
       meta: {
         description:
-          'The minimum number of times an alert must switch states in the look back window.',
+          'The minimum number of times an alert must switch states within the defined look back window time.',
       },
       min: MIN_STATUS_CHANGE_THRESHOLD_V1,
       max: MAX_STATUS_CHANGE_THRESHOLD_V1,
@@ -33,6 +33,7 @@ export const flappingSchema = schema.object(
   {
     validate: validateFlappingV1,
     meta: {
+      id: 'rule_flapping',
       description:
         'When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.',
     },

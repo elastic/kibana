@@ -27,7 +27,7 @@ const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParam
 }) => ({
   ...res,
   client_id: clientId,
-  client_secret: clientSecret,
+  ...(clientSecret ? { client_secret: clientSecret } : {}),
 });
 
 export async function requestOAuthClientCredentialsToken(

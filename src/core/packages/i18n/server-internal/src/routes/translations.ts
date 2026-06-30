@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import { open } from 'fs/promises';
+import type { ReadStream } from 'fs';
+import { i18n, i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
 
@@ -15,25 +17,22 @@ const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-interface TranslationCache {
-  translations: string;
-  hash: string;
-}
-
 export const registerTranslationsRoute = ({
   router,
   locale,
-  translationHash,
+  translationHashes,
+  localeFileMap,
   isDist,
 }: {
   router: IRouter;
   locale: string;
-  translationHash: string;
+  translationHashes: Record<string, string>;
+  localeFileMap: Record<string, string[]>;
   isDist: boolean;
 }) => {
-  let translationCache: TranslationCache;
+  const supportedLocales = Object.keys(translationHashes);
 
-  ['/translations/{locale}.json', `/translations/${translationHash}/{locale}.json`].forEach(
+  ['/translations/{locale}.json', `/translations/{translationHash}/{locale}.json`].forEach(
     (routePath) => {
       router.get(
         {
@@ -52,6 +51,7 @@ export const registerTranslationsRoute = ({
           validate: {
             params: schema.object({
               locale: schema.string(),
+              translationHash: schema.maybe(schema.string()),
             }),
           },
           options: {
@@ -60,18 +60,43 @@ export const registerTranslationsRoute = ({
             excludeFromRateLimiter: true,
           },
         },
-        (ctx, req, res) => {
-          if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
+        async (_ctx, req, res) => {
+          const requestedLocale = req.params.locale.toLowerCase();
+          // Find the canonical-cased locale key (e.g. 'fr-FR' not 'fr-fr')
+          const canonicalLocale = supportedLocales.find((s) => s.toLowerCase() === requestedLocale);
+          if (!canonicalLocale) {
             return res.notFound({
               body: `Unknown locale: ${req.params.locale}`,
             });
           }
-          if (!translationCache) {
-            const translations = JSON.stringify(i18n.getTranslation());
-            translationCache = {
-              translations,
-              hash: translationHash,
-            };
+
+          // Validate the translation hash if provided in the URL
+          const requestedHash = req.params.translationHash;
+          const expectedHash = translationHashes[canonicalLocale];
+          if (requestedHash && expectedHash && requestedHash !== expectedHash) {
+            return res.notFound({
+              body: `Stale translation hash for locale: ${req.params.locale}`,
+            });
+          }
+
+          let body: string | ReadStream;
+          if (canonicalLocale.toLowerCase() === locale.toLowerCase()) {
+            // Default locale: already in memory from server startup
+            body = JSON.stringify(i18n.getTranslation());
+          } else {
+            const files = localeFileMap[canonicalLocale] ?? [];
+            if (files.length === 1) {
+              // Open before res.ok() so I/O errors surface as 500, not a truncated 200.
+              // autoClose: true (Node default) closes the handle when the stream ends or is destroyed.
+              const fileHandle = await open(files[0], 'r');
+              body = fileHandle.createReadStream();
+            } else {
+              // Multiple files (external plugin contributed translations): merge via
+              // the loader and serve without caching.
+              const translationData = await i18nLoader.getTranslationsByLocale(canonicalLocale);
+              translationData.locale = canonicalLocale;
+              body = JSON.stringify(translationData);
+            }
           }
 
           let headers: Record<string, string>;
@@ -84,14 +109,11 @@ export const registerTranslationsRoute = ({
             headers = {
               'content-type': 'application/json',
               'cache-control': 'must-revalidate',
-              etag: translationCache.hash,
+              etag: expectedHash,
             };
           }
 
-          return res.ok({
-            headers,
-            body: translationCache.translations,
-          });
+          return res.ok({ headers, body });
         }
       );
     }

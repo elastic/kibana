@@ -22,7 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceMapGraph } from '../graph';
 import {
   generateServiceMapElements,
@@ -47,14 +46,8 @@ const defaultTimeRange = {
 const meta: Meta<typeof ServiceMapGraph> = {
   title: 'app/ServiceMap/ServiceMap',
   component: ServiceMapGraph,
-  decorators: [
-    (Story) => (
-      <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
-        <Story />
-      </MockApmPluginStorybook>
-    ),
-  ],
   parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'fullscreen',
     a11y: {
       config: {
@@ -122,6 +115,8 @@ export const GenerateMap: StoryFn = () => {
     groupedResourceCount: 2,
     hasAnomalies: true,
     includeBidirectional: true,
+    hasAlerts: true,
+    hasSlos: true,
   });
   const [json, setJson] = useState<string>('');
   const [{ nodes, edges }, setElements] = useState(() => generateServiceMapElements(options));
@@ -137,7 +132,7 @@ export const GenerateMap: StoryFn = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <EuiFlexGroup wrap>
+      <EuiFlexGroup wrap alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip content="Number of service nodes">
             <EuiFieldNumber
@@ -189,6 +184,20 @@ export const GenerateMap: StoryFn = () => {
             onChange={(e) =>
               setOptions((prev) => ({ ...prev, includeBidirectional: e.target.checked }))
             }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Alert Badges"
+            checked={options.hasAlerts ?? false}
+            onChange={(e) => setOptions((prev) => ({ ...prev, hasAlerts: e.target.checked }))}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="SLO Badges"
+            checked={options.hasSlos ?? false}
+            onChange={(e) => setOptions((prev) => ({ ...prev, hasSlos: e.target.checked }))}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -23,8 +23,9 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../../../../../common/constants/synthetics_alerts';
 import type { ClientPluginsStart } from '../../../../../../plugin';
-import { useGetUrlParams, useRefreshedRange } from '../../../../hooks';
+import { useGetUrlParams } from '../../../../hooks';
 import { selectOverviewStatus } from '../../../../state/overview_status';
+import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
@@ -62,7 +63,9 @@ export const useMonitorQueryIds = () => {
 };
 
 export const OverviewAlerts = () => {
-  const { from, to } = useRefreshedRange(12, 'hours');
+  // Follows the page-level date picker (URL params), defaulting to the overview's
+  // own window when untouched so it stays in step with the status panel.
+  const { from, to } = useOverviewRefreshedRange();
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
@@ -153,5 +156,5 @@ const ALERTS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.alerts', {
 });
 
 const headingText = i18n.translate('xpack.synthetics.overview.alerts.headingText', {
-  defaultMessage: 'Last 12 hours',
+  defaultMessage: 'Alerts',
 });

@@ -12,7 +12,8 @@ import type { NotificationsStart } from '@kbn/core/public';
 
 import type { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { isServerValidationError } from '../../services/tags';
-import { getRandomColor, validateTag } from './utils';
+import { getRandomColor } from '../../../common';
+import { validateTag } from './utils';
 import { CreateOrEditModal } from './create_or_edit_modal';
 import { useValidation } from './use_validation';
 

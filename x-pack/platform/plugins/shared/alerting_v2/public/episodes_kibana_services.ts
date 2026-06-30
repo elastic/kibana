@@ -15,6 +15,8 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 /**
  * Kibana context services for the Alert episodes management UI
@@ -31,4 +33,7 @@ export type AlertEpisodesKibanaServices = CoreStart & {
   charts: ChartsPluginStart;
   storage: Storage;
   toastNotifications: CoreStart['notifications']['toasts'];
+  unifiedDocViewer: UnifiedDocViewerStart;
+  userProfile: CoreStart['userProfile'];
+  spaces: SpacesPluginStart;
 };

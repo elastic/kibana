@@ -8,8 +8,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import {
+  WORKFLOWS_MANAGEMENT_FEATURE_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
@@ -37,6 +42,16 @@ jest.mock('./connectors/workflows', () => ({
   getWorkflowsConnectorType: jest.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
 }));
 
+const createPlugin = (globalExecutionsViewEnabled = false) =>
+  new WorkflowsPlugin(
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      logging: { console: false },
+      available: true,
+      globalExecutionsView: { enabled: globalExecutionsViewEnabled },
+    })
+  );
+
 describe('WorkflowsPlugin', () => {
   let plugin: WorkflowsPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -51,9 +66,10 @@ describe('WorkflowsPlugin', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    plugin = new WorkflowsPlugin();
+    plugin = createPlugin();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
+    coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
       triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
     };
@@ -73,8 +89,12 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register the workflows app when workflows UI is enabled', () => {
-      coreSetup.uiSettings.get.mockReturnValueOnce(true);
+    it('should register only the workflows list deep link when executions view flag is off in bootstrap', () => {
+      plugin = createPlugin(false);
+      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) return true;
+        return fallback;
+      });
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
@@ -84,9 +104,29 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
+          deepLinks: [expect.objectContaining({ id: 'workflowsList', path: '/' })],
         })
       );
       expect(result).toEqual({});
+    });
+
+    it('should register the executions deep link when executions view flag is on in bootstrap', () => {
+      plugin = createPlugin(true);
+      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) return true;
+        return fallback;
+      });
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deepLinks: expect.arrayContaining([
+            expect.objectContaining({ id: 'workflowsList', path: '/' }),
+            expect.objectContaining({ id: 'executions', path: '/executions' }),
+          ]),
+        })
+      );
     });
   });
 
@@ -102,19 +142,113 @@ describe('WorkflowsPlugin', () => {
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
     });
 
-    it('should subscribe to license changes', () => {
-      coreSetup.uiSettings.get.mockReturnValue(false);
-      plugin.setup(coreSetup, setupDeps as any);
+    describe('app visibility (visibleIn)', () => {
+      const setReadCapability = (canReadWorkflow: boolean) => {
+        coreStart.application.capabilities = {
+          ...coreStart.application.capabilities,
+          [WORKFLOWS_MANAGEMENT_FEATURE_ID]: { readWorkflow: canReadWorkflow },
+        } as any;
+      };
 
-      const license$ = new BehaviorSubject({
-        isActive: true,
-        hasAtLeast: jest.fn().mockReturnValue(true),
+      const setLicenseValid = (isValid: boolean) => {
+        startDeps.licensing.license$ = new BehaviorSubject({
+          isActive: true,
+          isAvailable: true,
+          hasAtLeast: jest.fn().mockReturnValue(isValid),
+        }) as any;
+      };
+
+      /**
+       * Registers the workflows app via setup() and subscribes to its updater$
+       * before start() runs, so the synchronous emission triggered by
+       * subscribeAppVisibilityChanges() is captured.
+       */
+      const captureAppUpdates = (): Array<Partial<AppUpdatableFields>> => {
+        const uiSettingsGetImpl = (key: string, fallback?: unknown) => {
+          if (key === WORKFLOWS_UI_SETTING_ID) return true;
+          return fallback;
+        };
+        coreSetup.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+        coreStart.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+
+        plugin.setup(coreSetup, setupDeps as any);
+
+        const registeredApp = coreSetup.application.register.mock.calls[0][0] as App;
+        const updates: Array<Partial<AppUpdatableFields>> = [];
+        registeredApp.updater$!.subscribe((updater: AppUpdater) => {
+          const fields = updater({} as App);
+          if (fields) updates.push(fields);
+        });
+        return updates;
+      };
+
+      it('should make the app visible everywhere when authorized and available', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'home',
+          'kibanaOverview',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
       });
-      startDeps.licensing.license$ = license$ as any;
 
-      plugin.start(coreStart, startDeps as any);
+      it('should hide the app from classicSideNav and projectSideNav when the user lacks read capability', () => {
+        setReadCapability(false);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
 
-      expect(license$.observed).toBe(true);
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual(['globalSearch']);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
+          'classicSideNav'
+        );
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
+          'projectSideNav'
+        );
+      });
+
+      it('should keep the app in classicSideNav and projectSideNav and globalSearch when authorized but unavailable', () => {
+        setReadCapability(true);
+        setLicenseValid(false);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
+      });
+
+      it('should hide the app from classicSideNav and projectSideNav for unauthorized users even when unavailable', () => {
+        setReadCapability(false);
+        setLicenseValid(false);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
+      });
     });
   });
 });

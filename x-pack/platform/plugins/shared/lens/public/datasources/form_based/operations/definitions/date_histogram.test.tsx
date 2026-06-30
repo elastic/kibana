@@ -62,7 +62,7 @@ const indexPattern1: IndexPattern = {
       searchable: true,
     },
   ]),
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };
@@ -91,7 +91,7 @@ const indexPattern2: IndexPattern = {
       searchable: true,
     },
   ]),
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };
@@ -214,6 +214,28 @@ describe('date_histogram', () => {
       );
     });
 
+    it('uses data view time field when column source field is empty', () => {
+      const esAggsFn = dateHistogramOperation.toEsAggsFn(
+        {
+          ...(layer.columns.col1 as DateHistogramIndexPatternColumn),
+          sourceField: '',
+        },
+        'col1',
+        indexPattern1,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          arguments: expect.objectContaining({
+            field: ['timestamp'],
+          }),
+        })
+      );
+    });
+
     it('should use restricted time zone and omit use normalized es interval for rollups', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,
@@ -252,7 +274,7 @@ describe('date_histogram', () => {
               },
             },
           ]),
-          getFormatterForField: () => ({ convert: (v: unknown) => v }),
+          getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
         },
         layer,
         uiSettingsMock,
@@ -714,7 +736,7 @@ describe('date_histogram', () => {
             },
           },
         ]),
-        getFormatterForField: () => ({ convert: (v: unknown) => v }),
+        getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
       };
 
       const instance = shallow(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import {
   EuiButton,
@@ -50,6 +50,12 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
     }
   );
   const usageTracker = useUsageTracker();
+
+  const onSubmit = useCallback(() => {
+    usageTracker?.click(AnalyticsEvents.new_set_created);
+    createSynonymsSet({ synonymsSetId: name, forceWrite });
+  }, [createSynonymsSet, forceWrite, name, usageTracker]);
+
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
@@ -62,15 +68,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm
-          id={formId}
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            usageTracker?.click(AnalyticsEvents.new_set_created);
-            createSynonymsSet({ synonymsSetId: name, forceWrite });
-          }}
-        >
+        <EuiForm id={formId} component="form">
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameLabel', {
@@ -96,6 +94,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           >
             <EuiFieldText
               data-test-subj="searchSynonymsCreateSynonymsSetModalFieldText"
+              isInvalid={conflictError}
               value={rawName}
               onChange={(e) => {
                 setRawName(e.target.value);
@@ -139,7 +138,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           form={formId}
           fill
           disabled={!name || (conflictError && !forceWrite)}
-          type="submit"
+          onClick={onSubmit}
         >
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.createButton"

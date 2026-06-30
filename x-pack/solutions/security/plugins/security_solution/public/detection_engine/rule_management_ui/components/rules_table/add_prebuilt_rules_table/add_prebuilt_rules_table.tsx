@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import * as i18n from '../../../pages/add_rules/translations';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
@@ -38,7 +38,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       isFetching,
       isRefetching,
       selectedRules,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       pagination,
       sortingOptions,
     },
@@ -47,7 +47,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
 
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
-  const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+  const shouldShowProgress = isInitializingPrebuiltRulesPackage || isRefetching;
 
   const handleTableChange = useCallback(
     ({ page: { index, size }, sort }: CriteriaWithPagination<RuleResponse>) => {

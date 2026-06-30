@@ -11,6 +11,7 @@ export default function ({ getPageObject }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('can browse Kibana', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await svlCommonPage.loginAsViewer();
     });

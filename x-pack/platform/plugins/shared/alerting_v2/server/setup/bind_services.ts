@@ -8,6 +8,7 @@
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
@@ -15,27 +16,46 @@ import { CountTimeframeStrategy } from '../lib/director/strategies/count_timefra
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
+import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import { ActionPolicyClient } from '../lib/action_policy_client';
+import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
+import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import {
-  DispatcherEnabledProviderToken,
-  DispatcherServiceInternalToken,
-} from '../lib/dispatcher/tokens';
-import { DISPATCHER_ENABLED_SETTING_ID } from '../lib/dispatcher/ui_settings';
-import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { NotificationPolicyNamespaceToken } from '../lib/notification_policy_client/tokens';
+  ExecutionHistoryClient,
+  ExecutionHistoryClientToken,
+} from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
+import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
-import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
-  NotificationPolicySavedObjectsClientToken,
-  NotificationPolicySavedObjectServiceInternalToken,
-  NotificationPolicySavedObjectServiceScopedToken,
-} from '../lib/services/notification_policy_saved_object_service/tokens';
+  EsServiceInternalToken,
+  EsServiceScopedToken,
+  EsServiceScopedSpaceRoutingToken,
+} from '../lib/services/es_service/tokens';
+import { EventLogService } from '../lib/services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
+import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { SettingsService } from '../lib/services/settings_service/settings_service';
+import {
+  SettingsServiceToken,
+  UiSettingsClientToken,
+} from '../lib/services/settings_service/tokens';
+import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
+import {
+  MaintenanceWindowSavedObjectsClientToken,
+  MaintenanceWindowServiceInternalToken,
+} from '../lib/services/maintenance_window_service/tokens';
+import { ActionPolicySavedObjectService } from '../lib/services/action_policy_saved_object_service/action_policy_saved_object_service';
+import {
+  ActionPolicySavedObjectsClientToken,
+  ActionPolicySavedObjectServiceInternalToken,
+  ActionPolicySavedObjectServiceScopedToken,
+} from '../lib/services/action_policy_saved_object_service/tokens';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
+  QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
@@ -56,10 +76,12 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
+import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
+import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
-  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
@@ -72,7 +94,14 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
-  bind(NotificationPolicyNamespaceToken)
+  bind(RequestSpaceIdToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      return spaces.spacesService.getSpaceId(request);
+    })
+    .inRequestScope();
+  bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
@@ -80,17 +109,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return spaces.spacesService.spaceIdToNamespace(spaceId);
     })
     .inRequestScope();
-  bind(NotificationPolicyClient)
-    .toDynamicValue(({ get }) => {
-      return new NotificationPolicyClient(
-        get(NotificationPolicySavedObjectServiceScopedToken),
-        get(UserService),
-        get(ApiKeyService),
-        get(EncryptedSavedObjectsClientToken),
-        get(NotificationPolicyNamespaceToken)
-      );
-    })
-    .inRequestScope();
+  bind(ActionPolicyClient).toSelf().inRequestScope();
+  bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
@@ -98,6 +120,22 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
+
+  bind(UiSettingsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const uiSettings = get(CoreStart('uiSettings'));
+      const internalSoClient = savedObjects.createInternalRepository();
+      return uiSettings.globalAsScopedToClient(internalSoClient);
+    })
+    .inSingletonScope();
+  bind(SettingsService).toSelf().inSingletonScope();
+  bind(SettingsServiceToken).toService(SettingsService);
+
+  bind(EventLogService).toSelf().inSingletonScope();
+  bind(EventLogServiceToken).toService(EventLogService);
+  bind(WorkflowService).toSelf().inSingletonScope();
+  bind(WorkflowServiceToken).toService(WorkflowService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -112,6 +150,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const request = get(Request);
       const elasticsearch = get(CoreStart('elasticsearch'));
       return elasticsearch.client.asScoped(request).asCurrentUser;
+    })
+    .inRequestScope();
+
+  bind(EsServiceScopedSpaceRoutingToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const elasticsearch = get(CoreStart('elasticsearch'));
+      // `projectRouting: 'space'` scopes rule-execution queries to the originating space/project
+      // when CPS is enabled, matching alerting v1 behavior. Only `asCurrentUser` honors the option.
+      return elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
     })
     .inRequestScope();
 
@@ -140,6 +188,21 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(MaintenanceWindowSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      return savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+    })
+    .inSingletonScope();
+
+  bind(MaintenanceWindowServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const client = get(MaintenanceWindowSavedObjectsClientToken);
+      const logger = get(LoggerServiceToken);
+      return new MaintenanceWindowService(client, logger);
+    })
+    .inSingletonScope();
+
   bind(EncryptedSavedObjectsClientToken)
     .toDynamicValue(({ get }) => {
       const eso = get(
@@ -147,33 +210,31 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       );
-      return eso.getClient({ includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE] });
+      return eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] });
     })
     .inSingletonScope();
 
-  bind(NotificationPolicySavedObjectsClientToken)
+  bind(ActionPolicySavedObjectsClientToken)
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({
-          includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+          includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE],
         }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();
 
-  bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
-  bind(NotificationPolicySavedObjectServiceScopedToken).toService(
-    NotificationPolicySavedObjectService
-  );
-  bind(NotificationPolicySavedObjectServiceInternalToken)
+  bind(ActionPolicySavedObjectService).toSelf().inRequestScope();
+  bind(ActionPolicySavedObjectServiceScopedToken).toService(ActionPolicySavedObjectService);
+  bind(ActionPolicySavedObjectServiceInternalToken)
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([
-        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
       ]);
       const esoClient = get(EncryptedSavedObjectsClientToken);
-      return new NotificationPolicySavedObjectService(internalClient, spaces, esoClient);
+      return new ActionPolicySavedObjectService(internalClient, spaces, esoClient);
     })
     .inSingletonScope();
 
@@ -188,6 +249,15 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
+      return new QueryService(esClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(QueryServiceScopedSpaceRoutingToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      // Rule-execution queries run against user data and must respect the space project routing.
+      const esClient = get(EsServiceScopedSpaceRoutingToken);
       return new QueryService(esClient, loggerService);
     })
     .inRequestScope();
@@ -230,23 +300,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(DispatcherService).toSelf().inSingletonScope();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);
 
-  bind(DispatcherEnabledProviderToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      const uiSettings = get(CoreStart('uiSettings'));
-      return async () => {
-        const soClient = savedObjects.createInternalRepository();
-        const client = uiSettings.globalAsScopedToClient(soClient);
-        return client.get<boolean>(DISPATCHER_ENABLED_SETTING_ID);
-      };
-    })
-    .inSingletonScope();
-
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
 
-  // Strategies are registered via TransitionStrategyToken for multi-injection.
-  // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
   bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 }

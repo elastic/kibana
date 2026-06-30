@@ -14,7 +14,7 @@ import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
-import { registerCasesSteps } from './workflows';
+import { registerCasesSteps, registerCasesWorkflowTriggers } from './workflows';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import { useIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -41,7 +41,6 @@ import type {
 } from './types';
 import { registerSystemActions } from './components/system_actions';
 import { registerAnalytics } from './analytics';
-import { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 
 /**
  * @public
@@ -75,11 +74,6 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
-
-    registerInternalAttachments(
-      externalReferenceAttachmentTypeRegistry,
-      unifiedAttachmentTypeRegistry
-    );
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
@@ -128,6 +122,7 @@ export class CasesUiPlugin
     registerAnalytics({ analyticsService: core.analytics });
 
     registerCasesSteps(plugins.workflowsExtensions);
+    registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
     return {
       attachmentFramework: {
@@ -146,6 +141,11 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      hasDashboardPluginEnabled: Boolean(plugins.dashboard),
+      hasMapsPluginEnabled: Boolean(plugins.maps),
+    });
 
     KibanaServices.init({
       ...core,
@@ -183,6 +183,12 @@ export class CasesUiPlugin
     return {
       config: {
         templatesEnabled: config?.templates?.enabled ?? false,
+        attachmentsEnabled: config?.attachments?.enabled ?? false,
+        casesRedesign: {
+          list: config?.casesRedesign?.list ?? false,
+          details: config?.casesRedesign?.details ?? false,
+          settings: config?.casesRedesign?.settings ?? false,
+        },
       },
       api: createClientAPI({ http: core.http }),
       ui: {
@@ -223,7 +229,6 @@ export class CasesUiPlugin
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
-        getObservablesFromEcs,
       },
     };
   }

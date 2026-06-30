@@ -118,10 +118,8 @@ export function isFormBasedLayer(
   return 'columnOrder' in layer;
 }
 
-export function isTextBasedLayer(
-  layer: LensApiConfig | DataSourceStateLayer
-): layer is TextBasedLayer {
-  return 'index' in layer && 'query' in layer;
+export function isTextBasedLayer(layer: DataSourceStateLayer): layer is TextBasedLayer {
+  return 'columns' in layer && Array.isArray(layer.columns) && 'query' in layer;
 }
 
 function sha256Sync(str: string): string {
@@ -133,9 +131,9 @@ function normalizeWhitespace(str: string): string {
   return str.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
-function generateAdHocDataViewId(
+export function generateAdHocDataViewId(
   dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
-) {
+): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
@@ -147,7 +145,7 @@ function generateAdHocDataViewId(
   return base;
 }
 
-function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
+export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
@@ -335,6 +333,7 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DataSourceType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
+    const layerWithSettings = config as Partial<LayerSettingsSchema>;
     const xAxisScale =
       fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const columns = getValueColumns(config, i, xAxisScale);
@@ -344,6 +343,7 @@ function buildDatasourceStatesLayer(
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
       columns,
+      ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
 
@@ -511,7 +511,8 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   if (!('columnOrder' in options)) {
     return {
       sampling: LENS_SAMPLING_DEFAULT_VALUE,
-      ignore_global_filters: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+      ignore_global_filters:
+        options.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     };
   }
   // mind this is already filled by schema validate

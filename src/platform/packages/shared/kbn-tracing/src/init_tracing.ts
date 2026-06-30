@@ -9,14 +9,14 @@
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
-  EVAL_RUN_ID_BAGGAGE_KEY,
+  EXECUTION_ID_BAGGAGE_KEY,
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
   LangfuseSpanProcessor,
   PhoenixSpanProcessor,
 } from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
-import { context, propagation, trace } from '@opentelemetry/api';
-import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { propagation, trace } from '@opentelemetry/api';
 import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { EvalSpanProcessor } from './eval_span_processor';
@@ -35,14 +35,15 @@ export function initTracing({
   resource: resources.Resource;
   tracingConfig: TracingConfig;
 }) {
-  const contextManager = new AsyncLocalStorageContextManager();
-  context.setGlobalContextManager(contextManager);
-  contextManager.enable();
-
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
-  lateBindingProcessor.register(new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }]));
+  lateBindingProcessor.register(
+    new EvalSpanProcessor([
+      { baggageKey: EXECUTION_ID_BAGGAGE_KEY },
+      { baggageKey: EVAL_EXPERIMENT_ID_BAGGAGE_KEY },
+    ])
+  );
 
   const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
 
@@ -54,12 +55,12 @@ export function initTracing({
 
   const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
 
+  const baseSampler = new tracing.ParentBasedSampler({
+    root: traceIdSampler,
+  });
+
   const nodeTracerProvider = new node.NodeTracerProvider({
-    // by default, base sampling on parent context,
-    // or for root spans, based on the configured sample rate
-    sampler: new tracing.ParentBasedSampler({
-      root: traceIdSampler,
-    }),
+    sampler: baseSampler,
     spanProcessors: allSpanProcessors,
     resource,
   });

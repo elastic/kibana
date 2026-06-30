@@ -7,9 +7,7 @@
 import { z } from '@kbn/zod';
 import {
   compositeSloIdSchema,
-  compositeSloBaseDefinitionSchema,
-  compositeSloMemberSummarySchema,
-  compositeSloSummarySchema,
+  compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
 const getCompositeSLOParamsSchema = z.object({
@@ -18,12 +16,9 @@ const getCompositeSLOParamsSchema = z.object({
   }),
 });
 
-const getCompositeSLOResponseSchema = compositeSloBaseDefinitionSchema.extend({
-  summary: compositeSloSummarySchema,
-  members: z.array(compositeSloMemberSummarySchema),
-});
+const getCompositeSLOResponseSchema = compositeSloWithSummaryResponseSchema;
 
-type GetCompositeSLOResponse = z.infer<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLOResponse = z.output<typeof getCompositeSLOResponseSchema>;
 
 export { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema };
 export type { GetCompositeSLOResponse };

@@ -6,7 +6,7 @@
  */
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { BUTTON_CLASS } from '../../../../../common/components/inspect';
@@ -34,19 +34,22 @@ const ChartSettingsPopoverComponent: React.FC<Props> = ({
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
-        color="text"
-        iconType="boxesVertical"
-        onClick={onButtonClick}
-        size="xs"
-      />
+      <EuiToolTip content={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
+          color="text"
+          iconType="boxesVertical"
+          onClick={onButtonClick}
+          size="xs"
+        />
+      </EuiToolTip>
     ),
     [onButtonClick]
   );
 
   return (
     <EuiPopover
+      aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
       anchorPosition="downCenter"
       button={button}
       className={BUTTON_CLASS}

@@ -17,7 +17,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getSeverityRangeDisplay } from '../../../components/controls/select_severity';
+import { getSeverityRangeDisplay } from '../../../../../common/util/severity_threshold';
 import { useSeverityLegendControlStyles } from './severity_legend_control_styles';
 import type { SeverityOption } from '../../hooks/use_severity_options';
 
@@ -79,6 +79,13 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
           <EuiFlexItem key={severity.val} grow={false}>
             <EuiButtonEmpty
               size="xs"
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.severityLegendControl.anomalyScoreButtonLabel',
+                {
+                  defaultMessage: 'Anomaly score {range}',
+                  values: { range: getSeverityRangeDisplay(severity.val) },
+                }
+              )}
               onClick={() => handleSeverityClick(severity)}
               css={styles.severityButton}
               data-test-subj={`${dataTestSubj}-item-${severity.val}`}
@@ -86,6 +93,7 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon
+                    aria-hidden={true}
                     type={isSelected ? 'dot' : 'eyeSlash'}
                     color={isSelected ? severity.color : euiTheme.colors.textDisabled}
                     size={isSelected ? 'm' : 's'}

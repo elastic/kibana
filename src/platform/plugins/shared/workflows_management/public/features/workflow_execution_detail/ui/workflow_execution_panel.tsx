@@ -26,7 +26,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
@@ -80,7 +80,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = useMemo<boolean>(
-      () => Boolean(execution && isCancelableStatus(execution.status)),
+      () => Boolean(execution && !isTerminalStatus(execution.status) && !execution.finishedAt),
       [execution]
     );
     const showDoneButton = useMemo<boolean>(

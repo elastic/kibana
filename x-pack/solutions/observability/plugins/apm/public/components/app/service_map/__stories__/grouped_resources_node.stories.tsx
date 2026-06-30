@@ -10,8 +10,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { GroupedResourcesNode } from '../../../shared/service_map/grouped_resources_node';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { GroupedNodeData } from '../../../../../common/service_map';
+import { ServiceMapHighlightProvider } from '../../../shared/service_map/service_map_search_context';
+import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -25,16 +26,17 @@ const meta: Meta<typeof GroupedResourcesNode> = {
   component: GroupedResourcesNode,
   decorators: [
     (Story) => (
-      <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
-        <ReactFlowProvider>
+      <ReactFlowProvider>
+        <ServiceMapHighlightProvider>
           <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
             <Story />
           </div>
-        </ReactFlowProvider>
-      </MockApmPluginStorybook>
+        </ServiceMapHighlightProvider>
+      </ReactFlowProvider>
     ),
   ],
   parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'centered',
     a11y: {
       config: {
@@ -161,4 +163,46 @@ export const DifferentResourceTypes: StoryObj = {
       </div>
     );
   },
+};
+
+const groupedData = (id: string, label: string): GroupedNodeData => ({
+  id,
+  label,
+  isService: false,
+  isGrouped: true,
+  spanType: 'db',
+  spanSubtype: 'postgresql',
+  count: 3,
+  groupedConnections: Array.from({ length: 3 }, (_, i) => ({
+    id: `${id}-${i}`,
+    label: `${id}-resource-${i}`,
+    spanType: 'db',
+    spanSubtype: 'postgresql',
+  })),
+});
+
+export const SearchHighlight: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <GroupedResourcesNode {...createNodeProps(groupedData('no-highlight', '3 databases'))} />
+        <LabelText>No highlight</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight matchNodeIds={new Set(['match-only'])} activeMatchNodeId={null}>
+          <GroupedResourcesNode {...createNodeProps(groupedData('match-only', '3 caches'))} />
+        </WithSearchHighlight>
+        <LabelText>Search match (inactive)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <WithSearchHighlight
+          matchNodeIds={new Set(['active-match'])}
+          activeMatchNodeId="active-match"
+        >
+          <GroupedResourcesNode {...createNodeProps(groupedData('active-match', '3 queues'))} />
+        </WithSearchHighlight>
+        <LabelText>Active search match</LabelText>
+      </div>
+    </div>
+  ),
 };

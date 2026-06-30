@@ -11,13 +11,15 @@ import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import { HttpService } from '../application/services/http_service';
 import type { MlApi } from '../application/services/ml_api_service';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
 import { EmbeddableSingleMetricViewerUserInput } from '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export type CreateSingleMetricViewerPanelActionContext = EmbeddableApiContext & {
   embeddable: SingleMetricViewerEmbeddableApi;
@@ -56,6 +58,7 @@ export function createAddSingleMetricViewerPanelAction(
           'View anomaly detection results for a single metric on a focused date range.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
@@ -80,13 +83,10 @@ export function createAddSingleMetricViewerPanelAction(
               coreStart={coreStart}
               services={{ data, share }}
               mlApi={mlApi}
-              onConfirm={(initialState) => {
-                presentationContainerParent.addNewPanel({
+              onConfirm={(serializedState) => {
+                presentationContainerParent.addNewPanel<SingleMetricViewerEmbeddableState>({
                   panelType: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-                  serializedState: {
-                    ...initialState,
-                    title: initialState.panelTitle,
-                  },
+                  serializedState,
                 });
                 closeFlyout();
               }}

@@ -28,7 +28,7 @@ export function createGenerateSignificantEventsPrompt({
   additionalTools?: Record<string, ToolDefinition>;
 }) {
   return createPrompt({
-    name: 'generate_significant_events',
+    name: 'generate_significant_events_ki_queries',
     input: z.object({
       name: z.string(),
       description: z.string(),
@@ -127,8 +127,23 @@ export function createGenerateSignificantEventsPrompt({
                       description:
                         'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query from `existing_queries`.',
                     },
+                    feature_ids: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                      },
+                      description:
+                        'IDs of the features (from get_stream_features) that informed this query. Each ID must match a feature `id` returned by a previous get_stream_features call.',
+                    },
                   },
-                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
+                  required: [
+                    'esql',
+                    'title',
+                    'description',
+                    'category',
+                    'severity_score',
+                    'feature_ids',
+                  ],
                 },
               },
             },

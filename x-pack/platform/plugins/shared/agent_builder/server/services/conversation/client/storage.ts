@@ -10,7 +10,11 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type {
+  ConversationAccessControl,
+  ConversationInternalState,
+  ConversationRoundStatus,
+} from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -29,6 +33,15 @@ const storageSettings = {
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
+      status: types.keyword({}),
+      read: types.boolean({}),
+      workspace_id: types.keyword({}),
+      access_control: types.object({
+        properties: {
+          access_mode: types.keyword({}),
+        },
+        dynamic: false,
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -44,6 +57,10 @@ export interface ConversationProperties {
   conversation_rounds: PersistentConversationRound[];
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
+  status?: ConversationRoundStatus;
+  read?: boolean;
+  workspace_id?: string;
+  access_control?: ConversationAccessControl;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

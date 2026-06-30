@@ -101,6 +101,7 @@ export interface ScoutTestInfo {
   expected_status?: string;
   duration?: number;
   status?: string;
+  console_errors?: string;
   step?: {
     title: string;
     category?: string;

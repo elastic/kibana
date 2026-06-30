@@ -196,7 +196,7 @@ export const setXState = (
 export const getXState = (
   availability:
     | {
-        stability?: 'experimental' | 'beta' | 'stable';
+        stability?: 'experimental' | 'stable' | 'tech_preview';
         since?: string;
       }
     | undefined,
@@ -207,10 +207,10 @@ export const getXState = (
   let state = '';
   if (availability.stability === 'stable') {
     state = 'Generally available';
-  } else if (availability.stability === 'experimental') {
+  } else if (availability.stability === 'tech_preview') {
     state = 'Technical Preview';
-  } else if (availability.stability === 'beta') {
-    state = 'Beta';
+  } else if (availability.stability === 'experimental') {
+    state = 'Experimental';
   }
   if (!env.serverless && availability.since) {
     state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;

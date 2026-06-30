@@ -31,13 +31,16 @@ import {
   distinctUntilChanged,
   finalize,
   map,
+  merge,
+  skip,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs';
 import { dataService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import type { DashboardCreationOptions } from './types';
+import type { DashboardApi, DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
@@ -48,6 +51,7 @@ export function initializeUnifiedSearchManager(
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
+  userActivity$: DashboardApi['userActivity$'],
   creationOptions?: DashboardCreationOptions
 ) {
   const {
@@ -289,6 +293,14 @@ export function initializeUnifiedSearchManager(
     };
   };
 
+  const anyStateChange$ = merge(
+    asCodeFilters$.pipe(skip(1)),
+    asCodeQuery$.pipe(skip(1)),
+    refreshInterval$.pipe(skip(1)),
+    timeRange$.pipe(skip(1)),
+    timeRestore$.pipe(skip(1))
+  ).pipe(map(() => undefined));
+
   return {
     api: {
       reload$,
@@ -304,23 +316,20 @@ export function initializeUnifiedSearchManager(
       timeslice$,
     },
     internalApi: {
+      anyStateChange$,
       unifiedSearchFilters$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([
-          asCodeFilters$,
-          asCodeQuery$,
-          refreshInterval$,
-          timeRange$,
-          timeRestore$,
-        ]).pipe(
+        return anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(COMPARE_DEBOUNCE),
-
-          map(([filters, query, refresh_interval, time_range]) => {
+          map(() => {
             return {
-              filters,
-              query,
-              refresh_interval,
-              time_range,
+              filters: asCodeFilters$.getValue(),
+              query: asCodeQuery$.getValue(),
+              refresh_interval: refreshInterval$.getValue(),
+              time_range: timeRange$.getValue(),
             };
           }),
           combineLatestWith(lastSavedState$),

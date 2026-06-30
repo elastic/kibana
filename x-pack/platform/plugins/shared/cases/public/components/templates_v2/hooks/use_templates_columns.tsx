@@ -132,14 +132,16 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
       id={`template-action-popover-${template.templateId}`}
       aria-label={i18n.ACTIONS}
       button={
-        <EuiButtonIcon
-          onClick={togglePopover}
-          iconType="boxesVertical"
-          aria-label={i18n.ACTIONS}
-          color="text"
-          data-test-subj={`template-action-popover-button-${template.templateId}`}
-          disabled={disableActions}
-        />
+        <EuiToolTip content={i18n.ACTIONS} disableScreenReaderOutput>
+          <EuiButtonIcon
+            onClick={togglePopover}
+            iconType="boxesVertical"
+            aria-label={i18n.ACTIONS}
+            color="text"
+            data-test-subj={`template-action-popover-button-${template.templateId}`}
+            disabled={disableActions}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -251,8 +253,8 @@ export const useTemplatesColumns = ({
                 position="top"
                 content={
                   <div data-test-subj="template-column-fields-tooltip">
-                    {fieldNames.map((name, idx) => (
-                      <div key={`${name}-${idx}`}>{name}</div>
+                    {fieldNames.map((field, idx) => (
+                      <div key={`${field.name}-${idx}`}>{field.label}</div>
                     ))}
                   </div>
                 }

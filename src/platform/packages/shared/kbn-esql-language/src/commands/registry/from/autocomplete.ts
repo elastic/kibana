@@ -9,12 +9,18 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItem } from '../complete_items';
+import {
+  newLineCompleteItem,
+  newLineAndPipeCompleteItems,
+  commaCompleteItem,
+  buildSubqueryCompleteItems,
+} from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
   additionalSourcesSuggestions,
   buildViewsDefinitions,
+  buildDatasetsDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -26,6 +32,7 @@ import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
 } from '../../definitions/utils/autocomplete/resource_browser_suggestions';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
@@ -66,11 +73,11 @@ async function handleFromAutocomplete(
   }
 
   // Extract text relative to command start (critical for subqueries)
-  // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
+  // Use commandText for pattern matching (e.g., /METADATA\s+$/ and trailing whitespace)
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
-  const subquerySuggestion =
-    commandText.length > command.name.length ? buildSubqueryCompleteItem() : undefined;
+  const subquerySuggestions =
+    commandText.length > command.name.length ? buildSubqueryCompleteItems() : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
@@ -95,7 +102,7 @@ async function handleFromAutocomplete(
       context,
       innerText,
       command.location.min,
-      subquerySuggestion
+      subquerySuggestions
     );
     if (indicesBrowserSuggestion) {
       suggestions.unshift(indicesBrowserSuggestion);
@@ -104,7 +111,7 @@ async function handleFromAutocomplete(
   }
 
   // Case 2: FROM index | (after space, suggest next actions)
-  if (/\s$/.test(commandText) && !isRestartingExpression(commandText)) {
+  if (endsWithWhitespace(commandText) && !isRestartingExpression(commandText)) {
     return suggestNextActions(context, callbacks);
   }
 
@@ -118,7 +125,7 @@ async function handleFromAutocomplete(
     context,
     callbacks,
     indexes,
-    subquerySuggestion,
+    subquerySuggestions,
     {
       textBeforeCursor: innerText,
       commandStart: command.location.min, // Full-query offset of this FROM command.
@@ -137,7 +144,7 @@ function suggestInitialSources(
   context: ICommandContext | undefined,
   innerText: string,
   commandStart: number,
-  subquerySuggestion?: ISuggestionItem
+  subquerySuggestions?: ISuggestionItem[]
 ): ISuggestionItem[] {
   let sources = context?.sources ?? [];
 
@@ -150,10 +157,11 @@ function suggestInitialSources(
     commandStart,
   });
   const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
-  const suggestions = [...sourceSuggestions, ...viewSuggestions];
+  const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
+  const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 
-  if (subquerySuggestion && shouldSuggestSubquery(context)) {
-    suggestions.push(subquerySuggestion);
+  if (subquerySuggestions && shouldSuggestSubquery(context)) {
+    suggestions.push(...subquerySuggestions);
   }
 
   return suggestions;
@@ -166,7 +174,11 @@ async function suggestNextActions(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
-  const suggestions: ISuggestionItem[] = [pipeCompleteItem, commaCompleteItem, metadataSuggestion];
+  const suggestions: ISuggestionItem[] = [
+    ...newLineAndPipeCompleteItems,
+    commaCompleteItem,
+    metadataSuggestion,
+  ];
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
@@ -184,7 +196,7 @@ async function suggestAdditionalSources(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined,
   indexes: ReturnType<typeof getSourcesFromCommands>,
-  subquerySuggestion?: ISuggestionItem,
+  subquerySuggestions?: ISuggestionItem[],
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
@@ -218,11 +230,22 @@ async function suggestAdditionalSources(
     indexes.map(({ name }) => name),
     recommendedQueries,
     context?.views ?? [],
+    context?.datasets ?? [],
     canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 
-  if (subquerySuggestion && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
-    suggestions.push(subquerySuggestion);
+  if (subquerySuggestions && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
+    suggestions.push(...subquerySuggestions);
+  }
+
+  if (isTypingIndexName) {
+    const indexNameStart = innerText.length - lastIndex.name.length;
+    suggestions.unshift({
+      ...newLineCompleteItem,
+      text: lastIndex.name + '\n',
+      filterText: lastIndex.name,
+      rangeToReplace: { start: indexNameStart, end: innerText.length },
+    });
   }
 
   return suggestions;

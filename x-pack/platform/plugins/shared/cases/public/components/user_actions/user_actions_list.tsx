@@ -64,11 +64,7 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
 
 export type UserActionListProps = Omit<
   UserActionTreeProps,
-  | 'userActivityQueryParams'
-  | 'userActionsStats'
-  | 'useFetchAlertData'
-  | 'onUpdateField'
-  | 'statusActionButton'
+  'userActivityQueryParams' | 'userActionsStats' | 'onUpdateField' | 'statusActionButton'
 > & {
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
@@ -76,8 +72,6 @@ export type UserActionListProps = Omit<
   handleManageQuote: (quote: string) => void;
   caseUserActions: UserActionUI[];
   attachments: AttachmentUIV2[];
-  loadingAlertData: boolean;
-  manualAlertsData: Record<string, unknown>;
   bottomActions?: EuiCommentProps[];
   isExpandable?: boolean;
 };
@@ -91,12 +85,6 @@ export const UserActionsList = React.memo(
     currentUserProfile,
     data: caseData,
     casesConfiguration,
-    getRuleDetailsHref,
-    actionsNavigation,
-    onRuleDetailsClick,
-    onShowAlertDetails,
-    loadingAlertData,
-    manualAlertsData,
     commentRefs,
     handleManageQuote,
     bottomActions = [],
@@ -154,15 +142,9 @@ export const UserActionsList = React.memo(
           manageMarkdownEditIds,
           selectedOutlineCommentId,
           loadingCommentIds,
-          loadingAlertData,
-          alertData: manualAlertsData,
           euiTheme,
           handleOutlineComment,
           handleDeleteComment,
-          onShowAlertDetails,
-          actionsNavigation,
-          getRuleDetailsHref,
-          onRuleDetailsClick,
         });
         return [...userActions, ...userActionBuilder.build()];
       }, []);
@@ -181,15 +163,9 @@ export const UserActionsList = React.memo(
       manageMarkdownEditIds,
       selectedOutlineCommentId,
       loadingCommentIds,
-      loadingAlertData,
-      manualAlertsData,
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
-      onShowAlertDetails,
-      actionsNavigation,
-      getRuleDetailsHref,
-      onRuleDetailsClick,
     ]);
 
     const comments = bottomActions?.length

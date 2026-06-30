@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
+import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
 import { visualizationSmlType } from './visualization';
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
@@ -186,7 +186,10 @@ describe('visualizationSmlType', () => {
             type: 'visualization',
             title: 'My Visualization',
             content: 'My Visualization\nA test viz\nlnsXY\nFROM test',
-            permissions: ['saved_object:lens/get'],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       });
@@ -258,7 +261,10 @@ describe('visualizationSmlType', () => {
         type: 'visualization',
         title: 'Minimal Viz',
         content: 'Minimal Viz\nlnsXY',
-        permissions: ['saved_object:lens/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        },
       });
     });
   });

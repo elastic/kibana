@@ -18,18 +18,23 @@ import {
   ConversationRoundStatus,
   isReasoningStep,
   isToolCallStep,
+  isBackgroundAgentCompleteStep,
+  isAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
   createUserMessage,
   sanitizeToolId,
+  wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
+import { formatSystemNotice } from '../prompts/utils/actions';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
-import type { ToolCallResultTransformer } from './create_result_transformer';
-import { serializeCompactionSummary } from './conversation_compactor';
+import type { ToolCallResultTransformer } from './tool_summarization';
+import { serializeCompactionSummary } from './compaction_serialize';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -108,10 +113,36 @@ export const roundToLangchain = async (
   if (!ignoreSteps) {
     const groups = groupToolCallSteps(round.steps);
     const reasoningSteps = round.steps.filter(isReasoningStep);
-    for (const group of groups) {
-      messages.push(
-        ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
-      );
+
+    let groupIndex = 0;
+    for (const step of round.steps) {
+      if (isBackgroundAgentCompleteStep(step)) {
+        messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isToolCallStep(step)) {
+        // Only process when we hit the first tool call of a group
+        // Other tool calls in the same group are handled by createGroupedToolCallMessages
+        const group = groups[groupIndex];
+        if (group && group[0] === step) {
+          messages.push(
+            ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
+          );
+          groupIndex++;
+        }
+      } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
+        // Render answered ask_user_question steps as a tool-call / tool-response pair.
+        const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+          questions: step.questions,
+          answers: step.answers,
+        });
+        messages.push(
+          new AIMessage({
+            content: '',
+            tool_calls: [{ id: toolCallId, name: toolName, args }],
+          })
+        );
+        messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
+      }
+      // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
     }
   }
 
@@ -242,7 +273,7 @@ const createGroupedToolCallMessages = async (
     toolMessages.push(
       new ToolMessage({
         tool_call_id: toolCall.tool_call_id,
-        content: JSON.stringify({ results: processedResults }),
+        content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
       })
     );
   }
@@ -277,7 +308,7 @@ export const createToolCallMessages = async (
 
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: JSON.stringify({ results: processedResults }),
+    content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
   });
 
   return [toolCallMessage, toolResultMessage];

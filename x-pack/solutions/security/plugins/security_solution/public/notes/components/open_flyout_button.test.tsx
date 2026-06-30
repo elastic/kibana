@@ -12,13 +12,11 @@ import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../sourcerer/containers');
 
 const mockEventId = 'eventId';
 const mockTimelineId = 'timelineId';
@@ -26,7 +24,6 @@ const mockTimelineId = 'timelineId';
 describe('OpenFlyoutButtonIcon', () => {
   it('should render the chevron icon', () => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
-    (useSourcererDataView as jest.Mock).mockReturnValue({ selectedPatterns: [] });
 
     const { getByTestId } = render(
       <TestProviders>
@@ -44,7 +41,6 @@ describe('OpenFlyoutButtonIcon', () => {
   it('should call the expandable flyout api when the button is clicked', () => {
     const openFlyout = jest.fn();
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout });
-    (useSourcererDataView as jest.Mock).mockReturnValue({ selectedPatterns: ['test1', 'test2'] });
     jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
 
     const { getByTestId } = render(

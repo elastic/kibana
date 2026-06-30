@@ -35,7 +35,7 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 
-import type { Pipeline } from '../../../../../common/types';
+import type { FieldAccessPattern, Pipeline } from '../../../../../common/types';
 
 import { deprecatedPipelineBadge } from '../table';
 import { PipelineDetailsJsonBlock } from '../details_json_block';
@@ -93,7 +93,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.duplicateActionLabel', {
         defaultMessage: 'Duplicate',
       }),
-      icon: <EuiIcon type="copy" />,
+      icon: <EuiIcon type="copy" aria-hidden={true} />,
       onClick: () => onCloneClick(pipeline.name),
     },
     /**
@@ -103,7 +103,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel', {
         defaultMessage: 'Delete',
       }),
-      icon: <EuiIcon type="trash" />,
+      icon: <EuiIcon type="trash" aria-hidden={true} />,
       'data-test-subj': 'deletePipelineButton',
       onClick: () => {
         setShowPopover(false);
@@ -114,20 +114,46 @@ export const DetailsPanel: FunctionComponent<Props> = ({
   ];
 
   const actionsPopoverButton = (
-    <EuiButtonIcon
-      display="base"
-      size="m"
-      data-test-subj="actionsPopoverButton"
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
         {
           defaultMessage: 'Other actions',
         }
       )}
-      onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="boxesVertical"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        display="base"
+        size="m"
+        data-test-subj="actionsPopoverButton"
+        aria-label={i18n.translate(
+          'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
+          {
+            defaultMessage: 'Other actions',
+          }
+        )}
+        onClick={() => setShowPopover((previousBool) => !previousBool)}
+        iconType="boxesVertical"
+      />
+    </EuiToolTip>
   );
+
+  const fieldAccessPatternLabels: Record<FieldAccessPattern, string> = {
+    classic: i18n.translate(
+      'xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternClassic',
+      {
+        defaultMessage: 'Classic',
+      }
+    ),
+    flexible: i18n.translate(
+      'xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternFlexible',
+      {
+        defaultMessage: 'Flexible',
+      }
+    ),
+  };
+
   return (
     <EuiSplitPanel.Inner grow={true} paddingSize="none">
       <EuiSplitPanel.Outer hasShadow={false} grow={true} css={{ height: '100%' }}>
@@ -197,6 +223,34 @@ export const DetailsPanel: FunctionComponent<Props> = ({
                     {pipeline.description}
                   </EuiSkeletonText>
                 </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {/* Field access pattern */}
+            {pipeline.field_access_pattern && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                  <EuiText size="s" data-test-subj="fieldAccessPatternValue">
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternTitle"
+                      defaultMessage="{label}: {pattern}"
+                      values={{
+                        label: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternLabel"
+                              defaultMessage="Field access pattern"
+                            />
+                          </strong>
+                        ),
+                        pattern: fieldAccessPatternLabels[pipeline.field_access_pattern],
+                      }}
+                    />
+                  </EuiText>
+                </EuiSkeletonText>
+
+                <EuiSpacer size="s" />
               </>
             )}
 
@@ -307,6 +361,10 @@ export const DetailsPanel: FunctionComponent<Props> = ({
                       button={actionsPopoverButton}
                       panelPaddingSize="none"
                       repositionOnScroll
+                      aria-label={i18n.translate(
+                        'xpack.ingestPipelines.list.pipelineDetails.actionsPopoverAriaLabel',
+                        { defaultMessage: 'Pipeline actions' }
+                      )}
                     >
                       <EuiContextMenu
                         initialPanelId={0}

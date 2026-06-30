@@ -25,7 +25,7 @@ const getTransforms = () => {
   const embeddable = createEmbeddableSetupMock();
   registerOptionsListControlTransforms(embeddable);
 
-  const [, transformsSetup] = embeddable.registerTransforms.mock.calls[0];
+  const [, transformsSetup] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
   const { transformOut, transformIn } = transformsSetup.getTransforms!({} as DrilldownTransforms);
   return { transformOut: transformOut!, transformIn: transformIn! };
 };
@@ -45,6 +45,7 @@ describe('options list control transforms', () => {
           searchTechnique: 'prefix',
           selectedOptions: ['val'],
           singleSelect: null,
+          title: null,
         },
         panelReferences,
         undefined,
@@ -61,8 +62,8 @@ describe('options list control transforms', () => {
           "selected_options": Array [
             "val",
           ],
-          "title": "Test",
           "use_global_filters": true,
+          "values_source": "field",
         }
       `);
     });
@@ -86,6 +87,7 @@ describe('options list control transforms', () => {
           "ignore_validations": false,
           "title": "Test",
           "use_global_filters": true,
+          "values_source": "field",
         }
       `);
     });

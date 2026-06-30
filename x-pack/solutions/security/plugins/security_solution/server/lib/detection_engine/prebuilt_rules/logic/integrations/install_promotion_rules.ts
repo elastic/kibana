@@ -16,7 +16,7 @@ import { upgradePrebuiltRules } from '../rule_objects/upgrade_prebuilt_rules';
 import type {
   RuleBootstrapError,
   RuleBootstrapResults,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
 import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';
@@ -95,12 +95,18 @@ export async function installPromotionRules({
   const promotionRulesToInstall = latestPromotionRules.filter(({ rule_id: ruleId }) => {
     return !installedRuleVersionsMap.has(ruleId);
   });
+  const installChangeTracking = {
+    metadata: {
+      bulkCount: promotionRulesToInstall.length,
+    },
+  };
   const { results: installationResults, errors: installationErrors } = await createPrebuiltRules(
     detectionRulesClient,
     promotionRulesToInstall.map((asset) => ({
       ...asset,
       enabled: true,
     })),
+    installChangeTracking,
     logger
   );
 
@@ -108,9 +114,15 @@ export async function installPromotionRules({
     const installedVersion = installedRuleVersionsMap.get(ruleId);
     return installedVersion && installedVersion.version < version;
   });
+  const upgradeChangeTracking = {
+    metadata: {
+      bulkCount: promotionRulesToUpgrade.length,
+    },
+  };
   const { results: upgradeResults, errors: upgradeErrors } = await upgradePrebuiltRules(
     detectionRulesClient,
     promotionRulesToUpgrade,
+    upgradeChangeTracking,
     logger
   );
 

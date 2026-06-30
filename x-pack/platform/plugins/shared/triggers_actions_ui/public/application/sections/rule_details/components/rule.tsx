@@ -7,7 +7,8 @@
 
 import React, { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
@@ -15,7 +16,6 @@ import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import type { AlertDetailsNavigation, CasesService } from '@kbn/response-ops-alerts-table/types';
@@ -41,6 +41,7 @@ import {
 } from '../../rules_list/translations';
 import { RuleAlertActionsCell } from './rule_alert_actions_cell';
 import { RuleAlertSearchBar } from './rule_alert_search_bar';
+import { RULE_DETAILS_FILTER_CONTROLS } from '../../alerts_search_bar/constants';
 import { AlertSummaryWidget } from '../../alert_summary_widget';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
@@ -89,6 +90,7 @@ export function RuleComponent({
     data,
     http,
     notifications,
+    rendering,
     fieldFormats,
     application,
     licensing,
@@ -126,6 +128,12 @@ export function RuleComponent({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
   const [alertsSearchEsQuery, setAlertsSearchEsQuery] = useState<{ bool: BoolQuery }>();
+  const [filterControls, setFilterControls] = useState<Filter[]>();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => Boolean(controlApi) && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
 
   const alertsTableQuery = useMemo(() => {
     const baseRuleFilter = {
@@ -184,7 +192,7 @@ export function RuleComponent({
   ].some(Boolean);
 
   const renderRuleAlertList = useCallback(() => {
-    if (ruleType.hasAlertsMappings) {
+    if (ruleType.hasAlertsMappings && hasInitialControlLoadingFinished) {
       const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
         ? {
             appId: 'observability',
@@ -212,6 +220,7 @@ export function RuleComponent({
             data,
             http,
             notifications,
+            rendering,
             fieldFormats,
             application,
             licensing,
@@ -227,12 +236,14 @@ export function RuleComponent({
     data,
     fieldFormats,
     getAlertFormatter,
+    hasInitialControlLoadingFinished,
     hasObservabilityAccess,
     http,
     alertsTableQuery,
     lastReloadRequestTime,
     licensing,
     notifications,
+    rendering,
     ruleType.hasAlertsMappings,
     ruleType.id,
     settings,
@@ -242,14 +253,20 @@ export function RuleComponent({
     () => (
       <>
         <EuiSpacer size="m" />
-        <RuleAlertSearchBar ruleTypeId={ruleType.id} onEsQueryChange={setAlertsSearchEsQuery} />
+        <RuleAlertSearchBar
+          ruleTypeId={ruleType.id}
+          filterControls={filterControls}
+          onFilterControlsChange={setFilterControls}
+          onControlApiAvailable={setControlApi}
+          onEsQueryChange={setAlertsSearchEsQuery}
+        />
         <EuiSpacer size="s" />
         <EuiFlexGroup css={{ minHeight: 450 }} direction="column">
           <EuiFlexItem>{renderRuleAlertList()}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     ),
-    [renderRuleAlertList, ruleType.id]
+    [filterControls, renderRuleAlertList, ruleType.id]
   );
 
   const scrollAlertsIntoView = useCallback(
@@ -257,7 +274,7 @@ export function RuleComponent({
       setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
       setSelectedTabId(ALERT_LIST_TAB);
 
-      const controlConfigs = DEFAULT_CONTROLS.map((control) => {
+      const controlConfigs = RULE_DETAILS_FILTER_CONTROLS.map((control) => {
         if (control.field_name === ALERT_STATUS) {
           return {
             ...control,

@@ -6,7 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -21,6 +21,9 @@ export interface AddToolOptions {
   dynamic?: boolean;
 }
 
+export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
+export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
+
 export enum ToolManagerToolType {
   executable = 'executable',
   browser = 'browser',
@@ -28,13 +31,13 @@ export enum ToolManagerToolType {
 
 export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
-  tools: ExecutableTool | ExecutableTool[];
+  tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
   logger: Logger;
 }
 
 export interface BrowserToolInput {
   type: ToolManagerToolType.browser;
-  tools: BrowserApiToolMetadata | BrowserApiToolMetadata[];
+  tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
 export type AddToolInput = ExecutableToolInput | BrowserToolInput;
@@ -77,6 +80,16 @@ export interface ToolManager {
    * @returns the tool id mapping
    */
   getToolIdMapping(): Map<string, string>;
+
+  getToolMeta(toolId: string): { origin: ToolOrigin | undefined; type: ToolType | undefined };
+
+  /**
+   * Returns the resolved executable tool for the given internal id, or `undefined`
+   * if no such tool was registered for this run. Use with `Runner.runInternalTool`
+   * to dispatch a tool from outside the LangChain graph (e.g. `exec_tool` in bash)
+   * while still going through the standard hooks/telemetry pipeline.
+   */
+  getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.

@@ -13,16 +13,18 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { builtInComparatorsWithInclusive } from '../../../constants/comparators';
 import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../types';
@@ -66,6 +68,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
 
+  // Keep a ref that always points to the latest expression prop so debounced
+  // callbacks never close over a stale snapshot.
+  const expressionRef = useRef(expression);
+  expressionRef.current = expression;
+
   const updateComparator = useCallback(
     (c?: string) => {
       setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
@@ -95,9 +102,16 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     },
     [expressionId, setRuleParams]
   );
+  // Pass only the new label value; read the rest of the expression from the ref
+  // at fire time so the 300ms delay never overwrites unrelated fields.
   const debouncedLabelChange = useMemo(
-    () => debounce(handleCustomMetricChange, 300),
-    [handleCustomMetricChange]
+    () =>
+      debounce((labelValue: string) => {
+        setRuleParams(expressionId, { ...expressionRef.current, label: labelValue });
+      }, 300),
+    // expressionRef is a stable ref object; expressionId and setRuleParams are stable too
+
+    [expressionId, setRuleParams]
   );
 
   const criticalThresholdExpression = (
@@ -120,9 +134,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const handleLabelChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setLabel(e.target.value);
-      debouncedLabelChange({ ...expression, label: e.target.value });
+      debouncedLabelChange(e.target.value);
     },
-    [debouncedLabelChange, expression]
+    [debouncedLabelChange]
   );
   return (
     <>
@@ -134,18 +148,28 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="o11yExpressionRowButton"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
                 {
                   defaultMessage: 'Remove condition',
                 }
               )}
-              color={'text'}
-              iconType={'trash'}
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="o11yExpressionRowButton"
+                aria-label={i18n.translate(
+                  'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
+                  {
+                    defaultMessage: 'Remove condition',
+                  }
+                )}
+                color={'text'}
+                iconType={'trash'}
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -210,6 +234,7 @@ const ThresholdElement: React.FC<{
   return (
     <>
       <ThresholdExpression
+        customComparators={builtInComparatorsWithInclusive}
         thresholdComparator={thresholdComparator()}
         threshold={displayedThreshold}
         onChangeSelectedThresholdComparator={updateComparator}

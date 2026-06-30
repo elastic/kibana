@@ -10,9 +10,8 @@ import { act, fireEvent, render, renderHook, screen } from '@testing-library/rea
 import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useSettingsView } from './use_settings_view';
 import type { UseSettingsView } from './use_settings_view';
+import { useSettingsView } from './use_settings_view';
 import { TestProviders } from '../../../../common/mock';
 
 const mockFilterManager = createFilterManagerMock();
@@ -38,8 +37,10 @@ jest.mock('@kbn/discover-utils', () => ({
     DOC_HIDE_TIME_COLUMN_SETTING: 'doc_table:hideTimeColumn',
   },
   buildDataTableRecord: jest.fn(),
+  getChartHidden: jest.fn().mockReturnValue(undefined),
   getDefaultSort: jest.fn().mockReturnValue([]),
   getSortArray: jest.fn().mockReturnValue([]),
+  getTableHidden: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('@kbn/data-plugin/common', () => ({
@@ -71,8 +72,6 @@ jest.mock('react-router', () => ({
 }));
 
 jest.mock('../../../../common/lib/kibana');
-
-jest.mock('../../../../sourcerer/containers');
 
 jest.mock('../../../../common/hooks/use_space_id', () => {
   return {
@@ -139,8 +138,6 @@ const defaultProps = {
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView: jest.MockedFunction<typeof useSourcererDataView> =
-  useSourcererDataView as jest.MockedFunction<typeof useSourcererDataView>;
 
 describe('useSettingsView', () => {
   beforeEach(() => {
@@ -171,11 +168,6 @@ describe('useSettingsView', () => {
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
   // DRY helper for simulating connector change and save

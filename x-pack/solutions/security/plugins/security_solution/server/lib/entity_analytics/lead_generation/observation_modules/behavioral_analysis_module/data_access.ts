@@ -6,9 +6,16 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { LeadEntity } from '../../types';
 import { parseAlertBuckets } from '../types';
+import { errorMessage } from '../utils';
 import { ALERT_ENTITY_TYPES, ALERT_LOOKBACK, MODULE_ID, type AlertSummary } from './config';
+
+type AlertEntityType = (typeof ALERT_ENTITY_TYPES)[number];
+
+const isAlertEntityType = (type: string): type is AlertEntityType =>
+  (ALERT_ENTITY_TYPES as readonly string[]).includes(type);
 
 const alertSubAggs = () => ({
   severity_breakdown: { terms: { field: 'kibana.alert.severity', size: 10 } },
@@ -29,11 +36,9 @@ const alertSubAggs = () => ({
   },
 });
 
-const parseEntityBuckets = (
-  agg: unknown,
-  entityType: string,
-  target: Map<string, AlertSummary>
-): void => {
+const runtimeFieldName = (type: AlertEntityType): string => `entity_id_${type}`;
+
+const parseEntityBuckets = (agg: unknown, target: Map<string, AlertSummary>): void => {
   const buckets = parseAlertBuckets(agg);
 
   for (const bucket of buckets) {
@@ -45,7 +50,7 @@ const parseEntityBuckets = (
       timestamp: String(fields['@timestamp']?.[0] ?? ''),
     }));
 
-    target.set(`${entityType}:${bucket.key}`, {
+    target.set(bucket.key, {
       totalAlerts: bucket.doc_count,
       severityCounts: Object.fromEntries(
         bucket.severity_breakdown.buckets.map((b) => [b.key, b.doc_count])
@@ -57,7 +62,7 @@ const parseEntityBuckets = (
   }
 };
 
-/** Maximum entity name buckets requested per ES aggregation call. */
+/** Maximum entity buckets requested per ES aggregation call. */
 const ENTITY_BUCKET_LIMIT = 500;
 
 export const fetchAlertSummariesForEntities = async (
@@ -68,19 +73,39 @@ export const fetchAlertSummariesForEntities = async (
 ): Promise<Map<string, AlertSummary>> => {
   const result = new Map<string, AlertSummary>();
 
-  const namesByType: Record<string, string[]> = {};
+  const euidsByType = new Map<AlertEntityType, string[]>();
   for (const e of entities) {
-    if (ALERT_ENTITY_TYPES.includes(e.type as (typeof ALERT_ENTITY_TYPES)[number])) {
-      const list = namesByType[e.type] ?? [];
-      list.push(e.name);
-      namesByType[e.type] = list;
+    if (isAlertEntityType(e.type)) {
+      const existing = euidsByType.get(e.type) ?? [];
+      existing.push(e.id);
+      euidsByType.set(e.type, existing);
     }
   }
+  if (euidsByType.size === 0) return result;
 
-  const entityTerms: Array<Record<string, unknown>> = Object.entries(namesByType)
-    .filter(([, names]) => names.length > 0)
-    .map(([type, names]) => ({ terms: { [`${type}.name`]: names } }));
-  if (entityTerms.length === 0) return result;
+  const runtimeMappings = Object.fromEntries(
+    Array.from(euidsByType.keys(), (type) => [
+      runtimeFieldName(type),
+      euid.painless.getEuidRuntimeMapping(type),
+    ])
+  );
+
+  const entityTerms = Array.from(euidsByType, ([type, euids]) => ({
+    terms: { [runtimeFieldName(type)]: euids },
+  }));
+
+  const aggs = Object.fromEntries(
+    Array.from(euidsByType, ([type, euids]) => [
+      `by_${type}`,
+      {
+        terms: {
+          field: runtimeFieldName(type),
+          size: Math.min(euids.length, ENTITY_BUCKET_LIMIT),
+        },
+        aggs: alertSubAggs(),
+      },
+    ])
+  );
 
   try {
     const response = await esClient.search({
@@ -88,6 +113,7 @@ export const fetchAlertSummariesForEntities = async (
       size: 0,
       ignore_unavailable: true,
       allow_no_indices: true,
+      runtime_mappings: runtimeMappings,
       query: {
         bool: {
           filter: [
@@ -98,25 +124,14 @@ export const fetchAlertSummariesForEntities = async (
           must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
         },
       },
-      aggs: Object.fromEntries(
-        Object.keys(namesByType).map((type) => [
-          `by_${type}`,
-          {
-            terms: {
-              field: `${type}.name`,
-              size: Math.min(namesByType[type].length, ENTITY_BUCKET_LIMIT),
-            },
-            aggs: alertSubAggs(),
-          },
-        ])
-      ),
+      aggs,
     });
 
-    for (const type of Object.keys(namesByType)) {
-      parseEntityBuckets(response.aggregations?.[`by_${type}`], type, result);
+    for (const type of euidsByType.keys()) {
+      parseEntityBuckets(response.aggregations?.[`by_${type}`], result);
     }
   } catch (error) {
-    logger.warn(`[${MODULE_ID}] Failed to fetch alert summaries: ${error}`);
+    logger.warn(`[${MODULE_ID}] Failed to fetch alert summaries: ${errorMessage(error)}`);
   }
 
   return result;

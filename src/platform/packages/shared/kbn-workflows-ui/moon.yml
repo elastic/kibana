@@ -28,6 +28,9 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/zod'
+  - '@kbn/data-views-plugin'
+  - '@kbn/monaco'
+  - '@kbn/use-observable'
 tags:
   - shared-browser
   - package

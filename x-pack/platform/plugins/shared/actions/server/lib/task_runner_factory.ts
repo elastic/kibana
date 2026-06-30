@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -17,7 +17,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { type IBasePath, type Headers, type FakeRawRequest } from '@kbn/core-http-server';
+import { type Headers, type FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -49,7 +49,6 @@ export interface TaskRunnerContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  basePathService: IBasePath;
   savedObjectsRepository: ISavedObjectsRepository;
 }
 
@@ -80,13 +79,8 @@ export class TaskRunnerFactory {
     }
 
     const { actionExecutor, inMemoryMetrics } = this;
-    const {
-      logger,
-      encryptedSavedObjectsClient,
-      spaceIdToNamespace,
-      basePathService,
-      savedObjectsRepository,
-    } = this.taskRunnerContext!;
+    const { logger, encryptedSavedObjectsClient, spaceIdToNamespace, savedObjectsRepository } =
+      this.taskRunnerContext!;
 
     const taskInfo = {
       scheduled: taskInstance.runAt,
@@ -116,10 +110,7 @@ export class TaskRunnerFactory {
         );
 
         const { spaceId } = actionTaskExecutorParams;
-        const path = addSpaceIdToPath('/', spaceId);
-        const request = getFakeRequest(apiKey);
-
-        basePathService.set(request, path);
+        const request = getFakeRequest(apiKey, spaceId);
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
@@ -184,9 +175,7 @@ export class TaskRunnerFactory {
           logger
         );
 
-        const request = getFakeRequest(apiKey);
-        const path = addSpaceIdToPath('/', spaceId);
-        basePathService.set(request, path);
+        const request = getFakeRequest(apiKey, spaceId);
 
         await actionExecutor.logCancellation({
           actionId,
@@ -224,7 +213,7 @@ export class TaskRunnerFactory {
   }
 }
 
-function getFakeRequest(apiKey?: string) {
+function getFakeRequest(apiKey: string | undefined, spaceId: string) {
   const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -232,11 +221,9 @@ function getFakeRequest(apiKey?: string) {
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path: '/',
+    spaceId: asSpaceId(spaceId),
   };
 
-  // Since we're using API keys and accessing elasticsearch can only be done
-  // via a request, we're faking one with the proper authorization headers.
   return kibanaRequestFactory(fakeRawRequest);
 }
 

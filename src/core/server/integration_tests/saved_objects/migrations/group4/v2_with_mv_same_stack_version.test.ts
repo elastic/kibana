@@ -134,9 +134,6 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     );
 
     expect(mappingMeta).toEqual({
-      indexTypesMap: {
-        '.kibana': ['test_mv'],
-      },
       mappingVersions: {
         test_mv: '10.2.0',
       },

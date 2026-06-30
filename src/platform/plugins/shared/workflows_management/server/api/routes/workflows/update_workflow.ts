@@ -12,30 +12,55 @@ import { UpdateWorkflowCommandSchema } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
+import {
+  WORKFLOW_MANAGED_UPDATE_SECURITY,
+  WORKFLOW_UPDATE_SECURITY,
+} from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
+const MANAGED_UPDATE_AVAILABILITY = { since: '9.5.0', stability: 'stable' } as const;
+
+interface UpdateWorkflowRouteConfig {
+  routePath: string;
+  security: typeof WORKFLOW_UPDATE_SECURITY;
+  summary: string;
+  description: string;
+  oasOperationFile: string;
+  availability: typeof AVAILABILITY | typeof MANAGED_UPDATE_AVAILABILITY;
+  allowManagedWorkflowMutation: boolean;
+}
+
+const registerUpdateWorkflowRouteForPath = (
+  deps: RouteDependencies,
+  {
+    routePath,
+    security,
+    summary,
+    description,
+    oasOperationFile,
+    availability,
+    allowManagedWorkflowMutation,
+  }: UpdateWorkflowRouteConfig
+) => {
   const { router, api, spaces, audit } = deps;
   router.versioned
     .put({
-      path: '/api/workflows/workflow/{id}',
+      path: routePath,
       access: 'public',
-      security: WORKFLOW_UPDATE_SECURITY,
-      summary: 'Update a workflow',
-      description:
-        'Partially update an existing workflow. You can update individual fields such as name, description, enabled state, tags, or the YAML definition without providing all fields.',
+      security,
+      summary,
+      description,
       options: {
         tags: [OAS_TAG],
-        availability: AVAILABILITY,
+        availability,
       },
     })
     .addVersion(
       {
         version: API_VERSION,
         options: {
-          oasOperationObject: () => path.join(__dirname, '../examples/update_workflow.yaml'),
+          oasOperationObject: () => path.join(__dirname, oasOperationFile),
         },
         validate: {
           request: {
@@ -44,11 +69,13 @@ export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const updated = await api.updateWorkflow(id, request.body, spaceId, request);
+          const updated = await api.updateWorkflow(id, request.body, spaceId, request, {
+            allowManagedWorkflowMutation,
+          });
           audit.logWorkflowUpdated(request, { id });
           return response.ok({ body: updated });
         } catch (error) {
@@ -60,4 +87,28 @@ export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
         }
       })
     );
+};
+
+export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
+  registerUpdateWorkflowRouteForPath(deps, {
+    routePath: '/api/workflows/workflow/{id}',
+    security: WORKFLOW_UPDATE_SECURITY,
+    summary: 'Update a workflow',
+    description:
+      'Partially update an existing workflow. You can update individual fields such as name, description, enabled state, tags, or the YAML definition without providing all fields.',
+    oasOperationFile: '../examples/update_workflow.yaml',
+    availability: AVAILABILITY,
+    allowManagedWorkflowMutation: false,
+  });
+
+  registerUpdateWorkflowRouteForPath(deps, {
+    routePath: '/api/workflows/managed/workflow/{id}',
+    security: WORKFLOW_MANAGED_UPDATE_SECURITY,
+    summary: 'Update a managed workflow',
+    description:
+      'Partially update an existing managed workflow. This elevated route can update fields beyond the enabled state.',
+    oasOperationFile: '../examples/update_managed_workflow.yaml',
+    availability: MANAGED_UPDATE_AVAILABILITY,
+    allowManagedWorkflowMutation: true,
+  });
 }

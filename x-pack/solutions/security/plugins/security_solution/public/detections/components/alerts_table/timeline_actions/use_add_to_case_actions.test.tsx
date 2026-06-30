@@ -50,14 +50,6 @@ const defaultProps = {
   refetch,
 };
 
-const mockObservable = [
-  {
-    typeKey: 'observable-type-hostname',
-    value: 'test-host',
-    description: 'Auto extracted observable',
-  },
-];
-
 const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const useKibanaMock = useKibana as jest.Mock;
@@ -66,13 +58,14 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
   const panels = [{ id: 0, items }];
   render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
@@ -89,7 +82,6 @@ describe('useAddToCaseActions', () => {
           helpers: {
             getRuleIdFromEvent: () => null,
             canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
-            getObservablesFromEcs: jest.fn().mockReturnValue(mockObservable),
           },
         },
       },
@@ -128,8 +120,16 @@ describe('useAddToCaseActions', () => {
       result.current.handleAddToNewCaseClick();
     });
     expect(open).toHaveBeenCalledWith({
-      attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
-      observables: mockObservable,
+      attachments: [
+        {
+          type: 'security.alert',
+          attachmentId: '123',
+          metadata: {
+            index: '',
+            rule: null,
+          },
+        },
+      ],
     });
   });
 

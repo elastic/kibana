@@ -15,22 +15,23 @@ import {
   type AlertAction,
 } from '../../resources/datastreams/alert_actions';
 import type {
-  NotificationPolicySavedObjectAttributes,
+  ActionPolicySavedObjectAttributes,
   RuleSavedObjectAttributes,
 } from '../../saved_objects';
 import { createRuleSoAttributes } from '../test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
+import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import { createActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
+import { createSettingsService } from '../services/settings_service/settings_service.mock';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { DispatcherService } from './dispatcher';
-import { DispatcherPipeline } from './execution_pipeline';
+import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
@@ -38,6 +39,7 @@ import {
 } from './fixtures/dispatcher';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
+  CheckEngineEnabledStep,
   FetchEpisodesStep,
   FetchSuppressionsStep,
   ApplySuppressionStep,
@@ -68,7 +70,7 @@ function mockRulesFindByIds(
 function mockNpFindAllDecrypted(
   spy: jest.SpyInstance,
   policyIds: string[],
-  overrides: Partial<NotificationPolicySavedObjectAttributes> = {}
+  overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
   spy.mockResolvedValue(
     policyIds.map((id) => ({
@@ -100,17 +102,21 @@ function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
   storageService: StorageServiceContract;
   rulesSoService: RulesSavedObjectServiceContract;
-  npSoService: NotificationPolicySavedObjectServiceContract;
+  npSoService: ActionPolicySavedObjectServiceContract;
   workflowsManagement: WorkflowsServerPluginSetup['management'];
 }): DispatcherService {
   const { loggerService } = createLoggerService();
+  const { settingsService, mockUiSettingsClient } = createSettingsService();
+  mockUiSettingsClient.get.mockResolvedValue(true);
+
   const pipeline = new DispatcherPipeline(loggerService, [
+    new CheckEngineEnabledStep(loggerService, settingsService),
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
     new FetchPoliciesStep(deps.npSoService),
-    new EvaluateMatchersStep(),
+    new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
     new DispatchStep(loggerService, deps.workflowsManagement),
@@ -126,7 +132,7 @@ describe('DispatcherService', () => {
   let queryEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let storageEsClient: jest.Mocked<ElasticsearchClient>;
   let rulesSoService: RulesSavedObjectServiceContract;
-  let npSoService: NotificationPolicySavedObjectServiceContract;
+  let npSoService: ActionPolicySavedObjectServiceContract;
   let mockFindByIds: jest.SpyInstance;
   let mockFindAllDecrypted: jest.SpyInstance;
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
@@ -140,8 +146,8 @@ describe('DispatcherService', () => {
     mockFindByIds = rulesMock.mockFindByIds;
     mockRulesFindByIds(mockFindByIds, ['rule-1', 'rule-2']);
 
-    const npMock = createNotificationPolicySavedObjectService();
-    npSoService = npMock.notificationPolicySavedObjectService;
+    const npMock = createActionPolicySavedObjectService();
+    npSoService = npMock.actionPolicySavedObjectService;
     mockFindAllDecrypted = npMock.mockFindAllDecrypted;
     mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
 
@@ -377,8 +383,8 @@ describe('DispatcherService', () => {
         'rule-005',
       ]);
 
-      const npMock = createNotificationPolicySavedObjectService();
-      npSoService = npMock.notificationPolicySavedObjectService;
+      const npMock = createActionPolicySavedObjectService();
+      npSoService = npMock.actionPolicySavedObjectService;
       mockFindAllDecrypted = npMock.mockFindAllDecrypted;
       mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
         throttle: { interval: '1h' },
@@ -634,6 +640,50 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+  });
+
+  describe('executionUuid', () => {
+    function buildMockPipeline(): jest.Mocked<DispatcherPipelineContract> {
+      return {
+        execute: jest.fn().mockResolvedValue({
+          completed: true,
+          finalState: {
+            input: {
+              startedAt: new Date(),
+              previousStartedAt: new Date(),
+              executionUuid: 'unused-in-result',
+            },
+          },
+        }),
+      };
+    }
+
+    it('passes a UUID v4 to the pipeline on each run', async () => {
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline);
+
+      await service.run({ previousStartedAt: new Date() });
+
+      expect(mockPipeline.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionUuid: expect.stringMatching(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+          ),
+        })
+      );
+    });
+
+    it('generates a fresh UUID on every run', async () => {
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline);
+
+      await service.run({ previousStartedAt: new Date() });
+      await service.run({ previousStartedAt: new Date() });
+
+      const [firstCall] = mockPipeline.execute.mock.calls[0];
+      const [secondCall] = mockPipeline.execute.mock.calls[1];
+      expect(firstCall.executionUuid).not.toBe(secondCall.executionUuid);
     });
   });
 });

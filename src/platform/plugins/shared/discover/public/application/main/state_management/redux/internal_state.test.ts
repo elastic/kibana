@@ -12,11 +12,14 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
+  createTabItem,
   DEFAULT_EXPANDED_DOC_OWNER,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   internalStateActions,
   selectTabRuntimeState,
   selectTab,
 } from '.';
+import { discardFlyoutsOnTabChange } from './internal_state';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
@@ -93,6 +96,112 @@ describe('InternalStateStore', () => {
     expect(tabsState.byId[tabsState.unsafeCurrentId].initialInternalState).toEqual({
       searchSessionId: params.searchSessionId,
     });
+  });
+
+  it('should copy tab UI state when duplicating a tab', async () => {
+    const { store, runtimeStateManager } = await createTestStore();
+    const sourceTabId = store.getState().tabs.unsafeCurrentId;
+    const sourceTopPanelHeight = 240;
+    const otherTopPanelHeight = 320;
+
+    store.dispatch(
+      internalStateActions.setFieldListUiState({
+        tabId: sourceTabId,
+        fieldListUiState: { nameFilter: 'geo' },
+      })
+    );
+    selectTabRuntimeState(runtimeStateManager, sourceTabId).unifiedHistogramConfig$.next({
+      localStorageKeyPrefix: undefined,
+      layoutPropsMap: {
+        [DEFAULT_HISTOGRAM_KEY_PREFIX]: { topPanelHeight: sourceTopPanelHeight },
+      },
+    });
+
+    const otherTab = {
+      ...createTabItem([selectTab(store.getState(), sourceTabId)]),
+      id: 'other-tab',
+    };
+    await store.dispatch(
+      internalStateActions.updateTabs({
+        items: [selectTab(store.getState(), sourceTabId), otherTab],
+        selectedItem: otherTab,
+      })
+    );
+
+    store.dispatch(
+      internalStateActions.setFieldListUiState({
+        tabId: otherTab.id,
+        fieldListUiState: { nameFilter: '' },
+      })
+    );
+    selectTabRuntimeState(runtimeStateManager, otherTab.id).unifiedHistogramConfig$.next({
+      localStorageKeyPrefix: undefined,
+      layoutPropsMap: {
+        [DEFAULT_HISTOGRAM_KEY_PREFIX]: { topPanelHeight: otherTopPanelHeight },
+      },
+    });
+
+    const duplicatedSourceTab = {
+      ...createTabItem([
+        selectTab(store.getState(), sourceTabId),
+        selectTab(store.getState(), otherTab.id),
+      ]),
+      id: 'duplicated-source-tab',
+      duplicatedFromId: sourceTabId,
+    };
+    await store.dispatch(
+      internalStateActions.updateTabs({
+        items: [
+          selectTab(store.getState(), sourceTabId),
+          selectTab(store.getState(), otherTab.id),
+          duplicatedSourceTab,
+        ],
+        selectedItem: duplicatedSourceTab,
+      })
+    );
+
+    expect(selectTab(store.getState(), duplicatedSourceTab.id).uiState.fieldList).toEqual({
+      nameFilter: 'geo',
+    });
+    expect(
+      selectTabRuntimeState(
+        runtimeStateManager,
+        duplicatedSourceTab.id
+      ).unifiedHistogramConfig$.getValue().layoutPropsMap[DEFAULT_HISTOGRAM_KEY_PREFIX]
+        ?.topPanelHeight
+    ).toBe(sourceTopPanelHeight);
+
+    const duplicatedOtherTab = {
+      ...createTabItem([
+        selectTab(store.getState(), sourceTabId),
+        selectTab(store.getState(), otherTab.id),
+        selectTab(store.getState(), duplicatedSourceTab.id),
+      ]),
+      id: 'duplicated-other-tab',
+      duplicatedFromId: otherTab.id,
+    };
+    await store.dispatch(
+      internalStateActions.updateTabs({
+        items: [
+          selectTab(store.getState(), sourceTabId),
+          selectTab(store.getState(), otherTab.id),
+          selectTab(store.getState(), duplicatedSourceTab.id),
+          duplicatedOtherTab,
+        ],
+        selectedItem: duplicatedOtherTab,
+      })
+    );
+
+    expect(selectTab(store.getState(), duplicatedOtherTab.id).uiState.fieldList).toEqual({
+      nameFilter: '',
+    });
+    expect(
+      selectTabRuntimeState(
+        runtimeStateManager,
+        duplicatedOtherTab.id
+      ).unifiedHistogramConfig$.getValue().layoutPropsMap[DEFAULT_HISTOGRAM_KEY_PREFIX]
+        ?.topPanelHeight
+    ).toBe(otherTopPanelHeight);
   });
 
   it('should set control state', async () => {
@@ -550,5 +659,51 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+  });
+
+  describe('discardFlyoutsOnTabChange', () => {
+    // dismissFlyouts works by clicking known close buttons in the DOM. We
+    // simulate the Lens edit and metric insights flyouts via fake close
+    // buttons and assert which one is clicked when the action is dispatched.
+    const setupFakeFlyouts = () => {
+      const lensEditFlyout = document.createElement('div');
+      lensEditFlyout.id = 'lnsCancelEditOnFlyFlyout';
+      const lensEditClick = jest.fn();
+      lensEditFlyout.addEventListener('click', lensEditClick);
+
+      const metricsFlyout = document.createElement('div');
+      metricsFlyout.setAttribute('data-test-subj', 'metricsExperienceFlyout');
+      const metricsCloseButton = document.createElement('button');
+      metricsCloseButton.setAttribute('data-test-subj', 'euiFlyoutCloseButton');
+      const metricsClick = jest.fn();
+      metricsCloseButton.addEventListener('click', metricsClick);
+      metricsFlyout.appendChild(metricsCloseButton);
+
+      document.body.appendChild(lensEditFlyout);
+      document.body.appendChild(metricsFlyout);
+
+      return {
+        lensEditClick,
+        metricsClick,
+        cleanup: () => {
+          lensEditFlyout.remove();
+          metricsFlyout.remove();
+        },
+      };
+    };
+
+    it('dismisses the Lens edit flyout but preserves the metric insights flyout', async () => {
+      const { store } = await createTestStore();
+      const { lensEditClick, metricsClick, cleanup } = setupFakeFlyouts();
+
+      try {
+        store.dispatch(discardFlyoutsOnTabChange());
+
+        expect(lensEditClick).toHaveBeenCalledTimes(1);
+        expect(metricsClick).not.toHaveBeenCalled();
+      } finally {
+        cleanup();
+      }
+    });
   });
 });

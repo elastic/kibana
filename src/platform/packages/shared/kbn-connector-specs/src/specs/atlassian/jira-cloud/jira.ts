@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   GetIssueInput,
   GetProjectInput,
@@ -56,22 +56,6 @@ export const JiraConnector: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'basic',
-        defaults: {},
-        overrides: {
-          meta: {
-            password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.label', {
-                defaultMessage: 'API key',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.helpText', {
-                defaultMessage: 'Your Jira API token',
-              }),
-            },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
         overrides: {
           meta: {
@@ -86,47 +70,68 @@ export const JiraConnector: ConnectorSpec = {
           scope: 'read:jira-work read:jira-user offline_access',
         },
       },
+      {
+        type: 'basic',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.basic.label', {
+            defaultMessage: 'Shared API key',
+          }),
+          meta: {
+            password: {
+              label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.label', {
+                defaultMessage: 'API key',
+              }),
+              helpText: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.helpText', {
+                defaultMessage: 'Your Jira API token',
+              }),
+            },
+          },
+        },
+      },
     ],
   },
-  schema: z.object({
-    subdomain: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.description', {
-          defaultMessage: 'Your Atlassian subdomain',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.label', {
-          defaultMessage: 'Subdomain',
+  schema: lazySchema(() =>
+    z.object({
+      subdomain: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.description', {
+            defaultMessage: 'Your Atlassian subdomain',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.label', {
+            defaultMessage: 'Subdomain',
+          }),
+          placeholder: 'your-domain',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.helpText', {
+            defaultMessage:
+              'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.net)',
+          }),
         }),
-        placeholder: 'your-domain',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.helpText', {
-          defaultMessage:
-            'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.net)',
+      cloudId: z
+        .string()
+        .optional()
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.description', {
+            defaultMessage: 'Atlassian cloud ID (OAuth)',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.label', {
+            defaultMessage: 'Cloud ID',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
+            defaultMessage:
+              'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response.',
+          }),
         }),
-      }),
-    cloudId: z
-      .string()
-      .optional()
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.description', {
-          defaultMessage: 'Atlassian cloud ID (OAuth)',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.label', {
-          defaultMessage: 'Cloud ID',
-        }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
-          defaultMessage:
-            'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response.',
-        }),
-      }),
-  }),
+    })
+  ),
   actions: {
     searchIssuesWithJql: {
       isTool: true,

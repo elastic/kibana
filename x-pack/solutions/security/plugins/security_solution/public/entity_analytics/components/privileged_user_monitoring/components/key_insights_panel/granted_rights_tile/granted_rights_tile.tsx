@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { getGrantedRightsEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const GrantedRightsTile: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
+export const GrantedRightsTile: React.FC<{ spaceId: string; dataViewSpec: DataViewSpec }> = ({
   spaceId,
-  sourcerDataView,
+  dataViewSpec,
 }) => {
   return (
     <KeyInsightsTile
@@ -24,7 +24,7 @@ export const GrantedRightsTile: React.FC<{ spaceId: string; sourcerDataView: Dat
       label={i18n.translate('xpack.securitySolution.privmon.grantedRights.label', {
         defaultMessage: 'Granted rights',
       })}
-      getEsqlQuery={(namespace) => getGrantedRightsEsqlCount(namespace, sourcerDataView)}
+      getEsqlQuery={(namespace) => getGrantedRightsEsqlCount(namespace, dataViewSpec)}
       id="privileged-user-monitoring-granted-rights"
       spaceId={spaceId}
       inspectTitle={

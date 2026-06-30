@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { TypeOf, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
 import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT } from './application/gaps/types/scheduler';
@@ -66,6 +67,13 @@ const rulesSchema = schema.object({
   }),
 });
 
+const ruleChangeTrackingSolutions: Type<RuleTypeSolution | 'all'> = schema.oneOf([
+  schema.literal('security'),
+  schema.literal('observability'),
+  schema.literal('stack'),
+  schema.literal('all'),
+]);
+
 export const configSchema = schema.object({
   healthCheck: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),
@@ -76,6 +84,17 @@ export const configSchema = schema.object({
   }),
   maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
+  alertsService: schema.object({
+    // Field limit applied to alerts-as-data (.alerts-*) indices, their index
+    // templates and component templates. Raise this above the alert mapping's
+    // field count to avoid the framework's reset-then-increase churn against
+    // Elasticsearch. Keep the default in sync with `TOTAL_FIELDS_LIMIT`.
+    totalFieldsLimit: schema.number({ defaultValue: 2800, min: 2500, max: 5000 }),
+  }),
+  ruleChangeTracking: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    scope: schema.arrayOf(ruleChangeTrackingSolutions, { defaultValue: ['security'] }),
+  }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
   rulesSettings: schema.object({
@@ -105,7 +124,7 @@ export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type AlertingRulesConfig = Pick<
   AlertingConfig['rules'],
-  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run'
+  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run' | 'apiKeyType'
 > & {
   isUsingSecurity: boolean;
 };

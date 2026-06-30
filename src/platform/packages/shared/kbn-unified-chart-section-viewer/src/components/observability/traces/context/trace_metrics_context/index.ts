@@ -16,7 +16,10 @@ type TraceMetricsContextProps = {
   metadataFields: string[];
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   actions: UnifiedMetricsGridProps['actions'];
-} & Pick<UnifiedMetricsGridProps, 'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter'>;
+} & Pick<
+  UnifiedMetricsGridProps,
+  'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter' | 'profileId' | 'breakdownField'
+>;
 
 export const TraceMetricsContext = createContext<TraceMetricsContextProps | undefined>(undefined);
 

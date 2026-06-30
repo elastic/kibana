@@ -10,13 +10,14 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerRunWorkflowRoute(deps: RouteDependencies) {
   const { router, api, logger, spaces, audit } = deps;
@@ -55,7 +56,7 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
@@ -88,13 +89,8 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
             processedInputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
           }
 
-          const workflowForExecution: WorkflowExecutionEngineModel = {
-            id: workflow.id,
-            name: workflow.name,
-            enabled: workflow.enabled,
-            definition: workflow.definition,
-            yaml: workflow.yaml,
-          };
+          const workflowForExecution: WorkflowExecutionEngineModel =
+            toWorkflowExecutionEngineModel(workflow);
           const workflowExecutionId = await api.runWorkflow(
             workflowForExecution,
             spaceId,

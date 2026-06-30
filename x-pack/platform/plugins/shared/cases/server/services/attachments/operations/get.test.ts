@@ -12,7 +12,6 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attachment_framework/mocks';
 import { AttachmentGetter } from './get';
 import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
 import { mockPointInTimeFinder, createSOFindResponse, createErrorSO } from '../../test_utils';
@@ -20,7 +19,12 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../../common/constants';
-import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { ConfigType } from '../../../config';
 
@@ -29,14 +33,12 @@ const mode = 'legacy';
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
 
   const mockFinder = (soFindRes: SavedObjectsFindResponse) =>
     mockPointInTimeFinder(unsecuredSavedObjectsClient)(soFindRes);
   const createAttachmentGetter = (attachmentsEnabled = false) =>
     new AttachmentGetter({
       log: mockLogger,
-      persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: { attachments: { enabled: attachmentsEnabled } } as unknown as ConfigType,
     });
@@ -149,6 +151,49 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
+      it('returns migrated legacy file externalReference in unified shape when mode=unified', async () => {
+        const legacyFile = createFileAttachment({
+          externalReferenceMetadata: {
+            files: [
+              {
+                name: 'foo',
+                extension: 'txt',
+                mimeType: 'text/plain',
+                created: '2025-01-01T00:00:00.000Z',
+              },
+            ],
+          },
+        });
+
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [legacyFile],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1'], 'unified');
+
+        expect(res.saved_objects).toEqual([
+          expect.objectContaining({
+            id: '1',
+            attributes: expect.objectContaining({
+              type: 'file',
+              attachmentId: 'my-id',
+              metadata: expect.objectContaining({
+                soType: 'file',
+                files: [
+                  {
+                    name: 'foo',
+                    extension: 'txt',
+                    mimeType: 'text/plain',
+                    created: '2025-01-01T00:00:00.000Z',
+                  },
+                ],
+              }),
+              owner: 'securitySolution',
+            }),
+          }),
+        ]);
+      });
+
       it('throws when the response is missing the attributes.comment field', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
@@ -247,7 +292,7 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1', owner: 'securitySolution' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"alertId\\""`
+          `"Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\""`
         );
       });
     });
@@ -567,6 +612,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 3 },
                       events: { eventIds: { value: 2 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
@@ -619,6 +665,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 0 },
                       events: { eventIds: { value: 4 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
@@ -687,6 +734,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 1 },
                       events: { eventIds: { value: 2 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                   {
@@ -694,6 +742,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 0 },
                       events: { eventIds: { value: 3 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
@@ -715,6 +764,73 @@ describe('AttachmentService getter', () => {
         userComments: 2,
         alerts: 0,
         events: 4,
+      });
+    });
+
+    it('sums unified alert ids across the per-type filter buckets', async () => {
+      const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [],
+          page: 1,
+          per_page: 0,
+          total: 0,
+          aggregations: {
+            references: {
+              caseIds: {
+                buckets: [
+                  {
+                    key: 'case-mixed-alerts',
+                    doc_count: 1,
+                    reverse: {
+                      comments: { doc_count: 0 },
+                      alerts: { value: 1 },
+                      events: { value: 0 },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [],
+          page: 1,
+          per_page: 0,
+          total: 0,
+          aggregations: {
+            refs: {
+              caseIds: {
+                buckets: [
+                  {
+                    key: 'case-mixed-alerts',
+                    reverse: {
+                      comments: { doc_count: 0 },
+                      events: { eventIds: { value: 0 } },
+                      alerts: {
+                        buckets: {
+                          [SECURITY_ALERT_ATTACHMENT_TYPE]: { alertIds: { value: 2 } },
+                          [OBSERVABILITY_ALERT_ATTACHMENT_TYPE]: { alertIds: { value: 1 } },
+                          [STACK_ALERT_ATTACHMENT_TYPE]: { alertIds: { value: 4 } },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+      const stats = await attachmentGetterWithFlagOn.getCaseAttatchmentStats({
+        caseIds: ['case-mixed-alerts'],
+      });
+
+      expect(stats.get('case-mixed-alerts')).toEqual({
+        userComments: 0,
+        // 1 legacy + 2 + 1 + 4 unified across three alert types
+        alerts: 8,
+        events: 0,
       });
     });
 
@@ -759,6 +875,7 @@ describe('AttachmentService getter', () => {
                       comments: { doc_count: 0 },
                       // Cardinality should count unique values only.
                       events: { eventIds: { value: 1 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],

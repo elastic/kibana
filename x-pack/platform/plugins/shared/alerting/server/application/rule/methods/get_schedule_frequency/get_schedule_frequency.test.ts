@@ -47,6 +47,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -181,7 +182,6 @@ describe('validateScheduleLimit', () => {
     ...rulesClientParams,
     maxScheduledPerMinute: 5,
     minimumScheduleIntervalInMs: 1000,
-    fieldsToExcludeFromPublicApi: [],
   };
 
   beforeEach(() => {

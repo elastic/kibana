@@ -19,6 +19,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
+  legendPositionSchema,
 } from '../shared';
 import type { PartitionMetric } from './partition_shared';
 import {
@@ -43,6 +44,7 @@ const treemapSharedConfigSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {
@@ -143,7 +145,8 @@ export const treemapConfigSchemaNoESQL = schema.object(
      */
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionConfigPrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema,
+        'treemapMetric'
       ),
       {
         minSize: 1,
@@ -156,7 +159,10 @@ export const treemapConfigSchemaNoESQL = schema.object(
      */
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionConfigBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'treemapGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,

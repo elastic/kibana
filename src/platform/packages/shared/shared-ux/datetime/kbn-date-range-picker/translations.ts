@@ -63,6 +63,12 @@ export const timeWindowButtonsTexts = {
   ),
 };
 
+export const inputControlTexts = {
+  hintTextPrefix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.hintTextPrefix', {
+    defaultMessage: 'Type',
+  }),
+};
+
 export const dialogTexts = {
   ariaLabel: i18n.translate('sharedUXPackages.dateRangePicker.dialog.ariaLabel', {
     defaultMessage: 'Date range picker dialog',
@@ -86,10 +92,6 @@ export const calendarPanelTexts = {
   applyButton: i18n.translate('sharedUXPackages.dateRangePicker.calendarPanel.applyButton', {
     defaultMessage: 'Apply',
   }),
-  selectEndDateTooltip: i18n.translate(
-    'sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip',
-    { defaultMessage: 'Select an end date to apply' }
-  ),
 };
 
 export const documentationPanelTexts = {

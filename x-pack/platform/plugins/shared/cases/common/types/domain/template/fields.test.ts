@@ -5,13 +5,82 @@
  * 2.0.
  */
 
-import { RadioGroupFieldSchema } from './fields';
+import { InputTextFieldSchema, RadioGroupFieldSchema, TextareaFieldSchema } from './fields';
 
 const baseField = {
   name: 'env',
   control: 'RADIO_GROUP' as const,
   type: 'keyword' as const,
 };
+
+const baseTextareaField = {
+  name: 'details',
+  control: 'TEXTAREA' as const,
+  type: 'keyword' as const,
+};
+
+const baseInputTextField = {
+  name: 'resolution',
+  control: 'INPUT_TEXT' as const,
+  type: 'keyword' as const,
+};
+
+describe('ValidationSchema — required_on_close', () => {
+  it('accepts required_on_close: true', () => {
+    const result = InputTextFieldSchema.safeParse({
+      ...baseInputTextField,
+      validation: { required_on_close: true },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.validation?.required_on_close).toBe(true);
+    }
+  });
+
+  it('accepts required_on_close: false', () => {
+    const result = InputTextFieldSchema.safeParse({
+      ...baseInputTextField,
+      validation: { required_on_close: false },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.validation?.required_on_close).toBe(false);
+    }
+  });
+
+  it('rejects non-boolean required_on_close', () => {
+    const result = InputTextFieldSchema.safeParse({
+      ...baseInputTextField,
+      validation: { required_on_close: 'yes' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts required_on_close alongside other validation flags', () => {
+    const result = InputTextFieldSchema.safeParse({
+      ...baseInputTextField,
+      validation: { required: false, required_on_close: true, min_length: 5 },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.validation?.required).toBe(false);
+      expect(result.data.validation?.required_on_close).toBe(true);
+      expect(result.data.validation?.min_length).toBe(5);
+    }
+  });
+
+  it('accepts required_on_close without required (the two are independent)', () => {
+    const result = InputTextFieldSchema.safeParse({
+      ...baseInputTextField,
+      validation: { required_on_close: true },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.validation?.required).toBeUndefined();
+      expect(result.data.validation?.required_on_close).toBe(true);
+    }
+  });
+});
 
 describe('RadioGroupFieldSchema', () => {
   describe('metadata.options validation', () => {
@@ -83,5 +152,82 @@ describe('RadioGroupFieldSchema', () => {
         'Default value development is not a valid option.'
       );
     });
+  });
+});
+
+describe('TextareaFieldSchema', () => {
+  it('accepts a TEXTAREA without metadata (backward compatibility)', () => {
+    const result = TextareaFieldSchema.safeParse(baseTextareaField);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts metadata with markdown: true', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { markdown: true },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metadata?.markdown).toBe(true);
+    }
+  });
+
+  it('accepts metadata with markdown: false', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { markdown: false },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metadata?.markdown).toBe(false);
+    }
+  });
+
+  it('accepts metadata with default and markdown together', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { default: '## Instructions', markdown: true },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metadata?.default).toBe('## Instructions');
+      expect(result.data.metadata?.markdown).toBe(true);
+    }
+  });
+
+  it('accepts metadata with only default (no markdown)', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { default: 'plain text' },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.metadata?.default).toBe('plain text');
+      expect(result.data.metadata?.markdown).toBeUndefined();
+    }
+  });
+
+  it('rejects non-boolean markdown value', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { markdown: 'yes' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-string default value', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { default: 123 },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('preserves unknown metadata keys via catchall', () => {
+    const result = TextareaFieldSchema.safeParse({
+      ...baseTextareaField,
+      metadata: { markdown: true, custom_key: 'value' },
+    });
+    expect(result.success).toBe(true);
   });
 });

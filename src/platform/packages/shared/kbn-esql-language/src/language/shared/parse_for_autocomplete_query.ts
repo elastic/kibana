@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@elastic/esql';
+import { Parser, PromQLParser } from '@elastic/esql';
+import type { PromQLAstQueryExpression } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
-import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
+import {
+  correctPromqlQuerySyntax,
+  correctQuerySyntax,
+  findAstPosition,
+  removeAutocompleteMarkers,
+  unwrapExpressionParens,
+} from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
+import { getEsqlLexerTokens, type EsqlLexerToken } from './lexer_scope';
 
 interface ParsedAutocompleteQuery {
   innerText: string;
-  correctedQuery: string;
   root: ESQLAstQueryExpression;
+  tokens: EsqlLexerToken[];
 }
 
 /**
@@ -24,13 +32,33 @@ interface ParsedAutocompleteQuery {
  */
 export function parseAutocompleteQuery(fullText: string, offset: number): ParsedAutocompleteQuery {
   const innerText = fullText.substring(0, offset);
+  // Keep tokens tied to the real editor text; correctedQuery can add synthetic markers/brackets.
+  const tokens = getEsqlLexerTokens(innerText);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const cleanRoot = removeAutocompleteMarkers(root);
 
   return {
     innerText,
+    root: unwrapExpressionParens(cleanRoot),
+    tokens,
+  };
+}
+
+/**
+ * PromQL counterpart of {@link parseAutocompleteQuery}: corrects partial PromQL syntax,
+ * parses it, and strips autocomplete markers from the resulting AST.
+ */
+export function parsePromqlAutocompleteQuery(query: string): {
+  correctedQuery: string;
+  root: PromQLAstQueryExpression;
+} {
+  const correctedQuery = correctPromqlQuerySyntax(query);
+  const { root } = PromQLParser.parse(correctedQuery);
+
+  return {
     correctedQuery,
-    root,
+    root: removeAutocompleteMarkers(root),
   };
 }
 

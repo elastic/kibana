@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { dump as yamlDump } from 'js-yaml';
 import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
 import type { YamlEditorFormValues } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
@@ -23,16 +22,15 @@ export interface EditTemplatePageProps {}
 
 export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { templateId } = useTemplateViewParams();
-  const { data: template, isLoading } = useGetTemplate(templateId);
+  const { data: template } = useGetTemplate(templateId);
   const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   useCasesTemplatesBreadcrumbs(template?.name ?? i18n.EDIT_TEMPLATE_TITLE);
 
-  // Server version as initial value - useDebouncedYamlEdit will use WIP from storage if exists
   const serverDefinition = useMemo(() => {
     if (template) {
-      return yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
+      return template.definitionString.trimEnd();
     }
     return '';
   }, [template]);
@@ -42,17 +40,6 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       definition: serverDefinition,
     },
   });
-
-  useEffect(() => {
-    if (!template) {
-      return;
-    }
-
-    const definition = yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
-    form.reset({
-      definition,
-    });
-  }, [form, template]);
 
   const handleSave = useCallback(
     async (data: YamlEditorFormValues, isEnabled: boolean) => {
@@ -71,7 +58,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
     [mutateAsync, navigateToCasesTemplates, templateId]
   );
 
-  if (isLoading && !template) {
+  if (!template) {
     return null;
   }
 

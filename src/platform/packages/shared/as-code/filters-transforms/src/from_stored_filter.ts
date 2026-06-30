@@ -146,10 +146,10 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
       field,
       operator: ASCODE_FILTER_OPERATOR.RANGE,
       value: {
-        ...(range.gte !== undefined && { gte: range.gte as number | string }),
-        ...(range.lte !== undefined && { lte: range.lte as number | string }),
-        ...(range.gt !== undefined && { gt: range.gt as number | string }),
-        ...(range.lt !== undefined && { lt: range.lt as number | string }),
+        ...(range.gte != null && { gte: range.gte as number | string }),
+        ...(range.lte != null && { lte: range.lte as number | string }),
+        ...(range.gt != null && { gt: range.gt as number | string }),
+        ...(range.lt != null && { lt: range.lt as number | string }),
         ...(range.format !== undefined && { format: range.format as string }),
       },
       ...(meta.negate && { negate: true }),
@@ -436,7 +436,7 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     ...(meta?.disabled !== undefined ? { disabled: meta.disabled } : {}),
     ...(meta?.controlledBy !== undefined ? { controlled_by: meta.controlledBy } : {}),
     ...(meta?.index !== undefined ? { data_view_id: meta.index } : {}),
-    ...(meta?.negate !== undefined ? { negate: meta.negate } : {}),
+    ...(meta?.negate === true ? { negate: true } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
   };

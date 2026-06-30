@@ -31,6 +31,38 @@ const capabilitiesAllowRevert: Capabilities = {
   agentBuilder: { manageAgents: true },
 };
 
+function createHttpMock({
+  observabilityConversationCount = 0,
+  securityTotal = 0,
+}: {
+  observabilityConversationCount?: number;
+  securityTotal?: number;
+} = {}) {
+  return {
+    fetch: jest.fn((path: string, options?: { method?: string }) => {
+      if (
+        path.includes('internal/observability_ai_assistant/conversations') &&
+        options?.method === 'POST'
+      ) {
+        return Promise.resolve({
+          conversations: Array(observabilityConversationCount).fill({
+            conversation: { id: 'c1', title: 't', last_updated: '' },
+          }),
+        });
+      }
+      if (path.includes('conversations/_find')) {
+        return Promise.resolve({
+          total: securityTotal,
+          page: 1,
+          perPage: 1,
+          data: [],
+        });
+      }
+      return Promise.resolve({});
+    }),
+  };
+}
+
 function buildServices({
   hideAnnouncements = false,
   announcementSeenInProfile = false,
@@ -39,6 +71,8 @@ function buildServices({
   agentBuilderSeenJson,
   chatExperienceCapabilities = capabilitiesAllowRevert,
   chatExperience = AIChatExperience.Agent,
+  observabilityConversationCount = 0,
+  securityTotal = 0,
 }: {
   hideAnnouncements?: boolean;
   announcementSeenInProfile?: boolean;
@@ -48,6 +82,8 @@ function buildServices({
   agentBuilderSeenJson?: string;
   chatExperienceCapabilities?: Capabilities;
   chatExperience?: AIChatExperience;
+  observabilityConversationCount?: number;
+  securityTotal?: number;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
@@ -70,6 +106,10 @@ function buildServices({
     partialUpdate,
   };
 
+  const http = createHttpMock({ observabilityConversationCount, securityTotal });
+
+  const addSuccess = jest.fn();
+
   const services = {
     settings: {
       client: {
@@ -77,7 +117,7 @@ function buildServices({
         get$: jest.fn((key: string) =>
           key === AI_CHAT_EXPERIENCE_TYPE ? of(chatExperience) : of(undefined)
         ),
-        set: jest.fn(),
+        set: jest.fn().mockResolvedValue(undefined),
       },
       globalClient: {
         get: (key: string) => (key === HIDE_ANNOUNCEMENTS_ID ? hideAnnouncements : undefined),
@@ -88,11 +128,28 @@ function buildServices({
       getActiveSpace$: () => space$.asObservable(),
     },
     analytics: { reportEvent },
-    application: { navigateToApp, capabilities: chatExperienceCapabilities },
+    application: {
+      navigateToApp,
+      getUrlForApp: jest.fn().mockReturnValue('/app/management/ai/genAiSettings'),
+      capabilities: chatExperienceCapabilities,
+    },
+    notifications: { toasts: { addSuccess } },
+    i18n: { Context: ({ children }: { children: React.ReactNode }) => <>{children}</> },
+    theme: {},
     userProfile,
+    http,
   };
 
-  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$ };
+  return {
+    services,
+    reportEvent,
+    navigateToApp,
+    addSuccess,
+    partialUpdate,
+    userProfile,
+    space$,
+    http,
+  };
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -110,6 +167,7 @@ function renderController(services: ReturnType<typeof buildServices>['services']
 describe('AgentBuilderAnnouncementModalController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   it('does not render the modal when hideAnnouncements is true', async () => {
@@ -185,6 +243,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await waitFor(() => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('agentBuilderAnnouncementModal-1a')).toBeInTheDocument();
   });
 
   it('does not show the modal again after switching space when dismissal was recorded for another space (legacy profile)', async () => {
@@ -234,13 +293,17 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
       action: 'confirmed',
       source: 'agent_builder_nav_control',
+      announcement_variant: '1a',
+      had_prior_ai_assistant_usage: false,
     });
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
-  it('calls partialUpdate, reports OptOut telemetry, navigates to GenAI settings, and hides the modal on revert', async () => {
+  it('calls partialUpdate, reports OptOut telemetry, sets Classic experience, shows success toast, and hides the modal on revert', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent, navigateToApp, partialUpdate } = buildServices();
+    const { services, reportEvent, addSuccess, partialUpdate } = buildServices({
+      observabilityConversationCount: 1,
+    });
     renderController(services);
 
     await waitFor(() =>
@@ -258,17 +321,26 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: 'agent_builder_nav_control',
+      announcement_variant: '1b',
+      had_prior_ai_assistant_usage: true,
     });
-    expect(navigateToApp).toHaveBeenCalledWith('management', { path: '/ai/genAiSettings' });
+    expect(services.settings.client.set).toHaveBeenCalledWith(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+    expect(addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Reverted to AI Assistant' })
+    );
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
   });
 
-  it('does not show revert when the user cannot change space-level chat experience', async () => {
+  it('shows variant 2a when the user has prior assistant usage but cannot change chat experience', async () => {
     const { services } = buildServices({
       chatExperienceCapabilities: {
         ...capabilitiesAllowRevert,
         advancedSettings: { save: false },
       },
+      observabilityConversationCount: 1,
     });
     renderController(services);
 
@@ -276,11 +348,41 @@ describe('AgentBuilderAnnouncementModalController', () => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
-    expect(screen.queryByText('Need your history?')).not.toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAnnouncementLearnMoreCallout')).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAnnouncementDocumentationLink')).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder'
+    expect(screen.getByTestId('agentBuilderAnnouncementModal-2a')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementImportantNotes')).toBeInTheDocument();
+  });
+
+  it('does not show the modal on remount when dismissed before a slow profile update completes', async () => {
+    // Simulate a slow profile update (e.g. high-latency proxy environment) that hasn't
+    // resolved by the time the user navigates to the next page and the component remounts.
+    let resolvePartialUpdate!: () => void;
+    const slowPartialUpdate = jest.fn(
+      () => new Promise<void>((resolve) => (resolvePartialUpdate = resolve))
     );
+    const { services } = buildServices();
+    (services.userProfile as { partialUpdate: jest.Mock }).partialUpdate = slowPartialUpdate;
+
+    const { unmount } = renderController(services);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument()
+    );
+
+    // Dismiss the modal — markSeen() fires but partialUpdate is still pending.
+    await userEvent.click(screen.getByTestId('agentBuilderAnnouncementContinueButton'));
+
+    // Simulate navigation: unmount and remount before the profile update resolves.
+    unmount();
+    renderController(services);
+
+    // The modal must not reappear even though partialUpdate hasn't finished.
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+
+    // Let the pending update resolve to avoid unhandled promise warnings.
+    resolvePartialUpdate();
   });
 });

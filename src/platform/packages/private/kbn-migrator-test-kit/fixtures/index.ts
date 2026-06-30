@@ -11,9 +11,10 @@ import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-s
 import type {
   SavedObjectMigration,
   SavedObjectModelUnsafeTransformFn,
+  SavedObjectsModelVersionMap,
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
-import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import { cloneDeep } from 'lodash';
 import type { ElasticsearchClientWrapperFactory } from '../src/elasticsearch_client_wrapper';
 import {
   currentVersion,
@@ -23,11 +24,6 @@ import {
   getKibanaMigratorTestKit,
   nextMinor,
 } from '../src/kibana_migrator_test_kit';
-
-export const baselineIndexTypesMap: IndexTypesMap = {
-  [defaultKibanaIndex]: ['basic', 'complex', 'server', 'deprecated'],
-  [defaultKibanaTaskIndex]: ['task'],
-};
 
 const defaultType: SavedObjectsType<any> = {
   name: 'defaultType',
@@ -47,18 +43,6 @@ const defaultType: SavedObjectsType<any> = {
 };
 
 export const REMOVED_TYPES = ['deprecated', 'server'];
-
-interface ComplexTypeV0 {
-  name: string;
-  value: number;
-  firstHalf: boolean;
-}
-
-interface ComplexTypeV1 {
-  name: string;
-  value: number;
-  firstHalf: boolean;
-}
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
@@ -147,7 +131,19 @@ export const getCompatibleBaselineTypes = (removedTypes: string[]) =>
     }
   });
 
-export const getReindexingBaselineTypes = (removedTypes: string[]) => {
+interface ComplexTypeV0 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
+interface ComplexTypeV1 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
+export const getTransformErrorBaselineTypes = (removedTypes: string[]) => {
   const transformComplex: SavedObjectModelUnsafeTransformFn<ComplexTypeV0, ComplexTypeV1> = (
     doc
   ) => {
@@ -158,41 +154,17 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) => {
     }
     return { document: doc };
   };
-  return getUpToDateBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
-    // introduce an incompatible change
+  return getCompatibleBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
     if (type.name === 'complex') {
-      return {
-        ...type,
-        mappings: {
-          properties: {
-            ...type.mappings.properties,
-            value: { type: 'text' }, // we're forcing an incompatible udpate (number => text)
-            createdAt: { type: 'date' },
-          },
-        },
-        modelVersions: {
-          ...type.modelVersions,
-          2: {
-            changes: [
-              {
-                type: 'data_removal', // not true (we're testing reindex migrations, and modelVersions do not support breaking changes)
-                removedAttributePaths: ['complex.properties.value'],
-              },
-              {
-                type: 'mappings_addition',
-                addedMappings: {
-                  createdAt: { type: 'date' },
-                },
-              },
-              {
-                type: 'unsafe_transform',
-                transformFn: (typeSafeGuard) => typeSafeGuard(transformComplex),
-              },
-            ],
-          },
-        },
-      };
-    } else if (type.name === 'task') {
+      const modelVersions = cloneDeep(type.modelVersions! as SavedObjectsModelVersionMap);
+      modelVersions[2]!.changes.push({
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) => typeSafeGuard(transformComplex),
+      });
+
+      return { ...type, modelVersions };
+    }
+    if (type.name === 'task') {
       return {
         ...type,
         mappings: {
@@ -348,6 +320,7 @@ export const getCompatibleMigratorTestKit = async ({
   removedTypes = REMOVED_TYPES,
   types = getCompatibleBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
+  clientWrapperFactory,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
@@ -355,67 +328,7 @@ export const getCompatibleMigratorTestKit = async ({
     types,
     removedTypes,
     kibanaVersion,
+    clientWrapperFactory,
     settings,
-  });
-};
-
-export const getReindexingMigratorTestKit = async ({
-  logFilePath = defaultLogFilePath,
-  removedTypes = REMOVED_TYPES,
-  types = getReindexingBaselineTypes(removedTypes),
-  kibanaVersion = nextMinor,
-  clientWrapperFactory,
-  settings = {},
-}: GetMutatedMigratorParams = {}) => {
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types,
-    removedTypes,
-    kibanaVersion,
-    clientWrapperFactory,
-    settings: {
-      ...settings,
-      migrations: {
-        discardUnknownObjects: nextMinor,
-        discardCorruptObjects: nextMinor,
-        ...settings.migrations,
-      },
-    },
-  });
-};
-
-export const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
-export const getRelocatingMigratorTestKit = async ({
-  logFilePath = defaultLogFilePath,
-  removedTypes = REMOVED_TYPES,
-  // relocate 'task' and 'basic' objects to a new SO index
-  relocateTypes = {
-    task: kibanaSplitIndex,
-    basic: kibanaSplitIndex,
-  },
-  types = getReindexingBaselineTypes(removedTypes).map((type) => ({
-    ...type,
-    ...(relocateTypes[type.name] && { indexPattern: relocateTypes[type.name] }),
-  })),
-  kibanaVersion = nextMinor,
-  clientWrapperFactory,
-  settings = {},
-}: GetMutatedMigratorParams & { relocateTypes?: Record<string, string> } = {}) => {
-  return await getKibanaMigratorTestKit({
-    logFilePath,
-    types,
-    removedTypes,
-    kibanaVersion,
-    clientWrapperFactory,
-    defaultIndexTypesMap: baselineIndexTypesMap,
-    settings: {
-      ...settings,
-      migrations: {
-        discardUnknownObjects: nextMinor,
-        discardCorruptObjects: nextMinor,
-        useCumulativeLogger: false,
-        ...settings.migrations,
-      },
-    },
   });
 };

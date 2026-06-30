@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTextTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,17 +50,27 @@ export const HeaderDataCards = ({
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={id}>
                 {(copy) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="document"
-                    color="text"
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.copyIdAriaLabel',
                       {
                         defaultMessage: 'Copy ID',
                       }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="document"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.copyIdAriaLabel',
+                        {
+                          defaultMessage: 'Copy ID',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
                 )}
               </EuiCopy>
             </EuiFlexItem>

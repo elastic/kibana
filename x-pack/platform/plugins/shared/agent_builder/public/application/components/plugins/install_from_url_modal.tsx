@@ -19,6 +19,8 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../utils/i18n';
 import { useInstallPluginFromUrl } from '../../hooks/plugins/use_install_plugin';
 
@@ -65,7 +67,14 @@ export const InstallFromUrlModal: React.FC<InstallFromUrlModalProps> = ({ onClos
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} disabled={isLoading}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          disabled={isLoading}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.INSTALL_FROM_URL_CANCEL,
+          })}
+        >
           {labels.plugins.cancelButton}
         </EuiButtonEmpty>
         <EuiButton
@@ -75,6 +84,10 @@ export const InstallFromUrlModal: React.FC<InstallFromUrlModalProps> = ({ onClos
           isLoading={isLoading}
           disabled={!url.trim()}
           data-test-subj="agentBuilderInstallPluginSubmitButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.INSTALL_FROM_URL_SUBMIT,
+          })}
         >
           {labels.plugins.installButton}
         </EuiButton>

@@ -15,6 +15,7 @@ import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs'
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
 import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { useGetUrlParams } from '../../hooks';
 import { getNetworkEvents } from '../../state/network_events/actions';
 import { ObjectWeightList } from './step_objects/object_weight_list';
 import { StepMetrics } from './step_metrics/step_metrics';
@@ -36,14 +37,22 @@ export const StepDetailPage = () => {
 
   const dispatch = useDispatch();
 
+  const { remoteName } = useGetUrlParams();
+
+  // Once the step is known we forward its run `@timestamp` so the network
+  // events query can be bounded to that run and prune frozen-tier shards.
+  const stepTimestamp = currentStep?.['@timestamp'];
+
   useEffect(() => {
     dispatch(
       getNetworkEvents.get({
         checkGroup: checkGroupId,
         stepIndex: Number(stepIndex),
+        remoteName,
+        timestamp: stepTimestamp,
       })
     );
-  }, [dispatch, stepIndex, checkGroupId]);
+  }, [dispatch, stepIndex, checkGroupId, remoteName, stepTimestamp]);
 
   return (
     <>
@@ -52,6 +61,7 @@ export const StepDetailPage = () => {
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
           name={data.details.journey.monitor.name!}
+          remoteName={remoteName}
         />
       )}
       <EuiFlexGroup gutterSize="m">

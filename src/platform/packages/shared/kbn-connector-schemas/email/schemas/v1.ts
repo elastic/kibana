@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defaultFooterText } from '../constants';
 
 const PORT_MAX = 256 * 256 - 1;
@@ -22,9 +22,10 @@ const ConfigSchemaProps = {
   tenantId: z.string().nullable().default(null),
   clientId: z.string().nullable().default(null),
   oauthTokenUrl: z.string().nullable().default(null),
+  allowHtml: z.boolean().optional(),
 };
 
-export const ConfigSchema = z.object(ConfigSchemaProps).strict();
+export const ConfigSchema = lazySchema(() => z.object(ConfigSchemaProps).strict());
 
 const SecretsSchemaProps = {
   user: z.string().nullable().default(null),
@@ -32,7 +33,7 @@ const SecretsSchemaProps = {
   clientSecret: z.string().nullable().default(null),
 };
 
-export const SecretsSchema = z.object(SecretsSchemaProps).strict();
+export const SecretsSchema = lazySchema(() => z.object(SecretsSchemaProps).strict());
 
 const AttachmentSchemaProps = {
   content: z.string(),
@@ -40,9 +41,9 @@ const AttachmentSchemaProps = {
   filename: z.string(),
   encoding: z.string().optional(),
 };
-export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
+export const AttachmentSchema = lazySchema(() => z.object(AttachmentSchemaProps).strict());
 
-export const emailSchema = z.array(z.string().max(512)).max(100);
+export const emailSchema = lazySchema(() => z.array(z.string().max(512)).max(100));
 
 export const ParamsSchemaProps = {
   to: emailSchema.default([]),
@@ -67,4 +68,4 @@ export const ParamsSchemaProps = {
   attachments: z.array(AttachmentSchema).optional(),
 };
 
-export const ParamsSchema = z.object(ParamsSchemaProps).strict();
+export const ParamsSchema = lazySchema(() => z.object(ParamsSchemaProps).strict());

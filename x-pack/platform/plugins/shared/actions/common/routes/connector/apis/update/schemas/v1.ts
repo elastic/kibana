@@ -14,15 +14,18 @@ export const updateConnectorParamsSchema = schema.object({
   }),
 });
 
-export const updateConnectorBodySchema = schema.object({
-  name: schema.string({
-    validate: validateEmptyStrings,
-    meta: { description: 'The display name for the connector.' },
-  }),
-  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
-  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
-});
+export const updateConnectorBodySchema = schema.object(
+  {
+    name: schema.string({
+      validate: validateEmptyStrings,
+      meta: { description: 'The display name for the connector.' },
+    }),
+    config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+      defaultValue: {},
+    }),
+    secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+      defaultValue: {},
+    }),
+  },
+  { meta: { id: 'update_connector' } }
+);

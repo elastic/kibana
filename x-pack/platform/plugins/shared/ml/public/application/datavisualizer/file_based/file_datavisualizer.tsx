@@ -6,10 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import { FileDataVisualizerWrapper } from '@kbn/file-upload/src/file_upload_component/wrapper';
 
@@ -23,7 +24,6 @@ import {
   useMlManagementLocatorInternal,
 } from '../../contexts/kibana';
 
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -43,7 +43,11 @@ export const FileDataVisualizerPage: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocatorInternal();
-  getMlNodeCount(mlApi);
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getDependencies = useCallback(async () => buildDependencies(services), [services]);
 

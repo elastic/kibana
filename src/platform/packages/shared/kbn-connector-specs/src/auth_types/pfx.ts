@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import { isString } from 'lodash';
 import type { SSLSettings } from '@kbn/actions-utils';
@@ -15,20 +15,22 @@ import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 import { configureAxiosInstanceWithSsl } from '../lib';
 
-const authSchema = z
-  .object({
-    pfx: z.string().meta({ label: i18n.PFX_AUTH_CERT_LABEL, sensitive: true }),
-    passphrase: z
-      .string()
-      .meta({ label: i18n.PFX_AUTH_PASSPHRASE_LABEL, sensitive: true })
-      .optional(),
-    ca: z.string().meta({ label: i18n.PFX_AUTH_CA_LABEL }).optional(),
-    verificationMode: z
-      .enum(['none', 'certificate', 'full'])
-      .meta({ label: i18n.PFX_AUTH_VERIFICATION_MODE_LABEL })
-      .optional(),
-  })
-  .meta({ label: i18n.PFX_AUTH_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      pfx: z.string().meta({ label: i18n.PFX_AUTH_CERT_LABEL, sensitive: true }),
+      passphrase: z
+        .string()
+        .meta({ label: i18n.PFX_AUTH_PASSPHRASE_LABEL, sensitive: true })
+        .optional(),
+      ca: z.string().meta({ label: i18n.PFX_AUTH_CA_LABEL }).optional(),
+      verificationMode: z
+        .enum(['none', 'certificate', 'full'])
+        .meta({ label: i18n.PFX_AUTH_VERIFICATION_MODE_LABEL })
+        .optional(),
+    })
+    .meta({ label: i18n.PFX_AUTH_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

@@ -16,8 +16,6 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
     cc: [],
     bcc: [],
   },
-  useAllRemoteClusters: false,
-  selectedRemoteClusters: [],
 };
 
 export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =

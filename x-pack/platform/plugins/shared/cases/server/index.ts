@@ -22,6 +22,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     templates: {
       enabled: true,
     },
+    // NOTE: these are visibility flags (expose to browser), not the feature flag values.
+    casesRedesign: {
+      list: true,
+      details: true,
+      settings: true,
+    },
     attachments: {
       enabled: true,
     },
@@ -36,3 +42,4 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export type { CasesServerSetup, CasesServerStart, CloseReasonValidator } from './types';
+export type { UnifiedAttachmentTypeSetup } from './attachment_framework/types';

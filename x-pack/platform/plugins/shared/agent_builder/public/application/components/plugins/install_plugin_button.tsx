@@ -14,6 +14,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import useToggle from 'react-use/lib/useToggle';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../utils/i18n';
 import { InstallFromUrlModal } from './install_from_url_modal';
 import { UploadPluginModal } from './upload_plugin_modal';
@@ -50,6 +52,11 @@ export const InstallPluginButton: React.FC = () => {
             iconSide="left"
             onClick={togglePopover}
             data-test-subj="agentBuilderInstallPluginButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.INSTALL_PLUGIN,
+              detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+            })}
           >
             <EuiText size="s">{labels.plugins.installPluginButton}</EuiText>
           </EuiButton>
@@ -66,6 +73,11 @@ export const InstallPluginButton: React.FC = () => {
               icon="link"
               onClick={handleOpenUrlModal}
               data-test-subj="agentBuilderInstallFromUrlMenuItem"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.INSTALL_FROM_URL,
+                detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              })}
             >
               {labels.plugins.installFromUrlMenuItem}
             </EuiContextMenuItem>,
@@ -74,6 +86,11 @@ export const InstallPluginButton: React.FC = () => {
               icon="exportAction"
               onClick={handleOpenUploadModal}
               data-test-subj="agentBuilderUploadPluginMenuItem"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.UPLOAD_PLUGIN,
+                detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              })}
             >
               {labels.plugins.uploadMenuItem}
             </EuiContextMenuItem>,

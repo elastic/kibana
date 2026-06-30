@@ -15,7 +15,8 @@ spaceTest.describe(
   'Attacks page smoke',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
     });
 
@@ -23,11 +24,15 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
       });
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest('renders critical attacks page components', async ({ pageObjects }) => {
@@ -50,8 +55,12 @@ spaceTest.describe(
       await detectionsAttackDiscoveryPage.attacksTableSection.scrollIntoViewIfNeeded();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attacksListTable).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(1);
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(2);
+      await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toHaveCount(1);
+      await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toHaveCount(1);
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.attackRunByAvatar).toBeVisible();
     });
   }
 );

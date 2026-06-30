@@ -67,7 +67,7 @@ export class ObservabilityAIAssistantAppPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observabilityAIAssistant',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       deepLinks: [
         {
           id: 'conversations',
@@ -129,25 +129,36 @@ export class ObservabilityAIAssistantAppPlugin
     const isEnabled = appService.isEnabled();
 
     if (isEnabled) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <NavControlInitiator
-              appService={appService}
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-              isServerless={this.isServerless}
-            />,
-            element,
-            () => {}
-          );
+      const mountObsAiAssistant = (element: HTMLElement) => {
+        ReactDOM.render(
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+            isServerless={this.isServerless}
+          />,
+          element,
+          () => {}
+        );
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      };
+
+      coreStart.chrome.navControls.registerRight({
+        mount: mountObsAiAssistant,
         // right before the user profile
         order: 1001,
+      });
+
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      coreStart.chrome.next.aiButton.register({
+        content: mountObsAiAssistant,
       });
     }
 
@@ -181,10 +192,17 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const getHideInUi = () => chatExperience !== AIChatExperience.Classic;
+
     const isObservabilityAIAssistantEnabled = service.isEnabled();
     if (isObservabilityAIAssistantEnabled) {
       pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-        getObsAIAssistantConnectorType(service)
+        getObsAIAssistantConnectorType({
+          service,
+          getHideInUi,
+          isDisabled: chatExperience !== AIChatExperience.Classic,
+        })
       );
     }
 

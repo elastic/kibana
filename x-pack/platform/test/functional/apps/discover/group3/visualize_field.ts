@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/x_pack_visualize_field/visualize_field.ts
 import expect from '@kbn/expect';
 import type { DebugState } from '@elastic/charts';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -301,26 +302,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('lensSuggestionsPanelToggleButton');
       await testSubjects.click('lnsSuggestion-pie');
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
-    });
-
-    it('should default title when saving chart in Discover (even when modal is closed and reopened)', async () => {
-      await discover.selectTextBaseLang();
-      await header.waitUntilLoadingHasFinished();
-      await monacoEditor.setCodeEditorValue(
-        'from logstash-* | stats averageB = avg(bytes) by extension'
-      );
-      await testSubjects.click('querySubmitButton');
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.click('unifiedHistogramSaveVisualization');
-      await header.waitUntilLoadingHasFinished();
-      let title = await testSubjects.getAttribute('savedObjectTitle', 'value');
-      expect(title).to.equal('Bar vertical stacked');
-      await testSubjects.click('saveCancelButton');
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.click('unifiedHistogramSaveVisualization');
-      await header.waitUntilLoadingHasFinished();
-      title = await testSubjects.getAttribute('savedObjectTitle', 'value');
-      expect(title).to.equal('Bar vertical stacked');
     });
   });
 }

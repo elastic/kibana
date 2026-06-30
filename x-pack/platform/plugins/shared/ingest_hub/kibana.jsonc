@@ -8,8 +8,11 @@
   "plugin": {
     "id": "ingestHub",
     "browser": true,
-    "server": false,
+    "server": true,
     "configPath": ["xpack", "ingestHub"],
-    "optionalPlugins": ["spaces", "cloud"]
+    "requiredPlugins": ["fleet"],
+    "optionalPlugins": ["spaces", "cloud"],
+    "requiredBundles": ["kibanaReact", "fleet"],
+    "extraPublicDirs": ["common"]
   }
 }

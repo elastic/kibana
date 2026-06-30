@@ -78,7 +78,7 @@ export const TagTable: FC<TagTableProps> = ({
       render: (name: string, tag: TagWithRelations) => {
         return (
           <>
-            <TagBadge tag={tag} />
+            <TagBadge tag={tag} data-test-subj="tagsTableRowTagName" />
             {tag.managed && (
               <div css={{ marginLeft: euiTheme.size.s }}>
                 <EuiIconTip
@@ -127,7 +127,6 @@ export const TagTable: FC<TagTableProps> = ({
         );
 
         return capabilities.viewConnections ? (
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink
             data-test-subj="tagsTableRowConnectionsLink"
             href={getTagRelationUrl(tag)}

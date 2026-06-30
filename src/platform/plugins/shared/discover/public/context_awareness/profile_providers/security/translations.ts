@@ -55,3 +55,17 @@ export const ecsDescriptionLoadingAriaLable = i18n.translate(
     defaultMessage: 'Loading ECS description',
   }
 );
+
+export const iocOverviewTabTitle = i18n.translate(
+  'discover.profile.security.flyout.iocOverviewTabTitle',
+  {
+    defaultMessage: 'Indicator Overview',
+  }
+);
+
+export const attackOverviewTabTitle = i18n.translate(
+  'discover.profile.security.flyout.attackOverviewTabTitle',
+  {
+    defaultMessage: 'Attack Overview',
+  }
+);

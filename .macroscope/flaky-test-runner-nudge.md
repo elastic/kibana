@@ -88,9 +88,7 @@ When the changed file is a shared fixture:
 Post one comment on the PR with a single `/flaky` command. Include tokens only for runner types that qualify. All configs — any number, any mix of Scout and FTR — go space-separated on the same line. Format:
 
 ````markdown
-## Catch flakiness early (recommended)
-
-**Recommended before merge**: run the flaky test runner against this PR to catch flakiness early.
+**Catch flakiness early (recommended)**: run the flaky test runner against this PR before merging.
 
 <!-- optional: one-sentence rationale, see "Rationale line" below -->
 
@@ -100,7 +98,7 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 /flaky <type>:<path>:30 [<type>:<path>:30 ...]
 ```
 
-This check is experimental. Share your feedback in the #appex-qa channel.
+<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
 ````
 
 ### Rationale line

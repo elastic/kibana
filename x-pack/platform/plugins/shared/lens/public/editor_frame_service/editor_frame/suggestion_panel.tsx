@@ -277,7 +277,7 @@ const SuggestionPreview = ({
             />
           ) : (
             <span css={suggestionStyles.icon(euiThemeContext)}>
-              <EuiIcon size="xxl" type={preview.icon} />
+              <EuiIcon size="xxl" type={preview.icon} aria-hidden={true} />
             </span>
           )}
           {showTitleAsLabel && (

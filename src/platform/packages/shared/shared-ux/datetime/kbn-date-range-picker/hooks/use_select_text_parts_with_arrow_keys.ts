@@ -10,15 +10,10 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { keys } from '@elastic/eui';
 
-// Matches text parts separated by spaces, commas, or colons
-// e.g. "Dec 29, 14:30 to now" => ["Dec", "29", "14", "30", "to", "now"]
-const TEXT_PARTS_REGEX = /[^\s,:]+/g;
-
-export interface TextPart {
-  text: string;
-  start: number;
-  end: number;
-}
+import { MODIFICATION_INCREASE, MODIFICATION_DECREASE } from '../constants';
+import type { DateType, ModificationAction } from '../types';
+import { parseInputParts, type RangePart } from '../parse/parse_range_parts';
+import { getInputScrollLeftToCenter } from '../utils';
 
 interface UseSelectTextPartsOptions {
   /** Ref to the input element */
@@ -33,14 +28,17 @@ interface UseSelectTextPartsOptions {
    * @default 'all'
    */
   initialSelection?: 'none' | 'first' | 'all';
+  /** The start and end types used to assign collapsed inputs to the correct side. */
+  rangeType?: [DateType, DateType];
   /**
    * Called when ArrowUp/ArrowDown is pressed on a selected part.
    * Return the new full input text, or `undefined` to skip the modification.
    */
   onModifyPart?: (params: {
     text: string;
-    part: TextPart;
-    action: 'increase' | 'decrease';
+    part: RangePart;
+    parts: RangePart[];
+    action: ModificationAction;
   }) => string | undefined;
 }
 
@@ -52,6 +50,7 @@ export function useSelectTextPartsWithArrowKeys({
   inputRef,
   isActive,
   initialSelection = 'all',
+  rangeType,
   onModifyPart,
 }: UseSelectTextPartsOptions) {
   // Stored in a ref so the effect doesn't re-run
@@ -63,12 +62,13 @@ export function useSelectTextPartsWithArrowKeys({
     if (!isActive) return;
 
     let currentIndex = -1; // -1 means no part is selected (caret mode)
+    let inCaretMode = false;
 
     const getPartsAndSyncIndex = () => {
       const inputEl = inputRef.current;
       if (!inputEl) return [];
 
-      const parts = getTextParts(inputEl.value);
+      const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
       const matchingPartIndex = parts.findIndex(
         (part) => part.start === inputEl.selectionStart && part.end === inputEl.selectionEnd
       );
@@ -77,33 +77,36 @@ export function useSelectTextPartsWithArrowKeys({
       return parts;
     };
 
-    const selectPart = (index: number, parts: TextPart[]) => {
+    const selectPart = (index: number, parts: RangePart[]) => {
       const inputEl = inputRef.current;
       if (!inputEl) return;
 
       // If navigating past the ends, go to caret mode
       if (index < 0) {
         currentIndex = -1;
+        inCaretMode = true;
         inputEl.setSelectionRange(0, 0);
         inputEl.scrollLeft = 0;
         return;
       }
       if (index >= parts.length) {
         currentIndex = -1;
+        inCaretMode = true;
         inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
         inputEl.scrollLeft = inputEl.scrollWidth - inputEl.clientWidth;
         return;
       }
 
+      inCaretMode = false;
       currentIndex = index;
       const part = parts[currentIndex];
 
       inputEl.focus();
       inputEl.setSelectionRange(part.start, part.end);
-      inputEl.scrollLeft = getInputScrollPositionFromStart(inputEl, part.start);
+      inputEl.scrollLeft = getInputScrollLeftToCenter(inputEl, part.start);
     };
 
-    const modifyPart = (action: 'increase' | 'decrease') => {
+    const modifyPart = (action: ModificationAction) => {
       if (!onModifyPartRef.current) return;
 
       const inputEl = inputRef.current;
@@ -113,11 +116,11 @@ export function useSelectTextPartsWithArrowKeys({
       if (currentIndex < 0 || currentIndex >= parts.length) return;
 
       const part = parts[currentIndex];
-      const newText = onModifyPartRef.current({ text: inputEl.value, part, action });
+      const newText = onModifyPartRef.current({ text: inputEl.value, part, parts, action });
 
       if (newText !== undefined) {
         inputEl.value = newText;
-        const updatedParts = getTextParts(newText);
+        const updatedParts = parseInputParts(newText, rangeType).filter((p) => p.navigable);
         selectPart(currentIndex, updatedParts);
       }
 
@@ -131,16 +134,17 @@ export function useSelectTextPartsWithArrowKeys({
       const inputEl = inputRef.current;
       if (!inputEl) return;
 
+      if (inCaretMode) return;
+
       if (event.key.startsWith('Arrow')) {
         // Always refresh parts and sync index on arrow key press
         const parts = getPartsAndSyncIndex();
 
         if (parts.length === 0) return;
 
-        event.preventDefault();
-
         switch (event.key) {
           case keys.ARROW_RIGHT:
+            event.preventDefault();
             // If in caret mode, select the first part to the right of caret
             if (currentIndex === -1) {
               const caretPos = inputEl.selectionStart ?? 0;
@@ -151,6 +155,7 @@ export function useSelectTextPartsWithArrowKeys({
             }
             return;
           case keys.ARROW_LEFT:
+            event.preventDefault();
             // If in caret mode, select the first part to the left of caret
             if (currentIndex === -1) {
               const caretPos = inputEl.selectionStart ?? 0;
@@ -161,31 +166,48 @@ export function useSelectTextPartsWithArrowKeys({
             }
             return;
           case keys.ARROW_UP: {
-            const modifiedUp = modifyPart('increase');
-            // Allow propagation if no modification was made
-            if (modifiedUp) event.stopImmediatePropagation();
+            if (currentIndex < 0) return;
+            event.preventDefault();
+            modifyPart(MODIFICATION_INCREASE);
+            event.stopImmediatePropagation();
             return;
           }
           case keys.ARROW_DOWN: {
-            const modifiedDown = modifyPart('decrease');
-            // Allow propagation if no modification was made
-            if (modifiedDown) event.stopImmediatePropagation();
+            if (currentIndex < 0) return;
+            event.preventDefault();
+            modifyPart(MODIFICATION_DECREASE);
+            event.stopImmediatePropagation();
             return;
           }
         }
       }
     };
 
+    const pointerDownHandler = () => {
+      inCaretMode = true;
+      currentIndex = -1;
+    };
+
+    const selectionChangeHandler = () => {
+      if (document.activeElement !== inputEl) return;
+      const parts = getPartsAndSyncIndex();
+      if (currentIndex >= 0 && currentIndex < parts.length) {
+        inCaretMode = false;
+      }
+    };
+
     const inputEl = inputRef.current;
 
     inputEl?.addEventListener('keydown', keydownHandler);
+    inputEl?.addEventListener('pointerdown', pointerDownHandler);
+    document.addEventListener('selectionchange', selectionChangeHandler);
 
     if (inputEl) {
       switch (initialSelection) {
         case 'none':
           break;
         case 'first': {
-          const parts = getTextParts(inputEl.value);
+          const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
           if (parts.length > 0) selectPart(0, parts);
           break;
         }
@@ -198,41 +220,8 @@ export function useSelectTextPartsWithArrowKeys({
 
     return () => {
       inputEl?.removeEventListener('keydown', keydownHandler);
+      inputEl?.removeEventListener('pointerdown', pointerDownHandler);
+      document.removeEventListener('selectionchange', selectionChangeHandler);
     };
-  }, [inputRef, isActive, initialSelection]);
-}
-
-/**
- * Splits a string into parts separated by spaces, commas, or colons,
- * and returns each part with its text and position indices.
- * @param value - The string to split
- * @returns Array of parts with their text and start/end positions
- */
-function getTextParts(value: string): TextPart[] {
-  return Array.from(value.matchAll(TEXT_PARTS_REGEX), (match) => ({
-    text: match[0],
-    start: match.index,
-    end: match.index + match[0].length,
-  }));
-}
-
-/**
- * Computes the scroll position needed to center a given caret position within a text input.
- * Uses Canvas text measurement to avoid DOM manipulation and layout thrashing.
- * @param input - The input element to measure
- * @param start - The character index to center on
- * @returns The `scrollLeft` value to apply, or `0` if the input is not scrollable
- */
-function getInputScrollPositionFromStart(input: HTMLInputElement, start: number): number {
-  if (input.scrollWidth <= input.clientWidth) return 0;
-
-  const textBeforeCaret = input.value.substring(0, start);
-  const style = window.getComputedStyle(input);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = style.font;
-  const textWidth = ctx.measureText(textBeforeCaret).width;
-  const offset = parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
-
-  return textWidth + offset - input.clientWidth / 2;
+  }, [inputRef, isActive, initialSelection, rangeType]);
 }

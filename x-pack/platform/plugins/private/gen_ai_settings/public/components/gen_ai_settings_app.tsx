@@ -20,9 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import {
+  AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
@@ -36,6 +39,7 @@ import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
 import { AnonymizationProfilesSection } from './anonymization_profiles_section';
 import { TokenUsageTracking } from './token_usage_tracking/token_usage_tracking';
+import { AgentBuilderTracingSection } from './agent_builder_tracing/agent_builder_tracing_section';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -49,7 +53,8 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, productDocBase, analytics } = services;
+  const { application, http, productDocBase, analytics, genAiSettingsApi, notifications } =
+    services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -95,17 +100,21 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   }, [setBreadcrumbs, showAiBreadcrumb]);
 
   const handleNavigateToSpaces = useCallback(() => {
-    const basePath = http.basePath.get();
-    const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-    const spacesPath = `/kibana/spaces/edit/${spaceId}${isPermissionsBased ? '/roles' : ''}`;
+    const spacesPath = `/kibana/spaces/edit/${http.spaceId}${isPermissionsBased ? '/roles' : ''}`;
 
     application.navigateToApp('management', {
       path: spacesPath,
       openInNewTab: true,
     });
-  }, [application, http.basePath, isPermissionsBased]);
+  }, [application, http.spaceId, isPermissionsBased]);
 
   async function handleSave() {
+    const tokenUsageTrackingTurnedOn =
+      unsavedChanges[GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]?.unsavedValue === true;
+
+    const tracingSettingChanged =
+      unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue !== undefined;
+
     const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
       ? chatExperienceField.savedValue
       : undefined;
@@ -133,6 +142,38 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       telemetryAfterChatExperience !== AIChatExperience.Agent;
 
     const needsReload = await saveAll();
+
+    if (tokenUsageTrackingTurnedOn) {
+      try {
+        await genAiSettingsApi('POST /internal/gen_ai_settings/install_token_usage_dashboard', {
+          signal: null,
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.gen_ai_settings.tokenUsageTracking.installDashboardError', {
+            defaultMessage: 'Failed to install token usage dashboard',
+          }),
+          text: error?.body?.message ?? error?.message,
+        });
+      }
+    }
+
+    if (tracingSettingChanged) {
+      try {
+        await genAiSettingsApi(
+          'POST /internal/gen_ai_settings/agent_builder/sync_tracing_dashboard',
+          { signal: null }
+        );
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.gen_ai_settings.agentBuilderTracing.syncDashboardError', {
+            defaultMessage: 'Failed to sync Agent Builder tracing dashboard',
+          }),
+          text: error?.body?.message ?? error?.message,
+        });
+      }
+    }
+
     if (shouldTrackOptInConfirmed) {
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'confirmed',
@@ -282,6 +323,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
           </EuiSplitPanel.Outer>
 
           <PrePromptWorkflowSection />
+
+          {hasAgentBuilderPrivileges && <AgentBuilderTracingSection />}
 
           {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>

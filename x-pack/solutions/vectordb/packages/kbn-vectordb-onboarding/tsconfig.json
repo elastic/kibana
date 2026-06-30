@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../../../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-query",
+    "@kbn/share-plugin",
+    "@kbn/console-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/agent-builder-plugin",
+    "@kbn/try-in-console",
+    "@kbn/cloud",
+    "@kbn/core-doc-links-browser",
+  ]
+}

@@ -9,7 +9,9 @@
 
 import type { monaco } from '@kbn/monaco';
 import type { StepStabilityLevel } from '@kbn/workflows';
-import { getStabilityNote as getStabilityNoteFromShared } from '../get_stability_note';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
+import { getCachedAllConnectors } from '../connectors_cache';
+import { getStabilityBadgeHtml } from '../get_stability_note';
 import type {
   ConnectorExamples,
   HoverContext,
@@ -142,11 +144,27 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
   }
 
   /**
-   * Returns a markdown blockquote stability note for non-GA steps.
+   * Prepends the stability badge to hover body lines (top-left, same as trigger hovers).
    */
-  protected getStabilityNote(stability: StepStabilityLevel | undefined): string {
-    const note = getStabilityNoteFromShared(stability);
-    return note ? `\n\n${note}` : '';
+  protected prependStabilityBadgeToContent(
+    stability: StepStabilityLevel | undefined,
+    bodyLines: string[]
+  ): string {
+    const badge = getStabilityBadgeHtml(stability);
+    if (!badge) {
+      return bodyLines.join('\n');
+    }
+    return [badge, '', ...bodyLines].join('\n');
+  }
+
+  protected getConnectorStabilityFromCache(connectorType: string): StepStabilityLevel | undefined {
+    const mapStability = getCachedAllConnectorsMap()?.get(connectorType)?.stability;
+    const listStability = getCachedAllConnectors().find((c) => c.type === connectorType)?.stability;
+    const stability = mapStability ?? listStability;
+    if (stability === 'tech_preview' || stability === 'beta') {
+      return stability;
+    }
+    return undefined;
   }
 
   /**

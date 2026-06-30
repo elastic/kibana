@@ -12,9 +12,11 @@ import type {
   InvalidateUiamAPIKeyParams,
 } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
+import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
+import { createFakeRequestEnrichment } from './authentication/fake_request_enrichment';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -24,15 +26,23 @@ export const buildSecurityApi = ({
   getSession,
   audit,
   config,
+  logger,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean } };
+  logger: Logger;
 }): CoreSecurityDelegateContract => {
+  const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
+
   return {
     authc: {
       getCurrentUser: (request) => {
+        if (request.isFakeRequest) {
+          const override = enrichment.getOverride(request);
+          if (override) return override;
+        }
         return getAuthc().getCurrentUser(request);
       },
       getRedactedSessionId: async (request) => {
@@ -44,6 +54,8 @@ export const buildSecurityApi = ({
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         grantAsInternalUser: (request, createParams) =>
           getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        cloneAsInternalUser: (request, cloneParams) =>
+          getAuthc().apiKeys.cloneAsInternalUser(request, cloneParams),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
         update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
@@ -72,6 +84,7 @@ export const buildSecurityApi = ({
         includeSavedObjectNames: audit.withoutRequest.includeSavedObjectNames,
       },
     },
+    fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };
 };
 

@@ -19,6 +19,7 @@ import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-se
 import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
@@ -97,10 +98,11 @@ describe('SearchEmbeddableGridComponent', () => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch);
     const stateManager = createStateManager();
+    const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
 
-    return render(
+    render(
       <DiscoverTestProvider services={services}>
         <SearchEmbeddableGridComponent
           api={api}
@@ -113,9 +115,14 @@ describe('SearchEmbeddableGridComponent', () => {
             onApply: jest.fn(),
             onCancel: jest.fn(),
           }}
+          docViewerRef={docViewerRef}
+          expandedDoc={undefined}
+          initialDocViewerTabId={undefined}
         />
       </DiscoverTestProvider>
     );
+
+    return { stateManager };
   };
 
   describe('onUpdateSampleSize', () => {
@@ -140,6 +147,28 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('onResize', () => {
+    it('should update the embeddable grid state', async () => {
+      const { stateManager } = renderComponent({ isEsql: false });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      const onResize = lastCallProps?.onResize as (params: {
+        columnId: string;
+        width: number | undefined;
+      }) => void;
+
+      onResize({ columnId: '_source', width: 250 });
+      expect(stateManager.grid.getValue()).toEqual({ columns: { _source: { width: 250 } } });
+
+      onResize({ columnId: '_source', width: undefined });
+      expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
     });
   });
 });

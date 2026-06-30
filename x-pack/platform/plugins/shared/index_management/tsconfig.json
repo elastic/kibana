@@ -51,7 +51,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/rollup",
-    "@kbn/ml-error-utils",
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
     "@kbn/core-application-browser",
@@ -65,7 +64,9 @@
     "@kbn/reindex-service-plugin",
     "@kbn/inference-common",
     "@kbn/upgrade-assistant-pkg-common",
+    "@kbn/ml-common-types",
     "@kbn/failure-store-modal",
+    "@kbn/data-lifecycle-phases",
     "@kbn/react-query",
     "@kbn/scout",
     "@kbn/deeplinks-management",
@@ -75,6 +76,7 @@
     "@kbn/search-index-documents",
     "@kbn/cloud-connect-plugin",
     "@kbn/shared-ux-column-presets",
+    "@kbn/index-lifecycle-management-common-shared",
   ],
   "exclude": ["target/**/*"]
 }

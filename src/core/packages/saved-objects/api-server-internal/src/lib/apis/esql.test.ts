@@ -8,6 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { esql } from '@elastic/esql';
 import type { SavedObjectsEsqlOptions } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsExtensions,
@@ -65,7 +66,7 @@ describe('esql', () => {
     options = {
       type: 'index-pattern',
       namespaces: ['foo-namespace'],
-      pipeline: '| LIMIT 10',
+      pipeline: esql`LIMIT 10`,
     };
 
     const serializer = createSpySerializer(registry);
@@ -135,21 +136,17 @@ describe('esql', () => {
     expect(request.query).toMatch(/^FROM .+ METADATA _id, _source \| LIMIT 10$/);
   });
 
-  it('should throw if pipeline starts with a source command', async () => {
+  it('should throw if pipeline contains a source command', async () => {
     await expect(
-      repository.esql({ ...options, pipeline: 'FROM .kibana | LIMIT 10' })
-    ).rejects.toThrowError('options.pipeline must not start with a source command');
+      repository.esql({ ...options, pipeline: esql`FROM .kibana | LIMIT 10` })
+    ).rejects.toThrowError('options.pipeline must not contain source command "FROM"');
 
-    await expect(repository.esql({ ...options, pipeline: 'ROW x = 1' })).rejects.toThrowError(
-      'options.pipeline must not start with a source command'
+    await expect(repository.esql({ ...options, pipeline: esql`ROW x = 1` })).rejects.toThrowError(
+      'options.pipeline must not contain source command "ROW"'
     );
 
-    await expect(repository.esql({ ...options, pipeline: 'SHOW INFO' })).rejects.toThrowError(
-      'options.pipeline must not start with a source command'
-    );
-
-    await expect(repository.esql({ ...options, pipeline: 'METRICS index' })).rejects.toThrowError(
-      'options.pipeline must not start with a source command'
+    await expect(repository.esql({ ...options, pipeline: esql`SHOW INFO` })).rejects.toThrowError(
+      'options.pipeline must not contain source command "SHOW"'
     );
 
     expect(client.esql.query).not.toHaveBeenCalled();
@@ -167,16 +164,49 @@ describe('esql', () => {
     expect(must[1]).toEqual(userFilter);
   });
 
-  it('should pass through esql options like params', async () => {
+  it('should pass through explicitly provided params alongside ComposerQuery params', async () => {
     await repository.esql({
       ...options,
-      params: ['test'],
+      params: [{ extra: 'val' }],
     });
 
     expect(client.esql.query).toHaveBeenCalledTimes(1);
     const [[request]] = client.esql.query.mock.calls;
     expect(request.query).toMatch(/^FROM .+ \| LIMIT 10$/);
-    expect(request.params).toEqual(['test']);
+    expect(request.params).toEqual([{ extra: 'val' }]);
+  });
+
+  it('should accept a ComposerQuery pipeline and forward params as protocol-level parameters', async () => {
+    const title = 'My Dashboard';
+    // esql tag does not take a leading '|' — the pipe separator is added by the SO client
+    const composerPipeline = esql`WHERE dashboard.title == ${{ title }} | LIMIT 10`;
+
+    await repository.esql({ ...options, pipeline: composerPipeline });
+
+    expect(client.esql.query).toHaveBeenCalledTimes(1);
+    const [[request]] = client.esql.query.mock.calls;
+    expect(request.query).toMatch(/^FROM .+ \| WHERE dashboard\.title == \?title \| LIMIT 10$/);
+    expect(request.params).toEqual([{ title: 'My Dashboard' }]);
+  });
+
+  it('should merge ComposerQuery params with explicitly provided params', async () => {
+    const title = 'My Dashboard';
+
+    await repository.esql({
+      ...options,
+      pipeline: esql`WHERE dashboard.title == ${{ title }} | LIMIT 10`,
+      params: [{ extra: 'val' }],
+    });
+
+    const [[request]] = client.esql.query.mock.calls;
+    expect(request.params).toEqual([{ title: 'My Dashboard' }, { extra: 'val' }]);
+  });
+
+  it('should not reject a ComposerQuery pipeline even if it contains only processing commands', async () => {
+    const composerPipeline = esql`LIMIT 1`;
+    await expect(
+      repository.esql({ ...options, pipeline: composerPipeline })
+    ).resolves.toBeDefined();
   });
 
   describe('with spaces extension', () => {

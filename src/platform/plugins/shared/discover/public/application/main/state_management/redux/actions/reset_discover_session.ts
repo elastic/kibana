@@ -12,6 +12,7 @@ import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
@@ -64,7 +65,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           }
 
           initialAppState = getInitialAppState({
-            initialUrlState: undefined,
+            initialUrlState: fromSavedObjectTabToAppState({ tab }),
             persistedTab: tab,
             dataView,
             services,

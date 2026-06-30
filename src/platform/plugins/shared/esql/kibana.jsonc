@@ -12,7 +12,8 @@
       "cps",
       "fieldsMetadata",
       "usageCollection",
-      "licensing"
+      "licensing",
+      "searchInferenceEndpoints"
     ],
     "requiredPlugins": [
       "data",

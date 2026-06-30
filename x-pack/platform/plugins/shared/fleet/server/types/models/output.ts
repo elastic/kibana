@@ -236,7 +236,7 @@ export const KafkaSchema = {
       schema.literal(kafkaCompressionType.None),
     ])
   ),
-  compression_level: schema.maybe(schema.number()),
+  compression_level: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   client_id: schema.maybe(schema.string()),
   auth_type: schema.oneOf([
     schema.literal(kafkaAuthType.None),
@@ -314,7 +314,7 @@ const KafkaUpdateSchema = {
   ),
 };
 
-export const OutputSchema = schema.oneOf([
+export const OutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
   schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
   schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
@@ -324,7 +324,7 @@ export const OutputSchema = schema.oneOf([
 // Separate schema for create operations: uses distinct meta IDs so OAS codegen
 // emits named $ref components instead of inline anyOf members, which the
 // Terraform provider requires to distinguish create vs read types.
-export const NewOutputSchema = schema.oneOf([
+export const NewOutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'new_output_elasticsearch' } }),
   schema.object(
     { ...RemoteElasticSearchSchema },

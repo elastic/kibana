@@ -24,7 +24,12 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChildWorkflowExecutionItem, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
@@ -38,11 +43,14 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps, shown on the overview pseudo-step. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
+  waitingStepExecutionId?: string;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
@@ -54,11 +62,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     workflowExecutionId,
     stepExecution,
     workflowExecutionDuration,
+    workflowExecutionUsage,
     isLoadingStepData,
     workflowExecutionStatus,
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
+    waitingStepExecutionId,
     childWorkflowExecution,
     parentWorkflowExecution,
   }) => {
@@ -96,6 +106,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const handleWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
+        if (hasActiveModifierKey(e)) return;
         if (childWorkflowExecution) {
           e.preventDefault();
           workflowNav.navigate();
@@ -106,6 +117,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const handleParentWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
+        if (hasActiveModifierKey(e)) return;
         if (parentWorkflowExecution) {
           e.preventDefault();
           parentWorkflowNav.navigate();
@@ -182,11 +194,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          workflowExecutionUsage={workflowExecutionUsage}
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
           shouldAutoResume={shouldAutoResume}
+          waitingStepExecutionId={waitingStepExecutionId}
         />
       );
     }
@@ -214,7 +228,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                       <EuiLink href={workflowNav.href} onClick={handleWorkflowLinkClick}>
                         {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
                       </EuiLink>
@@ -233,7 +246,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                       <EuiLink
                         href={parentWorkflowNav.href}
                         onClick={handleParentWorkflowLinkClick}
@@ -278,9 +290,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         <>
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
+                            workflowId={stepExecution?.workflowId}
+                            stepStartedAt={stepExecution?.startedAt}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}
+                            waitingStepExecutionId={stepExecution?.id}
                           />
                           <EuiSpacer size="m" />
                         </>

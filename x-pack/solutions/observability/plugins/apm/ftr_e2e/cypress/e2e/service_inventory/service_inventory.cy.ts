@@ -98,7 +98,7 @@ describe('Service inventory', () => {
       cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
-        .contains('button', 'production')
+        .contains('.euiComboBoxOption', 'production')
         .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
@@ -112,7 +112,8 @@ describe('Service inventory', () => {
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
-      cy.contains('Update').click();
+      // selectAbsoluteTimeRange now submits the query directly (legacy clicks
+      // querySubmitButton; new picker auto-submits via onDateRangeChange).
       cy.wait(mainAliasNames);
     });
   });

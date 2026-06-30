@@ -50,14 +50,23 @@ node scripts/capture_oas_snapshot \
   --include-path /api/spaces \
   --include-path /api/streams \
   --include-path /api/fleet \
-  --include-path /api/saved_objects/_import \
-  --include-path /api/saved_objects/_export \
+  --include-path /api/saved_objects \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
-  --include-path /api/workflows
+  --include-path /api/workflows \
+  --include-path /api/security/entity_store \
+  --include-path /api/dashboards \
+  --include-path /api/visualizations
 ```
 
-3. Rebuild the final OAS documents:
+3. Run the OpenAPI bundling scripts:
+
+```bash
+bash .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
+bash .buildkite/scripts/steps/openapi_bundling/final_merge.sh
+```
+
+4. Rebuild the final OAS documents:
 
 ```bash
 cd oas_docs && make api-docs
@@ -67,6 +76,7 @@ After this refresh flow completes, run the scoped validation command.
 
 Source of truth:
 - Keep the `capture_oas_snapshot` include-path list aligned with `.buildkite/scripts/steps/checks/capture_oas_snapshot.sh`.
+- Keep the openapi_bundling step list aligned with `.buildkite/scripts/steps/openapi_bundling/`.
 - If the Buildkite command changes, update this skill to match it.
 
 ## Required interaction flow
@@ -104,11 +114,15 @@ node scripts/capture_oas_snapshot \
   --include-path /api/spaces \
   --include-path /api/streams \
   --include-path /api/fleet \
-  --include-path /api/saved_objects/_import \
-  --include-path /api/saved_objects/_export \
+  --include-path /api/saved_objects \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
-  --include-path /api/workflows
+  --include-path /api/workflows \
+  --include-path /api/security/entity_store \
+  --include-path /api/dashboards \
+  --include-path /api/visualizations
+bash .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
+bash .buildkite/scripts/steps/openapi_bundling/final_merge.sh
 cd oas_docs && make api-docs
 ```
 

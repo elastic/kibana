@@ -6,14 +6,15 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
-import { formatChangePointDetectionUrl } from './formatters/aiops';
 import type {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
   MlLocator,
   ChangePointDetectionQueryState,
-} from '../../common/types/locator';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+} from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { formatChangePointDetectionUrl } from './formatters/aiops';
 import {
   formatExplorerUrl,
   formatSingleMetricViewerUrl,
@@ -51,12 +52,15 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         path = formatDataFrameAnalyticsExplorationUrl('', params.pageState);
         break;
-      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
-        path = formatChangePointDetectionUrl(
-          '',
-          params.pageState as ChangePointDetectionQueryState
-        );
+      case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION: {
+        const cpState = params.pageState as ChangePointDetectionQueryState;
+        if (cpState?.fieldConfigs && cpState?.index) {
+          path = formatChangePointDetectionUrl('', cpState);
+        } else {
+          path = formatGenericMlUrl('', params.page, params.pageState);
+        }
         break;
+      }
       default:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;

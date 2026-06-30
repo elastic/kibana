@@ -41,7 +41,7 @@ import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { sliceApmTimeseriesToValidYRange } from '../utils/split_line_series_for_edge_dots';
+import { sliceTimeseriesToValidYRange } from '../utils/timeseries_gap_handling';
 import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimeZone } from '../helper/timezone';
@@ -87,7 +87,7 @@ export function BreakdownChart({
   const isEmpty = isTimeseriesEmpty(timeseries);
 
   const trimmedTimeseries = useMemo(
-    () => (timeseries?.length ? sliceApmTimeseriesToValidYRange(timeseries) : timeseries),
+    () => (timeseries?.length ? sliceTimeseriesToValidYRange(timeseries) : timeseries),
     [timeseries]
   );
 
@@ -143,7 +143,7 @@ export function BreakdownChart({
             style={{
               line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
             }}
-            marker={<EuiIcon type="dot" color={annotationColor} />}
+            marker={<EuiIcon type="dot" color={annotationColor} aria-hidden={true} />}
             markerPosition={Position.Top}
           />
         )}

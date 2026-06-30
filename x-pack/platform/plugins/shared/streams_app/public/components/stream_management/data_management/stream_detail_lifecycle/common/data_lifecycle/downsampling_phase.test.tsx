@@ -23,7 +23,7 @@ describe('DownsamplingPhase', () => {
     fireEvent.click(button);
 
     expect(screen.getByTestId('downsamplingPopover-step1-title')).toBeInTheDocument();
-    expect(screen.getByTestId('downsamplingPopover-step1-afterDataStored')).toBeInTheDocument();
+    expect(screen.getByTestId('downsamplingPopover-step1-ageBadge')).toHaveTextContent('10d');
     expect(screen.getByTestId('downsamplingPopover-step1-interval')).toBeInTheDocument();
   });
 

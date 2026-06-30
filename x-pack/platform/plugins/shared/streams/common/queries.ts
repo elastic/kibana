@@ -15,10 +15,16 @@ export type QueryStatus = (typeof QUERY_STATUSES)[number];
 export const SEARCH_MODES = ['keyword', 'semantic', 'hybrid'] as const;
 export type SearchMode = (typeof SEARCH_MODES)[number];
 
-export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
+const DEFAULT_SEARCH_MODE: SearchMode = 'hybrid';
 
-export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
+export function resolveSearchMode(searchMode?: SearchMode): SearchMode {
+  return searchMode ?? DEFAULT_SEARCH_MODE;
+}
 
-export type Query = QueryLink & {
-  title: string;
-};
+export type QueryLinkRequest = Omit<QueryLink, 'stream_name' | 'rule_backed' | 'rule_id'>;
+
+export interface QueryUnlinkRequest {
+  id: string;
+}
+
+export type Query = QueryLink;

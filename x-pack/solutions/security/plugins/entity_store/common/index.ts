@@ -9,11 +9,12 @@
  * Lightweight `@kbn/entity-store/common` barrel (webpack `common` entry).
  * Keeps page-load size small: no euid / streamlang here — use `euid_helpers` or `loadEuidApi()`.
  *
+ * Public API for the entity_store plugin. Exports only constants and types needed
+ * on every load (including browser). For EUID translation helpers
+ * (DSL/ESQL/Painless, entity types), use common/euid_helpers.
+ *
  * @example
  * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
- * Public API for the entity_store plugin.
- * Exports only constants and types needed on every load (including browser).
- * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
  */
 
 import { z } from '@kbn/zod/v4';
@@ -64,7 +65,7 @@ export const ENTITY_STORE_ROUTES = {
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
-    FORCE_CCS_EXTRACT_TO_UPDATES: `${INTERNAL_BASE_ROUTE}/{entityType}/force_ccs_extract_to_updates`,
+    FORCE_REMOTE_EXTRACT_TO_UPDATES: `${INTERNAL_BASE_ROUTE}/{entityType}/force_remote_extract_to_updates`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
     ENTITY_MAINTAINERS_START: `${INTERNAL_BASE_ROUTE}/entity_maintainers/start/{id}`,
     ENTITY_MAINTAINERS_STOP: `${INTERNAL_BASE_ROUTE}/entity_maintainers/stop/{id}`,
@@ -79,6 +80,9 @@ export {
   EntityMaintainerResponseItem,
   GetEntityMaintainersResponse,
 } from './entity_maintainers';
+
+export { RESOLUTION_RULE_IDS } from './domain/resolution_rules/constants';
+export type { ResolutionRuleId } from './domain/resolution_rules/constants';
 
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -118,4 +122,5 @@ export {
   getEntityIndexPattern,
   getEntitiesAlias,
   getLatestEntitiesIndexName,
+  getLatestEntityIndexPattern,
 } from './domain/entity_index';

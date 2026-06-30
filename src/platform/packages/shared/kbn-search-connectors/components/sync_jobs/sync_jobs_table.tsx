@@ -67,7 +67,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
             {i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
               defaultMessage: 'Last sync',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -94,7 +100,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
             {i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
               defaultMessage: 'Sync duration',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -119,7 +131,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                   {i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
                     defaultMessage: 'Docs upserted',
                   })}
-                  <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+                  <EuiIcon
+                    size="s"
+                    type="question"
+                    color="subdued"
+                    className="eui-alignTop"
+                    aria-hidden={true}
+                  />
                 </>
               </EuiToolTip>
             ),
@@ -142,7 +160,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                   {i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
                     defaultMessage: 'Docs deleted',
                   })}
-                  <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+                  <EuiIcon
+                    size="s"
+                    type="question"
+                    color="subdued"
+                    className="eui-alignTop"
+                    aria-hidden={true}
+                  />
                 </>
               </EuiToolTip>
             ),
@@ -205,21 +229,34 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
               {
                 render: (job: ConnectorSyncJob) => {
                   return isSyncCancellable(job.status) ? (
-                    <EuiButtonIcon
-                      iconType="cross"
-                      color="danger"
-                      onClick={() => cancelConfirmModalProps.setSyncJobIdToCancel(job.id)}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'searchConnectors.index.syncJobs.actions.cancelSyncJob.caption',
                         {
                           defaultMessage: 'Cancel this sync job',
                         }
                       )}
+                      disableScreenReaderOutput
                     >
-                      {i18n.translate('searchConnectors.index.syncJobs.actions.deleteJob.caption', {
-                        defaultMessage: 'Delete',
-                      })}
-                    </EuiButtonIcon>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="danger"
+                        onClick={() => cancelConfirmModalProps.setSyncJobIdToCancel(job.id)}
+                        aria-label={i18n.translate(
+                          'searchConnectors.index.syncJobs.actions.cancelSyncJob.caption',
+                          {
+                            defaultMessage: 'Cancel this sync job',
+                          }
+                        )}
+                      >
+                        {i18n.translate(
+                          'searchConnectors.index.syncJobs.actions.deleteJob.caption',
+                          {
+                            defaultMessage: 'Delete',
+                          }
+                        )}
+                      </EuiButtonIcon>
+                    </EuiToolTip>
                   ) : (
                     <></>
                   );

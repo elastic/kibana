@@ -7,14 +7,17 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { buildEpisodeEventsEsqlQuery, type EpisodeEventRow } from '../queries/episode_events_query';
+import { QUERY_STALE_TIME } from '../constants';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeEventsQueryOptions {
   episodeId: string | undefined;
-  data: DataPublicPluginStart;
+  services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
 
 /**
@@ -22,20 +25,24 @@ export interface UseFetchEpisodeEventsQueryOptions {
  */
 export const useFetchEpisodeEventsQuery = ({
   episodeId,
-  data,
+  services,
 }: UseFetchEpisodeEventsQueryOptions) => {
+  const { data } = services;
+  const spaceId = useSpaceId(services.spaces);
+
   return useQuery({
-    queryKey: queryKeys.episodeEvents(episodeId ?? ''),
+    queryKey: queryKeys.episodeEvents(spaceId, episodeId ?? ''),
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeEventsEsqlQuery(episodeId!).print('basic'),
+          query: buildEpisodeEventsEsqlQuery(spaceId, episodeId!).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
       }),
     select: (raw) => esqlResponseToObjectRows<EpisodeEventRow>(raw),
     enabled: Boolean(episodeId),
+    staleTime: QUERY_STALE_TIME,
   });
 };

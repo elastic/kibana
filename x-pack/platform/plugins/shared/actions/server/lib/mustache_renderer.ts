@@ -10,7 +10,11 @@ import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
-export type Escape = 'markdown' | 'slack' | 'json' | 'none';
+export type Escape = 'markdown' | 'slack' | 'json' | 'none' | 'html';
+
+// Capture Mustache's built-in HTML escape before any render calls can change it.
+// This is the default Mustache.escape: it escapes &, <, >, ", ', /, `, and =.
+const mustacheEscapeHtml = Mustache.escape;
 
 type Variables = Record<string, unknown>;
 
@@ -31,8 +35,37 @@ export function renderMustacheString(
   string: string,
   variables: Variables,
   escape: Escape
-): string {
+): string;
+export function renderMustacheString(
+  logger: Logger,
+  string: string | null,
+  variables: Variables,
+  escape: Escape
+): string | null;
+export function renderMustacheString(
+  logger: Logger,
+  string: string | undefined,
+  variables: Variables,
+  escape: Escape
+): string | undefined;
+export function renderMustacheString(
+  logger: Logger,
+  string: string | null | undefined,
+  variables: Variables,
+  escape: Escape
+): string | null | undefined {
+  if (string == null) return string;
   const augmentedVariables = augmentObjectVariables(variables);
+  return renderMustacheStringWithAugmentedVariables(logger, string, augmentedVariables, escape);
+}
+
+// render a string with variables that have already been augmented with augmentObjectVariables().
+function renderMustacheStringWithAugmentedVariables(
+  logger: Logger,
+  string: string,
+  augmentedVariables: Variables,
+  escape: Escape
+): string {
   const lambdas = getMustacheLambdas(logger);
 
   const previousMustacheEscape = Mustache.escape;
@@ -59,7 +92,7 @@ export function renderMustacheObject<Params>(
     if (!isString(value)) return;
 
     // since we're rendering a JS object, no escaping needed
-    return renderMustacheString(logger, value, augmentedVariables, 'none');
+    return renderMustacheStringWithAugmentedVariables(logger, value, augmentedVariables, 'none');
   });
 
   // The return type signature for `cloneDeep()` ends up taking the return
@@ -132,6 +165,7 @@ function getEscape(escape: Escape): (value: unknown) => string {
   if (escape === 'markdown') return escapeMarkdown;
   if (escape === 'slack') return escapeSlack;
   if (escape === 'json') return escapeJSON;
+  if (escape === 'html') return mustacheEscapeHtml;
   return escapeNone;
 }
 

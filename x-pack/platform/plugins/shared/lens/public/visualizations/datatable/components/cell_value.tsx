@@ -19,8 +19,8 @@ import {
   buildColumnConfigLookup,
   getRenderMode,
   applyCellColoring,
-  isNonColorableValue,
-  HtmlCell,
+  isEmptyValue,
+  FormattedCell,
   LinkCell,
   BadgeCell,
 } from './cell_value_helpers';
@@ -51,13 +51,10 @@ export const createGridCell = (
     const { oneClickFilter, colorMode = 'none', palette, colorMapping } = currentColumnConfig ?? {};
 
     const isClickable = Boolean(oneClickFilter && handleFilterClick);
-    const isNonColorable = isNonColorableValue(rawValue);
+    const isNonColorable = isEmptyValue(rawValue);
     const renderMode = getRenderMode(colorMode, isClickable, isNonColorable);
 
-    // Badge and link modes need plain text; html mode uses the formatter's html output.
-    const contentFormat = renderMode !== 'html' ? 'text' : 'html';
     const fallbackText = rawValue == null ? '' : String(rawValue);
-    const content = formatter?.convert(rawValue, contentFormat) ?? fallbackText;
 
     const alignment = alignments?.get(columnId);
 
@@ -78,8 +75,11 @@ export const createGridCell = (
     );
 
     const badgeColor = useMemo(() => {
-      if (renderMode !== 'badge' || (!palette && !colorMapping)) return null;
-      if (isNonColorableValue(rawValue)) return null;
+      if (renderMode !== 'badge') return null;
+      if (isEmptyValue(rawValue)) return null;
+      // Always delegate to getCellColor: when no palette/colorMapping is configured
+      // (e.g. via the as-code Lens API) the factory resolves sensible defaults so badges
+      // are colored automatically, mirroring the cell/text coloring behavior.
       const color = getCellColor(columnId, palette, colorMapping)(rawValue);
       return color || null;
     }, [renderMode, columnId, palette, colorMapping, rawValue]);
@@ -114,7 +114,7 @@ export const createGridCell = (
       case 'badge':
         return (
           <BadgeCell
-            label={content}
+            label={formatter?.convertToText(rawValue) ?? fallbackText}
             badgeColor={badgeColor}
             isClickable={isClickable}
             onClick={onFilter}
@@ -126,7 +126,7 @@ export const createGridCell = (
 
       case 'link': {
         const backgroundColor =
-          colorMode === 'cell' && !isNonColorableValue(rawValue)
+          colorMode === 'cell' && !isEmptyValue(rawValue)
             ? getCellColor(columnId, palette, colorMapping)(rawValue)
             : null;
         const baseColor = euiTheme.colors.link;
@@ -141,7 +141,7 @@ export const createGridCell = (
 
         return (
           <LinkCell
-            content={content}
+            content={formatter?.convertToText(rawValue) ?? fallbackText}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}
@@ -150,11 +150,11 @@ export const createGridCell = (
         );
       }
 
-      case 'html':
+      case 'formatted':
       default:
         return (
-          <HtmlCell
-            content={content}
+          <FormattedCell
+            content={formatter?.convertToReact(rawValue) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
             isColored={Boolean(cellStyle)}

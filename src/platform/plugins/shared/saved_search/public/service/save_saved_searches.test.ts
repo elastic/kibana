@@ -19,6 +19,43 @@ describe('saveSavedSearch', () => {
   let cmApi: ContentManagementPublicStart['client'];
   let savedSearch: SavedSearch;
 
+  const expectedTabAttributes = {
+    breakdownField: undefined,
+    chartInterval: undefined,
+    columns: [],
+    controlGroupJson: undefined,
+    density: undefined,
+    grid: {},
+    hideAggregatedPreview: undefined,
+    hideChart: false,
+    hideTable: false,
+    isTextBasedQuery: false,
+    kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+    refreshInterval: undefined,
+    rowHeight: undefined,
+    headerRowHeight: undefined,
+    rowsPerPage: undefined,
+    sampleSize: undefined,
+    sort: [],
+    timeRange: undefined,
+    timeRestore: false,
+    usesAdHocDataView: undefined,
+    viewMode: undefined,
+    visContext: undefined,
+  };
+
+  const expectedData = {
+    title: 'title',
+    description: '',
+    tabs: [
+      {
+        id: expect.any(String),
+        label: 'Untitled',
+        attributes: expectedTabAttributes,
+      },
+    ],
+  };
+
   beforeEach(() => {
     cmApi = contentManagementMock.createStartContract().client;
     const searchSource = dataPluginMock.createStartContract().search.searchSource.createEmpty();
@@ -37,63 +74,6 @@ describe('saveSavedSearch', () => {
       },
       managed: false,
     } as SavedSearch;
-  });
-
-  describe('onTitleDuplicate', () => {
-    test('should check for title duplicating', async () => {
-      cmApi.search = jest.fn().mockReturnValue({
-        hits: [
-          {
-            attributes: {
-              title: 'title',
-            },
-          },
-        ],
-      });
-      const onTitleDuplicate = jest.fn();
-
-      await saveSavedSearch(
-        savedSearch,
-        {
-          onTitleDuplicate,
-          copyOnSave: true,
-        },
-        cmApi,
-        undefined
-      );
-
-      expect(onTitleDuplicate).toHaveBeenCalled();
-    });
-
-    test('should not check for title duplicating for saving existing search', async () => {
-      cmApi.search = jest.fn().mockReturnValue({
-        hits: [
-          {
-            attributes: {
-              title: 'title',
-            },
-          },
-        ],
-      });
-      cmApi.update = jest.fn().mockReturnValue({
-        item: {
-          id: 'id',
-        },
-      });
-      const onTitleDuplicate = jest.fn();
-
-      await saveSavedSearch(
-        savedSearch,
-        {
-          onTitleDuplicate,
-          copyOnSave: false,
-        },
-        cmApi,
-        undefined
-      );
-
-      expect(onTitleDuplicate).not.toHaveBeenCalled();
-    });
   });
 
   test('should call savedObjectsClient.create for saving new search', async () => {
@@ -118,46 +98,7 @@ describe('saveSavedSearch', () => {
 
     expect(cmApi.create).toHaveBeenCalledWith({
       contentTypeId: 'search',
-      data: {
-        breakdownField: undefined,
-        columns: [],
-        description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        hideChart: false,
-        hideTable: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        sort: [],
-        timeRange: undefined,
-        timeRestore: false,
-        title: 'title',
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
-        tabs: [
-          {
-            id: expect.any(String),
-            label: 'Untitled',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              sort: [],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              hideTable: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-            },
-          },
-        ],
-      },
+      data: expectedData,
       options: { references: [] },
     });
   });
@@ -173,46 +114,7 @@ describe('saveSavedSearch', () => {
 
     expect(cmApi.update).toHaveBeenCalledWith({
       contentTypeId: 'search',
-      data: {
-        breakdownField: undefined,
-        columns: [],
-        description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        isTextBasedQuery: false,
-        hideChart: false,
-        hideTable: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        timeRange: undefined,
-        sort: [],
-        title: 'title',
-        timeRestore: false,
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
-        tabs: [
-          {
-            id: expect.any(String),
-            label: 'Untitled',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              sort: [],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              hideTable: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-            },
-          },
-        ],
-      },
+      data: expectedData,
       id: 'id',
       options: { references: [] },
     });
@@ -243,46 +145,7 @@ describe('saveSavedSearch', () => {
     );
     expect(cmApi.update).toHaveBeenCalledWith({
       contentTypeId: 'search',
-      data: {
-        breakdownField: undefined,
-        columns: [],
-        description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        hideChart: false,
-        hideTable: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        sort: [],
-        timeRange: undefined,
-        timeRestore: false,
-        title: 'title',
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
-        tabs: [
-          {
-            id: expect.any(String),
-            label: 'Untitled',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              sort: [],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              hideTable: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-            },
-          },
-        ],
-      },
+      data: expectedData,
       id: 'id',
       options: { references: ['tag-1', 'tag-2'] },
     });

@@ -84,6 +84,8 @@ import {
   GetKnowledgeBaseResponseSchema,
   BulkRollbackPackagesRequestSchema,
   BulkRollbackPackagesResponseSchema,
+  BulkNamespaceCustomizationRequestSchema,
+  BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
@@ -127,6 +129,7 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
   postBulkRollbackPackagesHandler,
+  postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
@@ -1101,6 +1104,97 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   }
 
   router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_NAMESPACE_CUSTOMIZATION_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Bulk enable/disable namespace-level customization for packages`,
+      description: `Enable or disable namespace-level index template customization for a list of packages in one call. Use this for IaC-style declarative flows.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkNamespaceCustomizationRequest: {
+                      value: {
+                        packages: ['system', 'nginx'],
+                        enable: ['production', 'staging'],
+                        disable: ['dev'],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          items: [
+                            {
+                              name: 'system',
+                              success: true,
+                              namespace_customization_enabled_for: ['production', 'staging'],
+                            },
+                            {
+                              name: 'nginx',
+                              success: false,
+                              error: 'Package nginx is not installed',
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          statusCode: 400,
+                          error: 'Bad Request',
+                          message:
+                            'Namespaces must not appear in both enable and disable: production',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+        validate: {
+          request: BulkNamespaceCustomizationRequestSchema,
+          response: {
+            200: {
+              body: () => BulkNamespaceCustomizationResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      postBulkNamespaceCustomizationHandler
+    );
+
+  router.versioned
     .get({
       path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
@@ -1549,8 +1643,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .delete({
       path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
       security: INSTALL_PACKAGES_SECURITY,
-      summary: `Delete assets for an input package`,
-      description: `Delete datastream assets for a specific input package, by data stream name.`,
+      summary: `Delete assets for a package`,
+      description: `Delete datastream assets for a specific package, by data stream name.`,
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },

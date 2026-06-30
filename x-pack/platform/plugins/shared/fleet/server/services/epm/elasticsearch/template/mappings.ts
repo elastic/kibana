@@ -10,7 +10,7 @@ import type { Field } from '../../fields/field';
 const DEFAULT_SCALING_FACTOR = 1000;
 const DEFAULT_IGNORE_ABOVE = 1024;
 
-interface Properties {
+export interface Properties {
   [key: string]: any;
 }
 

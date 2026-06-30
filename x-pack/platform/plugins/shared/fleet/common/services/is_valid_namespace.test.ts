@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isValidNamespace } from './is_valid_namespace';
+import { isValidNamespace, isValidDataStreamType } from './is_valid_namespace';
 
 describe('Fleet - isValidNamespace', () => {
   it('returns true for valid namespaces', () => {
@@ -41,5 +41,39 @@ describe('Fleet - isValidNamespace', () => {
       ).valid
     ).toBe(false);
     expect(isValidNamespace('default', false, ['test']).valid).toBe(false);
+    expect(isValidNamespace('default', false, ['prod', 'qa']).valid).toBe(false);
+  });
+
+  it('accepts a namespace matching any of multiple allowed prefixes', () => {
+    expect(isValidNamespace('prod', false, ['prod', 'qa']).valid).toBe(true);
+    expect(isValidNamespace('qa', false, ['prod', 'qa']).valid).toBe(true);
+    expect(isValidNamespace('prodenv', false, ['prod', 'qa']).valid).toBe(true);
+    expect(isValidNamespace('qaenv', false, ['prod', 'qa']).valid).toBe(true);
+  });
+});
+
+describe('Fleet - isValidDataStreamType', () => {
+  it('returns true for each valid type', () => {
+    expect(isValidDataStreamType('logs').valid).toBe(true);
+    expect(isValidDataStreamType('metrics').valid).toBe(true);
+    expect(isValidDataStreamType('traces').valid).toBe(true);
+    expect(isValidDataStreamType('synthetics').valid).toBe(true);
+    expect(isValidDataStreamType('profiles').valid).toBe(true);
+  });
+
+  it('returns false for unknown types', () => {
+    expect(isValidDataStreamType('bogus').valid).toBe(false);
+    expect(isValidDataStreamType('LOGS').valid).toBe(false);
+    expect(isValidDataStreamType('').valid).toBe(false);
+    expect(isValidDataStreamType('profiling').valid).toBe(false);
+  });
+
+  it('returns true for blank when allowBlank is true', () => {
+    expect(isValidDataStreamType('', true).valid).toBe(true);
+    expect(isValidDataStreamType('  ', true).valid).toBe(true);
+  });
+
+  it('returns false for blank when allowBlank is false', () => {
+    expect(isValidDataStreamType('', false).valid).toBe(false);
   });
 });

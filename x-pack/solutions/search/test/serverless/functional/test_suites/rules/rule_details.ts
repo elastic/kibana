@@ -32,7 +32,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
-    await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
+    await find.clickDisplayedByCssSelector(
+      `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${ruleName}"]`
+    );
   };
 
   const openRulesSection = async () => {
@@ -536,7 +538,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).toEqual('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');

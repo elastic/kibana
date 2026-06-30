@@ -7,6 +7,8 @@
 
 import { esql } from '@elastic/esql';
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {
@@ -18,6 +20,7 @@ import {
   type AlertAction,
 } from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -25,13 +28,19 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(AlertActionEventPublisher)
+    private readonly eventPublisher: AlertActionEventPublisher
   ) {}
 
   public async createAction(params: {
@@ -46,13 +55,14 @@ export class AlertActionsClient {
       }),
     ]);
 
-    await this.bulkIndexActions([
-      this.buildAlertActionDocument({
-        action: params.action,
-        alertEvent,
-        userProfileUid,
-      }),
-    ]);
+    const doc = this.buildAlertActionDocument({
+      action: params.action,
+      alertEvent,
+      userProfileUid,
+    });
+
+    await this.bulkIndexActions([doc]);
+    this.eventPublisher.emitEpisodeActions(this.request, [doc]);
   }
 
   public async createBulkActions(
@@ -88,6 +98,7 @@ export class AlertActionsClient {
 
     if (docs.length > 0) {
       await this.bulkIndexActions(docs);
+      this.eventPublisher.emitEpisodeActions(this.request, docs);
     }
 
     return { processed: docs.length, total: actions.length };
@@ -114,7 +125,7 @@ export class AlertActionsClient {
 
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND (${whereClause})
+      | WHERE type == "alert" AND space_id == ${this.spaceId} AND (${whereClause})
       | STATS
         last_event_timestamp = MAX(@timestamp),
         last_episode_id = LAST(episode.id, @timestamp),
@@ -161,7 +172,7 @@ export class AlertActionsClient {
     const { groupHash, episodeId } = params;
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
+      | WHERE type == "alert" AND space_id == ${this.spaceId} AND group_hash == ${groupHash} AND ${
       episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
     }
       | SORT @timestamp DESC
@@ -175,7 +186,14 @@ export class AlertActionsClient {
 
     if (result.length === 0) {
       throw Boom.notFound(
-        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`
+        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`,
+        {
+          code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+          details: {
+            group_hash: groupHash,
+            ...(episodeId ? { episode_id: episodeId } : {}),
+          },
+        }
       );
     }
 

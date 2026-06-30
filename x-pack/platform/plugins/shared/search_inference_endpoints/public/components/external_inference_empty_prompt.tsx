@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { docLinks } from '../../common/doc_links';
+import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { EventType } from '../analytics/constants';
 
 interface ExternalInferenceEmptyPromptProps {
+  canManage: boolean;
   onFlyoutOpen: () => void;
 }
 
 export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPromptProps> = ({
+  canManage,
   onFlyoutOpen,
 }) => {
+  const usageTracker = useUsageTracker();
+  useEffect(() => {
+    usageTracker.load(EventType.EMPTY_STATE_VIEWED);
+  }, [usageTracker]);
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="externalInferenceEmptyPrompt"
@@ -39,15 +47,17 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
         </p>
       }
       actions={
-        <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
-          {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
-            defaultMessage: 'Add endpoint',
-          })}
-        </EuiButton>
+        canManage ? (
+          <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
+            {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
+              defaultMessage: 'Add endpoint',
+            })}
+          </EuiButton>
+        ) : undefined
       }
       footer={
         <EuiLink
-          href={docLinks.createInferenceEndpoint}
+          href={docLinks.externalInference}
           target="_blank"
           external
           data-test-subj="viewDocumentationLink"

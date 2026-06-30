@@ -26,6 +26,7 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type {
   FilterManager,
   TimefilterContract,
@@ -65,11 +66,12 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
-import type { ProfilesManager } from './context_awareness';
+import { type ProfilesManager, ProfileStateRegistry } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
@@ -98,6 +100,7 @@ export interface DiscoverFeatureFlags {
 }
 
 export interface DiscoverServices {
+  agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
   alertingVTwo?: AlertingV2PublicStart;
   application: ApplicationStart;
@@ -122,7 +125,7 @@ export interface DiscoverServices {
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
   inspector: InspectorPublicPluginStart;
-  metadata: { branch: string };
+  metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
@@ -155,11 +158,13 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
+  logger: Logger;
 }
 
 export const buildServices = ({
@@ -193,6 +198,7 @@ export const buildServices = ({
   const storage = new Storage(localStorage);
 
   return {
+    agentBuilder: plugins.agentBuilder,
     aiops: plugins.aiops,
     alertingVTwo: plugins.alertingVTwo,
     application: core.application,
@@ -227,6 +233,7 @@ export const buildServices = ({
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
+      version: context.env.packageInfo.version,
     },
     navigation: plugins.navigation,
     share: plugins.share,
@@ -259,6 +266,7 @@ export const buildServices = ({
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
+    profileStateRegistry: new ProfileStateRegistry(),
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
@@ -267,5 +275,6 @@ export const buildServices = ({
       plugins.embeddable.getStateTransfer(),
       core.application
     ),
+    logger: context.logger.get(),
   };
 };

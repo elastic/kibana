@@ -24,6 +24,7 @@ type DiscoverPage = PageObjects['discover'];
 const queryModes = [
   {
     name: 'Classic',
+    value: 'classic' as const,
     filterMinimal: (discover: DiscoverPage) =>
       discover.writeAndSubmitKqlQuery(`transaction.name: "${MINIMAL_TRACE.TRANSACTION_NAME}"`),
     filterRichSpan: (discover: DiscoverPage) =>
@@ -31,6 +32,7 @@ const queryModes = [
   },
   {
     name: 'ES|QL',
+    value: 'esql' as const,
     filterMinimal: (discover: DiscoverPage) =>
       discover.writeAndSubmitEsqlQuery(
         `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${MINIMAL_TRACE.TRANSACTION_NAME}"`
@@ -52,9 +54,8 @@ spaceTest.describe(
       await setupTracesExperience(scoutSpace, config);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -65,12 +66,14 @@ spaceTest.describe(
       spaceTest(
         `${mode.name} mode - should render always-visible sections and hide conditional ones for a minimal document`,
         async ({ pageObjects }) => {
+          await pageObjects.discover.goto({ queryMode: mode.value });
+
           await spaceTest.step(`${mode.name} mode - filter for minimal trace`, async () => {
             await mode.filterMinimal(pageObjects.discover);
           });
 
           await spaceTest.step('open Overview tab', async () => {
-            await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+            await pageObjects.tracesExperience.openOverviewTab();
           });
 
           await spaceTest.step('verify About section is visible', async () => {
@@ -102,6 +105,8 @@ spaceTest.describe(
       spaceTest(
         `${mode.name} mode - should render conditional sections for a document with errors and span links`,
         async ({ pageObjects }) => {
+          await pageObjects.discover.goto({ queryMode: mode.value });
+
           await spaceTest.step(
             `${mode.name} mode - filter for span with errors and span links`,
             async () => {
@@ -110,7 +115,7 @@ spaceTest.describe(
           );
 
           await spaceTest.step('open Overview tab', async () => {
-            await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+            await pageObjects.tracesExperience.openOverviewTab();
           });
 
           await spaceTest.step('verify Errors section is visible', async () => {
@@ -125,9 +130,11 @@ spaceTest.describe(
     }
 
     spaceTest(
-      'ES|QL mode - logs section shows only logs correlated to the opened trace',
+      'ES|QL mode only - logs section shows only logs correlated to the opened trace',
       async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
+
+        await pageObjects.discover.goto({ queryMode: 'esql' });
 
         await spaceTest.step('filter for minimal trace transaction', async () => {
           await pageObjects.discover.writeAndSubmitEsqlQuery(
@@ -136,7 +143,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('open Overview tab', async () => {
-          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+          await pageObjects.tracesExperience.openOverviewTab();
         });
 
         await spaceTest.step('expand the Logs section', async () => {

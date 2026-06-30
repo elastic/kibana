@@ -64,9 +64,12 @@ export const buildResultsQuery = ({
 
   const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
 
-  const esFilterClauses =
-    parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];
+  const { filter: esFilterClauses, must_not: esFilterMustNotClauses } =
+    parsedEsFilters.length > 0
+      ? buildQueryFromFilters(parsedEsFilters, undefined)
+      : { filter: [], must_not: [] };
 
+  // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
   const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
 
   let index: string;
@@ -98,7 +101,12 @@ export const buildResultsQuery = ({
         },
       },
     },
-    query: { bool: { filter: filterQuery } },
+    query: {
+      bool: {
+        filter: filterQuery,
+        ...(esFilterMustNotClauses.length > 0 ? { must_not: esFilterMustNotClauses } : {}),
+      },
+    },
     from: activePage * querySize,
     size: querySize,
     track_total_hits: true,

@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
+import { createAvailableControlsGetter } from './row_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { UnifiedDataTableContext } from '../../../table_context';
@@ -33,11 +34,13 @@ describe('getRowMenuControlColumn', () => {
         />
       )),
     };
-    const RowMenuControlColumn = getRowMenuControlColumn([
-      props,
-      mockRowAdditionalLeadingControls[0],
-      mockRowAdditionalLeadingControls[1],
-    ]);
+    const RowMenuControlColumn = getRowMenuControlColumn(
+      createAvailableControlsGetter([
+        props,
+        mockRowAdditionalLeadingControls[0],
+        mockRowAdditionalLeadingControls[1],
+      ])
+    );
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowMenuControlColumn

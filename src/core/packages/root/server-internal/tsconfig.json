@@ -86,6 +86,8 @@
     "@kbn/core-data-streams-server-internal",
     "@kbn/tracing-utils",
     "@kbn/core-user-activity-server-internal",
+    "@kbn/core-user-storage-server-internal",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

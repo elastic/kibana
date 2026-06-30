@@ -18,6 +18,7 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -42,6 +43,7 @@ import {
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
+import { fromDateHistogramLensApiToLensState } from '../columns/date_histogram';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type { MetricConfig } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
@@ -86,7 +88,7 @@ const LENS_METRIC_COMPARE_TO_REVERSED = false;
 type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
 
-const iconCompat = getReversibleMappings<MetricIconName, string>([
+export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
@@ -186,10 +188,12 @@ function convertStylingToAPIFormat(
   visualization: MetricVisualizationState,
   hasSecondary: boolean
 ): MetricStyling {
+  const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
+
   return stripUndefined({
-    icon: visualization.icon
+    icon: iconName
       ? {
-          name: iconCompat.toAPI(visualization.icon),
+          name: iconName,
           alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
         }
       : undefined,
@@ -253,7 +257,7 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.subtitle ?? '',
+    ...(primaryMetric.subtitle ? { subtitle: primaryMetric.subtitle } : {}),
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
     ...(secondaryMetric
@@ -273,7 +277,7 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn: layer.breakdown_by?.collapse_by,
+    ...(layer.breakdown_by?.collapse_by ? { collapseFn: layer.breakdown_by.collapse_by } : {}),
     ...(primaryMetric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -346,7 +350,7 @@ function buildFromTextBasedLayer(
                   type: 'bar',
                   max_value: getValueApiColumn(visualization.maxAccessor, layer),
                   ...(visualization.progressDirection
-                    ? { direction: visualization.progressDirection }
+                    ? { orientation: visualization.progressDirection }
                     : {}),
                 },
               }
@@ -467,7 +471,8 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.trendlineLayerType) {
-      primaryMetric.background_chart = { ...primaryMetric.background_chart, type: 'trend' };
+      // Trend takes precedence; do not retain bar-only fields (e.g. max_value) on the API config.
+      primaryMetric.background_chart = { type: 'trend' };
     }
 
     if (visualization.palette) {
@@ -480,7 +485,8 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.color = AUTO_COLOR;
     }
 
-    if (visualization.applyColorTo) {
+    // Check for valid enum, some integration panels have applyColorTo === 'bar', which is not a valid API enum; treat unknown values as unselected.
+    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
       primaryMetric.apply_color_to = visualization.applyColorTo;
     }
   }
@@ -577,8 +583,20 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), newPrimaryColumns);
   if (trendLineLayer) {
+    // Histogram first so columnOrder matches editor-built trendline layers and tabify agg order.
+    addLayerColumn(
+      trendLineLayer,
+      HISTOGRAM_COLUMN_NAME,
+      fromDateHistogramLensApiToLensState({
+        operation: 'date_histogram',
+        field: '',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      })
+    );
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
-    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, newPrimaryColumns);
   }
 
   if (layer.breakdown_by) {
@@ -661,17 +679,22 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   const visualization = buildVisualizationState(config);
 
   const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
-  const regularDataViews = Object.values(usedDataviews).filter(
-    (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
-  );
-  const references = regularDataViews.length
-    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+
+  const regularDataViewsByLayer: Record<string, string> = {};
+  for (const [layerId, dv] of Object.entries(usedDataviews)) {
+    if (dv.type === 'dataView') {
+      regularDataViewsByLayer[layerId] = dv.id;
+    }
+  }
+  const references = Object.keys(regularDataViewsByLayer).length
+    ? buildReferences(regularDataViewsByLayer)
     : [];
 
   return {
     visualizationType: 'lnsMetric',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,

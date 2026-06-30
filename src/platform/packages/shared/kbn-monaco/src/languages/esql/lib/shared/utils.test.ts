@@ -12,14 +12,14 @@ describe('offsetRangeToMonacoRange', () => {
   test('single line', () => {
     const expression = 'FROM kibana_sample_data_logs';
     const range = offsetRangeToMonacoRange(expression, { start: 5, end: 28 });
-    expect(range).toEqual({ startColumn: 6, endColumn: 28, startLineNumber: 1, endLineNumber: 1 });
+    expect(range).toEqual({ startColumn: 6, endColumn: 29, startLineNumber: 1, endLineNumber: 1 });
   });
 
   test('next line', () => {
     const expression = `FROM kibana_sample_data_logs
 | KEEP foo`;
     const range = offsetRangeToMonacoRange(expression, { start: 36, end: 39 });
-    expect(range).toEqual({ startColumn: 8, endColumn: 10, startLineNumber: 2, endLineNumber: 2 });
+    expect(range).toEqual({ startColumn: 8, endColumn: 11, startLineNumber: 2, endLineNumber: 2 });
   });
 
   test('should convert offset range to monaco range for multiple lines query when the cursor is not at the end', () => {
@@ -29,7 +29,7 @@ describe('offsetRangeToMonacoRange', () => {
 
     expect(monacoRange).toEqual({
       startColumn: 17,
-      endColumn: 17,
+      endColumn: 18,
       startLineNumber: 2,
       endLineNumber: 2,
     });
@@ -37,17 +37,35 @@ describe('offsetRangeToMonacoRange', () => {
 
   test('returns undefined if the start is past the end of the expression', () => {
     const expression = 'FROM test | WHERE test == 1 | LIMIT 1';
-    const range = { start: 37, end: 37 };
+    const range = { start: 38, end: 38 };
     const monacoRange = offsetRangeToMonacoRange(expression, range);
 
     expect(monacoRange).toEqual(undefined);
   });
 
-  test('should not create a range if start and end are equal', () => {
+  test('cursor at end of expression returns an empty insert-only range', () => {
+    const expression = 'FROM test | WHERE test == 1 | LIMIT 1';
+    const range = { start: 37, end: 37 };
+    const monacoRange = offsetRangeToMonacoRange(expression, range);
+
+    expect(monacoRange).toEqual({
+      startColumn: 38,
+      endColumn: 38,
+      startLineNumber: 1,
+      endLineNumber: 1,
+    });
+  });
+
+  test('empty range in the middle of an expression returns an insert-only position', () => {
     const expression = 'FROM test | WHERE test == | LIMIT 1';
     const range = { start: 26, end: 26 };
     const monacoRange = offsetRangeToMonacoRange(expression, range);
 
-    expect(monacoRange).toEqual(undefined);
+    expect(monacoRange).toEqual({
+      startColumn: 27,
+      endColumn: 27,
+      startLineNumber: 1,
+      endLineNumber: 1,
+    });
   });
 });

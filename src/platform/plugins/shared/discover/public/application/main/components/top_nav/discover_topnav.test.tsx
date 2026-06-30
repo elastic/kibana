@@ -173,7 +173,7 @@ describe('Discover topnav component', () => {
     });
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
-    expect(itemIds).toEqual(['new', 'open']);
+    expect(itemIds).toEqual(['new', 'open', 'inspect']);
     expect(capturedTopNavMenu?.primaryActionItem?.id).toBe('save');
   });
 
@@ -186,7 +186,7 @@ describe('Discover topnav component', () => {
     });
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
-    expect(itemIds).toEqual(['new', 'open']);
+    expect(itemIds).toEqual(['new', 'open', 'inspect']);
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
   });
 

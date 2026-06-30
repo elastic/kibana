@@ -23,6 +23,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -142,6 +143,8 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       return htmlIdGenerator('textarea')();
     }, []);
 
+    const popoverTitleId = useGeneratedHtmlId();
+
     const textareaContainerCss = useMemo(() => {
       return css`
         --height: 15rem;
@@ -241,6 +244,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
         initialFocus={`textarea.${textAreaHtmlId}`}
         panelProps={{ 'data-test-subj': testId('popoverPanel') }}
         panelPaddingSize="s"
+        aria-labelledby={popoverTitleId}
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
@@ -254,18 +258,19 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
             </EuiFlexItem>
             {showHelpIcon && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  size="xs"
-                  onClick={handleOpenPopover}
-                  title={openLabel}
-                  aria-label={openLabel}
-                  data-test-subj={testId('openInputButton')}
-                  css={css`
-                    inline-size: auto;
-                    block-size: auto;
-                  `}
-                />
+                <EuiToolTip content={openLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    size="xs"
+                    onClick={handleOpenPopover}
+                    aria-label={openLabel}
+                    data-test-subj={testId('openInputButton')}
+                    css={css`
+                      inline-size: auto;
+                      block-size: auto;
+                    `}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -277,7 +282,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiTitle size="xxxs" data-test-subj={testId('title')}>
-                    <h5>{textareaLabel ?? argName}</h5>
+                    <h5 id={popoverTitleId}>{textareaLabel ?? argName}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
 
@@ -288,7 +293,6 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       size="xs"
                       onClick={handleHelpOnClick}
                       isSelected={showHelpContent}
-                      title={helpIconLabel}
                       aria-label={helpIconLabel}
                       disabled={!helpContent}
                       data-test-subj={testId('helpButton')}
@@ -356,7 +360,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       </EuiPopover>
     ) : (
       <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
-        <EuiIcon type="warning" size="s" color="subdued" />{' '}
+        <EuiIcon type="warning" size="s" color="subdued" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noMultipleArgs"
           defaultMessage="Argument is only supported once per command"

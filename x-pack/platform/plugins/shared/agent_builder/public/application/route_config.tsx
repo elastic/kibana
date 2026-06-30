@@ -9,6 +9,8 @@ import React from 'react';
 import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
+import { AgentBuilderConnectorsPage } from './pages/connectors';
+import { AgentBuilderAgentConnectorsPage } from './pages/agent_connectors';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
@@ -26,13 +28,25 @@ import { AgentBuilderSkillCreatePage } from './pages/skill_create';
 import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
-import { AgentBuilderConnectorsPage } from './pages/connectors';
+import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
+import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
+import { appPaths } from './utils/app_paths';
 
 export type SidebarView = 'conversation' | 'manage';
 
 export interface FeatureFlags {
   experimental: boolean;
+  uiamOAuthClientManagement: boolean;
+}
+
+export interface Capabilities {
+  isUIAMEnabled: boolean;
+}
+
+export interface RouteAccessConfig {
+  featureFlags: FeatureFlags;
+  capabilities: Capabilities;
 }
 
 export interface RouteDefinition {
@@ -41,6 +55,8 @@ export interface RouteDefinition {
   element: React.ReactNode;
   sidebarView: SidebarView;
   isExperimental?: boolean;
+  requiresUIAM?: boolean;
+  requiresUiamOAuthClientManagement?: boolean;
   navLabel?: string;
   navIcon?: string;
 }
@@ -95,6 +111,14 @@ export const agentRoutes: RouteDefinition[] = [
     isExperimental: true,
     navLabel: navLabels.plugins,
     element: <AgentBuilderAgentPluginsPage />,
+  },
+  {
+    path: '/agents/:agentId/connectors',
+    viewId: agentBuilderViewIds.agentConnectors,
+    sidebarView: 'conversation',
+    navLabel: navLabels.connectors,
+    isExperimental: true,
+    element: <AgentBuilderAgentConnectorsPage />,
   },
   {
     path: '/agents/:agentId/tools',
@@ -194,6 +218,22 @@ export const manageRoutes: RouteDefinition[] = [
     element: <AgentBuilderBulkImportMcpToolsPage />,
   },
   {
+    path: '/manage/tools/mcp_clients/new',
+    viewId: agentBuilderViewIds.manageMcpClientCreate,
+    sidebarView: 'manage',
+    requiresUIAM: true,
+    requiresUiamOAuthClientManagement: true,
+    element: <AgentBuilderMcpClientCreatePage />,
+  },
+  {
+    path: '/manage/tools/mcp_clients',
+    viewId: agentBuilderViewIds.manageMcpClients,
+    sidebarView: 'manage',
+    requiresUIAM: true,
+    requiresUiamOAuthClientManagement: true,
+    element: <AgentBuilderMcpClientsPage />,
+  },
+  {
     path: '/manage/tools/:toolId',
     viewId: agentBuilderViewIds.manageToolDetails,
     sidebarView: 'manage',
@@ -228,27 +268,53 @@ export const getConversationIdFromPath = (pathname: string): string | undefined 
   return match ? match[1] : undefined;
 };
 
+export const getPathWithSwitchedAgent = (pathname: string, newAgentId: string): string => {
+  const currentAgentId = getAgentIdFromPath(pathname);
+  if (!currentAgentId) {
+    return appPaths.agent.root({ agentId: newAgentId });
+  }
+
+  if (getConversationIdFromPath(pathname)) {
+    return appPaths.agent.conversations.new({ agentId: newAgentId });
+  }
+
+  const agentBase = `/agents/${currentAgentId}`;
+  if (pathname === agentBase || pathname === `${agentBase}/`) {
+    return appPaths.agent.root({ agentId: newAgentId });
+  }
+
+  if (pathname.startsWith(`${agentBase}/`)) {
+    return `/agents/${newAgentId}${pathname.slice(agentBase.length)}`;
+  }
+
+  return appPaths.agent.root({ agentId: newAgentId });
+};
+
 export interface SidebarNavItem {
   label: string;
   path: string;
   icon?: string;
 }
 
-const isRouteEnabled = (route: RouteDefinition, flags: FeatureFlags): boolean => {
-  if (route.isExperimental && !flags.experimental) return false;
+const isRouteEnabled = (route: RouteDefinition, config: RouteAccessConfig): boolean => {
+  const { isExperimental, requiresUIAM, requiresUiamOAuthClientManagement } = route;
+  const { featureFlags, capabilities } = config;
+  if (isExperimental && !featureFlags.experimental) return false;
+  if (requiresUIAM && !capabilities.isUIAMEnabled) return false;
+  if (requiresUiamOAuthClientManagement && !featureFlags.uiamOAuthClientManagement) return false;
   return true;
 };
 
-export const getEnabledRoutes = (flags: FeatureFlags): RouteDefinition[] => {
-  return allRoutes.filter((route) => isRouteEnabled(route, flags));
+export const getEnabledRoutes = (config: RouteAccessConfig): RouteDefinition[] => {
+  return allRoutes.filter((route) => isRouteEnabled(route, config));
 };
 
 export const getAgentSettingsNavItems = (
   agentId: string,
-  flags: FeatureFlags
+  config: RouteAccessConfig
 ): SidebarNavItem[] => {
   return agentRoutes
-    .filter((route) => route.navLabel && isRouteEnabled(route, flags))
+    .filter((route) => route.navLabel && isRouteEnabled(route, config))
     .map((route) => ({
       label: route.navLabel ?? '',
       path: route.path.replace(':agentId', agentId),
@@ -256,9 +322,9 @@ export const getAgentSettingsNavItems = (
     }));
 };
 
-export const getManageNavItems = (flags: FeatureFlags): SidebarNavItem[] => {
+export const getManageNavItems = (config: RouteAccessConfig): SidebarNavItem[] => {
   return manageRoutes
-    .filter((route) => route.navLabel && isRouteEnabled(route, flags))
+    .filter((route) => route.navLabel && isRouteEnabled(route, config))
     .map((route) => ({
       label: route.navLabel!,
       path: route.path,

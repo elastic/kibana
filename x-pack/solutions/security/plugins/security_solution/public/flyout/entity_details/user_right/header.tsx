@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
@@ -72,22 +73,32 @@ export const UserPanelHeader = ({
   );
 
   return (
-    <FlyoutHeader data-test-subj="user-panel-header">
+    <FlyoutHeader
+      data-test-subj="user-panel-header"
+      hasBorder={false}
+      css={css`
+        & > .euiPanel {
+          padding-bottom: 0;
+        }
+      `}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" data-test-subj={'user-panel-header-lastSeen'}>
-            {isLoading ? (
-              <EuiSkeletonText
-                lines={1}
-                size="xs"
-                data-test-subj="user-panel-header-lastSeen-loading"
-              />
-            ) : (
-              lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />
-            )}
-            <EuiSpacer size="xs" />
-          </EuiText>
-        </EuiFlexItem>
+        {!isEntityInStore && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" data-test-subj={'user-panel-header-lastSeen'}>
+              {isLoading ? (
+                <EuiSkeletonText
+                  lines={1}
+                  size="xs"
+                  data-test-subj="user-panel-header-lastSeen-loading"
+                />
+              ) : (
+                lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />
+              )}
+              <EuiSpacer size="xs" />
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             gutterSize="xs"
@@ -96,24 +107,28 @@ export const UserPanelHeader = ({
             alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
-              <SecuritySolutionLinkAnchor
-                deepLinkId={SecurityPageName.users}
-                path={getTabsOnUsersDetailsUrl(
-                  userName,
-                  UsersTableType.events,
-                  undefined,
-                  entityId,
-                  identityFields && Object.keys(identityFields).length > 0
-                    ? identityFields
-                    : undefined
-                )}
-                target={'_blank'}
-                external={false}
-                css={linkTitleCSS}
-                override={urlParamOverride}
-              >
-                <FlyoutTitle title={userName} iconType={'user'} isLink />
-              </SecuritySolutionLinkAnchor>
+              {isEntityInStore ? (
+                <FlyoutTitle title={userName} iconType={'user'} />
+              ) : (
+                <SecuritySolutionLinkAnchor
+                  deepLinkId={SecurityPageName.users}
+                  path={getTabsOnUsersDetailsUrl(
+                    userName,
+                    UsersTableType.events,
+                    undefined,
+                    entityId,
+                    identityFields && Object.keys(identityFields).length > 0
+                      ? identityFields
+                      : undefined
+                  )}
+                  target={'_blank'}
+                  external={false}
+                  css={linkTitleCSS}
+                  override={urlParamOverride}
+                >
+                  <FlyoutTitle title={userName} iconType={'user'} isLink />
+                </SecuritySolutionLinkAnchor>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -127,7 +142,7 @@ export const UserPanelHeader = ({
           </EuiFlexItem>
         ) : (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiBadge data-test-subj="user-panel-header-entity-type-badge" color="hollow">
                   <FormattedMessage
@@ -143,16 +158,16 @@ export const UserPanelHeader = ({
                   data-test-subj="user-panel-header-observed-badge"
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {isManaged && (
+              {isManaged && (
+                <EuiFlexItem grow={false}>
                   <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
                       defaultMessage="Managed"
                     />
                   </EuiBadge>
-                )}
-              </EuiFlexItem>
+                </EuiFlexItem>
+              )}
               {isEntityInStore && riskLevel && (
                 <EuiFlexItem grow={false}>
                   <RiskLevelBadge riskLevel={riskLevel} />

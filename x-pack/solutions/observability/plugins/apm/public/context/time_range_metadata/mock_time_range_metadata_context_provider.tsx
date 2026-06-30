@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
-import { mockApmApiCallResponse } from '../../services/rest/call_apm_api_spy';
+import { mockApmApiCallResponse } from '../../services/rest/storybook_mock_http';
 
 const DEFAULTS = {
   isUsingServiceDestinationMetrics: true,

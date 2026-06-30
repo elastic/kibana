@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryClientConfig } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { merge } from 'lodash';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const DEFAULT_CONFIG = {
@@ -40,17 +40,25 @@ function HideableReactQueryDevTools() {
 
   return !isHidden && process.env.NODE_ENV === 'development' ? (
     <div>
-      <EuiButtonIcon
-        data-test-subj="infraHideableReactQueryDevToolsButton"
-        iconType="cross"
-        color="primary"
-        css={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
-        onClick={() => setIsHidden(!isHidden)}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.infra.hideableReactQueryDevTools.euiButtonIcon.disableReactQueryDevLabel',
           { defaultMessage: 'Disable React Query Dev Tools' }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          data-test-subj="infraHideableReactQueryDevToolsButton"
+          iconType="cross"
+          color="primary"
+          css={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
+          onClick={() => setIsHidden(!isHidden)}
+          aria-label={i18n.translate(
+            'xpack.infra.hideableReactQueryDevTools.euiButtonIcon.disableReactQueryDevLabel',
+            { defaultMessage: 'Disable React Query Dev Tools' }
+          )}
+        />
+      </EuiToolTip>
       <ReactQueryDevtools initialIsOpen={false} />
     </div>
   ) : null;

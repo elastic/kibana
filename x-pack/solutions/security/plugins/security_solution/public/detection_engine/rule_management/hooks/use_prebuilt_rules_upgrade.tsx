@@ -9,15 +9,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
-import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
-import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_packages';
+import { useIsInitializingPrebuiltRulesPackage } from '../logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import {
   type FindRulesSortField,
+  type PrebuiltRulesFilter,
+  type RuleCustomizationStatus,
   type RuleFieldsToUpgrade,
   type RuleResponse,
   type RuleSignatureId,
@@ -54,27 +55,50 @@ const RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION = 2;
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
+export interface UsePrebuiltRulesUpgradeFilterOptions {
+  tags?: string[];
+  customizationStatus?: RuleCustomizationStatus;
+  ruleIds?: string[];
+}
+
 export interface UsePrebuiltRulesUpgradeParams {
   pagination?: {
     page: number;
     perPage: number;
   };
   sort?: { order: UpgradePrebuiltRulesSortingOptions['order']; field: FindRulesSortField };
-  filter: ReviewPrebuiltRuleUpgradeFilter;
+  filterOptions?: UsePrebuiltRulesUpgradeFilterOptions;
+  searchTerm?: string;
   onUpgrade?: () => void;
 }
 
 export function usePrebuiltRulesUpgrade({
   pagination = { page: 1, perPage: RULES_TABLE_INITIAL_PAGE_SIZE },
   sort,
-  filter,
+  filterOptions,
+  searchTerm,
   onUpgrade,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+
+  const performUpgradeFilter: PrebuiltRulesFilter | undefined = useMemo(() => {
+    const nameTerm = searchTerm?.trim();
+    const entries: PrebuiltRulesFilter = {};
+    if (nameTerm) {
+      entries.name = nameTerm;
+    }
+    if (filterOptions?.tags?.length) {
+      entries.tags = filterOptions.tags;
+    }
+    if (filterOptions?.customizationStatus) {
+      entries.customization_status = filterOptions.customizationStatus;
+    }
+    return Object.keys(entries).length > 0 ? entries : undefined;
+  }, [searchTerm, filterOptions]);
 
   const {
     data: upgradeReviewResponse,
@@ -87,9 +111,14 @@ export function usePrebuiltRulesUpgrade({
   } = usePrebuiltRulesUpgradeReview(
     {
       page: pagination.page,
-      per_page: pagination.perPage,
-      sort,
-      filter,
+      perPage: pagination.perPage,
+      sortingOptions: sort,
+      filterOptions: {
+        tags: filterOptions?.tags,
+        customizationStatus: filterOptions?.customizationStatus,
+        ruleIds: filterOptions?.ruleIds,
+      },
+      searchTerm,
     },
     {
       refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
@@ -201,6 +230,11 @@ export function usePrebuiltRulesUpgrade({
   );
 
   const upgradeAllRules = useCallback(async () => {
+    if (filterOptions?.ruleIds?.length) {
+      await upgradeRules(upgradeableRules.map((rule) => rule.rule_id));
+      return;
+    }
+
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
@@ -213,7 +247,7 @@ export function usePrebuiltRulesUpgrade({
         await upgradeRulesWithDryRun({
           mode: 'ALL_RULES',
           pick_version: 'MERGED',
-          filter,
+          filter: performUpgradeFilter,
         });
       } else {
         // Upgrading prebuilt rules to TARGET version will erase any rule customizations.
@@ -221,7 +255,7 @@ export function usePrebuiltRulesUpgrade({
         await upgradeRulesRequest({
           mode: 'ALL_RULES',
           pick_version: 'TARGET',
-          filter,
+          filter: performUpgradeFilter,
         });
       }
     } catch {
@@ -230,12 +264,14 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules([]);
     }
   }, [
+    filterOptions?.ruleIds,
+    upgradeRules,
     upgradeableRules,
     upgradeRulesWithDryRun,
     upgradeRulesRequest,
     confirmLegacyMLJobs,
     isRulesCustomizationEnabled,
-    filter,
+    performUpgradeFilter,
   ]);
 
   const subHeaderFactory = useCallback(
@@ -259,7 +295,7 @@ export function usePrebuiltRulesUpgrade({
             !canEditRules ||
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
-            isUpgradingSecurityPackages ||
+            isInitializingPrebuiltRulesPackage ||
             (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
             isEditingRule
           }
@@ -284,7 +320,7 @@ export function usePrebuiltRulesUpgrade({
       canEditRules,
       loadingRules,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       isRulesCustomizationEnabled,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
@@ -418,7 +454,7 @@ export function usePrebuiltRulesUpgrade({
     isLoading: isLoading || areMlJobsLoading,
     isFetching,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     loadingRules,
     lastUpdated: dataUpdatedAt,
     rulePreviewFlyout,

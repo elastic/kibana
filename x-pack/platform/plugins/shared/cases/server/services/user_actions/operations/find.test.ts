@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UserActionFinder } from './find';
@@ -24,7 +23,6 @@ describe('UserActionsService: Finder', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
   const attributesToValidateIfMissing = ['created_at', 'created_by', 'owner', 'action', 'payload'];
@@ -36,7 +34,6 @@ describe('UserActionsService: Finder', () => {
     finder = new UserActionFinder({
       log: mockLogger,
       unsecuredSavedObjectsClient,
-      persistableStateAttachmentTypeRegistry,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
     });

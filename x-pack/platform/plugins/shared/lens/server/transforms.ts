@@ -27,7 +27,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
-import { isByRefLensConfig, unflattenAPIConfig } from './utils';
+import { isByRefLensConfig, unflattenAPIConfig } from '../common/transforms/utils';
 import type { FlattenedLensByValuePanelSchema } from './types';
 
 /**
@@ -50,7 +50,7 @@ export function registerLensEmbeddableTransforms(
   embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
 ) {
-  embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
+  embeddableSetup.registerEmbeddableServerDefinition(LENS_EMBEDDABLE_TYPE, {
     title: 'Visualization',
     getTransforms: (drilldownTransforms) =>
       ({

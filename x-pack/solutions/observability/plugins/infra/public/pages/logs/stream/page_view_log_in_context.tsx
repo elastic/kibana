@@ -97,7 +97,13 @@ export const PageViewLogInContext: React.FC = () => {
           }
         `}
       />
-      <EuiModal onClose={closeModal} maxWidth={false}>
+      <EuiModal
+        onClose={closeModal}
+        maxWidth={false}
+        aria-label={i18n.translate('xpack.infra.logs.viewInContext.modalAriaLabel', {
+          defaultMessage: 'View log in context',
+        })}
+      >
         <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
           <EuiFlexGroup direction="column" responsive={false} wrap={false} css={{ height: '100%' }}>
             <EuiFlexItem grow={false}>
@@ -186,7 +192,7 @@ const LogEntryContext: React.FC<{ context: LogEntry['context']; discoverLink?: s
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="discoverApp" size="s" color="primary" />
+                <EuiIcon type="discoverApp" size="s" color="primary" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">

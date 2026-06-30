@@ -45,11 +45,9 @@ export {
   DURATION_OUTPUT_FORMATS,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 
 export type {
   FieldFormatsGetConfigFn,
-  FieldFormatsContentType,
   FieldFormatConfig,
   FieldFormatId,
   SerializedFieldFormat,
@@ -59,12 +57,8 @@ export type {
   FieldFormatsStartCommon,
   FieldFormatParams,
   FieldFormatMetaParams,
-  FieldFormatConvert,
-  FieldFormatConvertFunction,
-  HtmlContextTypeConvert,
-  HtmlContextTypeOptions,
   ReactContextTypeConvert,
-  ReactContextTypeSingleConvert,
+  ReactConvertFunction,
   ReactContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,

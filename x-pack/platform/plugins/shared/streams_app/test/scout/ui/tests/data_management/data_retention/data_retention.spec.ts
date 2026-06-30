@@ -11,13 +11,14 @@ import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
-  closeToastsIfPresent,
-  openRetentionModal,
+  ensureDslLifecycle,
+  openLifecycleMethodFlyout,
+  removeDeletePhase,
+  RETENTION_TEST_IDS,
   saveRetentionChanges,
   setCustomRetention,
   toggleInheritSwitch,
-  verifyRetentionDisplay,
-} from '../../../fixtures/retention_helpers';
+} from '../../../fixtures/data_lifecycle_helpers';
 
 async function createTsdbIndexTemplate({
   esClient,
@@ -89,26 +90,37 @@ test.describe(
   'Stream data retention - custom retention periods',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      // Clear existing rules
+    test.beforeAll(async ({ apiServices }) => {
       await apiServices.streams.clearStreamChildren('logs.otel');
-      // Create a test stream with routing rules first
+      const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
+      await apiServices.streams.updateStream('logs.otel', {
+        ingest: {
+          ...logsDefinition.stream.ingest,
+          processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
+      });
       await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
+    });
 
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      // Reset only the child stream's retention via API — no fork/delete cycle
+      const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
+      await apiServices.streams.updateStream('logs.otel.nginx', {
+        ingest: {
+          ...childDefinition.stream.ingest,
+          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
+      });
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
     });
 
-    test.afterEach(async ({ apiServices, page }) => {
-      await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs.otel');
-    });
-
     test.afterAll(async ({ apiServices }) => {
-      // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
@@ -116,33 +128,25 @@ test.describe(
     // Detailed retention value tests (7d, 30d, 90d, hours, etc.) are covered by API tests
     // in test/scout/api/tests/lifecycle_retention.spec.ts
     test('should set and reset retention policy', async ({ page }) => {
-      // Set a specific retention policy
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Set a specific retention period (DSL delete phase)
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
-      // Reset to inherit
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, true);
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '∞');
+      // Reset to indefinite retention by removing the delete phase
+      await removeDeletePhase(page);
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
     // Smoke test: Verifies persistence across page refresh (UI-specific behavior)
     test('should persist retention value across page refresh', async ({ page, pageObjects }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '30 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
 
       // Refresh the page
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Verify the value persists
-      await verifyRetentionDisplay(page, '30 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
     });
 
     // Smoke test: Verifies classic stream retention UI workflow
@@ -151,16 +155,32 @@ test.describe(
       pageObjects,
       logsSynthtraceEsClient,
       apiServices,
+      config,
     }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Classic streams inherit their lifecycle from the backing index template,
+      // which may resolve to ILM. Switch to DSL so a custom delete phase can be set.
+      await ensureDslLifecycle(page);
+
+      await setCustomRetention(page, '7', 'd', {
+        expectOverrideConfirmation: config.serverless,
+      });
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
+    });
+
+    // Verifies the inherit lifecycle flyout flow
+    test('should switch lifecycle to inherit from parent', async ({ page }) => {
       await setCustomRetention(page, '7', 'd');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
+
+      // Switch to inherit via the lifecycle method flyout
+      await openLifecycleMethodFlyout(page);
+      await toggleInheritSwitch(page, true);
       await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
     test('should open DSL lifecycle phase popup and display phase details', async ({
@@ -168,10 +188,7 @@ test.describe(
       config,
     }) => {
       // Set a custom retention to have a DSL lifecycle with a delete phase
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
 
       // DSL phase label differs: 'Hot' in stateful, 'Successful ingest' in serverless
       // Click on the phase button using test ID
@@ -252,7 +269,10 @@ test.describe(
         await page.getByTestId('downsamplingPhase-1h-label').click();
         await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await cleanupTsdbResources({ esClient, templateName, streamName });
       }

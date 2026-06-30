@@ -10,6 +10,7 @@
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
+import type { MonacoMessage } from '../providers/types';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
@@ -31,7 +32,7 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
  *
  * IMPORTANT NOTE:
  * offset ranges are ZERO-based and NOT end-inclusive — [start, end)
- * monaco ranges are ONE-based and ARE end-inclusive — [start, end]
+ * monaco ranges are ONE-based and NOT end-inclusive — [start, end)
  */
 export const offsetRangeToMonacoRange = (
   expression: string,
@@ -44,25 +45,21 @@ export const offsetRangeToMonacoRange = (
       endLineNumber: number;
     }
   | undefined => {
-  if (range.start === range.end) {
-    return;
-  }
-
   let startColumn = NaN;
   let endColumn = 0;
   let startOfCurrentLine = 0;
   let currentLine = 1;
 
   // find the line and start column
-  for (let i = 0; i < expression.length; i++) {
-    if (expression[i] === '\n') {
+  for (let i = 0; i <= expression.length; i++) {
+    if (i < expression.length && expression[i] === '\n') {
       currentLine++;
       startOfCurrentLine = i + 1;
     }
 
     if (i === range.start) {
       startColumn = i + 1 - startOfCurrentLine;
-      endColumn = startColumn + range.end - range.start - 1;
+      endColumn = startColumn + range.end - range.start;
       break;
     }
   }
@@ -130,3 +127,21 @@ export const filterSuggestionsWithCustomCommands = (suggestions: ISuggestionItem
     )
     .map((suggestion) => suggestion.command!.id); // we know command is defined because of the filter
 };
+/**
+ * Given a marker it returns the editor message from which it was created.
+ * @param messages
+ * @param marker
+ * @returns
+ */
+export const findMessageByMarker = (
+  messages: MonacoMessage[],
+  marker: monaco.editor.IMarkerData
+): MonacoMessage | undefined =>
+  messages.find(
+    (m) =>
+      m.startLineNumber === marker.startLineNumber &&
+      m.startColumn === marker.startColumn &&
+      m.endLineNumber === marker.endLineNumber &&
+      m.endColumn === marker.endColumn &&
+      m.message === marker.message
+  );

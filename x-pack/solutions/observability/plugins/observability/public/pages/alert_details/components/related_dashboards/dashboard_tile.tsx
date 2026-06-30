@@ -55,8 +55,6 @@ export function DashboardTile({
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
         <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
-          {/* Allowing both href and onClick to allow telemetry to be reported */}
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
             data-test-subj={`alertDetails_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
             href={dashboardLocator?.getRedirectUrl({

@@ -28,12 +28,6 @@ export const visualizationTagParser = createTagParser({
     toolResultId: extractAttr(value, visualizationElement.attributes.toolResultId),
     chartType: extractAttr(value, visualizationElement.attributes.chartType),
   }),
-  assignAttributes: (node, attributes) => {
-    node.type = visualizationElement.tagName;
-    node.toolResultId = attributes.toolResultId;
-    node.chartType = attributes.chartType;
-    delete node.value;
-  },
   createNode: (attributes, position) => ({
     type: visualizationElement.tagName,
     toolResultId: attributes.toolResultId,

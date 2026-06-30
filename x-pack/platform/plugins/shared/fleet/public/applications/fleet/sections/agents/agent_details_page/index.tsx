@@ -8,7 +8,15 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
+
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +39,7 @@ import {
   useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-
+import { ExperimentalFeaturesService } from '../../../services';
 import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
@@ -42,6 +50,7 @@ import {
   AgentDiagnosticsTab,
 } from './components';
 import { AgentSettings } from './components/agent_settings';
+import { CollectorDetailsContent } from './components/collector_detail';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -92,6 +101,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     agentData?.item && (isAgentlessAgent ? showAgentless : true) ? agentData.item : null;
   const host = agent && agent.local_metadata?.host;
 
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+  const classicView = queryParams.get('classic') === 'true';
+  const isCollector = enableOtelUI && agent?.type === 'OPAMP' && !classicView;
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
@@ -110,27 +123,41 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText className="eui-textBreakWord">
-            <h1>
-              {isLoading && isInitialRequest ? (
-                <Loading />
-              ) : typeof host === 'object' && typeof host?.hostname === 'string' ? (
-                host.hostname
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.agentDetails.agentDetailsTitle"
-                  defaultMessage="Agent ''{id}''"
-                  values={{
-                    id: agentId,
-                  }}
-                />
-              )}
-            </h1>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText className="eui-textBreakWord">
+                <h1>
+                  {isLoading && isInitialRequest ? (
+                    <Loading />
+                  ) : typeof host === 'object' && typeof host?.hostname === 'string' ? (
+                    host.hostname
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.agentDetails.agentDetailsTitle"
+                      defaultMessage="Agent ''{id}''"
+                      values={{
+                        id: agentId,
+                      }}
+                    />
+                  )}
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            {isCollector && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.collectorBadge"
+                    defaultMessage="Collector (OpAMP)"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [host, agentId, getHref, isInitialRequest, isLoading]
+    [host, agentId, getHref, isInitialRequest, isLoading, isCollector]
   );
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
@@ -193,12 +220,16 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   );
 
   const headerTabs = useMemo(() => {
-    const tabs = [
+    return [
       {
         id: 'details',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
-          defaultMessage: 'Agent details',
-        }),
+        name: isCollector
+          ? i18n.translate('xpack.fleet.agentDetails.subTabs.collectorDetailsTab', {
+              defaultMessage: 'Collector details',
+            })
+          : i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
+              defaultMessage: 'Agent details',
+            }),
         href: getHref('agent_details', { agentId, tabId: 'details' }),
         isSelected: !tabId || tabId === 'details',
       },
@@ -210,14 +241,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
-      {
-        id: 'diagnostics',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
-          defaultMessage: 'Diagnostics',
-        }),
-        href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
-        isSelected: tabId === 'diagnostics',
-      },
+      ...(!isCollector
+        ? [
+            {
+              id: 'diagnostics',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
+                defaultMessage: 'Diagnostics',
+              }),
+              href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
+              isSelected: tabId === 'diagnostics',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
@@ -227,8 +262,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         isSelected: tabId === 'settings',
       },
     ];
-    return tabs;
-  }, [getHref, agentId, tabId]);
+  }, [getHref, agentId, tabId, isCollector]);
 
   return (
     <AgentRefreshContext.Provider
@@ -262,6 +296,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               agent={agent}
               agentPolicy={agentPolicyData?.item}
               outputs={outputsData?.item}
+              isCollector={isCollector}
             />
             {showTagsAddRemove && (
               <TagsAddRemove
@@ -306,7 +341,8 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
   outputs?: OutputsForAgentPolicy;
-}> = ({ agent, agentPolicy, outputs }) => {
+  isCollector: boolean;
+}> = ({ agent, agentPolicy, outputs, isCollector }) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -314,6 +350,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         ? agent.local_metadata.host.hostname
         : '-',
   });
+
   return (
     <Routes>
       <Route
@@ -322,12 +359,14 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
-      <Route
-        path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
-        render={() => {
-          return <AgentDiagnosticsTab agent={agent} />;
-        }}
-      />
+      {!isCollector && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
+          render={() => {
+            return <AgentDiagnosticsTab agent={agent} />;
+          }}
+        />
+      )}
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_settings}
         render={() => {
@@ -337,7 +376,11 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} outputs={outputs} />;
+          return isCollector ? (
+            <CollectorDetailsContent agent={agent} />
+          ) : (
+            <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
+          );
         }}
       />
     </Routes>

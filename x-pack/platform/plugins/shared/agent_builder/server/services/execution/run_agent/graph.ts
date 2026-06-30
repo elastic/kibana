@@ -22,21 +22,18 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ResolvedConfiguration } from './types';
 import { convertError, isRecoverableError } from './utils/errors';
 import type { PromptFactory } from './prompts';
-import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
-import { steps, tags } from './constants';
+import { getRandomThinkingMessage } from './i18n';
+import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL } from './constants';
+import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
-import {
-  processAnswerResponse,
-  processResearchResponse,
-  processToolNodeResponse,
-} from './action_utils';
+import { processResearchResponse, processToolNodeResponse } from './action_utils';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
   errorAction,
   handoverAction,
+  backgroundExecutionCompleteAction,
   isAgentErrorAction,
-  isAnswerAction,
   isHandoverAction,
   isStructuredAnswerAction,
   isToolCallAction,
@@ -58,6 +55,8 @@ export const createAgentGraph = ({
   outputSchema,
   processedConversation,
   promptFactory,
+  backgroundExecutionService,
+  roundId,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -69,9 +68,41 @@ export const createAgentGraph = ({
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
   promptFactory: PromptFactory;
+  backgroundExecutionService?: BackgroundExecutionService;
+  roundId: string;
 }) => {
   const init = async () => {
     return {};
+  };
+
+  const checkBackgroundWork = async (state: StateType) => {
+    // Only check at the beginning (cycle 0) and every BACKGROUND_CHECK_CYCLE_INTERVAL cycles
+    if (
+      !backgroundExecutionService ||
+      !backgroundExecutionService.hasPending() ||
+      (state.currentCycle > 0 && state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL !== 0)
+    ) {
+      return {};
+    }
+
+    // Find the last tool call group ID for positioning the completion notice
+    let lastToolCallGroupId: string | undefined;
+    for (let i = state.mainActions.length - 1; i >= 0; i--) {
+      const action = state.mainActions[i];
+      if (isToolCallAction(action)) {
+        lastToolCallGroupId = action.tool_call_group_id;
+        break;
+      }
+    }
+
+    const completions = await backgroundExecutionService.checkForCompletions({
+      roundId,
+      toolCallGroupId: lastToolCallGroupId,
+    });
+
+    return {
+      mainActions: completions.map(backgroundExecutionCompleteAction),
+    };
   };
 
   const researchAgent = async (state: StateType) => {
@@ -85,15 +116,17 @@ export const createAgentGraph = ({
     try {
       const response = await researcherModel.invoke(
         await promptFactory.getMainPrompt({
+          cycleLimit: state.cycleLimit,
           actions: state.mainActions,
         })
       );
 
-      const action = processResearchResponse(response);
+      const currentCycle = state.currentCycle + 1;
+      const action = processResearchResponse(response, { cycle: currentCycle });
 
       return {
         mainActions: [action],
-        currentCycle: state.currentCycle + 1,
+        currentCycle,
         errorCount: 0,
       };
     } catch (error) {
@@ -122,12 +155,19 @@ export const createAgentGraph = ({
     } else if (isToolCallAction(lastAction)) {
       const maxCycleReached = state.currentCycle > state.cycleLimit;
       if (maxCycleReached) {
-        return steps.prepareToAnswer;
+        if (structuredOutput) {
+          return steps.prepareToAnswer;
+        }
+        throw createAgentExecutionError(
+          `Agent exceeded its cycle budget of ${state.cycleLimit} without producing a final answer.`,
+          ErrCodes.cycleLimitExceeded,
+          {}
+        );
       } else {
         return steps.executeTool;
       }
     } else if (isHandoverAction(lastAction)) {
-      return steps.prepareToAnswer;
+      return structuredOutput ? steps.prepareToAnswer : steps.finalize;
     }
 
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
@@ -147,7 +187,7 @@ export const createAgentGraph = ({
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const actions = processToolNodeResponse(toolNodeResult);
+    const actions = processToolNodeResponse(toolNodeResult, { cycle: state.currentCycle });
 
     return {
       mainActions: actions,
@@ -159,7 +199,7 @@ export const createAgentGraph = ({
     if (isToolPromptAction(lastAction)) {
       return steps.handleToolInterrupt;
     }
-    return steps.researchAgent;
+    return steps.checkBackgroundWork;
   };
 
   const handleToolInterrupt = async (state: StateType) => {
@@ -186,41 +226,6 @@ export const createAgentGraph = ({
     }
   };
 
-  const answeringModel = chatModel.withConfig({
-    tags: [tags.agent, tags.answerAgent],
-  });
-
-  const answerAgent = async (state: StateType) => {
-    if (state.answerActions.length === 0 && state.errorCount === 0) {
-      events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
-    }
-    try {
-      const response = await answeringModel.invoke(
-        await promptFactory.getAnswerPrompt({
-          actions: state.mainActions,
-          answerActions: state.answerActions,
-        })
-      );
-
-      const action = processAnswerResponse(response);
-
-      return {
-        answerActions: [action],
-        errorCount: 0,
-      };
-    } catch (error) {
-      const executionError = convertError(error);
-      if (isRecoverableError(executionError)) {
-        return {
-          answerActions: [errorAction(executionError)],
-          errorCount: state.errorCount + 1,
-        };
-      } else {
-        throw executionError;
-      }
-    }
-  };
-
   const answerAgentStructured = createAnswerAgentStructured({
     chatModel,
     promptFactory,
@@ -239,7 +244,7 @@ export const createAgentGraph = ({
         // max error count reached, stop execution by throwing
         throw lastAction.error;
       }
-    } else if (isAnswerAction(lastAction) || isStructuredAnswerAction(lastAction)) {
+    } else if (isStructuredAnswerAction(lastAction)) {
       return steps.finalize;
     }
 
@@ -248,54 +253,66 @@ export const createAgentGraph = ({
   };
 
   const finalize = async (state: StateType) => {
-    const answerAction = state.answerActions[state.answerActions.length - 1];
-    if (isStructuredAnswerAction(answerAction)) {
-      return {
-        finalAnswer: answerAction.data,
-      };
-    } else if (isAnswerAction(answerAction)) {
-      return {
-        finalAnswer: answerAction.message,
-      };
-    } else {
-      throw invalidState(`[finalize] expect answer action, got ${answerAction.type} instead.`);
+    if (structuredOutput) {
+      const answerAction = state.answerActions[state.answerActions.length - 1];
+      if (isStructuredAnswerAction(answerAction)) {
+        return { finalAnswer: answerAction.data };
+      }
+      throw invalidState(
+        `[finalize] expected structured answer action, got ${answerAction.type} instead.`
+      );
     }
+
+    // Non-structured: the research agent's terminal HandoverAction carries the
+    // user-facing answer.
+    const lastMainAction = state.mainActions[state.mainActions.length - 1];
+    if (isHandoverAction(lastMainAction)) {
+      return { finalAnswer: lastMainAction.message };
+    }
+    throw invalidState(`[finalize] expected handover action, got ${lastMainAction.type} instead.`);
   };
 
-  const selectedAnswerAgent = structuredOutput ? answerAgentStructured : answerAgent;
-
   // note: the node names are used in the event convertion logic, they should *not* be changed
-  const graph = new StateGraph(StateAnnotation)
-    // nodes
+  const graphBuilder = new StateGraph(StateAnnotation)
     .addNode(steps.init, init)
+    .addNode(steps.checkBackgroundWork, checkBackgroundWork)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
-    .addNode(steps.prepareToAnswer, prepareToAnswer)
-    .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
-    // edges
     .addEdge(_START_, steps.init)
-    .addEdge(steps.init, steps.researchAgent)
-    .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-      [steps.researchAgent]: steps.researchAgent,
-      [steps.executeTool]: steps.executeTool,
-      [steps.prepareToAnswer]: steps.prepareToAnswer,
-    })
+    .addEdge(steps.init, steps.checkBackgroundWork)
+    .addEdge(steps.checkBackgroundWork, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
-      [steps.researchAgent]: steps.researchAgent,
+      [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
     })
     .addEdge(steps.handleToolInterrupt, _END_)
-    .addEdge(steps.prepareToAnswer, steps.answerAgent)
-    .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
-      [steps.answerAgent]: steps.answerAgent,
-      [steps.finalize]: steps.finalize,
-    })
-    .addEdge(steps.finalize, _END_)
-    .compile();
+    .addEdge(steps.finalize, _END_);
 
-  return graph;
+  if (structuredOutput) {
+    graphBuilder
+      .addNode(steps.prepareToAnswer, prepareToAnswer)
+      .addNode(steps.answerAgent, answerAgentStructured)
+      .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+        [steps.researchAgent]: steps.researchAgent,
+        [steps.executeTool]: steps.executeTool,
+        [steps.prepareToAnswer]: steps.prepareToAnswer,
+      })
+      .addEdge(steps.prepareToAnswer, steps.answerAgent)
+      .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
+        [steps.answerAgent]: steps.answerAgent,
+        [steps.finalize]: steps.finalize,
+      });
+  } else {
+    graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.executeTool]: steps.executeTool,
+      [steps.finalize]: steps.finalize,
+    });
+  }
+
+  return graphBuilder.compile();
 };
 
 const invalidState = (message: string) => {

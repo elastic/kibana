@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { omit, sortBy } from 'lodash';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
@@ -15,6 +16,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  bulkQueries,
   deleteStream,
   disableStreams,
   enableStreams,
@@ -60,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
@@ -68,6 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     beforeEach(async () => {
@@ -109,15 +113,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       ];
 
-      const updateStreamResponse = await putStream(apiClient, STREAM_NAME, {
-        stream,
-        ...emptyAssets,
-        queries,
-      });
-      expect(updateStreamResponse).to.have.property('acknowledged', true);
+      const bulkResponse = await bulkQueries(
+        apiClient,
+        STREAM_NAME,
+        queries.map((query) => ({ index: omit(query, 'type') }))
+      );
+      expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql(queries);
+      expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(queries, 'id'));
 
       const rules = await alertingApi.searchRules(
         roleAuthc,
@@ -128,6 +132,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(rules.body.data[0].params.query).to.eql(
         `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`
       );
+    });
+
+    it('rejects a stray top-level `queries` field on PUT and leaves detections unchanged', async () => {
+      // Significant-event queries are not part of the stream upsert; request validation rejects a
+      // stray `queries` field (DeepStrict) instead of silently dropping it. Cast past the type
+      // that no longer allows `queries`.
+      await putStream(
+        apiClient,
+        STREAM_NAME,
+        {
+          stream,
+          ...emptyAssets,
+          queries: [
+            {
+              id: v4(),
+              title: 'stray query',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'stray'")`,
+              },
+            },
+          ],
+        } as Streams.WiredStream.UpsertRequest,
+        400
+      );
+
+      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+      expect(getQueriesResponse.queries).to.eql([]);
     });
 
     describe('PUT /api/streams/{name}/queries/{queryId}', () => {
@@ -209,11 +240,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
         };
-        await putStream(apiClient, STREAM_NAME, {
-          stream,
-          ...emptyAssets,
-          queries: [query],
-        });
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
         const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("updated query")`;
@@ -258,11 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
         };
-        await putStream(apiClient, STREAM_NAME, {
-          stream,
-          ...emptyAssets,
-          queries: [query],
-        });
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
         const upsertQueryResponse = await apiClient
@@ -299,21 +322,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('deletes an existing query and the associated rule successfully', async () => {
       const queryId = v4();
-      await putStream(apiClient, STREAM_NAME, {
-        stream,
-        ...emptyAssets,
-        queries: [
-          {
+      await bulkQueries(apiClient, STREAM_NAME, [
+        {
+          index: {
             id: queryId,
-            type: 'match' as const,
             title: 'Significant Query',
             description: '',
             esql: {
               query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
             },
           },
-        ],
-      });
+        },
+      ]);
 
       const deleteQueryResponse = await apiClient
         .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -367,11 +387,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
         },
       };
-      await putStream(apiClient, STREAM_NAME, {
-        stream,
-        ...emptyAssets,
-        queries: [firstQuery, secondQuery, thirdQuery],
-      });
+      await bulkQueries(
+        apiClient,
+        STREAM_NAME,
+        [firstQuery, secondQuery, thirdQuery].map((query) => ({ index: omit(query, 'type') }))
+      );
       const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
       const newQuery = {
@@ -422,11 +442,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([
+      const expectedQueries = [
         firstQuery,
         { ...updateThirdQuery, type: 'match' },
         { ...newQuery, type: 'match' },
-      ]);
+      ];
+      expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(expectedQueries, 'id'));
 
       const updatedRules = await alertingApi.searchRules(roleAuthc, '');
       expect(updatedRules.body.data).to.have.length(3);
@@ -453,11 +474,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
         },
       };
-      await putStream(apiClient, STREAM_NAME, {
-        stream,
-        ...emptyAssets,
-        queries: [firstQuery],
-      });
+      await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(firstQuery, 'type') }]);
 
       const invalidQuery = {
         id: 'invalid',
@@ -481,6 +498,65 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([firstQuery]);
+    });
+
+    describe('POST /internal/streams/queries/_bulk_delete', () => {
+      const SECOND_STREAM_NAME = 'logs.otel.queries-test-bulk-delete';
+
+      beforeEach(async () => {
+        await putStream(apiClient, SECOND_STREAM_NAME, { stream, ...emptyAssets });
+      });
+
+      afterEach(async () => {
+        await deleteStream(apiClient, SECOND_STREAM_NAME);
+      });
+
+      it('deletes queries across multiple streams in one request', async () => {
+        const firstQuery = {
+          id: v4(),
+          title: 'cross-stream bulk delete 1',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'q1'")`,
+          },
+        };
+        const secondQuery = {
+          id: v4(),
+          title: 'cross-stream bulk delete 2',
+          description: '',
+          esql: {
+            query: `FROM ${SECOND_STREAM_NAME},${SECOND_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'q2'")`,
+          },
+        };
+
+        await apiClient
+          .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME },
+              body: { operations: [{ index: firstQuery }] },
+            },
+          })
+          .expect(200);
+        await apiClient
+          .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+            params: {
+              path: { name: SECOND_STREAM_NAME },
+              body: { operations: [{ index: secondQuery }] },
+            },
+          })
+          .expect(200);
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [firstQuery.id, secondQuery.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
+        expect((await getQueries(apiClient, SECOND_STREAM_NAME)).queries).to.eql([]);
+      });
     });
   });
 }

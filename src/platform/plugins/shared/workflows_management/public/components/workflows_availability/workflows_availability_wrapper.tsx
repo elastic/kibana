@@ -26,6 +26,9 @@ import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { AccessDenied } from '../access_denied/access_denied';
 
+const isSafeBillingUrl = (url: string | undefined): url is string =>
+  url?.startsWith('https://') ?? false;
+
 /**
  * Wrapper component to render the workflows app with the availability check
  */
@@ -144,11 +147,16 @@ const ServerlessTierAccessDenied = React.memo<{
   const [billingUrl, setBillingUrl] = useState<string | undefined>();
 
   useEffect(() => {
-    cloud?.getPrivilegedUrls().then(({ billingUrl: url }) => setBillingUrl(url));
+    if (cloud) {
+      cloud
+        .getPrivilegedUrls()
+        .then((urls) => setBillingUrl(urls.billingUrl))
+        .catch(() => {});
+    }
   }, [cloud]);
 
   const actions = useMemo(() => {
-    if (billingUrl) {
+    if (isSafeBillingUrl(billingUrl)) {
       return [
         <EuiButton fill href={billingUrl} target="_blank">
           <FormattedMessage

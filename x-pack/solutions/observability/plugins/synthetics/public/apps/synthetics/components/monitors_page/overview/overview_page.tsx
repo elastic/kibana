@@ -9,16 +9,17 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { selectOverviewStatus } from '../../../state/overview_status';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
-import { selectOverviewState, selectServiceLocationsState } from '../../../state';
+import { selectOverviewView, selectServiceLocationsState } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
+import { useOverviewStatus } from '../hooks/use_overview_status';
+import { useSyncOverviewDateRange } from '../common/use_sync_overview_date_range';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
@@ -34,7 +35,12 @@ export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview', delay: 15000 });
   useOverviewBreadcrumbs();
 
-  const { view } = useSelector(selectOverviewState);
+  // Mounted at the page level (above any empty-state early returns) so the
+  // URL stays the source of truth for the date range even when the grid
+  // unmounts because the previous request returned zero monitors.
+  useSyncOverviewDateRange();
+
+  const view = useSelector(selectOverviewView);
 
   const dispatch = useDispatch();
 
@@ -54,7 +60,9 @@ export const OverviewPage: React.FC = () => {
 
   const { isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, loaded: overviewLoaded } = useSelector(selectOverviewStatus);
+  const { allConfigs, loaded: overviewLoaded } = useOverviewStatus({
+    scopeStatusByLocation: true,
+  });
 
   const {
     loading: monitorsLoading,
@@ -87,7 +95,7 @@ export const OverviewPage: React.FC = () => {
           <QuickFilters />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FilterGroup handleFilterChange={handleFilterChange} />
+          <FilterGroup handleFilterChange={handleFilterChange} showRemoteClusterFilter />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

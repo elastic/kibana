@@ -43,6 +43,8 @@ import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
+import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics/risk_engine';
+import { RISK_SCORE_HISTORY_PAGE_SIZE_MAX } from '../../../../common/entity_analytics/risk_score/constants';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import {
@@ -93,22 +95,38 @@ export class RiskScoreDataClient {
   /**
    * Daily average normalized risk scores per entity (oldest → newest calendar buckets)
    * from the risk score time-series index. Suitable for trend / escalation analysis.
+   *
+   * The risk-score time-series index nests the identity-side fields under
+   * `<entityType>.risk.*` (e.g. `host.risk.id_field`, `user.risk.id_value`),
+   * so this query parameterises every reference on `entityType`.
+   *
+   * Filters on `<entityType>.risk.id_field === 'entity.id'` so only V2-shaped
+   * documents (written by the entity-store risk-score maintainer) participate.
+   * Legacy documents written by the pre-V2 scoring task have `id_field` set to
+   * `host.name` or `user.name`, and are excluded by this filter. That is the
+   * intended behaviour, since their `id_value` carries a raw name rather than
+   * an EUID and would silently distort the trend.
+   *
+   * The returned map is keyed by EUID (e.g. `"host:InnoDB"`).
    */
   public async getDailyAverageRiskScoreNormSeries(params: {
     entityType: string;
-    entityNames: readonly string[];
+    entityIds: readonly string[];
     lookbackRange?: { readonly gte: string; readonly lte: string };
   }): Promise<Map<string, number[]>> {
-    const { entityType, entityNames } = params;
+    const { entityType, entityIds } = params;
     const range = params.lookbackRange ?? { gte: 'now-90d', lte: 'now' };
     const result = new Map<string, number[]>();
 
-    if (entityNames.length === 0) {
+    if (entityIds.length === 0) {
       return result;
     }
 
     const { esClient, namespace } = this.options;
     const index = getRiskScoreTimeSeriesIndex(namespace);
+
+    const idFieldPath = `${entityType}.risk.id_field`;
+    const idValuePath = `${entityType}.risk.id_value`;
 
     const response = await esClient.search({
       index,
@@ -118,14 +136,15 @@ export class RiskScoreDataClient {
       query: {
         bool: {
           filter: [
-            { terms: { [`${entityType}.name`]: [...entityNames] } },
+            { term: { [idFieldPath]: 'entity.id' } },
+            { terms: { [idValuePath]: [...entityIds] } },
             { range: { '@timestamp': range } },
           ],
         },
       },
       aggs: {
         by_entity: {
-          terms: { field: `${entityType}.name`, size: entityNames.length },
+          terms: { field: idValuePath, size: entityIds.length },
           aggs: {
             scores_over_time: {
               date_histogram: { field: '@timestamp', calendar_interval: 'day' },
@@ -148,11 +167,44 @@ export class RiskScoreDataClient {
       const scores = bucket.scores_over_time.buckets
         .map((b) => b.avg_score.value)
         .filter((v): v is number => v != null);
-      result.set(`${entityType}:${bucket.key}`, scores);
+      result.set(bucket.key, scores);
     }
 
     return result;
   }
+
+  public getRiskScoreHistory = async (params: {
+    entityType: string;
+    entityId: string;
+    range: { readonly gte: string; readonly lte: string };
+    scoreType?: string;
+    pageSize: number;
+  }): Promise<RiskScoreHistoryEntry[]> => {
+    const { esClient, namespace } = this.options;
+    const index = getRiskScoreTimeSeriesIndex(namespace);
+    const riskPath = `${params.entityType}.risk`;
+
+    const response = await esClient.search<RiskScoreTimeSeriesSource>({
+      index,
+      size: Math.min(params.pageSize, RISK_SCORE_HISTORY_PAGE_SIZE_MAX),
+      sort: [{ '@timestamp': 'asc' }],
+      _source: ['@timestamp', riskPath],
+      query: {
+        bool: {
+          filter: [
+            { term: { [`${riskPath}.id_field`]: 'entity.id' } },
+            { term: { [`${riskPath}.id_value`]: params.entityId } },
+            { range: { '@timestamp': { gte: params.range.gte, lte: params.range.lte } } },
+            ...toScoreTypeFilter(riskPath, params.scoreType),
+          ],
+        },
+      },
+    });
+
+    return response.hits.hits
+      .map((hit) => toHistoryEntry(hit._source, params.entityType))
+      .filter((entry): entry is RiskScoreHistoryEntry => entry !== undefined);
+  };
 
   public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
     getRiskInputsIndex({
@@ -457,3 +509,90 @@ export class RiskScoreDataClient {
     });
   }
 }
+
+// --- types and helpers for getRiskScoreHistory ---
+
+type RiskScoreTimeSeriesRisk = RiskScoreHistoryEntry & {
+  readonly id_field: string;
+  readonly id_value: string;
+};
+
+interface RiskScoreTimeSeriesSource {
+  readonly '@timestamp': string;
+  readonly host?: { readonly risk: RiskScoreTimeSeriesRisk };
+  readonly user?: { readonly risk: RiskScoreTimeSeriesRisk };
+  readonly service?: { readonly risk: RiskScoreTimeSeriesRisk };
+}
+
+const toScoreTypeFilter = (
+  riskPath: string,
+  scoreType: string | undefined
+): Array<Record<string, unknown>> => {
+  if (scoreType === undefined) {
+    return [];
+  }
+
+  // documents written before score_type was introduced have no field — treat as base
+  if (scoreType === 'base') {
+    return [
+      {
+        bool: {
+          should: [
+            { term: { [`${riskPath}.score_type`]: 'base' } },
+            { bool: { must_not: { exists: { field: `${riskPath}.score_type` } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+  }
+
+  return [{ term: { [`${riskPath}.score_type`]: scoreType } }];
+};
+
+const getRiskFromSource = (
+  source: RiskScoreTimeSeriesSource,
+  entityType: string
+): RiskScoreTimeSeriesRisk | undefined => {
+  if (entityType === 'host') {
+    return source.host?.risk;
+  }
+  if (entityType === 'user') {
+    return source.user?.risk;
+  }
+  if (entityType === 'service') {
+    return source.service?.risk;
+  }
+  return undefined;
+};
+
+const toHistoryEntry = (
+  source: RiskScoreTimeSeriesSource | undefined,
+  entityType: string
+): RiskScoreHistoryEntry | undefined => {
+  if (source === undefined) {
+    return undefined;
+  }
+
+  const risk = getRiskFromSource(source, entityType);
+
+  if (risk === undefined) {
+    return undefined;
+  }
+
+  const timestamp = risk['@timestamp'] ?? source['@timestamp'];
+
+  if (timestamp === undefined) {
+    return undefined;
+  }
+
+  return {
+    '@timestamp': timestamp,
+    calculated_score_norm: risk.calculated_score_norm,
+    calculated_level: risk.calculated_level,
+    ...(risk.calculated_score !== undefined && { calculated_score: risk.calculated_score }),
+    ...(risk.score_type !== undefined && { score_type: risk.score_type }),
+    ...(risk.category_1_score !== undefined && { category_1_score: risk.category_1_score }),
+    ...(risk.category_1_count !== undefined && { category_1_count: risk.category_1_count }),
+  };
+};

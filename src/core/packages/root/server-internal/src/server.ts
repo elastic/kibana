@@ -65,6 +65,8 @@ import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
+import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -109,6 +111,7 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -172,6 +175,7 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -217,6 +221,10 @@ export class Server {
     });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
+
+    // Apply the `disableLazyZodSchemas` static override for `@kbn/zod` before plugin
+    // discovery so that `lazySchema` calls evaluated at plugin-module-load time observe it.
+    await this.#applyLazyZodSchemaOverride();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -402,6 +410,11 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
+    const userStorageSetup = this.userStorage.setup({
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+    });
+
     const statusSetup = await this.status.setup({
       analytics: analyticsSetup,
       elasticsearch: elasticsearchServiceSetup,
@@ -417,7 +430,9 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
-    const featureFlagsSetup = this.featureFlags.setup();
+    const featureFlagsSetup = this.featureFlags.setup({
+      http: httpSetup,
+    });
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -465,10 +480,12 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      userStorage: userStorageSetup,
     };
 
-    const pluginsSetup = await this.plugins.setup(coreSetup);
-    this.#pluginsInitialized = pluginsSetup.initialized;
+    const { contracts, initialized } = await this.plugins.setup(coreSetup);
+    coreSetup._plugins = contracts;
+    this.#pluginsInitialized = initialized;
     /**
      * This is a necessary step to ensure that the pricing service is ready to be used.
      * It must be called after all plugins have been setup.
@@ -579,6 +596,10 @@ export class Server {
 
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const userStorageStart = this.userStorage.start({
+      savedObjects: savedObjectsStart,
+      security: securityStart,
+    });
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
@@ -600,6 +621,7 @@ export class Server {
 
     this.rendering.start({
       featureFlags: featureFlagsStart,
+      userStorage: userStorageStart,
     });
 
     this.coreStart = {
@@ -622,12 +644,12 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      userStorage: userStorageStart,
     };
 
     this.coreApp.start(this.coreStart);
 
-    const { contracts } = await this.plugins.start(this.coreStart);
-    this.coreStart._plugins = contracts;
+    await this.plugins.start(this.coreStart);
 
     await this.http.start();
 
@@ -655,6 +677,7 @@ export class Server {
     this.deprecations.stop();
     this.security.stop();
     this.userProfile.stop();
+    this.userStorage.stop();
   }
 
   private async ensureValidConfiguration() {
@@ -678,6 +701,17 @@ export class Server {
         .error(
           `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
         );
+    }
+  }
+
+  async #applyLazyZodSchemaOverride() {
+    const featureFlagsCfg = await firstValueFrom(
+      this.configService.atPath<{ overrides?: Record<string, unknown> }>('feature_flags')
+    );
+    const override = featureFlagsCfg.overrides?.disableLazyZodSchemas;
+
+    if (typeof override === 'boolean') {
+      setLazySchemaDisabled(override);
     }
   }
 

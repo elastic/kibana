@@ -8,8 +8,11 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  bulkOperationParamsSchema,
+  bulkOperationResponseSchema,
+  errorResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
@@ -30,16 +33,17 @@ export class BulkDeleteRulesRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Delete rules in bulk',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkOperationParamsSchema),
+      body: bulkOperationParamsSchema,
     },
     response: {
       200: {
         body: () => bulkOperationResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the result of the bulk delete operation.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },
@@ -57,8 +61,8 @@ export class BulkDeleteRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { ids, filter } = this.request.body;
-    const params = ids ? { ids } : { filter: filter ?? '' };
+    const { ids, filter, search, match_all } = this.request.body;
+    const params = ids ? { ids } : { filter, search, match_all };
     const result = await this.rulesClient.bulkDeleteRules(params);
     return this.ctx.response.ok({ body: result });
   }

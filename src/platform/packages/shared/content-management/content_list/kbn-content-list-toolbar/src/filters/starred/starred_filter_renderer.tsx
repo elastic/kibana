@@ -12,6 +12,7 @@ import { EuiFilterButton } from '@elastic/eui';
 import type { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useContentListConfig } from '@kbn/content-list-provider';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 
 const STARRED_FIELD = 'starred';
 
@@ -46,7 +47,7 @@ export interface StarredFilterRendererProps {
 export const StarredFilterRenderer = ({
   query,
   onChange,
-  'data-test-subj': dataTestSubj = 'contentListStarredRenderer',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.starredFilter,
 }: StarredFilterRendererProps) => {
   const { supports } = useContentListConfig();
 
@@ -68,10 +69,20 @@ export const StarredFilterRenderer = ({
     return null;
   }
 
+  // Uses EUI's "single filter" pattern (`isToggle` + `isSelected`) so the
+  // button renders with `aria-pressed={active}` semantics and the proper
+  // toggled visual state. `hasActiveFilters` adds EUI's existing
+  // active-highlight on top, matching the treatment used by the recents
+  // filter so both single-filter toggles look and behave the same way.
+  // The icon also swaps between `starFilled`/`starEmpty` to reinforce the
+  // toggled state visually — a luxury the recents filter does not have
+  // because EUI doesn't ship a paired filled/empty clock glyph.
   return (
     <EuiFilterButton
-      iconType={active ? 'starFilled' : 'starEmpty'}
+      isToggle
+      isSelected={active}
       hasActiveFilters={active}
+      iconType={active ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
       data-test-subj={dataTestSubj}
     >

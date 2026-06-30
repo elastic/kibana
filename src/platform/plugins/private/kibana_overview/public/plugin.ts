@@ -67,7 +67,7 @@ export class KibanaOverviewPlugin
       order: 1,
       updater$: appUpdater$,
       appRoute: PLUGIN_PATH,
-      visibleIn: ['globalSearch', 'home', 'sideNav'],
+      visibleIn: ['globalSearch', 'home', 'classicSideNav', 'projectSideNav'],
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

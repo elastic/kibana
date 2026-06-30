@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowTokenUsage } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
@@ -20,15 +20,19 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps in this execution. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
   showResumeUI?: boolean;
   executionId?: string;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
+  waitingStepExecutionId?: string;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -55,11 +59,13 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
   ({
     stepExecution,
     workflowExecutionDuration,
+    workflowExecutionUsage,
     showResumeUI = false,
     executionId,
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
+    waitingStepExecutionId,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -125,6 +131,14 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
+                  {workflowExecutionUsage && (
+                    <EuiFlexItem grow={false}>
+                      <TokenUsageBadge
+                        usage={workflowExecutionUsage}
+                        data-test-subj="workflowExecutionTokenUsage"
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -196,9 +210,12 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             <EuiFlexItem grow={false}>
               <ResumeExecutionButton
                 executionId={executionId}
+                workflowId={stepExecution.workflowId}
+                stepStartedAt={stepExecution.startedAt}
                 resumeMessage={resumeMessage}
                 resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}
+                waitingStepExecutionId={waitingStepExecutionId}
               />
             </EuiFlexItem>
           )}

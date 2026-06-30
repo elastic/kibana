@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { useState } from 'react';
@@ -81,15 +81,25 @@ export function AdvancedConfigValueInput({
         value={configValue}
         onChange={(e) => handleValueChange(e.target.value)}
         append={
-          <EuiButtonIcon
-            data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
-            aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel', {
               defaultMessage: 'Remove advanced configuration',
             })}
-            iconType="trash"
-            color={'danger'}
-            onClick={() => onDelete(configKey, id)}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
+              aria-label={i18n.translate(
+                'xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel',
+                {
+                  defaultMessage: 'Remove advanced configuration',
+                }
+              )}
+              iconType="trash"
+              color="danger"
+              onClick={() => onDelete(configKey, id)}
+            />
+          </EuiToolTip>
         }
       />
     </EuiFormRow>

@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { UntypedNormalizedRuleType } from '../../../../rule_type_registry';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';
 import type {
@@ -66,6 +67,10 @@ export async function bulkEditRules<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
+    changeTracking: {
+      action: deriveChangeTrackingAction(options.operations),
+      ...options.changeTracking,
+    },
     shouldValidateSchedule: options.operations.some((operation) => operation.field === 'schedule'),
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleAttributesAndParamsInMemory<Params>({
@@ -466,4 +471,19 @@ async function attemptToMigrateLegacyFrequency<Params extends RuleParams>(
     actions,
   });
   return rule;
+}
+
+// Only emit a specific action when the batch is unambiguous (single operation); mixed batches fall back to ruleUpdate.
+function deriveChangeTrackingAction(operations: BulkEditOperation[]): RuleChangeTrackingAction {
+  if (operations.length === 1 && operations[0].field === 'apiKey') {
+    return RuleChangeTrackingAction.ruleUpdateApiKey;
+  }
+
+  if (operations.length === 1 && operations[0].field === 'snoozeSchedule') {
+    return operations[0].operation === 'set'
+      ? RuleChangeTrackingAction.ruleSnooze
+      : RuleChangeTrackingAction.ruleUnsnooze;
+  }
+
+  return RuleChangeTrackingAction.ruleUpdate;
 }

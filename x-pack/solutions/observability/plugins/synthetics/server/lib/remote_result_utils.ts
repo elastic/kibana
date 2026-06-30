@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { RemoteMonitorInfo } from '../../common/runtime_types';
 import type { SyntheticsServerSetup } from '../types';
 
-export const isCCSEnabled = (
-  server: Pick<SyntheticsServerSetup, 'isElasticsearchServerless' | 'config'>
-) => !server.isElasticsearchServerless && Boolean(server.config.experimental?.ccs?.enabled);
+// CCS is supported on stateful Kibana but not on Elasticsearch Serverless,
+// which doesn't expose remote-cluster wiring.
+export const isCCSEnabled = (server: Pick<SyntheticsServerSetup, 'isElasticsearchServerless'>) =>
+  !server.isElasticsearchServerless;
 
 /**
  * Extracts the remote cluster name from an ES `_index` field.
@@ -20,7 +21,7 @@ export const isCCSEnabled = (
  * Example: "cluster1:synthetics-*" → "cluster1"
  */
 export function getRemoteClusterName(index: string): string | undefined {
-  if (isCCSRemoteIndexName(index)) {
+  if (isNonLocalIndexName(index)) {
     return index.substring(0, index.indexOf(':'));
   }
 }
@@ -30,8 +31,12 @@ export function getRemoteClusterName(index: string): string | undefined {
  * Returns undefined for local hits.
  *
  * @param index - The `_index` field from the ES search hit
+ * @param kibanaUrl - Optional kibanaUrl from the document source, for deep linking
  */
-export function getRemoteMonitorInfo(index: string): RemoteMonitorInfo | undefined {
+export function getRemoteMonitorInfo(
+  index: string,
+  kibanaUrl?: string
+): RemoteMonitorInfo | undefined {
   const remoteName = getRemoteClusterName(index);
   if (!remoteName) {
     return undefined;
@@ -39,5 +44,6 @@ export function getRemoteMonitorInfo(index: string): RemoteMonitorInfo | undefin
 
   return {
     remoteName,
+    ...(kibanaUrl ? { kibanaUrl } : {}),
   };
 }

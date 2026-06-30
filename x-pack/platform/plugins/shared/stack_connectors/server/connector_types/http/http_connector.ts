@@ -29,6 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
@@ -38,6 +39,7 @@ import type {
 import type { Result } from '../lib/result_type';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
@@ -139,6 +141,18 @@ function renderParameterTemplates(
     renderedParams.body = renderMustacheString(logger, params.body, variables, 'json');
   }
 
+  if (params.form_data) {
+    const renderedFormData: HttpFormDataField = {};
+    for (const [key, entry] of Object.entries(params.form_data)) {
+      renderedFormData[key] = {
+        content: renderMustacheString(logger, entry.content, variables, 'json'),
+        filename: renderMustacheString(logger, entry.filename, variables, 'json'),
+        content_type: renderMustacheString(logger, entry.content_type, variables, 'json'),
+      };
+    }
+    renderedParams.form_data = renderedFormData;
+  }
+
   if (params.url) {
     renderedParams.url = renderMustacheString(logger, params.url, variables, 'json');
   }
@@ -167,20 +181,24 @@ function renderParameterTemplates(
 }
 
 function combineUrl(basePath: string, path?: string): string {
-  const basePathNormalized = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-  const pathNormalized = path?.startsWith('/') ? path : path ? `/${path}` : '';
-  return `${basePathNormalized}${pathNormalized}`;
+  if (!path) return basePath;
+  const url = new URL(basePath);
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  return url.toString();
 }
 
-function buildQueryString(query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
   if (!query || Object.keys(query).length === 0) {
-    return '';
+    return baseUrl;
   }
-  const params = new URLSearchParams();
+  const url = new URL(baseUrl);
   for (const [key, value] of Object.entries(query)) {
-    params.append(key, value);
+    if (!url.searchParams.has(key)) {
+      url.searchParams.set(key, value);
+    }
   }
-  return `?${params.toString()}`;
+  return url.toString();
 }
 
 function serializeHttpRequestBody(body: unknown): string {
@@ -192,7 +210,70 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
-// action executor
+function checkFormDataMaxSize(formData: HttpFormDataField, maxSize: number | undefined): void {
+  if (maxSize != null) {
+    let total = 0;
+    for (const spec of Object.values(formData)) {
+      if (spec.encoding === 'base64') {
+        // estimate the size of the base64 encoded content using the 75% rule
+        total += Math.ceil(spec.content.length * 0.75);
+      } else {
+        total += spec.content.length;
+      }
+      if (total > maxSize) {
+        throw new Error(`form_data exceeds max_content_length (${maxSize} bytes)`);
+      }
+    }
+  }
+}
+
+function buildFormData(formData: HttpFormDataField, maxSize: number | undefined): FormData {
+  checkFormDataMaxSize(formData, maxSize);
+
+  const form = new FormData();
+  for (const [fieldName, spec] of Object.entries(formData)) {
+    if (spec.encoding === 'base64') {
+      // Binary field — always go through the Blob branch so the bytes round-trip intact.
+      // Wrap the Buffer in a Uint8Array so the underlying storage is an ArrayBuffer (Buffer's `.buffer` is typed as ArrayBufferLike).
+      const normalized = spec.content.replace(/\s+/g, '');
+      if (normalized.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {
+        throw new Error(`Invalid base64 content in form_data field "${fieldName}"`);
+      }
+      const buf = Buffer.from(normalized, 'base64');
+      const blob = new Blob([new Uint8Array(buf)], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename); // filename optional
+    } else if (spec.filename !== undefined) {
+      const blob = new Blob([spec.content], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename);
+    } else if (spec.content_type !== undefined) {
+      const blob = new Blob([spec.content], { type: spec.content_type });
+      form.append(fieldName, blob);
+    } else {
+      // Plain HTML-form text field — no per-part Content-Type.
+      form.append(fieldName, spec.content);
+    }
+  }
+  return form;
+}
+
+function processResponseHeaders(headers: object): Record<string, string> {
+  return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (value != null) {
+      acc[key] = String(value);
+    }
+    return acc;
+  }, {});
+}
+
+/*
+ * Action executor for the HTTP connector. Shared by the regular and system connector types.
+ * @param execOptions - The executor options
+ * @returns The HTTP connector execution response
+ */
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
 ): Promise<HttpConnectorTypeExecutorResult> {
@@ -207,7 +288,15 @@ export async function executor(
     signal,
   } = execOptions;
 
-  const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
+  const {
+    method,
+    path,
+    body,
+    form_data: formData,
+    query,
+    headers: paramsHeaders,
+    fetcher,
+  } = params;
 
   // params always takes precedence over config
   const baseUrl = params.url || config.url;
@@ -215,8 +304,20 @@ export async function executor(
     return errorResultInvalid(actionId, 'URL is required');
   }
 
-  // Combine base url and path
-  const url = combineUrl(baseUrl, path) + buildQueryString(query);
+  if (body != null && formData != null) {
+    return errorResultInvalid(actionId, 'Cannot set both body and form_data');
+  }
+
+  let requestData: unknown;
+  try {
+    if (formData) {
+      requestData = buildFormData(formData, fetcher?.max_content_length);
+    } else {
+      requestData = serializeHttpRequestBody(body);
+    }
+  } catch (error) {
+    return errorResultInvalid(actionId, error.message);
+  }
 
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
@@ -239,10 +340,25 @@ export async function executor(
     );
   }
 
-  const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
+  const {
+    axiosInstance,
+    headers: configHeaders,
+    sslOverrides: baseSslOverrides,
+    secretQueryParams,
+  } = axiosConfig;
 
-  // Merge headers: params headers take precedence over config headers
-  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
+  const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
+
+  // Merge headers: params headers take precedence over config headers. When
+  // sending multipart/form-data, strip any user-supplied Content-Type so axios
+  // can set the correct multipart Content-Type (with boundary) itself.
+  const mergedHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  const finalHeaders = formData
+    ? Object.fromEntries(
+        Object.entries(mergedHeaders).filter(([key]) => key.toLowerCase() !== 'content-type')
+      )
+    : mergedHeaders;
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({
@@ -273,14 +389,14 @@ export async function executor(
     keepAlive = fetcher.keep_alive;
   }
 
-  const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
+  const result: Result<AxiosResponse<ResponseBuffer>, AxiosError<unknown>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
       url,
       logger,
       headers: finalHeaders,
-      data: serializeHttpRequestBody(body),
+      data: requestData,
       configurationUtilities,
       sslOverrides,
       proxyOverrides,
@@ -291,6 +407,7 @@ export async function executor(
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,
       }),
+      responseType: 'arraybuffer', // Guaranteed to return a buffer data type
       signal,
     })
   );
@@ -300,26 +417,27 @@ export async function executor(
   }
 
   if (isOk(result)) {
-    const {
-      value: { status, statusText, data },
-    } = result;
+    const { status, statusText } = result.value;
     logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-    const headers = Object.entries(result.value.headers || {}).reduce<Record<string, string>>(
-      (acc, [key, value]) => {
-        if (value != null) {
-          acc[key] = String(value);
-        }
-        return acc;
-      },
-      {}
-    );
+    const headers = processResponseHeaders(result.value.headers);
+    const data = processBufferResponse(result.value.data, headers);
 
     return { status: 'ok', actionId, data: { status, statusText, headers, data } };
   } else {
     const { error } = result;
     if (error.response) {
-      const { status, statusText, headers: responseHeaders } = error.response;
+      const { status, statusText, data: responseData } = error.response;
+
+      const responseHeaders = processResponseHeaders(error.response.headers);
+
+      // Using `responseType: 'arraybuffer'`, error response bodies also arrive as
+      // raw bytes. Decode them via `processBufferResponse` so the existing
+      // error-message extraction (which expects an object/string body, e.g.
+      // `{ message: '...' }`) continues to work for HTTP errors.
+      if (responseData instanceof ArrayBuffer || ArrayBuffer.isView(responseData)) {
+        error.response.data = processBufferResponse(responseData, responseHeaders);
+      }
 
       const responseMessage = getErrorResponseMessage(error);
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';

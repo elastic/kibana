@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
   htmlIdGenerator,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -185,14 +186,15 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             {config.renderInputRow(item, index, onChangeValue)}
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={config.getRemoveBtnAriaLabel(item)}
-                title={config.getRemoveBtnAriaLabel(item)}
-                disabled={models.length === 1}
-                color="danger"
-                iconType="trash"
-                onClick={() => onDelete(item.id)}
-              />
+              <EuiToolTip content={config.getRemoveBtnAriaLabel(item)} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={config.getRemoveBtnAriaLabel(item)}
+                  disabled={models.length === 1}
+                  color="danger"
+                  iconType="trash"
+                  onClick={() => onDelete(item.id)}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />

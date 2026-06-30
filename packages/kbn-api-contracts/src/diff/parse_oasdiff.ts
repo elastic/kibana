@@ -28,6 +28,7 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
   'request-parameter-removed': 'parameter_removed',
   'response-required-property-removed': 'response_property_removed',
   'response-optional-property-removed': 'response_property_removed',
+  'kbn:request-additional-properties-tightened': 'request_body_tightened',
 };
 
 // These oasdiff warning-level (level 2) checks are promoted to blocking because
@@ -41,9 +42,22 @@ const PROMOTED_WARNING_IDS = new Set([
 const isIncluded = ({ id, level }: OasdiffEntry): boolean =>
   level >= 3 || PROMOTED_WARNING_IDS.has(id);
 
-const mapEntryToBreakingChange = ({ id, path, operation, text }: OasdiffEntry): BreakingChange => {
+const mapEntryToBreakingChange = ({
+  id,
+  path,
+  operation,
+  text,
+  source,
+}: OasdiffEntry): BreakingChange => {
   const type = ID_TO_TYPE[id] ?? 'operation_breaking';
-  return { type, path, method: type === 'path_removed' ? undefined : operation, reason: text };
+  return {
+    type,
+    path,
+    method: type === 'path_removed' ? undefined : operation,
+    reason: text,
+    oasdiffId: id,
+    source,
+  };
 };
 
 export const parseOasdiff = (entries: OasdiffEntry[]): BreakingChange[] =>

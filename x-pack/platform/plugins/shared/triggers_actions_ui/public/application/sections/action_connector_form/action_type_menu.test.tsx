@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import type { GenericValidationResult } from '../../../types';
@@ -289,6 +290,44 @@ describe('connector_add_flyout', () => {
       expect(screen.queryByTestId('action-type-2-card')).not.toBeInTheDocument();
     });
 
+    it('Filters connectors based on selected feature ids', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType1.id,
+          enabled: true,
+          name: 'Jira',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: actionType2.id,
+          enabled: true,
+          name: 'Webhook',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['cases'],
+        },
+      ]);
+
+      actionTypeRegistry.get.mockImplementation((id) =>
+        id === actionType1.id ? actionType1 : actionType2
+      );
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+          selectedFeatureIds={['cases']}
+        />
+      );
+
+      expect(await screen.findByTestId('action-type-2-card')).toBeInTheDocument();
+      expect(screen.queryByTestId('action-type-1-card')).not.toBeInTheDocument();
+    });
+
     it('Filters connectors based on selectMessage search', async () => {
       loadActionTypes.mockResolvedValue([
         {
@@ -325,6 +364,94 @@ describe('connector_add_flyout', () => {
 
       expect(await screen.findByTestId('action-type-2-card')).toBeInTheDocument();
       expect(screen.queryByTestId('action-type-1-card')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('spec connectors', () => {
+    it('renders a spec connector using name and description from the server response', async () => {
+      const onActionTypeChange = jest.fn();
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Spec Connector',
+          description: 'Send data via spec connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      expect(await screen.findByTestId('my-spec-connector-card')).toBeInTheDocument();
+      expect(screen.getByText('My Spec Connector')).toBeInTheDocument();
+      expect(screen.getByText('Send data via spec connector')).toBeInTheDocument();
+    });
+
+    it('does not render a spec connector when enabledInConfig is false', async () => {
+      const onActionTypeChange = jest.fn();
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: false,
+          name: 'My Spec Connector',
+          enabledInConfig: false,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await new Promise((r) => setTimeout(r, 0));
+      expect(screen.queryByTestId('my-spec-connector-card')).not.toBeInTheDocument();
+    });
+
+    it('does not render a spec connector when workflows UI is disabled and connector only supports workflows', async () => {
+      const onActionTypeChange = jest.fn();
+      useKibanaMock().services.uiSettings.get = jest
+        .fn()
+        .mockImplementation((key: string) => (key === 'workflows:ui:enabled' ? false : undefined));
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-workflows-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Workflows Connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['workflows'],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await new Promise((r) => setTimeout(r, 0));
+      expect(screen.queryByTestId('my-workflows-connector-card')).not.toBeInTheDocument();
     });
   });
 

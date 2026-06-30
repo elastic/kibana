@@ -16,8 +16,8 @@
     "@kbn/cps-utils",
     "@kbn/es-query",
     "@kbn/i18n-react",
-    "@kbn/spaces-utils",
     "@kbn/cps-common",
+    "@kbn/core-security-server",
   ],
   "exclude": [
     "target/**/*",
