@@ -49,6 +49,21 @@ export class UnifiedTabs {
     );
   }
 
+  private async getTabWrapper(index: number): Promise<Locator> {
+    const tabWrappers = await this.page.locator('[data-test-subj^="unifiedTabs_tab_"]').all();
+
+    if (index < 0 || index >= tabWrappers.length) {
+      throw new Error(`Tab index ${index} is out of bounds (found ${tabWrappers.length} tabs)`);
+    }
+
+    return tabWrappers[index];
+  }
+
+  async getTabUnsavedIndicator(index: number): Promise<Locator> {
+    const tab = await this.getTabWrapper(index);
+    return tab.locator('[data-test-subj^="unifiedTabs__tabChangesIndicator-"]');
+  }
+
   private async getTab(index: number): Promise<Locator> {
     const tabs = await this.getTabs().all();
 
