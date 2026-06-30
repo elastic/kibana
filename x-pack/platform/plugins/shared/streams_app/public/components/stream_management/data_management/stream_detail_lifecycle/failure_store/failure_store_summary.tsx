@@ -38,6 +38,7 @@ interface FailureStoreSummaryProps {
   onEditDeletePhase?: () => void;
   onRemoveDeletePhase?: () => void;
   isExternalFlyoutOpen?: boolean;
+  isDeletePhaseFlyoutOpen?: boolean;
   previewInheritLifecycle?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const FailureStoreSummary = ({
   onEditDeletePhase,
   onRemoveDeletePhase,
   isExternalFlyoutOpen = false,
+  isDeletePhaseFlyoutOpen = false,
   previewInheritLifecycle,
 }: FailureStoreSummaryProps) => {
   const { isServerless } = useKibana();
@@ -193,6 +195,10 @@ export const FailureStoreSummary = ({
       }
       showDownsampling={false}
       headerActions={headerActions}
+      uiState={{
+        editedPhaseName: isDeletePhaseFlyoutOpen ? 'delete' : undefined,
+        isEditLifecycleFlyoutOpen: isDeletePhaseFlyoutOpen,
+      }}
       phaseActions={
         onEditDeletePhase || canRemoveDeletePhase
           ? {

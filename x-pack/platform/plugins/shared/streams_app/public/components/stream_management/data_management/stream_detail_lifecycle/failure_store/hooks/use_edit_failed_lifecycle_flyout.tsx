@@ -92,11 +92,14 @@ export const useEditFailedLifecycleFlyout = ({
     retentionDisabled,
   } = failureStoreConfig;
 
-  // The cluster default retention is not always known on the client (e.g. in
-  // Serverless `cluster.getSettings` is not available), so fall back to the
-  // failure store default of 30d. This is only used to *preview* the delete phase
-  // that Elasticsearch will materialize; the persisted payload never uses it.
-  const effectiveDefaultRetentionPeriod = defaultRetentionPeriod ?? '30d';
+  // Used only to *preview* the delete phase that Elasticsearch will materialize when
+  // the failure store is enabled without an explicit retention; the persisted payload
+  // never uses it. `defaultRetentionPeriod` is intentionally undefined when a custom
+  // retention is active, so fall back to the raw cluster default, and finally to the
+  // failure store default of 30d when the cluster default is unknown (e.g. in
+  // Serverless `cluster.getSettings` is not available).
+  const effectiveDefaultRetentionPeriod =
+    defaultRetentionPeriod ?? clusterDefaultRetention ?? '30d';
 
   const {
     setIsActive: setPreviewIsActive,
@@ -310,13 +313,26 @@ export const useEditFailedLifecycleFlyout = ({
       failureStoreEnabled: failureStoreEnabledDraft,
     });
 
+    // Persist exactly what the preview shows. When enabling the failure store
+    // without an explicit retention, the preview differs by deployment:
+    // - Stateful: infinite retention / 1 data phase. That maps to a disabled
+    //   lifecycle (`{ lifecycle: { disabled: {} } }`); persisting
+    //   `{ lifecycle: { enabled: {} } }` would instead let Elasticsearch
+    //   materialize the cluster default (e.g. 30d / 2 phases), contradicting the
+    //   preview.
+    // - Serverless: the cluster default retention / 2 data phases, which is what
+    //   `{ lifecycle: { enabled: {} } }` materializes.
+    const enabledWithoutRetention = isServerless
+      ? { lifecycle: { enabled: {} } }
+      : { lifecycle: { disabled: {} } };
+
     const nextFailureStore =
       payload.inheritLifecycle === true
         ? { inherit: {} }
         : payload.failureStoreEnabled
         ? payload.retention
           ? { lifecycle: { enabled: { data_retention: payload.retention } } }
-          : { lifecycle: { enabled: {} } }
+          : enabledWithoutRetention
         : { disabled: {} };
 
     return saveFailureStore(nextFailureStore, {
@@ -371,8 +387,12 @@ export const useEditFailedLifecycleFlyout = ({
       return;
     }
 
+    // When the delete phase is enabled but the concrete retention isn't known on
+    // the client (e.g. a default retention that ES will materialize), fall back
+    // to the effective default so the preview keeps showing a delete phase
+    // (2 data phases) instead of collapsing to infinite retention (1 data phase).
     const nextRetention = failedDeletePhaseInitialValue.deletePhaseEnabled
-      ? failedDeletePhaseInitialRetention
+      ? failedDeletePhaseInitialRetention ?? effectiveDefaultRetentionPeriod
       : effectiveDefaultRetentionPeriod;
     syncDeletePhasePreview(nextRetention ?? null);
   }, [
@@ -516,6 +536,7 @@ export const useEditFailedLifecycleFlyout = ({
     openDeletePhaseFlyout,
     removeDeletePhase,
     isMainFlyoutOpen,
+    isDeletePhaseFlyoutOpen,
     isAnyFlyoutOpen,
     failureStoreEnabledForUi,
     previewInheritLifecycle: isAnyFlyoutOpen ? inheritLifecycle : undefined,

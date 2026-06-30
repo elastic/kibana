@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RetentionCard } from './retention_card';
 import type { useFailureStoreConfig } from '../../hooks/use_failure_store_config';
-import { LifecyclePreviewProvider } from '../../common/hooks/lifecycle_preview';
+import {
+  LifecyclePreviewProvider,
+  useLifecyclePreview,
+} from '../../common/hooks/lifecycle_preview';
 
 const renderI18n = (ui: React.ReactElement) =>
   render(
@@ -18,6 +21,22 @@ const renderI18n = (ui: React.ReactElement) =>
       <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
     </I18nProvider>
   );
+
+const PreviewSeed = ({
+  retentionPeriod,
+  dataPhasesCount,
+}: {
+  retentionPeriod: string | null;
+  dataPhasesCount: number | null;
+}) => {
+  const { setIsActive, setRetentionPeriod, setDataPhasesCount } = useLifecyclePreview();
+  useEffect(() => {
+    setIsActive(true);
+    setRetentionPeriod(retentionPeriod);
+    setDataPhasesCount(dataPhasesCount);
+  }, [dataPhasesCount, retentionPeriod, setDataPhasesCount, setIsActive, setRetentionPeriod]);
+  return null;
+};
 
 const createMockConfig = (
   config: Partial<ReturnType<typeof useFailureStoreConfig>>
@@ -73,6 +92,21 @@ describe('RetentionCard', () => {
     expect(screen.getByTestId('failureStoreRetention-metric')).toHaveTextContent('∞');
     expect(screen.getByTestId('failureStoreRetention-metric-subtitle')).toHaveTextContent(
       '1 data phase'
+    );
+  });
+
+  it('reflects an active preview over the saved disabled lifecycle (editing a delete phase)', () => {
+    const mockConfig = createMockConfig({ retentionDisabled: true });
+    renderI18n(
+      <>
+        <PreviewSeed retentionPeriod="7d" dataPhasesCount={2} />
+        <RetentionCard failureStoreConfig={mockConfig} />
+      </>
+    );
+
+    expect(screen.getByTestId('failureStoreRetention-metric')).toHaveTextContent('7 days');
+    expect(screen.getByTestId('failureStoreRetention-metric-subtitle')).toHaveTextContent(
+      '2 data phases'
     );
   });
 });

@@ -88,80 +88,108 @@ const inheritedFailureStoreRoute = createServerRoute({
     const { name } = params.path;
 
     const definition = await streamsClient.getStream(name);
-    if (!Streams.ingest.all.Definition.is(definition)) {
-      throw new StatusError('Inherited failure store is only available for ingest streams', 400);
-    }
 
-    // Wired streams inherit from parent streams.
-    if (Streams.WiredStream.Definition.is(definition)) {
-      const ancestors = await streamsClient.getAncestors(name);
-      const inheritingDefinition: Streams.WiredStream.Definition = {
-        ...definition,
-        ingest: { ...definition.ingest, failure_store: { inherit: {} } },
-      };
-
-      const hasInheritableOrigin = ancestors.some(
-        ({ ingest }) => !isInheritFailureStore(ingest.failure_store)
-      );
-      if (!hasInheritableOrigin) {
-        return { failure_store: { disabled: {} } };
-      }
-
-      return { failure_store: findInheritedFailureStore(inheritingDefinition, ancestors) };
-    }
-
-    const template = await simulateClassicStreamTemplate({
-      esClient: scopedClusterClient.asCurrentUser,
+    return resolveInheritedFailureStore({
       name,
-      logger,
+      definition,
+      getAncestors: () => streamsClient.getAncestors(name),
+      getTemplate: () =>
+        simulateClassicStreamTemplate({
+          esClient: scopedClusterClient.asCurrentUser,
+          name,
+          logger,
+        }),
     });
+  },
+});
 
-    if (!template) {
-      throw new StatusError(
-        `Cannot determine template failure store for ${name} — the data stream may be replicated and managed by a remote cluster`,
-        400
-      );
+type SimulatedTemplate = Awaited<ReturnType<typeof simulateClassicStreamTemplate>>;
+
+/**
+ * Resolves the failure store a stream inherits from its parent (wired) or index
+ * template (classic). Extracted from the route handler so the branching and 400
+ * error paths can be unit tested without a live cluster.
+ */
+export async function resolveInheritedFailureStore({
+  name,
+  definition,
+  getAncestors,
+  getTemplate,
+}: {
+  name: string;
+  definition: Streams.all.Definition;
+  getAncestors: () => Promise<Streams.WiredStream.Definition[]>;
+  getTemplate: () => Promise<SimulatedTemplate>;
+}): Promise<{ failure_store: EffectiveFailureStore }> {
+  if (!Streams.ingest.all.Definition.is(definition)) {
+    throw new StatusError('Inherited failure store is only available for ingest streams', 400);
+  }
+
+  // Wired streams inherit from parent streams.
+  if (Streams.WiredStream.Definition.is(definition)) {
+    const ancestors = await getAncestors();
+    const inheritingDefinition: Streams.WiredStream.Definition = {
+      ...definition,
+      ingest: { ...definition.ingest, failure_store: { inherit: {} } },
+    };
+
+    const hasInheritableOrigin = ancestors.some(
+      ({ ingest }) => !isInheritFailureStore(ingest.failure_store)
+    );
+    if (!hasInheritableOrigin) {
+      return { failure_store: { disabled: {} } };
     }
 
-    const failureStoreOptions = template.data_stream_options?.failure_store;
+    return { failure_store: findInheritedFailureStore(inheritingDefinition, ancestors) };
+  }
 
-    const inherited: EffectiveFailureStore = (() => {
-      const enabled = failureStoreOptions?.enabled ?? failureStoreOptions?.lifecycle != null;
-      if (!enabled) {
-        return { disabled: {} };
-      }
+  const template = await getTemplate();
 
-      const lifecycle = failureStoreOptions?.lifecycle;
-      if (lifecycle?.enabled === false) {
-        return { lifecycle: { disabled: {} } };
-      }
+  if (!template) {
+    throw new StatusError(
+      `Cannot determine template failure store for ${name} — the data stream may be replicated and managed by a remote cluster`,
+      400
+    );
+  }
 
-      const lifecycleEnabled = lifecycle?.enabled ?? lifecycle?.data_retention != null;
-      if (lifecycleEnabled) {
-        const retention =
-          typeof lifecycle?.data_retention === 'string' ? lifecycle.data_retention : undefined;
-        return {
-          lifecycle: {
-            enabled: {
-              ...(retention ? { data_retention: retention } : {}),
-              is_default_retention: !retention,
-            },
-          },
-        };
-      }
+  const failureStoreOptions = template.data_stream_options?.failure_store;
 
+  const inherited: EffectiveFailureStore = (() => {
+    const enabled = failureStoreOptions?.enabled ?? failureStoreOptions?.lifecycle != null;
+    if (!enabled) {
+      return { disabled: {} };
+    }
+
+    const lifecycle = failureStoreOptions?.lifecycle;
+    if (lifecycle?.enabled === false) {
+      return { lifecycle: { disabled: {} } };
+    }
+
+    const lifecycleEnabled = lifecycle?.enabled ?? lifecycle?.data_retention != null;
+    if (lifecycleEnabled) {
+      const retention =
+        typeof lifecycle?.data_retention === 'string' ? lifecycle.data_retention : undefined;
       return {
         lifecycle: {
           enabled: {
-            is_default_retention: true,
+            ...(retention ? { data_retention: retention } : {}),
+            is_default_retention: !retention,
           },
         },
       };
-    })();
+    }
 
-    return { failure_store: inherited };
-  },
-});
+    return {
+      lifecycle: {
+        enabled: {
+          is_default_retention: true,
+        },
+      },
+    };
+  })();
+
+  return { failure_store: inherited };
+}
 
 export const getFailureStoreDefaultRetentionRoute = createServerRoute({
   endpoint: 'GET /internal/streams/failure_store/default_retention',

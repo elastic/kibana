@@ -142,25 +142,33 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
     mockInheritedLoading = false;
   });
 
-  it.each([
-    ['Serverless', true],
-    ['non-Serverless', false],
-  ])(
-    'enables the failure store with the default lifecycle (not a disabled lifecycle) in %s',
-    async (_label, isServerless) => {
-      const { updateFailureStore } = renderHarness(isServerless as boolean);
+  it('enables the failure store with the default (materialized) lifecycle in Serverless, matching the previewed delete phase', async () => {
+    const { updateFailureStore } = renderHarness(true);
 
-      fireEvent.click(screen.getByTestId('openMainFlyout'));
-      fireEvent.click(screen.getByTestId('editFailedDataLifecycle-enableFailureStoreCheckbox'));
-      fireEvent.click(screen.getByTestId('dataLifecycleFlyoutApplyButton'));
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+    fireEvent.click(screen.getByTestId('editFailedDataLifecycle-enableFailureStoreCheckbox'));
+    fireEvent.click(screen.getByTestId('dataLifecycleFlyoutApplyButton'));
 
-      await waitFor(() => {
-        expect(updateFailureStore).toHaveBeenCalledWith('logs-test', {
-          lifecycle: { enabled: {} },
-        });
+    await waitFor(() => {
+      expect(updateFailureStore).toHaveBeenCalledWith('logs-test', {
+        lifecycle: { enabled: {} },
       });
-    }
-  );
+    });
+  });
+
+  it('enables the failure store with a disabled lifecycle in stateful, matching the previewed infinite retention (no delete phase)', async () => {
+    const { updateFailureStore } = renderHarness(false);
+
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+    fireEvent.click(screen.getByTestId('editFailedDataLifecycle-enableFailureStoreCheckbox'));
+    fireEvent.click(screen.getByTestId('dataLifecycleFlyoutApplyButton'));
+
+    await waitFor(() => {
+      expect(updateFailureStore).toHaveBeenCalledWith('logs-test', {
+        lifecycle: { disabled: {} },
+      });
+    });
+  });
 
   it('previews the cluster default retention (delete phase) when enabling the failure store in Serverless, matching the persisted result', async () => {
     renderHarness(true, { defaultRetentionPeriod: '30d' });

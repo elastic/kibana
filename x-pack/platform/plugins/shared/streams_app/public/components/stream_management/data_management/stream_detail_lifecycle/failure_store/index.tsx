@@ -49,6 +49,7 @@ const StreamDetailFailureStoreInner = ({
     openDeletePhaseFlyout,
     removeDeletePhase,
     isMainFlyoutOpen,
+    isDeletePhaseFlyoutOpen,
     isAnyFlyoutOpen,
     failureStoreEnabledForUi,
     previewInheritLifecycle,
@@ -90,6 +91,7 @@ const StreamDetailFailureStoreInner = ({
                   onEditDeletePhase={openDeletePhaseFlyout}
                   onRemoveDeletePhase={removeDeletePhase}
                   isExternalFlyoutOpen={isAnyFlyoutOpen}
+                  isDeletePhaseFlyoutOpen={isDeletePhaseFlyoutOpen}
                   isHighlighted={isMainFlyoutOpen}
                   previewInheritLifecycle={previewInheritLifecycle}
                   previewFailureStoreEnabled={previewFailureStoreEnabled}

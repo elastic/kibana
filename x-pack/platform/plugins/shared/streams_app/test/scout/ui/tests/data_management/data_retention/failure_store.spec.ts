@@ -117,11 +117,13 @@ test.describe('Stream data retention - updating failure store', () => {
       }
     );
 
-    // Enabling the failure store without a custom retention persists an empty enabled lifecycle.
-    // In our supported deployments, a default delete phase is materialized and shown in the UI.
+    // Enabling the failure store without a custom retention persists exactly what the
+    // preview shows. Serverless persists an empty enabled lifecycle
+    // (`{ lifecycle: { enabled: {} } }`), so Elasticsearch materializes the default
+    // delete phase (30 days / 2 phases).
     test(
       `should enable failure store with the default delete phase for ${label}`,
-      { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+      { tag: tags.serverless.observability.complete },
       async ({ page, pageObjects, apiServices }) => {
         // Pin the starting state: failure store disabled.
         await pinFailureStore(apiServices, streamName, { disabled: {} });
@@ -129,12 +131,36 @@ test.describe('Stream data retention - updating failure store', () => {
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
         await setFailureStoreEnabled(page, true);
+
         await expect(
           page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)
         ).toContainText('30 days');
         await expect(
           page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
         ).toContainText('2 data phases');
+      }
+    );
+
+    // Stateful persists a disabled lifecycle (`{ lifecycle: { disabled: {} } }`) to
+    // match the preview (an empty enabled lifecycle would mean infinite retention there,
+    // contradicting the materialized default), i.e. infinite retention / 1 data phase.
+    test(
+      `should enable failure store with infinite retention for ${label}`,
+      { tag: tags.stateful.classic },
+      async ({ page, pageObjects, apiServices }) => {
+        // Pin the starting state: failure store disabled.
+        await pinFailureStore(apiServices, streamName, { disabled: {} });
+
+        await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+        await setFailureStoreEnabled(page, true);
+
+        await expect(
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric).getByText('∞')
+        ).toBeVisible();
+        await expect(
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
+        ).toContainText('1 data phase');
       }
     );
 

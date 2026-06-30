@@ -23,6 +23,7 @@ export const FailureStoreInfo = ({
   onEditDeletePhase,
   onRemoveDeletePhase,
   isExternalFlyoutOpen = false,
+  isDeletePhaseFlyoutOpen = false,
   previewInheritLifecycle,
   previewFailureStoreEnabled,
   definition,
@@ -39,6 +40,7 @@ export const FailureStoreInfo = ({
   onEditDeletePhase?: () => void;
   onRemoveDeletePhase?: () => void;
   isExternalFlyoutOpen?: boolean;
+  isDeletePhaseFlyoutOpen?: boolean;
   previewInheritLifecycle?: boolean;
   previewFailureStoreEnabled?: boolean;
   definition: Streams.ingest.all.GetResponse;
@@ -82,6 +84,7 @@ export const FailureStoreInfo = ({
             onEditDeletePhase={onEditDeletePhase}
             onRemoveDeletePhase={onRemoveDeletePhase}
             isExternalFlyoutOpen={isExternalFlyoutOpen}
+            isDeletePhaseFlyoutOpen={isDeletePhaseFlyoutOpen}
             previewInheritLifecycle={previewInheritLifecycle}
           />
         ) : null}

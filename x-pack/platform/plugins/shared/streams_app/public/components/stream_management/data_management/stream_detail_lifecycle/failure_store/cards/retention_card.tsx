@@ -46,11 +46,13 @@ export const RetentionCard = ({
   const retentionPeriod = isPreviewActive ? previewRetentionPeriod : savedRetentionPeriod ?? null;
 
   const failureRetentionPeriod =
-    retentionDisabled || !retentionPeriod ? '∞' : getTimeSizeAndUnitLabel(retentionPeriod);
+    (!isPreviewActive && retentionDisabled) || !retentionPeriod
+      ? '∞'
+      : getTimeSizeAndUnitLabel(retentionPeriod);
 
   const phasesCount = (() => {
-    if (retentionDisabled) return 1;
     if (isPreviewActive && previewDataPhasesCount !== null) return previewDataPhasesCount;
+    if (retentionDisabled) return 1;
     return savedRetentionPeriod ? 2 : 1;
   })();
 

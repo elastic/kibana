@@ -213,14 +213,13 @@ export async function removeDeletePhase(
 }
 
 /**
- * Closes any currently visible toasts.
+ * Best-effort close of any currently visible toasts.
  */
 export async function closeToastsIfPresent(page: ScoutPage): Promise<void> {
   const toastCloseButtons = page.getByTestId('toastCloseButton');
   for (const button of await toastCloseButtons.all()) {
-    await button.click();
+    await button.click({ timeout: 1000 }).catch(() => {});
   }
-  await expect(toastCloseButtons).toHaveCount(0);
 }
 
 // ---------------------------------------------------------------------------

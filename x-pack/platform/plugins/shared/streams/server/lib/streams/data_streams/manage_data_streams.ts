@@ -415,21 +415,42 @@ export async function simulateClassicStreamTemplate({
     logger,
   })
     .then((response) => response.data_streams?.[0])
-    .catch(() => undefined);
+    .catch((err) => {
+      logger.debug(
+        `simulateClassicStreamTemplate: could not get data stream "${name}": ${
+          parseError(err).message
+        }`
+      );
+      return undefined;
+    });
 
   const templateName = dataStream?.template;
   if (!templateName) {
     const simulation = await retryTransientEsErrors(
       () => esClient.indices.simulateIndexTemplate({ name: dataStream?.name ?? name }),
       { logger }
-    ).catch(() => undefined);
+    ).catch((err) => {
+      logger.warn(
+        `simulateClassicStreamTemplate: index template simulation failed for "${
+          dataStream?.name ?? name
+        }": ${parseError(err).message}`
+      );
+      return undefined;
+    });
     return simulation?.template;
   }
 
   const simulation = await retryTransientEsErrors(
     () => esClient.indices.simulateTemplate({ name: templateName }),
     { logger }
-  ).catch(() => undefined);
+  ).catch((err) => {
+    logger.warn(
+      `simulateClassicStreamTemplate: template simulation failed for "${templateName}": ${
+        parseError(err).message
+      }`
+    );
+    return undefined;
+  });
 
   return simulation?.template;
 }
