@@ -38,9 +38,7 @@ describe('invalidate api keys task runner', () => {
       logger: loggingSystemMock.createLogger(),
       configInterval: '5m',
       coreStartServices,
-      getEncryptedSavedObjectsClient: () => undefined,
       invalidateApiKeyFn: jest.fn(),
-      invalidateUiamApiKeyFn: () => undefined,
       removalDelay: '1h',
     })({ taskInstance: { state: {} } });
 
