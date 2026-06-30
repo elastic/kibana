@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiModal, EuiModalBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
@@ -15,6 +15,10 @@ import { useChangeHistoryAutoSelection } from '../../hooks/use_change_history_au
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
+import type { ChangeHistorySelectionSource } from '../../telemetry/types';
+import { findCurrentChangeHistoryListItem } from '../../utils/build_change_history_restore_telemetry';
+import { getRestoreVersionLabel } from '../../utils/get_restore_version_label';
 import * as i18n from '../timeline/translations';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
@@ -32,10 +36,13 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { adapter, objectId, labels, supports } = useChangeHistoryConfig();
+  const { adapter, objectId, labels, supports, telemetry } = useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
 
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
+  const lastReportedChangeIdBySourceRef = useRef<
+    Partial<Record<ChangeHistorySelectionSource, string>>
+  >({});
   const { items, total, isLoading, isFetchingFirstPage, isLoadingMore, error, loadMore } =
     useChangeHistoryList({
       adapter,
@@ -43,28 +50,49 @@ export function ChangeHistoryModal(): JSX.Element | null {
       enabled: isOpen,
     });
 
+  const reportChangeSelected = useCallback(
+    (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {
+      if (lastReportedChangeIdBySourceRef.current[selectionSource] === item.id) {
+        return;
+      }
+
+      lastReportedChangeIdBySourceRef.current[selectionSource] = item.id;
+      telemetry.reportChangeSelected({
+        hasSequence: getRestoreVersionLabel(item) !== undefined,
+        selectionSource,
+        ...(item.action ? { eventAction: item.action } : {}),
+      });
+    },
+    [telemetry]
+  );
+
   const { lockSelectionDecision, unlockSelectionDecision } = useChangeHistoryAutoSelection({
     objectId,
     items,
     isFetchingFirstPage,
     enabled: isOpen,
     setSelectedChangeId,
+    onAutoSelect: (item) => reportChangeSelected(item, 'auto_latest'),
   });
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedChangeId(undefined);
+      lastReportedChangeIdBySourceRef.current = {};
       unlockSelectionDecision();
     }
   }, [isOpen, unlockSelectionDecision]);
 
   const handleSelectItem = useCallback(
-    (changeId: string) => {
+    (item: ChangeHistoryListItem) => {
       lockSelectionDecision();
-      setSelectedChangeId(changeId);
+      setSelectedChangeId(item.id);
+      reportChangeSelected(item, 'user_click');
     },
-    [lockSelectionDecision]
+    [lockSelectionDecision, reportChangeSelected]
   );
+
+  const currentChange = useMemo(() => findCurrentChangeHistoryListItem(items), [items]);
 
   const styles = useMemo(
     () => ({
@@ -141,6 +169,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const previewHeaderActions = supports.restore ? (
     <ChangeHistoryDefaultPreviewHeaderActions
       selectedChangeId={selectedChangeId}
+      currentChange={currentChange}
       onRestored={unlockSelectionDecision}
     />
   ) : undefined;
@@ -164,7 +193,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
         selectedItemId={selectedChangeId}
         historyStartedAt={historyStartedAt}
         isLoading={isLoadingMore}
-        onSelectItem={(item) => handleSelectItem(item.id)}
+        onSelectItem={handleSelectItem}
         onLoadMore={loadMore}
       />
     );
