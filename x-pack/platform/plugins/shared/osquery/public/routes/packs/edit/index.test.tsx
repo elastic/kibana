@@ -38,17 +38,21 @@ jest.mock('../../../common/experimental_features_context', () => ({
 
 let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
 let capturedIsReadOnly: boolean | undefined;
+let capturedIsPrebuilt: boolean | undefined;
 
 jest.mock('../../../packs/form', () => ({
   PackForm: ({
     onDirtyStateChange,
     isReadOnly,
+    isPrebuilt,
   }: {
     onDirtyStateChange?: (isDirty: boolean) => void;
     isReadOnly?: boolean;
+    isPrebuilt?: boolean;
   }) => {
     capturedOnDirtyStateChange = onDirtyStateChange;
     capturedIsReadOnly = isReadOnly;
+    capturedIsPrebuilt = isPrebuilt;
 
     return <div data-testid="pack-form">Mock PackForm</div>;
   },
@@ -135,6 +139,7 @@ describe('EditPackPage', () => {
     jest.clearAllMocks();
     capturedOnDirtyStateChange = undefined;
     capturedIsReadOnly = undefined;
+    capturedIsPrebuilt = undefined;
     setupDefaultMocks();
   });
 
@@ -273,11 +278,52 @@ describe('EditPackPage', () => {
       expect(capturedIsReadOnly).toBe(false);
     });
 
+    it('does not flag an editable pack as prebuilt', () => {
+      renderPage();
+
+      expect(capturedIsPrebuilt).toBe(false);
+    });
+
     it('renders the Delete and Duplicate write actions', () => {
       renderPage();
 
       expect(screen.getByText('Delete pack')).toBeInTheDocument();
       expect(screen.getByText('Duplicate pack')).toBeInTheDocument();
+    });
+  });
+
+  describe('prebuilt pack with write access (read_only pack, writePacks)', () => {
+    beforeEach(() => {
+      mockUsePack.mockReturnValue({
+        isLoading: false,
+        data: { ...mockPackData, read_only: true },
+        error: null,
+      });
+      setPermissions({ readPacks: true, writePacks: true });
+    });
+
+    it('passes isPrebuilt but not isReadOnly to the PackForm', () => {
+      renderPage();
+
+      // A writePacks user editing a prebuilt pack may still re-target its
+      // scheduled agent policies, so the form is not fully read-only.
+      expect(capturedIsReadOnly).toBe(false);
+      expect(capturedIsPrebuilt).toBe(true);
+    });
+
+    it('shows the prebuilt callout, not the read-only access callout', () => {
+      renderPage();
+
+      expect(
+        screen.getByText(
+          'This is a prebuilt Elastic pack. You can modify the scheduled agent policies, but you cannot edit queries in the pack.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          'You have read-only access to packs. You can view this pack but cannot make changes.'
+        )
+      ).not.toBeInTheDocument();
     });
   });
 

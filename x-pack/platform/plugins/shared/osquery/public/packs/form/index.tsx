@@ -64,6 +64,7 @@ interface PackFormProps {
   defaultValue?: PackItem;
   editMode?: boolean;
   isReadOnly?: boolean;
+  isPrebuilt?: boolean;
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
@@ -71,6 +72,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
   isReadOnly = false,
+  isPrebuilt = false,
   onDirtyStateChange,
 }) => {
   const [shardsToggleState, setShardsToggleState] =
@@ -343,7 +345,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     await handleSubmitForm();
   }, [handleSubmitForm]);
 
-  const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
+  // Pack content (name, description, queries) is immutable for both read-only
+  // (readPacks-only) users and prebuilt Elastic packs.
+  const isContentDisabled = isReadOnly || isPrebuilt;
+  const euiFieldProps = useMemo(() => ({ isDisabled: isContentDisabled }), [isContentDisabled]);
+  // Scheduled agent policies / shards / Type stay editable for prebuilt packs
+  // (a writePacks user may re-target them) — only a fully read-only user is
+  // blocked. Matches the prebuiltPackModeDescription callout.
+  const policyFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
 
   const changePackType = useCallback(
     (type: 'global' | 'policy' | 'shards') => {
@@ -400,7 +409,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
-                <PolicyIdComboBoxField options={availableOptions} euiFieldProps={euiFieldProps} />
+                <PolicyIdComboBoxField
+                  options={availableOptions}
+                  euiFieldProps={policyFieldProps}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -430,7 +442,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 <ScheduleSection
                   value={schedule}
                   onChange={handleScheduleChange}
-                  disabled={isReadOnly}
+                  disabled={isContentDisabled}
                   showErrors={showScheduleErrors || scheduleErrors.length > 0}
                 />
               </EuiFlexItem>
@@ -463,6 +475,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   isLoading={isSubmitting}
+                  // Prebuilt packs keep an enabled save so writePacks users can
+                  // persist scheduled-policy/shards changes; only a read-only
+                  // (readPacks-only) user has saving disabled.
                   isDisabled={isReadOnly}
                   color="primary"
                   fill

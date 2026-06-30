@@ -47,7 +47,12 @@ const EditPackPageComponent = () => {
   const { isLoading, data, error } = usePack({ packId });
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
   const copyPackMutation = useCopyPack({ packId });
-  const isReadOnly = useMemo(() => !canWritePacks || !!data?.read_only, [canWritePacks, data]);
+  // Full lockdown: a readPacks-only user can view but not edit anything.
+  const isReadOnly = !canWritePacks;
+  // Prebuilt (Elastic-managed) pack: queries/name/description are immutable, but
+  // a writePacks user may still re-target its scheduled agent policies/shards
+  // (see the prebuiltPackModeDescription callout below).
+  const isPrebuilt = !!data?.read_only;
 
   const { handleDuplicateClick, handleDirtyStateChange, duplicateModal } = useDuplicateGuard({
     copyMutation: copyPackMutation,
@@ -185,6 +190,7 @@ const EditPackPageComponent = () => {
         editMode={true}
         defaultValue={data}
         isReadOnly={isReadOnly}
+        isPrebuilt={isPrebuilt}
         onDirtyStateChange={handleDirtyStateChange}
       />
     );

@@ -162,6 +162,23 @@ describe('PackForm', () => {
       expect(radioInput(getByTestId('osqueryPackTypePolicy'))).not.toBeDisabled();
       expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).not.toBeDisabled();
     });
+
+    it('keeps the pack Type selectable cards enabled for a prebuilt pack (policies stay re-targetable)', () => {
+      // A prebuilt pack locks its queries/name/description, but a writePacks
+      // user can still re-point its scheduled agent policies — matching the
+      // "You can modify the scheduled agent policies" callout.
+      const { getByTestId } = renderWithContext(
+        <PackForm
+          editMode={true}
+          isReadOnly={false}
+          isPrebuilt={true}
+          defaultValue={readOnlyDefaultValue}
+        />
+      );
+
+      expect(radioInput(getByTestId('osqueryPackTypePolicy'))).not.toBeDisabled();
+      expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).not.toBeDisabled();
+    });
   });
 
   describe('rruleScheduling feature flag', () => {
