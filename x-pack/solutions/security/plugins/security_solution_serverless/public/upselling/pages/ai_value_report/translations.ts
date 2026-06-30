@@ -16,14 +16,14 @@ export const AI_VALUE_DASHBOARD = i18n.translate(
 
 export const UPGRADE_TITLE = (requiredProduct: string) =>
   i18n.translate('xpack.securitySolutionServerless.upselling.aiValueReport.upgradeTitle', {
-    defaultMessage: 'Value Reports is available on the {requiredProduct} plan',
+    defaultMessage: 'Value Report is available on the {requiredProduct} plan',
     values: { requiredProduct },
   });
 
 export const UPGRADE_TEXT = (requiredProduct: string) =>
   i18n.translate('xpack.securitySolutionServerless.upselling.aiValueReport.upgradeText', {
     defaultMessage:
-      'See how much time and money AI triage saves your team, analyst hours reclaimed, costs reduced and real threats surfaced. Available on the {requiredProduct} plan.',
+      'See how Elastic AI SOC saves your team time and money through AI triage, including estimated analyst hours reclaimed, reduced costs, and real threats surfaced faster. Available on the {requiredProduct} plan.',
     values: { requiredProduct },
   });
 

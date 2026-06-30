@@ -34,19 +34,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 import { PageLoader } from '../../../common/components/page_loader';
 import * as i18n from './translations';
+import type { AIValueReportProps } from '../../../types';
 
-interface Props {
-  setHasReportData: React.Dispatch<boolean>;
-  setIsDatePickerDisabled: React.Dispatch<boolean>;
-  setIsSampleMode: React.Dispatch<boolean>;
-  isSourcererLoading: boolean;
-  from: string;
-  to: string;
-  sampleBanner?: React.ReactNode;
-  forceSampleData?: boolean;
-}
-
-type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
+type AIValueReportContentProps = Omit<AIValueReportProps, 'isSourcererLoading'>;
 
 const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   setHasReportData,
@@ -113,15 +103,15 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   }, [data, setReportInputForExportContext]);
 
   useEffect(() => {
-    setHasReportData(!data.isSample && data.valueMetrics.attackDiscoveryCount > 0);
+    setHasReportData?.(!data.isSample && data.valueMetrics.attackDiscoveryCount > 0);
   }, [data.isSample, data.valueMetrics, setHasReportData]);
 
   useEffect(() => {
-    setIsDatePickerDisabled(data.isLoading || data.isSample);
+    setIsDatePickerDisabled?.(data.isLoading || data.isSample);
   }, [data.isLoading, data.isSample, setIsDatePickerDisabled]);
 
   useEffect(() => {
-    setIsSampleMode(data.isSample);
+    setIsSampleMode?.(data.isSample);
   }, [data.isSample, setIsSampleMode]);
 
   if (data.isLoading) {
@@ -233,7 +223,7 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   );
 };
 
-export const AIValueReport: React.FC<Props> = ({
+export const AIValueReport: React.FC<AIValueReportProps> = ({
   setHasReportData,
   setIsDatePickerDisabled,
   setIsSampleMode,
@@ -246,9 +236,9 @@ export const AIValueReport: React.FC<Props> = ({
   useEffect(() => {
     if (isSourcererLoading) {
       // safety check: clear stale parent flags as soon as loading starts.
-      setHasReportData(false);
-      setIsDatePickerDisabled(true);
-      setIsSampleMode(false);
+      setHasReportData?.(false);
+      setIsDatePickerDisabled?.(true);
+      setIsSampleMode?.(false);
     }
   }, [isSourcererLoading, setHasReportData, setIsDatePickerDisabled, setIsSampleMode]);
 

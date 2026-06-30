@@ -11,8 +11,6 @@ import { useKibana } from '../../../common/services';
 import { AIValueReportUpgradeBanner } from './upgrade_banner';
 import * as i18n from './translations';
 
-const noop = () => {};
-
 export const AIValueReportUpsellPage: React.FC = () => {
   const { services } = useKibana();
   const AIValueReportComponent = services.securitySolution.getAIValueReport();
@@ -36,9 +34,6 @@ export const AIValueReportUpsellPage: React.FC = () => {
         <AIValueReportComponent
           from={from}
           to={to}
-          setHasReportData={noop}
-          setIsDatePickerDisabled={noop}
-          setIsSampleMode={noop}
           isSourcererLoading={false}
           sampleBanner={<AIValueReportUpgradeBanner />}
           forceSampleData={true}

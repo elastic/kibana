@@ -241,9 +241,9 @@ export interface PluginSetup {
 }
 
 export interface AIValueReportProps {
-  setHasReportData: React.Dispatch<boolean>;
-  setIsDatePickerDisabled: React.Dispatch<boolean>;
-  setIsSampleMode: React.Dispatch<boolean>;
+  setHasReportData?: React.Dispatch<boolean>;
+  setIsDatePickerDisabled?: React.Dispatch<boolean>;
+  setIsSampleMode?: React.Dispatch<boolean>;
   isSourcererLoading: boolean;
   from: string;
   to: string;

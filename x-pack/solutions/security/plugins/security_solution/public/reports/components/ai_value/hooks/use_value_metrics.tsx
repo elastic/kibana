@@ -45,12 +45,12 @@ export const useValueMetrics = ({
   const { http } = useKibana().services;
   const { assistantAvailability } = useAssistantContext();
   const { signalIndexName } = useSignalIndex();
-  const isEnabled = enabled && assistantAvailability.isAssistantEnabled;
+  const shouldQUeryAttackDiscoveries = enabled && assistantAvailability.isAssistantEnabled;
   const { data, isLoading: isLoadingAttackDiscoveries } = useFindAttackDiscoveries({
     end: to,
     http,
     includeUniqueAlertIds: true,
-    isAssistantEnabled: isEnabled,
+    isAssistantEnabled: shouldQUeryAttackDiscoveries,
     start: from,
     status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
   });
@@ -60,7 +60,7 @@ export const useValueMetrics = ({
       end: compareTimeRange.to,
       http,
       includeUniqueAlertIds: true,
-      isAssistantEnabled: isEnabled,
+      isAssistantEnabled: shouldQUeryAttackDiscoveries,
       start: compareTimeRange.from,
       status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
     });
@@ -80,7 +80,7 @@ export const useValueMetrics = ({
     from,
     signalIndexName,
     filters,
-    skip: !isEnabled,
+    skip: !shouldQUeryAttackDiscoveries,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE,
   });
 
@@ -89,7 +89,7 @@ export const useValueMetrics = ({
     from: compareTimeRange.from,
     signalIndexName,
     filters: filtersCompare,
-    skip: !isEnabled,
+    skip: !shouldQUeryAttackDiscoveries,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_COMPARE,
   });
 
@@ -97,14 +97,14 @@ export const useValueMetrics = ({
     to,
     from,
     signalIndexName,
-    skip: !isEnabled,
+    skip: !shouldQUeryAttackDiscoveries,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL,
   });
   const { alertCount: alertCountCompare, isLoading: isLoadingAlertsCompare } = useAlertCountQuery({
     to: compareTimeRange.to,
     from: compareTimeRange.from,
     signalIndexName,
-    skip: !isEnabled,
+    skip: !shouldQUeryAttackDiscoveries,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL_COMPARE,
   });
   const isLoading = useMemo(
