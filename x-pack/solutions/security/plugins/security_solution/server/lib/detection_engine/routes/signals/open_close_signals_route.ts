@@ -32,10 +32,7 @@ import {
   updateAlertsWorkflowStatus,
 } from '../common/operations/update_alerts_workflow_status';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
-import {
-  resolveRuntimeMappingsFromIndices,
-  resolveSourceIndicesForRules,
-} from './bulk_close_runtime_mappings';
+import { buildRuntimeMappingsFromFieldTypes } from './bulk_close_runtime_mappings';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -126,23 +123,20 @@ export const setSignalsStatusRoute = (
 
             return response.ok({ body });
           } else {
-            const { conflicts, query, rule_ids: ruleStaticIds } = request.body;
+            const { conflicts, query: rawQuery, runtime_fields: runtimeFields } = request.body;
+            // The schema validates `query` only as an open object (the route
+            // is intentionally permissive about DSL shape); narrow it to the
+            // ES DSL type once at the boundary so internal helpers stay
+            // strictly typed against `QueryDslQueryContainer`.
+            const query = rawQuery as estypes.QueryDslQueryContainer;
 
-            // Resolve the runtime mappings server-side from the rule's own
-            // declared source indices.
-            const rulesClient = await (await context.alerting).getRulesClient();
-            const savedObjectsClient = core.savedObjects.client;
-            const sourceIndices = await resolveSourceIndicesForRules(
-              rulesClient,
-              savedObjectsClient,
-              ruleStaticIds,
-              logger
-            );
-            const runtimeMappings = await resolveRuntimeMappingsFromIndices(
-              esClient,
-              sourceIndices,
-              logger
-            );
+            // Build runtime_mappings purely from the caller-supplied
+            // `runtime_fields` map. For each entry, the server defines a
+            // runtime field of the requested type whose script reads the
+            // field's value out of the alert document's `_source` — which
+            // is otherwise not directly queryable — and attaches the
+            // result to the underlying `_update_by_query`.
+            const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
             const body = await updateSignalsStatusByQuery(
               status,
@@ -188,7 +182,7 @@ export const setSignalsStatusRoute = (
  */
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
-  query: object | undefined,
+  query: estypes.QueryDslQueryContainer,
   options: { conflicts: 'abort' | 'proceed' },
   spaceId: string,
   esClient: ElasticsearchClient,

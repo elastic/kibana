@@ -67,24 +67,21 @@ describe('updateAlertStatus', () => {
       query,
     });
     expect(mockUpdateAlertStatusByIds).not.toHaveBeenCalled();
-    expect(mockUpdateAlertStatusByQuery).toHaveBeenCalledWith({
-      status,
-      query,
-    });
+    expect(mockUpdateAlertStatusByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ status, query })
+    );
   });
 
-  it('should forward `ruleStaticIds` to updateAlertStatusByQuery', () => {
+  it('should forward `runtimeFields` to updateAlertStatusByQuery', () => {
     const query = { query: 'query' };
-    const ruleStaticIds = ['rule-a', 'rule-b'];
+    const runtimeFields = { 'source.ip_ecs': 'ip', 'user.tag': 'keyword' } as const;
     updateAlertStatus({
       status,
       query,
-      ruleStaticIds,
+      runtimeFields,
     });
-    expect(mockUpdateAlertStatusByQuery).toHaveBeenCalledWith({
-      status,
-      query,
-      ruleStaticIds,
-    });
+    expect(mockUpdateAlertStatusByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ status, query, runtimeFields })
+    );
   });
 });

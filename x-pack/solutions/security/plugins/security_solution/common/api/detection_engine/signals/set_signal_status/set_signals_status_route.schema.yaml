@@ -65,7 +65,7 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-                description: Elasticsearch update by query response
+                description: Elasticsearch update by query response.
               examples:
                 byId:
                   value:
@@ -141,6 +141,19 @@ paths:
 
 components:
   schemas:
+    RuntimeFieldType:
+      type: string
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      description: >-
+        Elasticsearch runtime field type.
+
     ReasonEnum:
       type: string
       enum:
@@ -216,14 +229,19 @@ components:
             - abort
             - proceed
           default: abort
-        rule_ids:
-          type: array
-          maxItems: 100
-          items:
-            type: string
-            minLength: 1
-            maxLength: 255
-          description: 'Optional list of detection rule_ids (the static rule.rule_id, not the saved-object id) whose declared source indices the server reads runtime field mappings from. Resolved runtime fields are attached to the underlying updateByQuery as runtime_mappings so the exception filter can reference them (e.g. the workaround in elastic/security-ml#677 where a runtime field is defined on the ML anomaly results index). Server-side resolution ensures users cannot supply arbitrary index patterns.'
+        runtime_fields:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: >-
+            Optional map of field name to runtime field type. For each
+            entry, the server defines a runtime field of the given type
+            that reads its value from `_source[fieldName]` and attaches it
+            to the underlying `_update_by_query` as `runtime_mappings`.
+            Allows the `query` to reference non-ECS fields stored on the
+            alert `_source` but not in the alerts index mapping — for
+            example, runtime fields the rule's source index defined at the
+            time the alerts were created.
       required: [query, status]
 
     CloseAlertsByQuery:
@@ -243,14 +261,19 @@ components:
           default: abort
         reason:
           $ref: '#/components/schemas/Reason'
-        rule_ids:
-          type: array
-          maxItems: 100
-          items:
-            type: string
-            minLength: 1
-            maxLength: 255
-          description: 'Optional list of detection rule_ids (the static rule.rule_id, not the saved-object id) whose declared source indices the server reads runtime field mappings from. Resolved runtime fields are attached to the underlying updateByQuery as runtime_mappings so the exception filter can reference them (e.g. the workaround in elastic/security-ml#677 where a runtime field is defined on the ML anomaly results index). Server-side resolution ensures users cannot supply arbitrary index patterns.'
+        runtime_fields:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: >-
+            Optional map of field name to runtime field type. For each
+            entry, the server defines a runtime field of the given type
+            that reads its value from `_source[fieldName]` and attaches it
+            to the underlying `_update_by_query` as `runtime_mappings`.
+            Allows the `query` to reference non-ECS fields stored on the
+            alert `_source` but not in the alerts index mapping — for
+            example, runtime fields the rule's source index defined at the
+            time the alerts were created.
       required: [query, status]
 
     SetAlertsStatusByQuery:

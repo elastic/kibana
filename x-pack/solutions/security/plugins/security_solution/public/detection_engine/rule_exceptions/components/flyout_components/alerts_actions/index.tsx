@@ -9,13 +9,15 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
 
 import { EuiCallOut, EuiCheckbox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import type { Status } from '../../../../../../common/api/detection_engine';
-import { entryHasNonEcsType, shouldDisableBulkClose } from './utils';
+import type { RuntimeFieldType } from '../../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import { collectRuntimeFieldTypes, entryHasNonEcsType, shouldDisableBulkClose } from './utils';
 import * as i18n from './translations';
 import type { AlertData } from '../../../utils/types';
 
@@ -40,10 +42,26 @@ interface ExceptionsFlyoutAlertsActionsComponentProps {
   alertStatus?: Status;
   isAlertDataLoading?: boolean;
   shouldCloseSingleAlert?: boolean;
+  /**
+   * The rule's source-index data view. Used to look up the ES type of each
+   * non-ECS field referenced in the exception so the parent can pass an
+   * accurate `runtimeFields` map to bulk-close. Omit for callers without a
+   * rule context (e.g. endpoint exceptions); the runtimeFields callback
+   * still fires with default `keyword` types for any non-ECS fields.
+   */
+  sourceIndexPatterns?: DataViewBase;
   onUpdateBulkCloseIndex: (arg: string[] | undefined) => void;
   onBulkCloseCheckboxChange: (arg: boolean) => void;
   onSingleAlertCloseCheckboxChange?: (arg: boolean) => void;
   onDisableBulkClose: (arg: boolean) => void;
+  /**
+   * Fires when the runtime-field map (and whether any fields fell back to
+   * `keyword`) changes.
+   */
+  onRuntimeFieldsChange?: (
+    runtimeFields: Record<string, RuntimeFieldType>,
+    hasUntypedFields: boolean
+  ) => void;
 }
 
 const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
@@ -57,10 +75,12 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   disableBulkClose,
   alertData,
   alertStatus,
+  sourceIndexPatterns,
   onDisableBulkClose,
   onUpdateBulkCloseIndex,
   onBulkCloseCheckboxChange,
   onSingleAlertCloseCheckboxChange,
+  onRuntimeFieldsChange,
 }): JSX.Element => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const memoSignalIndexName = useMemo(
@@ -116,6 +136,39 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
     [shouldBulkCloseAlert, isSignalIndexPatternLoading, exceptionListItems, signalIndexPatterns]
   );
 
+  // Compute the runtime-field map for any non-ECS field the exception
+  // references and hand it back to the parent flyout so it can be forwarded
+  // to bulk-close. If we can't resolve a field's type against the rule's
+  // source indices (rule drift, source indices reconfigured), it falls back
+  // to `keyword` and we propagate the `hasUntypedFields` flag so the warning
+  // callout below can escalate its wording.
+  const runtimeFieldResolution = useMemo(() => {
+    if (
+      !shouldBulkCloseAlert ||
+      isSignalIndexPatternLoading ||
+      signalIndexPatterns == null ||
+      sourceIndexPatterns == null
+    ) {
+      return { runtimeFields: {} as Record<string, RuntimeFieldType>, hasUntypedFields: false };
+    }
+    return collectRuntimeFieldTypes(exceptionListItems, sourceIndexPatterns, signalIndexPatterns);
+  }, [
+    shouldBulkCloseAlert,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    sourceIndexPatterns,
+    exceptionListItems,
+  ]);
+
+  useEffect(() => {
+    if (onRuntimeFieldsChange != null) {
+      onRuntimeFieldsChange(
+        runtimeFieldResolution.runtimeFields,
+        runtimeFieldResolution.hasUntypedFields
+      );
+    }
+  }, [onRuntimeFieldsChange, runtimeFieldResolution]);
+
   return (
     <FlyoutCheckboxesSection>
       <SectionHeader size="xs">
@@ -156,6 +209,9 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
             title={i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_TITLE}
           >
             <p>{i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_BODY}</p>
+            {runtimeFieldResolution.hasUntypedFields && (
+              <p>{i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_UNTYPED_BODY}</p>
+            )}
           </EuiCallOut>
         </>
       )}

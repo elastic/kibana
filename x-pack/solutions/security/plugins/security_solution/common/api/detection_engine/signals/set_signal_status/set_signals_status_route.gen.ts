@@ -19,6 +19,16 @@ import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { AlertStatusExceptClosed } from '../../../model/alert.gen';
 
+/**
+ * Elasticsearch runtime field type.
+ */
+export const RuntimeFieldType = lazySchema(() =>
+  z.enum(['keyword', 'long', 'double', 'date', 'ip', 'boolean', 'geo_point'])
+);
+export type RuntimeFieldType = z.infer<typeof RuntimeFieldType>;
+export type RuntimeFieldTypeEnum = typeof RuntimeFieldType.enum;
+export const RuntimeFieldTypeEnum = RuntimeFieldType.enum;
+
 export const ReasonEnum = lazySchema(() =>
   z.enum([
     'false_positive',
@@ -73,9 +83,9 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
     status: AlertStatusExceptClosed,
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     /**
-     * Optional list of detection rule_ids (the static rule.rule_id, not the saved-object id) whose declared source indices the server reads runtime field mappings from. Resolved runtime fields are attached to the underlying updateByQuery as runtime_mappings so the exception filter can reference them (e.g. the workaround in elastic/security-ml#677 where a runtime field is defined on the ML anomaly results index). Server-side resolution ensures users cannot supply arbitrary index patterns.
+     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created.
      */
-    rule_ids: z.array(z.string().min(1).max(255)).max(100).optional(),
+    runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
   })
 );
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
@@ -87,9 +97,9 @@ export const CloseAlertsByQuery = lazySchema(() =>
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     reason: Reason.optional(),
     /**
-     * Optional list of detection rule_ids (the static rule.rule_id, not the saved-object id) whose declared source indices the server reads runtime field mappings from. Resolved runtime fields are attached to the underlying updateByQuery as runtime_mappings so the exception filter can reference them (e.g. the workaround in elastic/security-ml#677 where a runtime field is defined on the ML anomaly results index). Server-side resolution ensures users cannot supply arbitrary index patterns.
+     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created.
      */
-    rule_ids: z.array(z.string().min(1).max(255)).max(100).optional(),
+    runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
   })
 );
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;
@@ -106,7 +116,7 @@ export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBo
 export type SetAlertsStatusRequestBodyInput = z.input<typeof SetAlertsStatusRequestBody>;
 
 /**
- * Elasticsearch update by query response
+ * Elasticsearch update by query response.
  */
 export const SetAlertsStatusResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type SetAlertsStatusResponse = z.infer<typeof SetAlertsStatusResponse>;

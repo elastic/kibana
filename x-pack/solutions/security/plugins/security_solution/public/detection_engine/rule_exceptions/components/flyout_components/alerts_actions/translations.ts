@@ -48,7 +48,15 @@ export const BULK_CLOSE_RUNTIME_FIELD_WARNING_BODY = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.alertsActions.bulkCloseRuntimeFieldWarning.body',
   {
     defaultMessage:
-      "Bulk-close will try to match existing alerts by evaluating these fields against each alert's source document. Alerts that don't have the underlying values stored — for example, alerts created before the runtime field was added — may not be matched.",
+      "Bulk-close evaluates these fields against each alert's `_source` document. Alerts that don't have the value stored — for example, alerts created before the field existed on the rule's source indices — may not be matched. These fields are computed per document at query time, so closing large numbers of alerts may be slower than usual.",
+  }
+);
+
+export const BULK_CLOSE_RUNTIME_FIELD_WARNING_UNTYPED_BODY = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.alertsActions.bulkCloseRuntimeFieldWarning.untypedBody',
+  {
+    defaultMessage:
+      "Some of these fields couldn't be resolved against the rule's current data view (for example, the rule's source indices have changed since the alerts were created). Those fields will be matched as plain strings, so range and IP-CIDR matching won't apply to them.",
   }
 );
 

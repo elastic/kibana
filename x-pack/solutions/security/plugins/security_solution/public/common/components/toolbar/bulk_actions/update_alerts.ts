@@ -6,6 +6,7 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
@@ -13,7 +14,7 @@ import {
   updateAlertStatusByQuery,
 } from '../../../../detections/containers/detection_engine/alerts/api';
 
-interface UpdatedAlertsResponse {
+export interface UpdatedAlertsResponse {
   updated: number;
   version_conflicts: UpdateByQueryResponse['version_conflicts'];
 }
@@ -24,9 +25,7 @@ interface UpdatedAlertsProps {
   signalIds?: string[];
   signal?: AbortSignal;
   reason?: AlertClosingReason;
-  /** Static rule_ids whose source-index runtime mappings the server should
-   *  resolve and attach to updateByQuery. */
-  ruleStaticIds?: string[];
+  runtimeFields?: Record<string, RuntimeFieldType>;
 }
 
 /**
@@ -40,6 +39,10 @@ interface UpdatedAlertsProps {
  * @param signalIds optional signalIds to update alerts by signalIds.
  * @param signal to cancel request
  * @param reason to specify the reason of the status update
+ * @param runtimeFields optional map of field name to ES runtime field type.
+ *   The server synthesizes `_source`-reading runtime fields for each entry
+ *   and attaches them to the underlying `_update_by_query` so the close
+ *   filter can match fields not natively mapped on the alerts index.
  *
  * @throws An error if response is not OK
  */
@@ -49,7 +52,7 @@ export const updateAlertStatus = async ({
   signalIds,
   signal,
   reason,
-  ruleStaticIds,
+  runtimeFields,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
     const { updated } = await updateAlertStatusByIds({ status, signalIds, signal, reason });
@@ -64,7 +67,7 @@ export const updateAlertStatus = async ({
       query,
       signal,
       reason,
-      ruleStaticIds,
+      runtimeFields,
     });
     return {
       updated: updated ?? 0,

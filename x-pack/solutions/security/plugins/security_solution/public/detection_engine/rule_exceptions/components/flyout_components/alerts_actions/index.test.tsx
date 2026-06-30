@@ -11,12 +11,22 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { ExceptionItemsFlyoutAlertsActions } from '.';
+import * as i18n from './translations';
 import { TestProviders } from '../../../../../common/mock';
 import type { AlertData } from '../../../utils/types';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
+
+const sourceIndexPatternFor = (
+  fields: Array<Partial<DataViewFieldBase> & { name: string }>
+): DataViewBase =>
+  ({
+    title: 'rule-source',
+    fields: fields.map((f) => ({ type: 'string', ...f })) as DataViewFieldBase[],
+  } as DataViewBase);
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -351,7 +361,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       expect(wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').exists()).toBeFalsy();
     });
 
-    it('shows the warning callout when bulk close is checked and the exception references a field not on the alerts index', () => {
+    it('shows the warning callout with the title and main body when bulk close is checked and the exception references a field not on the alerts index', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
@@ -371,7 +381,10 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').exists()).toBeTruthy();
+      const callout = wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').first();
+      expect(callout.exists()).toBe(true);
+      expect(callout.text()).toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_TITLE);
+      expect(callout.text()).toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_BODY);
     });
 
     it('does not show the warning callout when all entries reference fields present on the alerts index', () => {
@@ -406,6 +419,182 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('runtime fields map (onRuntimeFieldsChange)', () => {
+    const runtimeFieldExceptionItems = [
+      {
+        ...getExceptionListItemSchemaMock(),
+        // Field is not on the stub alerts index, so treated as non-ECS.
+        entries: [{ field: 'source.ip_ecs', operator: 'included', type: 'match' }] as EntriesArray,
+      },
+    ];
+
+    it('does not invoke onRuntimeFieldsChange with a populated map when bulk close is unchecked', () => {
+      const onRuntimeFieldsChange = jest.fn();
+      mountWithIntl(
+        <TestProviders>
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListItems={runtimeFieldExceptionItems}
+            exceptionListType={ExceptionListTypeEnum.DETECTION}
+            shouldCloseSingleAlert={false}
+            shouldBulkCloseAlert={false}
+            disableBulkClose={false}
+            alertData={alertDataMock}
+            alertStatus="open"
+            sourceIndexPatterns={sourceIndexPatternFor([
+              { name: 'source.ip_ecs', esTypes: ['ip'] },
+            ])}
+            onDisableBulkClose={jest.fn()}
+            onUpdateBulkCloseIndex={jest.fn()}
+            onBulkCloseCheckboxChange={jest.fn()}
+            onSingleAlertCloseCheckboxChange={jest.fn()}
+            onRuntimeFieldsChange={onRuntimeFieldsChange}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
+      // Component still fires the callback (with an empty map) so the parent
+      // can clear any stale state; what we assert is that no real runtime
+      // field types are surfaced when the user hasn't opted in to bulk close.
+      expect(onRuntimeFieldsChange).toHaveBeenCalledWith({}, false);
+    });
+
+    it('emits the resolved type for a non-ECS field present on the source data view', () => {
+      const onRuntimeFieldsChange = jest.fn();
+      mountWithIntl(
+        <TestProviders>
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListItems={runtimeFieldExceptionItems}
+            exceptionListType={ExceptionListTypeEnum.DETECTION}
+            shouldCloseSingleAlert={false}
+            shouldBulkCloseAlert={true}
+            disableBulkClose={false}
+            alertData={alertDataMock}
+            alertStatus="open"
+            sourceIndexPatterns={sourceIndexPatternFor([
+              { name: 'source.ip_ecs', esTypes: ['ip'] },
+            ])}
+            onDisableBulkClose={jest.fn()}
+            onUpdateBulkCloseIndex={jest.fn()}
+            onBulkCloseCheckboxChange={jest.fn()}
+            onSingleAlertCloseCheckboxChange={jest.fn()}
+            onRuntimeFieldsChange={onRuntimeFieldsChange}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
+      expect(onRuntimeFieldsChange).toHaveBeenLastCalledWith({ 'source.ip_ecs': 'ip' }, false);
+    });
+
+    it('falls back to keyword + hasUntypedFields=true when the field is missing from the source data view', () => {
+      const onRuntimeFieldsChange = jest.fn();
+      mountWithIntl(
+        <TestProviders>
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListItems={runtimeFieldExceptionItems}
+            exceptionListType={ExceptionListTypeEnum.DETECTION}
+            shouldCloseSingleAlert={false}
+            shouldBulkCloseAlert={true}
+            disableBulkClose={false}
+            alertData={alertDataMock}
+            alertStatus="open"
+            // Source data view doesn't contain the field — rule-drift scenario.
+            sourceIndexPatterns={sourceIndexPatternFor([])}
+            onDisableBulkClose={jest.fn()}
+            onUpdateBulkCloseIndex={jest.fn()}
+            onBulkCloseCheckboxChange={jest.fn()}
+            onSingleAlertCloseCheckboxChange={jest.fn()}
+            onRuntimeFieldsChange={onRuntimeFieldsChange}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
+      expect(onRuntimeFieldsChange).toHaveBeenLastCalledWith({ 'source.ip_ecs': 'keyword' }, true);
+    });
+
+    it('emits an empty map when sourceIndexPatterns is not provided', () => {
+      const onRuntimeFieldsChange = jest.fn();
+      mountWithIntl(
+        <TestProviders>
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListItems={runtimeFieldExceptionItems}
+            exceptionListType={ExceptionListTypeEnum.DETECTION}
+            shouldCloseSingleAlert={false}
+            shouldBulkCloseAlert={true}
+            disableBulkClose={false}
+            alertData={alertDataMock}
+            alertStatus="open"
+            onDisableBulkClose={jest.fn()}
+            onUpdateBulkCloseIndex={jest.fn()}
+            onBulkCloseCheckboxChange={jest.fn()}
+            onSingleAlertCloseCheckboxChange={jest.fn()}
+            onRuntimeFieldsChange={onRuntimeFieldsChange}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
+      // Endpoint exceptions and other rule-less callers go through this path.
+      expect(onRuntimeFieldsChange).toHaveBeenCalledWith({}, false);
+    });
+
+    it('renders the untyped-fallback callout body when any field defaults to keyword', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListItems={runtimeFieldExceptionItems}
+            exceptionListType={ExceptionListTypeEnum.DETECTION}
+            shouldCloseSingleAlert={false}
+            shouldBulkCloseAlert={true}
+            disableBulkClose={false}
+            alertData={alertDataMock}
+            alertStatus="open"
+            sourceIndexPatterns={sourceIndexPatternFor([])}
+            onDisableBulkClose={jest.fn()}
+            onUpdateBulkCloseIndex={jest.fn()}
+            onBulkCloseCheckboxChange={jest.fn()}
+            onSingleAlertCloseCheckboxChange={jest.fn()}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
+      const callout = wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').first();
+      expect(callout.exists()).toBeTruthy();
+      expect(callout.text()).toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_UNTYPED_BODY);
+    });
+
+    it('does not render the untyped-fallback callout body when every field has a resolved type', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListItems={runtimeFieldExceptionItems}
+            exceptionListType={ExceptionListTypeEnum.DETECTION}
+            shouldCloseSingleAlert={false}
+            shouldBulkCloseAlert={true}
+            disableBulkClose={false}
+            alertData={alertDataMock}
+            alertStatus="open"
+            sourceIndexPatterns={sourceIndexPatternFor([
+              { name: 'source.ip_ecs', esTypes: ['ip'] },
+            ])}
+            onDisableBulkClose={jest.fn()}
+            onUpdateBulkCloseIndex={jest.fn()}
+            onBulkCloseCheckboxChange={jest.fn()}
+            onSingleAlertCloseCheckboxChange={jest.fn()}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
+      const callout = wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').first();
+      expect(callout.exists()).toBeTruthy();
+      expect(callout.text()).not.toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_UNTYPED_BODY);
     });
   });
 });
