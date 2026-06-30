@@ -18,8 +18,9 @@ project:
   sourceRoot: src/platform/packages/shared/as-code/utils
 dependsOn:
   - '@kbn/core'
+  - '@kbn/config-schema'
 tags:
-  - shared-common
+  - shared-server
   - package
   - prod
   - group-platform
