@@ -13,7 +13,7 @@ import {
   type Discovery,
   type LifecycleDetection,
   type EventLifecycleResponse,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../../lib/significant_events/events/attach_investigation';

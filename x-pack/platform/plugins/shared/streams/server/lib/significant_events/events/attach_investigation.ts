@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEventInvestigation } from '@kbn/streams-schema';
+import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
 
 export const attachInvestigationToEvent = async ({
@@ -37,25 +37,38 @@ export const attachInvestigationToEvent = async ({
   const latest = lineageHits[lineageHits.length - 1] ?? referenced;
 
   const existing = latest.investigations ?? [];
+  const now = new Date().toISOString();
+
+  /**
+   * cancel-in-progress (keyed on discovery_slug, max 1) guarantees only one run per slug is ever
+   * active, so any *other* entry still marked `pending` belongs to a superseded/cancelled run that
+   * will never reach its terminal step. Resolve it to `failed` so it stops driving the "Running"
+   * UI state (hasPendingInvestigation) and the flyout's 5s poll loop.
+   */
+  const reconciled = existing.map((entry) =>
+    entry.workflow_execution_id !== investigation.workflow_execution_id &&
+    entry.status === 'pending'
+      ? { ...entry, status: 'failed' as const, completed_at: entry.completed_at ?? now }
+      : entry
+  );
 
   // Replace-by-workflow_execution_id: callers always send the full investigation object.
-  // If an entry with the same execution id already exists and is identical, this is a no-op.
-  const existingIdx = existing.findIndex(
+  const existingIdx = reconciled.findIndex(
     (i) => i.workflow_execution_id === investigation.workflow_execution_id
   );
 
   let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
-    if (isEqual(existing[existingIdx], investigation)) {
-      return { event_id: eventId, updated: 0, ignored: 1 };
-    }
-    investigations = existing.map((entry, idx) => (idx === existingIdx ? investigation : entry));
+    investigations = reconciled.map((entry, idx) => (idx === existingIdx ? investigation : entry));
   } else {
-    investigations = [...existing, investigation];
+    investigations = [...reconciled, investigation];
+  }
+
+  if (isEqual(investigations, existing)) {
+    return { event_id: eventId, updated: 0, ignored: 1 };
   }
 
   const nextEventId = uuidv4();
-  const now = new Date().toISOString();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,

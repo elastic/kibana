@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEventInvestigationStatus } from '@kbn/streams-schema';
+import type { SignificantEventInvestigationStatus } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import type { EventClient } from '../../../lib/significant_events/events';
 

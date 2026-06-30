@@ -10,7 +10,7 @@ import { STREAMS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SignificantEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 /**
  * Runs the managed investigation workflow for the given significant event in the

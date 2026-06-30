@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SignificantEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { triggerInvestigationWorkflow } from './trigger_investigation_workflow';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({

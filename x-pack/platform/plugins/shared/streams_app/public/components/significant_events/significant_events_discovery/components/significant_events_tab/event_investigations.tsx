@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent, SignificantEventInvestigation } from '@kbn/streams-schema';
+import type { SignificantEvent, SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import {
   INVESTIGATION_STATUS_COLORS,

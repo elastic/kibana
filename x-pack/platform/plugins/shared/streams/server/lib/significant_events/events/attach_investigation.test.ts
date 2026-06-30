@@ -6,7 +6,7 @@
  */
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { SignificantEventInvestigation } from '@kbn/streams-schema';
+import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
@@ -118,7 +118,11 @@ describe('attachInvestigationToEvent', () => {
   });
 
   it('replaces by workflow_execution_id: different executions produce two entries', async () => {
-    const first = createInvestigation({ workflow_execution_id: 'exec-1' });
+    const first = createInvestigation({
+      workflow_execution_id: 'exec-1',
+      status: 'success',
+      completed_at: '2026-01-01T01:30:00.000Z',
+    });
     const existing = createEvent({ event_id: 'event-1', investigations: [first] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
@@ -179,6 +183,67 @@ describe('attachInvestigationToEvent', () => {
 
     expect(result.updated).toBe(1);
     expect(result.event_id).not.toBe('event-3');
+  });
+
+  it('reconciles orphaned pending entries from cancelled runs when a new execution attaches', async () => {
+    /**
+     * Regression for cancel-in-progress orphan: R1 writes pending (exec-1); R2 is triggered,
+     * cancelling R1 via cancel-in-progress; R1 never reaches its terminal step so exec-1 stays
+     * `pending` in the array. When R2's pending attach arrives (exec-2), exec-1 must be resolved
+     * to `failed` so hasPendingInvestigation stops returning true and the UI stops polling.
+     */
+    const orphaned = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+    const existing = createEvent({ event_id: 'event-1', investigations: [orphaned] });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const incoming = createInvestigation({ workflow_execution_id: 'exec-2', status: 'pending' });
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'event-1',
+      investigation: incoming,
+    });
+
+    expect(result.updated).toBe(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    expect(written.investigations).toHaveLength(2);
+    expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
+    expect(written.investigations![0].status).toBe('failed');
+    expect(written.investigations![0].completed_at).toBeDefined();
+    expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
+    expect(written.investigations![1].status).toBe('pending');
+  });
+
+  it('reconciles orphaned pending entries when a terminal attach arrives for a new execution', async () => {
+    const orphaned = createInvestigation({ workflow_execution_id: 'exec-1', status: 'pending' });
+    const existing = createEvent({ event_id: 'event-1', investigations: [orphaned] });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const terminal = createInvestigation({
+      workflow_execution_id: 'exec-2',
+      status: 'success',
+      completed_at: '2026-01-01T02:00:00.000Z',
+    });
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventId: 'event-1',
+      investigation: terminal,
+    });
+
+    expect(result.updated).toBe(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    // Both entries present; orphaned run resolved to failed, no pending remains
+    expect(written.investigations).toHaveLength(2);
+    expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
+    expect(written.investigations![0].status).toBe('failed');
+    expect(written.investigations![0].completed_at).toBeDefined();
+    expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
+    expect(written.investigations![1].status).toBe('success');
   });
 
   it('resolves lineage: terminal attach targets the latest slug version, not the frozen caller version', async () => {
