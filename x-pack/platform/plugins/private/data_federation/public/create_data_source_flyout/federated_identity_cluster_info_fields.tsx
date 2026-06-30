@@ -7,19 +7,36 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 
 function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
   return (
     <EuiFormRow label={label} fullWidth>
-      <EuiFieldText readOnly fullWidth value={value} />
+      <div style={{ position: 'relative' }}>
+        <EuiFieldText readOnly fullWidth value={value} style={{ paddingRight: '2rem' }} />
+        <div style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
+          <EuiCopy textToCopy={value}>
+            {(copy) => (
+              <EuiButtonIcon
+                iconType="copyClipboard"
+                display="empty"
+                onClick={copy}
+                aria-label={i18n.translate(
+                  'xpack.dataFederation.createFlyout.federated.copyAriaLabel',
+                  { defaultMessage: 'Copy to clipboard' }
+                )}
+              />
+            )}
+          </EuiCopy>
+        </div>
+      </div>
     </EuiFormRow>
   );
 }
 
 /**
- * Three read-only fields shown below Role ARN in the S3 federated identity auth section.
+ * Read-only fields shown below Role ARN in the S3 federated identity auth section.
  * They display cluster-level values the user needs to configure the CSP trust policy.
  * These fields do NOT use useController, so they are never submitted with the form.
  */
@@ -35,12 +52,6 @@ export function FederatedIdentityClusterInfoFields({
           defaultMessage: 'JWT issuer',
         })}
         value={cloudInfo?.jwtIssuer ?? ''}
-      />
-      <ReadOnlyFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.s3.federated.cloudOrgId', {
-          defaultMessage: 'Cloud organization ID',
-        })}
-        value={cloudInfo?.cloudOrgId ?? ''}
       />
       <ReadOnlyFormRow
         label={
