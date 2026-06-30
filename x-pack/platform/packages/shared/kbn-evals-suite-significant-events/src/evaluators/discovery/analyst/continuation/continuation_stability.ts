@@ -8,7 +8,7 @@
 import type { Evaluator, Example } from '@kbn/evals';
 import { selectEvaluators } from '@kbn/evals';
 
-/** One investigator invocation in a sequential "detections over time" run. */
+/** One analyst invocation in a sequential "detections over time" run. */
 export interface ContinuationCycle {
   /** rule_name of the detection fed this cycle — for human-readable explanations only. */
   ruleName?: string;
@@ -92,7 +92,7 @@ export function scoreContinuationStability(
   };
 }
 
-/** Output shape produced by the sequential "continuation over time" investigator task. */
+/** Output shape produced by the sequential "continuation over time" analyst task. */
 export interface ContinuationStabilityOutput {
   cycles: ContinuationCycle[];
 }
@@ -106,6 +106,6 @@ export const continuationStabilityEvaluator: ContinuationEvaluator = {
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
 
-/** Factory mirroring `createInvestigatorEvaluators` so the spec wires it the same way. */
+/** Factory mirroring `createAnalystEvaluators` so the spec wires it the same way. */
 export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
   selectEvaluators([continuationStabilityEvaluator]);

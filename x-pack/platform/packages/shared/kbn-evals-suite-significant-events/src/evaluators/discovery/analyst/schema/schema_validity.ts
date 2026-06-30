@@ -6,7 +6,7 @@
  */
 
 import type { Discovery } from '@kbn/streams-schema';
-import type { InvestigatorEvaluator } from '../../types';
+import type { AnalystEvaluator } from '../../types';
 
 const VALID_KINDS = new Set<Discovery['kind']>(['discovery', 'clearance', 'handled']);
 
@@ -32,7 +32,7 @@ function isCriticalityValid(value: unknown): boolean {
  * CODE evaluator: validates that each discovery has all required fields, a valid `kind`, and a
  * `criticality` (when present) that is a number in 0–100. Score = valid_docs / total_docs.
  */
-export const schemaValidityInvestigatorEvaluator: InvestigatorEvaluator = {
+export const schemaValidityAnalystEvaluator: AnalystEvaluator = {
   name: 'schema_validity',
   kind: 'CODE',
   evaluate: ({ output }) => {

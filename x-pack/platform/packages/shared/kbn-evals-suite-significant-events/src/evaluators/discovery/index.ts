@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export { createInvestigatorEvaluators } from './investigator';
+export { createAnalystEvaluators } from './analyst';
 export { createJudgeEvaluators } from './judge';
-export { createContinuationEvaluators } from './investigator/continuation/continuation_stability';
+export { createContinuationEvaluators } from './analyst/continuation/continuation_stability';
 
 export type {
-  InvestigatorAgentOutput,
-  InvestigatorEvaluationExample,
-  InvestigatorEvaluator,
+  AnalystAgentOutput,
+  AnalystEvaluationExample,
+  AnalystEvaluator,
   JudgeAgentOutput,
   JudgeEvaluationExample,
   JudgeEvaluator,

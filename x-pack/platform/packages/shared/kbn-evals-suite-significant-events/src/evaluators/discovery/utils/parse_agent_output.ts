@@ -8,7 +8,7 @@
 import type { Discovery, SignificantEvent } from '@kbn/streams-schema';
 
 /**
- * The discovery investigator/judge agents have no emit tool and no enforced `structured_output` on
+ * The discovery analyst/judge agents have no emit tool and no enforced `structured_output` on
  * the public converse API, so (per their instructions) they return their result as a single JSON
  * object in the final assistant `message`. These helpers recover that array. Conformance of each
  * item is graded separately by the `schema_validity` evaluator, so parsing casts loosely and returns
@@ -51,7 +51,7 @@ function parseArrayProperty<T>(message: string, key: string): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-/** Parse the investigator's `{ "discoveries": [...] }` message into `Discovery[]`. */
+/** Parse the analyst's `{ "discoveries": [...] }` message into `Discovery[]`. */
 export function parseDiscoveries(message: string): Discovery[] {
   return parseArrayProperty<Discovery>(message, 'discoveries');
 }

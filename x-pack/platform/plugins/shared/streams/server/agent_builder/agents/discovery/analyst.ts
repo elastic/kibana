@@ -8,23 +8,22 @@
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { StreamsServer } from '../../../types';
 import { getSignificantEventsAvailability } from '../../../routes/utils/assert_significant_events_access';
-import instructions from './instructions/investigator.md.text';
+import instructions from './instructions/analyst.md.text';
 import { SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS } from './constants';
 
-export const SIGEVENTS_INVESTIGATOR_AGENT_ID =
-  'platform.streams.significant-events.discovery.investigator';
+export const SIGEVENTS_ANALYST_AGENT_ID = 'platform.streams.significant-events.discovery.analyst';
 
-export function createSigEventsInvestigatorAgent({
+export function createSigEventsAnalystAgent({
   server,
 }: {
   server: StreamsServer;
 }): BuiltInAgentDefinition {
   return {
-    id: SIGEVENTS_INVESTIGATOR_AGENT_ID,
-    name: 'Significant Events Investigator',
+    id: SIGEVENTS_ANALYST_AGENT_ID,
+    name: 'Significant Events Analyst',
     description:
       'Triages statistical detection signals across rules, correlates related detections into incident candidates using shared infrastructure, temporal proximity, and causal plausibility, and drafts structured discovery documents with root-cause hypotheses and supporting evidence.',
-    labels: ['observability', 'streams', 'significant-events', 'discovery', 'investigator'],
+    labels: ['observability', 'streams', 'significant-events', 'discovery', 'analyst'],
     avatar_icon: 'logoElastic',
     availability: {
       cacheMode: 'space',

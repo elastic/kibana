@@ -10,9 +10,9 @@ import { summarizeEsqlGrounding } from '../utils/tool_usage';
 import type { AgentOutputBase } from '../types';
 
 /**
- * Coarse grounding floor (shared by investigator + judge): once the agent ran `execute_esql`, did at
+ * Coarse grounding floor (shared by analyst + judge): once the agent ran `execute_esql`, did at
  * least one call return rows? Tool presence is covered by the agent-specific trajectory evaluators
- * (`createInvestigatorToolUsageEvaluator` / `createJudgeToolUsageEvaluator`), so this returns
+ * (`createAnalystToolUsageEvaluator` / `createJudgeToolUsageEvaluator`), so this returns
  * `unavailable` when `execute_esql` was never called rather than double-penalizing.
  */
 export function createExecuteEsqlGroundingEvaluator<

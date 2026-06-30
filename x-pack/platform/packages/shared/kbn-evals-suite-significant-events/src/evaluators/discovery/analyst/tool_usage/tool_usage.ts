@@ -10,9 +10,9 @@ import {
   TOOL_ID_KI_SEARCH,
   extractToolCallIds,
 } from '../../utils/tool_usage';
-import type { InvestigatorEvaluator } from '../../types';
+import type { AnalystEvaluator } from '../../types';
 
-export const createInvestigatorToolUsageEvaluator = (): InvestigatorEvaluator => ({
+export const createAnalystToolUsageEvaluator = (): AnalystEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
   evaluate: ({ input, output }) => {

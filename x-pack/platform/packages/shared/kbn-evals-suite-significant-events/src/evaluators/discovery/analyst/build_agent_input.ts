@@ -7,9 +7,9 @@
 
 import Mustache from 'mustache';
 import type { Detection, Discovery } from '@kbn/streams-schema';
-import investigatorUserPrompt from './user_prompt.text';
+import analystUserPrompt from './user_prompt.text';
 
-export interface InvestigatorInputParams {
+export interface AnalystInputParams {
   /** Short unique string used verbatim by the agent as the new-episode slug suffix. */
   episodeSuffix: string;
   /** The unhandled detection batch (one latest doc per rule). */
@@ -19,15 +19,15 @@ export interface InvestigatorInputParams {
 }
 
 /**
- * Build the investigator agent's user message — the same shape the production batch workflow sends.
+ * Build the analyst agent's user message — the same shape the production batch workflow sends.
  * `## Continuation Candidates` is omitted when there are none.
  */
-export function buildInvestigatorInput({
+export function buildAnalystInput({
   episodeSuffix,
   detections,
   continuationCandidates = [],
-}: InvestigatorInputParams): string {
-  return Mustache.render(investigatorUserPrompt, {
+}: AnalystInputParams): string {
+  return Mustache.render(analystUserPrompt, {
     episodeSuffix,
     activeBatch: JSON.stringify(detections),
     continuationCandidates: continuationCandidates.length

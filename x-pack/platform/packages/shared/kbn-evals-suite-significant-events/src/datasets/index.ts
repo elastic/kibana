@@ -108,7 +108,7 @@ export type {
   KIFeatureExtractionScenario,
   KIFeatureExclusionScenario,
   KIFeatureDeduplicationScenario,
-  DiscoveryInvestigatorScenario,
+  DiscoveryAnalystScenario,
   DiscoveryJudgeScenario,
   SamplingCriterion,
   SnapshotSourceOverride,

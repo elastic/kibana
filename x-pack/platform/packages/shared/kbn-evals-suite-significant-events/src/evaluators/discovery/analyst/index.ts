@@ -9,30 +9,30 @@ import { selectEvaluators } from '@kbn/evals';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
-import type { InvestigatorEvaluator } from '../types';
+import type { AnalystEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grouding';
-import { createInvestigatorToolUsageEvaluator } from './tool_usage/tool_usage';
+import { createAnalystToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
   createCriticalityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
-import { schemaValidityInvestigatorEvaluator } from './schema/schema_validity';
+import { schemaValidityAnalystEvaluator } from './schema/schema_validity';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 
 /**
- * Factory that creates the full set of evaluators for the investigator agent eval suite.
+ * Factory that creates the full set of evaluators for the analyst agent eval suite.
  */
-export const createInvestigatorEvaluators = (
+export const createAnalystEvaluators = (
   esClient: ElasticsearchClient,
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
-): InvestigatorEvaluator[] => {
-  const codeEvaluators: InvestigatorEvaluator[] = [
-    schemaValidityInvestigatorEvaluator,
+): AnalystEvaluator[] => {
+  const codeEvaluators: AnalystEvaluator[] = [
+    schemaValidityAnalystEvaluator,
     groupingCorrectnessEvaluator,
     evidenceCollectionEvaluator,
-    createInvestigatorToolUsageEvaluator(),
+    createAnalystToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
   ];
 

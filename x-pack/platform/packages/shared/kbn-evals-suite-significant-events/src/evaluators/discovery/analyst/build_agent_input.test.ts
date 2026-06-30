@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildInvestigatorInput } from './build_agent_input';
+import { buildAnalystInput } from './build_agent_input';
 
-describe('buildInvestigatorInput', () => {
+describe('buildAnalystInput', () => {
   it('emits the exact headings the prompt expects, with compact JSON', () => {
-    const input = buildInvestigatorInput({
+    const input = buildAnalystInput({
       episodeSuffix: 'a1b2c3d4',
       detections: [{ rule_uuid: 'r1' }],
     });
@@ -19,12 +19,12 @@ describe('buildInvestigatorInput', () => {
   });
 
   it('omits the Continuation Candidates section when there are none', () => {
-    const input = buildInvestigatorInput({ episodeSuffix: 's', detections: [] });
+    const input = buildAnalystInput({ episodeSuffix: 's', detections: [] });
     expect(input).not.toContain('Continuation Candidates');
   });
 
   it('includes the Continuation Candidates section when provided', () => {
-    const input = buildInvestigatorInput({
+    const input = buildAnalystInput({
       episodeSuffix: 's',
       detections: [{ rule_uuid: 'r1' }],
       continuationCandidates: [{ discovery_slug: 'svc__x-s' }],

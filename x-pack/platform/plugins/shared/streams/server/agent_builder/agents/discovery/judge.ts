@@ -20,7 +20,7 @@ export const createSigEventsJudgeAgent = ({
 }): BuiltInAgentDefinition =>
   ({
     id: SIGEVENTS_JUDGE_AGENT_ID,
-    name: 'Significant Events Discovery Judge',
+    name: 'Significant Events Judge',
     description:
       'Reviews proposed discoveries and decides whether to promote, acknowledge, or demote a significant event.',
     labels: ['observability', 'streams', 'significant-events', 'discovery', 'judge'],
