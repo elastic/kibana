@@ -78,7 +78,10 @@ describe('ExecutionListFilters', () => {
   it('shows "Executed by" section when showExecutor is true', async () => {
     renderComponent({
       showExecutor: true,
-      availableExecutedByOptions: ['user1', 'user2'],
+      availableExecutedByOptions: [
+        { label: 'user1', value: 'user1' },
+        { label: 'user2', value: 'user2' },
+      ],
     });
     const filterButton = screen.getByLabelText('Filter executions');
     fireEvent.click(filterButton);

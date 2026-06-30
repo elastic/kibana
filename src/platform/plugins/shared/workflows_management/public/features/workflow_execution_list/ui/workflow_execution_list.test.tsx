@@ -11,7 +11,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
-import { TestWrapper } from '../../../shared/test_utils';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 jest.mock('./workflow_execution_list_item', () => ({
   WorkflowExecutionListItem: ({
@@ -102,11 +102,9 @@ describe('WorkflowExecutionList', () => {
   };
 
   const renderComponent = (overrides: Partial<WorkflowExecutionListProps> = {}) => {
-    return render(
-      <TestWrapper>
-        <WorkflowExecutionList {...defaultProps} {...overrides} />
-      </TestWrapper>
-    );
+    return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
+      wrapper: TestProvider,
+    });
   };
 
   beforeEach(() => {
