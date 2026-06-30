@@ -34,7 +34,7 @@ Use this skill when:
 
 Do **not** use this skill when:
 - The user only wants a one-off answer (just answer it).
-- The user wants to edit an already-persisted skill — direct them to the skill editor at /manage/skills.
+- The user wants to edit a persisted skill that is not already represented by a skill attachment in the current conversation — direct them to the skill editor at /manage/skills.
 - The user wants to author a tool, plugin, or agent (different entity types, not yet supported in chat).
 
 ## Available Tools
@@ -102,8 +102,11 @@ This skill exposes the following tools:
 8. **Iterate on feedback via \`patch_skill\`.**
    - Prefer search-replace patches over full rewrites; it's cheaper and easier for the user to follow.
    - After each patch, re-render the attachment so the card refreshes in place.
+   - If the attachment was already created, patching updates the conversation copy first. After re-rendering, tell the user to click **Update skill** on the card to persist the edited version.
 
-9. **When the user approves the draft, direct them to the create button on the card.**
+9. **When the user approves the draft or saved edit, direct them to the card action.**
+   - For a new draft, tell them to click **Create skill**.
+   - For a patched saved skill, tell them to click **Update skill**.
    - The card handles submission — you do not need to call any API endpoint yourself.
 
 ## Examples

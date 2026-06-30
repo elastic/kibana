@@ -17,10 +17,17 @@ jest.mock('@kbn/agent-builder-plugin/public', () => ({
 }));
 
 const CREATE_BUTTON_LABEL = 'Create skill';
+const UPDATE_BUTTON_LABEL = 'Update skill';
+const EDIT_IN_MANAGEMENT_BUTTON_LABEL = 'Edit in Management';
 const NEW_SKILL_ID = 'track-purchases';
 
-const buildAttachment = (): SkillAttachment =>
-  ({
+type SkillAttachmentOverrides = Partial<Omit<SkillAttachment, 'data'>> & {
+  data?: Partial<SkillAttachment['data']>;
+};
+
+const buildAttachment = (overrides: SkillAttachmentOverrides = {}): SkillAttachment => {
+  const { data, ...attachmentOverrides } = overrides;
+  return {
     id: 'attachment-1',
     type: SKILL_ATTACHMENT_TYPE,
     data: {
@@ -30,49 +37,67 @@ const buildAttachment = (): SkillAttachment =>
       content: 'instructions',
       tool_ids: [],
       referenced_content: [],
+      ...data,
     },
     // version === versionCount marks the draft as the latest, which is the
     // condition under which the "Create skill" button is rendered.
     version: 1,
     versionCount: 1,
-  } as unknown as SkillAttachment);
+    ...attachmentOverrides,
+  } as SkillAttachment;
+};
 
 const setup = () => {
   const post = jest.fn().mockResolvedValue({ id: NEW_SKILL_ID });
+  const put = jest.fn().mockResolvedValue({ id: NEW_SKILL_ID });
   const addSuccess = jest.fn();
   const addError = jest.fn();
   const addSkillToAgent = jest.fn().mockResolvedValue({});
   const updateOrigin = jest.fn().mockResolvedValue(undefined);
 
-  const http = { post } as unknown as HttpStart;
+  const http = { post, put } as unknown as HttpStart;
   const notifications = {
     toasts: { addSuccess, addError },
   } as unknown as CoreStart['notifications'];
   const application = {
     capabilities: { agentBuilder: { manageSkills: true } },
-    getUrlForApp: jest.fn(),
+    getUrlForApp: jest.fn().mockReturnValue('/app/agent_builder/manage/skills/track-purchases'),
   } as unknown as CoreStart['application'];
   const agents = { list: jest.fn(), addSkillToAgent } as unknown as AgentsServiceStartContract;
 
   const definition = createSkillAttachmentDefinition({ http, notifications, application, agents });
 
-  const getCreateHandler = (agentId?: string) => {
-    const buttons: ActionButton[] =
-      definition.getActionButtons?.({
-        attachment: buildAttachment(),
-        agentId,
-        isSidebar: false,
-        isCanvas: false,
-        updateOrigin,
-      }) ?? [];
-    const createButton = buttons.find((button) => button.label === CREATE_BUTTON_LABEL);
-    if (!createButton) {
-      throw new Error('Create skill button not found');
+  const getButtons = (attachment = buildAttachment(), agentId?: string): ActionButton[] =>
+    definition.getActionButtons?.({
+      attachment,
+      agentId,
+      isSidebar: false,
+      isCanvas: false,
+      updateOrigin,
+    }) ?? [];
+
+  const getHandler = (label: string, attachment = buildAttachment(), agentId?: string) => {
+    const button = getButtons(attachment, agentId).find((action) => action.label === label);
+    if (!button) {
+      throw new Error(`${label} button not found`);
     }
-    return createButton.handler;
+    return button.handler;
   };
 
-  return { post, addSuccess, addError, addSkillToAgent, updateOrigin, getCreateHandler };
+  const getCreateHandler = (agentId?: string) =>
+    getHandler(CREATE_BUTTON_LABEL, buildAttachment(), agentId);
+
+  return {
+    post,
+    put,
+    addSuccess,
+    addError,
+    addSkillToAgent,
+    updateOrigin,
+    getButtons,
+    getHandler,
+    getCreateHandler,
+  };
 };
 
 describe('createSkillAttachmentDefinition - Create skill', () => {
@@ -117,6 +142,75 @@ describe('createSkillAttachmentDefinition - Create skill', () => {
     await getCreateHandler('agent-1')();
 
     expect(addSkillToAgent).not.toHaveBeenCalled();
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addError).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('createSkillAttachmentDefinition - Update skill', () => {
+  const buildSavedAttachment = () =>
+    buildAttachment({
+      origin: NEW_SKILL_ID,
+      version: 2,
+      versionCount: 2,
+      data: {
+        id: NEW_SKILL_ID,
+        name: 'Track purchases',
+        description: 'Tracks updated purchases',
+        content: 'updated instructions',
+        tool_ids: ['platform.core.execute_esql'],
+        referenced_content: [
+          {
+            name: 'examples',
+            relativePath: './examples',
+            content: '# Examples',
+          },
+        ],
+      },
+    });
+
+  it('updates a saved skill', async () => {
+    const { put, addSuccess, addError, updateOrigin, getHandler } = setup();
+
+    await getHandler(UPDATE_BUTTON_LABEL, buildSavedAttachment())();
+
+    expect(put).toHaveBeenCalledWith('/api/agent_builder/skills/track-purchases', {
+      body: expect.any(String),
+    });
+    const [, request] = put.mock.calls[0];
+    expect(JSON.parse(request.body)).toEqual({
+      name: 'Track purchases',
+      description: 'Tracks updated purchases',
+      content: 'updated instructions',
+      referenced_content: [
+        {
+          name: 'examples',
+          relativePath: './examples',
+          content: '# Examples',
+        },
+      ],
+      tool_ids: ['platform.core.execute_esql'],
+    });
+    expect(updateOrigin).toHaveBeenCalledWith(NEW_SKILL_ID);
+    expect(addSuccess).toHaveBeenCalledTimes(1);
+    expect(addError).not.toHaveBeenCalled();
+  });
+
+  it('shows update and edit in management for a saved skill', () => {
+    const { getButtons } = setup();
+    const labels = getButtons(buildSavedAttachment()).map((button) => button.label);
+
+    expect(labels).toContain(EDIT_IN_MANAGEMENT_BUTTON_LABEL);
+    expect(labels).toContain(UPDATE_BUTTON_LABEL);
+  });
+
+  it('reports an error when saved skill update fails', async () => {
+    const { put, addSuccess, addError, updateOrigin, getHandler } = setup();
+    put.mockRejectedValueOnce(new Error('boom'));
+
+    await getHandler(UPDATE_BUTTON_LABEL, buildSavedAttachment())();
+
+    expect(updateOrigin).not.toHaveBeenCalled();
     expect(addSuccess).not.toHaveBeenCalled();
     expect(addError).toHaveBeenCalledTimes(1);
   });

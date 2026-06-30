@@ -65,6 +65,6 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
     };
   },
   getAgentDescription: () => {
-    return `A \`skill\` attachment is a versioned, by-value snapshot of a candidate Agent Builder skill. The user reviews it as an inline card with a "Create" button. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. After patching, re-render the same attachment id so the card refreshes in place. Do not invent attachment ids — only render ids returned by propose_skill or patch_skill.`;
+    return `A \`skill\` attachment is a versioned, by-value snapshot of an Agent Builder skill. New drafts show a "Create skill" button; saved skills patched in chat show an "Update skill" button. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. After patching, re-render the same attachment id so the card refreshes in place. Do not invent attachment ids — only render ids returned by propose_skill or patch_skill.`;
   },
 });

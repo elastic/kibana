@@ -60,6 +60,12 @@ const createSkillLabel = i18n.translate(
     defaultMessage: 'Create skill',
   }
 );
+const updateSkillLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skill.updateButtonLabel',
+  {
+    defaultMessage: 'Update skill',
+  }
+);
 const lackManageSkillsPermissionDescription = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.skill.createDisabledReason',
   {
@@ -238,6 +244,9 @@ const SkillCanvasContent: React.FC<AttachmentRenderProps<SkillAttachment>> = (pr
   <SkillCard {...props} isCanvas />
 );
 
+const getSkillByIdApiPath = (skillId: string): string =>
+  `${SKILLS_API_PATH}/${encodeURIComponent(skillId)}`;
+
 interface CreateSkillDeps {
   http: HttpStart;
   notifications: CoreStart['notifications'];
@@ -248,16 +257,16 @@ interface CreateSkillDeps {
 /**
  * Factory for the `skill` UI definition.
  *
- * The Create button:
+ * The create/update buttons:
  * 1. Disables when the user lacks the `manageSkills` capability.
- * 2. POSTs the captured payload to `/api/agent_builder/skills`.
- * 3. On success, calls the framework-provided `updateOrigin(skillId)` so the
- *    same attachment now references the persisted skill (the card flips to
- *    a "Created" badge and the button disables).
- * 4. Adds the new skill to the current conversation's agent (`agentId`) so it
- *    is immediately usable; a failure here is reported separately and does not
+ * 2. POSTs new drafts to `/api/agent_builder/skills`.
+ * 3. PUTs saved attachments back to their origin skill.
+ * 4. On success, calls the framework-provided `updateOrigin(skillId)` so the
+ *    attachment origin snapshot reflects the latest persisted version.
+ * 5. Adds newly-created skills to the current conversation's agent (`agentId`) so they
+ *    are immediately usable; a failure here is reported separately and does not
  *    undo the skill creation.
- * 5. On failure, surfaces the agent_builder error message via core toasts.
+ * 6. On failure, surfaces the agent_builder error message via core toasts.
  */
 export const createSkillAttachmentDefinition = ({
   http,
@@ -265,7 +274,7 @@ export const createSkillAttachmentDefinition = ({
   application,
   agents,
 }: CreateSkillDeps): AttachmentUIDefinition<SkillAttachment> => {
-  const canCreate = application.capabilities.agentBuilder?.manageSkills === true;
+  const canManageSkills = application.capabilities.agentBuilder?.manageSkills === true;
   const isLatest = ({
     version,
     versionCount,
@@ -394,15 +403,68 @@ export const createSkillAttachmentDefinition = ({
               // Do nothing. navigation handled by href
             },
           };
-          actionButtons.push(editInManagementButton);
+
+          const updateSkill = async () => {
+            const {
+              name,
+              description,
+              content,
+              referenced_content: referencedContent,
+              tool_ids: toolIds,
+            } = attachment.data;
+            try {
+              const response = await http.put<CreateSkillResponse>(getSkillByIdApiPath(skillId), {
+                body: JSON.stringify({
+                  name,
+                  description,
+                  content,
+                  referenced_content: referencedContent,
+                  tool_ids: toolIds,
+                }),
+              });
+              await updateOrigin(response.id);
+
+              notifications.toasts.addSuccess({
+                title: i18n.translate(
+                  'xpack.agentBuilderPlatform.attachments.skill.updateSuccessToast',
+                  {
+                    defaultMessage: 'Skill "{skillId}" updated.',
+                    values: { skillId: response.id },
+                  }
+                ),
+              });
+            } catch (error) {
+              notifications.toasts.addError(error as Error, {
+                title: i18n.translate(
+                  'xpack.agentBuilderPlatform.attachments.skill.updateErrorToast',
+                  {
+                    defaultMessage: 'Could not update skill from draft',
+                  }
+                ),
+              });
+            }
+          };
+
+          actionButtons.push({
+            label: updateSkillLabel,
+            icon: 'save',
+            type: ActionButtonType.PRIMARY,
+            disabled: !canManageSkills,
+            disabledReason: !canManageSkills ? lackManageSkillsPermissionDescription : undefined,
+            handler: updateSkill,
+          });
+          actionButtons.push({
+            ...editInManagementButton,
+            type: ActionButtonType.SECONDARY,
+          });
         } else {
           // Only show create button for the latest draft
           const createButton: ActionButton = {
             label: createSkillLabel,
             icon: 'plus',
             type: ActionButtonType.PRIMARY,
-            disabled: !canCreate,
-            disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+            disabled: !canManageSkills,
+            disabledReason: !canManageSkills ? lackManageSkillsPermissionDescription : undefined,
             handler: createSkill,
           };
 
