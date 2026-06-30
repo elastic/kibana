@@ -112,9 +112,8 @@ describe('set attacks assignees', () => {
 
   describe('update_related_alerts: true (cascade)', () => {
     beforeEach(() => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA', 'alertB'] }]) as any
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA', 'alertB'] }])
       );
     });
 
@@ -176,9 +175,8 @@ describe('set attacks assignees', () => {
     });
 
     test('updates attacks only when the attack doc has no related alert ids', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        getSearchResponse([{ _id: 'attack1' }]) as any
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1' }])
       );
 
       await server.inject(
