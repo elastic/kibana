@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "22.22.2",
+    "node": "22.23.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1454,7 +1454,7 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "6.24.1",
+    "undici": "6.27.0",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
