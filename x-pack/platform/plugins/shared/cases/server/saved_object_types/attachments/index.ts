@@ -32,6 +32,9 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
       attachmentId: {
         type: 'keyword',
       },
+      caseId: {
+        type: 'keyword',
+      },
       owner: {
         type: 'keyword',
       },

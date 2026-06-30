@@ -39,6 +39,8 @@ export interface AttachmentRequestAttributes {
 export interface CommonAttributes {
   created_at: string;
   created_by: User;
+  /** See io-ts v1: optional for V1 read tolerance, required in V2. */
+  caseId?: string;
   pushed_at: string | null;
   pushed_by: User | null;
   updated_at: string | null;

@@ -242,6 +242,7 @@ export const getAlertInfoFromComments = (comments: AttachmentRequestV2[] = []): 
 export type NewCommentArgs = AttachmentRequestV2 & {
   createdDate: string;
   owner: string;
+  caseId: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
@@ -250,6 +251,7 @@ export type NewCommentArgs = AttachmentRequestV2 & {
 
 export const transformNewComment = ({
   createdDate,
+  caseId,
   email,
   full_name,
   username,
@@ -258,6 +260,7 @@ export const transformNewComment = ({
 }: NewCommentArgs): AttachmentAttributesV2 => {
   return {
     ...comment,
+    caseId,
     created_at: createdDate,
     created_by: { email, full_name, username, profile_uid: profileUid },
     pushed_at: null,

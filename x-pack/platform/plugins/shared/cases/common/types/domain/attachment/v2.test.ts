@@ -194,6 +194,7 @@ describe('Unified Attachments', () => {
       metadata: {
         description: 'A test visualization',
       },
+      caseId: 'case-1',
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -229,6 +230,7 @@ describe('Unified Attachments', () => {
         type: 'lens',
         attachmentId: 'attachment-123',
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -256,6 +258,7 @@ describe('Unified Attachments', () => {
           content: 'My comment',
         },
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -280,6 +283,7 @@ describe('Unified Attachments', () => {
       const requestWithoutRequired = {
         type: 'lens',
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -293,6 +297,14 @@ describe('Unified Attachments', () => {
       };
 
       const query = UnifiedAttachmentAttributesRt.decode(requestWithoutRequired);
+
+      expect(query._tag).toBe('Left');
+    });
+
+    it('rejects request without caseId', () => {
+      const { caseId: _omitted, ...requestWithoutCaseId } = defaultRequest;
+
+      const query = UnifiedAttachmentAttributesRt.decode(requestWithoutCaseId);
 
       expect(query._tag).toBe('Left');
     });
@@ -311,6 +323,7 @@ describe('Unified Attachments', () => {
         description: 'A test visualization',
       },
       owner: 'securitySolution',
+      caseId: 'case-1',
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -348,6 +361,7 @@ describe('Unified Attachments', () => {
         type: 'lens',
         attachmentId: 'attachment-123',
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -377,6 +391,7 @@ describe('Unified Attachments', () => {
           content: 'My comment',
         },
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -403,6 +418,7 @@ describe('Unified Attachments', () => {
       const requestWithoutRequired = {
         type: 'lens',
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',
@@ -429,6 +445,7 @@ describe('Unified Attachments', () => {
         type: 'lens',
         attachmentId: 'attachment-123',
         owner: 'securitySolution',
+        caseId: 'case-1',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',

@@ -180,6 +180,22 @@ describe('Attachments', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
+
+    it('accepts the optional top-level caseId field (io-ts)', () => {
+      const withCaseId = { ...defaultRequest, caseId: 'case-1' };
+      const query = AttachmentAttributesBasicRt.decode(withCaseId);
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right).toMatchObject({ caseId: 'case-1' });
+      }
+    });
+
+    it('zod: accepts the optional top-level caseId field', () => {
+      const withCaseId = { ...defaultRequest, caseId: 'case-1' };
+      const result = AttachmentAttributesBasicSchema.safeParse(withCaseId);
+      expect(result.success).toBe(true);
+      expect(result.data).toMatchObject({ caseId: 'case-1' });
+    });
   });
 
   describe('UserCommentAttachmentPayloadRt', () => {

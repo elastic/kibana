@@ -293,6 +293,7 @@ export class CaseCommentModel {
       const comment = await this.params.services.attachmentService.create({
         attributes: transformNewComment({
           createdDate,
+          caseId: this.caseInfo.id,
           ...attachment,
           ...this.params.user,
         }),
@@ -696,6 +697,7 @@ export class CaseCommentModel {
           return {
             attributes: transformNewComment({
               createdDate: new Date().toISOString(),
+              caseId: this.caseInfo.id,
               ...attachment,
               ...this.params.user,
             }),
