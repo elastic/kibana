@@ -72,7 +72,7 @@ function getMockApmContext() {
       },
       spaces: {},
     },
-  }) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 }
 
 describe('ApmIndices', () => {

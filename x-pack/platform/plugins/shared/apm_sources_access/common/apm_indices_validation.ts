@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
 // APM settings store comma-separated index-pattern expressions, so keep their bound
@@ -26,8 +25,6 @@ export type ApmIndexSettingKey = (typeof APM_INDEX_SETTING_KEYS)[number];
 export type ApmIndexValidationErrors = Partial<Record<ApmIndexSettingKey, string>>;
 export type ApmIndexValidationValues = Partial<Record<ApmIndexSettingKey, string | undefined>>;
 
-const apmIndexPatternSchema = schema.string({ maxLength: APM_INDEX_PATTERN_MAX_LENGTH });
-
 function getApmIndexMaxLengthError() {
   return i18n.translate('xpack.apmSourcesAccess.apmIndices.validation.maxLength', {
     defaultMessage: 'Must be {maxLength} characters or fewer',
@@ -36,20 +33,8 @@ function getApmIndexMaxLengthError() {
 }
 
 function validateApmIndexPattern(value: string) {
-  try {
-    apmIndexPatternSchema.validate(value);
-  } catch (error) {
-    if (value.length > APM_INDEX_PATTERN_MAX_LENGTH) {
-      return getApmIndexMaxLengthError();
-    }
-
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    return i18n.translate('xpack.apmSourcesAccess.apmIndices.validation.invalid', {
-      defaultMessage: 'Invalid value',
-    });
+  if (value.length > APM_INDEX_PATTERN_MAX_LENGTH) {
+    return getApmIndexMaxLengthError();
   }
 }
 
