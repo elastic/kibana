@@ -19,6 +19,7 @@ import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
+import { convertRuleResponseToAlertingRule } from './converters/convert_rule_response_to_alerting_rule';
 
 jest.mock('uuid', () => ({
   ...jest.requireActual('uuid'),
@@ -29,6 +30,13 @@ jest.mock('../../../../machine_learning/validation');
 jest.mock('../../../prebuilt_rules/constants', () => ({
   ...jest.requireActual('../../../prebuilt_rules/constants'),
   PREBUILT_RULES_BULK_CREATE_BATCH_SIZE: 2,
+}));
+jest.mock('./converters/convert_rule_response_to_alerting_rule', () => ({
+  ...jest.requireActual('./converters/convert_rule_response_to_alerting_rule'),
+  convertRuleResponseToAlertingRule: jest.fn(
+    jest.requireActual('./converters/convert_rule_response_to_alerting_rule')
+      .convertRuleResponseToAlertingRule
+  ),
 }));
 
 describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
@@ -257,15 +265,8 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].item.rule_id).toBe('bad-rule');
     expect(result.errors[0].error.message).toBe('Unsupported rule type: not_a_real_type');
-    expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        rules: expect.arrayContaining([
-          expect.objectContaining({
-            data: expect.objectContaining({ name: validRule.name }),
-          }),
-        ]),
-      })
-    );
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+    expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(1);
   });
 
   it('processes rules in chunks based on PREBUILT_RULES_BULK_CREATE_BATCH_SIZE', async () => {
@@ -286,6 +287,72 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(2);
     expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(2);
     expect(rulesClient.bulkCreateRules.mock.calls[1][0].rules).toHaveLength(1);
+  });
+
+  it('isolates per-rule conversion errors without failing the entire batch', async () => {
+    const goodRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'good-rule' };
+    const badRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'bad-rule' };
+
+    const realImpl = jest.requireActual(
+      './converters/convert_rule_response_to_alerting_rule'
+    ).convertRuleResponseToAlertingRule;
+    let callCount = 0;
+    (convertRuleResponseToAlertingRule as jest.Mock).mockImplementation((...args: unknown[]) => {
+      callCount++;
+      if (callCount === 2) {
+        throw new Error('conversion failed');
+      }
+      return realImpl(...args);
+    });
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [expect.any(String)],
+      errors: [],
+      total: 1,
+    });
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [goodRule, badRule],
+    });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].item.rule_id).toBe('bad-rule');
+    expect(result.errors[0].error.message).toBe('conversion failed');
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+    expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(1);
+  });
+
+  it('handles mixed success and failure in the same bulk response', async () => {
+    const rule1 = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'success-rule' };
+    const rule2 = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'fail-rule' };
+
+    const successId = 'success-uuid';
+    const failId = 'fail-uuid';
+    (uuidv4 as jest.Mock).mockReturnValueOnce(successId).mockReturnValueOnce(failId);
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [successId],
+      errors: [
+        {
+          message: 'Conflict',
+          status: 409,
+          rule: { id: failId, name: rule2.name },
+        },
+      ],
+      total: 2,
+    });
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [rule1, rule2] });
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0]).toEqual({
+      id: successId,
+      rule_id: 'success-rule',
+      version: 1,
+    });
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].item.rule_id).toBe('fail-rule');
+    expect(result.errors[0].error.message).toBe('Conflict');
   });
 
   it('includes bulkCount in changeTracking metadata', async () => {
