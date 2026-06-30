@@ -27,10 +27,9 @@ const countAlertsRoute = createServerRoute({
     body: z.object({
       lookback: z.string().max(64),
       ruleUuid: z.string().max(256).optional(),
-      spaceId: z.string().max(1024),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -40,7 +39,7 @@ const countAlertsRoute = createServerRoute({
     const count = await alertsReader.countAlerts(scopedClusterClient.asCurrentUser, {
       lookback: params.body.lookback,
       ruleUuid: params.body.ruleUuid,
-      spaceId: params.body.spaceId,
+      spaceId: await getSpaceId(request),
     });
 
     return { alertIndex: alertsReader.index, count };
@@ -64,10 +63,9 @@ const changePointScanRoute = createServerRoute({
     body: z.object({
       lookback: z.string().max(64),
       bucketInterval: z.string().max(64),
-      spaceId: z.string().max(1024),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -83,7 +81,7 @@ const changePointScanRoute = createServerRoute({
       {
         lookback: params.body.lookback,
         bucketInterval: params.body.bucketInterval,
-        spaceId: params.body.spaceId,
+        spaceId: await getSpaceId(request),
       },
       queryLinks
     );
@@ -109,10 +107,9 @@ const ruleChangePointRoute = createServerRoute({
       ruleUuid: z.string().max(256),
       lookback: z.string().max(64),
       bucketInterval: z.string().max(64),
-      spaceId: z.string().max(1024),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -123,7 +120,7 @@ const ruleChangePointRoute = createServerRoute({
       ruleUuid: params.body.ruleUuid,
       lookback: params.body.lookback,
       bucketInterval: params.body.bucketInterval,
-      spaceId: params.body.spaceId,
+      spaceId: await getSpaceId(request),
     });
 
     return { alertIndex: alertsReader.index, ...result };
@@ -147,10 +144,9 @@ const ruleActivityRoute = createServerRoute({
       ruleUuid: z.string().max(256),
       lookback: z.string().max(64),
       windowInterval: z.string().max(64),
-      spaceId: z.string().max(1024),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -161,7 +157,7 @@ const ruleActivityRoute = createServerRoute({
       ruleUuid: params.body.ruleUuid,
       lookback: params.body.lookback,
       windowInterval: params.body.windowInterval,
-      spaceId: params.body.spaceId,
+      spaceId: await getSpaceId(request),
     });
 
     return { alertIndex: alertsReader.index, ...result };
@@ -187,10 +183,9 @@ const ruleAlertWindowsRoute = createServerRoute({
       currentLookback: z.string().max(64),
       referenceLookbackGte: z.string().max(64),
       referenceLookbackLt: z.string().max(64),
-      spaceId: z.string().max(1024),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -202,7 +197,7 @@ const ruleAlertWindowsRoute = createServerRoute({
       currentLookback: params.body.currentLookback,
       referenceLookbackGte: params.body.referenceLookbackGte,
       referenceLookbackLt: params.body.referenceLookbackLt,
-      spaceId: params.body.spaceId,
+      spaceId: await getSpaceId(request),
     });
 
     return { alertIndex: alertsReader.index, ...result };
