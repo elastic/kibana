@@ -68,6 +68,28 @@ describe('findMutedAlertInstancesRequestBodySchema', () => {
       `"[filter]: expected value of type [string] but got [number]"`
     );
   });
+
+  test('throws when per_page exceeds the maximum', () => {
+    expect(() =>
+      findMutedAlertInstancesRequestBodySchema.validate({ per_page: 101 })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[per_page]: Value must be equal to or lower than [100]."`
+    );
+  });
+
+  test('throws when page exceeds the maximum', () => {
+    expect(() =>
+      findMutedAlertInstancesRequestBodySchema.validate({ page: 10001, per_page: 1 })
+    ).toThrowErrorMatchingInlineSnapshot(`"[page]: Value must be equal to or lower than [10000]."`);
+  });
+
+  test('throws when page and per_page would return more than the max result window', () => {
+    expect(() =>
+      findMutedAlertInstancesRequestBodySchema.validate({ page: 200, per_page: 100 })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"The provided page and per_page values cannot return more than 10000 results."`
+    );
+  });
 });
 
 describe('findMutedAlertInstancesResponseSchema', () => {

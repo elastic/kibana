@@ -6,32 +6,39 @@
  */
 import { schema } from '@kbn/config-schema';
 import {
-  ALLOWED_MAX_ALERTS,
-  MAX_SNOOZED_INSTANCE_ID_LENGTH,
   MAX_KQL_FILTER_LENGTH,
   MAX_RESULT_WINDOW,
+  MAX_ALERTS_PER_PAGE,
 } from '../../../../../max_alert_limit';
 
-export const findMutedAlertInstancesRequestBodySchema = schema.object({
-  per_page: schema.number({
-    defaultValue: 10,
-    min: 0,
-  }),
-  page: schema.number({
-    defaultValue: 1,
-    min: 1,
-  }),
-  filter: schema.maybe(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH })),
-});
+export const findMutedAlertInstancesRequestBodySchema = schema.object(
+  {
+    per_page: schema.number({
+      defaultValue: 10,
+      min: 0,
+      max: MAX_ALERTS_PER_PAGE,
+    }),
+    page: schema.number({
+      defaultValue: 1,
+      min: 1,
+      max: MAX_RESULT_WINDOW,
+    }),
+    filter: schema.maybe(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH })),
+  },
+  {
+    validate: ({ page, per_page: perPage }) => {
+      if (page * perPage > MAX_RESULT_WINDOW) {
+        return `The provided page and per_page values cannot return more than ${MAX_RESULT_WINDOW} results.`;
+      }
+    },
+  }
+);
 
 const findMutedAlertInstancesResponseDataSchema = schema.arrayOf(
   schema.object({
-    id: schema.string({ maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH }),
-    muted_alert_ids: schema.arrayOf(schema.string({ maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH }), {
-      maxSize: ALLOWED_MAX_ALERTS,
-    }),
-  }),
-  { maxSize: MAX_RESULT_WINDOW }
+    id: schema.string(),
+    muted_alert_ids: schema.arrayOf(schema.string()),
+  })
 );
 
 export const findMutedAlertInstancesResponseSchema = schema.object({
