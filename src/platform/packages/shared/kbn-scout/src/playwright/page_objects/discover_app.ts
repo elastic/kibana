@@ -532,6 +532,15 @@ export class DiscoverApp {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
 
+  async openLensEditFlyout() {
+    await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
+    await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  getLensEditFlyout(): Locator {
+    return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
   async getTheColumnFromGrid(): Promise<string[]> {
     const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));

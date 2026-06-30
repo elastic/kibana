@@ -488,16 +488,21 @@ export class DatePicker {
     await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
   }
 
+  getTimePickerControl(): Locator {
+    return this.page.testSubj.locator('dateRangePickerControlButton').or(this.quickMenuButton);
+  }
+
+  getDisabledDatePickerIndicator(): Locator {
+    return this.page.testSubj.locator('kbnQueryBar-datePicker-disabled');
+  }
+
   async timePickerExists(): Promise<boolean> {
     // Some views have no time picker at all (e.g. a data view without a time
     // field), so this must resolve to `false` rather than throw. Don't delegate
     // to `isNewDateRangePicker()`: it waits up to 10s for a picker to mount and
     // throws when none does. Probe both variant markers directly with a short,
     // non-throwing wait — either one present means a time picker exists.
-    const anyPicker = this.page.testSubj
-      .locator('dateRangePickerControlButton')
-      .or(this.quickMenuButton);
-    return anyPicker
+    return this.getTimePickerControl()
       .waitFor({ state: 'visible', timeout: 1000 })
       .then(() => true)
       .catch(() => false);
