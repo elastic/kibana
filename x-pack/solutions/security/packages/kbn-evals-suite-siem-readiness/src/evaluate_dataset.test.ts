@@ -72,8 +72,21 @@ describe('createEvaluateSiemReadinessDataset', () => {
     );
   });
 
-  it('registers exactly the criteria evaluator plus the five trace-based evaluators', async () => {
+  it('registers the criteria evaluator, the five trace-based evaluators, plus trajectory + ExpectedToolCalled (L2 + L4)', async () => {
+    const names = (await getRegisteredEvaluators()).map((evaluator) => evaluator.name);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'SIEM Readiness Criteria',
+        'Input tokens',
+        'Output tokens',
+        'Cached tokens',
+        'Tool calls',
+        'Latency',
+        'Trajectory',
+        'ExpectedToolCalled',
+      ])
+    );
     const registeredEvaluators = await getRegisteredEvaluators();
-    expect(registeredEvaluators).toHaveLength(6);
+    expect(registeredEvaluators).toHaveLength(8);
   });
 });

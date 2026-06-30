@@ -69,6 +69,45 @@ export function createEndpointTrajectoryEvaluator(): Evaluator<SecurityDatasetEx
   } as Evaluator<SecurityDatasetExample, TaskOutput>;
 }
 
+/**
+ * L4 (Tool Selection) signal for the endpoint suite — code-judged, zero LLM cost.
+ * Mirrors the alerts-rag `ExpectedToolCalled` pattern: returns N/A when an example
+ * has no `tool_sequence` so partial-coverage datasets don't get penalised.
+ *
+ * Scores 1 if the first tool in the golden sequence was called, 0 otherwise. The
+ * full-order alignment is already covered by the Trajectory evaluator (L2); this
+ * answers the narrower "did the agent reach for the right entry-point tool?"
+ */
+export const createEndpointExpectedToolCalledEvaluator = (): Evaluator<
+  SecurityDatasetExample,
+  TaskOutput
+> => ({
+  name: 'ExpectedToolCalled',
+  kind: 'CODE',
+  evaluate: async ({ output, expected }) => {
+    const goldenSequence = deriveEndpointGoldenToolSequence(
+      expected as SecurityDatasetExample['output'] | undefined
+    );
+    if (goldenSequence.length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No tool_sequence annotation — skipping ExpectedToolCalled.',
+      };
+    }
+
+    const expectedToolId = goldenSequence[0];
+    const usedToolIds = getToolCallSteps(output as TaskOutput)
+      .map((step) => step.tool_id)
+      .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID);
+
+    return {
+      score: usedToolIds.includes(expectedToolId) ? 1 : 0,
+      metadata: { expectedToolId, usedToolIds },
+    };
+  },
+});
+
 export type EvaluateSecurityDataset = (options: {
   dataset: {
     name: string;
@@ -145,6 +184,7 @@ export function createEvaluateSecurityDataset({
           skillName: 'elastic-defend-configuration-troubleshooting',
         }) as Evaluator<SecurityDatasetExample, TaskOutput>,
         createEndpointTrajectoryEvaluator(),
+        createEndpointExpectedToolCalledEvaluator(),
         toolCalls as Evaluator<SecurityDatasetExample, TaskOutput>,
         latency as Evaluator<SecurityDatasetExample, TaskOutput>,
         inputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
