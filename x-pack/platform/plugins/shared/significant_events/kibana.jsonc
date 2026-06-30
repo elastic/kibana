@@ -21,6 +21,7 @@
       "licensing",
       "ruleRegistry",
       "security",
+      "streams",
       "taskManager",
       "usageCollection",
       "fieldsMetadata"
