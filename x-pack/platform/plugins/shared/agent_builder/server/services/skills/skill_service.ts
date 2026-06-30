@@ -17,10 +17,7 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import {
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
@@ -132,18 +129,31 @@ class SkillServiceImpl implements SkillService {
         const toolRegistry = await getToolRegistry({ request });
         const soClient = savedObjects.getScopedClient(request);
         const uiSettingsClient = uiSettings.asScopedToClient(soClient);
-        const [experimentalFeaturesEnabled, tracingEnabled] = await Promise.all([
+        const uiSettingKeys = [
+          ...new Set(
+            [...this.skills.values()]
+              .filter((skill) => skill.uiSettingRequired)
+              .map((skill) =>
+                typeof skill.uiSettingRequired === 'string'
+                  ? skill.uiSettingRequired
+                  : skill.uiSettingRequired!.key
+              )
+          ),
+        ];
+        const [experimentalFeaturesEnabled, ...uiSettingValuesList] = await Promise.all([
           uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
-          uiSettingsClient.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
+          ...uiSettingKeys.map((key) => uiSettingsClient.get(key)),
         ]);
-        const tracingFeaturesEnabled = tracingEnabled && experimentalFeaturesEnabled;
+        const uiSettingValues = new Map(
+          uiSettingKeys.map((key, index) => [key, uiSettingValuesList[index]])
+        );
 
         return createSkillRegistry({
           builtinProvider,
           persistedProvider,
           toolRegistry,
           experimentalFeaturesEnabled,
-          tracingFeaturesEnabled,
+          uiSettingValues,
         });
       },
       registerSkill: (skill) => {

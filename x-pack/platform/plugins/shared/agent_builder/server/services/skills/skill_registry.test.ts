@@ -799,7 +799,7 @@ describe('createSkillRegistry', () => {
     });
   });
 
-  describe('tracing features filtering', () => {
+  describe('ui setting requirement filtering', () => {
     const tracesSkill = createMockInternalSkillDefinition({
       id: 'agent-builder-traces',
       name: 'agent-builder-traces',
@@ -808,13 +808,13 @@ describe('createSkillRegistry', () => {
       uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
     });
 
-    it('hides the traces skill when tracing features are disabled', async () => {
+    it('hides skills when the required ui setting is false', async () => {
       const registry = createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([tracesSkill]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
         experimentalFeaturesEnabled: true,
-        tracingFeaturesEnabled: false,
+        uiSettingValues: new Map([[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID, false]]),
       });
 
       expect(await registry.has('agent-builder-traces')).toBe(false);
@@ -822,13 +822,13 @@ describe('createSkillRegistry', () => {
       expect(await registry.list()).toEqual([]);
     });
 
-    it('shows the traces skill when tracing and experimental features are enabled', async () => {
+    it('shows skills when the required ui setting is true', async () => {
       const registry = createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([tracesSkill]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
         experimentalFeaturesEnabled: true,
-        tracingFeaturesEnabled: true,
+        uiSettingValues: new Map([[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID, true]]),
       });
 
       expect(await registry.has('agent-builder-traces')).toBe(true);
