@@ -17,7 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
-import { AlertStatusExceptClosed } from '../../../model/alert.gen';
+import { AlertStatusExceptClosed, Reason } from '../../../model/alert.gen';
 
 /**
  * Elasticsearch runtime field type.
@@ -28,26 +28,6 @@ export const RuntimeFieldType = lazySchema(() =>
 export type RuntimeFieldType = z.infer<typeof RuntimeFieldType>;
 export type RuntimeFieldTypeEnum = typeof RuntimeFieldType.enum;
 export const RuntimeFieldTypeEnum = RuntimeFieldType.enum;
-
-export const ReasonEnum = lazySchema(() =>
-  z.enum([
-    'false_positive',
-    'duplicate',
-    'true_positive',
-    'benign_positive',
-    'automated_closure',
-    'other',
-  ])
-);
-export type ReasonEnum = z.infer<typeof ReasonEnum>;
-export type ReasonEnumEnum = typeof ReasonEnum.enum;
-export const ReasonEnumEnum = ReasonEnum.enum;
-
-/**
- * The reason for closing the alerts. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.
- */
-export const Reason = lazySchema(() => z.union([ReasonEnum, z.string()]));
-export type Reason = z.infer<typeof Reason>;
 
 export const SetAlertsStatusByIdsBase = lazySchema(() =>
   z.object({
@@ -116,7 +96,7 @@ export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBo
 export type SetAlertsStatusRequestBodyInput = z.input<typeof SetAlertsStatusRequestBody>;
 
 /**
- * Elasticsearch update by query response.
+ * Elasticsearch update by query response
  */
 export const SetAlertsStatusResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type SetAlertsStatusResponse = z.infer<typeof SetAlertsStatusResponse>;
