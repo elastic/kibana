@@ -87,6 +87,13 @@ export const ATTACH_ACTION = i18n.translate(
   }
 );
 
+export const OPEN_IN_LENS_ACTION = i18n.translate(
+  'xpack.cases.caseView.attach.savedObjectModal.openInLensAction',
+  {
+    defaultMessage: 'Open in Lens',
+  }
+);
+
 export const ATTACHED_ACTION = i18n.translate(
   'xpack.cases.caseView.attach.savedObjectModal.attachedAction',
   {

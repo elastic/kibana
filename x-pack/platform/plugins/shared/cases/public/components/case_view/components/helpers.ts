@@ -24,6 +24,7 @@ import {
   getSavedObjectAttachmentAttributes,
   isSavedObjectAttachment,
 } from '../../attachments/common/saved_object/helpers';
+import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type { SavedObjectAttachmentAttributes } from '../../attachments/common/saved_object/types';
 import { UNKNOWN } from '../../../common/translations';
 
@@ -42,6 +43,12 @@ export const getAttachmentAuthorLabel = (user: AttachmentUIV2['createdBy']): str
   user.fullName || user.username || user.email || UNKNOWN;
 
 export const getAttachmentItemCount = (comment: AttachmentUIV2): number => {
+  // Persistable (value) lens has no countable id and the attachments tab
+  // renderer only handles the SO-reference arm, so exclude it from the count.
+  // Explicit Lens carve-out for now; revisit when we generalize hybrid types.
+  if (comment.type === LENS_ATTACHMENT_TYPE && !isSavedObjectAttachment(comment)) {
+    return 0;
+  }
   if (isAlertAttachment(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId.length : 1;
   }

@@ -6,6 +6,16 @@
  */
 
 import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_SO_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LENS_SO_TYPE,
+  MAP_ATTACHMENT_TYPE,
+  MAP_SO_TYPE,
+} from '../../common/constants/attachments';
+import {
   externalReferenceAttachmentESAttributes,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
@@ -244,6 +254,38 @@ describe('so_references', () => {
       expect(res.didDeleteOperation).toBe(false);
     });
 
+    it.each([
+      [DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_SO_TYPE],
+      [DISCOVER_SESSION_ATTACHMENT_TYPE, DISCOVER_SESSION_SO_TYPE],
+      [LENS_ATTACHMENT_TYPE, LENS_SO_TYPE],
+      [MAP_ATTACHMENT_TYPE, MAP_SO_TYPE],
+    ])('should mirror attachmentId for %s saved-object attachments', (type, soType) => {
+      const res = extractAttachmentSORefsFromAttributes(
+        {
+          type,
+          attachmentId: `${soType}-id-1`,
+          metadata: {
+            soType,
+            title: 'Saved object title',
+          },
+          owner: 'securitySolution',
+        } as never,
+        []
+      );
+
+      expect(res.references).toEqual([
+        {
+          id: `${soType}-id-1`,
+          name: 'attachmentId',
+          type: soType,
+        },
+      ]);
+      expect((res.attributes as unknown as Record<string, unknown>).attachmentId).toBe(
+        `${soType}-id-1`
+      );
+      expect(res.didDeleteOperation).toBe(false);
+    });
+
     it('should not extract attachmentId for unified attachments without metadata.soType', () => {
       const unifiedNonSoBackedAttributes = {
         type: 'security.endpoint',
@@ -258,19 +300,22 @@ describe('so_references', () => {
       expect(res.didDeleteOperation).toBe(false);
     });
 
-    it('should NOT extract attachmentId for an unregistered unified type carrying a forged metadata.soType', () => {
-      // `comment` is a unified value type and is NOT mapped in
-      // UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP. Even with a string `metadata.soType`
-      // the dispatcher must refuse to mirror `attachmentId` into references.
-      const forged = {
-        type: 'comment',
-        attachmentId: 'attacker-supplied-id',
-        metadata: { soType: 'file', other: 'payload' },
+    it('should mirror attachmentId for any unified attachment carrying metadata.soType', () => {
+      const customSoBackedAttributes = {
+        type: 'custom.so-backed',
+        attachmentId: 'custom-so-id',
+        metadata: { soType: 'custom-so', title: 'Custom saved object' },
         owner: 'securitySolution',
       };
-      const res = extractAttachmentSORefsFromAttributes(forged as never, []);
+      const res = extractAttachmentSORefsFromAttributes(customSoBackedAttributes as never, []);
 
-      expect(res.references).toEqual([]);
+      expect(res.references).toEqual([
+        {
+          id: 'custom-so-id',
+          name: 'attachmentId',
+          type: 'custom-so',
+        },
+      ]);
     });
   });
 });

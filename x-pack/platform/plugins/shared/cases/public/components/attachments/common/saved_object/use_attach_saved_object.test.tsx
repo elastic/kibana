@@ -181,6 +181,14 @@ describe('useAttachSavedObject', () => {
     );
   });
 
+  it('no-ops for lens — lens is routed through the editor round trip', async () => {
+    const { result } = render();
+    await act(async () => {
+      await result.current.attach(buildSO({ id: 'lens-1', type: 'lens' }));
+    });
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
   it('falls back to the id when the SO has no title', async () => {
     const { result } = render();
     await act(async () => {
