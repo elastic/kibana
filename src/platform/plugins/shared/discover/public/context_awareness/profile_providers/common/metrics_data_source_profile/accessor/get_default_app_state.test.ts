@@ -36,6 +36,7 @@ describe('getDefaultAppState', () => {
       ...prevAppState,
       hideChart: false,
       hideTable: true,
+      hideSidebar: true,
     });
   });
 
