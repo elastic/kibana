@@ -35,6 +35,7 @@ export function transformIn(state: LinksEmbeddableState): {
   const { links, references } = transformLinksIn((state as LinksByValueState).links);
   return {
     state: {
+      title: '',
       ...state,
       links,
     },

@@ -117,6 +117,12 @@ export const linksByValueSchema = serializedTitlesSchema.extends(
 
 export const linksByReferenceSchema = serializedTitlesSchema.extends(
   {
+    // make title required for the library item
+    title: schema.string({
+      meta: {
+        description: 'The library item title.',
+      },
+    }),
     ref_id: schema.string({
       maxLength: MAX_ID_LENGTH + 50, // accounts for prefix
       meta: {
