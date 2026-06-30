@@ -16,14 +16,13 @@ import {
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { SERVICE_MAP_URL_PARAM_ROUTES } from '../constants';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { isEdge } from './utils';
-import { APM_EBT_ACTIONS } from '../../ebt_constants';
-import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -65,11 +64,7 @@ export function EdgeContents({
   start,
   end,
 }: Pick<ContentsProps, 'selection' | 'environment' | 'start' | 'end'>) {
-  const { query } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  const { query } = useAnyOfApmParams(...SERVICE_MAP_URL_PARAM_ROUTES);
   const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 
   const isEdgeSelection = isEdge(selection);
@@ -145,10 +140,6 @@ export function EdgeContents({
                 environment,
                 dependencyName,
                 sortDirection: 'DESC',
-              }}
-              ebt={{
-                action: APM_EBT_ACTIONS.EXPLORE_TRACES,
-                element: SERVICE_MAP_EBT_ELEMENTS.CONNECTION_POPOVER,
               }}
             />
           </EuiFlexItem>

@@ -5,6 +5,22 @@
  * 2.0.
  */
 
+/** Dedicated service-map pages and embed hosts (e.g. service overview). */
+export const SERVICE_MAP_URL_PARAM_ROUTES = [
+  '/service-map',
+  '/services/{serviceName}/service-map',
+  '/mobile-services/{serviceName}/service-map',
+  '/services/{serviceName}/overview',
+] as const;
+
+/** Routes where alert-badge SPA navigation is supported. */
+export const SERVICE_MAP_ALERTS_NAVIGATE_ROUTES = [
+  '/service-map',
+  '/services/{serviceName}/service-map',
+  '/mobile-services/{serviceName}/service-map',
+  '/services/{serviceName}/overview',
+] as const;
+
 /**
  * Layout constants for the React Flow service map (client-side only)
  */
@@ -26,12 +42,6 @@ export const GRAPH_MARGIN = 50;
 
 /** Padding around the graph when fitting the view (as a ratio) */
 export const FIT_VIEW_PADDING = 0.2;
-
-/** Minimum zoom level the user can pan/zoom to (also the floor fitView clamps to) */
-export const MIN_ZOOM = 0.2;
-
-/** Maximum zoom level the user can pan/zoom to */
-export const MAX_ZOOM = 3;
 
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
@@ -85,7 +95,6 @@ export const MOCK_EUI_THEME = {
     mediumShade: '#98A2B3',
     primaryText: '#0077CC',
     textPrimary: '#1a1c21',
-    textSubdued: '#69707D',
     emptyShade: '#fff',
     backgroundBasePlain: '#fff',
     backgroundBaseHighlighted: '#F6F9FC',
