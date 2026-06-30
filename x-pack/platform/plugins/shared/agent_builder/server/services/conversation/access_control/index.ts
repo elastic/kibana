@@ -33,7 +33,7 @@ const isPublicConversation = ({
   return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
 };
 
-export const hasConversationReadAccess = ({
+export const hasConversationConverseAccess = ({
   conversation,
   user,
 }: {

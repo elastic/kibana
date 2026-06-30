@@ -7,7 +7,7 @@
 
 import { ConversationAccessControlMode, type UserIdAndName } from '@kbn/agent-builder-common';
 import type { ConversationProperties } from '../client/storage';
-import { hasConversationOwnerAccess, hasConversationReadAccess, isConversationOwner } from '.';
+import { hasConversationConverseAccess, hasConversationOwnerAccess, isConversationOwner } from '.';
 
 const user: UserIdAndName = {
   id: 'user-profile-id',
@@ -53,7 +53,7 @@ describe('conversation access control', () => {
         access_control: { access_mode: ConversationAccessControlMode.Public },
       });
 
-      expect(hasConversationReadAccess({ conversation: publicConversation, user })).toBe(true);
+      expect(hasConversationConverseAccess({ conversation: publicConversation, user })).toBe(true);
     });
 
     it('does not grant owner access to non-owners of public conversations', () => {
@@ -68,7 +68,7 @@ describe('conversation access control', () => {
     });
 
     it('treats missing access_control as private for non-owners', () => {
-      expect(hasConversationReadAccess({ conversation: conversation(), user })).toBe(false);
+      expect(hasConversationConverseAccess({ conversation: conversation(), user })).toBe(false);
     });
   });
 });

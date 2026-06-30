@@ -17,8 +17,8 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  hasConversationConverseAccess,
   hasConversationOwnerAccess,
-  hasConversationReadAccess,
   type ConversationAccess,
 } from '../access_control';
 import { buildReadAccessFilter } from '../access_control/query';
@@ -142,6 +142,7 @@ class ConversationClientImpl implements ConversationClient {
       if (isConversationNotFoundError(error)) {
         return false;
       }
+
       throw error;
     }
   }
@@ -247,7 +248,7 @@ class ConversationClientImpl implements ConversationClient {
 
     switch (access) {
       case 'converse':
-        allowed = hasConversationReadAccess({ conversation, user: this.user });
+        allowed = hasConversationConverseAccess({ conversation, user: this.user });
 
         if (allowed) {
           try {
@@ -256,6 +257,7 @@ class ConversationClientImpl implements ConversationClient {
             if (!isAgentNotFoundError(error)) {
               throw error;
             }
+
             allowed = false;
           }
         }
