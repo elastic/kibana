@@ -19,6 +19,7 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { type SolutionId } from '@kbn/core-chrome-browser';
+import { KIBANA_PROJECTS } from '@kbn/projects-solutions-groups';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type {
   NavigationPublicSetup,
@@ -225,5 +226,9 @@ function getIsProjectNav(solutionView?: string) {
 }
 
 function isKnownSolutionView(solution?: string): solution is SolutionId {
-  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
+  // Validate against the canonical project/solution list rather than a hardcoded
+  // subset, so every solution type (es, oblt, security, workplaceai, vectordb, …)
+  // is supported and new ones are picked up automatically. `SolutionId` is the
+  // element type of `KIBANA_PROJECTS`, which keeps this predicate sound.
+  return solution !== undefined && (KIBANA_PROJECTS as readonly string[]).includes(solution);
 }
