@@ -16,6 +16,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getCastingTypesSuggestions } from '../../../commands/definitions/utils/autocomplete/expressions/positions/after_cast';
 import { fields, getFunctionSignaturesByReturnType, setup } from './helpers';
 import { Location } from '../../../commands/registry/types';
 
@@ -25,37 +26,27 @@ const fieldsToTest = fields.filter(
 
 describe('Inline Cast Autocomplete Suggestions', () => {
   it.each(fieldsToTest)('suggests casting types for $name', async (field) => {
-    const { suggest } = await setup('^');
-    const suggestions = await suggest(`FROM index_a | WHERE ${field.name}::^`);
-
-    expect(suggestions.every(({ kind }) => kind === 'Keyword')).toBe(true);
-    expect(suggestions.map(({ text }) => text)).not.toContain(field.type);
+    const { assertSuggestions } = await setup('^');
+    await assertSuggestions(
+      `FROM index_a | WHERE ${field.name}::^`,
+      getCastingTypesSuggestions(field.type)
+    );
   });
 
   it('suggests casting types when already partially writen', async () => {
     const { assertSuggestions } = await setup('^');
-    await assertSuggestions('FROM index_a | WHERE true::str^', [
-      'double',
-      'int',
-      'integer',
-      'keyword',
-      'long',
-      'string',
-      'unsigned_long',
-    ]);
+    await assertSuggestions(
+      'FROM index_a | WHERE true::str^',
+      getCastingTypesSuggestions('boolean')
+    );
   });
 
   it('suggests casting types inside a function', async () => {
     const { assertSuggestions } = await setup('^');
-    await assertSuggestions('FROM index_a | WHERE abs(false::^)', [
-      'double',
-      'int',
-      'integer',
-      'keyword',
-      'long',
-      'string',
-      'unsigned_long',
-    ]);
+    await assertSuggestions(
+      'FROM index_a | WHERE abs(false::^)',
+      getCastingTypesSuggestions('boolean')
+    );
   });
 
   it('suggests operators after inline cast', async () => {
