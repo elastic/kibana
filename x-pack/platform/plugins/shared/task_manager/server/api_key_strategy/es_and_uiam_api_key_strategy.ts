@@ -271,9 +271,11 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
 
     const targets: InvalidationTarget[] = [];
 
-    // Only emit an ES invalidation target when an ES API key was actually persisted.
-    // UIAM-only tasks reuse `apiKeyId` for the UIAM key id; emitting it as a bare ES
-    // target would route it to ES-native invalidation, which cannot revoke a UIAM key.
+    // Skip the ES invalidation target when no ES key material (`apiKey`) was persisted.
+    // UIAM-only tasks have only a UIAM key; their `userScope.apiKeyId` actually holds the
+    // UIAM key id (mirrored for the in-use guard query), so a bare `{ apiKeyId }` target
+    // would be sent to ES-native invalidation, which cannot revoke a UIAM key. The UIAM
+    // key is invalidated below via the `uiamApiKeyId` + `uiamApiKey` target.
     if (apiKey) {
       targets.push({ apiKeyId: userScope.apiKeyId });
     }

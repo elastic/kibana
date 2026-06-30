@@ -68,11 +68,8 @@ export const shouldCloneApiKeyFromRequest = (
   user: AuthenticatedUser | null = security.authc.getCurrentUser(request)
 ) => {
   const requestCarriesApiKey = (user && isRequestApiKeyType(user)) || request.isFakeRequest;
-  if (!requestCarriesApiKey) {
-    return false;
-  }
 
-  return options?.cloneApiKey === true || request.isFakeRequest;
+  return requestCarriesApiKey && (options?.cloneApiKey === true || request.isFakeRequest);
 };
 
 const grantApiKeysForTaskTypes = async ({
@@ -82,10 +79,7 @@ const grantApiKeysForTaskTypes = async ({
 }: {
   taskInstances: TaskInstance[];
   user: AuthenticatedUser | null;
-  createKey: (params: {
-    name: string;
-    taskType: string;
-  }) => Promise<{ id: string; api_key: string } | null>;
+  createKey: (params: { name: string }) => Promise<{ id: string; api_key: string } | null>;
 }) => {
   const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
   const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
@@ -95,7 +89,6 @@ const grantApiKeysForTaskTypes = async ({
     const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
     const apiKeyCreateResult = await createKey({
       name: truncate(apiKeyName, { length: 256 }),
-      taskType,
     });
 
     if (!apiKeyCreateResult) {
@@ -154,14 +147,12 @@ export const createApiKey = async (
     });
   }
 
-  // If the user passed in their own API key or the request is a fake request, use the API key from the request
+  // The user passed in their own API key, so reuse it directly (fake requests always clone above).
   if (apiKeyCreatedByUser) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
     if (!apiKeyCreateResult) {
-      throw Error(
-        `Could not extract API key from ${request.isFakeRequest ? 'fake' : 'user'} request header.`
-      );
+      throw Error('Could not extract API key from user request header.');
     }
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
