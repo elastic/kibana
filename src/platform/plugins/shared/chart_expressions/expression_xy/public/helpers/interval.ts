@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { XYChartProps } from '../../common';
