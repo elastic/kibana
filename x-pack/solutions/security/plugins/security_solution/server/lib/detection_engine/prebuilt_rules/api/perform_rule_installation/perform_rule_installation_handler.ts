@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -113,9 +112,7 @@ export const performRuleInstallationHandler = async (
     const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: ruleAssets,
     });
-    installedRules.push(
-      ...results.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
-    );
+    installedRules.push(...results.map(({ result }) => result));
     ruleErrors.push(...errors);
     logger.debug(
       `bulkCreatePrebuiltRules: ${results.length} created, ${errors.length} failed out of ${ruleAssets.length} total`
