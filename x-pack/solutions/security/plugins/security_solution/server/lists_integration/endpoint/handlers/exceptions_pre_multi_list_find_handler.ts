@@ -15,6 +15,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 import { setFindRequestFilterScopeToActiveSpace } from '../utils';
 
@@ -58,6 +59,15 @@ export const getExceptionsPreMultiListFindHandler = (
       // validate Blocklist
       isEndpointArtifact = true;
       await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind();
+    } else if (
+      data.listId.some((id) => CustomYaraSignaturesValidator.isCustomYaraSignature({ listId: id }))
+    ) {
+      // validate YARA signatures
+      isEndpointArtifact = true;
+      await new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      ).validatePreMultiListFind();
     } else if (
       data.listId.some((id) => EndpointExceptionsValidator.isEndpointException({ listId: id }))
     ) {
