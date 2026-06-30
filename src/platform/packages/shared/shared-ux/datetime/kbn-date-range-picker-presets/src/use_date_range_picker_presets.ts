@@ -30,7 +30,7 @@ import { mapQuickRanges, TIMEPICKER_QUICK_RANGES_SETTING, type QuickRange } from
 export interface UseDateRangePickerPresetsArgs {
   userStorage: IUserStorageClient | null;
   uiSettings: IUiSettingsClient;
-  userProfile: UserProfileService;
+  userProfile?: UserProfileService;
   notifications: NotificationsStart;
 }
 
@@ -55,7 +55,10 @@ export const useDateRangePickerPresets = ({
   userProfile,
   notifications,
 }: UseDateRangePickerPresetsArgs): UseDateRangePickerPresetsResult => {
-  const userProfile$ = useMemo(() => userProfile.getUserProfile$(), [userProfile]);
+  const userProfile$ = useMemo(
+    () => (userProfile ? userProfile.getUserProfile$() : of(undefined)),
+    [userProfile]
+  );
   const userProfileData = useObservable(userProfile$);
 
   const quickRanges = useMemo(
