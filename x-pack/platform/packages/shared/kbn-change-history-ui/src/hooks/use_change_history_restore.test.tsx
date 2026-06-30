@@ -264,6 +264,7 @@ describe('useChangeHistoryRestore', () => {
     expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.RestoreFailed, {
       eventName: 'Change history restore failed',
       ...testScope,
+      rollbackDistance: 4,
       errorCode: 'RESTORE_CONFLICT',
     });
   });

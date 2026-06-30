@@ -87,7 +87,10 @@ export const useChangeHistoryRestore: (
 
         const mappedError = mapChangeHistoryRestoreError(restoreError);
         setError(mappedError);
-        telemetry.reportRestoreFailed({ errorCode: mappedError.code });
+        telemetry.reportRestoreFailed({
+          ...params.restoreTelemetry,
+          errorCode: mappedError.code,
+        });
         return false;
       } finally {
         if (!abortController.signal.aborted) {

@@ -209,6 +209,7 @@ const restoreCompletedSchema: RootSchema<ReportChangeHistoryRestoreCompletedActi
 const restoreFailedSchema: RootSchema<ReportChangeHistoryRestoreFailedActionParams> = {
   ...eventNameSchema,
   ...scopeSchema,
+  ...restoreSequenceFieldsSchema,
   errorCode: {
     type: 'keyword',
     _meta: {

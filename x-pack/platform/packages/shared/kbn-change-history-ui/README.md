@@ -117,7 +117,7 @@ Every payload includes `eventName`, `module`, `dataset`, and `objectType` (from 
 | `change_history_diff_viewed` | Change history diff viewed | User views a diff *(not wired yet)* | `comparisonType` (`vs_current` \| `vs_previous`), optional `versionDistance`, `compareMode`, `hasSemanticSummary` |
 | `change_history_restore_confirmed` | Change history restore confirmed | User confirms restore in the dialog | optional `restoredFromSequence`, `currentSequence`, `rollbackDistance` |
 | `change_history_restore_completed` | Change history restore completed | Restore API succeeds | same sequence fields + optional `newSequence`, `durationMs` (confirm → API success) |
-| `change_history_restore_failed` | Change history restore failed | Restore API fails | optional `errorCode` (e.g. `RESTORE_CONFLICT`) |
+| `change_history_restore_failed` | Change history restore failed | Restore API fails | optional sequence fields (same as confirm) + optional `errorCode` (e.g. `RESTORE_CONFLICT`) |
 
 `rollbackDistance` is `currentSequence - restoredFromSequence` when both are present. Sequence fields are omitted when list rows lack `object.sequence`.
 

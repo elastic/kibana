@@ -175,6 +175,9 @@ describe('ChangeHistoryRestoreButton', () => {
       expect(reportEvent).toHaveBeenCalledWith(ChangeHistoryTelemetryEventTypes.RestoreFailed, {
         eventName: 'Change history restore failed',
         ...testScope,
+        restoredFromSequence: 3,
+        currentSequence: 7,
+        rollbackDistance: 4,
         errorCode: 'RESTORE_VALIDATION',
       });
     });

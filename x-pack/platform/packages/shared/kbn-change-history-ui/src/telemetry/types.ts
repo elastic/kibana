@@ -96,6 +96,9 @@ export interface ReportChangeHistoryRestoreCompletedActionParams
 export interface ReportChangeHistoryRestoreFailedActionParams
   extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
+  restoredFromSequence?: number;
+  currentSequence?: number;
+  rollbackDistance?: number;
   errorCode?: string;
 }
 
