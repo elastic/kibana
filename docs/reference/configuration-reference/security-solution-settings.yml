@@ -63,11 +63,11 @@ groups:
 
       - setting: xpack.securitySolution.disableEndpointRuleAutoInstall
         description: |
-          Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Introduced with v9.2.4.
+          Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created.
         datatype: bool
         default: false
         applies_to:
-          - "stack: ga 9.2.4+"
+          - "stack: ga 9.2.4!+"
           - "ech: ga"
           - "self: ga"
 
@@ -93,7 +93,7 @@ groups:
           stack: ga
           ech: ga
           self: ga
-        note: "Experimental features should not be enabled in production environments. The features in this section are experimental and may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features."
+        note: "Experimental features should not be enabled in production environments. Experimental features may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features."
         example: |
           ```yaml
           xpack.securitySolution.enableExperimental:
