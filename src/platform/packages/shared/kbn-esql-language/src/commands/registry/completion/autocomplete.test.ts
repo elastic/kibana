@@ -11,13 +11,13 @@ import { autocomplete } from './autocomplete';
 import {
   expectSuggestions,
   getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
   DATE_DIFF_TIME_UNITS,
   suggest as testSuggest,
   mockFieldsWithTypes,
 } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
-import { getFunctionsSuggestions } from '../../definitions/utils/autocomplete/helpers';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 
 interface SuggestionItem {
@@ -62,11 +62,9 @@ const completionExpectSuggestions = async (
 const PROMPT_SUGGESTIONS = [
   ' = ',
   ...getFieldNamesByType(ESQL_STRING_TYPES).map((fieldName) => `${fieldName} `),
-  ...getFunctionsSuggestions({
-    location: Location.COMPLETION,
-    types: ['text', 'keyword', 'unknown'],
-    options: {},
-  }).map(({ text }) => `${text} `),
+  ...getFunctionSignaturesByReturnType(Location.COMPLETION, ['text', 'keyword', 'unknown'], {
+    scalar: true,
+  }).map((text) => `${text} `),
 ];
 
 describe('COMPLETION Autocomplete', () => {
@@ -162,15 +160,17 @@ describe('COMPLETION Autocomplete', () => {
   it('suggests pipe after complete command', async () => {
     await completionExpectSuggestions(
       `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1" }`,
-      ['| ']
+      ['\n', '| ']
     );
   });
 
   it('suggests pipe after incomplete but enclosed map expression', async () => {
     await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" }`, [
+      '\n',
       '| ',
     ]);
     await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" } `, [
+      '\n',
       '| ',
     ]);
   });
@@ -184,6 +184,27 @@ describe('COMPLETION Autocomplete', () => {
           notContains: ['doubleField '],
         },
         mockCallbacks
+      );
+    });
+
+    it('suggests creating a value control for the prompt expression', async () => {
+      const results = await testSuggest(
+        'FROM a | COMPLETION ',
+        { ...mockContext, supportsControls: true },
+        'completion',
+        mockCallbacks,
+        autocomplete
+      );
+
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            label: 'Create control',
+            command: expect.objectContaining({
+              id: 'esql.control.values.create',
+            }),
+          }),
+        ])
       );
     });
   });

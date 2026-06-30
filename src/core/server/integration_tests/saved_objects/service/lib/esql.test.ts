@@ -10,6 +10,10 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import { URL } from 'url';
+import { esql } from '@elastic/esql';
+
+const colName = esql.col('esql-test-type.name');
+const colEmail = esql.col('esql-test-type.email');
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import type { Root } from '@kbn/core-root-server-internal';
@@ -109,8 +113,7 @@ describe('SOR - esql API', () => {
     const result = await savedObjectsRepository.esql({
       type: 'esql-test-type',
       namespaces: ['default'],
-      pipeline:
-        '| KEEP `esql-test-type.name`, `esql-test-type.email` | SORT `esql-test-type.email` | LIMIT 10',
+      pipeline: esql`KEEP ${colName}, ${colEmail} | SORT ${colEmail} | LIMIT 10`,
     });
 
     expect(result.columns).toEqual(
@@ -126,23 +129,24 @@ describe('SOR - esql API', () => {
     const defaultResult = await savedObjectsRepository.esql({
       type: 'esql-test-type',
       namespaces: ['default'],
-      pipeline: '| KEEP `esql-test-type.email` | LIMIT 100',
+      pipeline: esql`KEEP ${colEmail} | LIMIT 100`,
     });
     expect(defaultResult.values).toHaveLength(5);
 
     const namespaceAResult = await savedObjectsRepository.esql({
       type: 'esql-test-type',
       namespaces: ['namespaceA'],
-      pipeline: '| KEEP `esql-test-type.email` | LIMIT 100',
+      pipeline: esql`KEEP ${colEmail} | LIMIT 100`,
     });
     expect(namespaceAResult.values).toHaveLength(2);
   });
 
   it('should support WHERE filtering in the pipeline', async () => {
+    const email = 'john.doe@example.com';
     const result = await savedObjectsRepository.esql({
       type: 'esql-test-type',
       namespaces: ['default'],
-      pipeline: '| WHERE `esql-test-type.email` == "john.doe@example.com" | LIMIT 10',
+      pipeline: esql`WHERE ${colEmail} == ${{ email }} | LIMIT 10`,
     });
 
     expect(result.values).toHaveLength(1);
@@ -152,7 +156,7 @@ describe('SOR - esql API', () => {
     const result = await savedObjectsRepository.esql({
       type: 'esql-test-type',
       namespaces: ['default'],
-      pipeline: '| KEEP `esql-test-type.email` | SORT `esql-test-type.email` ASC | LIMIT 2',
+      pipeline: esql`KEEP ${colEmail} | SORT ${colEmail} ASC | LIMIT 2`,
     });
 
     expect(result.values).toHaveLength(2);
@@ -165,7 +169,7 @@ describe('SOR - esql API', () => {
     const result = await savedObjectsRepository.esql({
       type: 'esql-test-type',
       namespaces: ['default'],
-      pipeline: '| STATS doc_count = COUNT(*)',
+      pipeline: esql`STATS doc_count = COUNT(*)`,
     });
 
     expect(result.columns).toEqual(
@@ -182,7 +186,7 @@ describe('SOR - esql API', () => {
       type: 'esql-test-type',
       namespaces: ['default'],
       metadata: ['_id'],
-      pipeline: '| KEEP _id, `esql-test-type.email` | SORT `esql-test-type.email` | LIMIT 1',
+      pipeline: esql`KEEP _id, ${colEmail} | SORT ${colEmail} | LIMIT 1`,
     });
 
     expect(result.columns).toEqual(
@@ -202,36 +206,36 @@ describe('SOR - esql API', () => {
       filter: {
         term: { 'esql-test-type.email': 'charlie.brown@example.com' },
       },
-      pipeline: '| KEEP `esql-test-type.email` | LIMIT 10',
+      pipeline: esql`KEEP ${colEmail} | LIMIT 10`,
     });
 
     expect(result.values).toHaveLength(1);
     expect(result.values[0][0]).toBe('charlie.brown@example.com');
   });
 
-  it('should reject pipelines starting with a source command', async () => {
+  it('should reject pipelines containing a source command', async () => {
     await expect(
       savedObjectsRepository.esql({
         type: 'esql-test-type',
         namespaces: ['default'],
-        pipeline: 'FROM .kibana | LIMIT 10',
+        pipeline: esql`FROM .kibana | LIMIT 10`,
       })
-    ).rejects.toThrow('options.pipeline must not start with a source command');
+    ).rejects.toThrow('options.pipeline must not contain source command "FROM"');
 
     await expect(
       savedObjectsRepository.esql({
         type: 'esql-test-type',
         namespaces: ['default'],
-        pipeline: 'ROW x = 1',
+        pipeline: esql`ROW x = 1`,
       })
-    ).rejects.toThrow('options.pipeline must not start with a source command');
+    ).rejects.toThrow('options.pipeline must not contain source command "ROW"');
   });
 
   it('should return empty response for unknown types', async () => {
     const result = await savedObjectsRepository.esql({
       type: 'unknown-type',
       namespaces: ['default'],
-      pipeline: '| LIMIT 10',
+      pipeline: esql`LIMIT 10`,
     });
 
     expect(result.columns).toEqual([]);
@@ -243,7 +247,7 @@ describe('SOR - esql API', () => {
       savedObjectsRepository.esql({
         type: 'esql-test-type',
         namespaces: [],
-        pipeline: '| LIMIT 10',
+        pipeline: esql`LIMIT 10`,
       })
     ).rejects.toThrow('options.namespaces cannot be an empty array');
   });

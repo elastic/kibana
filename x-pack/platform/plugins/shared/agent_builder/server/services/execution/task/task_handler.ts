@@ -58,6 +58,11 @@ class TaskHandlerImpl implements TaskHandler {
       throw new Error(`Execution ${executionId} not found`);
     }
 
+    if (execution.status === ExecutionStatus.aborted) {
+      this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
+      return;
+    }
+
     // 2. Update status to running
     await executionClient.updateStatus(executionId, ExecutionStatus.running);
 

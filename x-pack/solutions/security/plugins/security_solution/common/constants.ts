@@ -123,6 +123,7 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
+export const RULES_CHANGES_HISTORY_PATH = `${RULES_PATH}/id/:ruleId/changes-history` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -359,6 +360,7 @@ export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
+export const INTERNAL_TIMELINES_BY_IDS_URL = '/internal/timelines/_by_ids' as const;
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite' as const;
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
@@ -500,6 +502,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
+  ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
+  ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

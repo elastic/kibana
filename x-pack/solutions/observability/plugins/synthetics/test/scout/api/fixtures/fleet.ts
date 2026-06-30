@@ -37,6 +37,22 @@ export async function getSyntheticsPackagePolicies(
 }
 
 /**
+ * Returns the compiled `synthetics/browser` journey stream of a monitor's Fleet
+ * package policy (the stream Fleet injects synced global `params` into). Used by
+ * the global-params sync suites to assert params are added/removed without
+ * depending on the brittle full golden-policy comparison.
+ */
+export function getBrowserCompiledStream(
+  policy: PackagePolicy | undefined
+): Record<string, unknown> | undefined {
+  const browserInput = policy?.inputs.find((input) => input.type === 'synthetics/browser');
+  const journeyStream = browserInput?.streams.find(
+    (stream) => (stream.compiled_stream as { type?: string } | undefined)?.type === 'browser'
+  );
+  return journeyStream?.compiled_stream as Record<string, unknown> | undefined;
+}
+
+/**
  * `GET /api/fleet/package_policies?...synthetics` then `.find` by the
  * `${monitorId}-${locationId}` package-policy id. Mirrors the FTR
  * `getPackagePoliciesForMonitor` helper used by the reset suites.

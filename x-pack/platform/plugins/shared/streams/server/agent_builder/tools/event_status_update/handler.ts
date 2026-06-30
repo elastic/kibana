@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SigEventStatus } from '@kbn/streams-schema';
-import type { EventClient } from '../../../lib/sig_events/events';
+import type { SignificantEventStatus } from '@kbn/streams-schema';
+import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
   eventClient,
@@ -16,12 +16,17 @@ export async function updateEventStatusToolHandler({
 }: {
   eventClient: EventClient;
   eventId: string;
-  status: SigEventStatus;
-}): Promise<{ event_id: string; updated: number; ignored: number; status: SigEventStatus }> {
+  status: SignificantEventStatus;
+}): Promise<{
+  event_id: string;
+  updated: number;
+  ignored: number;
+  status: SignificantEventStatus;
+}> {
   const { hits } = await eventClient.findById(eventId);
   const latest = hits[hits.length - 1];
 
-  if (!latest || latest.verdict === status) {
+  if (!latest || latest.status === status) {
     return { event_id: eventId, updated: 0, ignored: 1, status };
   }
 
@@ -33,7 +38,7 @@ export async function updateEventStatusToolHandler({
     created_at: now,
     event_id: nextEventId,
     previous_event_id: latest.event_id,
-    verdict: status,
+    status,
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });

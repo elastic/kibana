@@ -8,8 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectOption } from '@elastic/eui';
-import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelect,
+  EuiToolTip,
+} from '@elastic/eui';
+import { EuiPopoverTitle, EuiButtonIcon, useGeneratedHtmlId } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 
 interface WhenExpressionProps<TDropDownType extends string> {
@@ -47,9 +54,11 @@ export const ExpressionDropDown = <TDropDownType extends string>({
   ...props
 }: WhenExpressionProps<TDropDownType>) => {
   const [popoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={
         <EuiExpression
           data-test-subj="nodeTypeExpression"
@@ -65,7 +74,7 @@ export const ExpressionDropDown = <TDropDownType extends string>({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div onBlur={closePopover}>
-        <ClosablePopoverTitle onClose={closePopover}>
+        <ClosablePopoverTitle onClose={closePopover} titleId={popoverTitleId}>
           <>{popoverTitle}</>
         </ClosablePopoverTitle>
         <EuiSelect
@@ -87,26 +96,37 @@ export const ExpressionDropDown = <TDropDownType extends string>({
 interface ClosablePopoverTitleProps {
   children: JSX.Element;
   onClose: () => void;
+  titleId?: string;
 }
 
-export const ClosablePopoverTitle = ({ children, onClose }: ClosablePopoverTitleProps) => {
+export const ClosablePopoverTitle = ({ children, onClose, titleId }: ClosablePopoverTitleProps) => {
   return (
     <EuiPopoverTitle>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>{children}</EuiFlexItem>
+        <EuiFlexItem id={titleId}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraClosablePopoverTitleButton"
-            iconType="cross"
-            color="danger"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.infra.metrics.expressionItems.components.closablePopoverTitle.closeLabel',
               {
                 defaultMessage: 'Close',
               }
             )}
-            onClick={() => onClose()}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraClosablePopoverTitleButton"
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.infra.metrics.expressionItems.components.closablePopoverTitle.closeLabel',
+                {
+                  defaultMessage: 'Close',
+                }
+              )}
+              onClick={() => onClose()}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverTitle>

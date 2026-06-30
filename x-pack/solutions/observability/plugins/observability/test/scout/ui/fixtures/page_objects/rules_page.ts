@@ -435,8 +435,8 @@ export class RulesPage {
    */
   async clickExploreMatchingIndices() {
     await this.exploreMatchingIndicesButton.click();
-    // Wait for data view to be selected
-    await expect(this.dataViewExpression).toContainText('.alerts-*', { timeout: SHORTER_TIMEOUT });
+    // Wait for the button to disappear, which signals the ad-hoc data view was applied
+    await expect(this.exploreMatchingIndicesButton).toBeHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   /**
@@ -538,6 +538,15 @@ export class RulesPage {
   }
 
   /**
+   * Sets tags via the EUI ComboBox (creates custom options)
+   */
+  async setTags(tags: string[]) {
+    for (const tag of tags) {
+      await this.addRuleTag(tag);
+    }
+  }
+
+  /**
    * Selects a *saved* data view by name from the data-view switcher. Unlike
    * `setIndexPatternAndWaitForButton` (which creates an ad-hoc data view from a
    * pattern), this picks a persisted data view so its real fields populate the
@@ -547,13 +556,32 @@ export class RulesPage {
     await this.dataViewExpression.click();
     await expect(this.indexPatternInput).toBeVisible();
     await this.indexPatternInput.fill(name);
-    await this.page.locator(`[data-test-subj="indexPattern-switcher"] [title="${name}"]`).click();
+    await this.page
+      .locator(`[data-test-subj="indexPattern-switcher"] [data-test-subj="dataView-${name}"]`)
+      .click();
     await expect(this.dataViewExpression).toContainText(name, { timeout: BIGGER_TIMEOUT });
   }
 
   /** Aggregation expression button for metric B (present after adding a 2nd metric). */
   public get aggregationExpressionB() {
     return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_NAME_B);
+  }
+
+  /**
+   * Clicks the add-aggregation button and waits for metric B to appear
+   */
+  async addSecondAggregation() {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.ADD_AGGREGATION_BUTTON);
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Opens the metric B aggregation row popover
+   */
+  async openAggregationBPopover() {
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.aggregationExpressionB.click();
+    await expect(this.aggregationTypeSelect).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -567,6 +595,13 @@ export class RulesPage {
     await expect(closeButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await closeButton.click();
     await expect(closeButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Closes the currently open o11y closable popover
+   */
+  async closeCurrentPopover() {
+    await this.closeMetricPopover();
   }
 
   /**
@@ -621,7 +656,7 @@ export class RulesPage {
     );
     await expect(equationField).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await equationField.fill(equation);
-    await this.closeMetricPopover();
+    await this.closeCurrentPopover();
   }
 
   /** Sets the inline equation label field (rendered directly on the form). */
@@ -662,6 +697,11 @@ export class RulesPage {
       .locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_UNIT_SELECT)
       .selectOption(unit);
     await this.closeExpressionPopover('For the last');
+  }
+
+  /** Sets the rule's evaluation time window (size + unit as strings). */
+  async setTimeRange(size: string, unit: string) {
+    await this.setTimeWindow(Number(size), unit as 's' | 'm' | 'h' | 'd');
   }
 
   /** Adds a "group by" field via its EuiComboBox. */

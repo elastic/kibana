@@ -20,11 +20,13 @@ import type {
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderPadding } from '../types';
 import { AppHeaderView } from './app_header';
 
 interface ComposedHeaderStoryProps {
   title: string;
   editable: boolean;
+  padding: 'none' | 's' | 'm' | 'bleed-l';
   width: number;
   showBack: boolean;
   showTabs: boolean;
@@ -42,13 +44,26 @@ const badges: AppHeaderBadge[] = [
 const tabs: AppHeaderTab[] = [
   { id: 'overview', label: 'Overview', isSelected: true, onClick: action('tab-overview') },
   { id: 'alerts', label: 'Alerts', badge: 3, onClick: action('tab-alerts') },
+  {
+    id: 'insights',
+    label: 'Insights',
+    badge: { iconType: 'beaker', tooltip: 'Beta feature' },
+    onClick: action('tab-insights'),
+  },
   { id: 'settings', label: 'Settings', onClick: action('tab-settings') },
+  {
+    id: 'logs',
+    label: 'Logs',
+    onClick: action('tab-logs'),
+    disabled: true,
+    toolTipContent: 'Logs are disabled for this app',
+  },
 ];
 
 const metadata: AppHeaderMetadataItems = [
-  { type: 'text', label: 'Created by: analyst' },
   { type: 'health', label: 'Healthy', color: 'success' },
-  { type: 'button', label: 'Updated 2 minutes ago', onClick: action('metadata-clicked') },
+  { type: 'text', label: 'Created by', value: 'analyst' },
+  { type: 'button', label: 'View details', onClick: action('view-details-clicked') },
 ];
 
 // Six items so the menu overflows the visible limit into the "More" popover.
@@ -65,6 +80,7 @@ const menu: AppMenuConfig = {
 const ComposedHeader = ({
   title: initialTitle,
   editable,
+  padding,
   width,
   showBack,
   showTabs,
@@ -83,6 +99,8 @@ const ComposedHeader = ({
       setTitle(nextTitle);
     },
   };
+
+  const paddingProp: AppHeaderPadding = padding === 'bleed-l' ? { bleed: 'l' } : padding;
 
   return (
     <ChromeServiceProvider value={{ chrome }}>
@@ -110,7 +128,7 @@ const ComposedHeader = ({
             ) : undefined
           }
           sticky={false}
-          padding="m"
+          padding={paddingProp}
         />
       </div>
     </ChromeServiceProvider>
@@ -137,9 +155,17 @@ const meta: Meta<ComposedHeaderStoryProps> = {
       },
     },
   },
+  argTypes: {
+    padding: {
+      control: 'inline-radio',
+      options: ['none', 's', 'm', 'bleed-l'],
+      description: "Horizontal padding. `bleed-l` cancels a padded container (`{ bleed: 'l' }`).",
+    },
+  },
   args: {
     title: 'System Shells via Services',
     editable: true,
+    padding: 'm',
     width: 900,
     showBack: true,
     showTabs: true,

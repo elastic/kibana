@@ -15,7 +15,7 @@ import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
+import { resolveUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { getAttachmentItemCount } from './components/helpers';
 
@@ -41,7 +41,9 @@ export const SimilarCasesBadge = ({
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <EuiNotificationBadge
+    size="m"
     css={css`
+      border-radius: 999px;
       margin-left: ${euiTheme.size.xs};
     `}
     data-test-subj="case-view-similar-cases-badge"
@@ -62,7 +64,9 @@ export const AttachmentsBadge = ({
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <EuiNotificationBadge
+    size="m"
     css={css`
+      border-radius: 999px;
       margin-left: ${euiTheme.size.xs};
     `}
     data-test-subj="case-view-attachments-badge"
@@ -107,7 +111,7 @@ export const useCaseAttachmentsTotal = ({
 
     let registryTotal = 0;
     for (const comment of caseData.comments) {
-      if (typesWithTabView.has(toUnifiedAttachmentType(comment.type, owner))) {
+      if (typesWithTabView.has(resolveUnifiedAttachmentType(comment, owner))) {
         registryTotal += getAttachmentItemCount(comment);
       }
     }

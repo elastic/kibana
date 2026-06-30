@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SigEvent } from '@kbn/streams-schema';
-import type { EventClient } from '../../../lib/sig_events/events';
+import type { SignificantEvent } from '@kbn/streams-schema';
+import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function searchEventsToolHandler({
   eventClient,
@@ -20,13 +20,13 @@ export async function searchEventsToolHandler({
     page?: number;
     per_page?: number;
   };
-}): Promise<{ events: SigEvent[]; page: number; per_page: number; total: number }> {
+}): Promise<{ events: SignificantEvent[]; page: number; per_page: number; total: number }> {
   const response = await eventClient.findLatestPaginated({
     page: params.page,
     perPage: params.per_page,
     search: params.query,
     stream: params.stream_name ? [params.stream_name] : undefined,
-    verdict: params.status,
+    status: params.status,
   });
 
   return {

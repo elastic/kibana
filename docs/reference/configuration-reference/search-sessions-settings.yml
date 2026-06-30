@@ -48,7 +48,7 @@ groups:
 
       - setting: data.search.sessions.enabled
         description: |
-          Deprecated in 8.15.0. `false` by default. Set to `true` to enable search sessions.
+          Set to `true` to enable search sessions.
         datatype: bool
         default: false
         applies_to:
@@ -59,7 +59,7 @@ groups:
 
       - setting: data.search.sessions.notTouchedTimeout
         description: |
-          Deprecated in 8.15.0. How long {{kib}} stores search results from unsaved sessions, after the last search in the session completes. The default is `5m`.
+          How long {{kib}} stores search results from unsaved sessions, after the last search in the session completes. The default is `5m`.
         datatype: string
         default: 5m
         applies_to:
@@ -70,7 +70,7 @@ groups:
 
       - setting: data.search.sessions.maxUpdateRetries
         description: |
-          Deprecated in 8.15.0. How many retries {{kib}} can perform while attempting to save a search session. The default is `10`.
+          How many retries {{kib}} can perform while attempting to save a search session. The default is `10`.
         datatype: int
         default: 10
         applies_to:
@@ -81,7 +81,7 @@ groups:
 
       - setting: data.search.sessions.defaultExpiration
         description: |
-          Deprecated in 8.15.0. How long search session results are stored before they are deleted. Extending a search session resets the expiration by the same value. The default is `7d`.
+          How long search session results are stored before they are deleted. Extending a search session resets the expiration by the same value. The default is `7d`.
         datatype: string
         default: 7d
         applies_to:
